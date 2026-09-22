@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-import StudentRegisterVerify from '@/features/user/student/StudentRegisterVerify.vue'
+import { StudentRegisterVerify } from '@/features/user'
 import { ResetPasswordConfirmView } from '@/features/account'
 import companyRoutes from '@/router/company.js'
 
@@ -138,12 +138,15 @@ describe('StudentRegisterVerify', () => {
 })
 
 describe('the registration set-password route', () => {
-  test('mounts the account slice’s reset screen at the mailed URL, without auth', () => {
+  test('mounts the account slice’s reset screen at the mailed URL, without auth', async () => {
     const [root] = companyRoutes
     const route = root.children.find((child) => child.name === 'studentuser-reset-password')
 
     expect(route.path).toBe('/company/student-users/register/reset-password')
     expect(route.meta).toMatchObject({ needsAuth: false })
-    expect(route.components['app-content']).toBe(ResetPasswordConfirmView)
+    // The route holds a loader rather than the component: screens are split per
+    // chunk. Awaiting it is what still pins *which* screen the URL mounts.
+    const loaded = await route.components['app-content']()
+    expect(loaded.default).toBe(ResetPasswordConfirmView)
   })
 })

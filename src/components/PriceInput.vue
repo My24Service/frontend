@@ -36,7 +36,7 @@
 
 <script>
 import Dinero from "dinero.js";
-import {toDinero} from "@/services/money";
+import {formatMoneyPlain, toDinero} from "@/services/money";
 import { useVuelidate } from '@vuelidate/core'
 import { required, numeric } from '@vuelidate/validators'
 import componentMixin from "@/mixins/common";
@@ -122,7 +122,7 @@ export default {
       }
 
       this.dinero = toDinero(priceDecimal, this.currency)
-      const parts = this.dinero.toFormat('0.00').split('.')
+      const parts = formatMoneyPlain(this.dinero).split('.')
       this.number = parts[0]
       this.decimal = parts[1]
     },

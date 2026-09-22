@@ -37,7 +37,7 @@
               <p v-if="!customer.customer_id"><BLink @click="getNewCustomerIdFromLatest">{{ $trans('generate new') }}</BLink></p>
               <b-form-invalid-feedback
                 :state="submitClicked ? !errors.customer_id : null">
-                {{ errors.customer_id || FIELD_MESSAGES.customer_id() }}
+                {{ errors.customer_id || PLACEHOLDERS.customer_id() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -69,7 +69,7 @@
               ></BFormInput>
               <b-form-invalid-feedback
                 :state="submitClicked ? !errors.name : null">
-                {{ errors.name || FIELD_MESSAGES.name() }}
+                {{ errors.name || PLACEHOLDERS.name() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -88,7 +88,7 @@
               ></BFormInput>
               <b-form-invalid-feedback
                 :state="submitClicked ? !errors.address : null">
-                {{ errors.address || FIELD_MESSAGES.address() }}
+                {{ errors.address || PLACEHOLDERS.address() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -107,7 +107,7 @@
               ></BFormInput>
               <b-form-invalid-feedback
                 :state="submitClicked ? !errors.postal : null">
-                {{ errors.postal || FIELD_MESSAGES.postal() }}
+                {{ errors.postal || PLACEHOLDERS.postal() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -126,7 +126,7 @@
               ></BFormInput>
               <b-form-invalid-feedback
                 :state="submitClicked ? !errors.city : null">
-                {{ errors.city || FIELD_MESSAGES.city() }}
+                {{ errors.city || PLACEHOLDERS.city() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -145,7 +145,7 @@
 
               <b-form-invalid-feedback
                 :state="submitClicked ? !errors.country_code : null">
-                {{ errors.country_code || FIELD_MESSAGES.country_code() }}
+                {{ errors.country_code || PLACEHOLDERS.country_code() }}
               </b-form-invalid-feedback>
 
             </BFormGroup>
@@ -178,7 +178,7 @@
               <b-form-invalid-feedback
                 id="customer_tel-feedback"
                 :state="submitClicked ? !errors.tel : null">
-                {{ errors.tel || FIELD_MESSAGES.tel() }}
+                {{ errors.tel || PLACEHOLDERS.tel() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -197,7 +197,7 @@
               <b-form-invalid-feedback
                 id="customer_mobile-feedback"
                 :state="submitClicked ? !errors.mobile : null">
-                {{ errors.mobile || FIELD_MESSAGES.mobile() }}
+                {{ errors.mobile || PLACEHOLDERS.mobile() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -246,33 +246,27 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
 import type { Customer } from '@/api/types.gen'
 
 import {
   customerCustomerCheckCustomerIdHandlingRetrieveOptions,
-  customerCustomerCreateMutation,
-  customerCustomerPartialUpdateMutation,
-  customerCustomerRetrieveOptions,
+  customerCustomerListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
+import { customerCustomer } from '@/api/resources.gen'
 import { customerCustomerGetNewCustomerIdFromLatestRetrieve } from '@/api/sdk.gen'
 import CustomerFinancialsPanel from './CustomerFinancialsPanel.vue'
 import CustomerBranchPanel from './CustomerBranchPanel.vue'
 import {
   customerFromRecord,
   emptyCustomer,
-  FIELD_MESSAGES,
+  PLACEHOLDERS,
   parseCustomerCreate,
   parseCustomerPatch,
   validateCustomerForm,
   type CustomerFieldErrors,
   type CustomerFormValues,
 } from './schemas'
-import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
-import { useMainStore } from '@/stores/main'
-import { $trans } from '@/services/i18n'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { useResourceForm } from '@/features/forms'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -299,11 +293,8 @@ const {
   CustomerFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id) => customerCustomerRetrieveOptions({path: {id}}),
-  create: customerCustomerCreateMutation(),
-  update: customerCustomerPartialUpdateMutation(),
+  resource: customerCustomer,
   createVars: (body) => ({body}),
-  invalidate: (qc) => qc.invalidateQueries({queryKey: customerCustomerListQueryKey()}),
   empty: () => emptyCustomer(),
   fromRecord: (record) => customerFromRecord(record),
   validate: (values) => validateCustomerForm(values),

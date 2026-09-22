@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-import StudentUserDetail from '@/features/user/student/StudentUserDetail.vue'
+import { StudentUserDetail } from '@/features/user'
 import { vStudentUser } from '@/api/valibot.gen'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'

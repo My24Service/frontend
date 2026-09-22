@@ -1,5 +1,6 @@
 <template>
   <ListDeleteModal
+    v-if="deleteModal"
     ref="deleteModalRef"
     :modal-id="deleteModal.modalId"
     :confirm-text="deleteModal.confirmText"
@@ -14,6 +15,7 @@
     :title="title"
     :search-label="searchLabel"
     :refresh="refresh"
+    :searchable="searchable"
   >
     <template #icon>
       <slot name="icon" />
@@ -36,6 +38,11 @@
     :is="pageDetails ? 'div' : NoPanelWrapper"
     :class="pageDetails ? 'page-details panel' : undefined"
   >
+    <!-- The column filters, in the panel above the table (not inside the
+         table's overflow-auto box, which would clip the editors' popovers).
+         Renders nothing when no column declares one (table.ts, ColumnMeta.filter). -->
+    <ColumnFilterBar :table="table" />
+
     <div class="app-detail panel overflow-auto">
       <div class="data-table">
         <ServerDataTable
@@ -54,15 +61,16 @@
       :count="count"
       :label="label"
       :is-fetching="isFetching"
+      :page-size-options="pageSizeOptions"
     />
   </component>
 </template>
 
 <script setup lang="ts" generic="TData extends RowData">
-import { defineComponent, useTemplateRef } from 'vue'
 import type { PaginationState, RowData, VueTable } from '@tanstack/vue-table'
-import type { QueryClient, UseMutationOptions } from '@tanstack/vue-query'
+import type { QueryClient } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
+import { ColumnFilterBar } from '@/features/table/filters'
 import ListDeleteModal from './ListDeleteModal.vue'
 import ListPageHeader from './ListPageHeader.vue'
 import ServerDataTable from './ServerDataTable.vue'
@@ -88,7 +96,15 @@ withDefaults(defineProps<{
   searchLabel: string
   /** The header's refresh button — `useServerTable`'s `refresh`. */
   refresh: () => void
-  deleteModal: {
+  /** False on a list whose endpoint declares no `q`; the field is then no field. */
+  searchable?: boolean
+  /** Rows per page the pager offers. Defaults to 10/20/50, the API's own sizes. */
+  pageSizeOptions?: number[]
+  /**
+   * The delete confirmation, absent on read-only lists that offer no row
+   * actions. Without it no modal renders and `showDeleteModal` is a no-op.
+   */
+  deleteModal?: {
     /** The `b-modal` id — kept per screen for the legacy DOM id (`delete-xxx-modal`). */
     modalId: string
     /** e.g. "Are you sure you want to delete this customer?" */
@@ -108,6 +124,8 @@ withDefaults(defineProps<{
   isFetching: false,
   pageDetails: true,
   label: '',
+  searchable: true,
+  pageSizeOptions: () => [10, 20, 50],
 })
 
 const NoPanelWrapper = defineComponent({

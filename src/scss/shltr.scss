@@ -179,7 +179,7 @@ $font-size-base: 0.9rem;
   }
 
   /*
-   * New (mockup) sidebar — see components/the_nav/NavShltr.vue.
+   * New (mockup) sidebar — see components/the_nav/TheSidebar.vue.
    *
    * The shell is built with `tw:` utilities in the component; what lives here is
    * the styling of NavItems/NavItemsBranch/NavItemsSettings, which stay shared
@@ -540,6 +540,49 @@ $font-size-base: 0.9rem;
     }
 
     /*
+     * The column filter bar of a list, between the pills strip and the card.
+     *
+     * The list's outer .panel holds the card (the .app-detail below it), so
+     * the rule above makes it a transparent container with the page gutter,
+     * and the bar sits in that gutter aligned with the title. The card keeps
+     * its own top margin as the gap to the bar; under the pills strip the
+     * container's is trimmed so the bar does not float halfway between the
+     * strip and the card (under the bare header it keeps the full gutter).
+     */
+    > .subnav-pills {
+      margin-bottom: 0 !important;
+    }
+    > .subnav-pills + .panel:has(> .column-filter-bar),
+    > .subnav-pills + .column-filter-bar {
+      margin-top: 1rem !important;
+    }
+    > .panel > .column-filter-bar {
+      margin-bottom: 0;
+    }
+    > .panel > .column-filter-bar + .app-detail,
+    > .column-filter-bar + .app-detail {
+      margin-top: .75rem !important;
+    }
+
+    // When the table card (.app-detail) sits inside the outer panel
+    // (.page-details.panel), it fills the outer panel completely so it
+    // is horizontally aligned with the filter bar above it.
+    > .panel > .app-detail {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+
+    // A column filter bar directly in .app-page (pageDetails: false) receives
+    // the outer page gutter aligned with the card below it.
+    > .column-filter-bar {
+      max-width: 1400px;
+      width: calc(100% - 3rem);
+      margin: 1rem auto 0 !important;
+    }
+
+    /*
      * Detail pages.
      *
      * On a list page the .panel / .page-detail *is* the card. On a detail
@@ -839,7 +882,7 @@ $font-size-base: 0.9rem;
  * Schedule — the mockup's /planning screen.
  *
  * The card's chrome (teal band, period strip, legend) is markup in
- * ScheduleShltr.vue; FullCalendar's own toolbar is off and it renders the
+ * OrdersSchedule.vue (shltr family); FullCalendar's own toolbar is off and it renders the
  * grid only. What is left here is the grid itself, which FullCalendar
  * builds imperatively — no scoped style in the component could reach it.
  */

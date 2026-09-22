@@ -1,10 +1,8 @@
-import type { Ref } from 'vue'
-
 import { companyUsernameExistsRetrieve } from '@/api/sdk.gen'
 import {
   useAvailabilityProbe,
   type UseAvailabilityProbeReturn,
-} from '@/features/forms/use-availability-probe'
+} from '@/features/forms'
 
 import { USERNAME_PROBE_DEBOUNCE_MS } from './user-form'
 

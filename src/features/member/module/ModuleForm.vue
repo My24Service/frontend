@@ -21,7 +21,7 @@
               <b-form-invalid-feedback
                 id="module_name-feedback"
                 :state="submitClicked ? !errors.name : null">
-                {{ errors.name || FIELD_MESSAGES.name() }}
+                {{ errors.name || PLACEHOLDERS.name() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -43,24 +43,17 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  memberModuleCreateMutation,
-  memberModulePartialUpdateMutation,
-  memberModuleRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Module } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { memberModule } from '@/api/resources.gen'
+import type { Module, ModuleRequest } from '@/api/types.gen'
+import { useResourceForm } from '@/features/forms'
 import {
   emptyModule,
-  FIELD_MESSAGES,
+  PLACEHOLDERS,
   parseModule,
   validateModule,
   type ModuleFieldErrors,
-  type ModuleFormValues,
 } from './schemas'
 import { invalidateModuleListQueries } from '../invalidation'
-import { $trans } from '@/services/i18n'
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {
@@ -76,11 +69,9 @@ const {
   buttonDisabled,
   submitForm,
   cancelForm,
-} = useResourceForm<ModuleFormValues, Module, ReturnType<typeof parseModule>, ModuleFieldErrors>({
+} = useResourceForm<ModuleRequest, Module, ReturnType<typeof parseModule>, ModuleFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => memberModuleRetrieveOptions({path: {id}}),
-  create: memberModuleCreateMutation(),
-  update: memberModulePartialUpdateMutation(),
+  resource: memberModule,
   invalidate: invalidateModuleListQueries,
   empty: emptyModule,
   fromRecord: (record) => ({name: record.name}),

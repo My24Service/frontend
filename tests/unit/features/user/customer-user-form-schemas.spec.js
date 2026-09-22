@@ -6,7 +6,7 @@ import { vCustomerUserRequestWritable } from '@/api/valibot.gen'
 import {
   emptyCustomerUser,
   validateCustomerUserForm,
-} from '@/features/user/customer/schemas'
+} from '@/features/user'
 
 const valid = {
   username: 'cust-jan',
@@ -98,7 +98,7 @@ describe('emptyCustomerUser', () => {
 
   test('the defaults are not yet submittable on create', () => {
     const errors = validateCustomerUserForm(emptyCustomerUser(), {isCreate: true})
-    expect(errors.username).toBe('Username is required')
+    expect(errors.username).toBe('Please enter a username')
     expect(errors.first_name).toBe('Please enter a first name')
     expect(errors.email).toBe('Please enter a valid email')
     expect(errors.password1).toBe('Please enter a password')
@@ -112,7 +112,7 @@ describe('validateCustomerUserForm', () => {
 
   test('blames each blank field by name', () => {
     expect(validateCustomerUserForm({...valid, username: ''}, {isCreate: true}).username)
-      .toBe('Username is required')
+      .toBe('Please enter a username')
     expect(validateCustomerUserForm({...valid, email: 'nope'}, {isCreate: true}).email)
       .toBe('Please enter a valid email')
     expect(validateCustomerUserForm({...valid, first_name: ''}, {isCreate: true}).first_name)

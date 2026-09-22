@@ -1,4 +1,4 @@
-import {toDinero} from "@/services/money";
+import {formatMoneyPlain, toDinero} from "@/services/money";
 
 let priceMixin = {
   setPriceFields(obj) {
@@ -23,7 +23,7 @@ let priceMixin = {
     const dinero_field = `${field}_dinero`
     const currency_field = `${field}_currency`
     this[dinero_field] = priceDinero
-    this[field] = this[dinero_field].toFormat('0.00')
+    this[field] = formatMoneyPlain(this[dinero_field])
     this[currency_field] = this[dinero_field].getCurrency()
 
     return true

@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { ContractForm, ContractList, MemberList, ModuleForm, ModulePartForm, ModulePartList } from '@/features/member'
-import { invalidateModuleListQueries } from '@/features/member/invalidation'
+import {
+  ContractForm,
+  ContractList,
+  MemberList,
+  ModuleForm,
+  ModulePartForm,
+  ModulePartList,
+  invalidateModuleListQueries,
+} from '@/features/member'
 import {
   vModule,
   vModulePart,

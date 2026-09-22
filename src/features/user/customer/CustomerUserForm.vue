@@ -1,24 +1,13 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-page">
-      <header>
-        <div class="page-title">
-          <h3>
-            <IBiPeople></IBiPeople>
-            <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
-            <strong> {{ customerUser.username }}</strong>
-            <span class="dimmed" v-if="isCreate && !customerUser.username">{{ $trans('new') }}</span>
-            <span class="dimmed" v-if="!isCreate && !customerUser.username">{{ $trans('edit') }}</span>
-          </h3>
-          <div class="flex-columns">
-            <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
-              {{ $trans('Cancel') }}</BButton>
-            <BButton @click="submitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</BButton>
-          </div>
-        </div>
-      </header>
-      <div class="page-detail">
+  <UserFormShell
+    :username="customerUser.username"
+    :is-create="isCreate"
+    :is-loading="isLoading"
+    :button-disabled="buttonDisabled"
+    @cancel="cancelForm"
+    @submit="submitForm"
+  >
+
         <div class="flex-columns">
           <div class="panel col-1-3">
             <h6>{{ $trans('User info')}}</h6>
@@ -104,9 +93,7 @@
             </BFormGroup>
           </div>
         </div>
-      </div>
-    </div>
-  </b-overlay>
+  </UserFormShell>
 </template>
 
 <style scoped>
@@ -116,19 +103,12 @@
 </style>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { refDebounced } from '@vueuse/core'
-import { useQuery } from '@tanstack/vue-query'
+import UserFormShell from '../UserFormShell.vue'
 import VueMultiselect from 'vue-multiselect'
 import * as v from 'valibot'
 
-import {
-  companyCustomeruserCreateMutation,
-  companyCustomeruserListQueryKey,
-  companyCustomeruserPartialUpdateMutation,
-  companyCustomeruserRetrieveOptions,
-  customerCustomerAutocompleteListOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { customerCustomerAutocompleteListOptions } from '@/api/@tanstack/vue-query.gen'
+import { companyCustomeruser } from '@/api/resources.gen'
 import type { CustomerAutocomplete, CustomerUser } from '@/api/types.gen'
 import { vCustomerUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
@@ -142,8 +122,7 @@ import {
   type CustomerUserFieldErrors,
   type CustomerUserFormValues,
 } from './schemas'
-import { $trans } from '@/services/i18n'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import { useQueryErrorToast } from '@/features/forms'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -185,10 +164,7 @@ const {
   CustomerUserFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id) => companyCustomeruserRetrieveOptions({path: {id}}),
-  create: companyCustomeruserCreateMutation(),
-  update: companyCustomeruserPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyCustomeruserListQueryKey()}),
+  resource: companyCustomeruser,
   empty: emptyCustomerUser,
   fromRecord: customerUserFromRecord,
   validate: validateCustomerUserForm,

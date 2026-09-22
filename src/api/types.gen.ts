@@ -200,15 +200,6 @@ export type AppUserSettings = {
     };
 };
 
-export type AppUserSettingsRequest = {
-    /**
-     * The user’s app settings bag. Keys and value shapes belong to the frontend.
-     */
-    settings: {
-        [key: string]: unknown;
-    };
-};
-
 /**
  * The body the assign-orders actions read. `set_unavailable` marks
  * accepted on the engineer's availability row when given.
@@ -501,6 +492,14 @@ export type AssignedOrderRequest = {
     };
 };
 
+export type AssignedOrderSplitRequestRequest = {
+    order: number;
+    alt_start_date?: string | null;
+    alt_start_time?: string | null;
+    alt_end_date?: string | null;
+    alt_end_time?: string | null;
+};
+
 /**
  * fellow engineer/partner contact card assembled in detail_device().
  */
@@ -622,23 +621,20 @@ export type AutocompleteRow = {
 };
 
 /**
- * EngineerMinimalSerializer output for an engineer row.
+ * EngineerMinimalSerializer output for an engineer availability row.
  *
- * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
- * nests the account under 'user', so there is no key called 'engineer' to lift
- * and the row is that serializer's own shape, uuid included. The view used to
- * hand this serializer a User instead of an Engineer, which built a row out of
- * the fields a User happens to share - no `user`, no `country_code`.
+ * Subclassed, not redeclared: the row IS that serializer's shape, uuid
+ * included, so the fields cannot drift apart.
  */
 export type AvailabilityEngineerUserRow = {
-    id: number;
+    readonly id: number;
     user: EngineerUserMinimal;
-    address: string | null;
-    postal: string | null;
-    city: string | null;
-    country_code: string;
-    mobile: string | null;
-    uuid: string | null;
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    mobile?: string | null;
+    readonly uuid: string;
 };
 
 /**
@@ -654,9 +650,6 @@ export type AvailabilityResponse = {
 
 /**
  * flatten(StudentUserUserMinimalSerializer(...).data, 'student_user').
- *
- * the student_user block merges cleanly, so this row is User columns plus
- * StudentUserMinimalView's four display keys as top-level properties.
  */
 export type AvailabilityStudentUserRow = {
     id: number;
@@ -707,8 +700,13 @@ export type Branch = {
  */
 export type BranchAutocomplete = AddressAutocompleteRow;
 
-export type BranchOwner = {
-    branch?: number | null;
+export type BranchDashboardResponse = {
+    branch: Branch;
+    orders: CustomerDashboardOrders;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
 };
 
 export type BranchOwnerRequired = {
@@ -806,7 +804,14 @@ export type Building = {
  */
 export type BuildingAutocomplete = AutocompleteRow;
 
-export type BuildingBody = {
+export type BuildingBranchCreate = BuildingCreate & BranchOwnerRequired;
+
+export type BuildingBranchCreateRequest = {
+    branch: number;
+    name: string;
+};
+
+export type BuildingCreate = {
     readonly id: number;
     name: string;
     /**
@@ -819,41 +824,25 @@ export type BuildingBody = {
     readonly modified: string;
 };
 
-export type BuildingBranchCreate = BuildingBody & BranchOwnerRequired;
-
-export type BuildingBranchCreateRequest = {
-    branch: number;
-    name: string;
-};
-
-export type BuildingBranchUpdate = BuildingBody & BranchOwner;
-
-export type BuildingBranchUpdateRequest = {
-    branch?: number | null;
-    name: string;
-};
-
 export type BuildingCreateRequest = BuildingBranchCreate | BuildingCustomerCreate;
 
 export type BuildingCreateRequestRequest = BuildingBranchCreateRequest | BuildingCustomerCreateRequest;
 
-export type BuildingCustomerCreate = BuildingBody & CustomerOwnerRequired;
+export type BuildingCustomerCreate = BuildingCreate & CustomerOwnerRequired;
 
 export type BuildingCustomerCreateRequest = {
     customer: number;
     name: string;
 };
 
-export type BuildingCustomerUpdate = BuildingBody & CustomerOwner;
-
-export type BuildingCustomerUpdateRequest = {
-    customer?: number | null;
-    name: string;
+export type BuildingDashboardResponse = {
+    building: Building;
+    orders: CustomerDashboardOrders;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
 };
-
-export type BuildingUpdateRequest = BuildingBranchUpdate | BuildingCustomerUpdate;
-
-export type BuildingUpdateRequestRequest = BuildingBranchUpdateRequest | BuildingCustomerUpdateRequest;
 
 export type ChangePassword = {
     old_password: string;
@@ -928,7 +917,7 @@ export type Config = {
 export type Contract = {
     readonly id: number;
     name: string;
-    module_paths_pks?: string | null;
+    module_paths: Array<ModulePath>;
     readonly modules_text: string;
     max_users?: number;
     /**
@@ -942,34 +931,15 @@ export type Contract = {
 };
 
 /**
- * ContractSerializer as POST accepts it: `module_paths_pks` required.
+ * ContractSerializer as POST accepts it: at least one module path.
  *
- * A create has no stored value for save() to fall back on, so leaving the
- * field out is an AttributeError inside set_module_paths_text() and a 500 in
- * the caller's face. Requiring it here makes that a field-level 400, and
- * because ContractViewset.get_serializer_class hands each of these three to
- * one action, the schema can say `required` on POST and stay silent about it
- * on PUT and PATCH - which is the difference the endpoint actually makes.
- *
- * The test suite never saw the crash: settings.TESTING makes
- * set_module_paths_text return before it reads the field.
+ * A create has nothing stored for Contract.save() to fall back on, so the
+ * modules have to be in the body. PATCH may leave them out and keep the
+ * stored set.
  */
 export type ContractCreateRequest = {
     name: string;
-    module_paths_pks: string;
-    max_users?: number;
-};
-
-/**
- * ContractSerializer as PUT and PATCH accept it.
- *
- * Optional, because an omitted field is left out of validated_data and the
- * instance keeps the value it already has, which save() then splits happily.
- * Not nullable and not blank, because those two a caller can actually send.
- */
-export type ContractWriteRequest = {
-    name: string;
-    module_paths_pks?: string;
+    module_paths: Array<ModulePathRequest>;
     max_users?: number;
 };
 
@@ -1094,14 +1064,6 @@ export type Customer = {
     } | null;
     use_branch_address?: boolean;
     readonly num_orders: number;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerAutocomplete = AddressAutocompleteRow & {
@@ -1137,14 +1099,6 @@ export type CustomerCreate = {
     remarks?: string | null;
     customer_id?: string | null;
     external_identifier?: string | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerCreateRequest = {
@@ -1170,14 +1124,33 @@ export type CustomerCreateRequest = {
     remarks?: string | null;
     customer_id?: string | null;
     external_identifier?: string | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
+};
+
+/**
+ * One page of a customer's orders, in the paginated envelope the order
+ * list answers with (20 rows per page).
+ */
+export type CustomerDashboardOrders = {
+    count: number;
+    num_pages: number;
+    next: string | null;
+    previous: string | null;
+    results: Array<Order>;
+};
+
+/**
+ * GET /api/customer/customer/{id}/dashboard/: the customer head, the
+ * first orders page, and the four stats blocks the customer view charts -
+ * the same inner shapes the dedicated stats endpoints answer with, so the
+ * screen reads them unchanged.
+ */
+export type CustomerDashboardResponse = {
+    customer: Customer;
+    orders: CustomerDashboardOrders;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
 };
 
 /**
@@ -1223,40 +1196,6 @@ export type CustomerDocumentRequest = {
     user_can_view?: boolean;
 };
 
-export type CustomerExternal = {
-    readonly id: number;
-    name: string;
-    address: string;
-    postal: string;
-    city: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
-    external_identifier?: string | null;
-};
-
 /**
  * The dict CustomerViewset.check_customer_id_handling returns.
  */
@@ -1282,75 +1221,12 @@ export type CustomerMaterialTotalSalesRow = {
     material_name: string | null;
 };
 
-export type CustomerOwner = {
-    customer?: number | null;
-};
-
 export type CustomerOwnerRequired = {
     customer: number;
 };
 
-export type CustomerRating = {
-    readonly id: number;
-    customer: number;
-    rated_by: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-};
-
-export type CustomerRatingRequest = {
-    customer: number;
-    rated_by: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-};
-
 export type CustomerRelationOwnerRequired = {
     customer_relation: number;
-};
-
-export type CustomerRequest = {
-    name: string;
-    address: string;
-    postal: string;
-    city: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id?: string | null;
-    external_identifier?: string | null;
-    products_without_tax?: boolean;
-    maintenance_contract?: string | null;
-    standard_hours_hour?: number;
-    standard_hours_minute?: number;
-    branch_id?: number | null;
-    branch_partner?: number | null;
-    use_branch_address?: boolean;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 /**
@@ -1367,79 +1243,6 @@ export type CustomerTotalSalesRow = {
     amount_perc: number | string;
     amount_selling_perc: number | string;
     customer_name: string;
-};
-
-export type CustomerUpdate = {
-    readonly id: number;
-    name?: string;
-    address?: string;
-    postal?: string;
-    city?: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id?: string | null;
-    external_identifier?: string | null;
-    maintenance_contract?: string | null;
-    branch_id?: number | null;
-    branch_partner?: number | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
-};
-
-export type CustomerUpdateRequest = {
-    name?: string;
-    address?: string;
-    postal?: string;
-    city?: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id?: string | null;
-    external_identifier?: string | null;
-    maintenance_contract?: string | null;
-    branch_id?: number | null;
-    branch_partner?: number | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerUser = {
@@ -1546,55 +1349,7 @@ export type DefaultRegisterEmailRequest = {
     email: string;
 };
 
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type DefaultUserProfile = {
-    readonly id: number;
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username: string;
-    first_name?: string;
-    last_name?: string;
-    /**
-     * Email address
-     */
-    readonly email: string;
-};
-
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type DefaultUserProfileRequest = {
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username: string;
-    first_name?: string;
-    last_name?: string;
-};
-
 export type Department = {
-    department_uuid: string;
-    department_name: string;
-};
-
-export type DepartmentRequest = {
     department_uuid: string;
     department_name: string;
 };
@@ -1695,10 +1450,6 @@ export type Enabled = {
     api_enabled?: boolean;
 };
 
-export type EnabledRequest = {
-    api_enabled?: boolean;
-};
-
 export type Engineer = {
     readonly id: number;
     /**
@@ -1757,6 +1508,80 @@ export type EngineerEvent = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly created: string;
+};
+
+/**
+ * The 400 body of an engineer-event order create.
+ *
+ * The view wraps the order-create errors one level deep - `{'order': {<field>:
+ * [...]}}` - so a caller can tell an order-field error from anything the
+ * endpoint validates about the event itself. Declared here because the generic
+ * 400 document describes a flat `{name: [message]}` map, which reads `order` as
+ * a list of strings while the view sends a map.
+ *
+ * The view's other 400 - a caller who may not create orders - is not an
+ * order-field error and does not carry this shape.
+ */
+export type EngineerEventCreateOrderError = {
+    order: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type EngineerEventCreateOrderRequestRequest = EngineerEventOrderCreateBranchRequest | EngineerEventOrderCreateCustomerRelationRequest;
+
+/**
+ * The dict `EngineerEventCreateOrderView.post` returns on success.
+ */
+export type EngineerEventCreateOrderResponse = {
+    order: OrderDetail;
+    assigned_order: number;
+    event: number;
+};
+
+/**
+ * The `branch`-mandatory variant, plus `notify_user`.
+ */
+export type EngineerEventOrderCreateBranchRequest = EngineerEventOrderCreateRequest & BranchOwnerRequired;
+
+/**
+ * The `customer_relation`-mandatory variant, plus `notify_user`.
+ */
+export type EngineerEventOrderCreateCustomerRelationRequest = EngineerEventOrderCreateRequest & CustomerRelationOwnerRequired;
+
+export type EngineerEventOrderCreateRequest = {
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date: string;
+    start_time?: string | null;
+    end_date: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    branch?: number | null;
+    customer_relation?: number | null;
+    quotation?: number | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
+    /**
+     * Send the engineer the same websocket notification assign-user sends. Default: true.
+     */
+    notify_user?: boolean;
 };
 
 export type EngineerEventRequest = {
@@ -1824,6 +1649,16 @@ export type EngineerForSelect = {
 export type EngineerInfoLine = {
     readonly id: number;
     order: number;
+    info?: string | null;
+};
+
+export type EngineerInfoLineNested = {
+    id?: number;
+    info?: string | null;
+};
+
+export type EngineerInfoLineNestedRequest = {
+    id?: number;
     info?: string | null;
 };
 
@@ -1920,10 +1755,8 @@ export type EngineerSub = {
     readonly last_event: {
         [key: string]: unknown;
     } | null;
-    preferred_location?: number | null;
+    preferred_location: number | null;
     readonly prefered_location: number | null;
-    hourly_rate: string;
-    readonly hourly_rate_currency: string;
     hide_from_dispatch?: boolean;
 };
 
@@ -1948,8 +1781,7 @@ export type EngineerSubRequest = {
     remarks?: string | null;
     contract_hours_week?: string | null;
     uses_time_registration?: boolean;
-    preferred_location?: number | null;
-    hourly_rate: string;
+    preferred_location: number;
     hide_from_dispatch?: boolean;
 };
 
@@ -2018,7 +1850,25 @@ export type EquipmentAutocompleteLocation = {
     name: string;
 };
 
-export type EquipmentBody = {
+export type EquipmentBranchCreate = EquipmentCreate & BranchOwnerRequired;
+
+export type EquipmentBranchCreateRequest = {
+    branch: number;
+    name: string;
+    type?: EquipmentTypeEnum;
+    brand?: string | null;
+    identifier?: string | null;
+    description?: string | null;
+    installation_date?: string | null;
+    production_date?: string | null;
+    serialnumber?: string | null;
+    standard_hours?: string | null;
+    location?: number | null;
+    price?: string;
+    default_replace_months?: number;
+};
+
+export type EquipmentCreate = {
     readonly id: number;
     name: string;
     type?: EquipmentTypeEnum;
@@ -2043,42 +1893,6 @@ export type EquipmentBody = {
     readonly modified: string;
 };
 
-export type EquipmentBranchCreate = EquipmentBody & BranchOwnerRequired;
-
-export type EquipmentBranchCreateRequest = {
-    branch: number;
-    name: string;
-    type?: EquipmentTypeEnum;
-    brand?: string | null;
-    identifier?: string | null;
-    description?: string | null;
-    installation_date?: string | null;
-    production_date?: string | null;
-    serialnumber?: string | null;
-    standard_hours?: string | null;
-    location?: number | null;
-    price?: string;
-    default_replace_months?: number;
-};
-
-export type EquipmentBranchUpdate = EquipmentBody & BranchOwner;
-
-export type EquipmentBranchUpdateRequest = {
-    branch?: number | null;
-    name: string;
-    type?: EquipmentTypeEnum;
-    brand?: string | null;
-    identifier?: string | null;
-    description?: string | null;
-    installation_date?: string | null;
-    production_date?: string | null;
-    serialnumber?: string | null;
-    standard_hours?: string | null;
-    location?: number | null;
-    price?: string;
-    default_replace_months?: number;
-};
-
 export type EquipmentCreateQuickBranchRequest = EquipmentCreateQuickRequest & BranchOwnerRequired;
 
 export type EquipmentCreateQuickCustomerRequest = EquipmentCreateQuickRequest & CustomerOwnerRequired;
@@ -2094,7 +1908,7 @@ export type EquipmentCreateRequest = EquipmentBranchCreate | EquipmentCustomerCr
 
 export type EquipmentCreateRequestRequest = EquipmentBranchCreateRequest | EquipmentCustomerCreateRequest;
 
-export type EquipmentCustomerCreate = EquipmentBody & CustomerOwnerRequired;
+export type EquipmentCustomerCreate = EquipmentCreate & CustomerOwnerRequired;
 
 export type EquipmentCustomerCreateRequest = {
     customer: number;
@@ -2112,22 +1926,13 @@ export type EquipmentCustomerCreateRequest = {
     default_replace_months?: number;
 };
 
-export type EquipmentCustomerUpdate = EquipmentBody & CustomerOwner;
-
-export type EquipmentCustomerUpdateRequest = {
-    customer?: number | null;
-    name: string;
-    type?: EquipmentTypeEnum;
-    brand?: string | null;
-    identifier?: string | null;
-    description?: string | null;
-    installation_date?: string | null;
-    production_date?: string | null;
-    serialnumber?: string | null;
-    standard_hours?: string | null;
-    location?: number | null;
-    price?: string;
-    default_replace_months?: number;
+export type EquipmentDashboardResponse = {
+    equipment: Equipment;
+    orders: CustomerDashboardOrders;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
 };
 
 /**
@@ -2194,31 +1999,6 @@ export type EquipmentOrderLine = {
     readonly modified: string;
 };
 
-export type EquipmentPart = {
-    readonly id: number;
-    name: string;
-    equipment: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
-};
-
-export type EquipmentPartRequest = {
-    name: string;
-    equipment: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
-};
-
 export type EquipmentQr = {
     name: string;
     type?: EquipmentTypeEnum;
@@ -2262,10 +2042,6 @@ export type EquipmentStateRequest = {
  * * `facility` - Facility
  */
 export type EquipmentTypeEnum = 'technical' | 'facility';
-
-export type EquipmentUpdateRequest = EquipmentBranchUpdate | EquipmentCustomerUpdate;
-
-export type EquipmentUpdateRequestRequest = EquipmentBranchUpdateRequest | EquipmentCustomerUpdateRequest;
 
 export type FilterCondition = {
     filter?: number;
@@ -2316,6 +2092,7 @@ export type GetInitialDataResponse = {
     memberInfo: InitialDataMember;
     userInfo?: UserInfoResponse;
     statuscodes: Array<Statuscode>;
+    profile: Profile;
 };
 
 export type GetTopUsersForCustomerView = {
@@ -2343,6 +2120,19 @@ export type GetWorkorderSignDetailsResponse = {
 };
 
 /**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export type GrippSettings = {
+    gripp_api_enabled?: boolean;
+    gripp_default_order_type?: string;
+    gripp_default_employee?: string;
+    gripp_project_phase_match?: string;
+    gripp_project_phase_workorder_signed?: string;
+    gripp_tasktype_hours?: string;
+    gripp_tasktype_travel?: string;
+};
+
+/**
  * The body ValidateIBANView reads.
  */
 export type IbanCheckRequestRequest = {
@@ -2359,12 +2149,12 @@ export type IbanValidation = {
 
 export type Import = {
     readonly id: number;
-    name?: string | null;
+    name: string;
     file: string;
     /**
      * How import columns map onto model fields, as the import wizard left it.
      */
-    mapping: {
+    mapping?: {
         [key: string]: unknown;
     };
     /**
@@ -2374,7 +2164,7 @@ export type Import = {
     /**
      * How many rows were inserted, per model type.
      */
-    result_inserts: {
+    result_inserts?: {
         [key: string]: number;
     };
     /**
@@ -2408,12 +2198,12 @@ export type ImportError = {
 };
 
 export type ImportRequest = {
-    name?: string | null;
+    name: string;
     file: string;
     /**
      * How import columns map onto model fields, as the import wizard left it.
      */
-    mapping: {
+    mapping?: {
         [key: string]: unknown;
     };
     /**
@@ -2423,7 +2213,7 @@ export type ImportRequest = {
     /**
      * How many rows were inserted, per model type.
      */
-    result_inserts: {
+    result_inserts?: {
         [key: string]: number;
     };
 };
@@ -2493,8 +2283,6 @@ export type ImportedRow = {
  * MinimalMember plus what GetInitialData bolts onto it.
  *
  * The extra keys only exist for a logged-in caller, hence optional.
- * `settings` stays an open map: it mixes booleans, numbers and strings and
- * is tenant-configurable besides.
  */
 export type InitialDataMember = {
     readonly id: number;
@@ -2528,10 +2316,49 @@ export type InitialDataMember = {
     countries?: Array<string>;
     equipment_qr_type?: string;
     vat_types?: Array<number>;
-    settings?: {
-        [key: string]: unknown;
-    };
+    settings?: InitialDataSettings;
     contract?: MemberContract;
+};
+
+/**
+ * The typed member settings plus the one key read off a member column.
+ */
+export type InitialDataSettings = {
+    countries?: Array<string>;
+    date_format?: string;
+    default_currency?: string;
+    invoice_default_vat?: number;
+    invoice_default_hourly_rate?: string;
+    invoice_default_call_out_costs?: string;
+    invoice_default_price_per_km?: string;
+    invoice_default_term_of_payment_days?: number;
+    quotation_default_expire_days?: number;
+    quotation_default_call_out_costs?: string;
+    quotation_default_vat?: number;
+    quotation_default_hourly_rate?: string;
+    quotation_default_price_per_km?: string;
+    customer_id_autoincrement?: boolean;
+    order_uses_equipment?: boolean;
+    sick_leave_user_allowed_create?: boolean;
+    sick_leave_user_allowed_end?: boolean;
+    equipment_planning_quick_create?: boolean;
+    equipment_quick_create?: boolean;
+    equipment_location_planning_quick_create?: boolean;
+    equipment_location_quick_create?: boolean;
+    order_list_include_reference?: boolean;
+    workorder_show_related_orders?: boolean;
+    break_calculation?: boolean;
+    customer_id_start?: number;
+    order_id?: number;
+    quotation_id?: number;
+    workorder_id?: number;
+    purchase_order_id?: number;
+    invoice_id?: number;
+    order_types?: Array<string>;
+    break_calculation_after_minutes?: number;
+    break_calculation_duration_minutes?: number;
+    app_session_token_expiry_days?: number;
+    mobile_hours_select_user?: boolean;
 };
 
 export type InventoryLocations = {
@@ -2590,12 +2417,117 @@ export type Invoice = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
+};
+
+export type InvoiceActivity = {
+    readonly id: number;
+    assigned_order: number;
+    readonly full_name: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    activity_date?: string;
+    readonly activity_date_iso: string;
+    readonly date: string | null;
+    work_start?: string | null;
+    work_end?: string | null;
+    unforeseen_work_duration?: string | null;
+    unforeseen_work_description?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    extra_work_description?: string | null;
+    distance_fixed_rate_amount?: number;
+    actual_work?: string | null;
+    is_partner: boolean;
+    partner_companycode: string | null;
+};
+
+/**
+ * Full invoice totals, distinct from the workorder subset.
+ */
+export type InvoiceActivityTotals = {
+    work_total_secs?: string;
+    readonly work_total: string;
+    travel_to_total_secs?: string;
+    readonly travel_to_total: string;
+    travel_back_total_secs?: string;
+    readonly travel_back_total: string;
+    travel_total_secs?: string;
+    readonly travel_total: string;
+    distance_to_total?: number;
+    distance_back_total?: number;
+    distance_total?: number;
+    extra_work_total_secs?: string;
+    readonly extra_work_total: string;
+    actual_work_total_secs?: string;
+    readonly actual_work_total: string;
+    distance_fixed_rate_amount?: number;
+    user_totals: Array<ActivityUserTotal>;
+};
+
+/**
+ * One row of GET invoice/invoice/autocomplete/.
+ *
+ * The action builds the rows by hand (invoice id plus the customer
+ * address it belongs to), so the component names exactly those keys
+ * rather than the invoice serializer's.
+ */
+export type InvoiceAutocomplete = {
+    id: number;
+    uuid: string;
+    invoice_id: string;
+    name: string;
+    address: string;
+    postal: string;
+    city: string;
+    value: string;
+};
+
+export type InvoiceDataResponse = {
+    order_pk: number;
+    customer_pk: number | null;
+    invoice_id: number;
+    order_id: string;
+    order_reference: string | null;
+    invoice_default_call_out_costs: string | null;
+    invoice_default_hourly_rate: string | null;
+    invoice_default_price_per_km: string | null;
+    used_materials: Array<AssignedOrderMaterialTotals>;
+    material_models: Array<Material>;
+    activity: Array<InvoiceActivity>;
+    activity_totals: InvoiceActivityTotals;
+    engineer_models: Array<Engineer>;
 };
 
 export type InvoiceEmail = {
     readonly id: number;
     invoice: number;
     readonly sent_by_full_name: string | null;
+    recipients?: string | null;
+    subject?: string | null;
+    body?: string | null;
+    is_sent?: boolean;
+    sent_date?: string | null;
+};
+
+export type InvoiceEmailDocument = {
+    name: string;
+    is_pdf: boolean;
+};
+
+/**
+ * Lookup can return an empty draft, without a persisted id or sender.
+ */
+export type InvoiceEmailDraft = {
+    id?: number;
+    invoice: number | null;
+    sent_by_full_name?: string | null;
     recipients?: string | null;
     subject?: string | null;
     body?: string | null;
@@ -2684,6 +2616,9 @@ export type InvoicePreliminaryResponse = {
     last_status: string;
     last_status_full: string | null;
     last_status_date: string | null;
+    statuscode_id: number | null;
+    color: string | null;
+    text_color: string | null;
 };
 
 export type InvoiceRequest = {
@@ -2728,11 +2663,6 @@ export type InvoiceTemplate = {
     invoice_template_name: string;
 };
 
-export type InvoiceTemplateRequest = {
-    invoice_template_uuid: string;
-    invoice_template_name: string;
-};
-
 export type InvoiceView = {
     readonly id: number;
     invoice_id: string;
@@ -2760,6 +2690,9 @@ export type InvoiceView = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -2839,7 +2772,15 @@ export type Location = {
  */
 export type LocationAutocomplete = AutocompleteRow;
 
-export type LocationBody = {
+export type LocationBranchCreate = LocationCreate & BranchOwnerRequired;
+
+export type LocationBranchCreateRequest = {
+    branch: number;
+    name: string;
+    building?: number | null;
+};
+
+export type LocationCreate = {
     readonly id: number;
     name: string;
     building?: number | null;
@@ -2851,22 +2792,6 @@ export type LocationBody = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
-};
-
-export type LocationBranchCreate = LocationBody & BranchOwnerRequired;
-
-export type LocationBranchCreateRequest = {
-    branch: number;
-    name: string;
-    building?: number | null;
-};
-
-export type LocationBranchUpdate = LocationBody & BranchOwner;
-
-export type LocationBranchUpdateRequest = {
-    branch?: number | null;
-    name: string;
-    building?: number | null;
 };
 
 export type LocationCreateQuickBranchRequest = LocationCreateQuickRequest & BranchOwnerRequired;
@@ -2883,7 +2808,7 @@ export type LocationCreateRequest = LocationBranchCreate | LocationCustomerCreat
 
 export type LocationCreateRequestRequest = LocationBranchCreateRequest | LocationCustomerCreateRequest;
 
-export type LocationCustomerCreate = LocationBody & CustomerOwnerRequired;
+export type LocationCustomerCreate = LocationCreate & CustomerOwnerRequired;
 
 export type LocationCustomerCreateRequest = {
     customer: number;
@@ -2891,12 +2816,13 @@ export type LocationCustomerCreateRequest = {
     building?: number | null;
 };
 
-export type LocationCustomerUpdate = LocationBody & CustomerOwner;
-
-export type LocationCustomerUpdateRequest = {
-    customer?: number | null;
-    name: string;
-    building?: number | null;
+export type LocationDashboardResponse = {
+    location: Location;
+    orders: CustomerDashboardOrders;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
 };
 
 /**
@@ -2968,10 +2894,6 @@ export type LocationToAddressRequestRequest = {
     lon: number;
 };
 
-export type LocationUpdateRequest = LocationBranchUpdate | LocationCustomerUpdate;
-
-export type LocationUpdateRequestRequest = LocationBranchUpdateRequest | LocationCustomerUpdateRequest;
-
 export type Logout = {
     revoke_token?: boolean;
 };
@@ -2983,7 +2905,7 @@ export type LogoutRequest = {
 export type MaintenanceContract = {
     readonly id: number;
     customer: number;
-    name?: string | null;
+    name: string | null;
     customer_view: Customer;
     sum_tariffs: number | string;
     remarks?: string | null;
@@ -3002,14 +2924,52 @@ export type MaintenanceContract = {
 
 export type MaintenanceContractRequest = {
     customer: number;
-    name?: string | null;
+    name: string;
     remarks?: string | null;
+};
+
+/**
+ * Schema-only shape of the combined body: the actual write goes through
+ * MaintenanceContractSerializer for the contract fields and
+ * MaintenanceEquipmentReplaceSetSerializer for the rows (see
+ * MaintenanceContractWithEquipmentMixin).
+ *
+ * `equipment` is required, matching the view: the list is the whole set, so a
+ * body that leaves the key out would mean "delete every row" rather than
+ * "leave the equipment alone" (see the mixin's `_equipment_rows`).
+ */
+export type MaintenanceContractWithEquipmentRequestRequest = {
+    customer: number;
+    name: string;
+    remarks?: string | null;
+    equipment: Array<MaintenanceEquipmentRowRequest>;
+};
+
+export type MaintenanceContractWithEquipmentResponse = {
+    readonly id: number;
+    customer: number;
+    name: string | null;
+    customer_view: Customer;
+    sum_tariffs: number | string;
+    remarks?: string | null;
+    readonly created_orders: number | null;
+    readonly num_order_equipment: number | null;
+    readonly num_equipment: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly created: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly modified: string;
+    readonly equipment: Array<MaintenanceEquipment>;
 };
 
 export type MaintenanceEquipment = {
     readonly id: number;
     contract?: number | null;
-    equipment?: number | null;
+    equipment: number | null;
     equipment_name: string;
     times_per_year?: number;
     remarks?: string | null;
@@ -3029,11 +2989,21 @@ export type MaintenanceEquipment = {
 
 export type MaintenanceEquipmentRequest = {
     contract?: number | null;
-    equipment?: number | null;
+    equipment: number;
     equipment_name: string;
     times_per_year?: number;
     remarks?: string | null;
     tariff: string;
+};
+
+export type MaintenanceEquipmentRowRequest = {
+    id?: number;
+    equipment: number;
+    equipment_name: string;
+    times_per_year?: number;
+    remarks?: string | null;
+    tariff: string;
+    tariff_currency?: CurrencyEnum;
 };
 
 export type Material = {
@@ -3088,17 +3058,17 @@ export type MaterialCreate = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
+    price_purchase_currency?: CurrencyEnum;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
+    price_selling_currency?: CurrencyEnum;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
+    price_selling_alt_currency?: CurrencyEnum;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
+    price_selling_ex_currency?: CurrencyEnum;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -3115,41 +3085,22 @@ export type MaterialCreateRequest = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
+    price_purchase_currency?: CurrencyEnum;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
+    price_selling_currency?: CurrencyEnum;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
+    price_selling_alt_currency?: CurrencyEnum;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
+    price_selling_ex_currency?: CurrencyEnum;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
      */
     image?: string | null;
-};
-
-/**
- * What AssignmentInfoMixin.get_materials returns, as produced by
- * AssignedOrderMaterialSerializer in apps.mobile.serializers. Duplicated
- * rather than imported: apps.mobile.serializers imports apps.order.serializers,
- * so a module-level import here would be circular.
- */
-export type MaterialItem = {
-    id: number;
-    assigned_order: number;
-    material: number | null;
-    location: number | null;
-    location_name: string;
-    amount: string;
-    material_name: string | null;
-    material_identifier: string | null;
-    mutation_simple_id: number | null;
-    is_extra: boolean;
 };
 
 export type MaterialStatsTable = {
@@ -3256,62 +3207,6 @@ export type MaterialTotalSalesRow = {
     material_name: string | null;
 };
 
-export type MaterialUpdate = {
-    readonly id: number;
-    identifier?: string | null;
-    readonly show_name: string | null;
-    name: string | null;
-    name_short?: string | null;
-    unit?: string | null;
-    supplier?: string | null;
-    supplier_relation?: number | null;
-    product_type?: string | null;
-    price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
-    price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
-    price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
-    price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
-    price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
-    price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
-    external_identifier?: string | null;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
-};
-
-export type MaterialUpdateRequest = {
-    identifier?: string | null;
-    name: string | null;
-    name_short?: string | null;
-    unit?: string | null;
-    supplier?: string | null;
-    supplier_relation?: number | null;
-    product_type?: string | null;
-    price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
-    price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
-    price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
-    price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
-    price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
-    price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
-    external_identifier?: string | null;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
-};
-
 export type Member = {
     readonly id: number;
     companycode: string;
@@ -3411,6 +3306,46 @@ export type MemberRequest = {
 export type MemberSelect = {
     id: number;
     readonly name: string;
+};
+
+/**
+ * The tenant settings the web settings screen edits, typed.
+ */
+export type MemberSettings = {
+    countries?: Array<string>;
+    date_format?: string;
+    default_currency?: string;
+    invoice_default_vat?: number;
+    invoice_default_hourly_rate?: string;
+    invoice_default_call_out_costs?: string;
+    invoice_default_price_per_km?: string;
+    invoice_default_term_of_payment_days?: number;
+    quotation_default_expire_days?: number;
+    quotation_default_call_out_costs?: string;
+    quotation_default_vat?: number;
+    quotation_default_hourly_rate?: string;
+    quotation_default_price_per_km?: string;
+    customer_id_autoincrement?: boolean;
+    order_uses_equipment?: boolean;
+    sick_leave_user_allowed_create?: boolean;
+    sick_leave_user_allowed_end?: boolean;
+    equipment_planning_quick_create?: boolean;
+    equipment_quick_create?: boolean;
+    equipment_location_planning_quick_create?: boolean;
+    equipment_location_quick_create?: boolean;
+    order_list_include_reference?: boolean;
+    workorder_show_related_orders?: boolean;
+    break_calculation?: boolean;
+    customer_id_start?: number;
+    order_id?: number;
+    quotation_id?: number;
+    workorder_id?: number;
+    purchase_order_id?: number;
+    invoice_id?: number;
+    order_types?: Array<string>;
+    break_calculation_after_minutes?: number;
+    break_calculation_duration_minutes?: number;
+    app_session_token_expiry_days?: number;
 };
 
 /**
@@ -3539,6 +3474,22 @@ export type ModulePartRequest = {
     name: string;
     module: number;
     is_always_selected?: boolean;
+};
+
+/**
+ * One module of a contract with the parts it grants.
+ */
+export type ModulePath = {
+    module: number;
+    parts: Array<number>;
+};
+
+/**
+ * One module of a contract with the parts it grants.
+ */
+export type ModulePathRequest = {
+    module: number;
+    parts: Array<number>;
 };
 
 export type ModuleRequest = {
@@ -3731,7 +3682,7 @@ export type Order = {
     quotation?: number | null;
     readonly last_update?: string;
     order_email_extra?: Array<string>;
-    readonly materials: Array<MaterialItem>;
+    readonly materials: Array<AssignedOrderMaterial>;
     readonly copied_order_data: Array<CopiedOrderData>;
     parent_order_data: ParentOrderData;
     readonly start_date_iso: string;
@@ -3739,6 +3690,9 @@ export type Order = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -3793,13 +3747,12 @@ export type OrderCost = {
     amount_duration?: string | null;
     readonly amount_duration_read: string | null;
     readonly amount_duration_secs: number | null;
-    use_price: UsePriceEnum;
     price?: string;
     readonly price_currency: string;
     vat_type?: string;
-    vat?: string;
+    readonly vat: string;
     readonly vat_currency: string;
-    total?: string;
+    readonly total: string;
     readonly total_currency: string;
 };
 
@@ -3814,11 +3767,21 @@ export type OrderCostRequest = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price: UsePriceEnum;
     price?: string;
     vat_type?: string;
-    vat?: string;
-    total?: string;
+};
+
+export type OrderCostRowRequest = {
+    id?: number;
+    user?: number | null;
+    user_full_name?: string | null;
+    material?: number | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    price?: string;
+    price_currency?: CurrencyEnum;
+    vat_type?: string;
 };
 
 /**
@@ -3847,7 +3810,7 @@ export type OrderCreate = {
     customer_reference?: string | null;
     readonly order_id: string;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -3874,6 +3837,11 @@ export type OrderCreate = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -3890,7 +3858,7 @@ export type OrderCreateBranchEmployee = {
     customer_reference?: string | null;
     readonly order_id: string;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -3915,6 +3883,11 @@ export type OrderCreateBranchEmployee = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -3924,7 +3897,7 @@ export type OrderCreateBranchEmployeeRequest = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -3945,6 +3918,8 @@ export type OrderCreateBranchEmployeeRequest = {
     branch?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
 };
 
 /**
@@ -3954,7 +3929,7 @@ export type OrderCreateBranchRequest = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -3977,6 +3952,8 @@ export type OrderCreateBranchRequest = {
     quotation?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
 };
 
 /**
@@ -3997,7 +3974,7 @@ export type OrderCreateCustomer = {
     customer_reference?: string | null;
     readonly order_id: string;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -4021,6 +3998,11 @@ export type OrderCreateCustomer = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -4035,7 +4017,7 @@ export type OrderCreateCustomerRelationRequest = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -4058,6 +4040,8 @@ export type OrderCreateCustomerRelationRequest = {
     quotation?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
 };
 
 /**
@@ -4076,7 +4060,7 @@ export type OrderCreateCustomerRequest = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -4096,6 +4080,8 @@ export type OrderCreateCustomerRequest = {
     order_contact?: string | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
 };
 
 export type OrderCreateRequest = OrderCreateBranch | OrderCreateCustomerRelation | OrderCreateCustomer | OrderCreateBranchEmployee;
@@ -4127,6 +4113,9 @@ export type OrderCustomerHistory = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -4196,6 +4185,8 @@ export type OrderDetail = {
     readonly infolines: Array<EngineerInfoLine>;
     readonly assigned_user_info: Array<AssignedUserInfoWithBooked>;
     branch?: number | null;
+    external_identifier?: string | null;
+    quotation?: number | null;
     planning_remarks?: string | null;
     readonly last_update: string;
     order_email_extra?: Array<string>;
@@ -4211,80 +4202,9 @@ export type OrderDetail = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
-};
-
-/**
- * Public-facing detail serializer with limited fields.
- */
-export type OrderDetailPublic = {
-    uuid?: string;
-    customer_id?: string | null;
-    order_id?: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_time?: string | null;
-    readonly order_date: string;
-    remarks?: string | null;
-    order_name: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    readonly documents: Array<OrderDocument>;
-    readonly statuses: Array<OrderStatus>;
-    readonly orderlines: Array<OrderLine>;
-    readonly workorder_pdf_url: string | null;
-    customer_relation?: number | null;
-    readonly required_assigned: string;
-    required_users?: number;
-    readonly user_order_available_set_count: number;
-    readonly assigned_count: number;
-    readonly workorder_url: string;
-    readonly workorder_pdf_url_partner: Array<WorkorderUrlPartner>;
-    customer_order_accepted?: boolean;
-    readonly workorder_documents: Array<WorkorderDocument>;
-    readonly workorder_documents_partners: Array<WorkorderDocument>;
-    readonly infolines: Array<EngineerInfoLine>;
-    readonly assigned_user_info: Array<AssignedUserInfo>;
-    readonly reported_codes_extra_data: Array<ReportedCodeExtraData>;
-    branch?: number | null;
-    readonly invoices: Array<InvoiceInfo>;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
-    readonly last_update?: string;
-    total_price_purchase?: string;
-    total_price_selling?: string;
-    readonly start_date_iso: string;
-    readonly end_date_iso: string;
-    readonly last_status: string;
-    readonly last_status_full: string | null;
-    readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -4353,6 +4273,9 @@ export type OrderDispatch = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -4422,58 +4345,9 @@ export type OrderEvent = {
     last_status?: string | null;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
-};
-
-/**
- * Simplified external API serializer.
- */
-export type OrderExternal = {
-    readonly id: number;
-    uuid?: string;
-    customer_id?: string | null;
-    order_id: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date?: string;
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date?: string;
-    end_time?: string | null;
-    readonly order_date: string;
-    remarks?: string | null;
-    external_identifier?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly modified: string;
-    customer_relation?: number | null;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
-    readonly last_update?: string;
-    readonly last_status: string;
-    readonly last_status_full: string | null;
-    readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 export type OrderFilter = {
@@ -4629,6 +4503,44 @@ export type OrderLineDetail = {
 /**
  * Shared price fields for the OrderLine serializer family.
  */
+export type OrderLineNested = {
+    id?: number;
+    product?: string | null;
+    location?: string | null;
+    remarks?: string | null;
+    amount?: number;
+    price_purchase?: string;
+    price_selling?: string;
+    material_relation?: number | null;
+    location_relation_inventory?: number | null;
+    purchase_order_material?: number | null;
+    maintenance_contract?: number | null;
+    equipment?: number | null;
+    equipment_location?: number | null;
+};
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
+export type OrderLineNestedRequest = {
+    id?: number;
+    product?: string | null;
+    location?: string | null;
+    remarks?: string | null;
+    amount?: number;
+    price_purchase?: string;
+    price_selling?: string;
+    material_relation?: number | null;
+    location_relation_inventory?: number | null;
+    purchase_order_material?: number | null;
+    maintenance_contract?: number | null;
+    equipment?: number | null;
+    equipment_location?: number | null;
+};
+
+/**
+ * Shared price fields for the OrderLine serializer family.
+ */
 export type OrderLineRequest = {
     product?: string | null;
     location?: string | null;
@@ -4700,6 +4612,9 @@ export type OrderMinimal = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -4755,6 +4670,9 @@ export type OrderMinimalSerializerCounts = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -4791,6 +4709,19 @@ export type OrderRequest = {
     branch?: number | null;
     quotation?: number | null;
     order_email_extra?: Array<string>;
+};
+
+export type OrderSeedQuotation = {
+    id: number;
+    customer_relation: number | null;
+    quotation_reference: string | null;
+};
+
+export type OrderSeedResponse = {
+    branch: Branch | null;
+    customer: Customer | null;
+    quotation: OrderSeedQuotation | null;
+    equipment: Array<Equipment>;
 };
 
 export type OrderStatus = {
@@ -4910,6 +4841,11 @@ export type OrderUpdate = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -4942,67 +4878,14 @@ export type OrderUpdateCustomer = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
-};
-
-/**
- * Customer update serializer without customer_relation.
- */
-export type OrderUpdateCustomerRequest = {
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string;
-    description?: string | null;
-    start_date?: string;
-    start_time?: string | null;
-    end_date?: string;
-    end_time?: string | null;
-    remarks?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    order_email_extra?: Array<string>;
-    planning_remarks?: string | null;
-};
-
-/**
- * Full update serializer with customer_relation.
- */
-export type OrderUpdateRequest = {
-    customer_id?: string | null;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string;
-    customer_remarks?: string | null;
-    description?: string | null;
-    start_date?: string;
-    start_time?: string | null;
-    end_date?: string;
-    end_time?: string | null;
-    remarks?: string | null;
-    external_identifier?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    customer_relation?: number | null;
-    order_email_extra?: Array<string>;
-    planning_remarks?: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 export type OrderUpdateVariant = OrderUpdate | OrderUpdateCustomer;
-
-export type OrderUpdateVariantRequest = OrderUpdateRequest | OrderUpdateCustomerRequest;
 
 export type OrderlineEquipmentWorkorder = {
     equipment: EquipmentOrderLine | null;
@@ -5143,13 +5026,6 @@ export type PaginatedCustomerList = {
     results?: Array<Customer>;
 };
 
-export type PaginatedCustomerRatingList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<CustomerRating>;
-};
-
 export type PaginatedCustomerUserList = {
     count?: number;
     next?: string | null;
@@ -5204,13 +5080,6 @@ export type PaginatedEquipmentList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<Equipment>;
-};
-
-export type PaginatedEquipmentPartList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<EquipmentPart>;
 };
 
 export type PaginatedEquipmentStateList = {
@@ -5330,13 +5199,6 @@ export type PaginatedOfferList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<Offer>;
-};
-
-export type PaginatedOrderAutocompleteList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<OrderAutocomplete>;
 };
 
 export type PaginatedOrderCostList = {
@@ -5612,20 +5474,6 @@ export type PaginatedTemplateList = {
     results?: Array<Template>;
 };
 
-export type PaginatedTimeRegistrationListList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<TimeRegistrationList>;
-};
-
-export type PaginatedTransactionList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<Transaction>;
-};
-
 export type PaginatedTripList = {
     count?: number;
     next?: string | null;
@@ -5666,13 +5514,6 @@ export type PaginatedUserOrderAvailabilityList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<UserOrderAvailability>;
-};
-
-export type PaginatedUserRatingList = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<UserRating>;
 };
 
 export type PaginatedUserSickLeaveList = {
@@ -5755,7 +5596,7 @@ export type PartnerDetailRequest = {
 export type PartnerRequest = {
     readonly id: number;
     from_member: number | null;
-    to_member: number | null;
+    to_member: number;
     status?: PartnerRequestStatusEnum;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -5771,7 +5612,7 @@ export type PartnerRequest = {
 
 export type PartnerRequestRequest = {
     from_member: number | null;
-    to_member: number | null;
+    to_member: number;
     status?: PartnerRequestStatusEnum;
 };
 
@@ -5817,7 +5658,13 @@ export type PatchedApiUserRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    api_user?: ApiUserSubRequest;
+    api_user?: PatchedApiUserSubRequest;
+};
+
+export type PatchedApiUserSubRequest = {
+    name?: string;
+    expire_start_dt?: string;
+    expire_in_days?: number;
 };
 
 export type PatchedAppUserSettingsRequest = {
@@ -5933,16 +5780,9 @@ export type PatchedChapterRequest = {
     description?: string | null;
 };
 
-/**
- * ContractSerializer as PUT and PATCH accept it.
- *
- * Optional, because an omitted field is left out of validated_data and the
- * instance keeps the value it already has, which save() then splits happily.
- * Not nullable and not blank, because those two a caller can actually send.
- */
-export type PatchedContractWriteRequest = {
+export type PatchedContractRequest = {
     name?: string;
-    module_paths_pks?: string;
+    module_paths?: Array<ModulePathRequest>;
     max_users?: number;
 };
 
@@ -5960,13 +5800,6 @@ export type PatchedCustomerDocumentRequest = {
     description?: string | null;
     file?: string;
     user_can_view?: boolean;
-};
-
-export type PatchedCustomerRatingRequest = {
-    customer?: number;
-    rated_by?: number | null;
-    rating?: number;
-    assignedorder_id?: number;
 };
 
 export type PatchedCustomerRequest = {
@@ -5999,14 +5832,6 @@ export type PatchedCustomerRequest = {
     branch_id?: number | null;
     branch_partner?: number | null;
     use_branch_address?: boolean;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 export type PatchedCustomerUserRequest = {
@@ -6018,30 +5843,16 @@ export type PatchedCustomerUserRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    customer_user?: CustomerUserSubRequest;
+    customer_user?: PatchedCustomerUserSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
     last_name?: string;
 };
 
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type PatchedDefaultUserProfileRequest = {
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username?: string;
-    first_name?: string;
-    last_name?: string;
+export type PatchedCustomerUserSubRequest = {
+    customer?: number | null;
+    settings_group?: string | null;
 };
 
 export type PatchedDepartmentRequest = {
@@ -6058,21 +5869,34 @@ export type PatchedEmployeeUserRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    employee_user?: EmployeeUserSubRequest;
+    employee_user?: PatchedEmployeeUserSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
     last_name?: string;
 };
 
+export type PatchedEmployeeUserSubRequest = {
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+    branch?: number | null;
+};
+
 export type PatchedEnabledRequest = {
     api_enabled?: boolean;
 };
 
-export type PatchedEngineerEventRequest = {
-    engineer?: number;
-    event_dts?: string;
-    event_type?: string;
+/**
+ * The body EngineerEventUpdate.update reads: the assigned order id to
+ * attach to the event. A bare integer field rather than a
+ * PrimaryKeyRelatedField: the view reads the key straight off request.data
+ * and never validates it through a serializer, so a queryset here would
+ * only be documentation. Declared outright rather than derived from
+ * EngineerEventSerializer, whose `assigned_order` is a read-only method
+ * field answering the nested row.
+ */
+export type PatchedEngineerEventAttachOrderRequest = {
+    assigned_order?: number;
 };
 
 export type PatchedEngineerEventTypeRequest = {
@@ -6095,11 +5919,36 @@ export type PatchedEngineerRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    engineer?: EngineerSubRequest;
+    engineer?: PatchedEngineerSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
     last_name?: string;
+};
+
+export type PatchedEngineerSubRequest = {
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
+    mobile?: string | null;
+    email_tablet?: string | null;
+    passport?: string | null;
+    vca?: string | null;
+    cost_price?: string | null;
+    license_plate?: string | null;
+    inspection_date_car?: string | null;
+    cost_price_car?: string | null;
+    inspection_date_tools?: string | null;
+    cost_price_tools?: string | null;
+    remarks?: string | null;
+    contract_hours_week?: string | null;
+    uses_time_registration?: boolean;
+    preferred_location?: number;
+    hide_from_dispatch?: boolean;
 };
 
 /**
@@ -6115,14 +5964,6 @@ export type PatchedEquipmentDocumentRequest = {
     name?: string | null;
     description?: string | null;
     file?: string;
-};
-
-export type PatchedEquipmentPartRequest = {
-    name?: string;
-    equipment?: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
 };
 
 export type PatchedEquipmentRequest = {
@@ -6143,8 +5984,21 @@ export type PatchedEquipmentRequest = {
     price?: string;
 };
 
+/**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export type PatchedGrippSettingsRequest = {
+    gripp_api_enabled?: boolean;
+    gripp_default_order_type?: string;
+    gripp_default_employee?: string;
+    gripp_project_phase_match?: string;
+    gripp_project_phase_workorder_signed?: string;
+    gripp_tasktype_hours?: string;
+    gripp_tasktype_travel?: string;
+};
+
 export type PatchedImportRequest = {
-    name?: string | null;
+    name?: string;
     file?: string;
     /**
      * How import columns map onto model fields, as the import wizard left it.
@@ -6235,13 +6089,13 @@ export type PatchedLocationRequest = {
 
 export type PatchedMaintenanceContractRequest = {
     customer?: number;
-    name?: string | null;
+    name?: string;
     remarks?: string | null;
 };
 
 export type PatchedMaintenanceEquipmentRequest = {
     contract?: number | null;
-    equipment?: number | null;
+    equipment?: number;
     equipment_name?: string;
     times_per_year?: number;
     remarks?: string | null;
@@ -6306,6 +6160,46 @@ export type PatchedMemberRequest = {
     has_mobile_activity_user_select?: boolean;
 };
 
+/**
+ * The tenant settings the web settings screen edits, typed.
+ */
+export type PatchedMemberSettingsRequest = {
+    countries?: Array<string>;
+    date_format?: string;
+    default_currency?: string;
+    invoice_default_vat?: number;
+    invoice_default_hourly_rate?: string;
+    invoice_default_call_out_costs?: string;
+    invoice_default_price_per_km?: string;
+    invoice_default_term_of_payment_days?: number;
+    quotation_default_expire_days?: number;
+    quotation_default_call_out_costs?: string;
+    quotation_default_vat?: number;
+    quotation_default_hourly_rate?: string;
+    quotation_default_price_per_km?: string;
+    customer_id_autoincrement?: boolean;
+    order_uses_equipment?: boolean;
+    sick_leave_user_allowed_create?: boolean;
+    sick_leave_user_allowed_end?: boolean;
+    equipment_planning_quick_create?: boolean;
+    equipment_quick_create?: boolean;
+    equipment_location_planning_quick_create?: boolean;
+    equipment_location_quick_create?: boolean;
+    order_list_include_reference?: boolean;
+    workorder_show_related_orders?: boolean;
+    break_calculation?: boolean;
+    customer_id_start?: number;
+    order_id?: number;
+    quotation_id?: number;
+    workorder_id?: number;
+    purchase_order_id?: number;
+    invoice_id?: number;
+    order_types?: Array<string>;
+    break_calculation_after_minutes?: number;
+    break_calculation_duration_minutes?: number;
+    app_session_token_expiry_days?: number;
+};
+
 export type PatchedModulePartRequest = {
     name?: string;
     module?: number;
@@ -6336,11 +6230,8 @@ export type PatchedOrderCostRequest = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price?: UsePriceEnum;
     price?: string;
     vat_type?: string;
-    vat?: string;
-    total?: string;
 };
 
 /**
@@ -6385,16 +6276,12 @@ export type PatchedOrderLineDetailRequest = {
 };
 
 /**
- * Main Order serializer for list views with all standard fields.
+ * Customer update serializer without customer_relation.
  */
-export type PatchedOrderRequest = {
-    uuid?: string;
-    customer_id?: string | null;
-    order_id?: string;
+export type PatchedOrderUpdateCustomerRequest = {
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
+    order_type?: string;
     description?: string | null;
     start_date?: string;
     start_time?: string | null;
@@ -6410,15 +6297,45 @@ export type PatchedOrderRequest = {
     order_mobile?: string | null;
     order_email?: string | null;
     order_contact?: string | null;
-    total_price_purchase?: string;
-    total_price_selling?: string;
-    customer_relation?: number | null;
-    required_users?: number;
-    customer_order_accepted?: boolean;
-    branch?: number | null;
-    quotation?: number | null;
     order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
 };
+
+/**
+ * Full update serializer with customer_relation.
+ */
+export type PatchedOrderUpdateRequest = {
+    customer_id?: string | null;
+    customer_reference?: string | null;
+    order_reference?: string | null;
+    order_type?: string;
+    customer_remarks?: string | null;
+    description?: string | null;
+    start_date?: string;
+    start_time?: string | null;
+    end_date?: string;
+    end_time?: string | null;
+    remarks?: string | null;
+    external_identifier?: string | null;
+    order_name?: string;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_email?: string | null;
+    order_contact?: string | null;
+    customer_relation?: number | null;
+    order_email_extra?: Array<string>;
+    planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNestedRequest>;
+    infolines?: Array<EngineerInfoLineNestedRequest>;
+};
+
+export type PatchedOrderUpdateVariantRequest = PatchedOrderUpdateRequest | PatchedOrderUpdateCustomerRequest;
 
 export type PatchedPartnerDetailRequest = {
     partner?: number | null;
@@ -6426,7 +6343,7 @@ export type PatchedPartnerDetailRequest = {
 
 export type PatchedPartnerRequestRequest = {
     from_member?: number | null;
-    to_member?: number | null;
+    to_member?: number;
     status?: PartnerRequestStatusEnum;
 };
 
@@ -6444,11 +6361,16 @@ export type PatchedPlanningUserRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    planning_user?: PlanningUserSubRequest;
+    planning_user?: PatchedPlanningUserSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
     last_name?: string;
+};
+
+export type PatchedPlanningUserSubRequest = {
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
 };
 
 export type PatchedProductCategoryJsonRequest = {
@@ -6501,6 +6423,34 @@ export type PatchedPurchaseOrderStatusRequest = {
     status?: string;
 };
 
+/**
+ * PATCH .../purchaseorder/{id}/with-materials/ body: the same fields as
+ * PurchaseOrderDetailSerializer plus `materials` as a replace-set (see
+ * `_replace_materials`). Reuses PurchaseOrderDetailSerializer.update (status
+ * transition) for the PurchaseOrder row itself.
+ */
+export type PatchedPurchaseOrderWithMaterialsUpdateRequest = {
+    uuid?: string;
+    supplier?: number;
+    purchase_order_id?: string;
+    supplier_remarks?: string | null;
+    order_name?: string | null;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_po_box?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_email?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_contact?: string | null;
+    expected_entry_date?: string | null;
+    order_reference?: string | null;
+    description?: string | null;
+    supplier_reservation?: number | null;
+    materials?: Array<PurchaseOrderMaterialRowRequest>;
+};
+
 export type PatchedPurchaseRequest = {
     order?: number;
     reference?: string | null;
@@ -6519,9 +6469,6 @@ export type PatchedQuotationCostRequest = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price?: UsePriceEnum;
-    margin_perc?: string;
-    margin?: string;
     price?: string;
     vat_type?: string;
     vat?: string;
@@ -6598,7 +6545,6 @@ export type PatchedQuotationRequest = {
     preliminary?: boolean;
     accepted?: boolean;
     vat_type?: string;
-    margin?: number;
     total?: string;
     vat?: string;
     quotation_expire_days?: number;
@@ -6625,17 +6571,22 @@ export type PatchedSalesUserRequest = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    sales_user?: SalesUserSubRequest;
+    sales_user?: PatchedSalesUserSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
     last_name?: string;
 };
 
+export type PatchedSalesUserSubRequest = {
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+};
+
 export type PatchedStatuscodeRequest = {
     code_type?: CodeTypeEnum;
     statuscode?: string;
-    color?: string | null;
+    color?: string;
     description?: string | null;
     start_order?: boolean;
     end_order?: boolean;
@@ -6648,7 +6599,7 @@ export type PatchedStatuscodeRequest = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    roles?: Array<string>;
 };
 
 export type PatchedStockLocationRequest = {
@@ -6658,12 +6609,40 @@ export type PatchedStockLocationRequest = {
     external_identifier?: string | null;
 };
 
+export type PatchedStudentSubWriteRequest = {
+    street?: string | null;
+    house_number?: string | null;
+    house_number_addition?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    remarks?: string | null;
+    picture?: string;
+    info?: string;
+    lon?: number | null;
+    lat?: number | null;
+    iban?: string;
+    /**
+     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
+     */
+    mobile?: string | null;
+    gender?: string | null;
+    dob?: string | null;
+    drivers_licence?: string | null;
+    drivers_licence_type?: string | null;
+    box_truck?: string | null;
+    bsn?: string | null;
+    first_time_profile?: boolean;
+    uses_time_registration?: boolean;
+    contract_hours_week?: string;
+};
+
 export type PatchedStudentUserWriteRequest = {
     /**
      * Email address
      */
     email?: string;
-    student_user?: StudentSubWriteRequest;
+    student_user?: PatchedStudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -6706,6 +6685,17 @@ export type PatchedSupplierReservationRequest = {
     supplier?: number;
 };
 
+/**
+ * Body for both .../supplier-reservation/with-materials/ (create) and
+ * .../supplier-reservation/{id}/with-materials/ (update): the reservation's
+ * own fields plus `materials`. On create every row is inserted; on update
+ * `materials` is a replace-set (see `_replace_reservation_materials`).
+ */
+export type PatchedSupplierReservationWithMaterialsRequest = {
+    supplier?: number;
+    materials?: Array<SupplierReservationMaterialRowRequest>;
+};
+
 export type PatchedTemplateRequest = {
     name?: string;
     description?: string | null;
@@ -6726,12 +6716,6 @@ export type PatchedTimeCorrectionRequest = {
     work_correction?: string;
     work_correction_by_user?: number;
     notify_engineer?: boolean;
-};
-
-export type PatchedTransactionRequest = {
-    productid?: string;
-    identifier?: string;
-    member?: number;
 };
 
 export type PatchedTravelHoursProductRequest = {
@@ -6840,14 +6824,6 @@ export type PatchedUserOrderAvailabilityRequest = {
     is_accepted?: boolean;
 };
 
-export type PatchedUserRatingRequest = {
-    user?: number;
-    rated_by?: number | null;
-    rating?: number;
-    customer_name?: string | null;
-    assignedorder_id?: number;
-};
-
 export type PatchedUserSickLeaveRequest = {
     user?: number;
     user_full_name?: string | null;
@@ -6866,7 +6842,6 @@ export type PatchedUserWorkHoursRequest = {
     project?: number | null;
     work_start?: string | null;
     work_end?: string | null;
-    work_correction?: string | null;
     travel_to?: string | null;
     travel_back?: string | null;
     distance_to?: number;
@@ -6974,9 +6949,11 @@ export type ProductCategoryJson = {
     product_category_uuid: string;
 };
 
-export type ProductCategoryJsonRequest = {
-    product_category_uuid: string;
-};
+/**
+ * * `default` - default
+ * * `shltr` - shltr
+ */
+export type ProductFamilyEnum = 'default' | 'shltr';
 
 export type ProductList = {
     readonly id: number;
@@ -6995,6 +6972,22 @@ export type ProductRequest = {
     purchase_price?: string;
     selling_price?: string;
     tax_percentage?: string;
+};
+
+/**
+ * What product a tenant is: the web client themes and gates on this.
+ *
+ * Instance is a Member. `modules` is the plain list of module names in the
+ * tenant's contract, empty when there is no contract. `module_parts` maps
+ * each module in the contract's module paths to its enabled parts.
+ */
+export type Profile = {
+    family: ProductFamilyEnum;
+    flavour: MemberTypeEnum;
+    readonly modules: Array<string>;
+    readonly module_parts: {
+        [key: string]: Array<string>;
+    };
 };
 
 export type Project = {
@@ -7020,6 +7013,54 @@ export type Purchase = {
     readonly created: string;
 };
 
+export type PurchaseOrderDetail = {
+    readonly id: number;
+    uuid?: string;
+    supplier: number;
+    purchase_order_id?: string;
+    supplier_remarks?: string | null;
+    order_name?: string | null;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_po_box?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_email?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_contact?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    expected_entry_date?: string | null;
+    readonly expected_entry_date_iso: string | null;
+    order_reference?: string | null;
+    description?: string | null;
+    supplier_reservation?: number | null;
+    readonly reservation_materials: Array<SupplierReservationMaterial> | null;
+    readonly materials: Array<PurchaseOrderMaterial>;
+    readonly statuses: Array<PurchaseOrderStatus>;
+    readonly entries: Array<PurchaseOrderEntry>;
+    readonly num_entries: number;
+    readonly num_materials: number;
+    total_entries: number | string | null;
+    total_materials: number | string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly created: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly modified: string;
+    readonly last_status: string;
+    readonly last_status_full: string | null;
+    readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
+};
+
 export type PurchaseOrderEntry = {
     readonly id: number;
     purchase_order?: number | null;
@@ -7028,7 +7069,11 @@ export type PurchaseOrderEntry = {
     readonly order_id: string;
     readonly material_name: string;
     amount?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     entry_date?: string | null;
+    readonly entry_date_iso: string | null;
     stock_location?: number | null;
     readonly stock_location_name: string;
     /**
@@ -7061,7 +7106,11 @@ export type PurchaseOrderList = {
     order_tel?: string | null;
     order_mobile?: string | null;
     order_contact?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     expected_entry_date?: string | null;
+    readonly expected_entry_date_iso: string | null;
     order_reference?: string | null;
     description?: string | null;
     supplier_reservation?: number | null;
@@ -7080,6 +7129,9 @@ export type PurchaseOrderList = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 export type PurchaseOrderListRequest = {
@@ -7121,6 +7173,24 @@ export type PurchaseOrderMaterial = {
 };
 
 export type PurchaseOrderMaterialRequest = {
+    material: number;
+    material_name?: string | null;
+    purchase_order?: number | null;
+    amount?: number;
+    remarks?: string | null;
+};
+
+/**
+ * One row of a PurchaseOrder-with-materials nested create/replace-set.
+ *
+ * Same shape as PurchaseOrderMaterialSerializer (material, amount, remarks,
+ * ...) but `id` is writable and optional: present on a row -> update that
+ * stored PurchaseOrderMaterial, absent -> create a new one.
+ * `purchase_order` is optional here - the parent PurchaseOrder supplies it,
+ * not the row itself.
+ */
+export type PurchaseOrderMaterialRowRequest = {
+    id?: number | null;
     material: number;
     material_name?: string | null;
     purchase_order?: number | null;
@@ -7177,6 +7247,34 @@ export type PurchaseOrderView = {
     expected_entry_date: string | null;
 };
 
+/**
+ * POST .../purchaseorder/with-materials/ body: the same fields as
+ * PurchaseOrderListSerializer plus a `materials` list, created atomically.
+ * Reuses PurchaseOrderListSerializer.create (purchase_order_id assignment +
+ * initial status) for the PurchaseOrder row itself.
+ */
+export type PurchaseOrderWithMaterialsCreateRequest = {
+    uuid?: string;
+    supplier: number;
+    purchase_order_id?: string;
+    supplier_remarks?: string | null;
+    order_name?: string | null;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_po_box?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_email?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_contact?: string | null;
+    expected_entry_date?: string | null;
+    order_reference?: string | null;
+    description?: string | null;
+    supplier_reservation?: number | null;
+    materials?: Array<PurchaseOrderMaterialRowRequest>;
+};
+
 export type PurchaseRequest = {
     order: number;
     reference?: string | null;
@@ -7231,7 +7329,6 @@ export type Quotation = {
     preliminary?: boolean;
     accepted?: boolean;
     vat_type?: string;
-    margin?: number;
     total?: string;
     readonly total_currency: string;
     vat?: string;
@@ -7251,6 +7348,9 @@ export type Quotation = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -7280,10 +7380,6 @@ export type QuotationCost = {
     amount_duration?: string | null;
     readonly amount_duration_read: string | null;
     readonly amount_duration_secs: number | null;
-    use_price: UsePriceEnum;
-    margin_perc?: string;
-    margin?: string;
-    readonly margin_currency: string;
     price?: string;
     readonly price_currency: string;
     vat_type?: string;
@@ -7304,14 +7400,28 @@ export type QuotationCostRequest = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price: UsePriceEnum;
-    margin_perc?: string;
-    margin?: string;
     price?: string;
     vat_type?: string;
     vat?: string;
     total?: string;
     chapter?: number | null;
+};
+
+export type QuotationCostRowRequest = {
+    id?: number;
+    chapter?: number | null;
+    user?: number | null;
+    material?: number | null;
+    amount_int?: number | null;
+    amount_decimal?: string | null;
+    amount_duration?: string | null;
+    price?: string;
+    price_currency?: CurrencyEnum;
+    vat_type?: string;
+    vat?: string;
+    vat_currency?: CurrencyEnum;
+    total?: string;
+    total_currency?: CurrencyEnum;
 };
 
 export type QuotationDocument = {
@@ -7428,6 +7538,26 @@ export type QuotationLineRequest = {
     total?: string;
 };
 
+export type QuotationLineRowRequest = {
+    id?: number;
+    old_material?: string | null;
+    material_name?: string | null;
+    material_identifier?: string | null;
+    material?: number | null;
+    amount: string;
+    location?: string | null;
+    info?: string | null;
+    extra_description?: string | null;
+    vat_type?: string;
+    cost_type?: string | null;
+    price?: string;
+    price_currency?: CurrencyEnum;
+    vat?: string;
+    vat_currency?: CurrencyEnum;
+    total?: string;
+    total_currency?: CurrencyEnum;
+};
+
 /**
  * the row GET quotation/quotation/preliminary/ serves one quotation as.
  *
@@ -7439,10 +7569,10 @@ export type QuotationLineRequest = {
  * group. a modelserializer cannot short-change its own field set, so every
  * key stays required here and only nullability (null=true columns, unset
  * signatures/files) is declared. types match what quirk-for-quirk those very
- * fields generate: decimal strings for vat_type/vat/total, integer margin
- * (a percentage column, not money), email format on quotation_email, plain
- * strings for created/modified because transformdatesmixin rewrites both
- * into tenant display text before they hit the wire.
+ * fields generate: decimal strings for vat_type/vat/total, email format on
+ * quotation_email, plain strings for created/modified because
+ * transformdatesmixin rewrites both into tenant display text before they hit
+ * the wire.
  */
 export type QuotationPreliminaryResponse = {
     id: number;
@@ -7471,7 +7601,6 @@ export type QuotationPreliminaryResponse = {
     preliminary: boolean;
     accepted: boolean;
     vat_type: string;
-    margin: number;
     total: string;
     total_currency: string;
     vat: string;
@@ -7513,7 +7642,6 @@ export type QuotationRequest = {
     preliminary?: boolean;
     accepted?: boolean;
     vat_type?: string;
-    margin?: number;
     total?: string;
     vat?: string;
     quotation_expire_days?: number;
@@ -7642,11 +7770,6 @@ export type SalesUserCustomerExpanded = {
     readonly created: string;
 };
 
-export type SalesUserCustomerExpandedRequest = {
-    user?: number | null;
-    customer: number;
-};
-
 export type SalesUserCustomerRequest = {
     user?: number | null;
     customer: number;
@@ -7731,6 +7854,12 @@ export type SetOrderAcceptedResponse = {
 };
 
 /**
+ * * `mobile` - mobile
+ * * `company` - company
+ */
+export type SourceEnum = 'mobile' | 'company';
+
+/**
  * `{'status': 'ok'}` - what the OAuth callback and EmptyTokens answer.
  */
 export type StatusOkResponse = {
@@ -7746,7 +7875,7 @@ export type Statuscode = {
     readonly id: number;
     code_type: CodeTypeEnum;
     statuscode: string;
-    color?: string | null;
+    color: string | null;
     description?: string | null;
     readonly actions: Array<Action>;
     start_order?: boolean;
@@ -7760,8 +7889,9 @@ export type Statuscode = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    readonly settings_key: string | null;
     readonly settings_value: string | null;
+    roles?: Array<string>;
 };
 
 /**
@@ -7780,7 +7910,7 @@ export type StatuscodeAutocompleteRow = {
 export type StatuscodeRequest = {
     code_type: CodeTypeEnum;
     statuscode: string;
-    color?: string | null;
+    color: string;
     description?: string | null;
     start_order?: boolean;
     end_order?: boolean;
@@ -7793,7 +7923,7 @@ export type StatuscodeRequest = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    roles?: Array<string>;
 };
 
 export type StockLocation = {
@@ -8360,8 +8490,34 @@ export type SupplierReservationMaterialRequest = {
     remarks?: string | null;
 };
 
+/**
+ * One row of a SupplierReservation-with-materials nested create/replace-set.
+ *
+ * Same shape as SupplierReservationMaterialSerializer but `id` is writable
+ * and optional (present -> update, absent -> create), and `reservation` is
+ * optional - the parent SupplierReservation supplies it.
+ */
+export type SupplierReservationMaterialRowRequest = {
+    id?: number | null;
+    reservation?: number;
+    material: number;
+    amount?: number;
+    remarks?: string | null;
+};
+
 export type SupplierReservationRequest = {
     supplier: number;
+};
+
+/**
+ * Body for both .../supplier-reservation/with-materials/ (create) and
+ * .../supplier-reservation/{id}/with-materials/ (update): the reservation's
+ * own fields plus `materials`. On create every row is inserted; on update
+ * `materials` is a replace-set (see `_replace_reservation_materials`).
+ */
+export type SupplierReservationWithMaterialsRequest = {
+    supplier: number;
+    materials?: Array<SupplierReservationMaterialRowRequest>;
 };
 
 /**
@@ -8442,27 +8598,128 @@ export type TemplateRequest = {
 export type TemplateTypeEnum = 'invoice' | 'quotation';
 
 /**
- * The request body TimeCorrectionViewset.update accepts.
- *
- * Every field is optional: the endpoint is reached by PATCH with whatever
- * subset the caller is changing, and does nothing at all unless
- * `work_correction` is among them.
+ * The {total, interval_total} pair each bucket column carries.
  */
-export type TimeCorrectionRequest = {
-    source?: string;
-    work_correction?: string;
-    work_correction_by_user?: number;
-    notify_engineer?: boolean;
+export type TimeRegistrationIntervalTotal = {
+    total: string | number | null;
+    interval_total: string | number | null;
 };
 
-export type TimeRegistrationList = {
-    readonly bucket: string;
-    readonly full_name: string;
-    readonly user_id: number | null;
-    readonly contract_hours_week: number;
-    readonly user_work_total: string;
-    readonly user_interval_work_total: string;
-    readonly interval: number;
+/**
+ * A leave_data row: the detail-user shape minus the work/travel/distance
+ * keys list() deletes for leave records, plus the project (always null) and
+ * leave type it fills in.
+ */
+export type TimeRegistrationLeaveRow = {
+    readonly date: string;
+    username: string;
+    source: SourceEnum;
+    source_id: number;
+    readonly customer_name: string | null;
+    work_start?: string | null;
+    work_end?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    actual_work?: string | null;
+    readonly unforeseen_work: string;
+    readonly leave_duration: string;
+    readonly id: number;
+    readonly work_correction: string;
+    readonly work_correction_by_user_id: number;
+    project: string | null;
+    leave_type: string | null;
+};
+
+/**
+ * The hand-built envelope TimeRegistrationListView.list answers with.
+ */
+export type TimeRegistrationListResponse = {
+    full_name: string | null;
+    totals_fields: Array<string>;
+    date_list: Array<string>;
+    intervals: Array<number>;
+    totals: Array<TimeRegistrationTotalsRow>;
+    workhour_data?: Array<TimeRegistrationWorkhourRow>;
+    leave_data?: Array<TimeRegistrationLeaveRow>;
+};
+
+/**
+ * Bucket row for an engineer user: the user pairs plus extra, actual and
+ * unforeseen work.
+ */
+export type TimeRegistrationTotalsEngineerRow = {
+    bucket: string;
+    full_name: string;
+    user_id: number | null;
+    contract_hours_week: number;
+    interval: number;
+    work_total: TimeRegistrationIntervalTotal;
+    travel_total: TimeRegistrationIntervalTotal;
+    distance_total: TimeRegistrationIntervalTotal;
+    extra_work: TimeRegistrationIntervalTotal;
+    actual_work: TimeRegistrationIntervalTotal;
+    unforeseen_work: TimeRegistrationIntervalTotal;
+};
+
+/**
+ * Bucket row with no user pinned: only the work total.
+ */
+export type TimeRegistrationTotalsListRow = {
+    bucket: string;
+    full_name: string;
+    user_id: number | null;
+    contract_hours_week: number;
+    interval: number;
+    work_total: TimeRegistrationIntervalTotal;
+};
+
+export type TimeRegistrationTotalsRow = TimeRegistrationTotalsListRow | TimeRegistrationTotalsUserRow | TimeRegistrationTotalsEngineerRow;
+
+/**
+ * Bucket row for a non-engineer user: work, travel and distance totals.
+ */
+export type TimeRegistrationTotalsUserRow = {
+    bucket: string;
+    full_name: string;
+    user_id: number | null;
+    contract_hours_week: number;
+    interval: number;
+    work_total: TimeRegistrationIntervalTotal;
+    travel_total: TimeRegistrationIntervalTotal;
+    distance_total: TimeRegistrationIntervalTotal;
+};
+
+/**
+ * A workhour_data row: the detail-user shape plus the project and
+ * description list() fills in. leave_duration is deleted for non-leave rows
+ * and break_duration only exists when break calculation is on, so both stay
+ * optional on reads.
+ */
+export type TimeRegistrationWorkhourRow = {
+    readonly date: string;
+    username: string;
+    source: SourceEnum;
+    source_id: number;
+    readonly customer_name: string | null;
+    work_start?: string | null;
+    work_end?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    actual_work?: string | null;
+    readonly unforeseen_work: string;
+    readonly leave_duration?: string;
+    readonly id: number;
+    readonly work_correction: string;
+    readonly work_correction_by_user_id: number;
+    project: string | null;
+    description: string | null;
+    break_duration?: string | number | null;
 };
 
 /**
@@ -8538,33 +8795,7 @@ export type TopUsersForCustomerResponse = {
     data: Array<GetTopUsersForCustomerView>;
 };
 
-export type Transaction = {
-    readonly id: number;
-    productid: string;
-    identifier: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-    member: number;
-};
-
-export type TransactionRequest = {
-    productid: string;
-    identifier: string;
-    member: number;
-};
-
 export type TravelHoursProduct = {
-    travel_hours_product_uuid: string;
-    travel_hours_product_name: string;
-    travel_hours_product_purchase_price?: string | null;
-    travel_hours_product_purchase_price_currency?: string | null;
-    travel_hours_product_selling_price?: string | null;
-    travel_hours_product_selling_price_currency?: string | null;
-};
-
-export type TravelHoursProductRequest = {
     travel_hours_product_uuid: string;
     travel_hours_product_name: string;
     travel_hours_product_purchase_price?: string | null;
@@ -8616,6 +8847,19 @@ export type Trip = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
+};
+
+/**
+ * The {trip, assigned_users, available_users} bundle built by hand in
+ * trip_availability_detail().
+ */
+export type TripAvailabilityDetailResponse = {
+    trip: Trip;
+    assigned_users: Array<AvailabilityUserRow>;
+    available_users: Array<AvailabilityUserRow>;
 };
 
 export type TripOrder = {
@@ -8767,16 +9011,6 @@ export type UnauthorizedResponse = {
 };
 
 /**
- * * `settings` - settings
- * * `customer` - customer
- * * `user` - user
- * * `purchase` - purchase
- * * `selling` - selling
- * * `other` - other
- */
-export type UsePriceEnum = 'settings' | 'customer' | 'user' | 'purchase' | 'selling' | 'other';
-
-/**
  * The dict GetUserInfo returns.
  *
  * When the pk names a deleted user the answer is `{'error': ...}` instead;
@@ -8849,6 +9083,9 @@ export type UserLeaveHours = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 export type UserLeaveHoursData = {
@@ -8918,27 +9155,6 @@ export type UserOrderAvailabilityRequest = {
     is_accepted?: boolean;
 };
 
-export type UserRating = {
-    readonly id: number;
-    user: number;
-    rated_by: number | null;
-    rating?: number;
-    customer_name: string | null;
-    assignedorder_id?: number;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-};
-
-export type UserRatingRequest = {
-    user: number;
-    rated_by: number | null;
-    rating?: number;
-    customer_name: string | null;
-    assignedorder_id?: number;
-};
-
 /**
  * The rows UserList answers with.
  */
@@ -8961,6 +9177,7 @@ export type UserSickLeave = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     start_date?: string;
+    readonly start_date_iso: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -8976,6 +9193,9 @@ export type UserSickLeave = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 export type UserSickLeaveRequest = {
@@ -9034,7 +9254,7 @@ export type UserWorkHours = {
     /**
      * Minutes of correction after to_representation rewrites the stored timedelta.
      */
-    work_correction?: number;
+    readonly work_correction: number;
     travel_to?: string | null;
     travel_back?: string | null;
     distance_to?: number;
@@ -9056,6 +9276,9 @@ export type UserWorkHours = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
 };
 
 /**
@@ -9076,7 +9299,6 @@ export type UserWorkHoursRequest = {
     project?: number | null;
     work_start?: string | null;
     work_end?: string | null;
-    work_correction?: string | null;
     travel_to?: string | null;
     travel_back?: string | null;
     distance_to?: number;
@@ -9150,15 +9372,6 @@ export type WorkHoursProduct = {
     workhours_product_selling_price_currency?: string | null;
 };
 
-export type WorkHoursProductRequest = {
-    workhours_product_uuid: string;
-    workhours_product_name: string;
-    workhours_product_purchase_price?: string | null;
-    workhours_product_purchase_price_currency?: string | null;
-    workhours_product_selling_price?: string | null;
-    workhours_product_selling_price_currency?: string | null;
-};
-
 /**
  * The {url, name} dict WorkorderDocumentsMixin.get_workorder_documents
  * builds.
@@ -9193,6 +9406,9 @@ export type WorkorderOrder = {
     readonly last_status: string;
     readonly last_status_full: string | null;
     readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
     uuid?: string;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
@@ -9481,6 +9697,15 @@ export type AssignedOrderMaterialRequestedWritable = {
     material_identifier?: string | null;
 };
 
+export type AssignedOrderSplitRequestRequestWritable = {
+    order: number;
+    engineers: Array<number>;
+    alt_start_date?: string | null;
+    alt_start_time?: string | null;
+    alt_end_date?: string | null;
+    alt_end_time?: string | null;
+};
+
 export type AssignedOrderViewWritable = {
     started?: string | null;
     ended?: string | null;
@@ -9513,22 +9738,17 @@ export type AutocompleteRowWritable = {
 };
 
 /**
- * EngineerMinimalSerializer output for an engineer row.
+ * EngineerMinimalSerializer output for an engineer availability row.
  *
- * Nothing is flattened here, unlike the student row: EngineerMinimalSerializer
- * nests the account under 'user', so there is no key called 'engineer' to lift
- * and the row is that serializer's own shape, uuid included. The view used to
- * hand this serializer a User instead of an Engineer, which built a row out of
- * the fields a User happens to share - no `user`, no `country_code`.
+ * Subclassed, not redeclared: the row IS that serializer's shape, uuid
+ * included, so the fields cannot drift apart.
  */
 export type AvailabilityEngineerUserRowWritable = {
-    id: number;
-    address: string | null;
-    postal: string | null;
-    city: string | null;
-    country_code: string;
-    mobile: string | null;
-    uuid: string | null;
+    address?: string | null;
+    postal?: string | null;
+    city?: string | null;
+    country_code?: string;
+    mobile?: string | null;
 };
 
 export type AvailabilityUserRowWritable = AvailabilityStudentUserRow | AvailabilityEngineerUserRowWritable;
@@ -9554,6 +9774,15 @@ export type BranchWritable = {
  */
 export type BranchAutocompleteWritable = AddressAutocompleteRowWritable;
 
+export type BranchDashboardResponseWritable = {
+    branch: BranchWritable;
+    orders: CustomerDashboardOrdersWritable;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
+
 export type BudgetWritable = {
     year: number;
     amount?: string;
@@ -9570,21 +9799,24 @@ export type BuildingWritable = {
  */
 export type BuildingAutocompleteWritable = AutocompleteRowWritable;
 
-export type BuildingBodyWritable = {
+export type BuildingBranchCreateWritable = BuildingCreateWritable & BranchOwnerRequired;
+
+export type BuildingCreateWritable = {
     name: string;
 };
 
-export type BuildingBranchCreateWritable = BuildingBodyWritable & BranchOwnerRequired;
-
-export type BuildingBranchUpdateWritable = BuildingBodyWritable & BranchOwner;
-
 export type BuildingCreateRequestWritable = BuildingBranchCreateWritable | BuildingCustomerCreateWritable;
 
-export type BuildingCustomerCreateWritable = BuildingBodyWritable & CustomerOwnerRequired;
+export type BuildingCustomerCreateWritable = BuildingCreateWritable & CustomerOwnerRequired;
 
-export type BuildingCustomerUpdateWritable = BuildingBodyWritable & CustomerOwner;
-
-export type BuildingUpdateRequestWritable = BuildingBranchUpdateWritable | BuildingCustomerUpdateWritable;
+export type BuildingDashboardResponseWritable = {
+    building: BuildingWritable;
+    orders: CustomerDashboardOrdersWritable;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
 
 export type ChapterWritable = {
     quotation: number;
@@ -9604,7 +9836,7 @@ export type ConfigWritable = {
 
 export type ContractWritable = {
     name: string;
-    module_paths_pks?: string | null;
+    module_paths: Array<ModulePath>;
     max_users?: number;
 };
 
@@ -9638,14 +9870,6 @@ export type CustomerWritable = {
     branch_id?: number | null;
     branch_partner?: number | null;
     use_branch_address?: boolean;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerAutocompleteWritable = AddressAutocompleteRowWritable & {
@@ -9680,14 +9904,33 @@ export type CustomerCreateWritable = {
     remarks?: string | null;
     customer_id?: string | null;
     external_identifier?: string | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
+};
+
+/**
+ * One page of a customer's orders, in the paginated envelope the order
+ * list answers with (20 rows per page).
+ */
+export type CustomerDashboardOrdersWritable = {
+    count: number;
+    num_pages: number;
+    next: string | null;
+    previous: string | null;
+    results: Array<OrderWritable>;
+};
+
+/**
+ * GET /api/customer/customer/{id}/dashboard/: the customer head, the
+ * first orders page, and the four stats blocks the customer view charts -
+ * the same inner shapes the dedicated stats endpoints answer with, so the
+ * screen reads them unchanged.
+ */
+export type CustomerDashboardResponseWritable = {
+    customer: CustomerWritable;
+    orders: CustomerDashboardOrdersWritable;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
 };
 
 /**
@@ -9704,74 +9947,6 @@ export type CustomerDocumentWritable = {
     description?: string | null;
     file?: string;
     user_can_view?: boolean;
-};
-
-export type CustomerExternalWritable = {
-    name: string;
-    address: string;
-    postal: string;
-    city: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id: string | null;
-    external_identifier?: string | null;
-};
-
-export type CustomerRatingWritable = {
-    customer: number;
-    rated_by: number | null;
-    rating?: number;
-    assignedorder_id?: number;
-};
-
-export type CustomerUpdateWritable = {
-    name?: string;
-    address?: string;
-    postal?: string;
-    city?: string;
-    country_code?: string;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    tel?: string | null;
-    email?: string | null;
-    contact?: string | null;
-    /**
-     * E.164 phone number. The API also accepts national numbers with separators and stores the E.164 form.
-     */
-    mobile?: string | null;
-    time?: string | null;
-    time2?: string | null;
-    timealt?: string | null;
-    timealt2?: string | null;
-    remarks?: string | null;
-    customer_id?: string | null;
-    external_identifier?: string | null;
-    maintenance_contract?: string | null;
-    branch_id?: number | null;
-    branch_partner?: number | null;
-    call_out_costs?: string;
-    call_out_costs_currency?: CurrencyEnum;
-    hourly_rate_engineer?: string;
-    hourly_rate_engineer_currency?: CurrencyEnum;
-    hourly_rate_partner_engineer?: string;
-    hourly_rate_partner_engineer_currency?: CurrencyEnum;
-    price_per_km?: string;
-    price_per_km_currency?: CurrencyEnum;
 };
 
 export type CustomerUserWritable = {
@@ -9816,25 +9991,6 @@ export type CustomerUserRequestWritable = {
 export type CustomerUserSubWritable = {
     customer?: number | null;
     settings_group?: string | null;
-};
-
-/**
- * Default serializer used for user profile. It will use these:
- *
- * * User fields
- * * :ref:`user-hidden-fields-setting` setting
- * * :ref:`user-public-fields-setting` setting
- * * :ref:`user-editable-fields-setting` setting
- *
- * to automagically generate the required serializer fields.
- */
-export type DefaultUserProfileWritable = {
-    /**
-     * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
-     */
-    username: string;
-    first_name?: string;
-    last_name?: string;
 };
 
 /**
@@ -9932,6 +10088,15 @@ export type EngineerEventWritable = {
     engineer: number;
     event_dts?: string;
     event_type: string;
+};
+
+/**
+ * The dict `EngineerEventCreateOrderView.post` returns on success.
+ */
+export type EngineerEventCreateOrderResponseWritable = {
+    order: OrderDetailWritable;
+    assigned_order: number;
+    event: number;
 };
 
 export type EngineerEventTypeWritable = {
@@ -10035,8 +10200,7 @@ export type EngineerSubWritable = {
     remarks?: string | null;
     contract_hours_week?: string | null;
     uses_time_registration?: boolean;
-    preferred_location?: number | null;
-    hourly_rate: string;
+    preferred_location: number | null;
     hide_from_dispatch?: boolean;
 };
 
@@ -10079,7 +10243,9 @@ export type EquipmentAutocompleteWritable = AutocompleteRowWritable & {
     description: string | null;
 };
 
-export type EquipmentBodyWritable = {
+export type EquipmentBranchCreateWritable = EquipmentCreateWritable & BranchOwnerRequired;
+
+export type EquipmentCreateWritable = {
     name: string;
     type?: EquipmentTypeEnum;
     brand?: string | null;
@@ -10094,15 +10260,18 @@ export type EquipmentBodyWritable = {
     default_replace_months?: number;
 };
 
-export type EquipmentBranchCreateWritable = EquipmentBodyWritable & BranchOwnerRequired;
-
-export type EquipmentBranchUpdateWritable = EquipmentBodyWritable & BranchOwner;
-
 export type EquipmentCreateRequestWritable = EquipmentBranchCreateWritable | EquipmentCustomerCreateWritable;
 
-export type EquipmentCustomerCreateWritable = EquipmentBodyWritable & CustomerOwnerRequired;
+export type EquipmentCustomerCreateWritable = EquipmentCreateWritable & CustomerOwnerRequired;
 
-export type EquipmentCustomerUpdateWritable = EquipmentBodyWritable & CustomerOwner;
+export type EquipmentDashboardResponseWritable = {
+    equipment: EquipmentWritable;
+    orders: CustomerDashboardOrdersWritable;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
 
 /**
  * Base serializer for document models with filename and url computed fields.
@@ -10132,14 +10301,6 @@ export type EquipmentOrderLineWritable = {
     default_replace_months?: number;
 };
 
-export type EquipmentPartWritable = {
-    name: string;
-    equipment: number;
-    identifier?: string | null;
-    description?: string | null;
-    amount?: number;
-};
-
 export type EquipmentQrWritable = {
     name: string;
     type?: EquipmentTypeEnum;
@@ -10153,8 +10314,6 @@ export type EquipmentStateWritable = {
     replace_months?: number;
 };
 
-export type EquipmentUpdateRequestWritable = EquipmentBranchUpdateWritable | EquipmentCustomerUpdateWritable;
-
 /**
  * The bootstrap dict GetInitialData returns.
  */
@@ -10163,6 +10322,7 @@ export type GetInitialDataResponseWritable = {
     memberInfo: InitialDataMemberWritable;
     userInfo?: UserInfoResponse;
     statuscodes: Array<StatuscodeWritable>;
+    profile: ProfileWritable;
 };
 
 /**
@@ -10181,12 +10341,12 @@ export type GetWorkorderSignDetailsResponseWritable = {
 };
 
 export type ImportWritable = {
-    name?: string | null;
+    name: string;
     file: string;
     /**
      * How import columns map onto model fields, as the import wizard left it.
      */
-    mapping: {
+    mapping?: {
         [key: string]: unknown;
     };
     /**
@@ -10196,7 +10356,7 @@ export type ImportWritable = {
     /**
      * How many rows were inserted, per model type.
      */
-    result_inserts: {
+    result_inserts?: {
         [key: string]: number;
     };
 };
@@ -10205,8 +10365,6 @@ export type ImportWritable = {
  * MinimalMember plus what GetInitialData bolts onto it.
  *
  * The extra keys only exist for a logged-in caller, hence optional.
- * `settings` stays an open map: it mixes booleans, numbers and strings and
- * is tenant-configurable besides.
  */
 export type InitialDataMemberWritable = {
     companycode: string;
@@ -10238,9 +10396,7 @@ export type InitialDataMemberWritable = {
     countries?: Array<string>;
     equipment_qr_type?: string;
     vat_types?: Array<number>;
-    settings?: {
-        [key: string]: unknown;
-    };
+    settings?: InitialDataSettings;
 };
 
 export type InvoiceWritable = {
@@ -10259,6 +10415,61 @@ export type InvoiceWritable = {
     invoice_email?: string | null;
     invoice_pdf_path?: string | null;
     invoice_pdf_from_docx_filename?: string | null;
+};
+
+export type InvoiceActivityWritable = {
+    assigned_order: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    activity_date?: string;
+    work_start?: string | null;
+    work_end?: string | null;
+    unforeseen_work_duration?: string | null;
+    unforeseen_work_description?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    extra_work_description?: string | null;
+    distance_fixed_rate_amount?: number;
+    actual_work?: string | null;
+    is_partner: boolean;
+    partner_companycode: string | null;
+};
+
+/**
+ * Full invoice totals, distinct from the workorder subset.
+ */
+export type InvoiceActivityTotalsWritable = {
+    work_total_secs?: string;
+    travel_to_total_secs?: string;
+    travel_back_total_secs?: string;
+    travel_total_secs?: string;
+    distance_to_total?: number;
+    distance_back_total?: number;
+    distance_total?: number;
+    extra_work_total_secs?: string;
+    actual_work_total_secs?: string;
+    distance_fixed_rate_amount?: number;
+    user_totals: Array<ActivityUserTotalWritable>;
+};
+
+export type InvoiceDataResponseWritable = {
+    order_pk: number;
+    customer_pk: number | null;
+    invoice_id: number;
+    order_id: string;
+    order_reference: string | null;
+    invoice_default_call_out_costs: string | null;
+    invoice_default_hourly_rate: string | null;
+    invoice_default_price_per_km: string | null;
+    used_materials: Array<AssignedOrderMaterialTotals>;
+    material_models: Array<MaterialWritable>;
+    activity: Array<InvoiceActivityWritable>;
+    activity_totals: InvoiceActivityTotalsWritable;
+    engineer_models: Array<EngineerWritable>;
 };
 
 export type InvoiceEmailWritable = {
@@ -10338,20 +10549,25 @@ export type LocationWritable = {
  */
 export type LocationAutocompleteWritable = AutocompleteRowWritable;
 
-export type LocationBodyWritable = {
+export type LocationBranchCreateWritable = LocationCreateWritable & BranchOwnerRequired;
+
+export type LocationCreateWritable = {
     name: string;
     building?: number | null;
 };
 
-export type LocationBranchCreateWritable = LocationBodyWritable & BranchOwnerRequired;
-
-export type LocationBranchUpdateWritable = LocationBodyWritable & BranchOwner;
-
 export type LocationCreateRequestWritable = LocationBranchCreateWritable | LocationCustomerCreateWritable;
 
-export type LocationCustomerCreateWritable = LocationBodyWritable & CustomerOwnerRequired;
+export type LocationCustomerCreateWritable = LocationCreateWritable & CustomerOwnerRequired;
 
-export type LocationCustomerUpdateWritable = LocationBodyWritable & CustomerOwner;
+export type LocationDashboardResponseWritable = {
+    location: LocationWritable;
+    orders: CustomerDashboardOrdersWritable;
+    order_types_stats: OrderTypesStatsData;
+    order_counts_stats: OrderCountsStatsData;
+    order_types_month_stats: OrderTypesByPeriodData;
+    counts_year_order_type_stats: OrderTypesByPeriodData;
+};
 
 /**
  * Base serializer for document models with filename and url computed fields.
@@ -10376,17 +10592,21 @@ export type LocationQrWritable = {
     name: string;
 };
 
-export type LocationUpdateRequestWritable = LocationBranchUpdateWritable | LocationCustomerUpdateWritable;
-
 export type MaintenanceContractWritable = {
     customer: number;
-    name?: string | null;
+    name: string | null;
+    remarks?: string | null;
+};
+
+export type MaintenanceContractWithEquipmentResponseWritable = {
+    customer: number;
+    name: string | null;
     remarks?: string | null;
 };
 
 export type MaintenanceEquipmentWritable = {
     contract?: number | null;
-    equipment?: number | null;
+    equipment: number | null;
     equipment_name: string;
     times_per_year?: number;
     remarks?: string | null;
@@ -10428,17 +10648,17 @@ export type MaterialCreateWritable = {
     supplier_relation?: number | null;
     product_type?: string | null;
     price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
+    price_purchase_currency?: CurrencyEnum;
     price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
+    price_selling_currency?: CurrencyEnum;
     price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
+    price_selling_alt_currency?: CurrencyEnum;
     price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
+    price_purchase_ex_currency?: CurrencyEnum;
     price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
+    price_selling_ex_currency?: CurrencyEnum;
     price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
+    price_selling_alt_ex_currency?: CurrencyEnum;
     external_identifier?: string | null;
     /**
      * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
@@ -10463,33 +10683,6 @@ export type MaterialStatsTableResponseWritable = {
     inventory_keys: {
         [key: string]: unknown;
     };
-};
-
-export type MaterialUpdateWritable = {
-    identifier?: string | null;
-    name: string | null;
-    name_short?: string | null;
-    unit?: string | null;
-    supplier?: string | null;
-    supplier_relation?: number | null;
-    product_type?: string | null;
-    price_purchase?: string;
-    price_purchase_currency?: CurrencyEnum | null;
-    price_selling?: string;
-    price_selling_currency?: CurrencyEnum | null;
-    price_selling_alt?: string;
-    price_selling_alt_currency?: CurrencyEnum | null;
-    price_purchase_ex?: string;
-    price_purchase_ex_currency?: CurrencyEnum | null;
-    price_selling_ex?: string;
-    price_selling_ex_currency?: CurrencyEnum | null;
-    price_selling_alt_ex?: string;
-    price_selling_alt_ex_currency?: CurrencyEnum | null;
-    external_identifier?: string | null;
-    /**
-     * Base64 on the way in, a URL on the way out. Sending a data URI ("data:image/png;base64,...") or a bare base64 payload both store the image; reading the field back gives the stored file's URL.
-     */
-    image?: string | null;
 };
 
 export type MemberWritable = {
@@ -10703,18 +10896,15 @@ export type OrderCostWritable = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price: UsePriceEnum;
     price?: string;
     vat_type?: string;
-    vat?: string;
-    total?: string;
 };
 
 export type OrderCreateWritable = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -10737,6 +10927,8 @@ export type OrderCreateWritable = {
     quotation?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -10751,7 +10943,7 @@ export type OrderCreateBranchEmployeeWritable = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -10772,6 +10964,8 @@ export type OrderCreateBranchEmployeeWritable = {
     branch?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -10790,7 +10984,7 @@ export type OrderCreateCustomerWritable = {
     customer_id?: string | null;
     customer_reference?: string | null;
     order_reference?: string | null;
-    order_type: string;
+    order_type?: string;
     customer_remarks?: string | null;
     description?: string | null;
     start_date: string;
@@ -10810,6 +11004,8 @@ export type OrderCreateCustomerWritable = {
     order_contact?: string | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -10882,56 +11078,10 @@ export type OrderDetailWritable = {
     required_users?: number;
     customer_order_accepted?: boolean;
     branch?: number | null;
+    external_identifier?: string | null;
+    quotation?: number | null;
     planning_remarks?: string | null;
     order_email_extra?: Array<string>;
-};
-
-/**
- * Public-facing detail serializer with limited fields.
- */
-export type OrderDetailPublicWritable = {
-    uuid?: string;
-    customer_id?: string | null;
-    order_id?: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date: string;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_time?: string | null;
-    remarks?: string | null;
-    order_name: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    customer_relation?: number | null;
-    required_users?: number;
-    customer_order_accepted?: boolean;
-    branch?: number | null;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
-    total_price_purchase?: string;
-    total_price_selling?: string;
 };
 
 /**
@@ -11007,44 +11157,6 @@ export type OrderDocumentWritable = {
  */
 export type OrderEventWritable = {
     last_status?: string | null;
-};
-
-/**
- * Simplified external API serializer.
- */
-export type OrderExternalWritable = {
-    uuid?: string;
-    customer_id?: string | null;
-    order_id: string;
-    customer_reference?: string | null;
-    order_reference?: string | null;
-    order_type?: string | null;
-    customer_remarks?: string | null;
-    description?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    start_date?: string;
-    start_time?: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    end_date?: string;
-    end_time?: string | null;
-    remarks?: string | null;
-    external_identifier?: string | null;
-    order_name?: string;
-    order_address?: string | null;
-    order_postal?: string | null;
-    order_city?: string | null;
-    order_country_code?: string | null;
-    order_tel?: string | null;
-    order_mobile?: string | null;
-    order_email?: string | null;
-    order_contact?: string | null;
-    customer_relation?: number | null;
-    planning_remarks?: string | null;
-    order_email_extra?: Array<string>;
 };
 
 export type OrderFilterWritable = {
@@ -11211,6 +11323,13 @@ export type OrderMinimalSerializerCountsWritable = {
     required_users?: number;
 };
 
+export type OrderSeedResponseWritable = {
+    branch: BranchWritable | null;
+    customer: CustomerWritable | null;
+    quotation: OrderSeedQuotation | null;
+    equipment: Array<EquipmentWritable>;
+};
+
 export type OrderStatusWritable = {
     order: number;
     status: string;
@@ -11248,6 +11367,8 @@ export type OrderUpdateWritable = {
     customer_relation?: number | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 /**
@@ -11274,6 +11395,8 @@ export type OrderUpdateCustomerWritable = {
     order_contact?: string | null;
     order_email_extra?: Array<string>;
     planning_remarks?: string | null;
+    orderlines?: Array<OrderLineNested>;
+    infolines?: Array<EngineerInfoLineNested>;
 };
 
 export type OrderUpdateVariantWritable = OrderUpdateWritable | OrderUpdateCustomerWritable;
@@ -11401,13 +11524,6 @@ export type PaginatedCustomerListWritable = {
     results?: Array<CustomerWritable>;
 };
 
-export type PaginatedCustomerRatingListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<CustomerRatingWritable>;
-};
-
 export type PaginatedCustomerUserListWritable = {
     count?: number;
     next?: string | null;
@@ -11462,13 +11578,6 @@ export type PaginatedEquipmentListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<EquipmentWritable>;
-};
-
-export type PaginatedEquipmentPartListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<EquipmentPartWritable>;
 };
 
 export type PaginatedEquipmentStateListWritable = {
@@ -11581,13 +11690,6 @@ export type PaginatedOfferListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<OfferWritable>;
-};
-
-export type PaginatedOrderAutocompleteListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<OrderAutocompleteWritable>;
 };
 
 export type PaginatedOrderCostListWritable = {
@@ -11842,20 +11944,6 @@ export type PaginatedTemplateListWritable = {
     results?: Array<TemplateWritable>;
 };
 
-export type PaginatedTimeRegistrationListListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<unknown>;
-};
-
-export type PaginatedTransactionListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<TransactionWritable>;
-};
-
 export type PaginatedTripListWritable = {
     count?: number;
     next?: string | null;
@@ -11896,13 +11984,6 @@ export type PaginatedUserOrderAvailabilityListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<UserOrderAvailabilityWritable>;
-};
-
-export type PaginatedUserRatingListWritable = {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: Array<UserRatingWritable>;
 };
 
 export type PaginatedUserSickLeaveListWritable = {
@@ -11946,7 +12027,7 @@ export type PartnerDetailWritable = {
 
 export type PartnerRequestWritable = {
     from_member: number | null;
-    to_member: number | null;
+    to_member: number;
     status?: PartnerRequestStatusEnum;
 };
 
@@ -11967,7 +12048,7 @@ export type PatchedApiUserRequestWritable = {
      */
     username?: string;
     password?: string;
-    api_user?: ApiUserSubRequest;
+    api_user?: PatchedApiUserSubRequest;
 };
 
 export type PatchedCustomerUserRequestWritable = {
@@ -11979,7 +12060,7 @@ export type PatchedCustomerUserRequestWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    customer_user?: CustomerUserSubRequest;
+    customer_user?: PatchedCustomerUserSubRequest;
     password?: string;
     last_login?: string | null;
     date_joined?: string;
@@ -11997,7 +12078,7 @@ export type PatchedEmployeeUserRequestWritable = {
      */
     username?: string;
     password?: string;
-    employee_user?: EmployeeUserSubRequest;
+    employee_user?: PatchedEmployeeUserSubRequest;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
@@ -12013,12 +12094,27 @@ export type PatchedEngineerRequestWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    engineer?: EngineerSubRequest;
+    engineer?: PatchedEngineerSubRequest;
     password?: string;
     last_login?: string | null;
     date_joined?: string;
     first_name?: string;
     last_name?: string;
+};
+
+/**
+ * The Gripp connector settings; the secrets are write-only.
+ */
+export type PatchedGrippSettingsRequestWritable = {
+    gripp_api_enabled?: boolean;
+    gripp_api_key?: string | null;
+    gripp_webhook_password?: string;
+    gripp_default_order_type?: string;
+    gripp_default_employee?: string;
+    gripp_project_phase_match?: string;
+    gripp_project_phase_workorder_signed?: string;
+    gripp_tasktype_hours?: string;
+    gripp_tasktype_travel?: string;
 };
 
 export type PatchedPlanningUserRequestWritable = {
@@ -12030,7 +12126,7 @@ export type PatchedPlanningUserRequestWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    planning_user?: PlanningUserSubRequest;
+    planning_user?: PatchedPlanningUserSubRequest;
     password?: string;
     last_login?: string | null;
     date_joined?: string;
@@ -12047,7 +12143,7 @@ export type PatchedSalesUserRequestWritable = {
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
     username?: string;
-    sales_user?: SalesUserSubRequest;
+    sales_user?: PatchedSalesUserSubRequest;
     password?: string;
     last_login?: string | null;
     date_joined?: string;
@@ -12060,7 +12156,7 @@ export type PatchedStudentUserWriteRequestWritable = {
      * Email address
      */
     email?: string;
-    student_user?: StudentSubWriteRequest;
+    student_user?: PatchedStudentSubWriteRequest;
     /**
      * Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
      */
@@ -12147,6 +12243,18 @@ export type ProductListWritable = {
     tax_percentage?: string;
 };
 
+/**
+ * What product a tenant is: the web client themes and gates on this.
+ *
+ * Instance is a Member. `modules` is the plain list of module names in the
+ * tenant's contract, empty when there is no contract. `module_parts` maps
+ * each module in the contract's module paths to its enabled parts.
+ */
+export type ProfileWritable = {
+    family: ProductFamilyEnum;
+    flavour: MemberTypeEnum;
+};
+
 export type ProjectWritable = {
     name: string;
 };
@@ -12159,10 +12267,37 @@ export type PurchaseWritable = {
     total?: string;
 };
 
+export type PurchaseOrderDetailWritable = {
+    uuid?: string;
+    supplier: number;
+    purchase_order_id?: string;
+    supplier_remarks?: string | null;
+    order_name?: string | null;
+    order_address?: string | null;
+    order_postal?: string | null;
+    order_po_box?: string | null;
+    order_city?: string | null;
+    order_country_code?: string | null;
+    order_email?: string | null;
+    order_tel?: string | null;
+    order_mobile?: string | null;
+    order_contact?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    expected_entry_date?: string | null;
+    order_reference?: string | null;
+    description?: string | null;
+    supplier_reservation?: number | null;
+};
+
 export type PurchaseOrderEntryWritable = {
     purchase_order?: number | null;
     purchase_order_material: number;
     amount?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     entry_date?: string | null;
     stock_location?: number | null;
 };
@@ -12182,6 +12317,9 @@ export type PurchaseOrderListWritable = {
     order_tel?: string | null;
     order_mobile?: string | null;
     order_contact?: string | null;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
     expected_entry_date?: string | null;
     order_reference?: string | null;
     description?: string | null;
@@ -12227,7 +12365,6 @@ export type QuotationWritable = {
     preliminary?: boolean;
     accepted?: boolean;
     vat_type?: string;
-    margin?: number;
     total?: string;
     vat?: string;
     quotation_expire_days?: number;
@@ -12245,9 +12382,6 @@ export type QuotationCostWritable = {
     amount_int?: number | null;
     amount_decimal?: string | null;
     amount_duration?: string | null;
-    use_price: UsePriceEnum;
-    margin_perc?: string;
-    margin?: string;
     price?: string;
     vat_type?: string;
     vat?: string;
@@ -12364,7 +12498,7 @@ export type SalesUserSubWritable = {
 export type StatuscodeWritable = {
     code_type: CodeTypeEnum;
     statuscode: string;
-    color?: string | null;
+    color: string | null;
     description?: string | null;
     start_order?: boolean;
     end_order?: boolean;
@@ -12377,7 +12511,7 @@ export type StatuscodeWritable = {
     num_days?: number | null;
     num_days_operator?: NumDaysOperatorEnum;
     num_days_model_field?: string | null;
-    settings_key?: string | null;
+    roles?: Array<string>;
 };
 
 export type StockLocationWritable = {
@@ -12704,6 +12838,63 @@ export type TemplateWritable = {
     is_active?: boolean;
 };
 
+/**
+ * A leave_data row: the detail-user shape minus the work/travel/distance
+ * keys list() deletes for leave records, plus the project (always null) and
+ * leave type it fills in.
+ */
+export type TimeRegistrationLeaveRowWritable = {
+    username: string;
+    source: SourceEnum;
+    source_id: number;
+    work_start?: string | null;
+    work_end?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    actual_work?: string | null;
+    project: string | null;
+    leave_type: string | null;
+};
+
+/**
+ * The hand-built envelope TimeRegistrationListView.list answers with.
+ */
+export type TimeRegistrationListResponseWritable = {
+    full_name: string | null;
+    totals_fields: Array<string>;
+    date_list: Array<string>;
+    intervals: Array<number>;
+    totals: Array<TimeRegistrationTotalsRow>;
+    workhour_data?: Array<TimeRegistrationWorkhourRowWritable>;
+    leave_data?: Array<TimeRegistrationLeaveRowWritable>;
+};
+
+/**
+ * A workhour_data row: the detail-user shape plus the project and
+ * description list() fills in. leave_duration is deleted for non-leave rows
+ * and break_duration only exists when break calculation is on, so both stay
+ * optional on reads.
+ */
+export type TimeRegistrationWorkhourRowWritable = {
+    username: string;
+    source: SourceEnum;
+    source_id: number;
+    work_start?: string | null;
+    work_end?: string | null;
+    travel_to?: string | null;
+    travel_back?: string | null;
+    distance_to?: number;
+    distance_back?: number;
+    extra_work?: string | null;
+    actual_work?: string | null;
+    project: string | null;
+    description: string | null;
+    break_duration?: string | number | null;
+};
+
 export type TokenObtainSlidingSerializerDifferentTokenRequestWritable = {
     app?: string | null;
     username: string;
@@ -12715,12 +12906,6 @@ export type TokenObtainSlidingSerializerDifferentTokenRequestWritable = {
  */
 export type TopUsersForCustomerResponseWritable = {
     data: Array<unknown>;
-};
-
-export type TransactionWritable = {
-    productid: string;
-    identifier: string;
-    member: number;
 };
 
 export type TripWritable = {
@@ -12745,6 +12930,16 @@ export type TripWritable = {
     end_postal?: string | null;
     end_city?: string | null;
     end_country_code?: string | null;
+};
+
+/**
+ * The {trip, assigned_users, available_users} bundle built by hand in
+ * trip_availability_detail().
+ */
+export type TripAvailabilityDetailResponseWritable = {
+    trip: TripWritable;
+    assigned_users: Array<AvailabilityUserRowWritable>;
+    available_users: Array<AvailabilityUserRowWritable>;
 };
 
 export type TripOrderWritable = {
@@ -12822,14 +13017,6 @@ export type UserOrderAvailabilityWritable = {
     is_accepted?: boolean;
 };
 
-export type UserRatingWritable = {
-    user: number;
-    rated_by: number | null;
-    rating?: number;
-    customer_name: string | null;
-    assignedorder_id?: number;
-};
-
 export type UserSickLeaveWritable = {
     user: number;
     user_full_name?: string | null;
@@ -12854,10 +13041,6 @@ export type UserWorkHoursWritable = {
     project?: number | null;
     work_start?: string | null;
     work_end?: string | null;
-    /**
-     * Minutes of correction after to_representation rewrites the stored timedelta.
-     */
-    work_correction?: number;
     travel_to?: string | null;
     travel_back?: string | null;
     distance_to?: number;
@@ -12931,58 +13114,6 @@ export type AccountsLogoutCreateResponses = {
 };
 
 export type AccountsLogoutCreateResponse = AccountsLogoutCreateResponses[keyof AccountsLogoutCreateResponses];
-
-export type AccountsProfileRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfileRetrieveResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfileRetrieveResponse = AccountsProfileRetrieveResponses[keyof AccountsProfileRetrieveResponses];
-
-export type AccountsProfilePartialUpdateData = {
-    body?: PatchedDefaultUserProfileRequest;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfilePartialUpdateResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfilePartialUpdateResponse = AccountsProfilePartialUpdateResponses[keyof AccountsProfilePartialUpdateResponses];
-
-export type AccountsProfileCreateData = {
-    body: DefaultUserProfileRequest;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfileCreateResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfileCreateResponse = AccountsProfileCreateResponses[keyof AccountsProfileCreateResponses];
-
-export type AccountsProfileUpdateData = {
-    body: DefaultUserProfileRequest;
-    path?: never;
-    query?: never;
-    url: '/api/accounts/profile/';
-};
-
-export type AccountsProfileUpdateResponses = {
-    200: DefaultUserProfile;
-};
-
-export type AccountsProfileUpdateResponse = AccountsProfileUpdateResponses[keyof AccountsProfileUpdateResponses];
 
 export type AccountsRegisterCreateData = {
     body: StudentUserRegisterRequestWritable;
@@ -13081,11 +13212,15 @@ export type CompanyActivityListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-text' | 'created' | 'text'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13172,24 +13307,6 @@ export type CompanyActivityPartialUpdateResponses = {
 
 export type CompanyActivityPartialUpdateResponse = CompanyActivityPartialUpdateResponses[keyof CompanyActivityPartialUpdateResponses];
 
-export type CompanyActivityUpdateData = {
-    body: ActivityRequest;
-    path: {
-        /**
-         * A unique integer value identifying this activity.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/activity/{id}/';
-};
-
-export type CompanyActivityUpdateResponses = {
-    200: Activity;
-};
-
-export type CompanyActivityUpdateResponse = CompanyActivityUpdateResponses[keyof CompanyActivityUpdateResponses];
-
 export type CompanyApiuserListData = {
     body?: never;
     path?: never;
@@ -13199,7 +13316,7 @@ export type CompanyApiuserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13286,24 +13403,6 @@ export type CompanyApiuserPartialUpdateResponses = {
 
 export type CompanyApiuserPartialUpdateResponse = CompanyApiuserPartialUpdateResponses[keyof CompanyApiuserPartialUpdateResponses];
 
-export type CompanyApiuserUpdateData = {
-    body: ApiUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/apiuser/{id}/';
-};
-
-export type CompanyApiuserUpdateResponses = {
-    200: ApiUser;
-};
-
-export type CompanyApiuserUpdateResponse = CompanyApiuserUpdateResponses[keyof CompanyApiuserUpdateResponses];
-
 export type CompanyApiuserRenewTokenCreateData = {
     body: ApiUserRequestWritable;
     path: {
@@ -13358,11 +13457,15 @@ export type CompanyBranchListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-address' | '-city' | '-contact' | '-country_code' | '-name' | '-tel' | 'address' | 'city' | 'contact' | 'country_code' | 'name' | 'tel'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13417,19 +13520,6 @@ export type CompanyBranchMyPartialUpdateResponses = {
 };
 
 export type CompanyBranchMyPartialUpdateResponse = CompanyBranchMyPartialUpdateResponses[keyof CompanyBranchMyPartialUpdateResponses];
-
-export type CompanyBranchMyUpdateData = {
-    body: BranchRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/branch-my/';
-};
-
-export type CompanyBranchMyUpdateResponses = {
-    200: Branch;
-};
-
-export type CompanyBranchMyUpdateResponse = CompanyBranchMyUpdateResponses[keyof CompanyBranchMyUpdateResponses];
 
 export type CompanyBranchDestroyData = {
     body?: never;
@@ -13488,28 +13578,55 @@ export type CompanyBranchPartialUpdateResponses = {
 
 export type CompanyBranchPartialUpdateResponse = CompanyBranchPartialUpdateResponses[keyof CompanyBranchPartialUpdateResponses];
 
-export type CompanyBranchUpdateData = {
-    body: BranchRequest;
+export type CompanyBranchDashboardRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
     path: {
         /**
          * A unique integer value identifying this branch.
          */
         id: number;
     };
-    query?: never;
-    url: '/api/company/branch/{id}/';
+    query?: {
+        /**
+         * Orders page number (20 rows per page, default 1).
+         */
+        orders_page?: number;
+        /**
+         * Free-text filter on the orders page; matches the order list ?q=.
+         */
+        orders_search?: string;
+    };
+    url: '/api/company/branch/{id}/dashboard/';
 };
 
-export type CompanyBranchUpdateResponses = {
-    200: Branch;
+export type CompanyBranchDashboardRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
 };
 
-export type CompanyBranchUpdateResponse = CompanyBranchUpdateResponses[keyof CompanyBranchUpdateResponses];
+export type CompanyBranchDashboardRetrieveError = CompanyBranchDashboardRetrieveErrors[keyof CompanyBranchDashboardRetrieveErrors];
+
+export type CompanyBranchDashboardRetrieveResponses = {
+    200: BranchDashboardResponse;
+};
+
+export type CompanyBranchDashboardRetrieveResponse = CompanyBranchDashboardRetrieveResponses[keyof CompanyBranchDashboardRetrieveResponses];
 
 export type CompanyBranchAutocompleteListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Only the branches with these primary keys, comma-separated - the rows behind a filter a client restores from a URL.
+         */
+        id?: string;
         /**
          * Case-insensitive substring match on name, address, city or email.
          */
@@ -13546,7 +13663,7 @@ export type CompanyBudgetListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13633,24 +13750,6 @@ export type CompanyBudgetPartialUpdateResponses = {
 
 export type CompanyBudgetPartialUpdateResponse = CompanyBudgetPartialUpdateResponses[keyof CompanyBudgetPartialUpdateResponses];
 
-export type CompanyBudgetUpdateData = {
-    body: BudgetRequest;
-    path: {
-        /**
-         * A unique integer value identifying this budget.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/budget/{id}/';
-};
-
-export type CompanyBudgetUpdateResponses = {
-    200: Budget;
-};
-
-export type CompanyBudgetUpdateResponse = CompanyBudgetUpdateResponses[keyof CompanyBudgetUpdateResponses];
-
 export type CompanyBudgetCostsRetrieveData = {
     body?: never;
     path: {
@@ -13696,7 +13795,7 @@ export type CompanyCustomeruserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13783,59 +13882,6 @@ export type CompanyCustomeruserPartialUpdateResponses = {
 
 export type CompanyCustomeruserPartialUpdateResponse = CompanyCustomeruserPartialUpdateResponses[keyof CompanyCustomeruserPartialUpdateResponses];
 
-export type CompanyCustomeruserUpdateData = {
-    body: CustomerUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/customeruser/{id}/';
-};
-
-export type CompanyCustomeruserUpdateResponses = {
-    200: CustomerUser;
-};
-
-export type CompanyCustomeruserUpdateResponse = CompanyCustomeruserUpdateResponses[keyof CompanyCustomeruserUpdateResponses];
-
-export type CompanyDispatchAssignedordersUserListV3RetrieveData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * First day of the window; defaults to today.
-         */
-        start_date?: string;
-    };
-    url: '/api/company/dispatch-assignedorders-user-list-v3/';
-};
-
-export type CompanyDispatchAssignedordersUserListV3RetrieveResponses = {
-    /**
-     * {'data': [row]} - one row per user with assigned orders in the date window. Own users and partner users differ in id types (integers vs "tenantid_userid" strings) and in which keys they carry; v4 adds leave/sick to own-user rows.
-     */
-    200: {
-        data: Array<{
-            full_name: string;
-            is_partner: boolean;
-            assignedorders: {
-                start?: {
-                    [key: string]: Array<unknown>;
-                };
-                end?: {
-                    [key: string]: Array<unknown>;
-                };
-            };
-            [key: string]: unknown;
-        }>;
-    };
-};
-
-export type CompanyDispatchAssignedordersUserListV3RetrieveResponse = CompanyDispatchAssignedordersUserListV3RetrieveResponses[keyof CompanyDispatchAssignedordersUserListV3RetrieveResponses];
-
 export type CompanyDispatchAssignedordersUserListV4RetrieveData = {
     body?: never;
     path?: never;
@@ -13873,7 +13919,7 @@ export type CompanyEmployeeuserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -13960,24 +14006,6 @@ export type CompanyEmployeeuserPartialUpdateResponses = {
 
 export type CompanyEmployeeuserPartialUpdateResponse = CompanyEmployeeuserPartialUpdateResponses[keyof CompanyEmployeeuserPartialUpdateResponses];
 
-export type CompanyEmployeeuserUpdateData = {
-    body: EmployeeUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/employeeuser/{id}/';
-};
-
-export type CompanyEmployeeuserUpdateResponses = {
-    200: EmployeeUser;
-};
-
-export type CompanyEmployeeuserUpdateResponse = CompanyEmployeeuserUpdateResponses[keyof CompanyEmployeeuserUpdateResponses];
-
 export type CompanyEngineerListData = {
     body?: never;
     path?: never;
@@ -13987,7 +14015,7 @@ export type CompanyEngineerListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14026,7 +14054,7 @@ export type CompanyEngineerEventTypeListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14112,24 +14140,6 @@ export type CompanyEngineerEventTypePartialUpdateResponses = {
 };
 
 export type CompanyEngineerEventTypePartialUpdateResponse = CompanyEngineerEventTypePartialUpdateResponses[keyof CompanyEngineerEventTypePartialUpdateResponses];
-
-export type CompanyEngineerEventTypeUpdateData = {
-    body: EngineerEventTypeRequest;
-    path: {
-        /**
-         * A unique integer value identifying this engineer event type.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer-event-type/{id}/';
-};
-
-export type CompanyEngineerEventTypeUpdateResponses = {
-    200: EngineerEventType;
-};
-
-export type CompanyEngineerEventTypeUpdateResponse = CompanyEngineerEventTypeUpdateResponses[keyof CompanyEngineerEventTypeUpdateResponses];
 
 export type CompanyEngineerEventTypeStatsListData = {
     body?: never;
@@ -14218,24 +14228,6 @@ export type CompanyEngineerPartialUpdateResponses = {
 };
 
 export type CompanyEngineerPartialUpdateResponse = CompanyEngineerPartialUpdateResponses[keyof CompanyEngineerPartialUpdateResponses];
-
-export type CompanyEngineerUpdateData = {
-    body: EngineerRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer/{id}/';
-};
-
-export type CompanyEngineerUpdateResponses = {
-    200: Engineer;
-};
-
-export type CompanyEngineerUpdateResponse = CompanyEngineerUpdateResponses[keyof CompanyEngineerUpdateResponses];
 
 export type CompanyEngineerInfoRetrieveData = {
     body?: never;
@@ -14360,7 +14352,7 @@ export type CompanyEngineereventUpdateRetrieveResponses = {
 export type CompanyEngineereventUpdateRetrieveResponse = CompanyEngineereventUpdateRetrieveResponses[keyof CompanyEngineereventUpdateRetrieveResponses];
 
 export type CompanyEngineereventUpdatePartialUpdateData = {
-    body?: PatchedEngineerEventRequest;
+    body?: PatchedEngineerEventAttachOrderRequest;
     path: {
         id: number;
     };
@@ -14374,20 +14366,45 @@ export type CompanyEngineereventUpdatePartialUpdateResponses = {
 
 export type CompanyEngineereventUpdatePartialUpdateResponse = CompanyEngineereventUpdatePartialUpdateResponses[keyof CompanyEngineereventUpdatePartialUpdateResponses];
 
-export type CompanyEngineereventUpdateUpdateData = {
-    body: EngineerEventRequest;
+export type CompanyEngineereventDestroyData = {
+    body?: never;
     path: {
         id: number;
     };
     query?: never;
-    url: '/api/company/engineerevent-update/{id}/';
+    url: '/api/company/engineerevent/{id}/';
 };
 
-export type CompanyEngineereventUpdateUpdateResponses = {
-    200: ResultResponse;
+export type CompanyEngineereventDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
 };
 
-export type CompanyEngineereventUpdateUpdateResponse = CompanyEngineereventUpdateUpdateResponses[keyof CompanyEngineereventUpdateUpdateResponses];
+export type CompanyEngineereventDestroyResponse = CompanyEngineereventDestroyResponses[keyof CompanyEngineereventDestroyResponses];
+
+export type CompanyEngineereventCreateOrderCreateData = {
+    body?: EngineerEventCreateOrderRequestRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/company/engineerevent/{id}/create-order/';
+};
+
+export type CompanyEngineereventCreateOrderCreateErrors = {
+    400: EngineerEventCreateOrderError;
+    404: NotFoundResponse;
+};
+
+export type CompanyEngineereventCreateOrderCreateError = CompanyEngineereventCreateOrderCreateErrors[keyof CompanyEngineereventCreateOrderCreateErrors];
+
+export type CompanyEngineereventCreateOrderCreateResponses = {
+    201: EngineerEventCreateOrderResponse;
+};
+
+export type CompanyEngineereventCreateOrderCreateResponse = CompanyEngineereventCreateOrderCreateResponses[keyof CompanyEngineereventCreateOrderCreateResponses];
 
 export type CompanyEventsExportXlsListData = {
     body?: never;
@@ -14422,7 +14439,7 @@ export type CompanyImportListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14508,24 +14525,6 @@ export type CompanyImportPartialUpdateResponses = {
 };
 
 export type CompanyImportPartialUpdateResponse = CompanyImportPartialUpdateResponses[keyof CompanyImportPartialUpdateResponses];
-
-export type CompanyImportUpdateData = {
-    body: ImportRequest;
-    path: {
-        /**
-         * A unique integer value identifying this import.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/import/{id}/';
-};
-
-export type CompanyImportUpdateResponses = {
-    200: Import;
-};
-
-export type CompanyImportUpdateResponse = CompanyImportUpdateResponses[keyof CompanyImportUpdateResponses];
 
 export type CompanyImportDoCreateData = {
     body?: never;
@@ -14633,7 +14632,7 @@ export type CompanyLeaveTypeListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14720,24 +14719,6 @@ export type CompanyLeaveTypePartialUpdateResponses = {
 
 export type CompanyLeaveTypePartialUpdateResponse = CompanyLeaveTypePartialUpdateResponses[keyof CompanyLeaveTypePartialUpdateResponses];
 
-export type CompanyLeaveTypeUpdateData = {
-    body: LeaveTypeRequest;
-    path: {
-        /**
-         * A unique integer value identifying this leave type.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/leave-type/{id}/';
-};
-
-export type CompanyLeaveTypeUpdateResponses = {
-    200: LeaveType;
-};
-
-export type CompanyLeaveTypeUpdateResponse = CompanyLeaveTypeUpdateResponses[keyof CompanyLeaveTypeUpdateResponses];
-
 export type CompanyLeaveTypeListForSelectListData = {
     body?: never;
     path?: never;
@@ -14761,11 +14742,15 @@ export type CompanyPartnerListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-partner__name' | 'created' | 'partner__name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14804,7 +14789,7 @@ export type CompanyPartnerRequestListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14891,25 +14876,7 @@ export type CompanyPartnerRequestPartialUpdateResponses = {
 
 export type CompanyPartnerRequestPartialUpdateResponse = CompanyPartnerRequestPartialUpdateResponses[keyof CompanyPartnerRequestPartialUpdateResponses];
 
-export type CompanyPartnerRequestUpdateData = {
-    body: PartnerRequestRequest;
-    path: {
-        /**
-         * A unique integer value identifying this partner request.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner-request/{id}/';
-};
-
-export type CompanyPartnerRequestUpdateResponses = {
-    200: PartnerRequest;
-};
-
-export type CompanyPartnerRequestUpdateResponse = CompanyPartnerRequestUpdateResponses[keyof CompanyPartnerRequestUpdateResponses];
-
-export type CompanyPartnerRequestAcceptUpdateData = {
+export type CompanyPartnerRequestAcceptPartialUpdateData = {
     body?: never;
     path: {
         /**
@@ -14921,13 +14888,13 @@ export type CompanyPartnerRequestAcceptUpdateData = {
     url: '/api/company/partner-request/{id}/accept/';
 };
 
-export type CompanyPartnerRequestAcceptUpdateResponses = {
+export type CompanyPartnerRequestAcceptPartialUpdateResponses = {
     200: SuccessResponse;
 };
 
-export type CompanyPartnerRequestAcceptUpdateResponse = CompanyPartnerRequestAcceptUpdateResponses[keyof CompanyPartnerRequestAcceptUpdateResponses];
+export type CompanyPartnerRequestAcceptPartialUpdateResponse = CompanyPartnerRequestAcceptPartialUpdateResponses[keyof CompanyPartnerRequestAcceptPartialUpdateResponses];
 
-export type CompanyPartnerRequestRejectUpdateData = {
+export type CompanyPartnerRequestRejectPartialUpdateData = {
     body?: never;
     path: {
         /**
@@ -14939,22 +14906,26 @@ export type CompanyPartnerRequestRejectUpdateData = {
     url: '/api/company/partner-request/{id}/reject/';
 };
 
-export type CompanyPartnerRequestRejectUpdateResponses = {
+export type CompanyPartnerRequestRejectPartialUpdateResponses = {
     200: SuccessResponse;
 };
 
-export type CompanyPartnerRequestRejectUpdateResponse = CompanyPartnerRequestRejectUpdateResponses[keyof CompanyPartnerRequestRejectUpdateResponses];
+export type CompanyPartnerRequestRejectPartialUpdateResponse = CompanyPartnerRequestRejectPartialUpdateResponses[keyof CompanyPartnerRequestRejectPartialUpdateResponses];
 
 export type CompanyPartnerRequestReceivedListData = {
     body?: never;
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -14976,11 +14947,15 @@ export type CompanyPartnerRequestSentListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15002,11 +14977,15 @@ export type CompanyPartnerRequestSentCreateData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15080,24 +15059,6 @@ export type CompanyPartnerPartialUpdateResponses = {
 
 export type CompanyPartnerPartialUpdateResponse = CompanyPartnerPartialUpdateResponses[keyof CompanyPartnerPartialUpdateResponses];
 
-export type CompanyPartnerUpdateData = {
-    body?: PartnerDetailRequest;
-    path: {
-        /**
-         * A unique integer value identifying this partner.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner/{id}/';
-};
-
-export type CompanyPartnerUpdateResponses = {
-    200: PartnerDetail;
-};
-
-export type CompanyPartnerUpdateResponse = CompanyPartnerUpdateResponses[keyof CompanyPartnerUpdateResponses];
-
 export type CompanyPartnerBranchCreateFromCustomerCreateData = {
     body: PartnerCustomerIdRequest;
     path: {
@@ -15157,11 +15118,15 @@ export type CompanyPictureListData = {
     path?: never;
     query?: {
         /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-name' | 'created' | 'name'>;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15248,24 +15213,6 @@ export type CompanyPicturePartialUpdateResponses = {
 
 export type CompanyPicturePartialUpdateResponse = CompanyPicturePartialUpdateResponses[keyof CompanyPicturePartialUpdateResponses];
 
-export type CompanyPictureUpdateData = {
-    body: PictureRequest;
-    path: {
-        /**
-         * A unique integer value identifying this picture.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/picture/{id}/';
-};
-
-export type CompanyPictureUpdateResponses = {
-    200: Picture;
-};
-
-export type CompanyPictureUpdateResponse = CompanyPictureUpdateResponses[keyof CompanyPictureUpdateResponses];
-
 export type CompanyPlanninguserListData = {
     body?: never;
     path?: never;
@@ -15275,7 +15222,7 @@ export type CompanyPlanninguserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15362,24 +15309,6 @@ export type CompanyPlanninguserPartialUpdateResponses = {
 
 export type CompanyPlanninguserPartialUpdateResponse = CompanyPlanninguserPartialUpdateResponses[keyof CompanyPlanninguserPartialUpdateResponses];
 
-export type CompanyPlanninguserUpdateData = {
-    body: PlanningUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/planninguser/{id}/';
-};
-
-export type CompanyPlanninguserUpdateResponses = {
-    200: PlanningUser;
-};
-
-export type CompanyPlanninguserUpdateResponse = CompanyPlanninguserUpdateResponses[keyof CompanyPlanninguserUpdateResponses];
-
 export type CompanyProjectListData = {
     body?: never;
     path?: never;
@@ -15390,7 +15319,7 @@ export type CompanyProjectListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15477,24 +15406,6 @@ export type CompanyProjectPartialUpdateResponses = {
 
 export type CompanyProjectPartialUpdateResponse = CompanyProjectPartialUpdateResponses[keyof CompanyProjectPartialUpdateResponses];
 
-export type CompanyProjectUpdateData = {
-    body: ProjectRequest;
-    path: {
-        /**
-         * A unique integer value identifying this project.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/project/{id}/';
-};
-
-export type CompanyProjectUpdateResponses = {
-    200: Project;
-};
-
-export type CompanyProjectUpdateResponse = CompanyProjectUpdateResponses[keyof CompanyProjectUpdateResponses];
-
 export type CompanyProjectListForSelectListData = {
     body?: never;
     path?: never;
@@ -15541,7 +15452,7 @@ export type CompanySalesuserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15628,24 +15539,6 @@ export type CompanySalesuserPartialUpdateResponses = {
 
 export type CompanySalesuserPartialUpdateResponse = CompanySalesuserPartialUpdateResponses[keyof CompanySalesuserPartialUpdateResponses];
 
-export type CompanySalesuserUpdateData = {
-    body: SalesUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesuser/{id}/';
-};
-
-export type CompanySalesuserUpdateResponses = {
-    200: SalesUser;
-};
-
-export type CompanySalesuserUpdateResponse = CompanySalesuserUpdateResponses[keyof CompanySalesuserUpdateResponses];
-
 export type CompanySalesusercustomerListData = {
     body?: never;
     path?: never;
@@ -15655,7 +15548,7 @@ export type CompanySalesusercustomerListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15743,24 +15636,6 @@ export type CompanySalesusercustomerPartialUpdateResponses = {
 
 export type CompanySalesusercustomerPartialUpdateResponse = CompanySalesusercustomerPartialUpdateResponses[keyof CompanySalesusercustomerPartialUpdateResponses];
 
-export type CompanySalesusercustomerUpdateData = {
-    body: SalesUserCustomerRequest;
-    path: {
-        /**
-         * A unique integer value identifying this sales user customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesusercustomer/{id}/';
-};
-
-export type CompanySalesusercustomerUpdateResponses = {
-    200: SalesUserCustomer;
-};
-
-export type CompanySalesusercustomerUpdateResponse = CompanySalesusercustomerUpdateResponses[keyof CompanySalesusercustomerUpdateResponses];
-
 export type CompanySalesusercustomerMyListData = {
     body?: never;
     path?: never;
@@ -15770,7 +15645,7 @@ export type CompanySalesusercustomerMyListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -15858,25 +15733,6 @@ export type CompanySalesusercustomerMyPartialUpdateErrors = {
     400: unknown;
 };
 
-export type CompanySalesusercustomerMyUpdateData = {
-    body: SalesUserCustomerExpandedRequest;
-    path: {
-        /**
-         * A unique integer value identifying this sales user customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesusercustomer/my/{id}/';
-};
-
-export type CompanySalesusercustomerMyUpdateErrors = {
-    /**
-     * No response body
-     */
-    400: unknown;
-};
-
 export type CompanyStreamInfoRetrieveData = {
     body?: never;
     path?: never;
@@ -15923,7 +15779,7 @@ export type CompanyStudentuserListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16010,24 +15866,6 @@ export type CompanyStudentuserPartialUpdateResponses = {
 
 export type CompanyStudentuserPartialUpdateResponse = CompanyStudentuserPartialUpdateResponses[keyof CompanyStudentuserPartialUpdateResponses];
 
-export type CompanyStudentuserUpdateData = {
-    body: StudentUserWriteRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/studentuser/{id}/';
-};
-
-export type CompanyStudentuserUpdateResponses = {
-    200: StudentUser;
-};
-
-export type CompanyStudentuserUpdateResponse = CompanyStudentuserUpdateResponses[keyof CompanyStudentuserUpdateResponses];
-
 export type CompanyTemplateListData = {
     body?: never;
     path?: never;
@@ -16038,7 +15876,7 @@ export type CompanyTemplateListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16125,24 +15963,6 @@ export type CompanyTemplatePartialUpdateResponses = {
 
 export type CompanyTemplatePartialUpdateResponse = CompanyTemplatePartialUpdateResponses[keyof CompanyTemplatePartialUpdateResponses];
 
-export type CompanyTemplateUpdateData = {
-    body: TemplateRequest;
-    path: {
-        /**
-         * A unique integer value identifying this template.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/template/{id}/';
-};
-
-export type CompanyTemplateUpdateResponses = {
-    200: Template;
-};
-
-export type CompanyTemplateUpdateResponse = CompanyTemplateUpdateResponses[keyof CompanyTemplateUpdateResponses];
-
 export type CompanyTemplatePreviewTemplatePdfCreateData = {
     body: TemplatePreviewRequest;
     path?: never;
@@ -16156,7 +15976,7 @@ export type CompanyTemplatePreviewTemplatePdfCreateResponses = {
 
 export type CompanyTemplatePreviewTemplatePdfCreateResponse = CompanyTemplatePreviewTemplatePdfCreateResponses[keyof CompanyTemplatePreviewTemplatePdfCreateResponses];
 
-export type CompanyTimeRegistrationListData = {
+export type CompanyTimeRegistrationRetrieveData = {
     body?: never;
     path?: never;
     query?: {
@@ -16165,13 +15985,9 @@ export type CompanyTimeRegistrationListData = {
          */
         mode?: string;
         /**
-         * A page number within the paginated result set.
+         * Calendar month (1-12) the window is computed for. Honoured for month.
          */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
+        month?: number;
         /**
          * Anchor date (YYYY-MM-DD); the window is computed from it. Honoured for week and month, ignored for year.
          */
@@ -16180,15 +15996,19 @@ export type CompanyTimeRegistrationListData = {
          * User id the totals are computed for. Planning/staff only; everyone else always sees their own rows.
          */
         user?: number;
+        /**
+         * Calendar year the window is computed for. Honoured for month and year.
+         */
+        year?: number;
     };
     url: '/api/company/time-registration/';
 };
 
-export type CompanyTimeRegistrationListResponses = {
-    200: PaginatedTimeRegistrationListList;
+export type CompanyTimeRegistrationRetrieveResponses = {
+    200: TimeRegistrationListResponse;
 };
 
-export type CompanyTimeRegistrationListResponse = CompanyTimeRegistrationListResponses[keyof CompanyTimeRegistrationListResponses];
+export type CompanyTimeRegistrationRetrieveResponse = CompanyTimeRegistrationRetrieveResponses[keyof CompanyTimeRegistrationRetrieveResponses];
 
 export type CompanyTimeRegistrationTimeCorrectionPartialUpdateData = {
     body?: PatchedTimeCorrectionRequest;
@@ -16204,21 +16024,6 @@ export type CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses = {
 };
 
 export type CompanyTimeRegistrationTimeCorrectionPartialUpdateResponse = CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses[keyof CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses];
-
-export type CompanyTimeRegistrationTimeCorrectionUpdateData = {
-    body?: TimeCorrectionRequest;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/time-registration/time-correction/{id}/';
-};
-
-export type CompanyTimeRegistrationTimeCorrectionUpdateResponses = {
-    200: ResultResponse;
-};
-
-export type CompanyTimeRegistrationTimeCorrectionUpdateResponse = CompanyTimeRegistrationTimeCorrectionUpdateResponses[keyof CompanyTimeRegistrationTimeCorrectionUpdateResponses];
 
 export type CompanyTimeRegistrationTopUsersForCustomerRetrieveData = {
     body?: never;
@@ -16288,7 +16093,7 @@ export type CompanyUserLeaveHoursListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16375,24 +16180,6 @@ export type CompanyUserLeaveHoursPartialUpdateResponses = {
 
 export type CompanyUserLeaveHoursPartialUpdateResponse = CompanyUserLeaveHoursPartialUpdateResponses[keyof CompanyUserLeaveHoursPartialUpdateResponses];
 
-export type CompanyUserLeaveHoursUpdateData = {
-    body?: UserLeaveHoursNoPlanningRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/{id}/';
-};
-
-export type CompanyUserLeaveHoursUpdateResponses = {
-    200: UserLeaveHours;
-};
-
-export type CompanyUserLeaveHoursUpdateResponse = CompanyUserLeaveHoursUpdateResponses[keyof CompanyUserLeaveHoursUpdateResponses];
-
 export type CompanyUserLeaveHoursAdminListData = {
     body?: never;
     path?: never;
@@ -16402,7 +16189,7 @@ export type CompanyUserLeaveHoursAdminListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16489,24 +16276,6 @@ export type CompanyUserLeaveHoursAdminPartialUpdateResponses = {
 
 export type CompanyUserLeaveHoursAdminPartialUpdateResponse = CompanyUserLeaveHoursAdminPartialUpdateResponses[keyof CompanyUserLeaveHoursAdminPartialUpdateResponses];
 
-export type CompanyUserLeaveHoursAdminUpdateData = {
-    body?: UserLeaveHoursPlanningRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/admin/{id}/';
-};
-
-export type CompanyUserLeaveHoursAdminUpdateResponses = {
-    200: UserLeaveHours;
-};
-
-export type CompanyUserLeaveHoursAdminUpdateResponse = CompanyUserLeaveHoursAdminUpdateResponses[keyof CompanyUserLeaveHoursAdminUpdateResponses];
-
 export type CompanyUserLeaveHoursAdminSetAcceptedCreateData = {
     body?: never;
     path: {
@@ -16552,7 +16321,7 @@ export type CompanyUserLeaveHoursAdminAllNotAcceptedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16604,7 +16373,7 @@ export type CompanyUserLeaveHoursAllNotAcceptedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16650,7 +16419,16 @@ export type CompanyUserLeaveHoursGetTotalsCreateResponse = CompanyUserLeaveHours
 export type CompanyUserListListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on username, first name or last name.
+         */
+        q?: string;
+        /**
+         * Only users carrying this user-type submodel.
+         */
+        user_type?: 'sales_user' | 'planning_user' | 'customer_user' | 'engineer' | 'student_user' | 'api_user' | 'employee_user';
+    };
     url: '/api/company/user-list/';
 };
 
@@ -16686,19 +16464,6 @@ export type CompanyUserSettingsPartialUpdateResponses = {
 
 export type CompanyUserSettingsPartialUpdateResponse = CompanyUserSettingsPartialUpdateResponses[keyof CompanyUserSettingsPartialUpdateResponses];
 
-export type CompanyUserSettingsUpdateData = {
-    body: AppUserSettingsRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-settings/';
-};
-
-export type CompanyUserSettingsUpdateResponses = {
-    200: AppUserSettings;
-};
-
-export type CompanyUserSettingsUpdateResponse = CompanyUserSettingsUpdateResponses[keyof CompanyUserSettingsUpdateResponses];
-
 export type CompanyUserSickLeaveListData = {
     body?: never;
     path?: never;
@@ -16708,7 +16473,7 @@ export type CompanyUserSickLeaveListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16795,24 +16560,6 @@ export type CompanyUserSickLeavePartialUpdateResponses = {
 
 export type CompanyUserSickLeavePartialUpdateResponse = CompanyUserSickLeavePartialUpdateResponses[keyof CompanyUserSickLeavePartialUpdateResponses];
 
-export type CompanyUserSickLeaveUpdateData = {
-    body: UserSickLeaveRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/{id}/';
-};
-
-export type CompanyUserSickLeaveUpdateResponses = {
-    200: UserSickLeave;
-};
-
-export type CompanyUserSickLeaveUpdateResponse = CompanyUserSickLeaveUpdateResponses[keyof CompanyUserSickLeaveUpdateResponses];
-
 export type CompanyUserSickLeaveAdminListData = {
     body?: never;
     path?: never;
@@ -16822,7 +16569,7 @@ export type CompanyUserSickLeaveAdminListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -16910,24 +16657,6 @@ export type CompanyUserSickLeaveAdminPartialUpdateResponses = {
 
 export type CompanyUserSickLeaveAdminPartialUpdateResponse = CompanyUserSickLeaveAdminPartialUpdateResponses[keyof CompanyUserSickLeaveAdminPartialUpdateResponses];
 
-export type CompanyUserSickLeaveAdminUpdateData = {
-    body: UserSickLeaveRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/admin/{id}/';
-};
-
-export type CompanyUserSickLeaveAdminUpdateResponses = {
-    200: UserSickLeave;
-};
-
-export type CompanyUserSickLeaveAdminUpdateResponse = CompanyUserSickLeaveAdminUpdateResponses[keyof CompanyUserSickLeaveAdminUpdateResponses];
-
 export type CompanyUserSickLeaveAdminEndSickCreateData = {
     body?: never;
     path: {
@@ -16973,7 +16702,7 @@ export type CompanyUserSickLeaveAdminAllSickListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -17013,7 +16742,7 @@ export type CompanyUserSickLeaveAdminAllUnconfirmedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -17066,7 +16795,7 @@ export type CompanyUserWorkhoursListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -17158,24 +16887,6 @@ export type CompanyUserWorkhoursPartialUpdateResponses = {
 
 export type CompanyUserWorkhoursPartialUpdateResponse = CompanyUserWorkhoursPartialUpdateResponses[keyof CompanyUserWorkhoursPartialUpdateResponses];
 
-export type CompanyUserWorkhoursUpdateData = {
-    body?: UserWorkHoursRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user work hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-workhours/{id}/';
-};
-
-export type CompanyUserWorkhoursUpdateResponses = {
-    200: UserWorkHours;
-};
-
-export type CompanyUserWorkhoursUpdateResponse = CompanyUserWorkhoursUpdateResponses[keyof CompanyUserWorkhoursUpdateResponses];
-
 export type CompanyUserWorkhoursListTotalsRetrieveData = {
     body?: never;
     path?: never;
@@ -17231,120 +16942,6 @@ export type CompanyUsernameExistsRetrieveResponses = {
 
 export type CompanyUsernameExistsRetrieveResponse = CompanyUsernameExistsRetrieveResponses[keyof CompanyUsernameExistsRetrieveResponses];
 
-export type CompanyUserratingListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/userrating/';
-};
-
-export type CompanyUserratingListResponses = {
-    200: PaginatedUserRatingList;
-};
-
-export type CompanyUserratingListResponse = CompanyUserratingListResponses[keyof CompanyUserratingListResponses];
-
-export type CompanyUserratingCreateData = {
-    body: UserRatingRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/userrating/';
-};
-
-export type CompanyUserratingCreateResponses = {
-    201: UserRating;
-};
-
-export type CompanyUserratingCreateResponse = CompanyUserratingCreateResponses[keyof CompanyUserratingCreateResponses];
-
-export type CompanyUserratingDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/userrating/{id}/';
-};
-
-export type CompanyUserratingDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyUserratingDestroyResponse = CompanyUserratingDestroyResponses[keyof CompanyUserratingDestroyResponses];
-
-export type CompanyUserratingRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/userrating/{id}/';
-};
-
-export type CompanyUserratingRetrieveResponses = {
-    200: UserRating;
-};
-
-export type CompanyUserratingRetrieveResponse = CompanyUserratingRetrieveResponses[keyof CompanyUserratingRetrieveResponses];
-
-export type CompanyUserratingPartialUpdateData = {
-    body?: PatchedUserRatingRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/userrating/{id}/';
-};
-
-export type CompanyUserratingPartialUpdateResponses = {
-    200: UserRating;
-};
-
-export type CompanyUserratingPartialUpdateResponse = CompanyUserratingPartialUpdateResponses[keyof CompanyUserratingPartialUpdateResponses];
-
-export type CompanyUserratingUpdateData = {
-    body: UserRatingRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/userrating/{id}/';
-};
-
-export type CompanyUserratingUpdateResponses = {
-    200: UserRating;
-};
-
-export type CompanyUserratingUpdateResponse = CompanyUserratingUpdateResponses[keyof CompanyUserratingUpdateResponses];
-
 export type CompanyUsersStudentProfileRetrieveData = {
     body?: never;
     path: {
@@ -17386,19 +16983,6 @@ export type CompanyUsersStudentProfileMePartialUpdateResponses = {
 
 export type CompanyUsersStudentProfileMePartialUpdateResponse = CompanyUsersStudentProfileMePartialUpdateResponses[keyof CompanyUsersStudentProfileMePartialUpdateResponses];
 
-export type CompanyUsersStudentProfileMeUpdateData = {
-    body: StudentUserWriteRequestWritable;
-    path?: never;
-    query?: never;
-    url: '/api/company/users/student/profile/me/';
-};
-
-export type CompanyUsersStudentProfileMeUpdateResponses = {
-    200: StudentUser;
-};
-
-export type CompanyUsersStudentProfileMeUpdateResponse = CompanyUsersStudentProfileMeUpdateResponses[keyof CompanyUsersStudentProfileMeUpdateResponses];
-
 export type CompanyUsersStudentRegisterFetchUserCreateData = {
     body: WordPressUserFetchRequestRequest;
     path?: never;
@@ -17435,6 +17019,32 @@ export type CompanyUsersVerifyRecaptchaCreateResponses = {
 
 export type CompanyUsersVerifyRecaptchaCreateResponse = CompanyUsersVerifyRecaptchaCreateResponses[keyof CompanyUsersVerifyRecaptchaCreateResponses];
 
+export type ConnectorGrippSettingsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/connector/gripp-settings/';
+};
+
+export type ConnectorGrippSettingsRetrieveResponses = {
+    200: GrippSettings;
+};
+
+export type ConnectorGrippSettingsRetrieveResponse = ConnectorGrippSettingsRetrieveResponses[keyof ConnectorGrippSettingsRetrieveResponses];
+
+export type ConnectorGrippSettingsPartialUpdateData = {
+    body?: PatchedGrippSettingsRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/connector/gripp-settings/';
+};
+
+export type ConnectorGrippSettingsPartialUpdateResponses = {
+    200: GrippSettings;
+};
+
+export type ConnectorGrippSettingsPartialUpdateResponse = ConnectorGrippSettingsPartialUpdateResponses[keyof ConnectorGrippSettingsPartialUpdateResponses];
+
 export type CustomerCustomerListData = {
     body?: never;
     path?: never;
@@ -17452,7 +17062,7 @@ export type CustomerCustomerListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -17535,133 +17145,6 @@ export type CustomerCustomerMyPartialUpdateResponses = {
 };
 
 export type CustomerCustomerMyPartialUpdateResponse = CustomerCustomerMyPartialUpdateResponses[keyof CustomerCustomerMyPartialUpdateResponses];
-
-export type CustomerCustomerMyUpdateData = {
-    body: CustomerRequest;
-    path?: never;
-    query?: never;
-    url: '/api/customer/customer-my/';
-};
-
-export type CustomerCustomerMyUpdateResponses = {
-    200: Customer;
-};
-
-export type CustomerCustomerMyUpdateResponse = CustomerCustomerMyUpdateResponses[keyof CustomerCustomerMyUpdateResponses];
-
-export type CustomerCustomerRatingListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/customer/customer-rating/';
-};
-
-export type CustomerCustomerRatingListResponses = {
-    200: PaginatedCustomerRatingList;
-};
-
-export type CustomerCustomerRatingListResponse = CustomerCustomerRatingListResponses[keyof CustomerCustomerRatingListResponses];
-
-export type CustomerCustomerRatingCreateData = {
-    body: CustomerRatingRequest;
-    path?: never;
-    query?: never;
-    url: '/api/customer/customer-rating/';
-};
-
-export type CustomerCustomerRatingCreateResponses = {
-    201: CustomerRating;
-};
-
-export type CustomerCustomerRatingCreateResponse = CustomerCustomerRatingCreateResponses[keyof CustomerCustomerRatingCreateResponses];
-
-export type CustomerCustomerRatingDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this customer rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer-rating/{id}/';
-};
-
-export type CustomerCustomerRatingDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CustomerCustomerRatingDestroyResponse = CustomerCustomerRatingDestroyResponses[keyof CustomerCustomerRatingDestroyResponses];
-
-export type CustomerCustomerRatingRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this customer rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer-rating/{id}/';
-};
-
-export type CustomerCustomerRatingRetrieveResponses = {
-    200: CustomerRating;
-};
-
-export type CustomerCustomerRatingRetrieveResponse = CustomerCustomerRatingRetrieveResponses[keyof CustomerCustomerRatingRetrieveResponses];
-
-export type CustomerCustomerRatingPartialUpdateData = {
-    body?: PatchedCustomerRatingRequest;
-    path: {
-        /**
-         * A unique integer value identifying this customer rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer-rating/{id}/';
-};
-
-export type CustomerCustomerRatingPartialUpdateResponses = {
-    200: CustomerRating;
-};
-
-export type CustomerCustomerRatingPartialUpdateResponse = CustomerCustomerRatingPartialUpdateResponses[keyof CustomerCustomerRatingPartialUpdateResponses];
-
-export type CustomerCustomerRatingUpdateData = {
-    body: CustomerRatingRequest;
-    path: {
-        /**
-         * A unique integer value identifying this customer rating.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer-rating/{id}/';
-};
-
-export type CustomerCustomerRatingUpdateResponses = {
-    200: CustomerRating;
-};
-
-export type CustomerCustomerRatingUpdateResponse = CustomerCustomerRatingUpdateResponses[keyof CustomerCustomerRatingUpdateResponses];
 
 export type CustomerCustomerDestroyData = {
     body?: never;
@@ -17766,44 +17249,6 @@ export type CustomerCustomerPartialUpdateResponses = {
 
 export type CustomerCustomerPartialUpdateResponse = CustomerCustomerPartialUpdateResponses[keyof CustomerCustomerPartialUpdateResponses];
 
-export type CustomerCustomerUpdateData = {
-    body?: CustomerUpdateRequest;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        /**
-         * A unique integer value identifying this customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/customer/{id}/';
-};
-
-export type CustomerCustomerUpdateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type CustomerCustomerUpdateError = CustomerCustomerUpdateErrors[keyof CustomerCustomerUpdateErrors];
-
-export type CustomerCustomerUpdateResponses = {
-    200: CustomerUpdate;
-};
-
-export type CustomerCustomerUpdateResponse = CustomerCustomerUpdateResponses[keyof CustomerCustomerUpdateResponses];
-
 export type CustomerCustomerCustomDetailRetrieveData = {
     body?: never;
     path: {
@@ -17822,6 +17267,43 @@ export type CustomerCustomerCustomDetailRetrieveResponses = {
 
 export type CustomerCustomerCustomDetailRetrieveResponse = CustomerCustomerCustomDetailRetrieveResponses[keyof CustomerCustomerCustomDetailRetrieveResponses];
 
+export type CustomerCustomerDashboardRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this customer.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Orders head page number (20 rows per page, default 1).
+         */
+        orders_page?: number;
+    };
+    url: '/api/customer/customer/{id}/dashboard/';
+};
+
+export type CustomerCustomerDashboardRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type CustomerCustomerDashboardRetrieveError = CustomerCustomerDashboardRetrieveErrors[keyof CustomerCustomerDashboardRetrieveErrors];
+
+export type CustomerCustomerDashboardRetrieveResponses = {
+    200: CustomerDashboardResponse;
+};
+
+export type CustomerCustomerDashboardRetrieveResponse = CustomerCustomerDashboardRetrieveResponses[keyof CustomerCustomerDashboardRetrieveResponses];
+
 export type CustomerCustomerAutocompleteListData = {
     body?: never;
     path?: never;
@@ -17832,6 +17314,10 @@ export type CustomerCustomerAutocompleteListData = {
          * Only the customer with this customer_id.
          */
         customer_id?: number;
+        /**
+         * Only the customers with these primary keys, comma-separated - the rows behind a filter a client restores from a URL.
+         */
+        id?: string;
         name?: string;
         num_orders?: string;
         /**
@@ -17862,34 +17348,6 @@ export type CustomerCustomerCheckCustomerIdHandlingRetrieveResponses = {
 
 export type CustomerCustomerCheckCustomerIdHandlingRetrieveResponse = CustomerCustomerCheckCustomerIdHandlingRetrieveResponses[keyof CustomerCustomerCheckCustomerIdHandlingRetrieveResponses];
 
-export type CustomerCustomerExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/customer/customer/external/{external_id}/';
-};
-
-export type CustomerCustomerExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type CustomerCustomerExternalRetrieveError = CustomerCustomerExternalRetrieveErrors[keyof CustomerCustomerExternalRetrieveErrors];
-
-export type CustomerCustomerExternalRetrieveResponses = {
-    200: CustomerExternal;
-};
-
-export type CustomerCustomerExternalRetrieveResponse = CustomerCustomerExternalRetrieveResponses[keyof CustomerCustomerExternalRetrieveResponses];
-
 export type CustomerCustomerGetNewCustomerIdFromLatestRetrieveData = {
     body?: never;
     path?: never;
@@ -17913,7 +17371,7 @@ export type CustomerDocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -18000,24 +17458,6 @@ export type CustomerDocumentPartialUpdateResponses = {
 
 export type CustomerDocumentPartialUpdateResponse = CustomerDocumentPartialUpdateResponses[keyof CustomerDocumentPartialUpdateResponses];
 
-export type CustomerDocumentUpdateData = {
-    body: CustomerDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this customer document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/document/{id}/';
-};
-
-export type CustomerDocumentUpdateResponses = {
-    200: CustomerDocument;
-};
-
-export type CustomerDocumentUpdateResponse = CustomerDocumentUpdateResponses[keyof CustomerDocumentUpdateResponses];
-
 export type CustomerExportListData = {
     body?: never;
     path?: never;
@@ -18039,6 +17479,7 @@ export type CustomerMaintenanceContractListData = {
     path?: never;
     query?: {
         customer?: number;
+        name?: string;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
          */
@@ -18048,13 +17489,14 @@ export type CustomerMaintenanceContractListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
+        remarks?: string;
     };
     url: '/api/customer/maintenance-contract/';
 };
@@ -18135,8 +17577,14 @@ export type CustomerMaintenanceContractPartialUpdateResponses = {
 
 export type CustomerMaintenanceContractPartialUpdateResponse = CustomerMaintenanceContractPartialUpdateResponses[keyof CustomerMaintenanceContractPartialUpdateResponses];
 
-export type CustomerMaintenanceContractUpdateData = {
-    body: MaintenanceContractRequest;
+export type CustomerMaintenanceContractWithEquipmentUpdateData = {
+    body: MaintenanceContractWithEquipmentRequestRequest;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
     path: {
         /**
          * A unique integer value identifying this maintenance contract.
@@ -18144,14 +17592,60 @@ export type CustomerMaintenanceContractUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/customer/maintenance-contract/{id}/';
+    url: '/api/customer/maintenance-contract/{id}/with-equipment/';
 };
 
-export type CustomerMaintenanceContractUpdateResponses = {
-    200: MaintenanceContract;
+export type CustomerMaintenanceContractWithEquipmentUpdateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
 };
 
-export type CustomerMaintenanceContractUpdateResponse = CustomerMaintenanceContractUpdateResponses[keyof CustomerMaintenanceContractUpdateResponses];
+export type CustomerMaintenanceContractWithEquipmentUpdateError = CustomerMaintenanceContractWithEquipmentUpdateErrors[keyof CustomerMaintenanceContractWithEquipmentUpdateErrors];
+
+export type CustomerMaintenanceContractWithEquipmentUpdateResponses = {
+    200: MaintenanceContractWithEquipmentResponse;
+};
+
+export type CustomerMaintenanceContractWithEquipmentUpdateResponse = CustomerMaintenanceContractWithEquipmentUpdateResponses[keyof CustomerMaintenanceContractWithEquipmentUpdateResponses];
+
+export type CustomerMaintenanceContractWithEquipmentCreateData = {
+    body: MaintenanceContractWithEquipmentRequestRequest;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/customer/maintenance-contract/with-equipment/';
+};
+
+export type CustomerMaintenanceContractWithEquipmentCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+};
+
+export type CustomerMaintenanceContractWithEquipmentCreateError = CustomerMaintenanceContractWithEquipmentCreateErrors[keyof CustomerMaintenanceContractWithEquipmentCreateErrors];
+
+export type CustomerMaintenanceContractWithEquipmentCreateResponses = {
+    201: MaintenanceContractWithEquipmentResponse;
+};
+
+export type CustomerMaintenanceContractWithEquipmentCreateResponse = CustomerMaintenanceContractWithEquipmentCreateResponses[keyof CustomerMaintenanceContractWithEquipmentCreateResponses];
 
 export type CustomerMaintenanceEquipmentListData = {
     body?: never;
@@ -18163,7 +17657,7 @@ export type CustomerMaintenanceEquipmentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -18250,24 +17744,6 @@ export type CustomerMaintenanceEquipmentPartialUpdateResponses = {
 
 export type CustomerMaintenanceEquipmentPartialUpdateResponse = CustomerMaintenanceEquipmentPartialUpdateResponses[keyof CustomerMaintenanceEquipmentPartialUpdateResponses];
 
-export type CustomerMaintenanceEquipmentUpdateData = {
-    body: MaintenanceEquipmentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this maintenance equipment.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/customer/maintenance-equipment/{id}/';
-};
-
-export type CustomerMaintenanceEquipmentUpdateResponses = {
-    200: MaintenanceEquipment;
-};
-
-export type CustomerMaintenanceEquipmentUpdateResponse = CustomerMaintenanceEquipmentUpdateResponses[keyof CustomerMaintenanceEquipmentUpdateResponses];
-
 export type EquipmentBuildingListData = {
     body?: never;
     path?: never;
@@ -18279,7 +17755,7 @@ export type EquipmentBuildingListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -18366,23 +17842,46 @@ export type EquipmentBuildingPartialUpdateResponses = {
 
 export type EquipmentBuildingPartialUpdateResponse = EquipmentBuildingPartialUpdateResponses[keyof EquipmentBuildingPartialUpdateResponses];
 
-export type EquipmentBuildingUpdateData = {
-    body?: BuildingUpdateRequestRequest;
+export type EquipmentBuildingDashboardRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
     path: {
         /**
          * A unique integer value identifying this building.
          */
         id: number;
     };
-    query?: never;
-    url: '/api/equipment/building/{id}/';
+    query?: {
+        /**
+         * Orders page number (20 rows per page, default 1).
+         */
+        orders_page?: number;
+        /**
+         * Free-text filter on the orders page; matches the order list ?q=.
+         */
+        orders_search?: string;
+    };
+    url: '/api/equipment/building/{id}/dashboard/';
 };
 
-export type EquipmentBuildingUpdateResponses = {
-    200: BuildingUpdateRequest;
+export type EquipmentBuildingDashboardRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
 };
 
-export type EquipmentBuildingUpdateResponse = EquipmentBuildingUpdateResponses[keyof EquipmentBuildingUpdateResponses];
+export type EquipmentBuildingDashboardRetrieveError = EquipmentBuildingDashboardRetrieveErrors[keyof EquipmentBuildingDashboardRetrieveErrors];
+
+export type EquipmentBuildingDashboardRetrieveResponses = {
+    200: BuildingDashboardResponse;
+};
+
+export type EquipmentBuildingDashboardRetrieveResponse = EquipmentBuildingDashboardRetrieveResponses[keyof EquipmentBuildingDashboardRetrieveResponses];
 
 export type EquipmentBuildingAutocompleteListData = {
     body?: never;
@@ -18435,20 +17934,43 @@ export type EquipmentEquipmentListData = {
     path?: never;
     query?: {
         branch?: number;
+        brand?: string;
         customer?: number;
+        description?: string;
+        identifier?: string;
         location?: number;
+        name?: string;
+        num_orders?: string;
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-brand' | '-description' | '-identifier' | '-name' | '-num_orders' | '-serialnumber' | '-type' | 'brand' | 'description' | 'identifier' | 'name' | 'num_orders' | 'serialnumber' | 'type'>;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
+        serialnumber?: string;
+        /**
+         * Sort direction; anything but `desc` sorts ascending.
+         */
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: name, brand, identifier, serialnumber, description, type, num_orders.
+         */
+        sort_field?: string;
+        /**
+         * * `technical` - Technical
+         * * `facility` - Facility
+         */
+        type?: 'facility' | 'technical';
     };
     url: '/api/equipment/equipment/';
 };
@@ -18482,7 +18004,7 @@ export type EquipmentEquipmentDocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -18569,149 +18091,25 @@ export type EquipmentEquipmentDocumentPartialUpdateResponses = {
 
 export type EquipmentEquipmentDocumentPartialUpdateResponse = EquipmentEquipmentDocumentPartialUpdateResponses[keyof EquipmentEquipmentDocumentPartialUpdateResponses];
 
-export type EquipmentEquipmentDocumentUpdateData = {
-    body: EquipmentDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this equipment document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-document/{id}/';
-};
-
-export type EquipmentEquipmentDocumentUpdateResponses = {
-    200: EquipmentDocument;
-};
-
-export type EquipmentEquipmentDocumentUpdateResponse = EquipmentEquipmentDocumentUpdateResponses[keyof EquipmentEquipmentDocumentUpdateResponses];
-
 export type EquipmentEquipmentExportQrListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on the name.
+         */
+        q?: string;
+        /**
+         * Only rows for this equipment type.
+         */
+        type?: 'facility' | 'technical';
+    };
     url: '/api/equipment/equipment-export-qr/';
 };
 
 export type EquipmentEquipmentExportQrListResponses = {
     200: unknown;
 };
-
-export type EquipmentEquipmentPartListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        equipment?: number;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/equipment/equipment-part/';
-};
-
-export type EquipmentEquipmentPartListResponses = {
-    200: PaginatedEquipmentPartList;
-};
-
-export type EquipmentEquipmentPartListResponse = EquipmentEquipmentPartListResponses[keyof EquipmentEquipmentPartListResponses];
-
-export type EquipmentEquipmentPartCreateData = {
-    body: EquipmentPartRequest;
-    path?: never;
-    query?: never;
-    url: '/api/equipment/equipment-part/';
-};
-
-export type EquipmentEquipmentPartCreateResponses = {
-    201: EquipmentPart;
-};
-
-export type EquipmentEquipmentPartCreateResponse = EquipmentEquipmentPartCreateResponses[keyof EquipmentEquipmentPartCreateResponses];
-
-export type EquipmentEquipmentPartDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this equipment part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-part/{id}/';
-};
-
-export type EquipmentEquipmentPartDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type EquipmentEquipmentPartDestroyResponse = EquipmentEquipmentPartDestroyResponses[keyof EquipmentEquipmentPartDestroyResponses];
-
-export type EquipmentEquipmentPartRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this equipment part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-part/{id}/';
-};
-
-export type EquipmentEquipmentPartRetrieveResponses = {
-    200: EquipmentPart;
-};
-
-export type EquipmentEquipmentPartRetrieveResponse = EquipmentEquipmentPartRetrieveResponses[keyof EquipmentEquipmentPartRetrieveResponses];
-
-export type EquipmentEquipmentPartPartialUpdateData = {
-    body?: PatchedEquipmentPartRequest;
-    path: {
-        /**
-         * A unique integer value identifying this equipment part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-part/{id}/';
-};
-
-export type EquipmentEquipmentPartPartialUpdateResponses = {
-    200: EquipmentPart;
-};
-
-export type EquipmentEquipmentPartPartialUpdateResponse = EquipmentEquipmentPartPartialUpdateResponses[keyof EquipmentEquipmentPartPartialUpdateResponses];
-
-export type EquipmentEquipmentPartUpdateData = {
-    body: EquipmentPartRequest;
-    path: {
-        /**
-         * A unique integer value identifying this equipment part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment-part/{id}/';
-};
-
-export type EquipmentEquipmentPartUpdateResponses = {
-    200: EquipmentPart;
-};
-
-export type EquipmentEquipmentPartUpdateResponse = EquipmentEquipmentPartUpdateResponses[keyof EquipmentEquipmentPartUpdateResponses];
 
 export type EquipmentEquipmentStateListData = {
     body?: never;
@@ -18801,24 +18199,6 @@ export type EquipmentEquipmentPartialUpdateResponses = {
 
 export type EquipmentEquipmentPartialUpdateResponse = EquipmentEquipmentPartialUpdateResponses[keyof EquipmentEquipmentPartialUpdateResponses];
 
-export type EquipmentEquipmentUpdateData = {
-    body?: EquipmentUpdateRequestRequest;
-    path: {
-        /**
-         * A unique integer value identifying this equipment.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/equipment/{id}/';
-};
-
-export type EquipmentEquipmentUpdateResponses = {
-    200: EquipmentUpdateRequest;
-};
-
-export type EquipmentEquipmentUpdateResponse = EquipmentEquipmentUpdateResponses[keyof EquipmentEquipmentUpdateResponses];
-
 export type EquipmentEquipmentCreateQrCreateData = {
     body?: never;
     path: {
@@ -18836,6 +18216,47 @@ export type EquipmentEquipmentCreateQrCreateResponses = {
 };
 
 export type EquipmentEquipmentCreateQrCreateResponse = EquipmentEquipmentCreateQrCreateResponses[keyof EquipmentEquipmentCreateQrCreateResponses];
+
+export type EquipmentEquipmentDashboardRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this equipment.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Orders page number (20 rows per page, default 1).
+         */
+        orders_page?: number;
+        /**
+         * Free-text filter on the orders page; matches the order list ?q=.
+         */
+        orders_search?: string;
+    };
+    url: '/api/equipment/equipment/{id}/dashboard/';
+};
+
+export type EquipmentEquipmentDashboardRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type EquipmentEquipmentDashboardRetrieveError = EquipmentEquipmentDashboardRetrieveErrors[keyof EquipmentEquipmentDashboardRetrieveErrors];
+
+export type EquipmentEquipmentDashboardRetrieveResponses = {
+    200: EquipmentDashboardResponse;
+};
+
+export type EquipmentEquipmentDashboardRetrieveResponse = EquipmentEquipmentDashboardRetrieveResponses[keyof EquipmentEquipmentDashboardRetrieveResponses];
 
 export type EquipmentEquipmentUuidRetrieveData = {
     body?: never;
@@ -18860,15 +18281,26 @@ export type EquipmentEquipmentAutocompleteListData = {
          * Only rows for this branch id.
          */
         branch?: number;
+        brand?: string;
         /**
          * Only rows for this customer id.
          */
         customer?: number;
+        description?: string;
+        identifier?: string;
         location?: number;
+        name?: string;
+        num_orders?: string;
         /**
          * Case-insensitive substring match on the name.
          */
         q?: string;
+        serialnumber?: string;
+        /**
+         * * `technical` - Technical
+         * * `facility` - Facility
+         */
+        type?: 'facility' | 'technical';
     };
     url: '/api/equipment/equipment/autocomplete/';
 };
@@ -18903,7 +18335,7 @@ export type EquipmentLocationListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -18943,7 +18375,7 @@ export type EquipmentLocationDocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -19030,28 +18462,15 @@ export type EquipmentLocationDocumentPartialUpdateResponses = {
 
 export type EquipmentLocationDocumentPartialUpdateResponse = EquipmentLocationDocumentPartialUpdateResponses[keyof EquipmentLocationDocumentPartialUpdateResponses];
 
-export type EquipmentLocationDocumentUpdateData = {
-    body: LocationDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this location document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/location-document/{id}/';
-};
-
-export type EquipmentLocationDocumentUpdateResponses = {
-    200: LocationDocument;
-};
-
-export type EquipmentLocationDocumentUpdateResponse = EquipmentLocationDocumentUpdateResponses[keyof EquipmentLocationDocumentUpdateResponses];
-
 export type EquipmentLocationExportQrListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on the name.
+         */
+        q?: string;
+    };
     url: '/api/equipment/location-export-qr/';
 };
 
@@ -19116,24 +18535,6 @@ export type EquipmentLocationPartialUpdateResponses = {
 
 export type EquipmentLocationPartialUpdateResponse = EquipmentLocationPartialUpdateResponses[keyof EquipmentLocationPartialUpdateResponses];
 
-export type EquipmentLocationUpdateData = {
-    body?: LocationUpdateRequestRequest;
-    path: {
-        /**
-         * A unique integer value identifying this location.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/equipment/location/{id}/';
-};
-
-export type EquipmentLocationUpdateResponses = {
-    200: LocationUpdateRequest;
-};
-
-export type EquipmentLocationUpdateResponse = EquipmentLocationUpdateResponses[keyof EquipmentLocationUpdateResponses];
-
 export type EquipmentLocationCreateQrCreateData = {
     body?: never;
     path: {
@@ -19151,6 +18552,47 @@ export type EquipmentLocationCreateQrCreateResponses = {
 };
 
 export type EquipmentLocationCreateQrCreateResponse = EquipmentLocationCreateQrCreateResponses[keyof EquipmentLocationCreateQrCreateResponses];
+
+export type EquipmentLocationDashboardRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this location.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Orders page number (20 rows per page, default 1).
+         */
+        orders_page?: number;
+        /**
+         * Free-text filter on the orders page; matches the order list ?q=.
+         */
+        orders_search?: string;
+    };
+    url: '/api/equipment/location/{id}/dashboard/';
+};
+
+export type EquipmentLocationDashboardRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type EquipmentLocationDashboardRetrieveError = EquipmentLocationDashboardRetrieveErrors[keyof EquipmentLocationDashboardRetrieveErrors];
+
+export type EquipmentLocationDashboardRetrieveResponses = {
+    200: LocationDashboardResponse;
+};
+
+export type EquipmentLocationDashboardRetrieveResponse = EquipmentLocationDashboardRetrieveResponses[keyof EquipmentLocationDashboardRetrieveResponses];
 
 export type EquipmentLocationUuidRetrieveData = {
     body?: never;
@@ -19339,7 +18781,12 @@ export type InventoryInventoryForMaterialLocationRetrieveResponse = InventoryInv
 export type InventoryInventoryLocationsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on identifier, name, unit or stock location name.
+         */
+        q?: string;
+    };
     url: '/api/inventory/inventory-locations/';
 };
 
@@ -19378,7 +18825,16 @@ export type InventoryInventoryMaterialsListResponse = InventoryInventoryMaterial
 export type InventoryInventoryMaterialsForLocationListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Only materials at this stock location id.
+         */
+        location?: number;
+        /**
+         * Case-insensitive substring match on identifier, name, unit or stock location name.
+         */
+        q?: string;
+    };
     url: '/api/inventory/inventory-materials-for-location/';
 };
 
@@ -19397,7 +18853,7 @@ export type InventoryMaterialListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -19532,44 +18988,6 @@ export type InventoryMaterialPartialUpdateResponses = {
 
 export type InventoryMaterialPartialUpdateResponse = InventoryMaterialPartialUpdateResponses[keyof InventoryMaterialPartialUpdateResponses];
 
-export type InventoryMaterialUpdateData = {
-    body: MaterialUpdateRequest;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        /**
-         * A unique integer value identifying this material.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/material/{id}/';
-};
-
-export type InventoryMaterialUpdateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type InventoryMaterialUpdateError = InventoryMaterialUpdateErrors[keyof InventoryMaterialUpdateErrors];
-
-export type InventoryMaterialUpdateResponses = {
-    200: MaterialUpdate;
-};
-
-export type InventoryMaterialUpdateResponse = InventoryMaterialUpdateResponses[keyof InventoryMaterialUpdateResponses];
-
 export type InventoryMaterialMoveCreateData = {
     body: MoveRequest;
     path: {
@@ -19618,34 +19036,6 @@ export type InventoryMaterialAutocompleteListResponses = {
 };
 
 export type InventoryMaterialAutocompleteListResponse = InventoryMaterialAutocompleteListResponses[keyof InventoryMaterialAutocompleteListResponses];
-
-export type InventoryMaterialExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/inventory/material/external/{external_id}/';
-};
-
-export type InventoryMaterialExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type InventoryMaterialExternalRetrieveError = InventoryMaterialExternalRetrieveErrors[keyof InventoryMaterialExternalRetrieveErrors];
-
-export type InventoryMaterialExternalRetrieveResponses = {
-    200: Material;
-};
-
-export type InventoryMaterialExternalRetrieveResponse = InventoryMaterialExternalRetrieveResponses[keyof InventoryMaterialExternalRetrieveResponses];
 
 export type InventoryMaterialStatsTableRetrieveData = {
     body?: never;
@@ -19788,7 +19178,7 @@ export type InventoryPurchaseorderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -19827,7 +19217,7 @@ export type InventoryPurchaseorderEntryListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         purchase_order_material?: number;
@@ -19915,23 +19305,35 @@ export type InventoryPurchaseorderEntryPartialUpdateResponses = {
 
 export type InventoryPurchaseorderEntryPartialUpdateResponse = InventoryPurchaseorderEntryPartialUpdateResponses[keyof InventoryPurchaseorderEntryPartialUpdateResponses];
 
-export type InventoryPurchaseorderEntryUpdateData = {
-    body: PurchaseOrderEntryRequest;
-    path: {
+export type InventoryPurchaseorderEntryBulkCreateData = {
+    body: Array<PurchaseOrderEntryRequest>;
+    path?: never;
+    query?: {
+        purchase_order_material?: number;
         /**
-         * A unique integer value identifying this purchase order entry.
+         * A search term.
          */
-        id: number;
+        q?: string;
     };
-    query?: never;
-    url: '/api/inventory/purchaseorder-entry/{id}/';
+    url: '/api/inventory/purchaseorder-entry/bulk/';
 };
 
-export type InventoryPurchaseorderEntryUpdateResponses = {
-    200: PurchaseOrderEntry;
+export type InventoryPurchaseorderEntryBulkCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
 };
 
-export type InventoryPurchaseorderEntryUpdateResponse = InventoryPurchaseorderEntryUpdateResponses[keyof InventoryPurchaseorderEntryUpdateResponses];
+export type InventoryPurchaseorderEntryBulkCreateError = InventoryPurchaseorderEntryBulkCreateErrors[keyof InventoryPurchaseorderEntryBulkCreateErrors];
+
+export type InventoryPurchaseorderEntryBulkCreateResponses = {
+    201: Array<PurchaseOrderEntry>;
+};
+
+export type InventoryPurchaseorderEntryBulkCreateResponse = InventoryPurchaseorderEntryBulkCreateResponses[keyof InventoryPurchaseorderEntryBulkCreateResponses];
 
 export type InventoryPurchaseorderMaterialListData = {
     body?: never;
@@ -19942,7 +19344,7 @@ export type InventoryPurchaseorderMaterialListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         purchase_order?: number;
@@ -20030,24 +19432,6 @@ export type InventoryPurchaseorderMaterialPartialUpdateResponses = {
 
 export type InventoryPurchaseorderMaterialPartialUpdateResponse = InventoryPurchaseorderMaterialPartialUpdateResponses[keyof InventoryPurchaseorderMaterialPartialUpdateResponses];
 
-export type InventoryPurchaseorderMaterialUpdateData = {
-    body: PurchaseOrderMaterialRequest;
-    path: {
-        /**
-         * A unique integer value identifying this purchase order material.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/purchaseorder-material/{id}/';
-};
-
-export type InventoryPurchaseorderMaterialUpdateResponses = {
-    200: PurchaseOrderMaterial;
-};
-
-export type InventoryPurchaseorderMaterialUpdateResponse = InventoryPurchaseorderMaterialUpdateResponses[keyof InventoryPurchaseorderMaterialUpdateResponses];
-
 export type InventoryPurchaseorderStatusListData = {
     body?: never;
     path?: never;
@@ -20057,7 +19441,7 @@ export type InventoryPurchaseorderStatusListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         purchase_order?: number;
@@ -20145,24 +19529,6 @@ export type InventoryPurchaseorderStatusPartialUpdateResponses = {
 
 export type InventoryPurchaseorderStatusPartialUpdateResponse = InventoryPurchaseorderStatusPartialUpdateResponses[keyof InventoryPurchaseorderStatusPartialUpdateResponses];
 
-export type InventoryPurchaseorderStatusUpdateData = {
-    body: PurchaseOrderStatusRequest;
-    path: {
-        /**
-         * A unique integer value identifying this purchase order status.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/purchaseorder-status/{id}/';
-};
-
-export type InventoryPurchaseorderStatusUpdateResponses = {
-    200: PurchaseOrderStatus;
-};
-
-export type InventoryPurchaseorderStatusUpdateResponse = InventoryPurchaseorderStatusUpdateResponses[keyof InventoryPurchaseorderStatusUpdateResponses];
-
 export type InventoryPurchaseorderDestroyData = {
     body?: never;
     path: {
@@ -20220,8 +19586,8 @@ export type InventoryPurchaseorderPartialUpdateResponses = {
 
 export type InventoryPurchaseorderPartialUpdateResponse = InventoryPurchaseorderPartialUpdateResponses[keyof InventoryPurchaseorderPartialUpdateResponses];
 
-export type InventoryPurchaseorderUpdateData = {
-    body: PurchaseOrderListRequest;
+export type InventoryPurchaseorderWithMaterialsPartialUpdateData = {
+    body?: PatchedPurchaseOrderWithMaterialsUpdateRequest;
     path: {
         /**
          * A unique integer value identifying this purchase order.
@@ -20229,14 +19595,49 @@ export type InventoryPurchaseorderUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/inventory/purchaseorder/{id}/';
+    url: '/api/inventory/purchaseorder/{id}/with-materials/';
 };
 
-export type InventoryPurchaseorderUpdateResponses = {
-    200: PurchaseOrderList;
+export type InventoryPurchaseorderWithMaterialsPartialUpdateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
 };
 
-export type InventoryPurchaseorderUpdateResponse = InventoryPurchaseorderUpdateResponses[keyof InventoryPurchaseorderUpdateResponses];
+export type InventoryPurchaseorderWithMaterialsPartialUpdateError = InventoryPurchaseorderWithMaterialsPartialUpdateErrors[keyof InventoryPurchaseorderWithMaterialsPartialUpdateErrors];
+
+export type InventoryPurchaseorderWithMaterialsPartialUpdateResponses = {
+    200: PurchaseOrderDetail;
+};
+
+export type InventoryPurchaseorderWithMaterialsPartialUpdateResponse = InventoryPurchaseorderWithMaterialsPartialUpdateResponses[keyof InventoryPurchaseorderWithMaterialsPartialUpdateResponses];
+
+export type InventoryPurchaseorderWithMaterialsCreateData = {
+    body: PurchaseOrderWithMaterialsCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/purchaseorder/with-materials/';
+};
+
+export type InventoryPurchaseorderWithMaterialsCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type InventoryPurchaseorderWithMaterialsCreateError = InventoryPurchaseorderWithMaterialsCreateErrors[keyof InventoryPurchaseorderWithMaterialsCreateErrors];
+
+export type InventoryPurchaseorderWithMaterialsCreateResponses = {
+    201: PurchaseOrderDetail;
+};
+
+export type InventoryPurchaseorderWithMaterialsCreateResponse = InventoryPurchaseorderWithMaterialsCreateResponses[keyof InventoryPurchaseorderWithMaterialsCreateResponses];
 
 export type InventoryStatsTableExportListData = {
     body?: never;
@@ -20264,7 +19665,7 @@ export type InventoryStockLocationListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -20405,72 +19806,6 @@ export type InventoryStockLocationPartialUpdateResponses = {
 
 export type InventoryStockLocationPartialUpdateResponse = InventoryStockLocationPartialUpdateResponses[keyof InventoryStockLocationPartialUpdateResponses];
 
-export type InventoryStockLocationUpdateData = {
-    body?: StockLocationCreateUpdateRequest;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        /**
-         * A unique integer value identifying this stock location.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/stock-location/{id}/';
-};
-
-export type InventoryStockLocationUpdateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type InventoryStockLocationUpdateError = InventoryStockLocationUpdateErrors[keyof InventoryStockLocationUpdateErrors];
-
-export type InventoryStockLocationUpdateResponses = {
-    200: StockLocationCreateUpdate;
-};
-
-export type InventoryStockLocationUpdateResponse = InventoryStockLocationUpdateResponses[keyof InventoryStockLocationUpdateResponses];
-
-export type InventoryStockLocationExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/inventory/stock-location/external/{external_id}/';
-};
-
-export type InventoryStockLocationExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type InventoryStockLocationExternalRetrieveError = InventoryStockLocationExternalRetrieveErrors[keyof InventoryStockLocationExternalRetrieveErrors];
-
-export type InventoryStockLocationExternalRetrieveResponses = {
-    200: StockLocation;
-};
-
-export type InventoryStockLocationExternalRetrieveResponse = InventoryStockLocationExternalRetrieveResponses[keyof InventoryStockLocationExternalRetrieveResponses];
-
 export type InventoryStockmutationsimpleListListData = {
     body?: never;
     path?: never;
@@ -20480,7 +19815,7 @@ export type InventoryStockmutationsimpleListListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
     };
@@ -20521,7 +19856,7 @@ export type InventorySupplierListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -20586,7 +19921,7 @@ export type InventorySupplierReservationListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -20674,8 +20009,8 @@ export type InventorySupplierReservationPartialUpdateResponses = {
 
 export type InventorySupplierReservationPartialUpdateResponse = InventorySupplierReservationPartialUpdateResponses[keyof InventorySupplierReservationPartialUpdateResponses];
 
-export type InventorySupplierReservationUpdateData = {
-    body: SupplierReservationRequest;
+export type InventorySupplierReservationWithMaterialsPartialUpdateData = {
+    body?: PatchedSupplierReservationWithMaterialsRequest;
     path: {
         /**
          * A unique integer value identifying this supplier reservation.
@@ -20683,14 +20018,25 @@ export type InventorySupplierReservationUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/inventory/supplier-reservation/{id}/';
+    url: '/api/inventory/supplier-reservation/{id}/with-materials/';
 };
 
-export type InventorySupplierReservationUpdateResponses = {
+export type InventorySupplierReservationWithMaterialsPartialUpdateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type InventorySupplierReservationWithMaterialsPartialUpdateError = InventorySupplierReservationWithMaterialsPartialUpdateErrors[keyof InventorySupplierReservationWithMaterialsPartialUpdateErrors];
+
+export type InventorySupplierReservationWithMaterialsPartialUpdateResponses = {
     200: SupplierReservation;
 };
 
-export type InventorySupplierReservationUpdateResponse = InventorySupplierReservationUpdateResponses[keyof InventorySupplierReservationUpdateResponses];
+export type InventorySupplierReservationWithMaterialsPartialUpdateResponse = InventorySupplierReservationWithMaterialsPartialUpdateResponses[keyof InventorySupplierReservationWithMaterialsPartialUpdateResponses];
 
 export type InventorySupplierReservationAutocompleteListData = {
     body?: never;
@@ -20711,6 +20057,30 @@ export type InventorySupplierReservationAutocompleteListResponses = {
 
 export type InventorySupplierReservationAutocompleteListResponse = InventorySupplierReservationAutocompleteListResponses[keyof InventorySupplierReservationAutocompleteListResponses];
 
+export type InventorySupplierReservationWithMaterialsCreateData = {
+    body: SupplierReservationWithMaterialsRequest;
+    path?: never;
+    query?: never;
+    url: '/api/inventory/supplier-reservation/with-materials/';
+};
+
+export type InventorySupplierReservationWithMaterialsCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type InventorySupplierReservationWithMaterialsCreateError = InventorySupplierReservationWithMaterialsCreateErrors[keyof InventorySupplierReservationWithMaterialsCreateErrors];
+
+export type InventorySupplierReservationWithMaterialsCreateResponses = {
+    201: SupplierReservation;
+};
+
+export type InventorySupplierReservationWithMaterialsCreateResponse = InventorySupplierReservationWithMaterialsCreateResponses[keyof InventorySupplierReservationWithMaterialsCreateResponses];
+
 export type InventorySupplierReservationmaterialListData = {
     body?: never;
     path?: never;
@@ -20721,7 +20091,7 @@ export type InventorySupplierReservationmaterialListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -20809,24 +20179,6 @@ export type InventorySupplierReservationmaterialPartialUpdateResponses = {
 
 export type InventorySupplierReservationmaterialPartialUpdateResponse = InventorySupplierReservationmaterialPartialUpdateResponses[keyof InventorySupplierReservationmaterialPartialUpdateResponses];
 
-export type InventorySupplierReservationmaterialUpdateData = {
-    body: SupplierReservationMaterialRequest;
-    path: {
-        /**
-         * A unique integer value identifying this supplier reservation material.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/supplier-reservationmaterial/{id}/';
-};
-
-export type InventorySupplierReservationmaterialUpdateResponses = {
-    200: SupplierReservationMaterial;
-};
-
-export type InventorySupplierReservationmaterialUpdateResponse = InventorySupplierReservationmaterialUpdateResponses[keyof InventorySupplierReservationmaterialUpdateResponses];
-
 export type InventorySupplierDestroyData = {
     body?: never;
     headers?: {
@@ -20912,44 +20264,6 @@ export type InventorySupplierPartialUpdateResponses = {
 
 export type InventorySupplierPartialUpdateResponse = InventorySupplierPartialUpdateResponses[keyof InventorySupplierPartialUpdateResponses];
 
-export type InventorySupplierUpdateData = {
-    body: SupplierCreateUpdateRequest;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        /**
-         * A unique integer value identifying this supplier.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/inventory/supplier/{id}/';
-};
-
-export type InventorySupplierUpdateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type InventorySupplierUpdateError = InventorySupplierUpdateErrors[keyof InventorySupplierUpdateErrors];
-
-export type InventorySupplierUpdateResponses = {
-    200: SupplierCreateUpdate;
-};
-
-export type InventorySupplierUpdateResponse = InventorySupplierUpdateResponses[keyof InventorySupplierUpdateResponses];
-
 export type InventorySupplierAutocompleteListData = {
     body?: never;
     path?: never;
@@ -20967,34 +20281,6 @@ export type InventorySupplierAutocompleteListResponses = {
 };
 
 export type InventorySupplierAutocompleteListResponse = InventorySupplierAutocompleteListResponses[keyof InventorySupplierAutocompleteListResponses];
-
-export type InventorySupplierExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/inventory/supplier/external/{external_id}/';
-};
-
-export type InventorySupplierExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    404: NotFoundResponse;
-};
-
-export type InventorySupplierExternalRetrieveError = InventorySupplierExternalRetrieveErrors[keyof InventorySupplierExternalRetrieveErrors];
-
-export type InventorySupplierExternalRetrieveResponses = {
-    200: Supplier;
-};
-
-export type InventorySupplierExternalRetrieveResponse = InventorySupplierExternalRetrieveResponses[keyof InventorySupplierExternalRetrieveResponses];
 
 export type InventoryTotalSalesPerCustomerExportListData = {
     body?: never;
@@ -21027,7 +20313,7 @@ export type InvoiceEmailListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21114,46 +20400,32 @@ export type InvoiceEmailPartialUpdateResponses = {
 
 export type InvoiceEmailPartialUpdateResponse = InvoiceEmailPartialUpdateResponses[keyof InvoiceEmailPartialUpdateResponses];
 
-export type InvoiceEmailUpdateData = {
-    body: InvoiceEmailRequest;
-    path: {
-        /**
-         * A unique integer value identifying this invoice email.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/invoice/email/{id}/';
-};
-
-export type InvoiceEmailUpdateResponses = {
-    200: InvoiceEmail;
-};
-
-export type InvoiceEmailUpdateResponse = InvoiceEmailUpdateResponses[keyof InvoiceEmailUpdateResponses];
-
-export type InvoiceEmailGetDocumentsRetrieveData = {
+export type InvoiceEmailGetDocumentsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        invoiceId: number;
+    };
     url: '/api/invoice/email/get_documents/';
 };
 
-export type InvoiceEmailGetDocumentsRetrieveResponses = {
-    200: InvoiceEmail;
+export type InvoiceEmailGetDocumentsListResponses = {
+    200: Array<InvoiceEmailDocument>;
 };
 
-export type InvoiceEmailGetDocumentsRetrieveResponse = InvoiceEmailGetDocumentsRetrieveResponses[keyof InvoiceEmailGetDocumentsRetrieveResponses];
+export type InvoiceEmailGetDocumentsListResponse = InvoiceEmailGetDocumentsListResponses[keyof InvoiceEmailGetDocumentsListResponses];
 
 export type InvoiceEmailGetUnsentEmailRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        invoiceId: number;
+    };
     url: '/api/invoice/email/get_unsent_email/';
 };
 
 export type InvoiceEmailGetUnsentEmailRetrieveResponses = {
-    200: InvoiceEmail;
+    200: InvoiceEmailDraft;
 };
 
 export type InvoiceEmailGetUnsentEmailRetrieveResponse = InvoiceEmailGetUnsentEmailRetrieveResponses[keyof InvoiceEmailGetUnsentEmailRetrieveResponses];
@@ -21168,7 +20440,7 @@ export type InvoiceInvoiceListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21223,7 +20495,7 @@ export type InvoiceInvoiceLineListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21310,24 +20582,6 @@ export type InvoiceInvoiceLinePartialUpdateResponses = {
 
 export type InvoiceInvoiceLinePartialUpdateResponse = InvoiceInvoiceLinePartialUpdateResponses[keyof InvoiceInvoiceLinePartialUpdateResponses];
 
-export type InvoiceInvoiceLineUpdateData = {
-    body: InvoiceLineRequest;
-    path: {
-        /**
-         * A unique integer value identifying this invoice line.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/invoice/invoice-line/{id}/';
-};
-
-export type InvoiceInvoiceLineUpdateResponses = {
-    200: InvoiceLine;
-};
-
-export type InvoiceInvoiceLineUpdateResponse = InvoiceInvoiceLineUpdateResponses[keyof InvoiceInvoiceLineUpdateResponses];
-
 export type InvoiceInvoiceStatusCreateData = {
     body: InvoiceStatusRequest;
     path?: never;
@@ -21398,26 +20652,8 @@ export type InvoiceInvoicePartialUpdateResponses = {
 
 export type InvoiceInvoicePartialUpdateResponse = InvoiceInvoicePartialUpdateResponses[keyof InvoiceInvoicePartialUpdateResponses];
 
-export type InvoiceInvoiceUpdateData = {
-    body: InvoiceRequest;
-    path: {
-        /**
-         * A unique integer value identifying this invoice.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/invoice/invoice/{id}/';
-};
-
-export type InvoiceInvoiceUpdateResponses = {
-    200: Invoice;
-};
-
-export type InvoiceInvoiceUpdateResponse = InvoiceInvoiceUpdateResponses[keyof InvoiceInvoiceUpdateResponses];
-
 export type InvoiceInvoiceDownloadPdfCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -21428,14 +20664,21 @@ export type InvoiceInvoiceDownloadPdfCreateData = {
     url: '/api/invoice/invoice/{id}/download_pdf/';
 };
 
+export type InvoiceInvoiceDownloadPdfCreateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
+};
+
 export type InvoiceInvoiceDownloadPdfCreateResponses = {
-    200: Invoice;
+    200: Blob | File;
 };
 
 export type InvoiceInvoiceDownloadPdfCreateResponse = InvoiceInvoiceDownloadPdfCreateResponses[keyof InvoiceInvoiceDownloadPdfCreateResponses];
 
 export type InvoiceInvoiceGeneratePreviewPdfCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -21446,14 +20689,21 @@ export type InvoiceInvoiceGeneratePreviewPdfCreateData = {
     url: '/api/invoice/invoice/{id}/generate_preview_pdf/';
 };
 
+export type InvoiceInvoiceGeneratePreviewPdfCreateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
+};
+
 export type InvoiceInvoiceGeneratePreviewPdfCreateResponses = {
-    200: Invoice;
+    200: Blob | File;
 };
 
 export type InvoiceInvoiceGeneratePreviewPdfCreateResponse = InvoiceInvoiceGeneratePreviewPdfCreateResponses[keyof InvoiceInvoiceGeneratePreviewPdfCreateResponses];
 
 export type InvoiceInvoiceMakeDefinitiveCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -21471,7 +20721,7 @@ export type InvoiceInvoiceMakeDefinitiveCreateResponses = {
 export type InvoiceInvoiceMakeDefinitiveCreateResponse = InvoiceInvoiceMakeDefinitiveCreateResponses[keyof InvoiceInvoiceMakeDefinitiveCreateResponses];
 
 export type InvoiceInvoiceRecreatePdfCreateData = {
-    body: InvoiceRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this invoice.
@@ -21482,24 +20732,37 @@ export type InvoiceInvoiceRecreatePdfCreateData = {
     url: '/api/invoice/invoice/{id}/recreate_pdf/';
 };
 
-export type InvoiceInvoiceRecreatePdfCreateResponses = {
-    200: Invoice;
+export type InvoiceInvoiceRecreatePdfCreateErrors = {
+    400: ResultResponse;
 };
 
-export type InvoiceInvoiceRecreatePdfCreateResponse = InvoiceInvoiceRecreatePdfCreateResponses[keyof InvoiceInvoiceRecreatePdfCreateResponses];
+export type InvoiceInvoiceRecreatePdfCreateError = InvoiceInvoiceRecreatePdfCreateErrors[keyof InvoiceInvoiceRecreatePdfCreateErrors];
 
-export type InvoiceInvoiceAutocompleteRetrieveData = {
+export type InvoiceInvoiceRecreatePdfCreateResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
+export type InvoiceInvoiceAutocompleteListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        order?: number;
+        /**
+         * Case-insensitive substring match on reference, description or order name.
+         */
+        q?: string;
+    };
     url: '/api/invoice/invoice/autocomplete/';
 };
 
-export type InvoiceInvoiceAutocompleteRetrieveResponses = {
-    200: Invoice;
+export type InvoiceInvoiceAutocompleteListResponses = {
+    200: Array<InvoiceAutocomplete>;
 };
 
-export type InvoiceInvoiceAutocompleteRetrieveResponse = InvoiceInvoiceAutocompleteRetrieveResponses[keyof InvoiceInvoiceAutocompleteRetrieveResponses];
+export type InvoiceInvoiceAutocompleteListResponse = InvoiceInvoiceAutocompleteListResponses[keyof InvoiceInvoiceAutocompleteListResponses];
 
 export type InvoiceInvoiceDataRetrieveData = {
     body?: never;
@@ -21511,31 +20774,7 @@ export type InvoiceInvoiceDataRetrieveData = {
 };
 
 export type InvoiceInvoiceDataRetrieveResponses = {
-    /**
-     * Everything the invoice PDF template needs, gathered for one order.
-     */
-    200: {
-        order_pk: number;
-        customer_pk: number | null;
-        invoice_id: number;
-        order_id: string;
-        order_reference: string | null;
-        invoice_default_call_out_costs?: string | null;
-        invoice_default_hourly_rate?: string | null;
-        invoice_default_partner_hourly_rate?: string | null;
-        invoice_default_price_per_km?: string | null;
-        used_materials: Array<{
-            [key: string]: unknown;
-        }>;
-        material_models: Array<Material>;
-        activity: Array<{
-            [key: string]: unknown;
-        }>;
-        activity_totals: {
-            [key: string]: unknown;
-        };
-        engineer_models: Array<Engineer>;
-    };
+    200: InvoiceDataResponse;
 };
 
 export type InvoiceInvoiceDataRetrieveResponse = InvoiceInvoiceDataRetrieveResponses[keyof InvoiceInvoiceDataRetrieveResponses];
@@ -21550,7 +20789,7 @@ export type InvoiceInvoicePreliminaryListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21567,18 +20806,32 @@ export type InvoiceInvoicePreliminaryListResponses = {
 
 export type InvoiceInvoicePreliminaryListResponse = InvoiceInvoicePreliminaryListResponses[keyof InvoiceInvoicePreliminaryListResponses];
 
-export type InvoiceInvoiceSentRetrieveData = {
+export type InvoiceInvoiceSentListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        order?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/invoice/invoice/sent/';
 };
 
-export type InvoiceInvoiceSentRetrieveResponses = {
-    200: Invoice;
+export type InvoiceInvoiceSentListResponses = {
+    200: PaginatedInvoiceList;
 };
 
-export type InvoiceInvoiceSentRetrieveResponse = InvoiceInvoiceSentRetrieveResponses[keyof InvoiceInvoiceSentRetrieveResponses];
+export type InvoiceInvoiceSentListResponse = InvoiceInvoiceSentListResponses[keyof InvoiceInvoiceSentListResponses];
 
 export type InvoicePurchaseListData = {
     body?: never;
@@ -21590,7 +20843,7 @@ export type InvoicePurchaseListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21676,24 +20929,6 @@ export type InvoicePurchasePartialUpdateResponses = {
 };
 
 export type InvoicePurchasePartialUpdateResponse = InvoicePurchasePartialUpdateResponses[keyof InvoicePurchasePartialUpdateResponses];
-
-export type InvoicePurchaseUpdateData = {
-    body: PurchaseRequest;
-    path: {
-        /**
-         * A unique integer value identifying this purchase.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/invoice/purchase/{id}/';
-};
-
-export type InvoicePurchaseUpdateResponses = {
-    200: Purchase;
-};
-
-export type InvoicePurchaseUpdateResponse = InvoicePurchaseUpdateResponses[keyof InvoicePurchaseUpdateResponses];
 
 export type InvoicePurchaseYearListData = {
     body?: never;
@@ -21783,6 +21018,7 @@ export type MemberContractListData = {
     body?: never;
     path?: never;
     query?: {
+        name?: string;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
          */
@@ -21792,7 +21028,7 @@ export type MemberContractListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -21862,7 +21098,7 @@ export type MemberContractRetrieveResponses = {
 export type MemberContractRetrieveResponse = MemberContractRetrieveResponses[keyof MemberContractRetrieveResponses];
 
 export type MemberContractPartialUpdateData = {
-    body?: PatchedContractWriteRequest;
+    body?: PatchedContractRequest;
     path: {
         /**
          * A unique integer value identifying this contract.
@@ -21878,24 +21114,6 @@ export type MemberContractPartialUpdateResponses = {
 };
 
 export type MemberContractPartialUpdateResponse = MemberContractPartialUpdateResponses[keyof MemberContractPartialUpdateResponses];
-
-export type MemberContractUpdateData = {
-    body: ContractWriteRequest;
-    path: {
-        /**
-         * A unique integer value identifying this contract.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/contract/{id}/';
-};
-
-export type MemberContractUpdateResponses = {
-    200: Contract;
-};
-
-export type MemberContractUpdateResponse = MemberContractUpdateResponses[keyof MemberContractUpdateResponses];
 
 export type MemberCurrentDetailPublicRetrieveData = {
     body?: never;
@@ -22019,7 +21237,7 @@ export type MemberMemberListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -22105,24 +21323,6 @@ export type MemberMemberPartialUpdateResponses = {
 };
 
 export type MemberMemberPartialUpdateResponse = MemberMemberPartialUpdateResponses[keyof MemberMemberPartialUpdateResponses];
-
-export type MemberMemberUpdateData = {
-    body: MemberRequest;
-    path: {
-        /**
-         * A unique integer value identifying this member.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/member/{id}/';
-};
-
-export type MemberMemberUpdateResponses = {
-    200: Member;
-};
-
-export type MemberMemberUpdateResponse = MemberMemberUpdateResponses[keyof MemberMemberUpdateResponses];
 
 export type MemberMemberGetDashboardRetrieveData = {
     body?: never;
@@ -22235,19 +21435,6 @@ export type MemberMemberMePartialUpdateResponses = {
 
 export type MemberMemberMePartialUpdateResponse = MemberMemberMePartialUpdateResponses[keyof MemberMemberMePartialUpdateResponses];
 
-export type MemberMemberMeUpdateData = {
-    body: MemberRequest;
-    path?: never;
-    query?: never;
-    url: '/api/member/member/me/';
-};
-
-export type MemberMemberMeUpdateResponses = {
-    200: Member;
-};
-
-export type MemberMemberMeUpdateResponse = MemberMemberMeUpdateResponses[keyof MemberMemberMeUpdateResponses];
-
 export type MemberMemberMySettingsRetrieveData = {
     body?: never;
     path?: never;
@@ -22256,35 +21443,23 @@ export type MemberMemberMySettingsRetrieveData = {
 };
 
 export type MemberMemberMySettingsRetrieveResponses = {
-    /**
-     * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
-     */
-    200: {
-        [key: string]: unknown;
-    };
+    200: MemberSettings;
 };
 
 export type MemberMemberMySettingsRetrieveResponse = MemberMemberMySettingsRetrieveResponses[keyof MemberMemberMySettingsRetrieveResponses];
 
-export type MemberMemberMySettingsUpdateData = {
-    body?: {
-        [key: string]: unknown;
-    };
+export type MemberMemberMySettingsPartialUpdateData = {
+    body?: PatchedMemberSettingsRequest;
     path?: never;
     query?: never;
     url: '/api/member/member/my_settings/';
 };
 
-export type MemberMemberMySettingsUpdateResponses = {
-    /**
-     * The tenant settings bag. Keys come from the defaults plus whatever the tenant added, and values range over strings, numbers and nested objects.
-     */
-    200: {
-        [key: string]: unknown;
-    };
+export type MemberMemberMySettingsPartialUpdateResponses = {
+    200: MemberSettings;
 };
 
-export type MemberMemberMySettingsUpdateResponse = MemberMemberMySettingsUpdateResponses[keyof MemberMemberMySettingsUpdateResponses];
+export type MemberMemberMySettingsPartialUpdateResponse = MemberMemberMySettingsPartialUpdateResponses[keyof MemberMemberMySettingsPartialUpdateResponses];
 
 export type MemberMemberOverviewStatsRetrieveData = {
     body?: never;
@@ -22329,6 +21504,7 @@ export type MemberModuleListData = {
     body?: never;
     path?: never;
     query?: {
+        name?: string;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
          */
@@ -22338,7 +21514,7 @@ export type MemberModuleListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -22372,6 +21548,8 @@ export type MemberModulePartListData = {
     body?: never;
     path?: never;
     query?: {
+        module?: number;
+        name?: string;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
          */
@@ -22381,7 +21559,7 @@ export type MemberModulePartListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -22468,24 +21646,6 @@ export type MemberModulePartPartialUpdateResponses = {
 
 export type MemberModulePartPartialUpdateResponse = MemberModulePartPartialUpdateResponses[keyof MemberModulePartPartialUpdateResponses];
 
-export type MemberModulePartUpdateData = {
-    body: ModulePartRequest;
-    path: {
-        /**
-         * A unique integer value identifying this module part.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/module-part/{id}/';
-};
-
-export type MemberModulePartUpdateResponses = {
-    200: ModulePart;
-};
-
-export type MemberModulePartUpdateResponse = MemberModulePartUpdateResponses[keyof MemberModulePartUpdateResponses];
-
 export type MemberModuleDestroyData = {
     body?: never;
     path: {
@@ -22543,138 +21703,6 @@ export type MemberModulePartialUpdateResponses = {
 
 export type MemberModulePartialUpdateResponse = MemberModulePartialUpdateResponses[keyof MemberModulePartialUpdateResponses];
 
-export type MemberModuleUpdateData = {
-    body: ModuleRequest;
-    path: {
-        /**
-         * A unique integer value identifying this module.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/module/{id}/';
-};
-
-export type MemberModuleUpdateResponses = {
-    200: Module;
-};
-
-export type MemberModuleUpdateResponse = MemberModuleUpdateResponses[keyof MemberModuleUpdateResponses];
-
-export type MemberTransactionListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/member/transaction/';
-};
-
-export type MemberTransactionListResponses = {
-    200: PaginatedTransactionList;
-};
-
-export type MemberTransactionListResponse = MemberTransactionListResponses[keyof MemberTransactionListResponses];
-
-export type MemberTransactionCreateData = {
-    body: TransactionRequest;
-    path?: never;
-    query?: never;
-    url: '/api/member/transaction/';
-};
-
-export type MemberTransactionCreateResponses = {
-    201: Transaction;
-};
-
-export type MemberTransactionCreateResponse = MemberTransactionCreateResponses[keyof MemberTransactionCreateResponses];
-
-export type MemberTransactionDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this transaction.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/transaction/{id}/';
-};
-
-export type MemberTransactionDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type MemberTransactionDestroyResponse = MemberTransactionDestroyResponses[keyof MemberTransactionDestroyResponses];
-
-export type MemberTransactionRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this transaction.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/transaction/{id}/';
-};
-
-export type MemberTransactionRetrieveResponses = {
-    200: Transaction;
-};
-
-export type MemberTransactionRetrieveResponse = MemberTransactionRetrieveResponses[keyof MemberTransactionRetrieveResponses];
-
-export type MemberTransactionPartialUpdateData = {
-    body?: PatchedTransactionRequest;
-    path: {
-        /**
-         * A unique integer value identifying this transaction.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/transaction/{id}/';
-};
-
-export type MemberTransactionPartialUpdateResponses = {
-    200: Transaction;
-};
-
-export type MemberTransactionPartialUpdateResponse = MemberTransactionPartialUpdateResponses[keyof MemberTransactionPartialUpdateResponses];
-
-export type MemberTransactionUpdateData = {
-    body: TransactionRequest;
-    path: {
-        /**
-         * A unique integer value identifying this transaction.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/member/transaction/{id}/';
-};
-
-export type MemberTransactionUpdateResponses = {
-    200: Transaction;
-};
-
-export type MemberTransactionUpdateResponse = MemberTransactionUpdateResponses[keyof MemberTransactionUpdateResponses];
-
 export type MemberVatTypesRetrieveData = {
     body?: never;
     path?: never;
@@ -22726,7 +21754,12 @@ export type MobileAssignUserCreateData = {
     path: {
         id: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * When given, send the assigned user a websocket notification per order.
+         */
+        notify_user?: string;
+    };
     url: '/api/mobile/assign-user/{id}/';
 };
 
@@ -22747,7 +21780,7 @@ export type MobileAssignedorderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -22787,7 +21820,7 @@ export type MobileAssignedorderWorkorderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -22874,24 +21907,6 @@ export type MobileAssignedorderWorkorderPartialUpdateResponses = {
 
 export type MobileAssignedorderWorkorderPartialUpdateResponse = MobileAssignedorderWorkorderPartialUpdateResponses[keyof MobileAssignedorderWorkorderPartialUpdateResponses];
 
-export type MobileAssignedorderWorkorderUpdateData = {
-    body: AssignedOrderWorkOrderRequest;
-    path: {
-        /**
-         * A unique integer value identifying this assigned order work order.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/assignedorder-workorder/{id}/';
-};
-
-export type MobileAssignedorderWorkorderUpdateResponses = {
-    200: AssignedOrderWorkOrder;
-};
-
-export type MobileAssignedorderWorkorderUpdateResponse = MobileAssignedorderWorkorderUpdateResponses[keyof MobileAssignedorderWorkorderUpdateResponses];
-
 export type MobileAssignedorderDestroyData = {
     body?: never;
     path: {
@@ -22948,24 +21963,6 @@ export type MobileAssignedorderPartialUpdateResponses = {
 };
 
 export type MobileAssignedorderPartialUpdateResponse = MobileAssignedorderPartialUpdateResponses[keyof MobileAssignedorderPartialUpdateResponses];
-
-export type MobileAssignedorderUpdateData = {
-    body: AssignedOrderRequest;
-    path: {
-        /**
-         * A unique integer value identifying this assigned order.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/assignedorder/{id}/';
-};
-
-export type MobileAssignedorderUpdateResponses = {
-    200: AssignedOrder;
-};
-
-export type MobileAssignedorderUpdateResponse = MobileAssignedorderUpdateResponses[keyof MobileAssignedorderUpdateResponses];
 
 export type MobileAssignedorderCreateExtraOrderCreateData = {
     body: AssignedOrderRequest;
@@ -23098,13 +22095,17 @@ export type MobileAssignedorderFinishedListListData = {
     path?: never;
     query?: {
         engineer?: number;
+        /**
+         * Only finished assigned orders for this month (1-12).
+         */
+        month?: number;
         order?: number;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23112,6 +22113,14 @@ export type MobileAssignedorderFinishedListListData = {
          */
         q?: string;
         student_user?: number;
+        /**
+         * Only assigned orders for this engineer/student id.
+         */
+        submodel_id?: number;
+        /**
+         * Only finished assigned orders for this year.
+         */
+        year?: number;
     };
     url: '/api/mobile/assignedorder/finished_list/';
 };
@@ -23133,7 +22142,7 @@ export type MobileAssignedorderListAppListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23180,7 +22189,28 @@ export type MobileAssignedorderListDeviceAppRetrieveResponse = MobileAssignedord
 export type MobileAssignedorderListTimesheetTotalsRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Window shown: week (default), month or year.
+         */
+        mode?: string;
+        /**
+         * Calendar month (1-12) the window is computed for. Honoured for month.
+         */
+        month?: number;
+        /**
+         * Anchor date (YYYY-MM-DD); the window is computed from it. Honoured for week and month, ignored for year.
+         */
+        start_date?: string;
+        /**
+         * User id the totals are computed for; without it the rows span every user.
+         */
+        user_id?: number;
+        /**
+         * Calendar year the window is computed for. Honoured for month and year.
+         */
+        year?: number;
+    };
     url: '/api/mobile/assignedorder/list_timesheet_totals/';
 };
 
@@ -23189,6 +22219,38 @@ export type MobileAssignedorderListTimesheetTotalsRetrieveResponses = {
 };
 
 export type MobileAssignedorderListTimesheetTotalsRetrieveResponse = MobileAssignedorderListTimesheetTotalsRetrieveResponses[keyof MobileAssignedorderListTimesheetTotalsRetrieveResponses];
+
+export type MobileAssignedorderSplitCreateData = {
+    body: AssignedOrderSplitRequestRequestWritable;
+    path?: never;
+    query?: {
+        engineer?: number;
+        order?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        student_user?: number;
+    };
+    url: '/api/mobile/assignedorder/split/';
+};
+
+export type MobileAssignedorderSplitCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type MobileAssignedorderSplitCreateError = MobileAssignedorderSplitCreateErrors[keyof MobileAssignedorderSplitCreateErrors];
+
+export type MobileAssignedorderSplitCreateResponses = {
+    201: Array<AssignedOrder>;
+};
+
+export type MobileAssignedorderSplitCreateResponse = MobileAssignedorderSplitCreateResponses[keyof MobileAssignedorderSplitCreateResponses];
 
 export type MobileAssignedorderactivityListData = {
     body?: never;
@@ -23200,7 +22262,7 @@ export type MobileAssignedorderactivityListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23287,24 +22349,6 @@ export type MobileAssignedorderactivityPartialUpdateResponses = {
 
 export type MobileAssignedorderactivityPartialUpdateResponse = MobileAssignedorderactivityPartialUpdateResponses[keyof MobileAssignedorderactivityPartialUpdateResponses];
 
-export type MobileAssignedorderactivityUpdateData = {
-    body: AssignedOrderActivityRequest;
-    path: {
-        /**
-         * A unique integer value identifying this assigned order activity.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/assignedorderactivity/{id}/';
-};
-
-export type MobileAssignedorderactivityUpdateResponses = {
-    200: AssignedOrderActivity;
-};
-
-export type MobileAssignedorderactivityUpdateResponse = MobileAssignedorderactivityUpdateResponses[keyof MobileAssignedorderactivityUpdateResponses];
-
 export type MobileAssignedorderdocumentListData = {
     body?: never;
     path?: never;
@@ -23318,7 +22362,7 @@ export type MobileAssignedorderdocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23405,24 +22449,6 @@ export type MobileAssignedorderdocumentPartialUpdateResponses = {
 
 export type MobileAssignedorderdocumentPartialUpdateResponse = MobileAssignedorderdocumentPartialUpdateResponses[keyof MobileAssignedorderdocumentPartialUpdateResponses];
 
-export type MobileAssignedorderdocumentUpdateData = {
-    body: AssignedOrderDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this assigned order document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/assignedorderdocument/{id}/';
-};
-
-export type MobileAssignedorderdocumentUpdateResponses = {
-    200: AssignedOrderDocument;
-};
-
-export type MobileAssignedorderdocumentUpdateResponse = MobileAssignedorderdocumentUpdateResponses[keyof MobileAssignedorderdocumentUpdateResponses];
-
 export type MobileAssignedordermaterialListData = {
     body?: never;
     path?: never;
@@ -23436,7 +22462,7 @@ export type MobileAssignedordermaterialListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23523,24 +22549,6 @@ export type MobileAssignedordermaterialPartialUpdateResponses = {
 
 export type MobileAssignedordermaterialPartialUpdateResponse = MobileAssignedordermaterialPartialUpdateResponses[keyof MobileAssignedordermaterialPartialUpdateResponses];
 
-export type MobileAssignedordermaterialUpdateData = {
-    body: AssignedOrderMaterialRequest;
-    path: {
-        /**
-         * A unique integer value identifying this assigned order material.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/assignedordermaterial/{id}/';
-};
-
-export type MobileAssignedordermaterialUpdateResponses = {
-    200: AssignedOrderMaterial;
-};
-
-export type MobileAssignedordermaterialUpdateResponse = MobileAssignedordermaterialUpdateResponses[keyof MobileAssignedordermaterialUpdateResponses];
-
 export type MobileAssignedordermaterialOrderlinesListData = {
     body?: never;
     path?: never;
@@ -23586,7 +22594,7 @@ export type MobileTripListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23625,7 +22633,7 @@ export type MobileTripOrderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23712,24 +22720,6 @@ export type MobileTripOrderPartialUpdateResponses = {
 
 export type MobileTripOrderPartialUpdateResponse = MobileTripOrderPartialUpdateResponses[keyof MobileTripOrderPartialUpdateResponses];
 
-export type MobileTripOrderUpdateData = {
-    body: TripOrderRequest;
-    path: {
-        /**
-         * A unique integer value identifying this trip order.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/trip-order/{id}/';
-};
-
-export type MobileTripOrderUpdateResponses = {
-    200: TripOrder;
-};
-
-export type MobileTripOrderUpdateResponse = MobileTripOrderUpdateResponses[keyof MobileTripOrderUpdateResponses];
-
 export type MobileTripStatuscodeListData = {
     body?: never;
     path?: never;
@@ -23739,7 +22729,7 @@ export type MobileTripStatuscodeListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23778,7 +22768,7 @@ export type MobileTripStatuscodeActionListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -23865,24 +22855,6 @@ export type MobileTripStatuscodeActionPartialUpdateResponses = {
 
 export type MobileTripStatuscodeActionPartialUpdateResponse = MobileTripStatuscodeActionPartialUpdateResponses[keyof MobileTripStatuscodeActionPartialUpdateResponses];
 
-export type MobileTripStatuscodeActionUpdateData = {
-    body: TripStatuscodeActionRequest;
-    path: {
-        /**
-         * A unique integer value identifying this trip statuscode action.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/trip-statuscode-action/{id}/';
-};
-
-export type MobileTripStatuscodeActionUpdateResponses = {
-    200: TripStatuscodeAction;
-};
-
-export type MobileTripStatuscodeActionUpdateResponse = MobileTripStatuscodeActionUpdateResponses[keyof MobileTripStatuscodeActionUpdateResponses];
-
 export type MobileTripStatuscodeActionOperatorsRetrieveData = {
     body?: never;
     path?: never;
@@ -23966,24 +22938,6 @@ export type MobileTripStatuscodePartialUpdateResponses = {
 
 export type MobileTripStatuscodePartialUpdateResponse = MobileTripStatuscodePartialUpdateResponses[keyof MobileTripStatuscodePartialUpdateResponses];
 
-export type MobileTripStatuscodeUpdateData = {
-    body: TripStatuscodeRequest;
-    path: {
-        /**
-         * A unique integer value identifying this trip statuscode.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/trip-statuscode/{id}/';
-};
-
-export type MobileTripStatuscodeUpdateResponses = {
-    200: TripStatuscode;
-};
-
-export type MobileTripStatuscodeUpdateResponse = MobileTripStatuscodeUpdateResponses[keyof MobileTripStatuscodeUpdateResponses];
-
 export type MobileTripStatuscodeAutocompleteListData = {
     body?: never;
     path?: never;
@@ -24059,24 +23013,6 @@ export type MobileTripPartialUpdateResponses = {
 
 export type MobileTripPartialUpdateResponse = MobileTripPartialUpdateResponses[keyof MobileTripPartialUpdateResponses];
 
-export type MobileTripUpdateData = {
-    body: TripRequest;
-    path: {
-        /**
-         * A unique integer value identifying this trip.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/trip/{id}/';
-};
-
-export type MobileTripUpdateResponses = {
-    200: Trip;
-};
-
-export type MobileTripUpdateResponse = MobileTripUpdateResponses[keyof MobileTripUpdateResponses];
-
 export type MobileTripTripAvailabilityDetailRetrieveData = {
     body?: never;
     path: {
@@ -24090,7 +23026,7 @@ export type MobileTripTripAvailabilityDetailRetrieveData = {
 };
 
 export type MobileTripTripAvailabilityDetailRetrieveResponses = {
-    200: Trip;
+    200: TripAvailabilityDetailResponse;
 };
 
 export type MobileTripTripAvailabilityDetailRetrieveResponse = MobileTripTripAvailabilityDetailRetrieveResponses[keyof MobileTripTripAvailabilityDetailRetrieveResponses];
@@ -24147,7 +23083,7 @@ export type MobileUserOrderAvailabilityListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24234,24 +23170,6 @@ export type MobileUserOrderAvailabilityPartialUpdateResponses = {
 
 export type MobileUserOrderAvailabilityPartialUpdateResponse = MobileUserOrderAvailabilityPartialUpdateResponses[keyof MobileUserOrderAvailabilityPartialUpdateResponses];
 
-export type MobileUserOrderAvailabilityUpdateData = {
-    body?: UserOrderAvailabilityRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user order availability.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/user-order-availability/{id}/';
-};
-
-export type MobileUserOrderAvailabilityUpdateResponses = {
-    200: UserOrderAvailability;
-};
-
-export type MobileUserOrderAvailabilityUpdateResponse = MobileUserOrderAvailabilityUpdateResponses[keyof MobileUserOrderAvailabilityUpdateResponses];
-
 export type MobileUserTripAvailabilityListData = {
     body?: never;
     path?: never;
@@ -24261,7 +23179,7 @@ export type MobileUserTripAvailabilityListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24348,24 +23266,6 @@ export type MobileUserTripAvailabilityPartialUpdateResponses = {
 
 export type MobileUserTripAvailabilityPartialUpdateResponse = MobileUserTripAvailabilityPartialUpdateResponses[keyof MobileUserTripAvailabilityPartialUpdateResponses];
 
-export type MobileUserTripAvailabilityUpdateData = {
-    body: UserTripAvailabilityRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user trip availability.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/mobile/user-trip-availability/{id}/';
-};
-
-export type MobileUserTripAvailabilityUpdateResponses = {
-    200: UserTripAvailability;
-};
-
-export type MobileUserTripAvailabilityUpdateResponse = MobileUserTripAvailabilityUpdateResponses[keyof MobileUserTripAvailabilityUpdateResponses];
-
 export type OrderCostListData = {
     body?: never;
     path?: never;
@@ -24386,7 +23286,7 @@ export type OrderCostListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24473,23 +23373,57 @@ export type OrderCostPartialUpdateResponses = {
 
 export type OrderCostPartialUpdateResponse = OrderCostPartialUpdateResponses[keyof OrderCostPartialUpdateResponses];
 
-export type OrderCostUpdateData = {
-    body: OrderCostRequest;
-    path: {
+export type OrderCostOrderCreateData = {
+    body: Array<OrderCostRowRequest>;
+    headers?: {
         /**
-         * A unique integer value identifying this cost.
+         * Authorization token
          */
-        id: number;
+        Authorization?: string;
     };
-    query?: never;
-    url: '/api/order/cost/{id}/';
+    path: {
+        cost_type: string;
+        order_id: string;
+    };
+    query?: {
+        /**
+         * * `used_materials` - used_materials
+         * * `work_hours` - work_hours
+         * * `travel_hours` - travel_hours
+         * * `distance` - distance
+         * * `extra_work` - extra_work
+         * * `actual_work` - actual_work
+         * * `call_out_costs` - call_out_costs
+         */
+        cost_type?: 'actual_work' | 'call_out_costs' | 'distance' | 'extra_work' | 'travel_hours' | 'used_materials' | 'work_hours';
+        order?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/order/cost/order/{order_id}/{cost_type}/';
 };
 
-export type OrderCostUpdateResponses = {
-    200: OrderCost;
+export type OrderCostOrderCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
 };
 
-export type OrderCostUpdateResponse = OrderCostUpdateResponses[keyof OrderCostUpdateResponses];
+export type OrderCostOrderCreateError = OrderCostOrderCreateErrors[keyof OrderCostOrderCreateErrors];
+
+export type OrderCostOrderCreateResponses = {
+    200: Array<OrderCost>;
+};
+
+export type OrderCostOrderCreateResponse = OrderCostOrderCreateResponses[keyof OrderCostOrderCreateResponses];
 
 export type OrderDocumentListData = {
     body?: never;
@@ -24501,7 +23435,7 @@ export type OrderDocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24588,24 +23522,6 @@ export type OrderDocumentPartialUpdateResponses = {
 
 export type OrderDocumentPartialUpdateResponse = OrderDocumentPartialUpdateResponses[keyof OrderDocumentPartialUpdateResponses];
 
-export type OrderDocumentUpdateData = {
-    body: OrderDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this order document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/order/document/{id}/';
-};
-
-export type OrderDocumentUpdateResponses = {
-    200: OrderDocument;
-};
-
-export type OrderDocumentUpdateResponse = OrderDocumentUpdateResponses[keyof OrderDocumentUpdateResponses];
-
 export type OrderFilterListData = {
     body?: never;
     path?: never;
@@ -24615,7 +23531,7 @@ export type OrderFilterListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24701,24 +23617,6 @@ export type OrderFilterPartialUpdateResponses = {
 };
 
 export type OrderFilterPartialUpdateResponse = OrderFilterPartialUpdateResponses[keyof OrderFilterPartialUpdateResponses];
-
-export type OrderFilterUpdateData = {
-    body: OrderFilterRequest;
-    path: {
-        /**
-         * A unique integer value identifying this order filter.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/order/filter/{id}/';
-};
-
-export type OrderFilterUpdateResponses = {
-    200: OrderFilter;
-};
-
-export type OrderFilterUpdateResponse = OrderFilterUpdateResponses[keyof OrderFilterUpdateResponses];
 
 export type OrderFilterGetBaseFilterOptionsRetrieveData = {
     body?: never;
@@ -24844,7 +23742,7 @@ export type OrderInfolineListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -24931,24 +23829,6 @@ export type OrderInfolinePartialUpdateResponses = {
 
 export type OrderInfolinePartialUpdateResponse = OrderInfolinePartialUpdateResponses[keyof OrderInfolinePartialUpdateResponses];
 
-export type OrderInfolineUpdateData = {
-    body: EngineerInfoLineRequest;
-    path: {
-        /**
-         * A unique integer value identifying this engineer info line.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/order/infoline/{id}/';
-};
-
-export type OrderInfolineUpdateResponses = {
-    200: EngineerInfoLine;
-};
-
-export type OrderInfolineUpdateResponse = OrderInfolineUpdateResponses[keyof OrderInfolineUpdateResponses];
-
 export type OrderOrderListData = {
     body?: never;
     headers?: {
@@ -24959,87 +23839,23 @@ export type OrderOrderListData = {
     };
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
+        assigned_count?: string;
+        branch?: string;
         /**
          * Only orders with an orderline on equipment in this building id.
          */
         building?: number;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
+        customer_relation?: string;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        end_date__until?: string;
         /**
          * Only orders with an orderline on this equipment id.
          */
         equipment?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
@@ -25048,69 +23864,28 @@ export type OrderOrderListData = {
          * Only orders with an orderline on equipment at this location id.
          */
         location?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
+        /**
+         * Which order set to list. `all` is the default and behaves as if the parameter were omitted. Every other value selects the set one of the old list actions used to serve: `unaccepted` (not yet accepted by the customer), `dispatch` / `inprogress` / `finished` (the dispatch board sets), `past`, `sales_orders`, `unassigned` (assignable to an engineer), `equipment_location` (filtered by `?equipment=` / `?location=`). Unknown values are a 400.
+         */
+        mode?: 'all' | 'dispatch' | 'equipment_location' | 'finished' | 'inprogress' | 'past' | 'sales_orders' | 'unaccepted' | 'unassigned';
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         /**
          * Legacy sorting. Superseded by `ordering`, which takes precedence when both are given.
          */
         order_by?: 'default' | 'last_update' | 'start_date';
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending. Takes precedence over the legacy `order_by`.
          */
         ordering?: Array<'-assigned_count' | '-branch__name' | '-created' | '-customer_id' | '-customer_relation__name' | '-end_date' | '-id' | '-last_status_qs' | '-last_update_qs' | '-modified' | '-order_city' | '-order_id' | '-order_name' | '-order_type' | '-start_date' | '-total_price_selling' | 'assigned_count' | 'branch__name' | 'created' | 'customer_id' | 'customer_relation__name' | 'end_date' | 'id' | 'last_status_qs' | 'last_update_qs' | 'modified' | 'order_city' | 'order_id' | 'order_name' | 'order_type' | 'start_date' | 'total_price_selling'>;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * Comma-separated order pks. When given, no other filtering is applied beyond the caller's own role scoping. Equivalent to `id__in`.
          */
@@ -25120,59 +23895,32 @@ export type OrderOrderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         /**
          * Only orders whose `start_date` is on or after this date.
          */
         since?: string;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Sort direction; anything but `desc` sorts ascending.
          */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: order_id, order_name, order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city, customer_id, customer_relation__name, branch__name, total_price_selling, created, modified, last_update_qs.
+         */
+        sort_field?: string;
+        start_date?: string;
+        start_date__from?: string;
+        start_date__until?: string;
         /**
          * Id of a saved OrderFilter. When given, it replaces the base queryset entirely and the equipment and branch parameters below are not applied.
          */
         user_filter?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
     };
     url: '/api/order/order/';
 };
@@ -25212,7 +23960,6 @@ export type OrderOrderCreateErrors = {
     };
     401: UnauthorizedResponse;
     403: ForbiddenResponse;
-    404: NotFoundResponse;
 };
 
 export type OrderOrderCreateError = OrderOrderCreateErrors[keyof OrderOrderCreateErrors];
@@ -25268,9 +24015,9 @@ export type OrderOrderRetrieveData = {
     };
     path: {
         /**
-         * A unique integer value identifying this order.
+         * Order pk or uuid. A uuid addresses the order the emailed link carries; the answer is the full detail either way.
          */
-        id: number;
+        id: string;
     };
     query?: never;
     url: '/api/order/order/{id}/';
@@ -25291,25 +24038,7 @@ export type OrderOrderRetrieveResponses = {
 export type OrderOrderRetrieveResponse = OrderOrderRetrieveResponses[keyof OrderOrderRetrieveResponses];
 
 export type OrderOrderPartialUpdateData = {
-    body?: PatchedOrderRequest;
-    path: {
-        /**
-         * A unique integer value identifying this order.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/order/order/{id}/';
-};
-
-export type OrderOrderPartialUpdateResponses = {
-    200: Order;
-};
-
-export type OrderOrderPartialUpdateResponse = OrderOrderPartialUpdateResponses[keyof OrderOrderPartialUpdateResponses];
-
-export type OrderOrderUpdateData = {
-    body?: OrderUpdateVariantRequest;
+    body?: PatchedOrderUpdateVariantRequest;
     headers?: {
         /**
          * Authorization token
@@ -25326,7 +24055,7 @@ export type OrderOrderUpdateData = {
     url: '/api/order/order/{id}/';
 };
 
-export type OrderOrderUpdateErrors = {
+export type OrderOrderPartialUpdateErrors = {
     /**
      * Validation error.
      */
@@ -25338,13 +24067,13 @@ export type OrderOrderUpdateErrors = {
     404: NotFoundResponse;
 };
 
-export type OrderOrderUpdateError = OrderOrderUpdateErrors[keyof OrderOrderUpdateErrors];
+export type OrderOrderPartialUpdateError = OrderOrderPartialUpdateErrors[keyof OrderOrderPartialUpdateErrors];
 
-export type OrderOrderUpdateResponses = {
+export type OrderOrderPartialUpdateResponses = {
     200: OrderUpdateVariant;
 };
 
-export type OrderOrderUpdateResponse = OrderOrderUpdateResponses[keyof OrderOrderUpdateResponses];
+export type OrderOrderPartialUpdateResponse = OrderOrderPartialUpdateResponses[keyof OrderOrderPartialUpdateResponses];
 
 export type OrderOrderAssignMeCreateData = {
     body: OrderRequest;
@@ -25481,192 +24210,74 @@ export type OrderOrderAllForCustomerNotAcceptedListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
+        customer_relation?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        /**
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         */
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
          */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
+        ordering?: Array<'-assigned_count' | '-branch__name' | '-created' | '-customer_id' | '-customer_relation__name' | '-end_date' | '-id' | '-last_status_qs' | '-last_update_qs' | '-modified' | '-order_city' | '-order_id' | '-order_name' | '-order_type' | '-start_date' | '-total_price_selling' | 'assigned_count' | 'branch__name' | 'created' | 'customer_id' | 'customer_relation__name' | 'end_date' | 'id' | 'last_status_qs' | 'last_update_qs' | 'modified' | 'order_city' | 'order_id' | 'order_name' | 'order_type' | 'start_date' | 'total_price_selling'>;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Sort direction; anything but `desc` sorts ascending.
          */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: order_id, order_name, order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city, customer_id, customer_relation__name, branch__name, total_price_selling, created, modified, last_update_qs.
+         */
+        sort_field?: string;
+        /**
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
+         */
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
+        start_date__from?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__until?: string;
     };
     url: '/api/order/order/all_for_customer_not_accepted/';
 };
@@ -25694,192 +24305,44 @@ export type OrderOrderAllForCustomerV2ListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
+        customer_relation?: string;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/all_for_customer_v2/';
 };
@@ -25890,291 +24353,23 @@ export type OrderOrderAllForCustomerV2ListResponses = {
 
 export type OrderOrderAllForCustomerV2ListResponse = OrderOrderAllForCustomerV2ListResponses[keyof OrderOrderAllForCustomerV2ListResponses];
 
-export type OrderOrderAllForCustomerWebListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        /**
-         * Only orders for this customer id. Ignored for customer users.
-         */
-        customer_id?: number;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
-        customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
-        end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
-        external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
-        last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
-        /**
-         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
-         */
-        limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
-        /**
-         * The initial index from which to return the results. Only read when `limit` is supplied.
-         */
-        offset?: number;
-        order_address__icontains?: string;
-        order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
-        order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
-        order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
-        order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
-        order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
-        start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
-    };
-    url: '/api/order/order/all_for_customer_web/';
-};
-
-export type OrderOrderAllForCustomerWebListResponses = {
-    200: PaginatedOrderList;
-};
-
-export type OrderOrderAllForCustomerWebListResponse = OrderOrderAllForCustomerWebListResponses[keyof OrderOrderAllForCustomerWebListResponses];
-
 export type OrderOrderAllForEquipmentLocationListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
+        customer_relation?: string;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        end_date__until?: string;
         /**
          * Only orders with an orderline on this equipment id.
          */
         equipment?: number;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
@@ -26183,115 +24378,31 @@ export type OrderOrderAllForEquipmentLocationListData = {
          * Only orders with an orderline on equipment at this location id.
          */
         location?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/all_for_equipment_location/';
 };
@@ -26306,192 +24417,74 @@ export type OrderOrderAssignableListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
+        customer_relation?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        /**
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         */
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending. Takes precedence over the legacy `order_by`.
          */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
+        ordering?: Array<'-assigned_count' | '-branch__name' | '-created' | '-customer_id' | '-customer_relation__name' | '-end_date' | '-id' | '-last_status_qs' | '-last_update_qs' | '-modified' | '-order_city' | '-order_id' | '-order_name' | '-order_type' | '-start_date' | '-total_price_selling' | 'assigned_count' | 'branch__name' | 'created' | 'customer_id' | 'customer_relation__name' | 'end_date' | 'id' | 'last_status_qs' | 'last_update_qs' | 'modified' | 'order_city' | 'order_id' | 'order_name' | 'order_type' | 'start_date' | 'total_price_selling'>;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Sort direction; anything but `desc` sorts ascending.
          */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: order_id, order_name, order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city, customer_id, customer_relation__name, branch__name, total_price_selling, created, modified, last_update_qs.
+         */
+        sort_field?: string;
+        /**
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
+         */
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
+        start_date__from?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__until?: string;
     };
     url: '/api/order/order/assignable/';
 };
@@ -26506,198 +24499,34 @@ export type OrderOrderAutocompleteListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
+        customer_relation?: string;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
-        /**
-         * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
-         */
-        limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
-        /**
-         * The initial index from which to return the results. Only read when `limit` is supplied.
-         */
-        offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
         /**
          * Case-insensitive substring match on the order name, address or city.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/autocomplete/';
 };
 
 export type OrderOrderAutocompleteListResponses = {
-    200: PaginatedOrderAutocompleteList;
+    200: Array<OrderAutocomplete>;
 };
 
 export type OrderOrderAutocompleteListResponse = OrderOrderAutocompleteListResponses[keyof OrderOrderAutocompleteListResponses];
@@ -26736,211 +24565,78 @@ export type OrderOrderCountsYearOrderTypeStatsRetrieveResponses = {
 
 export type OrderOrderCountsYearOrderTypeStatsRetrieveResponse = OrderOrderCountsYearOrderTypeStatsRetrieveResponses[keyof OrderOrderCountsYearOrderTypeStatsRetrieveResponses];
 
-export type OrderOrderDetailRetrieveData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/api/order/order/detail/{id}/';
-};
-
-export type OrderOrderDetailRetrieveResponses = {
-    200: OrderDetailPublic;
-};
-
-export type OrderOrderDetailRetrieveResponse = OrderOrderDetailRetrieveResponses[keyof OrderOrderDetailRetrieveResponses];
-
 export type OrderOrderDispatchListAllListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
+        customer_relation?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        /**
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         */
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending. Takes precedence over the legacy `order_by`.
          */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
+        ordering?: Array<'-assigned_count' | '-branch__name' | '-created' | '-customer_id' | '-customer_relation__name' | '-end_date' | '-id' | '-last_status_qs' | '-last_update_qs' | '-modified' | '-order_city' | '-order_id' | '-order_name' | '-order_type' | '-start_date' | '-total_price_selling' | 'assigned_count' | 'branch__name' | 'created' | 'customer_id' | 'customer_relation__name' | 'end_date' | 'id' | 'last_status_qs' | 'last_update_qs' | 'modified' | 'order_city' | 'order_id' | 'order_name' | 'order_type' | 'start_date' | 'total_price_selling'>;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Sort direction; anything but `desc` sorts ascending.
          */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: order_id, order_name, order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city, customer_id, customer_relation__name, branch__name, total_price_selling, created, modified, last_update_qs.
+         */
+        sort_field?: string;
+        /**
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
+         */
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
+        start_date__from?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__until?: string;
     };
     url: '/api/order/order/dispatch_list_all/';
 };
@@ -26955,192 +24651,74 @@ export type OrderOrderDispatchListFinishedListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
+        customer_relation?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        /**
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         */
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending. Takes precedence over the legacy `order_by`.
          */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
+        ordering?: Array<'-assigned_count' | '-branch__name' | '-created' | '-customer_id' | '-customer_relation__name' | '-end_date' | '-id' | '-last_status_qs' | '-last_update_qs' | '-modified' | '-order_city' | '-order_id' | '-order_name' | '-order_type' | '-start_date' | '-total_price_selling' | 'assigned_count' | 'branch__name' | 'created' | 'customer_id' | 'customer_relation__name' | 'end_date' | 'id' | 'last_status_qs' | 'last_update_qs' | 'modified' | 'order_city' | 'order_id' | 'order_name' | 'order_type' | 'start_date' | 'total_price_selling'>;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Sort direction; anything but `desc` sorts ascending.
          */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: order_id, order_name, order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city, customer_id, customer_relation__name, branch__name, total_price_selling, created, modified, last_update_qs.
+         */
+        sort_field?: string;
+        /**
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
+         */
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
+        start_date__from?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__until?: string;
     };
     url: '/api/order/order/dispatch_list_finished/';
 };
@@ -27155,192 +24733,74 @@ export type OrderOrderDispatchListInprogressListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
+        customer_relation?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        /**
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         */
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending. Takes precedence over the legacy `order_by`.
          */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
+        ordering?: Array<'-assigned_count' | '-branch__name' | '-created' | '-customer_id' | '-customer_relation__name' | '-end_date' | '-id' | '-last_status_qs' | '-last_update_qs' | '-modified' | '-order_city' | '-order_id' | '-order_name' | '-order_type' | '-start_date' | '-total_price_selling' | 'assigned_count' | 'branch__name' | 'created' | 'customer_id' | 'customer_relation__name' | 'end_date' | 'id' | 'last_status_qs' | 'last_update_qs' | 'modified' | 'order_city' | 'order_id' | 'order_name' | 'order_type' | 'start_date' | 'total_price_selling'>;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Sort direction; anything but `desc` sorts ascending.
          */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: order_id, order_name, order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city, customer_id, customer_relation__name, branch__name, total_price_selling, created, modified, last_update_qs.
+         */
+        sort_field?: string;
+        /**
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
+         */
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
+        start_date__from?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__until?: string;
     };
     url: '/api/order/order/dispatch_list_inprogress/';
 };
@@ -27355,192 +24815,74 @@ export type OrderOrderDispatchListUnassignedListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
+        customer_relation?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose end_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        /**
+         * Only rows whose end_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
+         */
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending. Takes precedence over the legacy `order_by`.
          */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
+        ordering?: Array<'-assigned_count' | '-branch__name' | '-created' | '-customer_id' | '-customer_relation__name' | '-end_date' | '-id' | '-last_status_qs' | '-last_update_qs' | '-modified' | '-order_city' | '-order_id' | '-order_name' | '-order_type' | '-start_date' | '-total_price_selling' | 'assigned_count' | 'branch__name' | 'created' | 'customer_id' | 'customer_relation__name' | 'end_date' | 'id' | 'last_status_qs' | 'last_update_qs' | 'modified' | 'order_city' | 'order_id' | 'order_name' | 'order_type' | 'start_date' | 'total_price_selling'>;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Sort direction; anything but `desc` sorts ascending.
          */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: order_id, order_name, order_type, start_date, last_status_qs, assigned_count, id, end_date, order_city, customer_id, customer_relation__name, branch__name, total_price_selling, created, modified, last_update_qs.
+         */
+        sort_field?: string;
+        /**
+         * Only rows whose start_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `start_date=2026-09...2026-10` the inclusive months, `start_date=2026-09..2026-11` the exclusive same, `start_date=2026-11...` open-ended.
+         */
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or after this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the first day of the period it spells.
          */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
+        start_date__from?: string;
         /**
-         * Multiple values may be separated by commas.
+         * Only rows whose start_date is on or before this. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. Snaps to the last day of the period it spells.
          */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__until?: string;
     };
     url: '/api/order/order/dispatch_list_unassigned/';
 };
@@ -27550,35 +24892,6 @@ export type OrderOrderDispatchListUnassignedListResponses = {
 };
 
 export type OrderOrderDispatchListUnassignedListResponse = OrderOrderDispatchListUnassignedListResponses[keyof OrderOrderDispatchListUnassignedListResponses];
-
-export type OrderOrderExternalRetrieveData = {
-    body?: never;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        external_id: string;
-    };
-    query?: never;
-    url: '/api/order/order/external/{external_id}/';
-};
-
-export type OrderOrderExternalRetrieveErrors = {
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type OrderOrderExternalRetrieveError = OrderOrderExternalRetrieveErrors[keyof OrderOrderExternalRetrieveErrors];
-
-export type OrderOrderExternalRetrieveResponses = {
-    200: OrderExternal;
-};
-
-export type OrderOrderExternalRetrieveResponse = OrderOrderExternalRetrieveResponses[keyof OrderOrderExternalRetrieveResponses];
 
 export type OrderOrderGetTopXCustomersRetrieveData = {
     body?: never;
@@ -27597,192 +24910,44 @@ export type OrderOrderGetWithinRangeListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
+        customer_relation?: string;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/get_within_range/';
 };
@@ -27803,146 +24968,33 @@ export type OrderOrderMaintenanceOrdersListData = {
     };
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
+        assigned_count?: string;
+        branch?: string;
         /**
          * Only orders with order lines under this maintenance contract. Omit for orders under any maintenance contract.
          */
         contract?: number;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
+        customer_relation?: string;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * Page number.
          */
@@ -27955,44 +25007,9 @@ export type OrderOrderMaintenanceOrdersListData = {
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/maintenance_orders/';
 };
@@ -28027,184 +25044,36 @@ export type OrderOrderMonthEventsListData = {
     body?: never;
     path?: never;
     query: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
+        customer_relation?: string;
         /**
          * Inclusive end bound (YYYY-MM-DD).
          */
         end: string;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         /**
          * Inclusive start bound (YYYY-MM-DD).
          */
         start: string;
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/month_events/';
 };
@@ -28255,196 +25124,88 @@ export type OrderOrderMonthListRetrieveResponses = {
 
 export type OrderOrderMonthListRetrieveResponse = OrderOrderMonthListRetrieveResponses[keyof OrderOrderMonthListRetrieveResponses];
 
+export type OrderOrderNewRetrieveData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization token
+         */
+        Authorization?: string;
+    };
+    path?: never;
+    query?: {
+        /**
+         * Equipment ids to stage order rows for.
+         */
+        equipment?: Array<number>;
+        /**
+         * Quotation to create from: its customer and reference are copied over.
+         */
+        from_quotation?: number;
+        /**
+         * Customer the staged maintenance equipment belongs to.
+         */
+        maintenance_customer?: number;
+    };
+    url: '/api/order/order/new/';
+};
+
+export type OrderOrderNewRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type OrderOrderNewRetrieveError = OrderOrderNewRetrieveErrors[keyof OrderOrderNewRetrieveErrors];
+
+export type OrderOrderNewRetrieveResponses = {
+    200: OrderSeedResponse;
+};
+
+export type OrderOrderNewRetrieveResponse = OrderOrderNewRetrieveResponses[keyof OrderOrderNewRetrieveResponses];
+
 export type OrderOrderOrderAvailabilityListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
+        customer_relation?: string;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/order_availability/';
 };
@@ -28587,192 +25348,44 @@ export type OrderOrderPastListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
+        customer_relation?: string;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__from?: string;
+        start_date__until?: string;
     };
     url: '/api/order/order/past/';
 };
@@ -28787,192 +25400,44 @@ export type OrderOrderSalesOrdersListData = {
     body?: never;
     path?: never;
     query?: {
-        assigned_count?: number;
-        assigned_count__gt?: number;
-        assigned_count__gte?: number;
-        assigned_count__lt?: number;
-        assigned_count__lte?: number;
-        branch?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        branch__in?: Array<number>;
-        branch__isnull?: boolean;
-        created__date?: string;
-        created__gt?: string;
-        created__gte?: string;
-        created__lt?: string;
-        created__lte?: string;
-        customer_id__icontains?: string;
-        customer_id__iexact?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_id__in?: Array<string>;
-        customer_order_accepted?: boolean;
+        assigned_count?: string;
+        branch?: string;
         customer_reference?: string;
-        customer_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_reference__in?: Array<string>;
-        customer_relation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        customer_relation__in?: Array<number>;
-        customer_relation__isnull?: boolean;
+        customer_relation?: string;
         end_date?: string;
-        end_date__gt?: string;
-        end_date__gte?: string;
-        end_date__lt?: string;
-        end_date__lte?: string;
-        end_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        end_date__range?: Array<string>;
-        end_date__year?: number;
+        end_date__from?: string;
+        end_date__until?: string;
         external_identifier?: string;
-        external_identifier__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        external_identifier__in?: Array<string>;
-        id?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        id__in?: Array<number>;
-        infolines__info__icontains?: string;
         last_status?: string;
-        last_status__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        last_status__in?: Array<string>;
-        last_update?: string;
-        last_update__gt?: string;
-        last_update__gte?: string;
-        last_update__lt?: string;
-        last_update__lte?: string;
-        last_update_dt__gt?: string;
-        last_update_dt__gte?: string;
-        last_update_dt__lt?: string;
-        last_update_dt__lte?: string;
         /**
          * Number of results to return per page, counting from `offset`. Supplying this switches the endpoint from page-number to limit/offset pagination. Capped at 1000.
          */
         limit?: number;
-        modified__date?: string;
-        modified__gt?: string;
-        modified__gte?: string;
-        modified__lt?: string;
-        modified__lte?: string;
         /**
          * The initial index from which to return the results. Only read when `limit` is supplied.
          */
         offset?: number;
-        order_address__icontains?: string;
+        order_address?: string;
         order_city?: string;
-        order_city__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_city__in?: Array<string>;
-        order_country_code?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_country_code__in?: Array<string>;
         order_id?: string;
-        order_id__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_id__in?: Array<string>;
         order_name?: string;
-        order_name__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_name__in?: Array<string>;
-        order_name__istartswith?: string;
-        order_postal?: string;
-        order_postal__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_postal__in?: Array<string>;
         order_reference?: string;
-        order_reference__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_reference__in?: Array<string>;
         order_type?: string;
-        order_type__icontains?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        order_type__in?: Array<string>;
-        order_type__isnull?: boolean;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        orderlines__location__icontains?: string;
-        orderlines__product__icontains?: string;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
-        quotation?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        quotation__in?: Array<number>;
-        quotation__isnull?: boolean;
         start_date?: string;
-        start_date__gt?: string;
-        start_date__gte?: string;
-        start_date__lt?: string;
-        start_date__lte?: string;
-        start_date__month?: number;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        start_date__range?: Array<string>;
-        start_date__year?: number;
-        statuses__status?: string;
-        statuses__status__icontains?: string;
-        total_price_purchase__gte?: number;
-        total_price_purchase__lte?: number;
-        total_price_selling__gte?: number;
-        total_price_selling__lte?: number;
-        uuid?: string;
-        /**
-         * Multiple values may be separated by commas.
-         */
-        uuid__in?: Array<string>;
-        /**
-         * * `private` - private
-         * * `partner` - partner
-         * * `public` - public
-         */
-        visibility?: 'partner' | 'private' | 'public';
-        /**
-         * Multiple values may be separated by commas.
-         */
-        visibility__in?: Array<string>;
+        start_date__from?: string;
+        start_date__until?: string;
         /**
          * Only orders with sales mutations in this year.
          */
@@ -29040,7 +25505,7 @@ export type OrderOrderlineListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -29174,44 +25639,6 @@ export type OrderOrderlinePartialUpdateResponses = {
 
 export type OrderOrderlinePartialUpdateResponse = OrderOrderlinePartialUpdateResponses[keyof OrderOrderlinePartialUpdateResponses];
 
-export type OrderOrderlineUpdateData = {
-    body: OrderLineCreateUpdateRequest;
-    headers?: {
-        /**
-         * Authorization token
-         */
-        Authorization?: string;
-    };
-    path: {
-        /**
-         * A unique integer value identifying this order line.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/order/orderline/{id}/';
-};
-
-export type OrderOrderlineUpdateErrors = {
-    /**
-     * Validation error.
-     */
-    400: {
-        [key: string]: Array<string>;
-    };
-    401: UnauthorizedResponse;
-    403: ForbiddenResponse;
-    404: NotFoundResponse;
-};
-
-export type OrderOrderlineUpdateError = OrderOrderlineUpdateErrors[keyof OrderOrderlineUpdateErrors];
-
-export type OrderOrderlineUpdateResponses = {
-    200: OrderLineCreateUpdate;
-};
-
-export type OrderOrderlineUpdateResponse = OrderOrderlineUpdateResponses[keyof OrderOrderlineUpdateResponses];
-
 export type OrderOrderlineAssignedOrderRetrieveData = {
     body?: never;
     path: {
@@ -29231,6 +25658,18 @@ export type OrderOrderlineLatestWorkordersListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Only orders with an orderline on equipment in this building id.
+         */
+        building?: number;
+        /**
+         * Only orders with an orderline on this equipment id.
+         */
+        equipment?: number;
+        /**
+         * Only orders with an orderline on equipment at this location id.
+         */
+        location?: number;
         order?: number;
         /**
          * A search term.
@@ -29258,7 +25697,7 @@ export type OrderOrderlineOrderListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -29326,6 +25765,7 @@ export type OrderWorkorderDataRetrieveResponses = {
     200: {
         order: Order;
         member: Member;
+        copied_order_data: Array<CopiedOrderData>;
         assigned_order_activity: Array<{
             [key: string]: unknown;
         }>;
@@ -29366,7 +25806,7 @@ export type QuotationChapterListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -29454,24 +25894,6 @@ export type QuotationChapterPartialUpdateResponses = {
 
 export type QuotationChapterPartialUpdateResponse = QuotationChapterPartialUpdateResponses[keyof QuotationChapterPartialUpdateResponses];
 
-export type QuotationChapterUpdateData = {
-    body: ChapterRequest;
-    path: {
-        /**
-         * A unique integer value identifying this chapter.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/chapter/{id}/';
-};
-
-export type QuotationChapterUpdateResponses = {
-    200: Chapter;
-};
-
-export type QuotationChapterUpdateResponse = QuotationChapterUpdateResponses[keyof QuotationChapterUpdateResponses];
-
 export type QuotationCostListData = {
     body?: never;
     path?: never;
@@ -29492,7 +25914,7 @@ export type QuotationCostListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -29580,23 +26002,58 @@ export type QuotationCostPartialUpdateResponses = {
 
 export type QuotationCostPartialUpdateResponse = QuotationCostPartialUpdateResponses[keyof QuotationCostPartialUpdateResponses];
 
-export type QuotationCostUpdateData = {
-    body: QuotationCostRequest;
-    path: {
+export type QuotationCostQuotationCreateData = {
+    body: Array<QuotationCostRowRequest>;
+    headers?: {
         /**
-         * A unique integer value identifying this cost.
+         * Authorization token
          */
-        id: number;
+        Authorization?: string;
     };
-    query?: never;
-    url: '/api/quotation/cost/{id}/';
+    path: {
+        cost_type: string;
+        quotation_id: string;
+    };
+    query?: {
+        chapter?: number;
+        /**
+         * * `used_materials` - used_materials
+         * * `work_hours` - work_hours
+         * * `travel_hours` - travel_hours
+         * * `distance` - distance
+         * * `extra_work` - extra_work
+         * * `actual_work` - actual_work
+         * * `call_out_costs` - call_out_costs
+         */
+        cost_type?: 'actual_work' | 'call_out_costs' | 'distance' | 'extra_work' | 'travel_hours' | 'used_materials' | 'work_hours';
+        /**
+         * A search term.
+         */
+        q?: string;
+        quotation?: number;
+    };
+    url: '/api/quotation/cost/quotation/{quotation_id}/{cost_type}/';
 };
 
-export type QuotationCostUpdateResponses = {
-    200: QuotationCost;
+export type QuotationCostQuotationCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
 };
 
-export type QuotationCostUpdateResponse = QuotationCostUpdateResponses[keyof QuotationCostUpdateResponses];
+export type QuotationCostQuotationCreateError = QuotationCostQuotationCreateErrors[keyof QuotationCostQuotationCreateErrors];
+
+export type QuotationCostQuotationCreateResponses = {
+    200: Array<QuotationCost>;
+};
+
+export type QuotationCostQuotationCreateResponse = QuotationCostQuotationCreateResponses[keyof QuotationCostQuotationCreateResponses];
 
 export type QuotationDocumentListData = {
     body?: never;
@@ -29607,7 +26064,7 @@ export type QuotationDocumentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -29695,24 +26152,6 @@ export type QuotationDocumentPartialUpdateResponses = {
 
 export type QuotationDocumentPartialUpdateResponse = QuotationDocumentPartialUpdateResponses[keyof QuotationDocumentPartialUpdateResponses];
 
-export type QuotationDocumentUpdateData = {
-    body: QuotationDocumentRequest;
-    path: {
-        /**
-         * A unique integer value identifying this quotation document.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/document/{id}/';
-};
-
-export type QuotationDocumentUpdateResponses = {
-    200: QuotationDocument;
-};
-
-export type QuotationDocumentUpdateResponse = QuotationDocumentUpdateResponses[keyof QuotationDocumentUpdateResponses];
-
 export type QuotationOfferListData = {
     body?: never;
     path?: never;
@@ -29722,7 +26161,7 @@ export type QuotationOfferListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -29809,24 +26248,6 @@ export type QuotationOfferPartialUpdateResponses = {
 
 export type QuotationOfferPartialUpdateResponse = QuotationOfferPartialUpdateResponses[keyof QuotationOfferPartialUpdateResponses];
 
-export type QuotationOfferUpdateData = {
-    body: OfferRequest;
-    path: {
-        /**
-         * A unique integer value identifying this offer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/offer/{id}/';
-};
-
-export type QuotationOfferUpdateResponses = {
-    200: Offer;
-};
-
-export type QuotationOfferUpdateResponse = QuotationOfferUpdateResponses[keyof QuotationOfferUpdateResponses];
-
 export type QuotationOfferGetDocumentsRetrieveData = {
     body?: never;
     path?: never;
@@ -29863,7 +26284,7 @@ export type QuotationQuotationListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -29902,7 +26323,7 @@ export type QuotationQuotationImageListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -29990,24 +26411,6 @@ export type QuotationQuotationImagePartialUpdateResponses = {
 
 export type QuotationQuotationImagePartialUpdateResponse = QuotationQuotationImagePartialUpdateResponses[keyof QuotationQuotationImagePartialUpdateResponses];
 
-export type QuotationQuotationImageUpdateData = {
-    body: QuotationImageRequest;
-    path: {
-        /**
-         * A unique integer value identifying this quotation image.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/quotation-image/{id}/';
-};
-
-export type QuotationQuotationImageUpdateResponses = {
-    200: QuotationImage;
-};
-
-export type QuotationQuotationImageUpdateResponse = QuotationQuotationImageUpdateResponses[keyof QuotationQuotationImageUpdateResponses];
-
 export type QuotationQuotationLineListData = {
     body?: never;
     path?: never;
@@ -30018,7 +26421,7 @@ export type QuotationQuotationLineListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -30058,7 +26461,7 @@ export type QuotationQuotationLineImageListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -30146,24 +26549,6 @@ export type QuotationQuotationLineImagePartialUpdateResponses = {
 
 export type QuotationQuotationLineImagePartialUpdateResponse = QuotationQuotationLineImagePartialUpdateResponses[keyof QuotationQuotationLineImagePartialUpdateResponses];
 
-export type QuotationQuotationLineImageUpdateData = {
-    body: QuotationLineImageRequest;
-    path: {
-        /**
-         * A unique integer value identifying this quotation line image.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/quotation-line-image/{id}/';
-};
-
-export type QuotationQuotationLineImageUpdateResponses = {
-    200: QuotationLineImage;
-};
-
-export type QuotationQuotationLineImageUpdateResponse = QuotationQuotationLineImageUpdateResponses[keyof QuotationQuotationLineImageUpdateResponses];
-
 export type QuotationQuotationLineDestroyData = {
     body?: never;
     path: {
@@ -30221,23 +26606,47 @@ export type QuotationQuotationLinePartialUpdateResponses = {
 
 export type QuotationQuotationLinePartialUpdateResponse = QuotationQuotationLinePartialUpdateResponses[keyof QuotationQuotationLinePartialUpdateResponses];
 
-export type QuotationQuotationLineUpdateData = {
-    body: QuotationLineRequest;
-    path: {
+export type QuotationQuotationLineChapterCreateData = {
+    body: Array<QuotationLineRowRequest>;
+    headers?: {
         /**
-         * A unique integer value identifying this quotation line.
+         * Authorization token
          */
-        id: number;
+        Authorization?: string;
     };
-    query?: never;
-    url: '/api/quotation/quotation-line/{id}/';
+    path: {
+        chapter_id: string;
+    };
+    query?: {
+        chapter?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        quotation?: number;
+    };
+    url: '/api/quotation/quotation-line/chapter/{chapter_id}/';
 };
 
-export type QuotationQuotationLineUpdateResponses = {
-    200: QuotationLine;
+export type QuotationQuotationLineChapterCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
 };
 
-export type QuotationQuotationLineUpdateResponse = QuotationQuotationLineUpdateResponses[keyof QuotationQuotationLineUpdateResponses];
+export type QuotationQuotationLineChapterCreateError = QuotationQuotationLineChapterCreateErrors[keyof QuotationQuotationLineChapterCreateErrors];
+
+export type QuotationQuotationLineChapterCreateResponses = {
+    200: Array<QuotationLine>;
+};
+
+export type QuotationQuotationLineChapterCreateResponse = QuotationQuotationLineChapterCreateResponses[keyof QuotationQuotationLineChapterCreateResponses];
 
 export type QuotationQuotationDestroyData = {
     body?: never;
@@ -30295,24 +26704,6 @@ export type QuotationQuotationPartialUpdateResponses = {
 };
 
 export type QuotationQuotationPartialUpdateResponse = QuotationQuotationPartialUpdateResponses[keyof QuotationQuotationPartialUpdateResponses];
-
-export type QuotationQuotationUpdateData = {
-    body?: QuotationRequest;
-    path: {
-        /**
-         * A unique integer value identifying this quotation.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/quotation/quotation/{id}/';
-};
-
-export type QuotationQuotationUpdateResponses = {
-    200: Quotation;
-};
-
-export type QuotationQuotationUpdateResponse = QuotationQuotationUpdateResponses[keyof QuotationQuotationUpdateResponses];
 
 export type QuotationQuotationDownloadDefinitivePdfCreateData = {
     body?: QuotationRequest;
@@ -30439,7 +26830,7 @@ export type QuotationQuotationNotAcceptedListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -30466,7 +26857,7 @@ export type QuotationQuotationPreliminaryListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -30493,7 +26884,7 @@ export type QuotationQuotationSentListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -30548,7 +26939,7 @@ export type StatuscodeActionListData = {
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
@@ -30636,24 +27027,6 @@ export type StatuscodeActionPartialUpdateResponses = {
 
 export type StatuscodeActionPartialUpdateResponse = StatuscodeActionPartialUpdateResponses[keyof StatuscodeActionPartialUpdateResponses];
 
-export type StatuscodeActionUpdateData = {
-    body: ActionRequest;
-    path: {
-        /**
-         * A unique integer value identifying this action.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/statuscode/action/{id}/';
-};
-
-export type StatuscodeActionUpdateResponses = {
-    200: Action;
-};
-
-export type StatuscodeActionUpdateResponse = StatuscodeActionUpdateResponses[keyof StatuscodeActionUpdateResponses];
-
 export type StatuscodeActionOperatorsRetrieveData = {
     body?: never;
     path?: never;
@@ -30686,29 +27059,33 @@ export type StatuscodeStatuscodeListData = {
     body?: never;
     path?: never;
     query?: {
+        code_type?: string;
+        description?: string;
         /**
-         * * `order` - order
-         * * `quotation` - quotation
-         * * `invoice` - invoice
-         * * `trip` - trip
-         * * `leave_hours` - leave_hours
-         * * `sick_leave` - sick_leave
-         * * `purchase_order` - purchase_order
-         * * `work_hours` - work_hours
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
          */
-        code_type?: 'invoice' | 'leave_hours' | 'order' | 'purchase_order' | 'quotation' | 'sick_leave' | 'trip' | 'work_hours';
+        ordering?: Array<'-code_type' | '-description' | '-statuscode' | 'code_type' | 'description' | 'statuscode'>;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
         /**
-         * Number of results to return per page.
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
          */
         page_size?: number;
         /**
          * A search term.
          */
         q?: string;
+        /**
+         * Sort direction; anything but `desc` sorts ascending.
+         */
+        sort_dir?: string;
+        /**
+         * The column to sort by. Sortable columns: statuscode, description, code_type.
+         */
+        sort_field?: string;
+        statuscode?: string;
     };
     url: '/api/statuscode/statuscode/';
 };
@@ -30789,43 +27166,17 @@ export type StatuscodeStatuscodePartialUpdateResponses = {
 
 export type StatuscodeStatuscodePartialUpdateResponse = StatuscodeStatuscodePartialUpdateResponses[keyof StatuscodeStatuscodePartialUpdateResponses];
 
-export type StatuscodeStatuscodeUpdateData = {
-    body: StatuscodeRequest;
-    path: {
-        /**
-         * A unique integer value identifying this statuscode.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/statuscode/statuscode/{id}/';
-};
-
-export type StatuscodeStatuscodeUpdateResponses = {
-    200: Statuscode;
-};
-
-export type StatuscodeStatuscodeUpdateResponse = StatuscodeStatuscodeUpdateResponses[keyof StatuscodeStatuscodeUpdateResponses];
-
 export type StatuscodeStatuscodeAutocompleteListData = {
     body?: never;
     path?: never;
     query?: {
-        /**
-         * * `order` - order
-         * * `quotation` - quotation
-         * * `invoice` - invoice
-         * * `trip` - trip
-         * * `leave_hours` - leave_hours
-         * * `sick_leave` - sick_leave
-         * * `purchase_order` - purchase_order
-         * * `work_hours` - work_hours
-         */
-        code_type?: 'invoice' | 'leave_hours' | 'order' | 'purchase_order' | 'quotation' | 'sick_leave' | 'trip' | 'work_hours';
+        code_type?: string;
+        description?: string;
         /**
          * A search term.
          */
         q?: string;
+        statuscode?: string;
     };
     url: '/api/statuscode/statuscode/autocomplete/';
 };
@@ -30835,6 +27186,21 @@ export type StatuscodeStatuscodeAutocompleteListResponses = {
 };
 
 export type StatuscodeStatuscodeAutocompleteListResponse = StatuscodeStatuscodeAutocompleteListResponses[keyof StatuscodeStatuscodeAutocompleteListResponses];
+
+export type StatuscodeStatuscodeRolesRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        code_type: 'invoice' | 'leave_hours' | 'order' | 'purchase_order' | 'quotation' | 'sick_leave' | 'trip' | 'work_hours';
+    };
+    url: '/api/statuscode/statuscode/roles/';
+};
+
+export type StatuscodeStatuscodeRolesRetrieveResponses = {
+    200: Array<string>;
+};
+
+export type StatuscodeStatuscodeRolesRetrieveResponse = StatuscodeStatuscodeRolesRetrieveResponses[keyof StatuscodeStatuscodeRolesRetrieveResponses];
 
 export type TeamleaderAuthorizeCreateData = {
     body?: never;
@@ -31104,7 +27470,12 @@ export type TeamleaderTlProductCreateLinkCreateResponse = TeamleaderTlProductCre
 export type TeamleaderTlProductListListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Comma-separated material IDs whose linked Teamleader products are returned.
+         */
+        ids?: string;
+    };
     url: '/api/teamleader/tl-product-list/';
 };
 
@@ -31127,19 +27498,6 @@ export type TeamleaderTravelHoursProductPartialUpdateResponses = {
 
 export type TeamleaderTravelHoursProductPartialUpdateResponse = TeamleaderTravelHoursProductPartialUpdateResponses[keyof TeamleaderTravelHoursProductPartialUpdateResponses];
 
-export type TeamleaderTravelHoursProductUpdateData = {
-    body: TravelHoursProductRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/travel-hours-product/';
-};
-
-export type TeamleaderTravelHoursProductUpdateResponses = {
-    200: TravelHoursProduct;
-};
-
-export type TeamleaderTravelHoursProductUpdateResponse = TeamleaderTravelHoursProductUpdateResponses[keyof TeamleaderTravelHoursProductUpdateResponses];
-
 export type TeamleaderUpdateDepartmentPartialUpdateData = {
     body?: PatchedDepartmentRequest;
     path?: never;
@@ -31152,19 +27510,6 @@ export type TeamleaderUpdateDepartmentPartialUpdateResponses = {
 };
 
 export type TeamleaderUpdateDepartmentPartialUpdateResponse = TeamleaderUpdateDepartmentPartialUpdateResponses[keyof TeamleaderUpdateDepartmentPartialUpdateResponses];
-
-export type TeamleaderUpdateDepartmentUpdateData = {
-    body: DepartmentRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/update-department/';
-};
-
-export type TeamleaderUpdateDepartmentUpdateResponses = {
-    200: Department;
-};
-
-export type TeamleaderUpdateDepartmentUpdateResponse = TeamleaderUpdateDepartmentUpdateResponses[keyof TeamleaderUpdateDepartmentUpdateResponses];
 
 export type TeamleaderUpdateEnabledPartialUpdateData = {
     body?: PatchedEnabledRequest;
@@ -31179,19 +27524,6 @@ export type TeamleaderUpdateEnabledPartialUpdateResponses = {
 
 export type TeamleaderUpdateEnabledPartialUpdateResponse = TeamleaderUpdateEnabledPartialUpdateResponses[keyof TeamleaderUpdateEnabledPartialUpdateResponses];
 
-export type TeamleaderUpdateEnabledUpdateData = {
-    body?: EnabledRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/update-enabled/';
-};
-
-export type TeamleaderUpdateEnabledUpdateResponses = {
-    200: Enabled;
-};
-
-export type TeamleaderUpdateEnabledUpdateResponse = TeamleaderUpdateEnabledUpdateResponses[keyof TeamleaderUpdateEnabledUpdateResponses];
-
 export type TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateData = {
     body?: PatchedInvoiceTemplateRequest;
     path?: never;
@@ -31204,19 +27536,6 @@ export type TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponses = {
 };
 
 export type TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponse = TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponses[keyof TeamleaderUpdateInvoiceDocumentTemplatePartialUpdateResponses];
-
-export type TeamleaderUpdateInvoiceDocumentTemplateUpdateData = {
-    body: InvoiceTemplateRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/update-invoice-document-template/';
-};
-
-export type TeamleaderUpdateInvoiceDocumentTemplateUpdateResponses = {
-    200: InvoiceTemplate;
-};
-
-export type TeamleaderUpdateInvoiceDocumentTemplateUpdateResponse = TeamleaderUpdateInvoiceDocumentTemplateUpdateResponses[keyof TeamleaderUpdateInvoiceDocumentTemplateUpdateResponses];
 
 export type TeamleaderUpdateProductCategoryPartialUpdateData = {
     body?: PatchedProductCategoryJsonRequest;
@@ -31231,19 +27550,6 @@ export type TeamleaderUpdateProductCategoryPartialUpdateResponses = {
 
 export type TeamleaderUpdateProductCategoryPartialUpdateResponse = TeamleaderUpdateProductCategoryPartialUpdateResponses[keyof TeamleaderUpdateProductCategoryPartialUpdateResponses];
 
-export type TeamleaderUpdateProductCategoryUpdateData = {
-    body: ProductCategoryJsonRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/update-product-category/';
-};
-
-export type TeamleaderUpdateProductCategoryUpdateResponses = {
-    200: ProductCategoryJson;
-};
-
-export type TeamleaderUpdateProductCategoryUpdateResponse = TeamleaderUpdateProductCategoryUpdateResponses[keyof TeamleaderUpdateProductCategoryUpdateResponses];
-
 export type TeamleaderWorkHoursProductPartialUpdateData = {
     body?: PatchedWorkHoursProductRequest;
     path?: never;
@@ -31256,16 +27562,3 @@ export type TeamleaderWorkHoursProductPartialUpdateResponses = {
 };
 
 export type TeamleaderWorkHoursProductPartialUpdateResponse = TeamleaderWorkHoursProductPartialUpdateResponses[keyof TeamleaderWorkHoursProductPartialUpdateResponses];
-
-export type TeamleaderWorkHoursProductUpdateData = {
-    body: WorkHoursProductRequest;
-    path?: never;
-    query?: never;
-    url: '/api/teamleader/work-hours-product/';
-};
-
-export type TeamleaderWorkHoursProductUpdateResponses = {
-    200: WorkHoursProduct;
-};
-
-export type TeamleaderWorkHoursProductUpdateResponse = TeamleaderWorkHoursProductUpdateResponses[keyof TeamleaderWorkHoursProductUpdateResponses];

@@ -36,14 +36,12 @@
 </template>
 
 <script lang="ts" setup>
-import { h, useTemplateRef } from 'vue'
 import IBiCheckSquare from '~icons/bi/check-square'
 import {
   memberModulePartDestroyMutation,
   memberModulePartListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { MemberModulePartListData, PaginatedModulePartList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
 import { invalidateModulePartListQueries } from '../invalidation'
 import {
   ServerTable,

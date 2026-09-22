@@ -19,12 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from 'vue'
-import { useRoute, useRouter, type LocationQueryValue } from 'vue-router'
-
-import { LoginForm, useAuthStore } from '@/features/auth'
-import { $trans } from '@/services/i18n'
-
+import { LoginForm } from '@/features/auth'
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()

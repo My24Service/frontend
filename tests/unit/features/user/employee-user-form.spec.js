@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import EmployeeUserForm from '@/features/user/employee/EmployeeUserForm.vue'
+import { EmployeeUserForm } from '@/features/user'
 import { vBranch, vEmployeeUser } from '@/api/valibot.gen'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
@@ -153,7 +153,7 @@ describe('EmployeeUserForm, creating an employee', () => {
 
     await submit(wrapper)
 
-    expect(refused(wrapper, 'Username is required')).toBe(true)
+    expect(refused(wrapper, 'Please enter a username')).toBe(true)
     expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
   })
 

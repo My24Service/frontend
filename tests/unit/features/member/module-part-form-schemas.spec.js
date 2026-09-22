@@ -6,7 +6,7 @@ import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
 import {
   emptyModulePart,
   validateModulePart,
-} from '@/features/member/module-part/schemas'
+} from '@/features/member'
 
 const valid = { name: 'dashboard', module: 7, is_always_selected: false }
 
@@ -49,7 +49,7 @@ describe('emptyModulePart', () => {
   test('defaults are not yet submittable', () => {
     expect(validateModulePart(emptyModulePart())).toEqual({
       name: 'Please enter a name',
-      module: 'Please choose a module',
+      module: 'Please select a module',
     })
   })
 })
@@ -73,14 +73,14 @@ describe('validateModulePart', () => {
 
   test('blames the module field when no module is chosen', () => {
     expect(validateModulePart({ ...valid, module: null })).toEqual({
-      module: 'Please choose a module',
+      module: 'Please select a module',
     })
   })
 
   test('reports both broken fields at once', () => {
     expect(validateModulePart({ name: '', module: null, is_always_selected: false })).toEqual({
       name: 'Please enter a name',
-      module: 'Please choose a module',
+      module: 'Please select a module',
     })
   })
 })

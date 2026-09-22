@@ -87,6 +87,12 @@ tr:focus-within .edit-icon {
 #app-layout {
   height: 100vh;
   width: 100%;
+}
+
+// The sidebar is fixed, so the page steps aside for it — but only when there
+// is one: the logged-out screens (/no-access, the reset-password pages) mount
+// this layout without it.
+#app-layout:has(.main-menu) {
   padding-left: 240px;
 }
 

@@ -1,58 +1,121 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-
-import purchaseorderEntryModel from '@/models/inventory/PurchaseOrderEntry.js'
-import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
-import stockLocationModel from '@/models/inventory/StockLocation'
-import materialModel from '@/models/inventory/Material.js'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { HttpResponse } from 'msw'
 
 import PurchaseOrderEntryForm from '@/views/inventory/PurchaseOrderEntryForm.vue'
 
 import {
-  installFakeClients,
+  vPurchaseOrderDetail,
+  vPurchaseOrderEntry,
+  vPurchaseOrderList,
+  vStockLocation,
+} from '@/api/valibot.gen'
+import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import {
   mountForm,
-  restoreClients,
   routerGo,
   toastCreate,
   toastTitles,
-  urls,
 } from '../../support/form-harness.js'
 
-// CHARACTERISATION TESTS.
+// THE CREATE IS ONE REQUEST.
 //
-// These describe what PurchaseOrderEntryForm does *today*, before the model
-// logic in it moves to the model layer. The contract they pin down is the HTTP
-// traffic a given form state produces, plus the per-entry toasts.
+// The form used to POST one entry per row through BaseModel.updateCollection,
+// which threw on the first failure: entries booked in before it stayed booked
+// in, and the retry booked the earlier ones in twice. `POST /api/inventory/purchaseorder-entry/bulk/`
+// takes the whole list in one request, so what this spec pins is the traffic a
+// given form state produces - which endpoints, in which order, with which
+// bodies - plus the guarantee that comes with it: a failed save books nothing
+// in, and a removed row is simply absent from the list.
 //
-// Two of these tests pin behaviour that is almost certainly a bug - see the
-// "update - pinned bug" block. They are here to record what the code does, not
-// to bless it. Fixing it is a separate, deliberate change.
+// The requests are read off the wire (tests/unit/support/api-seam), and the
+// seam validates each body against the operation's generated request schema.
+// The per-entry endpoint is stubbed but never expected to be called on the
+// create path: if the loop comes back, the assertion below names the leaked
+// request instead of failing with "no response registered".
+//
+// The edit path is a single entry and stays where it was: it PATCHes one row
+// through the model, which was never a per-row loop.
 
 vi.mock('bootstrap-vue-next', async () => {
   const { toastCreate: create } = await import('../../support/form-harness.js')
   return { useToast: () => ({ create }) }
 })
 
-const models = [
-  purchaseorderEntryModel,
-  purchaseOrderModel,
-  stockLocationModel,
-  materialModel,
-]
+const api = installApiSeam()
+
+const BULK = '/api/inventory/purchaseorder-entry/bulk/'
+const ENTRY = '/api/inventory/purchaseorder-entry/{id}/'
+const ORDERS = '/api/inventory/purchaseorder/'
+const ORDER = '/api/inventory/purchaseorder/{id}/'
+const LOCATIONS = '/api/inventory/stock-location/'
+/** The per-entry create the loop used. Stubbed so a leak is nameable. */
+const ENTRY_CREATE = '/api/inventory/purchaseorder-entry/'
 
 const STOCK_LOCATIONS = [
-  { id: 1, name: 'Warehouse' },
-  { id: 2, name: 'Van' },
+  fixtureFor(vStockLocation, { id: 1, name: 'Warehouse' }),
+  fixtureFor(vStockLocation, { id: 2, name: 'Van' }),
 ]
 
-const PURCHASE_ORDER = {
+/**
+ * The purchase order the form receives, with the two products it was ordered
+ * with: one entry is staged per material, for the ordered amount.
+ */
+const PURCHASE_ORDER = fixtureFor(vPurchaseOrderDetail, {
   id: 55,
+  supplier: 3,
+  purchase_order_id: 'PO-1',
+  order_name: 'ACME',
+  order_city: 'Amsterdam',
   materials: [
-    { id: 7, amount: 3, material_view: { name: 'Widget', unit: 'pcs' } },
-    { id: 8, amount: 5, material_view: { name: 'Gadget', unit: 'box' } },
+    { id: 7, material: 10, amount: 3, material_view: { name: 'Widget', unit: 'pcs' } },
+    { id: 8, material: 11, amount: 5, material_view: { name: 'Gadget', unit: 'box' } },
   ],
+})
+
+const ENTRY_ROW = fixtureFor(vPurchaseOrderEntry, {
+  id: 42,
+  purchase_order: 55,
+  purchase_order_material: 7,
+  material_name: 'Widget',
+  amount: 3,
+  entry_date: '2026-03-04',
+  stock_location: 1,
+})
+
+/** Every write the form made, in call order. Reads are noise here. */
+function writes() {
+  return api.requests().filter((request) => request.method !== 'get')
 }
 
-let http
+/** The staged rows as the bulk body carries them, whole. */
+function bulkBody(rows) {
+  return rows.map((row) => ({
+    entry_date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+    stock_location: null,
+    ...row,
+  }))
+}
+
+beforeEach(() => {
+  api.get(ORDERS, () => paginated([fixtureFor(vPurchaseOrderList, {
+    id: 55,
+    purchase_order_id: 'PO-1',
+    order_name: 'ACME',
+    order_city: 'Amsterdam',
+    num_materials: 2,
+  })]))
+  api.get(LOCATIONS, () => paginated(STOCK_LOCATIONS))
+  api.get(ORDER, () => PURCHASE_ORDER)
+  api.get(ENTRY, () => ENTRY_ROW)
+  // The endpoint answers with the entries it created, as DRF serializes them.
+  api.post(BULK, ({ body }) => body.map((row, index) => fixtureFor(
+    vPurchaseOrderEntry, { ...row, id: 100 + index, material_name: 'Widget' },
+  )))
+  api.patch(ENTRY, ({ body }) => fixtureFor(vPurchaseOrderEntry, { ...ENTRY_ROW, ...body }))
+  api.post(ENTRY_CREATE, () => fixtureFor(vPurchaseOrderEntry, { id: 100 }))
+  toastCreate.mockClear()
+})
 
 // The form focuses the amount input after picking a product. Under
 // shallowMount BFormInput is a stub, and a default stub has no focus() - so
@@ -70,37 +133,16 @@ function mount(props = {}, stubs = {}) {
  */
 async function ready(wrapper) {
   await vi.waitFor(() => expect(wrapper.vm.stockLocations.length).toBe(2))
+  await settle()
+
   return wrapper
 }
 
 /** Pick a purchase order, which is what builds the entry rows. */
 async function pickPurchaseOrder(wrapper) {
   await wrapper.vm.selectPurchaseOrder({ id: 55 })
-  await wrapper.vm.$nextTick()
+  await settle()
 }
-
-beforeEach(() => {
-  http = installFakeClients(models, {
-    defaultGet: { data: { count: 0, results: [] } },
-  })
-  http.get.mockImplementation((url) => {
-    if (url === '/get-csrf-token/') {
-      return Promise.resolve({ data: { token: 'csrf-token' } })
-    }
-    if (url.startsWith('/inventory/stock-location/')) {
-      return Promise.resolve({ data: { count: 2, results: STOCK_LOCATIONS } })
-    }
-    if (url === '/inventory/purchaseorder/55/') {
-      return Promise.resolve({ data: PURCHASE_ORDER })
-    }
-    return Promise.resolve({ data: { count: 0, results: [] } })
-  })
-  toastCreate.mockClear()
-})
-
-afterEach(() => {
-  restoreClients()
-})
 
 describe('PurchaseOrderEntryForm - building the entry rows', () => {
   test('selecting a purchase order creates one entry per material', async () => {
@@ -152,14 +194,13 @@ describe('PurchaseOrderEntryForm - building the entry rows', () => {
     }
   })
 
-  test('deleteEntry removes the row and remembers it', async () => {
+  test('deleteEntry removes the row from the list', async () => {
     const wrapper = await ready(mount())
     await pickPurchaseOrder(wrapper)
 
     wrapper.vm.deleteEntry(0)
 
     expect(wrapper.vm.purchaseorderEntries.map((e) => e.purchase_order_material)).toEqual([8])
-    expect(wrapper.vm.deletedEntries.map((e) => e.purchase_order_material)).toEqual([7])
   })
 
   test('doEditEntry writes back the row and resolves the location name', async () => {
@@ -179,34 +220,32 @@ describe('PurchaseOrderEntryForm - building the entry rows', () => {
 })
 
 describe('PurchaseOrderEntryForm - create', () => {
-  test('posts one entry per row, with the date formatted', async () => {
+  test('sends one request carrying every entry row, with the dates formatted', async () => {
     const wrapper = await ready(mount())
     await pickPurchaseOrder(wrapper)
 
     await wrapper.vm.submitForm()
 
-    expect(urls('post')).toEqual([
-      '/inventory/purchaseorder-entry/',
-      '/inventory/purchaseorder-entry/',
+    expect(writes()).toEqual([
+      {
+        method: 'post',
+        path: BULK,
+        query: {},
+        body: bulkBody([
+          { purchase_order: 55, purchase_order_material: 7, amount: 3 },
+          { purchase_order: 55, purchase_order_material: 8, amount: 5 },
+        ]),
+      },
     ])
-
-    const [, first] = http.post.mock.calls[0]
-    expect(first).toMatchObject({
-      purchase_order: 55,
-      purchase_order_material: 7,
-      amount: 3,
-    })
-    // preInsert turns the Date into YYYY-MM-DD.
-    expect(first.entry_date).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   })
 
-  test('shows one toast per entry', async () => {
+  test('shows one toast for the save, not one per entry', async () => {
     const wrapper = await ready(mount())
     await pickPurchaseOrder(wrapper)
 
     await wrapper.vm.submitForm()
 
-    expect(toastTitles()).toEqual(['Created', 'Created'])
+    expect(toastTitles()).toEqual(['Created'])
   })
 
   test('navigates back and re-enables the button', async () => {
@@ -220,74 +259,72 @@ describe('PurchaseOrderEntryForm - create', () => {
     expect(wrapper.vm.isLoading).toBe(false)
   })
 
-  test('stops at the first failure, keeping the toast for the entry before it', async () => {
+  test('a failed save books nothing in, and the retry sends the same list', async () => {
+    // The rows are one atomic request, so the entries the first attempt failed
+    // on are not booked in: the retry cannot book any of them in twice.
+    let attempts = 0
+    api.post(BULK, ({ body }) => {
+      attempts += 1
+      return attempts === 1
+        ? HttpResponse.json({ detail: 'boom' }, { status: 500 })
+        : body.map((row, index) => fixtureFor(vPurchaseOrderEntry, { ...row, id: 100 + index }))
+    })
+
     const wrapper = await ready(mount())
     await pickPurchaseOrder(wrapper)
 
-    http.post
-      .mockResolvedValueOnce({ data: { id: 1 } })
-      .mockRejectedValueOnce(new Error('boom'))
+    await wrapper.vm.submitForm()
+
+    expect(writes().map((request) => request.path)).toEqual([BULK])
+    expect(toastTitles()).toEqual(['Error'])
+    expect(routerGo()).not.toHaveBeenCalled()
+    expect(wrapper.vm.buttonDisabled).toBe(false)
 
     await wrapper.vm.submitForm()
 
-    expect(urls('post')).toHaveLength(2)
-    expect(toastTitles()).toEqual(['Created', 'Error'])
-    expect(routerGo()).not.toHaveBeenCalled()
-    expect(wrapper.vm.buttonDisabled).toBe(false)
+    expect(writes().map((request) => request.path)).toEqual([BULK, BULK])
+    expect(writes()[1].body).toEqual(writes()[0].body)
+    expect(routerGo()).toHaveBeenCalledWith(-1)
   })
 
-  test('deleted rows are not sent, and are never deleted server-side', async () => {
+  test('a removed row is left out of the list, and nothing is deleted server-side', async () => {
     const wrapper = await ready(mount())
     await pickPurchaseOrder(wrapper)
 
     wrapper.vm.deleteEntry(0)
     await wrapper.vm.submitForm()
 
-    expect(urls('post')).toEqual(['/inventory/purchaseorder-entry/'])
-    // The rows were never saved, so there is nothing to delete.
-    expect(http.delete).not.toHaveBeenCalled()
+    expect(writes()).toEqual([
+      {
+        method: 'post',
+        path: BULK,
+        query: {},
+        body: bulkBody([{ purchase_order: 55, purchase_order_material: 8, amount: 5 }]),
+      },
+    ])
+    expect(api.requests().map((request) => request.method)).not.toContain('delete')
   })
 
   test('the create path does not validate before sending', async () => {
     // No purchase order picked, so the entry form is empty and invalid. The
-    // create branch returns before submitForm's validity check, so an empty
-    // entry list simply posts nothing rather than being rejected.
+    // create branch returns before submitForm's validity check, and an empty
+    // list is nothing to send rather than a rejection.
     const wrapper = await ready(mount())
 
     await wrapper.vm.submitForm()
 
-    expect(http.post).not.toHaveBeenCalled()
+    expect(writes()).toEqual([])
+    expect(toastTitles()).toEqual([])
     expect(routerGo()).toHaveBeenCalledWith(-1)
   })
 })
 
 describe('PurchaseOrderEntryForm - edit', () => {
   async function readyEdit() {
-    http.get.mockImplementation((url) => {
-      if (url === '/get-csrf-token/') {
-        return Promise.resolve({ data: { token: 'csrf-token' } })
-      }
-      if (url.startsWith('/inventory/stock-location/')) {
-        return Promise.resolve({ data: { count: 2, results: STOCK_LOCATIONS } })
-      }
-      if (url === '/inventory/purchaseorder-entry/42/') {
-        return Promise.resolve({
-          data: {
-            id: 42,
-            purchase_order: 55,
-            purchase_order_material: 7,
-            material_name: 'Widget',
-            amount: 3,
-            entry_date: '2026-03-04',
-            stock_location: 1,
-          },
-        })
-      }
-      return Promise.resolve({ data: { count: 0, results: [] } })
-    })
-
     const wrapper = mount({ pk: 42 })
     await vi.waitFor(() => expect(wrapper.vm.entry.material_name).toBe('Widget'))
+    await settle()
+
     return wrapper
   }
 
@@ -300,41 +337,6 @@ describe('PurchaseOrderEntryForm - edit', () => {
       purchase_order_material_view: { name: 'Widget', unit: '' },
     })
   })
-})
-
-// These replaced the two tests that pinned the `purchaseorderEntry` bug: the
-// form used to bind to `entry` while submitForm validated and patched a second,
-// never-populated object, so editing an entry silently sent nothing. The stray
-// object is gone; these assert the behaviour the form was always meant to have.
-describe('PurchaseOrderEntryForm - edit, saving', () => {
-  async function readyEdit() {
-    http.get.mockImplementation((url) => {
-      if (url === '/get-csrf-token/') {
-        return Promise.resolve({ data: { token: 'csrf-token' } })
-      }
-      if (url.startsWith('/inventory/stock-location/')) {
-        return Promise.resolve({ data: { count: 2, results: STOCK_LOCATIONS } })
-      }
-      if (url === '/inventory/purchaseorder-entry/42/') {
-        return Promise.resolve({
-          data: {
-            id: 42,
-            purchase_order: 55,
-            purchase_order_material: 7,
-            material_name: 'Widget',
-            amount: 3,
-            entry_date: '2026-03-04',
-            stock_location: 1,
-          },
-        })
-      }
-      return Promise.resolve({ data: { count: 0, results: [] } })
-    })
-
-    const wrapper = mount({ pk: 42 })
-    await vi.waitFor(() => expect(wrapper.vm.entry.material_name).toBe('Widget'))
-    return wrapper
-  }
 
   test('patches the edited entry and navigates back', async () => {
     const wrapper = await readyEdit()
@@ -342,9 +344,14 @@ describe('PurchaseOrderEntryForm - edit, saving', () => {
     wrapper.vm.entry.amount = 99
     await wrapper.vm.submitForm()
 
-    expect(urls('patch')).toEqual(['/inventory/purchaseorder-entry/42/'])
-    const [, payload] = http.patch.mock.calls[0]
-    expect(payload).toMatchObject({ id: 42, purchase_order_material: 7, amount: 99 })
+    expect(writes()).toEqual([
+      {
+        method: 'patch',
+        path: '/api/inventory/purchaseorder-entry/42/',
+        query: {},
+        body: expect.objectContaining({ id: 42, purchase_order_material: 7, amount: 99 }),
+      },
+    ])
 
     expect(toastTitles()).toEqual(['Updated'])
     expect(routerGo()).toHaveBeenCalledWith(-1)
@@ -357,8 +364,7 @@ describe('PurchaseOrderEntryForm - edit, saving', () => {
     wrapper.vm.selectPurchaseOrderMaterial({ id: 8 })
     await wrapper.vm.submitForm()
 
-    const [, payload] = http.patch.mock.calls[0]
-    expect(payload.purchase_order_material).toBe(8)
+    expect(writes()[0].body.purchase_order_material).toBe(8)
   })
 
   test('sends nothing when the entry is not valid', async () => {
@@ -367,7 +373,7 @@ describe('PurchaseOrderEntryForm - edit, saving', () => {
     wrapper.vm.entry.amount = 0
     await wrapper.vm.submitForm()
 
-    expect(http.patch).not.toHaveBeenCalled()
+    expect(writes()).toEqual([])
     expect(routerGo()).not.toHaveBeenCalled()
   })
 
@@ -377,14 +383,13 @@ describe('PurchaseOrderEntryForm - edit, saving', () => {
     wrapper.vm.entry.stock_location = null
     await wrapper.vm.submitForm()
 
-    const [, payload] = http.patch.mock.calls[0]
-    expect(payload).not.toHaveProperty('stock_location')
+    expect(writes()[0].body).not.toHaveProperty('stock_location')
   })
 
   test('does not navigate when the patch fails', async () => {
-    const wrapper = await readyEdit()
+    api.patch(ENTRY, () => HttpResponse.json({ detail: 'boom' }, { status: 500 }))
 
-    http.patch.mockRejectedValueOnce(new Error('boom'))
+    const wrapper = await readyEdit()
     await wrapper.vm.submitForm()
 
     expect(toastTitles()).toEqual(['Error'])
@@ -405,6 +410,7 @@ describe('PurchaseOrderEntryForm - the add-entry guard', () => {
   async function readyToAdd() {
     const wrapper = await ready(mount())
     await pickPurchaseOrder(wrapper)
+
     return wrapper
   }
 

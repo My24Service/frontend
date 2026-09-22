@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import {
+  enableAutoUnmount,
+  mount,
+} from '@vue/test-utils'
 
 import { createTestingPinia } from '@pinia/testing'
-import { mount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import TheIndex from '@/components/TheIndex.vue'

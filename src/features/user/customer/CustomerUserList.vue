@@ -37,16 +37,12 @@
 </template>
 
 <script lang="ts" setup>
-import { h, ref } from 'vue'
-
 import {
   companyCustomeruserDestroyMutation,
   companyCustomeruserListOptions,
+  companyCustomeruserListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyCustomeruserListData, PaginatedCustomerUserList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-import { useAuthStore } from '@/features/auth'
-import { companyCustomeruserListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import {
   ServerTable,
   baseListParams,

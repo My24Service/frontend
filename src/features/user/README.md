@@ -108,7 +108,7 @@ blank (a nullish date, an optional-but-non-empty IBAN); `check` adds the one
 rule a schema cannot express (the engineer's required location).
 
 `filledFrom(defaults, record)` keys by the defaults, so a read-only
-companion the record carries (`uuid`, `picture_url`, `hourly_rate_currency`)
+companion the record carries (`uuid`, `picture_url`)
 never lands on the form — the form reads those off the wrapper's `record`
 when it needs to show them.
 
@@ -133,7 +133,7 @@ assert the routes verbatim.
 | Engineer list | Same as the sales list, plus the mobile display cell | The display column renders the nested `engineer.mobile` as text, non-sortable like the rest |
 | Engineer list | The export download is gone; the add link is staff-gated | Slice convention, matching sales/customer |
 | Engineer form | Same as the sales form, plus the location picker/create flow | The picker feeds the generated list op and creates through the generated create op |
-| Engineer form | `preferred_location` is refused empty on the form, optional on the wire | 74 of 206 engineers have null — real stored data, so the API stays lax and the form keeps the rule |
+| Engineer form | `preferred_location` is required on the write, nullable on the read | 74 of 206 engineers have null, so the response stays nullable; the write serializer refuses null and the form parses the generated entry with no rule of its own |
 | Employee list | Same as the planning list (company/settings dual mount) | Both routers pass `fromSettings` and the edit route passes `pk` |
 | Employee form | Same as the planning form, plus the branch picker / branch-employee pinning | The picker feeds the generated branch list op, branch employees pin to their own branch via the generated my-branch op. `uses_time_registration` is no longer sent: absent on create defaults to `True`, absent on edit keeps the stored value |
 | Student list | Same as the sales list, plus the in-place active toggle and the detail link | The name links to the detail screen, not the edit page as in the sibling lists. The toggle PATCHes `{is_active}` only; the patched schema has no required keys |

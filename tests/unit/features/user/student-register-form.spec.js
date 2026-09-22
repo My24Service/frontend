@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
-import StudentRegisterForm from '@/features/user/student/StudentRegisterForm.vue'
+import { StudentRegisterForm } from '@/features/user'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toastCreate, toasts } from '../../support/form-harness.js'
@@ -156,14 +156,14 @@ describe('StudentRegisterForm', () => {
     await submit(wrapper)
     await settle()
 
-    expect(refused(wrapper, 'Please provide a valid email')).toBe(true)
-    expect(refused(wrapper, 'Please provide your first name')).toBe(true)
-    expect(refused(wrapper, 'Please provide your last name')).toBe(true)
-    expect(refused(wrapper, 'Please provide a valid mobile')).toBe(true)
-    expect(refused(wrapper, 'Please provide your street')).toBe(true)
-    expect(refused(wrapper, 'Please provide your house number')).toBe(true)
-    expect(refused(wrapper, 'Please provide your postal code')).toBe(true)
-    expect(refused(wrapper, 'Please provide your city')).toBe(true)
+    expect(refused(wrapper, 'Please enter a valid email')).toBe(true)
+    expect(refused(wrapper, 'Please enter a first name')).toBe(true)
+    expect(refused(wrapper, 'Please enter a last name')).toBe(true)
+    expect(refused(wrapper, 'Please enter a mobile')).toBe(true)
+    expect(refused(wrapper, 'Please enter a street')).toBe(true)
+    expect(refused(wrapper, 'Please enter a house nr./addition')).toBe(true)
+    expect(refused(wrapper, 'Please enter a postal')).toBe(true)
+    expect(refused(wrapper, 'Please enter a city')).toBe(true)
     expect(refused(wrapper, 'Please tell us something about yourself')).toBe(true)
     expect(posts()).toEqual([])
     expect(registerButton(wrapper).attributes('disabled')).toBeUndefined()
@@ -178,7 +178,7 @@ describe('StudentRegisterForm', () => {
     await submit(wrapper)
     await settle()
 
-    expect(refused(wrapper, 'Please provide a valid mobile')).toBe(true)
+    expect(refused(wrapper, 'Please enter a valid mobile')).toBe(true)
     expect(posts()).toEqual([])
   })
 
@@ -210,7 +210,7 @@ describe('StudentRegisterForm', () => {
     await submit(wrapper)
     await settle()
 
-    expect(refused(wrapper, 'Please provide a valid email')).toBe(true)
+    expect(refused(wrapper, 'Please enter a valid email')).toBe(true)
     expect(posts()).toEqual([])
   })
 

@@ -4,6 +4,10 @@ import { toDinero } from '@/services/money'
 import priceMixin from '@/mixins/price'
 
 describe('toDinero', () => {
+  test('has no tolerant export: the contract carries every currency', async () => {
+    expect(await import('@/services/money')).not.toHaveProperty('tryToDinero')
+  })
+
   test.each(['EUR', 'USD', 'GBP'])('converts a decimal amount for %s', (currency) => {
     const amount = toDinero(12.34, currency)
     expect(amount.getAmount()).toBe(1234)

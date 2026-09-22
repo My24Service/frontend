@@ -1,11 +1,14 @@
 import * as v from 'valibot'
 
+import type { StudentUserRegisterRequest } from '@/api/types.gen'
 import { vAccountsRegisterCreateBody } from '@/api/valibot.gen'
-import { normalizePhone } from '@/features/forms/phone'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
-import { $trans } from '@/services/i18n'
-
+import {
+  normalizePhone,
+  type FieldLabels,
+  fieldErrors,
+  type FieldErrors,
+  type FieldMessages,
+} from '@/features/forms'
 /**
  * The public registration form: a student signing themselves up, before any
  * account exists. `POST /accounts/register/` has its own request body — no
@@ -14,10 +17,7 @@ import { $trans } from '@/services/i18n'
  * mobile and introduction required — so the generated schema is the whole
  * contract and the form binds its input shape directly.
  */
-export type StudentRegistrationValues = v.InferInput<typeof vAccountsRegisterCreateBody>
-export type StudentRegistration = v.InferOutput<typeof vAccountsRegisterCreateBody>
-
-export function emptyStudentRegistration(): StudentRegistrationValues {
+export function emptyStudentRegistration(): StudentUserRegisterRequest {
   return {
     email: '',
     first_name: '',
@@ -35,42 +35,36 @@ export function emptyStudentRegistration(): StudentRegistrationValues {
   }
 }
 
+/** The error keys: each field by its whole path on the form object. */
 export type StudentRegistrationField =
   | 'email' | 'first_name' | 'last_name'
-  | 'mobile' | 'street' | 'house_number' | 'postal' | 'city' | 'info'
+  | 'student_user.mobile' | 'student_user.street' | 'student_user.house_number'
+  | 'student_user.postal' | 'student_user.city' | 'student_user.info'
 
 export type StudentRegistrationErrors = FieldErrors<StudentRegistrationField>
 
-const MESSAGES = {
-  email_invalid: () => $trans('Please provide a valid email'),
-  first_name_required: () => $trans('Please provide your first name'),
-  last_name_required: () => $trans('Please provide your last name'),
-  mobile_invalid: () => $trans('Please provide a valid mobile'),
-  street_required: () => $trans('Please provide your street'),
-  house_number_required: () => $trans('Please provide your house number'),
-  postal_required: () => $trans('Please provide your postal code'),
-  city_required: () => $trans('Please provide your city'),
-  info_required: () => $trans('Please tell us something about yourself'),
-} as const
+/**
+ * The names the fields bind under. The six nested fields are named relative to
+ * the `student_user` provider, so their labels are their own names rather than
+ * the path the error is keyed by.
+ */
+type StudentRegistrationLabel =
+  | 'email' | 'first_name' | 'last_name'
+  | 'mobile' | 'street' | 'house_number' | 'postal' | 'city' | 'info'
 
+/**
+ * The one line the rules cannot say under a label: the info field's label
+ * is a prompt rather than a noun, so its required line is its own.
+ */
 export const REGISTRATION_FIELD_MESSAGES = {
-  email: MESSAGES.email_invalid,
-  first_name: MESSAGES.first_name_required,
-  last_name: MESSAGES.last_name_required,
   student_user: {
-    mobile: MESSAGES.mobile_invalid,
-    street: MESSAGES.street_required,
-    house_number: MESSAGES.house_number_required,
-    postal: MESSAGES.postal_required,
-    city: MESSAGES.city_required,
-    info: MESSAGES.info_required,
+    info: () => $trans('Please tell us something about yourself'),
   },
 } satisfies FieldMessages<'email' | 'first_name' | 'last_name' | 'student_user'>
 
 /**
- * The nine keys are the names the errors already carry, not the shape of the
- * values: six of the fields live under `student_user` on the form object but
- * are reported flat, and a field is labelled by the name it is reported under.
+ * The nine labels the two nested providers read: the outer trio and the six
+ * fields under `student_user`.
  */
 export const FIELD_LABELS = {
   email: () => $trans('Email'),
@@ -82,25 +76,25 @@ export const FIELD_LABELS = {
   postal: () => $trans('Postal'),
   city: () => $trans('City'),
   info: () => $trans('Tell something about yourself'),
-} satisfies FieldLabels<StudentRegistrationField>
+} satisfies FieldLabels<StudentRegistrationLabel>
 
 /**
  * The values as the wire takes them: the mobile goes out normalized (the
  * schema wants E.164) while the input keeps what was typed.
  */
-function toWire(values: StudentRegistrationValues): StudentRegistrationValues {
+function toWire(values: StudentUserRegisterRequest): StudentUserRegisterRequest {
   return {
     ...values,
-    student_user: { ...values.student_user, mobile: normalizePhone(values.student_user.mobile) },
+    student_user: { ...values.student_user, mobile: normalizePhone(values.student_user.mobile, '+31') },
   }
 }
 
 export function validateStudentRegistration(
-  values: StudentRegistrationValues,
+  values: StudentUserRegisterRequest,
 ): StudentRegistrationErrors {
-  return fieldErrors(vAccountsRegisterCreateBody, toWire(values), REGISTRATION_FIELD_MESSAGES)
+  return fieldErrors(vAccountsRegisterCreateBody, toWire(values), REGISTRATION_FIELD_MESSAGES, FIELD_LABELS)
 }
 
-export function parseStudentRegistration(values: StudentRegistrationValues): StudentRegistration {
+export function parseStudentRegistration(values: StudentUserRegisterRequest): StudentUserRegisterRequest {
   return v.parse(vAccountsRegisterCreateBody, toWire(values))
 }

@@ -27,7 +27,7 @@
         <StatuscodePills :active="codeType" :from-settings="fromSettings" />
       </template>
       <template #add>
-        <router-link :to="{name: routeNames.add}" class="btn btn-primary">
+        <router-link :to="toRoute(routeNames.add)" class="btn btn-primary">
           <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans('Add statuscode') }}
         </router-link>
       </template>
@@ -36,7 +36,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import {
@@ -44,9 +43,7 @@ import {
   statuscodeStatuscodeListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedStatuscodeList, StatuscodeStatuscodeListData } from '@/api/types.gen'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkPlus from '@/components/IconLinkPlus.vue'
-import { $trans } from '@/services/i18n'
+import RowAction from '@/components/RowAction.vue'
 import {
   ServerTable,
   baseListParams,
@@ -59,6 +56,7 @@ import { routeNamesFor, type CodeType } from './code-types'
 import { invalidateStatuscodeLists } from './invalidation'
 import StatuscodePills from './StatuscodePills.vue'
 import StatuscodeLabel from './StatuscodeLabel.vue'
+import StatuscodeRoleBadges from './StatuscodeRoleBadges.vue'
 
 const props = withDefaults(defineProps<{
   codeType: CodeType
@@ -93,7 +91,7 @@ const columns = columnHelper.columns([
     enableSorting: false,
     meta: {width: '15%'},
     cell: (info) => h(RouterLink, {
-      to: {name: routeNames.value.edit, params: {pk: info.row.original.id}},
+      to: toRoute(routeNames.value.edit, {pk: info.row.original.id}),
     }, () => info.getValue()),
   }),
   columnHelper.display({
@@ -111,6 +109,11 @@ const columns = columnHelper.columns([
     cell: (info) => h('div', typeLines(info.row.original).map((line) =>
       h('div', [h('span', {class: 'statuscode_type'}, line)]))),
   }),
+  columnHelper.display({
+    id: 'roles',
+    header: $trans('Roles'),
+    cell: (info) => h(StatuscodeRoleBadges, {roles: info.row.original.roles ?? []}),
+  }),
   columnHelper.accessor('description', {
     header: $trans('Description'),
     enableSorting: false,
@@ -122,7 +125,7 @@ const columns = columnHelper.columns([
     cell: (info) => h('ul', {class: 'statuscode-actions'}, info.row.original.actions.map((action) =>
       h('li', {key: action.id}, [
         h(RouterLink, {
-          to: {name: routeNames.value.actionEdit, params: {pk: action.id}},
+          to: toRoute(routeNames.value.actionEdit, {pk: action.id}),
         }, () => `${action.name} (${action.type})`),
       ]))),
   }),
@@ -131,13 +134,12 @@ const columns = columnHelper.columns([
     header: '',
     meta: {width: '15%'},
     cell: (info) => h('div', {class: 'h2 float-end'}, [
-      h(IconLinkPlus, {
-        type: 'tr',
+      h(RowAction, {icon: 'plus',
         title: $trans('Add action'),
         router_name: routeNames.value.actionAdd,
         router_params: {statuscode_pk: info.row.original.id},
       }),
-      h(IconLinkDelete, {
+      h(RowAction, {icon: 'delete',
         title: $trans('Delete'),
         method: () => tableRef.value?.showDeleteModal(info.row.original.id),
       }),

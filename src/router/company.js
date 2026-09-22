@@ -1,64 +1,79 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import SubNavCompany from '../components/SubNavCompany.vue'
-
-import Dashboard from '../views/company/Dashboard.vue'
-import Info from '../views/company/Info.vue'
-import Settings from '../views/company/Settings.vue'
+import SubNav from '../components/SubNav.vue'
 
 // The user screens live in the feature folder; this file only routes them
 // (ADR-0002). The student registration's set-password step is the account
 // slice's reset-password screen, reached through the link the backend mails.
-import { ApiUserForm, ApiUserList, CustomerUserForm, CustomerUserList, EmployeeUserForm, EmployeeUserList, EngineerUserForm, EngineerUserList, PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList, StudentRegisterForm, StudentRegisterVerify, StudentUserDetail, StudentUserForm, StudentUserList } from '@/features/user'
-import { ResetPasswordConfirmView } from '@/features/account'
 
-import PartnerList from '../views/company/PartnerList.vue'
-import PartnerRequestsSentList from '../views/company/PartnerRequestsSentList.vue'
-import PartnerRequestsSentForm from '../views/company/PartnerRequestsSentForm.vue'
-import PartnerRequestsReceivedList from '../views/company/PartnerRequestsReceivedList.vue'
-
-import ActivityList from '../views/company/ActivityList.vue'
-
-import PictureList from '../views/company/PictureList.vue'
-import PictureForm from '../views/company/PictureForm.vue'
-
-import SubNavInventory from "../components/SubNavInventory";
-
-import EngineerEventTypeList from "../views/company/EngineerEventTypeList";
-import EngineerEventTypeForm from "../views/company/EngineerEventTypeForm";
-import EngineerEventList from "../views/company/EngineerEventList";
+// The engineer-event screens (the events list, its event types and the event
+// type form) live in the field-service feature folder; this file only routes
+// them (ADR-0002). The attach-order modal the list mounts comes with it.
 
 import {AUTH_LEVELS} from "../constants";
 
+// The workforce screens (time registration, leave, sick leave) live in the
+// feature folder; this file only routes them (ADR-0002). The backend split them
+// into apps/workforce and the frontend mirrors that split.
 
-import BranchList from "../views/company/BranchList";
-import BranchForm from "../views/company/BranchForm";
+import { CODE_TYPES } from '@/features/statuscode';
 
-import TimeRegistration from '../views/company/time-registration/TimeRegistration.vue'
-import BranchView from "../views/company/BranchView";
-
-import BudgetList from "../views/company/BudgetList";
-import BudgetView from "../views/company/BudgetView";
-
-import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
-
-import TemplateList from "../views/company/template/TemplateList";
-import TemplateForm from "../views/company/template/TemplateForm";
-
-import LeaveRequestsList from "../views/company/time-registration/LeaveRequestsList";
-import LeaveList from "../views/company/time-registration/LeaveList";
-import LeaveForm from "../views/company/time-registration/LeaveForm";
-import LeaveTypes from "../views/company/time-registration/LeaveTypes";
-import UnconfirmedSickLeaveList from "../views/company/time-registration/UnconfirmedSickLeaveList";
-import SickLeaveList from "../views/company/time-registration/SickLeaveList";
-import SickLeaveForm from "../views/company/time-registration/SickLeaveForm";
-import GrippSettings from "../views/company/ConnectorGrippSettings.vue";
-
-import ImportList from "../views/company/ImportList";
-import ImportForm from "../views/company/ImportForm";
-import ImportPreview from "../views/company/ImportPreview";
-import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
-import TeamleaderCallback from "@/views/company/TeamleaderCallback.vue";
-import ComingSoon from "@/views/shared/ComingSoon.vue";
+// Route screens, split per chunk: the router holds a loader, not the module.
+const ActionForm = () => import('@/features/statuscode/action/ActionForm.vue')
+const ActivityList = () => import('@/features/company/activity/ActivityList.vue')
+const ApiUserForm = () => import('@/features/user/api/ApiUserForm.vue')
+const ApiUserList = () => import('@/features/user/api/ApiUserList.vue')
+const BranchForm = () => import('@/features/company/branch/BranchForm.vue')
+const BranchList = () => import('@/features/company/branch/BranchList.vue')
+const BranchView = () => import('@/features/company/branch/BranchView.vue')
+const BudgetList = () => import('@/features/company/budget/BudgetList.vue')
+const BudgetView = () => import('@/features/company/budget/BudgetView.vue')
+const ComingSoon = () => import('@/views/shared/ComingSoon.vue')
+const CompanyDashboard = () => import('../views/company/CompanyDashboard.vue')
+const CompanyInfo = () => import('@/features/company/info/CompanyInfo.vue')
+const CustomerUserForm = () => import('@/features/user/customer/CustomerUserForm.vue')
+const CustomerUserList = () => import('@/features/user/customer/CustomerUserList.vue')
+const EmployeeUserForm = () => import('@/features/user/employee/EmployeeUserForm.vue')
+const EmployeeUserList = () => import('@/features/user/employee/EmployeeUserList.vue')
+const EngineerEventList = () => import('@/features/field-service/engineer-event/EngineerEventList.vue')
+const EngineerEventTypeForm = () => import('@/features/field-service/engineer-event/EngineerEventTypeForm.vue')
+const EngineerEventTypeList = () => import('@/features/field-service/engineer-event/EngineerEventTypeList.vue')
+const EngineerUserForm = () => import('@/features/user/engineer/EngineerUserForm.vue')
+const EngineerUserList = () => import('@/features/user/engineer/EngineerUserList.vue')
+const GrippSettings = () => import('../views/company/ConnectorGrippSettings.vue')
+const ImportForm = () => import('@/features/company/import/ImportForm.vue')
+const ImportList = () => import('@/features/company/import/ImportList.vue')
+const ImportPreview = () => import('@/features/company/import/ImportPreview.vue')
+const LeaveForm = () => import('@/features/workforce/leave/LeaveForm.vue')
+const LeaveList = () => import('@/features/workforce/leave/LeaveList.vue')
+const LeaveRequestsList = () => import('@/features/workforce/leave/LeaveRequestsList.vue')
+const LeaveTypes = () => import('@/features/workforce/leave/LeaveTypes.vue')
+const PartnerList = () => import('@/features/company/partner/PartnerList.vue')
+const PartnerRequestsReceivedList = () => import('@/features/company/partner/PartnerRequestsReceivedList.vue')
+const PartnerRequestsSentForm = () => import('@/features/company/partner/PartnerRequestsSentForm.vue')
+const PartnerRequestsSentList = () => import('@/features/company/partner/PartnerRequestsSentList.vue')
+const PictureForm = () => import('@/features/company/picture/PictureForm.vue')
+const PictureList = () => import('@/features/company/picture/PictureList.vue')
+const PlanningUserForm = () => import('@/features/user/planning/PlanningUserForm.vue')
+const PlanningUserList = () => import('@/features/user/planning/PlanningUserList.vue')
+const ResetPasswordConfirmView = () => import('@/features/account/ResetPasswordConfirmView.vue')
+const SalesUserForm = () => import('@/features/user/sales/SalesUserForm.vue')
+const SalesUserList = () => import('@/features/user/sales/SalesUserList.vue')
+const SettingsForm = () => import('@/features/member/settings/SettingsForm.vue')
+const SickLeaveForm = () => import('@/features/workforce/sick-leave/SickLeaveForm.vue')
+const SickLeaveList = () => import('@/features/workforce/sick-leave/SickLeaveList.vue')
+const StatuscodeForm = () => import('@/features/statuscode/statuscode/StatuscodeForm.vue')
+const StatuscodeList = () => import('@/features/statuscode/StatuscodeList.vue')
+const StudentRegisterForm = () => import('@/features/user/student/StudentRegisterForm.vue')
+const StudentRegisterVerify = () => import('@/features/user/student/StudentRegisterVerify.vue')
+const StudentUserDetail = () => import('@/features/user/student/StudentUserDetail.vue')
+const StudentUserForm = () => import('@/features/user/student/StudentUserForm.vue')
+const StudentUserList = () => import('@/features/user/student/StudentUserList.vue')
+const TeamleaderCallback = () => import('@/views/company/TeamleaderCallback.vue')
+const TeamleaderSettings = () => import('@/views/company/TeamleaderSettings.vue')
+const TemplateForm = () => import('@/features/company/template/TemplateForm.vue')
+const TemplateList = () => import('@/features/company/template/TemplateList.vue')
+const TimeRegistration = () => import('@/features/workforce/time-registration/TimeRegistration.vue')
+const UnconfirmedSickLeaveList = () => import('@/features/workforce/sick-leave/UnconfirmedSickLeaveList.vue')
 
 const DEFAULT_STATUSCODE_TYPE = 'order'
 
@@ -73,11 +88,11 @@ function createStatuscodeRoutes(type) {
       path: `/company/statuscodes/${type}`,
       components: {
         'app-content': StatuscodeList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {codeType: type},
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -85,11 +100,11 @@ function createStatuscodeRoutes(type) {
       path: `/company/statuscodes/${type}/form`,
       components: {
         'app-content': StatuscodeForm,
-        'app-subnav':  SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {codeType: type},
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -97,11 +112,11 @@ function createStatuscodeRoutes(type) {
       path: `/company/statuscodes/${type}/form/:pk`,
       components: {
         'app-content': StatuscodeForm,
-        'app-subnav':  SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({pk: route.params.pk, codeType: type}),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -109,11 +124,11 @@ function createStatuscodeRoutes(type) {
       path: `/company/statuscodes/action/${type}/add/:statuscode_pk`,
       components: {
         'app-content': ActionForm,
-        'app-subnav':  SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({statuscodePk: route.params.statuscode_pk, codeType: type}),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -121,11 +136,11 @@ function createStatuscodeRoutes(type) {
       path: `/company/statuscodes/action/${type}/form/:pk`,
       props: {
         'app-content': route => ({pk: route.params.pk, codeType: type}),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': ActionForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
   ]
@@ -142,35 +157,35 @@ export default [
       path: '/company/employee-dashboard',
       components: {
         'app-content': BranchView,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
       name: 'company-dashboard',
       path: '/company/dashboard',
       components: {
-        'app-content': Dashboard,
-        'app-subnav': SubNavCompany
+        'app-content': CompanyDashboard,
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
       name: 'company-info',
       path: '/company/company/info',
       components: {
-        'app-content': Info,
-        'app-subnav': SubNavCompany
+        'app-content': CompanyInfo,
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -178,12 +193,12 @@ export default [
       path: '/company/company/settings',
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
-        'app-content': Settings,
-        'app-subnav': SubNavCompany
+        'app-content': SettingsForm,
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     // engineer users — converted, #user-slice
@@ -192,11 +207,11 @@ export default [
       path: '/company/engineer-users',
       components: {
         'app-content': EngineerUserList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -204,11 +219,11 @@ export default [
       path: '/company/engineer-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': EngineerUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     {
@@ -220,11 +235,11 @@ export default [
       path: '/company/engineer-users/form',
       components: {
         'app-content': EngineerUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     // engineer events
@@ -233,11 +248,11 @@ export default [
       path: '/company/engineer-users/events',
       components: {
         'app-content': EngineerEventList,
-        'app-subnav': SubNavInventory
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'inventory' }
       },
     },
 
@@ -247,11 +262,11 @@ export default [
       path: '/company/engineer-users/event-types',
       components: {
         'app-content': EngineerEventTypeList,
-        'app-subnav': SubNavInventory
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'inventory' }
       },
     },
     {
@@ -259,11 +274,11 @@ export default [
       path: '/company/engineer-users/event-types/form/:pk',
       components: {
         'app-content': EngineerEventTypeForm,
-        'app-subnav': SubNavInventory
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'inventory' }
       },
     },
     {
@@ -271,11 +286,11 @@ export default [
       path: '/company/engineer-users/event-types/form',
       components: {
         'app-content': EngineerEventTypeForm,
-        'app-subnav': SubNavInventory
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': true
+        'app-subnav': { section: 'inventory' }
       },
     },
     // sales users — converted, #user-slice
@@ -284,11 +299,11 @@ export default [
       path: '/company/sales-users',
       components: {
         'app-content': SalesUserList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -296,11 +311,11 @@ export default [
       path: '/company/sales-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': SalesUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     {
@@ -309,11 +324,11 @@ export default [
       path: '/company/sales-users/form',
       components: {
         'app-content': SalesUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     // customer users — converted, #user-slice
@@ -322,11 +337,11 @@ export default [
       path: '/company/customer-users',
       components: {
         'app-content': CustomerUserList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -334,11 +349,11 @@ export default [
       path: '/company/customer-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': CustomerUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     {
@@ -347,11 +362,11 @@ export default [
       path: '/company/customer-users/form',
       components: {
         'app-content': CustomerUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     // planning users — converted, #user-slice
@@ -360,11 +375,11 @@ export default [
       path: '/company/planning-users',
       components: {
         'app-content': PlanningUserList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -372,11 +387,11 @@ export default [
       path: '/company/planning-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': PlanningUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     {
@@ -384,11 +399,11 @@ export default [
       path: '/company/planning-users/form',
       components: {
         'app-content': PlanningUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     // API users — converted, #user-slice
@@ -397,11 +412,11 @@ export default [
       path: '/company/api-users',
       components: {
         'app-content': ApiUserList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -412,11 +427,11 @@ export default [
       path: '/company/api-users/form',
       components: {
         'app-content': ApiUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -424,11 +439,11 @@ export default [
       path: '/company/api-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': ApiUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     // employee users — converted, #user-slice
@@ -438,11 +453,11 @@ export default [
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
         'app-content': EmployeeUserList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -451,11 +466,11 @@ export default [
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': EmployeeUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     {
@@ -464,11 +479,11 @@ export default [
       meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING, AUTH_LEVELS.EMPLOYEE] },
       components: {
         'app-content': EmployeeUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     // student users
@@ -477,11 +492,11 @@ export default [
       path: '/company/student-users',
       components: {
         'app-content': StudentUserList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -489,11 +504,11 @@ export default [
       path: '/company/student-users/form',
       components: {
         'app-content': StudentUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -501,11 +516,11 @@ export default [
       path: '/company/student-users/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': StudentUserForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     {
@@ -513,11 +528,11 @@ export default [
       path: '/company/student-users/view/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': StudentUserDetail,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     // registration
@@ -560,11 +575,11 @@ export default [
       path: '/company/partners/active',
       components: {
         'app-content': PartnerList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -572,11 +587,11 @@ export default [
       path: '/company/partners/requests-sent',
       components: {
         'app-content': PartnerRequestsSentList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -584,11 +599,11 @@ export default [
       path: '/company/partners/requests/form',
       components: {
         'app-content': PartnerRequestsSentForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -596,11 +611,11 @@ export default [
       path: '/company/partners/requests-received',
       components: {
         'app-content': PartnerRequestsReceivedList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     // activity
@@ -609,11 +624,11 @@ export default [
       path: '/company/activity',
       components: {
         'app-content': ActivityList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     // pictures
@@ -622,11 +637,11 @@ export default [
       path: '/company/pictures',
       components: {
         'app-content': PictureList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -634,11 +649,11 @@ export default [
       path: '/company/pictures/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': PictureForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     {
@@ -646,11 +661,11 @@ export default [
       path: '/company/pictures/form',
       components: {
         'app-content': PictureForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     // time registration
@@ -659,11 +674,11 @@ export default [
       path: '/company/time-registration',
       components: {
         'app-content': TimeRegistration,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -671,11 +686,11 @@ export default [
       path: '/company/time-registration/detail/:user_id',
       components: {
         'app-content': TimeRegistration,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     // branches
@@ -685,11 +700,11 @@ export default [
       path: '/company/branches',
       components: {
         'app-content': BranchList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     // Declared before `form/:pk`, otherwise that route swallows
@@ -701,11 +716,11 @@ export default [
       path: '/company/branches/form/my',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': BranchForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     {
@@ -713,11 +728,11 @@ export default [
       path: '/company/branches/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': BranchForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     {
@@ -725,11 +740,11 @@ export default [
       path: '/company/branches/form',
       components: {
         'app-content': BranchForm,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -737,11 +752,11 @@ export default [
       path: '/company/branches/:pk',
       components: {
         'app-content': BranchView,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     // budgets
@@ -750,11 +765,11 @@ export default [
       path: '/company/budgets',
       components: {
         'app-content': BudgetList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -762,11 +777,11 @@ export default [
       path: '/company/budgets/:pk',
       components: {
         'app-content': BudgetView,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -775,7 +790,10 @@ export default [
       name: 'company-my-budgets',
       components: {
         'app-content': ComingSoon,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
+      },
+      props: {
+        'app-subnav': { section: 'company' },
       },
     },
     // statuscodes
@@ -784,11 +802,11 @@ export default [
       path: `/company/statuscodes`,
       components: {
         'app-content': StatuscodeList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {codeType: DEFAULT_STATUSCODE_TYPE},
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     ...CODE_TYPES.flatMap(createStatuscodeRoutes),
@@ -798,11 +816,11 @@ export default [
       path: '/company/templates',
       components: {
         'app-content': TemplateList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -810,11 +828,11 @@ export default [
       path: '/company/templates/form',
       components: {
         'app-content': TemplateForm,
-        'app-subnav':  SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params }),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -822,11 +840,11 @@ export default [
       path: '/company/templates/form/:pk',
       components: {
         'app-content': TemplateForm,
-        'app-subnav':  SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params }),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -834,11 +852,11 @@ export default [
       path: '/company/time-registration/leave/requests',
       components: {
         'app-content': LeaveRequestsList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params }),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -846,11 +864,11 @@ export default [
       path: '/company/time-registration/leave',
       components: {
         'app-content': LeaveList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params }),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -858,11 +876,11 @@ export default [
       path: '/company/time-registration/leave/form',
       components: {
         'app-content': LeaveForm,
-        'app-subnav':  SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params }),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -870,11 +888,11 @@ export default [
       path: '/company/time-registration/leave/form/:pk',
       components: {
         'app-content': LeaveForm,
-        'app-subnav':  SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params }),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -882,11 +900,11 @@ export default [
       path: '/company/time-registration/leave/types',
       components: {
         'app-content': LeaveTypes,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params }),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -894,11 +912,11 @@ export default [
       path: '/company/time-registration/sick-leave/unconfirmed',
       components: {
         'app-content': UnconfirmedSickLeaveList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params }),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -906,11 +924,11 @@ export default [
       path: '/company/time-registration/sick-leave',
       components: {
         'app-content': SickLeaveList,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params }),
-        'app-subnav': {}
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -918,11 +936,11 @@ export default [
       path: '/company/time-registration/sick-leave/form',
       components: {
         'app-content': SickLeaveForm,
-        'app-subnav':  SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params }),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
     {
@@ -930,11 +948,11 @@ export default [
       path: '/company/time-registration/sick-leave/form/:pk',
       components: {
         'app-content': SickLeaveForm,
-        'app-subnav':  SubNavCompany
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params }),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
     },
 
@@ -952,11 +970,11 @@ export default [
           path: '',
           components: {
             'app-content': ImportList,
-            'app-subnav': SubNavCompany
+            'app-subnav': SubNav
           },
           props: {
             'app-content': route => ({...route.params}),
-            'app-subnav': true
+            'app-subnav': { section: 'company' }
           },
         },
         {
@@ -964,11 +982,11 @@ export default [
           path: 'form',
           components: {
             'app-content': ImportForm,
-            'app-subnav': SubNavCompany
+            'app-subnav': SubNav
           },
           props: {
             'app-content': route => ({...route.params}),
-            'app-subnav': true
+            'app-subnav': { section: 'company' }
           },
         },
         {
@@ -976,11 +994,11 @@ export default [
           path: 'form/:pk',
           components: {
             'app-content': ImportForm,
-            'app-subnav': SubNavCompany
+            'app-subnav': SubNav
           },
           props: {
             'app-content': route => ({...route.params}),
-            'app-subnav': true
+            'app-subnav': { section: 'company' }
           },
         },
         {
@@ -988,11 +1006,11 @@ export default [
           path: 'preview/:pk',
           components: {
             'app-content': ImportPreview,
-            'app-subnav': SubNavCompany
+            'app-subnav': SubNav
           },
           props: {
             'app-content': route => ({...route.params}),
-            'app-subnav': true
+            'app-subnav': { section: 'company' }
           },
         },
       ],
@@ -1003,11 +1021,11 @@ export default [
       path: '/company/connector-gripp',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': GrippSettings,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     // Teamleader
@@ -1016,11 +1034,11 @@ export default [
       path: '/company/teamleader/settings',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': TeamleaderSettings,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
     {
@@ -1028,11 +1046,11 @@ export default [
       path: '/company/teamleader/callback',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'company' }
       },
       components: {
         'app-content': TeamleaderCallback,
-        'app-subnav': SubNavCompany
+        'app-subnav': SubNav
       },
     },
   ]

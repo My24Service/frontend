@@ -2,8 +2,11 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 
 import { AUTH_LEVELS } from '@/constants'
-import { getUserAuthLevel, hasAccessRouteAuthLevel } from '@/features/auth/auth-levels'
-import { useAuthStore } from '@/features/auth'
+import {
+  getUserAuthLevel,
+  hasAccessRouteAuthLevel,
+  useAuthStore,
+} from '@/features/auth'
 
 // The auth store derives the user's level from `submodel` plus a matching flag
 // on `user`. These are the minimal shapes that make each getter return true.

@@ -44,7 +44,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   memberMemberDestroyMutation,
@@ -52,8 +51,6 @@ import {
   memberMemberListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { MemberMemberListData, PaginatedMemberList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-import { useAuthStore } from '@/features/auth'
 import {
   ServerTable,
   baseListParams,

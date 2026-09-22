@@ -21,7 +21,7 @@
               <b-form-invalid-feedback
                 id="contract_name-feedback"
                 :state="submitClicked ? !errors.name : null">
-                {{ errors.name || FIELD_MESSAGES.name() }}
+                {{ errors.name || PLACEHOLDERS.name() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -60,9 +60,9 @@
           </b-col>
         </b-row>
         <b-form-invalid-feedback
-          id="contract_module_paths_pks-feedback"
-          :state="submitClicked ? !errors.module_paths_pks : null">
-          {{ errors.module_paths_pks || FIELD_MESSAGES.module_paths_pks() }}
+          id="contract_module_paths-feedback"
+          :state="submitClicked ? !errors.module_paths : null">
+          {{ errors.module_paths || PLACEHOLDERS.module_paths() }}
         </b-form-invalid-feedback>
 
         <div class="mx-auto">
@@ -81,30 +81,21 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-
+import { memberGetModuleDataListOptions } from '@/api/@tanstack/vue-query.gen'
+import { memberContract } from '@/api/resources.gen'
+import type { Contract, ContractCreateRequest } from '@/api/types.gen'
 import {
-  memberContractCreateMutation,
-  memberContractListQueryKey,
-  memberContractPartialUpdateMutation,
-  memberContractRetrieveOptions,
-  memberGetModuleDataListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Contract } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms/use-resource-form'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+  useResourceForm,
+  useQueryErrorToast,
+} from '@/features/forms'
 import {
   emptyContract,
-  FIELD_MESSAGES,
+  PLACEHOLDERS,
   parseContract,
   validateContract,
   type ContractFieldErrors,
-  type ContractFormValues,
 } from './schemas'
 import { pathsFromSelection, selectionFromPaths, type ModuleSelection } from './module-paths'
-import { $trans } from '@/services/i18n'
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {
@@ -117,7 +108,7 @@ useQueryErrorToast(moduleDataQuery.error, $trans('Error loading modules'))
 
 // The checkbox tree the wire encoding reads as. It lives beside the kit
 // values rather than in them: `name` binds straight onto the kit state, but
-// the per-module tick sets only fold into `module_paths_pks` at
+// the per-module tick sets only fold into `module_paths` at
 // validate/parse time, below.
 const selection = ref<ModuleSelection>({})
 
@@ -131,24 +122,21 @@ const {
   submitForm,
   cancelForm,
   record,
-} = useResourceForm<ContractFormValues, Contract, ReturnType<typeof parseContract>, ContractFieldErrors>({
+} = useResourceForm<ContractCreateRequest, Contract, ReturnType<typeof parseContract>, ContractFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => memberContractRetrieveOptions({path: {id}}),
-  create: memberContractCreateMutation(),
-  update: memberContractPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberContractListQueryKey()}),
+  resource: memberContract,
   empty: emptyContract,
-  fromRecord: (entry) => ({name: entry.name ?? '', module_paths_pks: entry.module_paths_pks ?? ''}),
+  fromRecord: (entry) => ({name: entry.name ?? '', module_paths: entry.module_paths ?? []}),
   validate: (values) => {
     const candidate = emptyContract()
     candidate.name = values.name
-    candidate.module_paths_pks = pathsFromSelection(selection.value)
+    candidate.module_paths = pathsFromSelection(selection.value)
     return validateContract(candidate)
   },
   parse: (values) => {
     const candidate = emptyContract()
     candidate.name = values.name
-    candidate.module_paths_pks = pathsFromSelection(selection.value)
+    candidate.module_paths = pathsFromSelection(selection.value)
     return parseContract(candidate)
   },
   copy: {
@@ -195,7 +183,7 @@ watch(
     if (!detailApplied.value && (detail || isCreate.value)) {
       if (detail?.name) contract.value.name = detail.name
 
-      const parsed = selectionFromPaths(detail?.module_paths_pks)
+      const parsed = selectionFromPaths(detail?.module_paths)
       for (const [moduleId, parts] of Object.entries(parsed)) {
         selection.value[moduleId] = parts
       }

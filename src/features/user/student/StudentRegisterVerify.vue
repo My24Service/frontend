@@ -25,18 +25,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { useMutation } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   accountsSendResetPasswordLinkCreateMutation,
   accountsVerifyRegistrationCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import { readLinkParams } from '@/features/account'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
-
 /**
  * The activation link a registrant follows from their email: verify the
  * signed params on arrival, then let them ask for the link that sets their

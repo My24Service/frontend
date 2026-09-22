@@ -1,13 +1,14 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import SubNavQuotations from '../components/SubNavQuotations.vue'
+import SubNav from '../components/SubNav.vue'
 
-import QuotationList from '../views/quotations/QuotationList.vue'
-import QuotationForm from '../views/quotations/QuotationForm.vue'
 import {AUTH_LEVELS} from "@/constants";
-import TheAppLayoutEmpty from "@/components/TheAppLayoutEmpty.vue";
-import QuotationView from "@/views/quotations/QuotationView.vue";
-import QuotationDetail from "@/views/quotations/QuotationDetail.vue";
-import OfferForm from "@/views/quotations/OfferForm.vue";
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const OfferForm = () => import('@/views/quotations/OfferForm.vue')
+const QuotationDetail = () => import('@/views/quotations/QuotationDetail.vue')
+const QuotationForm = () => import('../views/quotations/QuotationForm.vue')
+const QuotationList = () => import('../views/quotations/QuotationList.vue')
+const QuotationView = () => import('@/views/quotations/QuotationView.vue')
 
 export default [
 {
@@ -20,11 +21,11 @@ export default [
       path: '/quotations/quotations',
       components: {
         'app-content': QuotationList,
-        'app-subnav': SubNavQuotations
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'quotations' }
       },
     },
     {
@@ -33,11 +34,11 @@ export default [
       path: '/quotations/preliminary',
       components: {
         'app-content': QuotationList,
-        'app-subnav': SubNavQuotations
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'quotations' }
       },
     },
     {
@@ -46,11 +47,11 @@ export default [
       path: '/quotations/quotations/view/:pk',
       components: {
         'app-content': QuotationView,
-        'app-subnav': SubNavQuotations
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'quotations' }
       },
     },
     {
@@ -59,11 +60,11 @@ export default [
       path: '/quotations/sent/view/:pk',
       components: {
         'app-content': QuotationView,
-        'app-subnav': SubNavQuotations
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'quotations' }
       },
     },
     {
@@ -72,11 +73,11 @@ export default [
       path: '/quotations/sent',
       components: {
         'app-content': QuotationList,
-        'app-subnav': SubNavQuotations
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'quotations' }
       },
     },
     {
@@ -85,11 +86,11 @@ export default [
       path: '/quotations/preliminary/form',
       components: {
         'app-content': QuotationForm,
-        'app-subnav': SubNavQuotations
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'quotations' }
       },
 	  },
     {
@@ -98,11 +99,11 @@ export default [
       path: '/quotations/quotations/form/:pk(\\d+)',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'quotations' }
       },
       components: {
         'app-content': QuotationForm,
-        'app-subnav': SubNavQuotations
+        'app-subnav': SubNav
       },
     },
     {
@@ -111,11 +112,11 @@ export default [
       path: '/quotations/preliminary/form/:pk(\\d+)',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'quotations' }
       },
       components: {
         'app-content': QuotationForm,
-        'app-subnav': SubNavQuotations
+        'app-subnav': SubNav
       },
     },
     {
@@ -124,11 +125,11 @@ export default [
       path: '/quotations/sent/form/',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'quotations' }
       },
       components: {
         'app-content': OfferForm,
-        'app-subnav': SubNavQuotations
+        'app-subnav': SubNav
       },
     },
     {
@@ -137,11 +138,11 @@ export default [
       path: '/quotations/quotations/detail/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': true
+        'app-subnav': { section: 'quotations' }
       },
       components: {
         'app-content': QuotationDetail,
-        'app-subnav': SubNavQuotations
+        'app-subnav': SubNav
       },
     },
   ]

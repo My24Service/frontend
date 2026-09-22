@@ -232,6 +232,11 @@ function build(
     query = {},
     routes = [],
     queryClient: sharedQueryClient = null,
+    // Off the document by default. Pass `document.body` when the spec asserts
+    // on focus: `.focus()` on a detached element never moves
+    // `document.activeElement`. Pair it with `enableAutoUnmount`, or the
+    // mounted tree outlives its test.
+    attachTo = undefined,
   } = {},
 ) {
   const pinia = createTestingPinia({ createSpy: vi.fn, stubActions: true })
@@ -281,6 +286,7 @@ function build(
     mount: () =>
       mountFn(component, {
         props,
+        attachTo,
         global: {
           plugins: [pinia, router, [VueQueryPlugin, sharedQueryClient ? {...queryPluginOptions, queryClient: sharedQueryClient} : queryPluginOptions]],
           mixins: [componentMixin],

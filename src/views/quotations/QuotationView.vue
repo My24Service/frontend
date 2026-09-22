@@ -156,9 +156,9 @@
                     <tr v-for="quotationLine in chapter.quotationLines" :key="quotationLine.id">
                       <td>{{ quotationLine.info }}</td>
                       <td>{{ quotationLine.amount }}</td>
-                      <td>{{ quotationLine.price_dinero.toFormat('$0.00') }}</td>
-                      <td>{{ quotationLine.total_dinero.toFormat('$0.00') }}</td>
-                      <td>{{ quotationLine.vat_dinero.toFormat('$0.00') }}</td>
+                      <td>{{ formatMoney(quotationLine.price_dinero) }}</td>
+                      <td>{{ formatMoney(quotationLine.total_dinero) }}</td>
+                      <td>{{ formatMoney(quotationLine.vat_dinero) }}</td>
                     </tr>
                     </tbody>
                   </table>
@@ -199,18 +199,16 @@
   </b-overlay>
 </template>
 <script>
-import TotalsInputs from "@/components/TotalsInputs.vue";
-import StatusesComponent from "@/components/StatusesComponent.vue";
+import { StatusesComponent } from '@/features/shared'
 import QuotationPDFViewer from "@/views/quotations/QuotationPDFViewer.vue";
 
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {ChapterModel, ChapterService} from "@/models/quotations/Chapter"
-import {CostService} from "@/models/orders/Cost"
-import {memberShape} from "@/features/member/member/wire-defaults"
+import {memberShape} from '@/features/member'
 
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
-import {useMainStore} from "@/stores/main";
+import {formatMoney} from "@/services/money";
 
 export default {
   setup() {
@@ -224,7 +222,6 @@ export default {
   name: "QuotationView",
   components: {
     QuotationPDFViewer,
-    TotalsInputs,
     DocumentsComponent,
     StatusesComponent
   },
@@ -236,7 +233,6 @@ export default {
       quotationURL: '',
       quotationService: new QuotationService(),
       chapterService: new ChapterService(),
-      costService: new CostService(),
       quotationLineService: new QuotationLineService(),
     }
   },
@@ -250,6 +246,7 @@ export default {
     await this.loadQuotation()
   },
   methods: {
+    formatMoney,
     sendQuotation() {
       this.$router.push({name: 'quotation-send',
         query: {

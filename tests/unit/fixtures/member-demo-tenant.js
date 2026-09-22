@@ -11,7 +11,7 @@
  *
  * And the expected body in ContractForm's spec names these exact part ids in
  * this exact order. A smaller invented tree would put a different
- * `module_paths_pks` on the wire and fail that spec for a reason that has
+ * `module_paths` on the wire and fail that spec for a reason that has
  * nothing to do with the component.
  *
  * Closing the annotation gap in the backend is the real fix; then this becomes
@@ -419,7 +419,7 @@ export const moduleData = [
 export const contract28 = {
   "id": 28,
   "name": "My24Service Normal",
-  "module_paths_pks": "1:250,269,245,246,248,247,249,251,262,261,268|2:229,223,224,225,267,227,226,228,289|4:233,244,242,264,263,260,271,240,266,239|6:230,282,232|7:258,255,279,259,275,256,273,283,254,272,274,257,276,277,293,281|11:294,295,296,297",
+  "module_paths": [{"module": 1, "parts": [250, 269, 245, 246, 248, 247, 249, 251, 262, 261, 268]}, {"module": 2, "parts": [229, 223, 224, 225, 267, 227, 226, 228, 289]}, {"module": 4, "parts": [233, 244, 242, 264, 263, 260, 271, 240, 266, 239]}, {"module": 6, "parts": [230, 282, 232]}, {"module": 7, "parts": [258, 255, 279, 259, 275, 256, 273, 283, 254, 272, 274, 257, 276, 277, 293, 281]}, {"module": 11, "parts": [294, 295, 296, 297]}],
   "modules_text": "mobile (11), orders (9), inventory (10), customers (3), company (16), invoices (4)",
   "max_users": 0,
   "created": "15/07/2024 17:21",

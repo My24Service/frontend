@@ -208,7 +208,7 @@ describe('CustomerUserForm, creating a customer user', () => {
 
     await submit(wrapper)
 
-    expect(refused(wrapper, 'Username is required')).toBe(true)
+    expect(refused(wrapper, 'Please enter a username')).toBe(true)
     expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
   })
 

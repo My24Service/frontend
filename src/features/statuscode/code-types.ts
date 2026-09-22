@@ -1,6 +1,4 @@
 import type { CodeTypeEnum } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-
 /**
  * The code types this Slice edits, in the order the pills show them.
  *
@@ -44,12 +42,14 @@ export function codeTypeLabel(type: CodeType): string {
  * in three `getNavLink` methods; this is the one place that knows both
  * schemes.
  */
+// CodeType is a literal union, so the template literals below are checked
+// against the route table name by name.
 export interface StatuscodeRouteNames {
-  list: string
-  add: string
-  edit: string
-  actionAdd: string
-  actionEdit: string
+  list: RouteName
+  add: RouteName
+  edit: RouteName
+  actionAdd: RouteName
+  actionEdit: RouteName
 }
 
 export function routeNamesFor(type: CodeType, fromSettings: boolean): StatuscodeRouteNames {

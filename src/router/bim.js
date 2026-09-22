@@ -1,5 +1,7 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import BIMFrame from '../views/bim/BIMFrame.vue';
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const BIMFrame = () => import('../views/bim/BIMFrame.vue')
 
 export default [
   {

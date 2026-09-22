@@ -21,7 +21,7 @@ const MODULE_DATA = moduleData
 
 const DETAIL = fixtureFor(vContract, contract28)
 
-const STORED_PATHS = contract28.module_paths_pks
+const STORED_PATHS = contract28.module_paths
 
 beforeEach(() => {
   api.get('/api/member/get-module-data/', MODULE_DATA)
@@ -107,7 +107,11 @@ describe('ContractForm, creating a contract', () => {
         query: {},
         body: {
           name: 'new contract',
-          module_paths_pks: '1:246|7:258,255,279,259,275,256|11:294',
+          module_paths: [
+            {module: 1, parts: [246]},
+            {module: 7, parts: [258, 255, 279, 259, 275, 256]},
+            {module: 11, parts: [294]},
+          ],
         },
       },
     ])
@@ -192,9 +196,13 @@ describe('ContractForm, editing a contract', () => {
         query: {},
         body: {
           name: 'My24Service Normal',
-          module_paths_pks: STORED_PATHS,
+          module_paths: STORED_PATHS,
         },
       },
+      // The write staled every read of the resource, its own detail included:
+      // the form is still mounted when it invalidates, so the record refetches
+      // before the form leaves.
+      { method: 'get', path: '/api/member/contract/28/', query: {} },
     ])
   })
 
@@ -248,11 +256,10 @@ describe('ContractForm, the module-level checkbox', () => {
     await tickModule(wrapper, 9)
     await submit(wrapper)
 
-    const groups = api.requests().find((sent) => sent.method === 'post')
-      .body.module_paths_pks.split('|')
-    expect(groups).toHaveLength(2)
-    expect(groups).toContain('9:291')
-    expect(groups).toContain('7:258,255,279,259,275,256')
+    const rows = api.requests().find((sent) => sent.method === 'post').body.module_paths
+    expect(rows).toHaveLength(2)
+    expect(rows).toContainEqual({module: 9, parts: [291]})
+    expect(rows).toContainEqual({module: 7, parts: [258, 255, 279, 259, 275, 256]})
   })
 
   test('switching it off keeps only the always-selected parts', async () => {
@@ -265,7 +272,10 @@ describe('ContractForm, the module-level checkbox', () => {
     await submit(wrapper)
 
     const post = api.requests().find((sent) => sent.method === 'post')
-    expect(post.body.module_paths_pks).toBe('1:246|7:258,255,279,259,275,256')
+    expect(post.body.module_paths).toEqual([
+      {module: 1, parts: [246]},
+      {module: 7, parts: [258, 255, 279, 259, 275, 256]},
+    ])
   })
 })
 

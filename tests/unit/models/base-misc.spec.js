@@ -5,7 +5,7 @@ import BaseModel from '@/models/base'
 // Same seam as base-collection.spec.js: BaseModel holds axios in an instance
 // field, so a fake goes straight onto the instance.
 //
-// Collection-editing/updateCollection/direct-edit behaviour lives in
+// Collection-editing and direct-edit behaviour lives in
 // base-collection.spec.js, which already has the ThingService + client
 // fixtures for that. This file is for the rest of BaseModel: defaults,
 // standalone helper methods, and list()'s own request/response handling.

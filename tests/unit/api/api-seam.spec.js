@@ -71,7 +71,7 @@ describe('the API seam is strict', () => {
     api.post('/api/member/contract/', fixtureFor(vContract, { id: 1 }))
 
     // `name` is required on ContractCreate, and a number is not a string.
-    await legacyClient.post('/member/contract/', { name: 42, module_paths_pks: '1' })
+    await legacyClient.post('/member/contract/', { name: 42, module_paths: [{module: 1, parts: [2]}] })
 
     expect(api.takeViolations()).toEqual([
       expect.stringContaining('sends a body its request schema rejects'),
@@ -81,7 +81,7 @@ describe('the API seam is strict', () => {
   test('a body the request schema accepts passes', async () => {
     api.post('/api/member/contract/', fixtureFor(vContract, { id: 1, name: 'Contract A' }))
 
-    const body = { name: 'Contract A', module_paths_pks: '1' }
+    const body = { name: 'Contract A', module_paths: [{module: 1, parts: [2]}] }
 
     await expect(memberContractCreate({ body })).resolves.toMatchObject({
       data: { id: 1, name: 'Contract A' },

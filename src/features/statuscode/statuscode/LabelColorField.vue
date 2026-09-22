@@ -19,10 +19,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, type CSSProperties } from 'vue'
-
-import { $trans } from '@/services/i18n'
-
 import { LABEL_PALETTE, isPaletteColor, labelTextColor } from './palette'
 
 /**

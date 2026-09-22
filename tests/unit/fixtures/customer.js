@@ -39,14 +39,6 @@ export default {
     "standard_hours_hour": 0,
     "standard_hours_minute": 0,
     "standard_hours_txt": "0:00",
-    "rating_avg": null,
-    "call_out_costs": "0.00",
-    "call_out_costs_currency": "EUR",
-    "hourly_rate_engineer": "10.00",
-    "hourly_rate_engineer_currency": "EUR",
-    "hourly_rate_partner_engineer": "0.00",
-    "hourly_rate_partner_engineer_currency": "EUR",
-    "price_per_km": "0.25",
-    "price_per_km_currency": "EUR"
+    "rating_avg": null
   }
 }

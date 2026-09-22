@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   devServer: {
     host: 'demo.my24service.com'
   },

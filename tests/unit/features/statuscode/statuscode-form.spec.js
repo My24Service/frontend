@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { StatuscodeForm } from '@/features/statuscode'
+import {
+  StatuscodeForm,
+  LABEL_PALETTE,
+  labelTextColor,
+} from '@/features/statuscode'
 import { vStatuscode } from '@/api/valibot.gen'
 
-import { LABEL_PALETTE, labelTextColor } from '@/features/statuscode/statuscode/palette'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
@@ -29,6 +32,9 @@ const api = installApiSeam()
 
 const PICKED = LABEL_PALETTE.light[3]
 
+/** The roles the API offers for the mounted type; the seam ignores `code_type`. */
+const ROLES = ['quotation_change_status', 'quotation_created_status', 'quotation_sent_status']
+
 const STATUSCODE = fixtureFor(vStatuscode, {
   id: 3,
   code_type: 'quotation',
@@ -41,12 +47,14 @@ const STATUSCODE = fixtureFor(vStatuscode, {
   num_days: 14,
   num_days_operator: '>=',
   num_days_model_field: 'sent',
+  roles: ['quotation_sent_status'],
 })
 
 beforeEach(() => {
   api.get('/api/statuscode/statuscode/{id}/', STATUSCODE)
   api.post('/api/statuscode/statuscode/', STATUSCODE)
   api.patch('/api/statuscode/statuscode/{id}/', STATUSCODE)
+  api.get('/api/statuscode/statuscode/roles/', ROLES)
 })
 
 async function mountStatuscodeForm({ codeType = 'order', fromSettings = false, pk = null } = {}) {
@@ -120,6 +128,7 @@ describe('StatuscodeForm, creating a statuscode', () => {
     await submit(wrapper)
 
     expect(api.requests()).toEqual([
+      { method: 'get', path: '/api/statuscode/statuscode/roles/', query: { code_type: 'order' } },
       {
         method: 'post',
         path: '/api/statuscode/statuscode/',
@@ -131,6 +140,10 @@ describe('StatuscodeForm, creating a statuscode', () => {
           text_color: labelTextColor(LABEL_PALETTE.dark[5]),
           description: null,
           new_status_template: null,
+          num_days: null,
+          num_days_operator: '<',
+          num_days_model_field: null,
+          roles: [],
         },
       },
     ])
@@ -152,8 +165,8 @@ describe('StatuscodeForm, creating a statuscode', () => {
 
     await submit(wrapper)
 
-    expect(shownFeedback(wrapper)).toEqual(expect.arrayContaining(['Please enter a statuscode', 'Please choose a color']))
-    expect(api.requests()).toEqual([])
+    expect(shownFeedback(wrapper)).toEqual(expect.arrayContaining(['Please enter a statuscode', 'Please select a label color']))
+    expect(api.requests().filter((request) => request.method !== 'get')).toEqual([])
   })
 
   test('tells the user when the create fails, and stays on the form', async () => {
@@ -212,10 +225,33 @@ describe('StatuscodeForm, the expiry condition', () => {
     })
   })
 
-  test('is not offered for any other type, and stays off the wire', async () => {
+  test('is offered for an order as a date trigger, with the field picked from the order dates', async () => {
     const wrapper = await mountStatuscodeForm({ codeType: 'order' })
 
+    expect(wrapper.text()).toContain('Date trigger')
     expect(wrapper.text()).not.toContain('Expiry condition')
+    const field = wrapper.get('select#statuscode_num_days_model_field')
+    expect(field.findAll('option').slice(1).map((o) => o.element.value)).toEqual(['start_date', 'end_date'])
+
+    await type(wrapper, '#statuscode_statuscode', 'Herinnering')
+    await pickColor(wrapper, LABEL_PALETTE.light[0])
+    await field.setValue('start_date')
+    await wrapper.get('#statuscode_num_days_operator').setValue('<=')
+    await type(wrapper, '#statuscode_num_days', '14')
+    await submit(wrapper)
+
+    expect(api.requests().at(-1).body).toMatchObject({
+      num_days: 14,
+      num_days_operator: '<=',
+      num_days_model_field: 'start_date',
+    })
+  })
+
+  test('is not offered for any other type, and stays off the wire', async () => {
+    const wrapper = await mountStatuscodeForm({ codeType: 'invoice' })
+
+    expect(wrapper.text()).not.toContain('Expiry condition')
+    expect(wrapper.text()).not.toContain('Date trigger')
     expect(wrapper.find('#statuscode_num_days').exists()).toBe(false)
   })
 })
@@ -260,6 +296,7 @@ describe('StatuscodeForm, editing a statuscode', () => {
     await submit(wrapper)
 
     expect(api.requests()).toEqual([
+      { method: 'get', path: '/api/statuscode/statuscode/roles/', query: { code_type: 'quotation' } },
       { method: 'get', path: '/api/statuscode/statuscode/3/', query: {} },
       {
         method: 'patch',
@@ -275,6 +312,7 @@ describe('StatuscodeForm, editing a statuscode', () => {
           num_days: 14,
           num_days_operator: '>=',
           num_days_model_field: 'sent',
+          roles: ['quotation_sent_status'],
         },
       },
     ])

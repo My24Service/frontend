@@ -2,42 +2,30 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { computed, ref } from 'vue'
 
 import { vStockLocation } from '@/api/valibot.gen'
-import ApiUserForm from '@/features/user/api/ApiUserForm.vue'
-import CustomerUserForm from '@/features/user/customer/CustomerUserForm.vue'
-import EmployeeUserForm from '@/features/user/employee/EmployeeUserForm.vue'
-import EngineerUserForm from '@/features/user/engineer/EngineerUserForm.vue'
-import PlanningUserForm from '@/features/user/planning/PlanningUserForm.vue'
-import SalesUserForm from '@/features/user/sales/SalesUserForm.vue'
-import StudentUserForm from '@/features/user/student/StudentUserForm.vue'
-
 import {
+  ApiUserForm,
+  CustomerUserForm,
+  EmployeeUserForm,
+  EngineerUserForm,
+  PlanningUserForm,
+  SalesUserForm,
+  StudentUserForm,
   parseApiUserForm,
   validateApiUserForm,
-} from '@/features/user/api/schemas'
-import {
   parseCustomerUserForm,
   validateCustomerUserForm,
-} from '@/features/user/customer/schemas'
-import {
   parseEmployeeUserForm,
   validateEmployeeUserForm,
-} from '@/features/user/employee/schemas'
-import {
   parseEngineerUserForm,
   validateEngineerUserForm,
-} from '@/features/user/engineer/schemas'
-import {
   parsePlanningUserForm,
   validatePlanningUserForm,
-} from '@/features/user/planning/schemas'
-import {
   parseSalesUserForm,
   validateSalesUserForm,
-} from '@/features/user/sales/schemas'
-import {
   parseStudentUserForm,
   validateStudentUserForm,
-} from '@/features/user/student/schemas'
+} from '@/features/user'
+
 
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'

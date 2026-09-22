@@ -23,7 +23,6 @@
             name="member"
             v-model="member"
             :errors="errors"
-            :messages="FIELD_MESSAGES"
             :labels="FIELD_LABELS"
             :submitted="submitClicked"
           >
@@ -235,40 +234,30 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-
 import { vEquipmentQrTypeEnum, vMemberTypeEnum } from '@/api/valibot.gen'
-import {
-  memberContractListOptions,
-  memberMemberCreateMutation,
-  memberMemberListQueryKey,
-  memberMemberPartialUpdateMutation,
-  memberMemberRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Member } from '@/api/types.gen'
+import { memberContractListOptions } from '@/api/@tanstack/vue-query.gen'
+import { memberMember } from '@/api/resources.gen'
+import type { Member, MemberRequest } from '@/api/types.gen'
 import MemberLogoFields from './MemberLogoFields.vue'
-import ValidatedForm from '@/features/forms/ValidatedForm.vue'
-import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
-import { useResourceForm } from '@/features/forms/use-resource-form'
-import { useRoutePk } from '@/features/forms/use-route-pk'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import {
+  ValidatedForm,
+  ValidatedFormField,
+  useResourceForm,
+  useRoutePk,
+  useQueryErrorToast,
+  mergeTakenVerdict,
+} from '@/features/forms'
 import {
   COMPANYCODE_TAKEN_MESSAGE,
   emptyMember,
   FIELD_LABELS,
-  FIELD_MESSAGES,
   memberFromRecord,
   parseMemberForm,
   validateMemberForm,
   type MemberFieldErrors,
-  type MemberFormValues,
 } from './schemas'
-import { mergeTakenVerdict } from '@/features/forms/use-availability-probe'
 import { useCompanyCodeProbe, type UseCompanyCodeProbeReturn } from './use-company-code-probe'
-import { useAuthStore } from '@/features/auth'
-import { useMainStore } from '@/stores/main'
-import { $trans } from '@/services/i18n'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -287,7 +276,6 @@ const {isCreate} = useRoutePk(() => props.pk)
 // 1000 is the API's own ceiling: `My24Pagination.max_page_size` (my24service
 // `source/apps/core/rest.py:236`), which DRF clamps a larger value down to
 // rather than rejecting it, so this is the most one response can carry.
-const WHOLE_COLLECTION_PAGE_SIZE = 1000
 
 const contractsQuery = useQuery(
   memberContractListOptions({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
@@ -329,12 +317,9 @@ const {
   submitForm,
   cancelForm,
   record,
-} = useResourceForm<MemberFormValues, Member, ReturnType<typeof parseMemberForm>, MemberFieldErrors>({
+} = useResourceForm<MemberRequest, Member, ReturnType<typeof parseMemberForm>, MemberFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => memberMemberRetrieveOptions({path: {id}}),
-  create: memberMemberCreateMutation(),
-  update: memberMemberPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()}),
+  resource: memberMember,
   empty: emptyMember,
   fromRecord: memberFromRecord,
   validate: async (values) => {

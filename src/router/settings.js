@@ -1,22 +1,30 @@
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "@/constants";
-import Settings from "@/views/company/Settings.vue";
-import ImportList from "@/views/company/ImportList.vue";
-import ImportForm from "@/views/company/ImportForm.vue";
-import ImportPreview from "@/views/company/ImportPreview.vue";
 import {createUserFilterRoutes} from "@/router/helpers";
-import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
-import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList } from "@/features/user";
-import TheAppLayoutSettings from "@/components/TheAppLayoutSettings.vue";
-import BranchList from "@/views/company/BranchList.vue";
-import BranchForm from "@/views/company/BranchForm.vue";
-import BranchView from "@/views/company/BranchView.vue";
-import EquipmentList from "@/views/equipment/EquipmentList.vue";
-import EquipmentForm from "@/views/equipment/EquipmentForm.vue";
-import EquipmentView from "@/views/equipment/EquipmentView.vue";
-import LocationList from "@/views/equipment/LocationList.vue";
-import LocationForm from "@/views/equipment/LocationForm.vue";
-import LocationView from "@/views/equipment/LocationView.vue";
-import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from "@/features/statuscode";
+import {USER_FILTER_TYPE} from "@/models/base_user_filter";
+import TheAppLayout from "@/components/TheAppLayout.vue";
+import { CODE_TYPES } from '@/features/statuscode';
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const ActionForm = () => import('@/features/statuscode/action/ActionForm.vue')
+const BranchForm = () => import('@/features/company/branch/BranchForm.vue')
+const BranchList = () => import('@/features/company/branch/BranchList.vue')
+const BranchView = () => import('@/features/company/branch/BranchView.vue')
+const EmployeeUserForm = () => import('@/features/user/employee/EmployeeUserForm.vue')
+const EmployeeUserList = () => import('@/features/user/employee/EmployeeUserList.vue')
+const EquipmentDetail = () => import('@/features/equipment/equipment/EquipmentDetail.vue')
+const EquipmentForm = () => import('@/features/equipment/equipment/EquipmentForm.vue')
+const EquipmentList = () => import('@/features/equipment/equipment/EquipmentList.vue')
+const ImportForm = () => import('@/features/company/import/ImportForm.vue')
+const ImportList = () => import('@/features/company/import/ImportList.vue')
+const ImportPreview = () => import('@/features/company/import/ImportPreview.vue')
+const LocationDetail = () => import('@/features/equipment/location/LocationDetail.vue')
+const LocationForm = () => import('@/features/equipment/location/LocationForm.vue')
+const LocationList = () => import('@/features/equipment/location/LocationList.vue')
+const PlanningUserForm = () => import('@/features/user/planning/PlanningUserForm.vue')
+const PlanningUserList = () => import('@/features/user/planning/PlanningUserList.vue')
+const SettingsForm = () => import('@/features/member/settings/SettingsForm.vue')
+const StatuscodeForm = () => import('@/features/statuscode/statuscode/StatuscodeForm.vue')
+const StatuscodeList = () => import('@/features/statuscode/StatuscodeList.vue')
 
 // The Statuscode Slice (src/features/statuscode/), mounted a second time
 // under /settings; fromSettings switches the screens' route names. The
@@ -79,7 +87,8 @@ function createStatuscodeRoutes(type) {
 export default [
   {
     path: '/settings',
-    component: TheAppLayoutSettings,
+    component: TheAppLayout,
+    props: { settings: true },
     // Branch employees can reach a few sections below (their own branch, their
     // branch's employee users, equipment and locations). Every other section
     // narrows this back down to PLANNING on its own group.
@@ -98,7 +107,7 @@ export default [
             name: 'settings-company',
             path: '',
             components: {
-              'app-content': Settings,
+              'app-content': SettingsForm,
             },
           },
           // import
@@ -269,12 +278,31 @@ export default [
               'app-content': EquipmentList,
             },
           },
+          // The untyped pair as well as the typed one. The equipment detail page
+          // picks its edit route by product family - the plain name on default,
+          // the typed one on shltr - and the location detail page's equipment
+          // table links to the plain view. With only the typed pair registered,
+          // both were dead on a default tenant.
+          {
+            name: 'settings-equipment-view',
+            path: ':pk',
+            components: {
+              'app-content': EquipmentDetail,
+            },
+          },
+          {
+            name: 'settings-equipment-edit',
+            path: 'form/:pk',
+            components: {
+              'app-content': EquipmentForm,
+            },
+          },
           ...Object.values(EQUIPMENT_TYPES).map((item) => {
             return {
               name: `settings-equipment-view-${item}`,
               path: `${item}/:pk`,
               components: {
-                'app-content': EquipmentView,
+                'app-content': EquipmentDetail,
               },
             }
           }),
@@ -324,7 +352,7 @@ export default [
             name: 'settings-location-view',
             path: ':pk',
             components: {
-              'app-content': LocationView,
+              'app-content': LocationDetail,
             },
           },
           {
@@ -340,7 +368,7 @@ export default [
       ...createUserFilterRoutes(
         'settings-order',
         'settings',
-        USER_FILTER_TYPE_ORDER,
+        USER_FILTER_TYPE.ORDER,
         true
       ).map((route) => ({
         ...route,

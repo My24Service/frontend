@@ -1,23 +1,20 @@
+import type { ModulePath } from '@/api/types.gen'
+
+/** The checkbox tree's state: per module id, the ticked part ids. */
 export type ModuleSelection = Record<string, string[]>
 
-export function pathsFromSelection(selection: ModuleSelection): string {
-  const paths: string[] = []
-  for (const [moduleId, parts] of Object.entries(selection)) {
-    if (parts.length) {
-      paths.push(`${moduleId}:${parts.join(',')}`)
-    }
-  }
-  return paths.join('|')
+/** The wire rows for the ticked parts; modules with nothing ticked are left out. */
+export function pathsFromSelection(selection: ModuleSelection): ModulePath[] {
+  return Object.entries(selection)
+    .filter(([, parts]) => parts.length)
+    .map(([moduleId, parts]) => ({module: Number(moduleId), parts: parts.map(Number)}))
 }
 
-export function selectionFromPaths(paths: string | null | undefined): ModuleSelection {
-  if (!paths) return {}
-
+/** The tree state a stored contract's rows select. */
+export function selectionFromPaths(paths: ModulePath[] | null | undefined): ModuleSelection {
   const selection: ModuleSelection = {}
-  for (const moduleElement of paths.split('|')) {
-    const [moduleId = '', partList = ''] = moduleElement.split(':')
-    if (!moduleId || !partList) continue
-    selection[moduleId] = partList.split(',')
+  for (const path of paths ?? []) {
+    if (path.parts.length) selection[`${path.module}`] = path.parts.map(String)
   }
   return selection
 }

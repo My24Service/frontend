@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import EngineerUserList from '@/features/user/engineer/EngineerUserList.vue'
+import { EngineerUserList } from '@/features/user'
 import { vEngineer, vPaginatedEngineerList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'

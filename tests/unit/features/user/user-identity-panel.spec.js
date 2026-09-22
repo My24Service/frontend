@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import UserIdentityPanel from '@/features/user/UserIdentityPanel.vue'
+import { UserIdentityPanel } from '@/features/user'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'
@@ -78,12 +78,12 @@ describe('UserIdentityPanel', () => {
   test('a taken probe stays quiet once the username error owns the row', async () => {
     const wrapper = await mountPanel({
       probeState: 'taken',
-      errors: { username: 'Username is required' },
+      errors: { username: 'Please enter a username' },
       submitClicked: true,
     })
 
     expect(wrapper.find('#salesuser_username-taken-feedback').exists()).toBe(false)
-    expect(wrapper.text()).toContain('Username is required')
+    expect(wrapper.text()).toContain('Please enter a username')
   })
 
   test('a password mismatch displays once submitted', async () => {

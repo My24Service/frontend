@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import { computed, defineComponent, h, nextTick, ref } from 'vue'
 
-import { useCompanyCodeProbe } from '@/features/member/member/use-company-code-probe'
+import { useCompanyCodeProbe } from '@/features/member'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { serverError } from '../../support/list-harness.js'

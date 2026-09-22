@@ -104,15 +104,21 @@ whichever was registered first — and an "add" URL opened an edit of the
 wrong record. The add route is now `action/<type>/add/:statuscode_pk`. Route
 *names* are unchanged.
 
-### The expiry condition is a quotation concept
+### The date trigger: orders and quotations only
 
-`num_days`, `num_days_operator` and `num_days_model_field` say when a
-quotation expires ("14 days after `sent`"). The legacy form showed the three
-fields for every type and sent them for every type; the converted form
-renders `ExpiryConditionFields` for `quotation` only, and `parseStatuscode`
-leaves the three keys off the body for every other type. The fields bind
-straight to the form's values — the legacy child kept its own copy and
-emitted it on every keystroke.
+`num_days`, `num_days_operator` and `num_days_model_field` are a date
+trigger. For an order statuscode the backend's daily task sets the
+statuscode on every order whose date is in the window, once per order
+("`start_date` `<=` 14 days from today": a reminder mail two weeks before the
+job, via an email action on the statuscode), so the field is a select of the
+order date fields the backend accepts (`start_date`, `end_date`). For a
+quotation the same three fields say when it expires ("14 days after `sent`")
+and the field is typed. The legacy form showed the three fields for every
+type and sent them for every type; the converted form renders
+`ExpiryConditionFields` for the types in `DATE_TRIGGER_TYPES` only, and
+`parseStatuscode` leaves the three keys off the body for every other type.
+The fields bind straight to the form's values — the legacy child kept its
+own copy and emitted it on every keystroke.
 
 ### Blank optional text goes out as null
 
@@ -148,8 +154,9 @@ go with the Quotation and Invoice Slices.
 
 ## Ledger
 
-The colour rule — the form requires a `color` the API leaves nullable — is
-entry 12 in `docs/schema-strengthenings.md`.
+Nothing. The colour is required on the write (the response stays nullable
+for the seeded statuscodes); `docs/schema-strengthenings.md` records the
+former entry 12 under "Paid".
 
 ## Tests
 

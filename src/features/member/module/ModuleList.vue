@@ -36,13 +36,11 @@
 </template>
 
 <script lang="ts" setup>
-import { useTemplateRef } from 'vue'
 import {
   memberModuleDestroyMutation,
   memberModuleListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { MemberModuleListData, PaginatedModuleList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
 import { invalidateModuleListQueries } from '../invalidation'
 import {
   ServerTable,

@@ -10,6 +10,7 @@ class BaseSocket {
   protocol = document.location.protocol.indexOf('https') !== -1 ? 'wss' : 'ws'
   host = BASE_URL
   reconnectTimeout = 5000
+  reconnectTimer = null
   debug = false
 
   setOnmessageHandler(func) {
@@ -34,7 +35,13 @@ class BaseSocket {
   }
 
   removeSocket() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer)
+      this.reconnectTimer = null
+    }
+
     if (this.socket) {
+      this.socket.onclose = null
       this.socket.close()
     }
 
@@ -97,18 +104,25 @@ class BaseSocket {
   }
 
   _onCloseMethod(e) {
-    if (this.root.socket) {
-      if (this.debug) {
-        console.log(`${this.root.name}: socket is closed. Reconnect will be attempted in 1 second.`)
+    const root = this.root
+
+    if (!root.socket) {
+      if (root.debug) {
+        console.log(`${root.name}: socket is closed, not reconnecting.`)
       }
-      setTimeout(() => {
-        this.root._connect()
-      }, this.reconnectTimeout)
-    } else {
-      if (this.debug) {
-        console.log(`${this.root.name}: socket is closed, not reconnecting.`)
-      }
+      return
     }
+
+    root.socket = null
+
+    if (root.debug) {
+      console.log(`${root.name}: socket is closed. Reconnect will be attempted in ${root.reconnectTimeout}ms.`)
+    }
+
+    root.reconnectTimer = setTimeout(() => {
+      root.reconnectTimer = null
+      root.getSocket()
+    }, root.reconnectTimeout)
   }
 
   _onOpenMethod(e) {

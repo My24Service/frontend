@@ -36,17 +36,14 @@
 </template>
 
 <script lang="ts" setup>
-import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
   customerMaintenanceContractDestroyMutation,
   customerMaintenanceContractListOptions,
+  customerMaintenanceContractListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractList } from '@/api/types.gen'
-import { tryToDinero } from './dinero-helpers'
-import { useMainStore } from '@/stores/main'
-import { $trans } from '@/services/i18n'
-import { customerMaintenanceContractListQueryKey } from '@/api/@tanstack/vue-query.gen'
+import { formatMoney, toDinero } from '@/services/money'
 import {
   ServerTable,
   baseListParams,
@@ -66,7 +63,8 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 const mainStore = useMainStore()
 
 function dineroFor(row: ContractRow) {
-  return tryToDinero(row.sum_tariffs, mainStore.getDefaultCurrency)
+  // sum_tariffs is required on the contract; the tenant default prices it.
+  return toDinero(row.sum_tariffs, mainStore.getDefaultCurrency)
 }
 
 const columnHelper = createAppColumnHelper<ContractRow>()
@@ -84,10 +82,7 @@ const columns = columnHelper.columns([
   }),
   columnHelper.accessor('sum_tariffs', {
     header: $trans('Contract value'),
-    cell: (info) => {
-      const dinero = dineroFor(info.row.original)
-      return dinero ? h('span', dinero.toFormat('$0.00')) : ''
-    },
+    cell: (info) => h('span', formatMoney(dineroFor(info.row.original))),
   }),
   columnHelper.accessor('remarks', {header: $trans('Remarks')}),
   columnHelper.accessor('created', {

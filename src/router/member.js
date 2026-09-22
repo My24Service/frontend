@@ -1,20 +1,19 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import SubNavMembers from '../components/SubNavMembers.vue'
+import SubNav from '../components/SubNav.vue'
 
 // The whole Member Slice — lists and forms, #321-#325 — lives in the feature
 // folder; this file only routes it.
-import {
-  ContractForm,
-  ContractList,
-  MemberForm,
-  MemberList,
-  ModuleForm,
-  ModuleList,
-  ModulePartForm,
-  ModulePartList,
-} from '@/features/member'
 import {AUTH_LEVELS} from "@/constants";
 
+// Route screens, split per chunk: the router holds a loader, not the module.
+const ContractForm = () => import('@/features/member/contract/ContractForm.vue')
+const ContractList = () => import('@/features/member/contract/ContractList.vue')
+const MemberForm = () => import('@/features/member/member/MemberForm.vue')
+const MemberList = () => import('@/features/member/member/MemberList.vue')
+const ModuleForm = () => import('@/features/member/module/ModuleForm.vue')
+const ModuleList = () => import('@/features/member/module/ModuleList.vue')
+const ModulePartForm = () => import('@/features/member/module-part/ModulePartForm.vue')
+const ModulePartList = () => import('@/features/member/module-part/ModulePartList.vue')
 
 export default [
 {
@@ -27,11 +26,11 @@ export default [
       path: '/members/members',
       components: {
         'app-content': MemberList,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params, variant: 'active'}),
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
     },
     {
@@ -40,11 +39,11 @@ export default [
       path: '/members/deleted-members',
       components: {
         'app-content': MemberList,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params, variant: 'deleted'}),
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
     },
     {
@@ -53,11 +52,11 @@ export default [
       path: '/members/requested-members',
       components: {
         'app-content': MemberList,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params, variant: 'requested'}),
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
     },
     {
@@ -66,11 +65,11 @@ export default [
       path: '/members/members/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
       components: {
         'app-content': MemberForm,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
     },
     {
@@ -79,24 +78,25 @@ export default [
       path: '/members/members/form',
       components: {
         'app-content': MemberForm,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
     },
     {
       meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
       name: 'member-request',
-      path: '/members/members/form',
+      // Its own path: sharing member-add's meant a reload matched member-add.
+      path: '/members/members/request-form',
       components: {
         'app-content': MemberForm,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': route => ({...route.params, isRequest: true}),
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
     },
     // contracts
@@ -106,11 +106,11 @@ export default [
       path: '/members/contracts',
       components: {
         'app-content': ContractList,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
     },
     {
@@ -119,11 +119,11 @@ export default [
       path: '/members/contracts/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
       components: {
         'app-content': ContractForm,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
     },
     {
@@ -132,11 +132,11 @@ export default [
       path: '/members/contracts/form',
       components: {
         'app-content': ContractForm,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
     },
     // modules
@@ -146,11 +146,11 @@ export default [
       path: '/members/modules',
       components: {
         'app-content': ModuleList,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
     },
     {
@@ -159,11 +159,11 @@ export default [
       path: '/members/modules/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
       components: {
         'app-content': ModuleForm,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
     },
     {
@@ -172,11 +172,11 @@ export default [
       path: '/members/modules/form',
       components: {
         'app-content': ModuleForm,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
     },
     // module parts
@@ -186,11 +186,11 @@ export default [
       path: '/members/module-parts',
       components: {
         'app-content': ModulePartList,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
     },
     {
@@ -199,11 +199,11 @@ export default [
       path: '/members/module-parts/form/:pk',
       props: {
         'app-content': route => ({...route.params}),
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
       components: {
         'app-content': ModulePartForm,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
     },
     {
@@ -212,11 +212,11 @@ export default [
       path: '/members/module-parts/form',
       components: {
         'app-content': ModulePartForm,
-        'app-subnav': SubNavMembers
+        'app-subnav': SubNav
       },
       props: {
         'app-content': {},
-        'app-subnav': {}
+        'app-subnav': { section: 'members' }
       },
     },
   ]

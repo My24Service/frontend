@@ -39,31 +39,12 @@
                   v-bind:label="$trans('Price')"
                   v-if="cost.quotation"
                 >
-                  <BFormRadioGroup
-                    @change="updateTotals"
-                    v-model="cost.use_price"
+                  <PriceInput
+                    v-model="cost.price"
+                    :currency="cost.price_currency"
+                    @priceChanged="(val) => priceChanged(val, cost)"
                     v-if="!parentHasQuotationLines"
-                  >
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_SETTINGS">
-                      {{ $trans('Settings') }}
-                      {{ getPriceFor(usePriceOptions.USE_PRICE_SETTINGS).toFormat("$0.00") }}
-                    </BFormRadio>
-
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_CUSTOMER">
-                      {{ $trans('Customer') }}
-                      {{ getPriceFor(usePriceOptions.USE_PRICE_CUSTOMER).toFormat("$0.00") }}
-                    </BFormRadio>
-
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
-                      {{ $trans("Other") }}
-                      <PriceInput
-                        v-model="cost.price_other"
-                        :currency="cost.price_other_currency"
-                        @priceChanged="(val) => otherPriceChanged(val, cost)"
-                        @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
-                      />
-                    </BFormRadio>
-                  </BFormRadioGroup>
+                  />
                 </BFormGroup>
               </b-col>
               <b-col cols="2">
@@ -82,7 +63,7 @@
                   <BFormInput
                     readonly
                     disabled
-                    :value="cost.vat_dinero.toFormat('$0.00')"
+                    :value="formatMoney(cost.vat_dinero)"
                     class="text-right pr-0"
                   ></BFormInput>
                 </BFormGroup>
@@ -95,7 +76,7 @@
                     readonly
                     disabled
                     class="text-right pr-0"
-                    :value="cost.total_dinero.toFormat('$0.00')"
+                    :value="formatMoney(cost.total_dinero)"
                   ></BFormInput>
                 </BFormGroup>
               </b-col>
@@ -166,19 +147,13 @@
   </b-overlay>
 </template>
 <script>
-import {toDinero} from "@/services/money";
 import PriceInput from "@/components/PriceInput";
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/services/i18n";
 
-import {COST_TYPE_DISTANCE, CostService} from "@/models/quotations/Cost";
+import {formatMoney} from "@/services/money";
+
+import {COST_TYPE, CostService} from "@/models/quotations/Cost";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 
-import {
-  USE_PRICE_OTHER,
-  USE_PRICE_SETTINGS,
-  USE_PRICE_CUSTOMER
-} from "./constants";
 import quotationMixin from "./mixin.js";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
@@ -186,7 +161,6 @@ import AddToQuotationLines from './AddToQuotationLines.vue'
 import SectionHeader from "./SectionHeader.vue";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
-import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
@@ -248,15 +222,10 @@ export default {
       totalVAT_dinero: null,
       totalAmount: null,
       costService: new CostService(),
-      usePriceOptions: {
-        USE_PRICE_SETTINGS,
-        USE_PRICE_CUSTOMER,
-        USE_PRICE_OTHER,
-      },
       default_currency: this.mainStore.getDefaultCurrency,
       default_vat: this.mainStore.getQuotationDefaultVat,
       default_price_per_km: this.mainStore.getQuotationDefaultPricePerKm,
-      quotationLineType: COST_TYPE_DISTANCE,
+      quotationLineType: COST_TYPE.DISTANCE,
       parentHasQuotationLines: false,
       quotationLineService: new QuotationLineService(),
       isLoaded: false,
@@ -269,21 +238,17 @@ export default {
     this.costService.default_vat = this.default_vat
     this.costService.default_currency = this.default_currency
 
-    this.default_price_per_km_dinero = toDinero(
-      this.default_price_per_km,
-      this.default_currency
-    )
-
     if (this.chapter.id) {
       this.costService.addListArg(`chapter=${this.chapter.id}`)
-      this.costService.addListArg(`cost_type=${COST_TYPE_DISTANCE}`)
+      this.costService.addListArg(`cost_type=${COST_TYPE.DISTANCE}`)
       await this.loadData()
     }
     this.isLoading = false
   },
   methods: {
-    otherPriceChanged(priceDinero, cost) {
-      cost.setPriceField('price_other', priceDinero)
+    formatMoney,
+    priceChanged(priceDinero, cost) {
+      cost.setPriceField('price', priceDinero)
       this.updateTotals()
       this.hasChanges = true
     },
@@ -292,15 +257,9 @@ export default {
         new this.costService.model({
           ...this.costService.getDefaultCostProps(),
           ...this.getDefaultProps(),
-          price: this.getPrice(
-            {use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
-          price_currency: this.getCurrency(
-            {use_price: this.usePriceOptions.USE_PRICE_SETTINGS}),
-          use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
-          price_other_currency: this.getCurrency(
-            {use_price: this.usePriceOptions.USE_PRICE_OTHER}),
-          cost_type: COST_TYPE_DISTANCE,
-          margin_perc: 0
+          price: this.default_price_per_km,
+          price_currency: this.default_currency,
+          cost_type: COST_TYPE.DISTANCE
         })
       )
       this.updateTotals()
@@ -316,7 +275,7 @@ export default {
     async saveCosts() {
       try {
         this.isLoading = true
-        await this.costService.updateCollection()
+        await this.replaceCostRows()
         infoToast(this.create, $trans('Created'), $trans('Distance costs updated'))
         await this.loadData()
         this.isLoading = false
@@ -340,10 +299,6 @@ export default {
       try {
         const response = await this.costService.list()
         this.costService.collection = response.results.map((cost) => {
-          if (cost.use_price === this.usePriceOptions.USE_PRICE_OTHER) {
-            cost.price_other = cost.price
-            cost.price_other_currency = cost.price_currency
-          }
           cost.distanceSaved = true
           return new this.costService.model(cost)
         })
@@ -363,38 +318,16 @@ export default {
     },
     getDefaultProps() {
       return {
-        use_price: this.usePriceOptions.USE_PRICE_SETTINGS,
         quotation: this.chapter.quotation,
         chapter: this.chapter.id,
         vat_type: this.default_vat
       }
     },
-    getPriceFor(usePrice) {
-      switch (usePrice) {
-        case this.usePriceOptions.USE_PRICE_SETTINGS:
-          return this.default_price_per_km_dinero
-        case this.usePriceOptions.USE_PRICE_CUSTOMER:
-          return this.customer.price_per_km_dinero
-        default:
-          console.log(`getPriceFor - unknown use price: ${usePrice}`)
-          return "0.00"
-      }
-    },
     getPrice(cost) {
-      switch (cost.use_price) {
-        case this.usePriceOptions.USE_PRICE_SETTINGS:
-          return this.default_price_per_km
-        case this.usePriceOptions.USE_PRICE_CUSTOMER:
-          return this.customer.price_per_km
-        case this.usePriceOptions.USE_PRICE_OTHER:
-          return cost.price_other
-        default:
-          console.log(`getPrice - unknown use price: ${cost.use_price}`)
-          return "0.00"
-      }
+      return cost.price
     },
-    getCurrency(_activity) {
-      return this.default_currency
+    getCurrency(cost) {
+      return cost.price_currency || this.default_currency
     },
     amountChanged() {
       this.hasChanges = true

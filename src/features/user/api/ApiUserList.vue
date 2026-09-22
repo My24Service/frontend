@@ -46,10 +46,7 @@
 </template>
 
 <script lang="ts" setup>
-import { h, useTemplateRef } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
 import { addDays, format } from 'date-fns'
 
 import {
@@ -59,8 +56,6 @@ import {
   companyApiuserRevokeCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyApiuserListData, PaginatedApiUserList } from '@/api/types.gen'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
-import { useAuthStore } from '@/features/auth'
 import {
   ServerTable,
   baseListParams,
@@ -85,7 +80,7 @@ const columnHelper = createAppColumnHelper<ApiUserRow>()
 
 function validUntil(expireStartDt: string | undefined, expireInDays: number): string {
   if (!expireStartDt) return '—'
-  const [year, month, day] = expireStartDt.slice(0, 10).split('-').map(Number)
+  const [year, month, day] = expireStartDt.split('-').map(Number)
   return format(addDays(new Date(year, month - 1, day), expireInDays), 'dd/MM/yyyy')
 }
 

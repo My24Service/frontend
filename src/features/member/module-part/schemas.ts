@@ -1,31 +1,37 @@
 import * as v from 'valibot'
 
 import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
-import { $trans } from '@/services/i18n'
-
+import {
+  fieldErrors,
+  requiredMessages,
+  type FieldErrors,
+  type FieldLabels,
+} from '@/features/forms'
+import { formDefaults } from '@/models/schema'
 export type ModulePartFormValues =
   Omit<v.InferInput<typeof vMemberModulePartCreateBody>, 'module'> & {module: number | null}
 
+/**
+ * The blank form, derived from the request component. `module` is the one
+ * decision the schema cannot make for us: the entry is a required integer, so
+ * its inferred blank is `0`, while an unchosen picker is `null`.
+ */
 export function emptyModulePart(): ModulePartFormValues {
-  return { name: '', module: null, is_always_selected: false }
+  return formDefaults(vMemberModulePartCreateBody, {module: null})
 }
 
 export type ModulePartFieldErrors = FieldErrors<keyof ModulePartFormValues & string>
 
-const MESSAGES = {
-  name_required: () => $trans('Please enter a name'),
-  name_max_length: () => $trans('Please use at most 255 characters'),
-  module_required: () => $trans('Please choose a module'),
-} as const
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+  module: () => $trans('Module'),
+} satisfies FieldLabels<keyof ModulePartFormValues & string>
 
-export const FIELD_MESSAGES = {
-  name: (issue?: v.BaseIssue<unknown>) => issue?.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required(),
-  module: MESSAGES.module_required,
-} satisfies FieldMessages<keyof ModulePartFormValues & string>
+/** The line under an untouched field: the same required line the validation shows. */
+export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)
 
 export function validateModulePart(values: ModulePartFormValues): ModulePartFieldErrors {
-  return fieldErrors(vMemberModulePartCreateBody, values, FIELD_MESSAGES)
+  return fieldErrors(vMemberModulePartCreateBody, values, {}, FIELD_LABELS)
 }
 
 export function parseModulePart(values: ModulePartFormValues): v.InferOutput<typeof vMemberModulePartCreateBody> {

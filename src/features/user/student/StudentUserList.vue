@@ -36,18 +36,13 @@
 </template>
 
 <script lang="ts" setup>
-import { h, useTemplateRef } from 'vue'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   companyStudentuserDestroyMutation,
   companyStudentuserListOptions,
   companyStudentuserPartialUpdateMutation,
+  companyStudentuserListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyStudentuserListData, PaginatedStudentUserList } from '@/api/types.gen'
-import { errorToast, $trans } from '@/services/i18n'
-import { companyStudentuserListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import {
   ServerTable,
   baseListParams,

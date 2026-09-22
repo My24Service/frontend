@@ -36,15 +36,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-
 import {
   companyPlanninguserDestroyMutation,
   companyPlanninguserListOptions,
+  companyPlanninguserListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyPlanninguserListData, PaginatedPlanningUserList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-import { companyPlanninguserListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import {
   ServerTable,
   baseListParams,

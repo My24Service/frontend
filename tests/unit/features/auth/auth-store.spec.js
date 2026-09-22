@@ -2,8 +2,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 
 import { client } from '@/api/client.gen'
-import { useAuthStore } from '@/features/auth'
-import { useAuthToken } from '@/features/auth/token'
+import {
+  useAuthStore,
+  useAuthToken,
+} from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 
 /**

@@ -152,7 +152,6 @@
                 ></BFormInput>
               </BFormGroup>
 
-
               <h6>{{ $trans("Pricing") }}</h6>
 
               <BFormGroup
@@ -267,8 +266,6 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import VueMultiselect from 'vue-multiselect'
@@ -276,8 +273,6 @@ import VueMultiselect from 'vue-multiselect'
 import materialService from '../../models/inventory/Material.js'
 import supplierModel from '../../models/inventory/Supplier'
 import {NO_IMAGE_URL} from "@/constants"
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 const props = defineProps({
   pk: {

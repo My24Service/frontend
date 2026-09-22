@@ -2,8 +2,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { enableAutoUnmount } from '@vue/test-utils'
 
 import { NoAccessView } from '@/features/account'
-import { useAuthStore } from '@/features/auth'
-import { useAuthToken } from '@/features/auth/token'
+import {
+  useAuthStore,
+  useAuthToken,
+} from '@/features/auth'
 
 import { mountListView, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
 
@@ -92,8 +94,8 @@ async function loginThroughForm(wrapper) {
     authStore.isLoggedIn = true
   })
 
-  await wrapper.get('#username-input').setValue('jan')
-  await wrapper.get('#password-input').setValue('secret')
+  await wrapper.get('#login_username').setValue('jan')
+  await wrapper.get('#login_password').setValue('secret')
   await wrapper.get('form').trigger('submit')
   await flush()
 }

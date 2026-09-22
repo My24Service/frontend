@@ -1,4 +1,4 @@
-import { CODE_TYPES } from '@/features/statuscode/code-types'
+import { CODE_TYPES } from '@/features/statuscode'
 
 /**
  * The routes the Statuscode-Slice screens link to, for the harness's router.

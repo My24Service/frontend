@@ -33,7 +33,6 @@
           name="action"
           v-model="action"
           :errors="errors"
-          :messages="FIELD_MESSAGES"
           :labels="FIELD_LABELS"
           :submitted="submitClicked"
         >
@@ -189,28 +188,21 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
   companyPartnerListOptions,
-  statuscodeActionCreateMutation,
   statuscodeActionDestroyMutation,
-  statuscodeActionPartialUpdateMutation,
-  statuscodeActionRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { Action, CompanyPartnerListData } from '@/api/types.gen'
-import { useAuthStore } from '@/features/auth/store'
-import { useResourceForm } from '@/features/forms/use-resource-form'
-import ValidatedForm from '@/features/forms/ValidatedForm.vue'
-import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
-import { useConfirmedAction } from '@/features/table'
-import { $trans, errorToast, infoToast } from '@/services/i18n'
-import my24 from '@/services/my24'
-import { useMainStore } from '@/stores/main'
-
+import { statuscodeAction } from '@/api/resources.gen'
+import type { Action, ActionRequest, CompanyPartnerListData } from '@/api/types.gen'
+import {
+  useResourceForm,
+  ValidatedForm,
+  ValidatedFormField,
+} from '@/features/forms'
+import {
+  useConfirmedAction,
+  WHOLE_COLLECTION_PAGE_SIZE,
+} from '@/features/table'
 import type { CodeType } from '../code-types'
 import { invalidateStatuscodeLists } from '../invalidation'
 import {
@@ -218,10 +210,8 @@ import {
   actionTypesFor,
   emptyAction,
   FIELD_LABELS,
-  FIELD_MESSAGES,
   parseAction,
   validateAction,
-  type ActionBody,
   type ActionCondition,
   type ActionFieldErrors,
   type ActionFormValues,
@@ -256,11 +246,9 @@ const {
   buttonDisabled,
   submitForm,
   cancelForm,
-} = useResourceForm<ActionFormValues, Action, ActionBody, ActionFieldErrors>({
+} = useResourceForm<ActionFormValues, Action, ActionRequest, ActionFieldErrors>({
   pk: () => props.pk,
-  retrieve: (actionId) => statuscodeActionRetrieveOptions({path: {id: actionId}}),
-  create: statuscodeActionCreateMutation(),
-  update: statuscodeActionPartialUpdateMutation(),
+  resource: statuscodeAction,
   invalidate: invalidateStatuscodeLists,
   empty: emptyAction,
   fromRecord: actionFromRecord,
@@ -282,7 +270,8 @@ const {
 const hasGripp = computed(() => my24.hasAccessToModule({
   isStaff: authStore.isStaff,
   isSuperuser: authStore.isSuperuser,
-  contract: mainStore.memberContract,
+        modules: mainStore.getModules,
+        parts: mainStore.getModuleParts,
   module: 'company',
   part: 'connector-gripp',
 }))
@@ -294,7 +283,7 @@ const actionTypes = computed(() => actionTypesFor(props.codeType, {hasGripp: has
 type PartnerListQueryParams = NonNullable<CompanyPartnerListData['query']>
 
 const partnersQuery = useQuery(() => ({
-  ...companyPartnerListOptions({query: {page_size: 1000} as PartnerListQueryParams}),
+  ...companyPartnerListOptions({query: {page_size: WHOLE_COLLECTION_PAGE_SIZE} as PartnerListQueryParams}),
   enabled: props.codeType === 'order',
 }))
 

@@ -21,7 +21,7 @@
               <b-form-invalid-feedback
                 id="module-part_name-feedback"
                 :state="submitClicked ? !errors.name : null">
-                {{ errors.name || FIELD_MESSAGES.name() }}
+                {{ errors.name || PLACEHOLDERS.name() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -40,7 +40,7 @@
               <b-form-invalid-feedback
                 id="module-part_module-feedback"
                 :state="submitClicked ? !errors.module : null">
-                {{ errors.module || FIELD_MESSAGES.module() }}
+                {{ errors.module || PLACEHOLDERS.module() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </b-col>
@@ -76,28 +76,23 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-
-import {
-  memberModuleListOptions,
-  memberModulePartCreateMutation,
-  memberModulePartPartialUpdateMutation,
-  memberModulePartRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { memberModuleListOptions } from '@/api/@tanstack/vue-query.gen'
+import { memberModulePart } from '@/api/resources.gen'
 import type { ModulePart } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms/use-resource-form'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
+import {
+  useResourceForm,
+  useQueryErrorToast,
+} from '@/features/forms'
 import {
   emptyModulePart,
-  FIELD_MESSAGES,
+  PLACEHOLDERS,
   parseModulePart,
   validateModulePart,
   type ModulePartFieldErrors,
   type ModulePartFormValues,
 } from './schemas'
 import { invalidateModulePartListQueries } from '../invalidation'
-import { $trans } from '@/services/i18n'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -116,9 +111,7 @@ const {
   cancelForm,
 } = useResourceForm<ModulePartFormValues, ModulePart, ReturnType<typeof parseModulePart>, ModulePartFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => memberModulePartRetrieveOptions({path: {id}}),
-  create: memberModulePartCreateMutation(),
-  update: memberModulePartPartialUpdateMutation(),
+  resource: memberModulePart,
   invalidate: invalidateModulePartListQueries,
   empty: emptyModulePart,
   fromRecord: (record) => ({
@@ -143,7 +136,6 @@ const {
 // 1000 is the API's own ceiling: `My24Pagination.max_page_size` (my24service
 // `source/apps/core/rest.py:236`), which DRF clamps a larger value down to
 // rather than rejecting it, so this is the most one response can carry.
-const WHOLE_COLLECTION_PAGE_SIZE = 1000
 
 const modulesQuery = useQuery(
   memberModuleListOptions({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),

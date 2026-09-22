@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
-import { validateSetPassword } from '@/features/account/schemas'
-import { PASSWORD_MESSAGES, passwordErrors } from '@/features/forms/password-rules'
+import { validateSetPassword } from '@/features/account'
+import { PASSWORD_MESSAGES, passwordErrors } from '@/features/forms'
 
 /**
  * One implementation of the password rule, and one copy, shared by the seven

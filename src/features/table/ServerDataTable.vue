@@ -25,24 +25,6 @@
           </template>
         </th>
       </tr>
-      <tr
-        v-if="hasFilterInputs"
-        class="filter-row"
-      >
-        <th
-          v-for="header in headers"
-          :key="header.id + '-filter'"
-        >
-          <input
-            v-if="filterVariant(header) === 'text'"
-            :aria-label="`Filter ${header.column.id}`"
-            class="form-control form-control-sm"
-            :placeholder="filterPlaceholder(header)"
-            :value="filterValue(header)"
-            @input="onFilterInput(header, $event)"
-          />
-        </th>
-      </tr>
     </thead>
     <tbody>
       <tr
@@ -76,10 +58,12 @@
 </template>
 
 <script setup lang="ts" generic="TData extends RowData">
-import { computed } from 'vue'
-import { FlexRender } from '@tanstack/vue-table'
-import type { Header, RowData, VueTable } from '@tanstack/vue-table'
-import { $trans } from '@/services/i18n'
+import {
+  FlexRender,
+  type Header,
+  type RowData,
+  type VueTable,
+} from '@tanstack/vue-table'
 import type { AppFeatures } from './table'
 
 const props = defineProps<{
@@ -95,35 +79,15 @@ const headers = computed(() => headerGroup.value?.headers ?? [])
 const columnCount = computed(() => headers.value.length)
 const loadingText = computed(() => props.loadingText ?? $trans('Loading...'))
 const emptyText = computed(() => props.emptyText ?? $trans('No rows found'))
-const hasFilterInputs = computed(() => headers.value.some((header) => filterVariant(header) !== undefined))
 
 function ariaSort(header: Header<AppFeatures, TData, unknown>): 'ascending' | 'descending' | 'none' {
   const sorted = header.column.getIsSorted()
   return sorted === 'asc' ? 'ascending' : sorted === 'desc' ? 'descending' : 'none'
 }
 
-function filterVariant(header: Header<AppFeatures, TData, unknown>): string | undefined {
-  if (!header.column.getCanFilter()) return undefined
-  return header.column.columnDef.meta?.filterVariant
-}
-
 function colStyle(header: Header<AppFeatures, TData, unknown>): {width: string} | undefined {
   const width = header.column.columnDef.meta?.width
   return width ? {width} : undefined
-}
-
-function filterPlaceholder(header: Header<AppFeatures, TData, unknown>): string | undefined {
-  return header.column.columnDef.meta?.filterPlaceholder
-}
-
-function filterValue(header: Header<AppFeatures, TData, unknown>): string {
-  const value = header.column.getFilterValue()
-  return typeof value === 'string' ? value : ''
-}
-
-function onFilterInput(header: Header<AppFeatures, TData, unknown>, event: Event) {
-  const value = (event.target as HTMLInputElement).value
-  header.column.setFilterValue(value || undefined)
 }
 </script>
 
@@ -150,16 +114,6 @@ th.sortable-header:hover {
   min-width: 1.1em;
   margin-left: 0.25rem;
   color: var(--bs-primary);
-}
-
-thead .filter-row th {
-  position: sticky;
-  top: 38px;
-  z-index: 1;
-  background: var(--bs-body-bg);
-  border-top: 0;
-  padding-top: 0;
-  font-weight: 400;
 }
 
 .table-state-row td {

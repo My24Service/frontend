@@ -1,12 +1,13 @@
 import * as v from 'valibot'
 
-import type { Action, ActionTypeEnum } from '@/api/types.gen'
+import type { Action, ActionRequest, ActionTypeEnum } from '@/api/types.gen'
 import { vActionRequest } from '@/api/valibot.gen'
-import { fieldsFromRecord } from '@/features/forms/record-fields'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
-import { $trans } from '@/services/i18n'
-
+import {
+  fieldsFromRecord,
+  type FieldLabels,
+  fieldErrors,
+  type FieldErrors,
+} from '@/features/forms'
 import type { CodeType } from '../code-types'
 
 type WireValues = v.InferInput<typeof vActionRequest>
@@ -52,16 +53,6 @@ const actionFormSchema = v.omit(vActionRequest, ['statuscode'])
 
 export type ActionFieldErrors = FieldErrors<keyof ActionFormValues & string>
 
-const MESSAGES = {
-  name_required: () => $trans('Please enter a name'),
-  name_max_length: () => $trans('Please use at most 120 characters'),
-} as const
-
-export const FIELD_MESSAGES = {
-  name: (issue?: v.BaseIssue<unknown>) =>
-    issue?.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required(),
-} satisfies FieldMessages<keyof ActionFormValues & string>
-
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
 } satisfies FieldLabels<keyof ActionFormValues & string>
@@ -81,10 +72,8 @@ function toWire(values: ActionFormValues): Record<string, unknown> {
 }
 
 export function validateAction(values: ActionFormValues): ActionFieldErrors {
-  return fieldErrors(actionFormSchema, toWire(values), FIELD_MESSAGES)
+  return fieldErrors(actionFormSchema, toWire(values), {}, FIELD_LABELS)
 }
-
-export type ActionBody = v.InferOutput<typeof vActionRequest>
 
 /** Where the action's statuscode comes from: the route on a create, the record on an edit. */
 export interface ActionWrite {
@@ -92,7 +81,7 @@ export interface ActionWrite {
   statuscodePk: string | number | null
 }
 
-export function parseAction(values: ActionFormValues, write: ActionWrite): ActionBody {
+export function parseAction(values: ActionFormValues, write: ActionWrite): ActionRequest {
   const statuscode = write.isCreate ? Number(write.statuscodePk) : values.statuscode
   return v.parse(vActionRequest, {...toWire(values), statuscode})
 }

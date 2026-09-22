@@ -1,15 +1,5 @@
-import { computed, ref, watch, type Ref } from 'vue'
-import { useRouter } from 'vue-router'
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  type QueryClient,
-  type UseMutationOptions,
-} from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
-import { errorToast, infoToast } from '@/services/i18n'
+import { type QueryClient } from '@tanstack/vue-query'
+import type { ActionResource, CollectionResource, Resource, SingletonResource } from '@/api/resources.gen'
 import { useRoutePk } from './use-route-pk'
 import { useQueryErrorToast } from './use-query-error-toast'
 
@@ -23,6 +13,103 @@ import { useQueryErrorToast } from './use-query-error-toast'
  * care simply declares one parameter.
  */
 export type WriteContext = {isCreate: true; id: null} | {isCreate: false; id: number}
+
+/**
+ * Refresh every read a write to `resource` made stale: its list, its detail,
+ * and the filtered views and counts under its path - `resource.reads`, which
+ * the generator collected from the schema. hey-api keys each query
+ * `[{_id, baseURL, ...}]` and tanstack matches a filter partially, so `[{_id}]`
+ * reaches every page, filter and id of that read.
+ *
+ * Returns the `(queryClient) => Promise` shape a delete modal or
+ * `useResourceForm` takes, so a screen writes `invalidate:
+ * invalidateReads(companyBranch)`. A read that is stale for a reason the
+ * schema cannot state - another resource's list - is still a hand-written
+ * `invalidation.ts` helper, composed with this one.
+ */
+export function invalidateReads(resource: Pick<Resource, 'reads'>) {
+  return (queryClient: QueryClient) =>
+    Promise.all(resource.reads.map((_id) => queryClient.invalidateQueries({queryKey: [{_id}]})))
+}
+
+/**
+ * What `useResourceForm` needs of a generated resource (`@/api/resources.gen`):
+ * one with a record, read and updated. An `action` has no record and is not
+ * a member, so passing one is a type error rather than a form that cannot
+ * load; `retrieve` and `update` are required because this composable always
+ * builds both. Each member keeps its own `retrieve` - by id in the path, or
+ * with no arguments for a singleton.
+ */
+type WithRecord<R extends Exclude<Resource, ActionResource>> = R & Required<Pick<R, 'retrieve' | 'update'>>
+export type FormResource =
+  | WithRecord<CollectionResource<number>>
+  | WithRecord<CollectionResource<string>>
+  | WithRecord<SingletonResource>
+
+/**
+ * Where a form's reads and writes come from: the generated resource, or the
+ * generated pieces named by hand. One or the other - a form that names a
+ * resource has nothing left to name, and the `never`s make a mix a type
+ * error rather than a silent precedence rule.
+ */
+export type ResourceFormWiring =
+  | {
+    resource: FormResource
+    retrieve?: never
+    create?: never
+    update?: never
+    /**
+     * Defaults to `invalidateReads(resource)`. Given when a write stales more
+     * than the resource's own reads - the branch form's `branch-my` variant
+     * also refreshes the branch list.
+     */
+    invalidate?: (queryClient: QueryClient) => Promise<unknown>
+  }
+  | {
+    resource?: never
+    /** The generated `*RetrieveOptions` for this record. */
+    retrieve: (id: number) => Record<string, unknown>
+    /**
+     * The generated `*CreateMutation()` / `*PartialUpdateMutation()` results.
+     *
+     * `any` rather than a type parameter, and the reason is narrower than
+     * "contravariance": `UseMutationOptions` is not a plain data shape. It
+     * re-exposes the response and the error through the parameters of
+     * `onSuccess`, `onSettled`, `onError` and `throwOnError`, which makes BOTH
+     * slots invariant, so `unknown` is rejected the moment a generated pair is
+     * passed and only `any` — or that pair's exact types — satisfies them. The
+     * variables slot *could* be parameterized, but every call site already
+     * supplies four explicit type arguments and TypeScript does not infer the
+     * parameters that follow them: the fifth and sixth would silently take their
+     * defaults. Buying the fix means naming five generated types across ten type
+     * arguments at ~14 call sites, plus four casts inside this composable, to
+     * delete two suppressed `any`s. That was measured, not assumed — the spike is
+     * recorded in the 2026-09-10 session log.
+     *
+     * Only `mutationFn` is used from these — the composable supplies its own
+     * `onSuccess`/`onError`.
+     */
+    //
+    // `create` is optional for the pathless "singleton" screens (the company
+    // info, the tenant's settings, a branch employee's own branch), which only
+    // ever edit; a create attempt there throws rather than silently doing
+    // nothing.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    create?: UseMutationOptions<any, any, any>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    update: UseMutationOptions<any, any, any>
+    /** The surviving invalidation concern — the writer refreshes what it made stale. */
+    invalidate: (queryClient: QueryClient) => Promise<unknown>
+  }
+
+/** What `submitForm` accepts: `stay` keeps the user on the form after a successful write. */
+export interface SubmitOptions {
+  stay?: boolean
+}
+
+function isSubmitOptions(value: unknown): value is SubmitOptions {
+  return typeof value === 'object' && value !== null && 'stay' in value
+}
 
 /** The seven strings a create/edit form says. Already localized by the caller. */
 export interface ResourceFormCopy {
@@ -46,39 +133,27 @@ export interface ResourceFormCopy {
  * `updateError` copy verbatim; the Member form is the one that says otherwise,
  * passing `saveErrorReason` so the API's own reason reaches the toast body
  * (its ledger row records that, and its spec pins it).
+ *
+ * `submitForm` answers whether the record was written, and `{stay: true}`
+ * keeps the user on the form afterwards: the equipment, building and
+ * location forms' "save and add another" is the adopter. A record without a
+ * `:pk` route - the tenant's own settings, the branch employee's own branch -
+ * is an edit whose endpoint declares no path; `updateVars` shapes what such
+ * an update sends, the way `createVars` does for a create, and `create` is
+ * left out.
  */
-export function useResourceForm<TValues extends object, TRecord, TBody, TErrors extends object>(config: {
+export function useResourceForm<TValues extends object, TRecord, TBody, TErrors extends object>(config: ResourceFormWiring & {
   pk: () => string | number | null
-  /** The generated `*RetrieveOptions` for this record. */
-  retrieve: (id: number) => Record<string, unknown>
+  /** The variables the create mutation wants, built from the parsed body. Defaults to `{body}`. */
+  createVars?: (body: TBody, context: WriteContext) => Record<string, unknown>
   /**
-   * The generated `*CreateMutation()` / `*PartialUpdateMutation()` results.
-   *
-   * `any` rather than a type parameter, and the reason is narrower than
-   * "contravariance": `UseMutationOptions` is not a plain data shape. It
-   * re-exposes the response and the error through the parameters of
-   * `onSuccess`, `onSettled`, `onError` and `throwOnError`, which makes BOTH
-   * slots invariant, so `unknown` is rejected the moment a generated pair is
-   * passed and only `any` — or that pair's exact types — satisfies them. The
-   * variables slot *could* be parameterized, but every call site already
-   * supplies four explicit type arguments and TypeScript does not infer the
-   * parameters that follow them: the fifth and sixth would silently take their
-   * defaults. Buying the fix means naming five generated types across ten type
-   * arguments at ~14 call sites, plus four casts inside this composable, to
-   * delete two suppressed `any`s. That was measured, not assumed — the spike is
-   * recorded in the 2026-09-10 session log.
-   *
-   * Only `mutationFn` is used from these — the composable supplies its own
-   * `onSuccess`/`onError`.
+   * The variables the update mutation wants. Defaults to `{path: {id}, body}`,
+   * which is what every `/{id}/` endpoint declares; a pathless endpoint
+   * (`member/me`, `branch-my`, `my_settings`) refuses a path; a `singleton`
+   * resource defaults to `{body}` for that reason, and a screen without one
+   * passes `(body) => ({body})` itself.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  create: UseMutationOptions<any, any, any>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  update: UseMutationOptions<any, any, any>
-  /** The variables each mutation wants, built from the parsed body. */
-  createVars?: (body: TBody) => Record<string, unknown>
-  /** The surviving invalidation concern — the writer refreshes what it made stale. */
-  invalidate: (queryClient: QueryClient) => Promise<unknown>
+  updateVars?: (body: TBody, context: WriteContext) => Record<string, unknown>
   empty: () => TValues
   fromRecord: (record: TRecord) => TValues
   validate: (values: TValues, context: WriteContext) => TErrors | Promise<TErrors>
@@ -98,6 +173,12 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
    * copy its spec pins.
    */
   reasonOf?: (error: unknown, fallback: string) => string
+  /**
+   * Where a successful save goes. Defaults to `router.go(-1)`; the Order
+   * form's "Submit and open dispatch" is the adopter, going forward to the
+   * dispatch screen instead of back to the list.
+   */
+  afterSave?: () => void | Promise<void>
 }) {
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -105,19 +186,49 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
 
   const { isCreate, id } = useRoutePk(config.pk)
 
+  // wiring ----------------------------------------------------------------
+
+  const { resource } = config
+  const retrieve = resource
+    ? (id: number) => {
+      if (resource.kind === 'singleton') return resource.retrieve.options()
+      return resource.id === 'string'
+        ? resource.retrieve.options({path: {id: String(id)}})
+        : resource.retrieve.options({path: {id}})
+    }
+    : config.retrieve
+  const createOptions = resource ? (resource.kind === 'collection' ? resource.create?.mutation() : undefined) : config.create
+  const updateOptions = resource ? resource.update.mutation() : config.update
+  const updateVars = config.updateVars
+    ?? (resource?.kind === 'singleton' ? (body: TBody) => ({body}) : undefined)
+  const invalidate = config.resource ? config.invalidate ?? invalidateReads(config.resource) : config.invalidate
+
+  /**
+   * The id a create wrote, once its write landed. A record that exists must not
+   * be created twice: if the write succeeded but a later step failed — the
+   * caller's `onSaved` work, the staged child rows — the retry has to update
+   * that record. The route still reads "create" (so the detail read stays off
+   * and a form keeps what it staged), but the write context no longer does.
+   */
+  const createdId = ref<number | null>(null)
+
+  watch([isCreate, id], () => { createdId.value = null })
+
   /**
    * The write context `validate`, `parse` and `onSaved` receive. `useRoutePk`'s
    * `id` is `Number(pk)`, which is `NaN` on a create; this is where that stops,
    * so no caller ever has to guard against a NaN id.
    */
-  const writeContext = computed<WriteContext>(() =>
-    isCreate.value ? {isCreate: true, id: null} : {isCreate: false, id: id.value},
-  )
+  const writeContext = computed<WriteContext>(() => {
+    if (!isCreate.value) return {isCreate: false, id: id.value}
+    if (createdId.value !== null) return {isCreate: false, id: createdId.value}
+    return {isCreate: true, id: null}
+  })
 
   // reads -----------------------------------------------------------------
 
   const detailQuery = useQuery(() => ({
-    ...config.retrieve(id.value),
+    ...retrieve(id.value),
     // A create form has no record to fetch; without this the retrieve fires
     // against `undefined`.
     enabled: !isCreate.value,
@@ -166,24 +277,46 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
     }
   }
 
+  async function leave() {
+    if (config.afterSave) await config.afterSave()
+    else router.go(-1)
+  }
+
+  /**
+   * Set by `submitForm` for the write it is about to make, read by the
+   * mutations' `onSuccess`. The re-entry guard makes one write at a time, so a
+   * single flag is enough.
+   */
+  let stayOnForm = false
+
   const createMutation = useMutation({
-    ...config.create,
+    ...(createOptions ?? {
+      mutationFn: async () => {
+        throw new Error('useResourceForm: this form has no `create` mutation, but was asked to create')
+      },
+    }),
     onSuccess: async (result: unknown) => {
-      await settle(result, writeContext.value, config.copy.createError)
+      // Read the context before recording the id: this first call's `onSaved`
+      // is still the create's, even though the retry's will be the update's.
+      const context = writeContext.value
+      // A "save and add another" stays to create again, so it must not point
+      // the form at the record it just made.
+      if (!stayOnForm) createdId.value = (result as {id?: number} | null | undefined)?.id ?? null
+      await settle(result, context, config.copy.createError)
       infoToast(toast, config.copy.created, config.copy.createdDetail)
-      await config.invalidate(queryClient)
-      router.go(-1)
+      await invalidate(queryClient)
+      if (!stayOnForm) await leave()
     },
     onError: (error: unknown) => onWriteError(error, config.copy.createError),
   })
 
   const updateMutation = useMutation({
-    ...config.update,
+    ...updateOptions,
     onSuccess: async (result: unknown) => {
       await settle(result, writeContext.value, config.copy.updateError)
       infoToast(toast, config.copy.updated, config.copy.updatedDetail)
-      await config.invalidate(queryClient)
-      router.go(-1)
+      await invalidate(queryClient)
+      if (!stayOnForm) await leave()
     },
     onError: (error: unknown) => onWriteError(error, config.copy.updateError),
   })
@@ -207,35 +340,52 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   const errors = ref({}) as Ref<TErrors>
   const submitClicked = ref(false)
 
-  async function submitForm(): Promise<void> {
+  /**
+   * Validate, parse and send. Resolves `true` only when the record was
+   * written - after `onSaved`, the toast and the invalidation - so a caller
+   * can tell a written record from a validation failure or a failed write.
+   *
+   * `{stay: true}` skips the exit (`afterSave` / `router.go(-1)`). The first
+   * argument is checked for shape rather than trusted, because the common
+   * `@click="form.submitForm"` binding hands over a MouseEvent.
+   */
+  async function submitForm(options?: SubmitOptions | Event): Promise<boolean> {
+    const stay = isSubmitOptions(options) && options.stay === true
+
     // The re-entry guard three of the six forms were missing.
-    if (saving.value) return
+    if (saving.value) return false
     saving.value = true
+    stayOnForm = stay
 
     try {
       submitClicked.value = true
 
       const found = await config.validate(values.value, writeContext.value)
       errors.value = found
-      if (Object.keys(found).length > 0) return
+      if (Object.keys(found).length > 0) return false
 
       // The parsed output is the body — typed by the request schema and
       // stripped of anything it does not declare.
       const body = config.parse(values.value, writeContext.value)
 
       try {
-        if (isCreate.value) {
+        const context = writeContext.value
+        if (context.isCreate) {
           await createMutation.mutateAsync(
-            (config.createVars ?? ((b: TBody) => ({ body: b })))(body))
+            (config.createVars ?? ((b: TBody) => ({ body: b })))(body, context))
         } else {
-          await updateMutation.mutateAsync({ path: { id: id.value }, body })
+          await updateMutation.mutateAsync(
+            (updateVars ?? ((b: TBody) => ({ path: { id: context.id }, body: b })))(body, context))
         }
+        return true
       } catch {
         // Already handled: onError told the user what failed, and the form
         // keeps what they entered.
+        return false
       }
     } finally {
       saving.value = false
+      stayOnForm = false
     }
   }
 

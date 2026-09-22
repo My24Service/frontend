@@ -1,8 +1,10 @@
 import type { RouteLocationNormalized } from 'vue-router'
 
-import UserFilterList from "../views/shared/UserFilterList.vue";
-import SubNavOrders from "../components/SubNavOrders.vue";
-import UserFilterForm from "../views/shared/UserFilterForm.vue";
+import SubNav from "../components/SubNav.vue";
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const UserFilterForm = () => import('../views/shared/UserFilterForm.vue')
+const UserFilterList = () => import('../views/shared/UserFilterList.vue')
 
 function createUserFilterRoutes(name_part: string, path_part: string, filter_type: string, from_settings = false) {
   return [
@@ -11,7 +13,7 @@ function createUserFilterRoutes(name_part: string, path_part: string, filter_typ
       path: `/${path_part}/filter`,
       components: {
         'app-content': UserFilterList,
-        'app-subnav': SubNavOrders
+        'app-subnav': SubNav
       },
       props: {
         'app-content': () => ({
@@ -19,7 +21,7 @@ function createUserFilterRoutes(name_part: string, path_part: string, filter_typ
           route_name_part: name_part,
           from_settings
         }),
-        'app-subnav': true
+        'app-subnav': { section: 'orders' }
       },
     },
     {
@@ -27,14 +29,14 @@ function createUserFilterRoutes(name_part: string, path_part: string, filter_typ
       path: `/${path_part}/filter/form`,
       components: {
         'app-content': UserFilterForm,
-        'app-subnav': SubNavOrders
+        'app-subnav': SubNav
       },
       props: {
         'app-content': () => ({
           type: filter_type,
           route_name_part: name_part,
         }),
-        'app-subnav': true
+        'app-subnav': { section: 'orders' }
       },
     },
     {
@@ -46,11 +48,11 @@ function createUserFilterRoutes(name_part: string, path_part: string, filter_typ
           type: filter_type,
           route_name_part: name_part,
         }),
-        'app-subnav': true
+        'app-subnav': { section: 'orders' }
       },
       components: {
         'app-content': UserFilterForm,
-        'app-subnav': SubNavOrders
+        'app-subnav': SubNav
       },
     },
   ]

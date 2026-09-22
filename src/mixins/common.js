@@ -1,18 +1,13 @@
-import my24 from "@/services/my24";
-import {$trans} from "@/services/i18n";
-// Deep import on purpose: the "@/features/auth" door re-exports LoginForm.vue,
-// which pulls bootstrap-vue-next into the stores graph and deadlocks specs
-// that mock it through tests/unit/support/form-harness.js. See 2.4/2.7.
-import {useAuthStore} from "@/features/auth/store";
-import {useMainStore} from "@/stores/main";
-import {isShltrTheme} from "@/theme";
-
-let componentMixin = {
+export default {
   computed: {
-    // Which design a component should render. Resolved once at load from the
-    // tenant's companycode; see @/theme.
-    isShltrTheme() {
-      return isShltrTheme
+    // The product family from the server profile (`default` or `shltr`).
+    // Family differences in a component are CSS or a branch on this.
+    isDefaultFamily() {
+      return useMainStore().getProductFamily === 'default'
+    },
+    // The product flavour from the server profile (`maintenance` or `temps`).
+    flavour() {
+      return useMainStore().getFlavour
     },
     isStaff() {
       const store = useAuthStore()
@@ -79,41 +74,16 @@ let componentMixin = {
     $trans(text) {
       return $trans(text)
     },
-    translateHoursField(field) {
-      const allFields = {
-        'work_total': this.$trans("Work total"),
-        'break_total': this.$trans('Breaks total'),
-        'travel_total': this.$trans('Travel total'),
-        'distance_total': this.$trans('Distance total'),
-        'extra_work': this.$trans('Total extra work'),
-        'actual_work': this.$trans('Total actual work'),
-        'unforeseen_work': this.$trans('Total unforeseen work'),
-        'distance_fixed_rate_amount': this.$trans('Total trips')
-      }
-
-      return allFields[field]
-    },
-    displayDurationFromSeconds(seconds, exclude_seconds) {
-      return this.displayDuration(moment.duration(seconds*1000), exclude_seconds)
-    },
-    displayDuration(duration, exclude_seconds) {
-      const totalMilliseconds = duration.as('milliseconds')
-      const hours = parseInt(moment.duration(totalMilliseconds).asHours())
-      const format = exclude_seconds ? 'mm' : 'mm:ss'
-      return `${hours}:${moment.utc(totalMilliseconds).format(format)}`
-    },
     hasAccessToModule(module, part) {
       const store = useMainStore()
       return my24.hasAccessToModule({
         isStaff: this.isStaff,
         isSuperuser: this.isSuperuser,
-        contract: store.memberContract,
+        modules: store.getModules,
+        parts: store.getModuleParts,
         module,
         part,
       })
     },
   }
 }
-
-
-export default componentMixin

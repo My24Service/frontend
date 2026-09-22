@@ -1,17 +1,23 @@
 import { vEngineerRequestWritable } from '@/api/valibot.gen'
-import { normalizePhone } from '@/features/forms/phone'
-import { type FieldMessages } from '@/features/forms/validation'
+import {
+  normalizePhone,
+  type FieldLabels,
+} from '@/features/forms'
 import {
   emptyUserIdentity,
+  IDENTITY_FIELD_LABELS,
   IDENTITY_FIELD_MESSAGES,
   userFormContract,
   type UserFieldErrors,
   type UserFormValues,
 } from '../user-form'
-import { $trans } from '@/services/i18n'
+type EngineerWireValues = UserFormValues<typeof vEngineerRequestWritable>
 
-export type EngineerUserFormValues = UserFormValues<typeof vEngineerRequestWritable>
-export type EngineerUserFieldErrors = UserFieldErrors<'mobile' | 'preferred_location'>
+/** The wire shape, except that the location picker is empty until one is chosen. */
+export type EngineerUserFormValues = Omit<EngineerWireValues, 'engineer'> & {
+  engineer: Omit<EngineerWireValues['engineer'], 'preferred_location'> & {preferred_location: number | null}
+}
+export type EngineerUserFieldErrors = UserFieldErrors<'engineer.mobile' | 'engineer.preferred_location'>
 
 export function emptyEngineerUser(): EngineerUserFormValues {
   return {
@@ -28,20 +34,20 @@ export function emptyEngineerUser(): EngineerUserFormValues {
       cost_price: '0.00',
       license_plate: '',
       contract_hours_week: '38.00',
-      hourly_rate: '0.00',
       preferred_location: null,
       hide_from_dispatch: false,
     },
   }
 }
 
-export const FIELD_MESSAGES = {
-  ...IDENTITY_FIELD_MESSAGES,
-  engineer: {
-    mobile: () => $trans('Please provide a valid mobile'),
-    preferred_location: () => $trans('Please select a preferred location'),
-  },
-} satisfies FieldMessages
+export const FIELD_MESSAGES = IDENTITY_FIELD_MESSAGES
+
+/** The nested fields, keyed by the path `fieldErrors` reports them under. */
+export const FIELD_LABELS = {
+  ...IDENTITY_FIELD_LABELS,
+  'engineer.mobile': () => $trans('Mobile phone'),
+  'engineer.preferred_location': () => $trans('Preferred location'),
+} satisfies FieldLabels
 
 /**
  * Only the inputs the schema cannot take as typed need shaping. `country_code`
@@ -61,21 +67,16 @@ function payloadOf(values: EngineerUserFormValues) {
       email_tablet: email_tablet || null,
       cost_price: cost_price || null,
       contract_hours_week: contract_hours_week || null,
-      mobile: normalizePhone(mobile ?? ''),
+      mobile: normalizePhone(mobile ?? '', '+31'),
     },
   }
 }
 
 export const { validate: validateEngineerUserForm, parse: parseEngineerUserForm } = userFormContract<
-  typeof vEngineerRequestWritable, EngineerUserFormValues, 'mobile' | 'preferred_location'
+  typeof vEngineerRequestWritable, EngineerUserFormValues, 'engineer.mobile' | 'engineer.preferred_location'
 >({
   schema: vEngineerRequestWritable,
   messages: FIELD_MESSAGES,
+  labels: FIELD_LABELS,
   payloadOf,
-  // The entry is nullish on the wire; the form requires a choice.
-  check: (values, errors) => {
-    if (values.engineer.preferred_location == null) {
-      errors.preferred_location = FIELD_MESSAGES.engineer.preferred_location()
-    }
-  },
 })

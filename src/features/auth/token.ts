@@ -1,4 +1,3 @@
-import { useLocalStorage } from '@vueuse/core'
 import type { RemovableRef } from '@vueuse/core'
 
 export const TOKEN_KEY = 'accessToken'

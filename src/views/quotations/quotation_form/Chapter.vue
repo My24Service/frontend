@@ -43,12 +43,12 @@
             class="h2 float-right"
             v-if="data.item.id && !isView"
           >
-            <IconLinkEdit
+            <RowAction icon="edit"
               :method="function() { editChapter(data.item, data.index) }"
               v-bind:title="$trans('Edit')"
               class="pr-2"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { showDeleteModal(data.item.id) }"
             />
@@ -144,20 +144,11 @@
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 
-import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import IconLinkEdit from "@/components/IconLinkEdit.vue";
-
 import {QuotationModel} from '@/models/quotations/Quotation.js'
 import {ChapterModel, ChapterService} from '@/models/quotations/Chapter'
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   name: 'ChapterComponent',
-  components: {
-    IconLinkEdit,
-    IconLinkDelete
-  },
   emits: [
     'chapterCreated',
     'loadChapterClicked'

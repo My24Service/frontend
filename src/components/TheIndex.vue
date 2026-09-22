@@ -12,7 +12,7 @@
       </div>
     </b-container>
     <b-container class="d-flex justify-center">
-      <Version />
+      <AppVersion />
     </b-container>
   </div>
   <div v-else id="app-layout">
@@ -29,12 +29,8 @@
 </template>
 
 <script setup>
-import NavBrand from '@/components/NavBrand.vue'
-import { LoginForm, useAuthStore } from "@/features/auth";
-import Version from "./Version.vue"
-import {computed, onMounted, watchEffect} from "vue";
-import {useMainStore} from "@/stores/main";
-import {useRouter} from "vue-router";
+import { LoginForm } from '@/features/auth';
+import AppVersion from "./AppVersion.vue"
 
 const authStore = useAuthStore()
 const mainStore = useMainStore()

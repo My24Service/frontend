@@ -3,25 +3,25 @@
     <div class="d-flex justify-content-between">
       <span v-if="!isFinalTotal" class="value-container">{{ $trans("Total") }}</span>
       <span v-else class="value-container-bold">{{ $trans("Total") }}</span>
-      <div class="d-flex align-items-end">{{ total.toFormat('$0.00') }}</div>
+      <div class="d-flex align-items-end">{{ formatMoney(total) }}</div>
     </div>
 
     <div class="d-flex justify-content-between">
       <span v-if="!isFinalTotal" class="value-container">{{ $trans("VAT") }}</span>
       <span v-if="isFinalTotal" class="value-container-bold">{{ $trans("VAT") }}</span>
       <div class="d-flex align-items-end">
-        {{ vat.toFormat('$0.00') }}
+        {{ formatMoney(vat) }}
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import {$trans} from "@/services/i18n";
+import {formatMoney} from "@/services/money";
 
 export default {
   name: "TotalsInputs",
-  methods: {$trans},
+  methods: {$trans, formatMoney},
   props: {
     vat: {
       type: [Object],

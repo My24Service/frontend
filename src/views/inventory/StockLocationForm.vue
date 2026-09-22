@@ -73,8 +73,6 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 
 import stockLocationModel from '@/models/inventory/StockLocation'
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {

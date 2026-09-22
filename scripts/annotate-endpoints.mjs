@@ -18,9 +18,14 @@
  *    *\/
  *   export const vOrder = v.object({ ... })
  *
- * Request bodies are attributed to the `Writable` variant, since that is the
- * component hey-api generates for them - which also makes the read/write split
- * visible at each schema rather than something you have to know.
+ * Request bodies are attributed to the `Writable` variant *where one exists*,
+ * and to the plain const where it does not - because there the plain const is
+ * the request body. hey-api emits the twin only for a request that has
+ * read-only keys of its own (the user endpoints), so that is 18 components of
+ * 233. Assuming a twin everywhere is what used to leave 215 request schemas
+ * annotated "No endpoint returns this; it appears only as a request body" -
+ * true, but it withholds the one thing this file exists to say, which endpoint
+ * takes them.
  *
  * Components reached only from other components (nested serializers, pagination
  * envelopes) get a "Nested in" line instead of an endpoint list, so "no
@@ -100,25 +105,47 @@ function commentFor(component, writable) {
   const entry = usage.get(component)
   if (!entry) return null
 
+  /**
+   * Where this const's endpoints come from.
+   *
+   * A component with a `Writable` twin splits: the twin takes the request
+   * bodies and the read const takes the responses. Without a twin there is one
+   * const for both directions, so it lists whichever of the two it serves -
+   * and since hey-api only emits a twin for a request carrying read-only keys
+   * of its own, "without a twin" is the ordinary case, not the exception.
+   */
+  const hasTwin = declared.has(`${constName(component)}Writable`)
+  const requests = writable || !hasTwin ? entry.requests : new Set()
+  const responses = writable ? new Set() : entry.responses
+
   const lines = []
-  const endpoints = writable ? entry.requests : entry.responses
 
-  if (endpoints.size) {
-    lines.push(`${writable ? 'Request body' : 'Response'}:`)
-    for (const endpoint of [...endpoints].sort()) lines.push(`  ${endpoint}`)
+  if (responses.size) {
+    lines.push('Response:')
+    for (const endpoint of [...responses].sort()) lines.push(`  ${endpoint}`)
   }
 
-  // A read component used as a request body (or vice versa) is worth seeing.
-  const other = writable ? entry.responses : entry.requests
-  if (!endpoints.size && other.size) {
-    lines.push(
-      writable
-        ? 'No endpoint takes this as a request body; the read component is used instead.'
-        : 'No endpoint returns this; it appears only as a request body.',
-    )
+  if (requests.size) {
+    if (lines.length) lines.push('')
+    lines.push('Request body:')
+    for (const endpoint of [...requests].sort()) lines.push(`  ${endpoint}`)
   }
 
-  if (!endpoints.size && !other.size) {
+  // A const whose own direction nothing uses, while the component is used in
+  // the other - the read half of a split component. Worth saying, so that
+  // "no endpoints" never reads as "unused".
+  if (!requests.size && !responses.size) {
+    const other = writable ? entry.responses : entry.requests
+    if (other.size) {
+      lines.push(
+        writable
+          ? 'No endpoint takes this as a request body; the read const is used instead.'
+          : 'No endpoint returns this; it appears only as a request body.',
+      )
+    }
+  }
+
+  if (!lines.length) {
     if (!entry.nestedIn.size) return null
     lines.push('Not used directly by an endpoint.')
   }
@@ -130,8 +157,6 @@ function commentFor(component, writable) {
     lines.push(`Nested in: ${shown.join(', ')}${nested.length > shown.length ? `, +${nested.length - shown.length} more` : ''}`)
   }
 
-  if (!lines.length) return null
-
   return ['/**', ` * ${MARKER}`, ...lines.map((l) => (l ? ` * ${l}` : ' *')), ' */'].join('\n')
 }
 
@@ -139,6 +164,15 @@ let source = readFileSync(TARGET, 'utf8')
 
 // Strip any block this script wrote on a previous run.
 source = source.replace(new RegExp(`/\\*\\*\\n \\* ${MARKER}\\n(?: \\*.*\\n)*? \\*/\\n`, 'g'), '')
+
+/**
+ * Every const the generator declares, read before any comment is inserted.
+ * `commentFor` asks this whether a component has a `Writable` twin, which is
+ * what decides where that component's request bodies are attributed.
+ */
+const declared = new Set(
+  [...source.matchAll(/^export const (v[A-Za-z0-9_]+)\s*=/gm)].map((match) => match[1]),
+)
 
 let annotated = 0
 for (const component of Object.keys(components)) {

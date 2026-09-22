@@ -6,7 +6,7 @@
     iconName="card-list"
     height="100%"
   >
-    <table v-if="isShltrTheme" class="tw:w-full tw:text-sm">
+    <table v-if="!isDefaultFamily" class="tw:w-full tw:text-sm">
       <tbody>
         <tr
           v-for="status in statuses"
@@ -52,11 +52,10 @@
 
 <script>
 import {StatusesService} from '@/models/orders/Status.js'
-import {useMainStore} from "@/stores/main/index.js";
-import my24 from "@/services/my24.js";
+
 import DashboardBlock from "./DashboardBlock.vue";
 import DashboardBlockShltr from "./DashboardBlockShltr.vue";
-import {$trans} from "@/services/i18n";
+
 import componentMixin from "@/mixins/common";
 
 export default {
@@ -72,7 +71,7 @@ export default {
   },
   computed: {
     blockComponent() {
-      return this.isShltrTheme ? 'DashboardBlockShltr' : 'DashboardBlock'
+      return this.isDefaultFamily ? 'DashboardBlock' : 'DashboardBlockShltr'
     }
   },
   data() {

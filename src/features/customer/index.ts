@@ -1,6 +1,17 @@
-export { default as CustomerList } from './customer/CustomerList.vue'
-export { default as CustomerForm } from './customer/CustomerForm.vue'
-export { default as CustomerView } from './customer/CustomerView.vue'
-export { default as MaintenanceContractList } from './maintenance-contract/MaintenanceContractList.vue'
-export { default as MaintenanceContractForm } from './maintenance-contract/MaintenanceContractForm.vue'
-export { default as MaintenanceContractView } from './maintenance-contract/MaintenanceContractView.vue'
+export {
+  CustomerList,
+  CustomerForm,
+  CustomerView,
+} from './customer'
+export {
+  MaintenanceContractList,
+  MaintenanceContractForm,
+  MaintenanceContractView,
+  StagedEquipmentPanel,
+  useEquipmentStaging,
+} from './maintenance-contract'
+export { default as CustomerCard } from './CustomerCard.vue'
+export {
+  customerDocumentResource,
+  DocumentPanel,
+} from './document'

@@ -1,11 +1,7 @@
-import { h, toValue } from 'vue'
-import type { MaybeRefOrGetter } from 'vue'
 import { RouterLink } from 'vue-router'
 import type { RowData } from '@tanstack/vue-table'
 
-import { $trans } from '@/services/i18n'
 import type { createAppColumnHelper } from '@/features/table'
-
 export type UserListRow = {
   id: number
   full_name: string
@@ -29,7 +25,7 @@ export type UserColumnWidths = {
 export function createUserColumns<TData extends RowData & UserListRow>(
   columnHelper: AnyColumnHelper<TData>,
   options: {
-    nameRoute: MaybeRefOrGetter<string>
+    nameRoute: MaybeRefOrGetter<RouteName>
     widths: UserColumnWidths
   },
 ) {
@@ -54,7 +50,7 @@ export function createUserColumns<TData extends RowData & UserListRow>(
       enableSorting: false,
       meta: {width: widths.name},
       cell: (info) => h(RouterLink, {
-        to: {name: toValue(options.nameRoute), params: {pk: info.row.original.id}},
+        to: toRoute(toValue(options.nameRoute), {pk: info.row.original.id}),
       }, () => info.row.original.full_name),
     }),
     username: columnHelper.accessor((row) => row.username, {

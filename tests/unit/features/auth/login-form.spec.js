@@ -77,8 +77,8 @@ async function mountLogin() {
 }
 
 async function submit(wrapper, username = 'jan', password = 'secret') {
-  await wrapper.get('#username-input').setValue(username)
-  await wrapper.get('#password-input').setValue(password)
+  await wrapper.get('#login_username').setValue(username)
+  await wrapper.get('#login_password').setValue(password)
   await wrapper.get('form').trigger('submit')
   await flush()
 }
@@ -87,11 +87,11 @@ describe('LoginForm', () => {
   test('a fresh form shows empty fields with no validation state', async () => {
     const wrapper = await mountLogin()
 
-    expect(wrapper.get('#username-input').element.value).toBe('')
-    expect(wrapper.get('#password-input').element.value).toBe('')
+    expect(wrapper.get('#login_username').element.value).toBe('')
+    expect(wrapper.get('#login_password').element.value).toBe('')
     // Neutral until the first submit: nothing is flagged valid or invalid.
-    expect(wrapper.get('#username-input').attributes('aria-invalid')).toBeUndefined()
-    expect(wrapper.get('#password-input').attributes('aria-invalid')).toBeUndefined()
+    expect(wrapper.get('#login_username').attributes('aria-invalid')).toBeUndefined()
+    expect(wrapper.get('#login_password').attributes('aria-invalid')).toBeUndefined()
   })
 
   test('a submit posts credentials and then runs the bootstrap', async () => {
@@ -143,23 +143,23 @@ describe('LoginForm', () => {
     expect(posts()).toEqual([])
     expect(toasts()).toEqual([])
     // Both fields are empty, so both report invalid.
-    expect(wrapper.get('#username-input').attributes('aria-invalid')).toBe('true')
-    expect(wrapper.get('#password-input').attributes('aria-invalid')).toBe('true')
+    expect(wrapper.get('#login_username').attributes('aria-invalid')).toBe('true')
+    expect(wrapper.get('#login_password').attributes('aria-invalid')).toBe('true')
   })
 
   test('a filled username with no password flags only the password', async () => {
     const wrapper = await mountLogin()
 
-    await wrapper.get('#username-input').setValue('jan')
+    await wrapper.get('#login_username').setValue('jan')
     await wrapper.get('form').trigger('submit')
     await flush()
 
     expect(posts()).toEqual([])
     // Each field carries its own verdict; the username is not the problem.
     // A valid field renders no aria-invalid at all, so the class is the signal.
-    expect(wrapper.get('#username-input').classes()).toContain('is-valid')
-    expect(wrapper.get('#username-input').classes()).not.toContain('is-invalid')
-    expect(wrapper.get('#password-input').classes()).toContain('is-invalid')
+    expect(wrapper.get('#login_username').classes()).toContain('is-valid')
+    expect(wrapper.get('#login_username').classes()).not.toContain('is-invalid')
+    expect(wrapper.get('#login_password').classes()).toContain('is-invalid')
   })
 
   test('a username of only spaces sends nothing', async () => {
@@ -223,8 +223,8 @@ describe('LoginForm', () => {
       localStorage.setItem('accessToken', data.token)
     })
 
-    await wrapper.get('#username-input').setValue('jan')
-    await wrapper.get('#password-input').setValue('secret')
+    await wrapper.get('#login_username').setValue('jan')
+    await wrapper.get('#login_password').setValue('secret')
     await wrapper.get('form').trigger('submit')
     await wrapper.get('form').trigger('submit')
     release({ data: { token: 'jwt-abc' } })

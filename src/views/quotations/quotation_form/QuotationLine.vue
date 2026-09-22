@@ -31,20 +31,20 @@
           {{ $trans("Amount") }}: <b>{{ data.item.amount }}</b>
         </template>
         <template #cell(total)="data">
-          {{ data.item.total_dinero.toFormat('$0.00') }}<br/>
-          {{ $trans("VAT") }} {{ data.item.vat_dinero.toFormat('$0.00') }} ({{ Math.round(data.item.vat_type) }}%)
+          {{ formatMoney(data.item.total_dinero) }}<br/>
+          {{ $trans("VAT") }} {{ formatMoney(data.item.vat_dinero) }} ({{ Math.round(data.item.vat_type) }}%)
         </template>
         <template #cell(icons)="data">
           <div
             class="h2 float-right"
             v-if="data.item.id && !isView"
           >
-            <IconLinkEdit
+            <RowAction icon="edit"
               class="pr-2"
               :method="function() { editQuotationLine(data.item, data.index) }"
               v-bind:title="$trans('Edit')"
             />
-            <IconLinkDelete
+            <RowAction icon="delete"
               v-bind:title="$trans('Delete')"
               v-bind:method="function() { deleteItem(data.item.id) }"
             />
@@ -256,29 +256,55 @@
 <script>
 import {useVuelidate} from "@vuelidate/core";
 
-import PriceInput from "@/components/PriceInput";
-import TotalsInputs from "@/components/TotalsInputs";
-import IconLinkDelete from "@/components/IconLinkDelete.vue";
-import IconLinkEdit from "@/components/IconLinkEdit.vue";
-
 import {QuotationModel} from '@/models/quotations/Quotation.js';
 import {ChapterModel} from '@/models/quotations/Chapter'
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js';
 
-import VAT from "../quotation_form/VAT";
-import {INVOICE_LINE_TYPE_MANUAL} from "./constants";
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-import {useMainStore} from "@/stores/main";
+import VAT from "../quotation_form/VAT.vue";
+import {INVOICE_LINE_TYPE} from "./constants";
+
+import {quotationQuotationLineChapterCreate} from "@/api/sdk.gen";
+
+import {formatMoney} from "@/services/money";
+
+/**
+ * One row of the replace-set body `POST quotation-line/chapter/{chapter_id}/`
+ * takes (see QuotationLineViewset.replace_for_chapter).
+ *
+ * `chapter` travels in the url and `quotation` is inferred from it, so neither
+ * is in the row; a row without an id is created, one with an id updates that
+ * stored line, and a stored line left out of the list is deleted.
+ */
+function quotationLineRow(line) {
+  return {
+    ...(line.id == null ? {} : {id: line.id}),
+    old_material: line.old_material ?? null,
+    material_name: line.material_name ?? null,
+    material_identifier: line.material_identifier ?? null,
+    material: line.material ?? null,
+    amount: String(line.amount),
+    location: line.location ?? null,
+    info: line.info ?? null,
+    extra_description: line.extra_description ?? null,
+    vat_type: String(line.vat_type),
+    cost_type: line.cost_type ?? null,
+    price: line.price,
+    vat: line.vat,
+    total: line.total,
+    // The currency the row carries. djmoney reads the companion off the raw row
+    // and otherwise keeps the column's default, so dropping it relabels a USD or
+    // GBP tenant's amounts as EUR. Sent only when there is one: the field rejects
+    // null, and leaving the key out keeps the server's default.
+    ...(line.price_currency ? {price_currency: line.price_currency} : {}),
+    ...(line.vat_currency ? {vat_currency: line.vat_currency} : {}),
+    ...(line.total_currency ? {total_currency: line.total_currency} : {}),
+  }
+}
 
 export default {
   name: 'QuotationLineForm',
   components: {
-    IconLinkEdit,
-    IconLinkDelete,
-    PriceInput,
     VAT,
-    TotalsInputs,
   },
   emits: [
     'quotationLineDeleted',
@@ -324,7 +350,7 @@ export default {
     return {
       submitClicked: false,
       quotationLineService: new QuotationLineService(),
-      INVOICE_LINE_TYPE_MANUAL,
+      INVOICE_LINE_TYPE,
       total: 0,
       vat: 0,
       isLoading: false,
@@ -372,6 +398,7 @@ export default {
     this.isLoading = false
   },
   methods: {
+    formatMoney,
     rowClass(item, type) {
       if (item && type === 'row') {
         if (item.hasChanges) {
@@ -440,8 +467,8 @@ export default {
       this.vat = this.quotationLineService.getItemsTotalVAT()
     },
     addQuotationLine() {
-      this.quotationLineService.editItem.cost_type = this.INVOICE_LINE_TYPE_MANUAL
-      this.quotationLineService.editItem.price_text = this.quotationLineService.editItem.price_dinero.toFormat('$0.00')
+      this.quotationLineService.editItem.cost_type = this.INVOICE_LINE_TYPE.MANUAL
+      this.quotationLineService.editItem.price_text = formatMoney(this.quotationLineService.editItem.price_dinero)
       this.quotationLineService.addCollectionItem()
       this.updateChapterTotals()
       this.newItem = false
@@ -466,11 +493,16 @@ export default {
     async submitQuotationLines() {
       try {
           this.isLoading = true
-          for (let quotationLine of this.quotationLineService.collection) {
-            quotationLine.quotation = this.chapter.quotation
-            quotationLine.chapter = this.chapter.id
-          }
-          await this.quotationLineService.updateCollection()
+          // One replace-set for the whole chapter: the lines the panel holds
+          // go in a single request and the stored lines it left out are
+          // deleted, where the per-row update walked the collection and
+          // stopped at the first failure. The reload below is what adopts the
+          // stored rows, ids included.
+          await quotationQuotationLineChapterCreate({
+            path: {chapter_id: String(this.chapter.id)},
+            body: this.quotationLineService.collection.map(quotationLineRow),
+            throwOnError: true,
+          })
           infoToast(this.create, $trans('Updated'), $trans('chapter has been updated'))
           this.isLoading = false
           this.quotationLineService.collection = []

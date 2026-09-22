@@ -45,7 +45,7 @@
             :items="rows" responsive="md"
           >
             <template #cell(tariff)="data">
-              {{ rowDinero(data.item).toFormat('$0.00')}}
+              {{ formatMoney(rowDinero(data.item))}}
             </template>
             <template #cell(icons)="data">
               <div class="float-end">
@@ -212,17 +212,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
 import VueMultiselect from 'vue-multiselect'
 
-import PriceInput from '@/components/PriceInput.vue'
-import { $trans } from '@/services/i18n'
-import { useEquipmentStaging } from './useEquipmentStaging'
+import { formatMoney } from '@/services/money'
+import type { EquipmentStaging } from './useEquipmentStaging'
 
 const props = defineProps<{
+  /** The staged set, owned by the contract form. This panel renders it. */
+  staging: EquipmentStaging
   customer: {id?: number} | null
-  contractId: number
-  isCreate: boolean
   loading: boolean
   error?: string
 }>()
@@ -238,27 +236,20 @@ const {
   rowEdit,
   rowErrors,
   editingIndex,
-  stagedErrors,
   addEquipment,
   editEquipment,
   doEditEquipment,
   cancelEditEquipment,
   deleteEquipment,
   rowDinero,
-  totalDinero,
   newEquipmentName,
   submitCreateEquipment,
   cancelCreateEquipment,
   showAddEquipmentModal,
-  replay,
   timesPerYear,
   equipmentMultiselect,
   newEquipmentModal,
-} = useEquipmentStaging({
-  contractId: () => props.contractId,
-  isCreate: () => props.isCreate,
-  customerId: () => props.customer?.id,
-})
+} = props.staging
 
 const equipmentFields = [
   {key: 'equipment_name', label: $trans('Name')},
@@ -267,9 +258,4 @@ const equipmentFields = [
   {key: 'remarks', label: $trans('Remarks')},
   {key: 'icons', label: ''},
 ]
-
-// What the contract form needs from the staged set: whether it is still
-// loading, what it is worth, whether it can be saved, and the replay the
-// contract's own write triggers.
-defineExpose({isLoading, totalDinero, stagedErrors, replay})
 </script>

@@ -291,11 +291,9 @@
 import {TeamleaderService} from '@/models/company/Teamleader'
 import DepartmentChooser from "@/views/company/teamleader/DepartmentsChooser.vue";
 import DocumentTemplateChooser from "@/views/company/teamleader/DocumentTemplateChooser.vue";
-import {errorToast, infoToast} from "@/services/i18n";
-import {useToast} from "bootstrap-vue-next";
+
 import componentMixin from "@/mixins/common";
 import {useLoading} from "vue-loading-overlay";
-import TeamleaderProductChooser from "@/components/TeamleaderProductChooser.vue";
 
 export default {
   setup() {
@@ -311,7 +309,6 @@ export default {
   },
   mixins: [componentMixin],
   components: {
-    TeamleaderProductChooser,
     DocumentTemplateChooser,
     DepartmentChooser,
   },

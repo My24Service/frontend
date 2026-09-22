@@ -1,6 +1,6 @@
 <template>
   <div class="main-menu logged-in">
-    <Notification v-if="isLoggedIn && !isCustomer" />
+    <NotificationListener v-if="isLoggedIn && !isCustomer" />
     <TokenRefresh />
     <b-modal
       id="password-change-modal"
@@ -93,7 +93,7 @@
       <TheLanguageChooser />
   </b-modal>
 
-    <component :is="activeNav" :only-settings="onlySettings" />
+    <TheSidebar :only-settings="onlySettings" />
   </div>
 </template>
 
@@ -108,18 +108,10 @@ import memberSocket from '../services/websocket/MemberSocket'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket'
 import {NEW_DATA_EVENTS} from "@/constants";
 
-import TheLanguageChooser from "../components/TheLanguageChooser.vue"
-import NavDefault from "./the_nav/NavDefault.vue"
-import NavShltr from "./the_nav/NavShltr.vue"
-import Notification from '../components/Notification'
-import { TokenRefresh, useAuthStore } from '@/features/auth'
+import { TokenRefresh } from '@/features/auth'
 import componentMixin from "@/mixins/common";
-import {errorToast, infoToast} from "@/services/i18n";
-import {useToast} from "bootstrap-vue-next";
-import {useMainStore} from "@/stores/main";
-import {computed} from "vue";
+
 import PasswordMeter from "vue-simple-password-meter";
-import {isShltrTheme} from "@/theme";
 
 export default {
   setup() {
@@ -144,10 +136,6 @@ export default {
   mixins: [componentMixin],
   components: {
     PasswordMeter,
-    TheLanguageChooser,
-    NavDefault,
-    NavShltr,
-    Notification,
     TokenRefresh,
   },
   validations() {
@@ -165,9 +153,6 @@ export default {
     }
   },
   computed: {
-    activeNav() {
-      return isShltrTheme ? 'NavShltr' : 'NavDefault'
-    },
     isSubmitClicked() {
       return this.submitClicked
     },

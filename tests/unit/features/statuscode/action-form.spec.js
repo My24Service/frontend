@@ -66,7 +66,7 @@ async function mountActionForm({ codeType = 'quotation', fromSettings = false, p
     routes: statuscodeRoutes,
     props: { codeType, fromSettings, pk, statuscodePk },
     auth,
-    main: { memberContract: {}, ...main },
+    main: { profile: { modules: [], module_parts: {} }, ...main },
   })
   await settle()
   return wrapper
@@ -180,7 +180,7 @@ describe('ActionForm, the action types per code type', () => {
     const wrapper = await mountActionForm({
       codeType: 'order',
       statuscodePk: '3',
-      main: { memberContract: { company: ['connector-gripp'] } },
+      main: { profile: { modules: ['company'], module_parts: { company: ['connector-gripp'] } } },
     })
 
     expect(typeOptions(wrapper)).toContain('send_to_gripp')

@@ -1,9 +1,5 @@
-import { useQueryClient } from '@tanstack/vue-query'
-import type { QueryClient, UseMutationOptions } from '@tanstack/vue-query'
+import type { QueryClient } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
-import { useToast } from 'bootstrap-vue-next'
-
-import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useConfirmedAction } from './use-confirmed-action'
 
 export function useListDelete({

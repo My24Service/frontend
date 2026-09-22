@@ -77,16 +77,19 @@ class PurchaseOrder extends BaseModel {
   /**
    * Turn a detail response into the shape the form works with.
    *
-   * The API sends expected_entry_date as DD/MM/YYYY; the rest of the app - the
-   * date picker, and preInsert/preUpdate on the way back out - works with a
-   * Date. This is the inbound half of that conversion.
+   * The response carries the date twice: `expected_entry_date` is the tenant's
+   * display string and `expected_entry_date_iso` is the machine-readable one.
+   * The rest of the app - the date picker, and preInsert/preUpdate on the way
+   * back out - works with a Date, so the ISO twin is the one to read. Parsing
+   * the display string as DD/MM/YYYY, which is all this could do before the
+   * twin existed, is right only for the tenants whose date_format is that.
    */
   async detail(pk) {
     const purchaseOrder = await super.detail(pk)
 
-    purchaseOrder.expected_entry_date = moment(
-      purchaseOrder.expected_entry_date, 'DD/MM/YYYY'
-    ).toDate()
+    purchaseOrder.expected_entry_date = purchaseOrder.expected_entry_date_iso
+      ? moment(purchaseOrder.expected_entry_date_iso).toDate()
+      : moment(purchaseOrder.expected_entry_date, 'DD/MM/YYYY').toDate()
 
     return purchaseOrder
   }

@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
-          <router-link :to="{name: routeNames.list}">{{ $trans('Statuscodes') }}</router-link>
+          <router-link :to="toRoute(routeNames.list)">{{ $trans('Statuscodes') }}</router-link>
           /
           <strong>{{ statuscode.statuscode }}</strong>
           <span class="dimmed">
@@ -61,6 +61,12 @@
               />
             </BFormGroup>
 
+            <RolesField
+              v-model="statuscode.roles"
+              :code-type="codeType"
+              :error="errors.roles"
+            />
+
             <h6>{{ $trans('Label') }}</h6>
             <BFormGroup label-cols="3" :label="$trans('Label preview')">
               <StatuscodeLabel
@@ -80,7 +86,8 @@
             </BFormGroup>
 
             <ExpiryConditionFields
-              v-if="codeType === 'quotation'"
+              v-if="hasDateTrigger(codeType)"
+              :code-type="codeType"
               v-model:num-days="statuscode.num_days"
               v-model:operator="statuscode.num_days_operator"
               v-model:model-field="statuscode.num_days_model_field"
@@ -95,32 +102,27 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-
+import { statuscodeStatuscode } from '@/api/resources.gen'
+import type { Statuscode, StatuscodeRequest } from '@/api/types.gen'
 import {
-  statuscodeStatuscodeCreateMutation,
-  statuscodeStatuscodePartialUpdateMutation,
-  statuscodeStatuscodeRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Statuscode } from '@/api/types.gen'
-import { useResourceForm } from '@/features/forms/use-resource-form'
-import ValidatedForm from '@/features/forms/ValidatedForm.vue'
-import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
-import { $trans } from '@/services/i18n'
-
+  useResourceForm,
+  ValidatedForm,
+  ValidatedFormField,
+} from '@/features/forms'
 import { routeNamesFor, type CodeType } from '../code-types'
 import { invalidateStatuscodeLists } from '../invalidation'
 import StatuscodeLabel from '../StatuscodeLabel.vue'
 import ExpiryConditionFields from './ExpiryConditionFields.vue'
 import LabelColorField from './LabelColorField.vue'
+import RolesField from './RolesField.vue'
 import {
   emptyStatuscode,
   FIELD_LABELS,
   FIELD_MESSAGES,
+  hasDateTrigger,
   parseStatuscode,
   statuscodeFromRecord,
   validateStatuscode,
-  type StatuscodeBody,
   type StatuscodeFieldErrors,
   type StatuscodeFormValues,
 } from './schemas'
@@ -145,11 +147,9 @@ const {
   buttonDisabled,
   submitForm,
   cancelForm,
-} = useResourceForm<StatuscodeFormValues, Statuscode, StatuscodeBody, StatuscodeFieldErrors>({
+} = useResourceForm<StatuscodeFormValues, Statuscode, StatuscodeRequest, StatuscodeFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => statuscodeStatuscodeRetrieveOptions({path: {id}}),
-  create: statuscodeStatuscodeCreateMutation(),
-  update: statuscodeStatuscodePartialUpdateMutation(),
+  resource: statuscodeStatuscode,
   invalidate: invalidateStatuscodeLists,
   empty: emptyStatuscode,
   fromRecord: statuscodeFromRecord,

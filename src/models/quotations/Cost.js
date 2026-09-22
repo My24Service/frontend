@@ -14,11 +14,6 @@ class CostModel {
   amount_duration = "00:00:00"
   amount_duration_read
   amount_duration_secs
-  use_price
-
-  margin_perc
-  margin = "0.00"
-  margin_currency
 
   price = "0.00"
   price_dinero = null
@@ -34,7 +29,7 @@ class CostModel {
 
   total_amount = 0
 
-  priceFields = ['margin', 'price', 'vat', 'total']
+  priceFields = ['price', 'vat', 'total']
 
   constructor(cost) {
     for (const [k, v] of Object.entries(cost)) {
@@ -55,18 +50,18 @@ class CostModel {
 
   getTotal() {
     switch (this.cost_type) {
-      case COST_TYPE_USED_MATERIALS:
+      case COST_TYPE.USED_MATERIALS:
         return this.price_dinero.multiply(this.amount_decimal)
-      case COST_TYPE_WORK_HOURS:
-      case COST_TYPE_TRAVEL_HOURS:
-      case COST_TYPE_EXTRA_WORK:
-      case COST_TYPE_ACTUAL_WORK:
+      case COST_TYPE.WORK_HOURS:
+      case COST_TYPE.TRAVEL_HOURS:
+      case COST_TYPE.EXTRA_WORK:
+      case COST_TYPE.ACTUAL_WORK:
         const seconds = this.amount_duration_secs ? this.amount_duration_secs : 0
         let total = this.price_dinero.multiply(seconds)
         return total.divide(60*60)
-      case COST_TYPE_DISTANCE:
+      case COST_TYPE.DISTANCE:
         return this.price_dinero.multiply(this.amount_int)
-      case COST_TYPE_CALL_OUT_COSTS:
+      case COST_TYPE.CALL_OUT_COSTS:
         return this.price_dinero.multiply(this.amount_int)
       default:
         console.debug(`getTotal - unknown cost type: ${this.cost_type}`)
@@ -76,16 +71,16 @@ class CostModel {
 
   getAmount() {
     switch (this.cost_type) {
-      case COST_TYPE_USED_MATERIALS:
+      case COST_TYPE.USED_MATERIALS:
         return this.amount_decimal
-      case COST_TYPE_WORK_HOURS:
-      case COST_TYPE_TRAVEL_HOURS:
-      case COST_TYPE_EXTRA_WORK:
-      case COST_TYPE_ACTUAL_WORK:
+      case COST_TYPE.WORK_HOURS:
+      case COST_TYPE.TRAVEL_HOURS:
+      case COST_TYPE.EXTRA_WORK:
+      case COST_TYPE.ACTUAL_WORK:
         return this.amount_duration_read
-      case COST_TYPE_DISTANCE:
+      case COST_TYPE.DISTANCE:
         return this.amount_int
-      case COST_TYPE_CALL_OUT_COSTS:
+      case COST_TYPE.CALL_OUT_COSTS:
         return this.amount_int
       default:
         console.debug(`getTotal - unknown cost type: ${this.cost_type}`)
@@ -95,15 +90,15 @@ class CostModel {
 
   isEmpty() {
     switch (this.cost_type) {
-      case COST_TYPE_USED_MATERIALS:
+      case COST_TYPE.USED_MATERIALS:
         return this.material === null
-      case COST_TYPE_WORK_HOURS:
-      case COST_TYPE_TRAVEL_HOURS:
-      case COST_TYPE_EXTRA_WORK:
-      case COST_TYPE_ACTUAL_WORK:
+      case COST_TYPE.WORK_HOURS:
+      case COST_TYPE.TRAVEL_HOURS:
+      case COST_TYPE.EXTRA_WORK:
+      case COST_TYPE.ACTUAL_WORK:
         return this.amount_duration_secs === 0
-      case COST_TYPE_DISTANCE:
-      case COST_TYPE_CALL_OUT_COSTS:
+      case COST_TYPE.DISTANCE:
+      case COST_TYPE.CALL_OUT_COSTS:
         return this.amount_int === 0
       default:
         console.log(`getTotal - unknown cost type: ${this.cost_type}`)
@@ -117,21 +112,16 @@ Object.assign(CostModel.prototype, priceMixin);
 class CostService extends BaseModel {
   model = CostModel
   url = '/quotation/cost/'
-  invoice_default_margin = null
   invoice_default_vat = null
   default_currency = null
 
   getDefaultCostProps() {
     // default props for cost model
     return {
-      margin_perc:  this.invoice_default_margin,
       vat_type: this.invoice_default_vat,
       vat_currency: this.default_currency,
-      margin_currency: this.default_currency,
       price_currency: this.default_currency,
       total_currency: this.default_currency,
-      price_other_currency: this.default_currency,
-      price_other: "0.00",
     }
   }
 
@@ -166,10 +156,12 @@ class CostService extends BaseModel {
 
 export { CostModel, CostService }
 
-export const COST_TYPE_USED_MATERIALS = 'used_materials'
-export const COST_TYPE_WORK_HOURS = 'work_hours'
-export const COST_TYPE_TRAVEL_HOURS = 'travel_hours'
-export const COST_TYPE_EXTRA_WORK = 'extra_work'
-export const COST_TYPE_ACTUAL_WORK = 'actual_work'
-export const COST_TYPE_DISTANCE = 'distance'
-export const COST_TYPE_CALL_OUT_COSTS = 'call_out_costs'
+export const COST_TYPE = {
+  USED_MATERIALS: 'used_materials',
+  WORK_HOURS: 'work_hours',
+  TRAVEL_HOURS: 'travel_hours',
+  EXTRA_WORK: 'extra_work',
+  ACTUAL_WORK: 'actual_work',
+  DISTANCE: 'distance',
+  CALL_OUT_COSTS: 'call_out_costs',
+}

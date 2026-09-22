@@ -77,9 +77,8 @@ img[src*="no-img.png"] {
 import materialService from '../../models/inventory/Material.js'
 import inventoryModel from '../../models/inventory/Inventory.js'
 import {NO_IMAGE_URL} from "@/constants";
-import {useToast} from "bootstrap-vue-next";
+
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/services/i18n";
 
 export default {
   setup() {

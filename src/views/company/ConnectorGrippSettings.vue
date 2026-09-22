@@ -16,10 +16,8 @@
 <!--      <h4>Webhook configuration</h4>-->
 <!--      <p>The following webhooks need to be configured:</p>-->
 <!--      <ul><li>Trigger</li></ul>-->
-      <h4>Gripp API instellingen</h4>
-      <p>De volgende gegevens zijn nodig om met de Gripp API te kunnen communiceren. Een <strong>API key</strong> kan binnen de
-      Gripp omgeving aangemaakt worden bij de API instellingen. Het wordt aangeraden een aparte <strong>API rol</strong> aan te
-      maken met een beperkt aantal rechten. De volgende rechten op de volgende modules zijn noodzakelijk:</p>
+      <h4>{{ $trans('Gripp API settings') }}</h4>
+      <p>{{ $trans('The following data is needed to communicate with the Gripp API. An API key can be created within the Gripp environment under the API settings. It is recommended to create a separate API role with a limited number of rights. The following rights on the following modules are required:') }}</p>
       <ul>
         <li>company: <strong>read</strong></li>
         <li>contact: <strong>read</strong></li>
@@ -58,7 +56,7 @@
               size="sm"
               type="text"
               v-model="settings.gripp_api_key"></BFormInput>
-            <p>De <strong>API key</strong> dat binnen het Gripp platform is aangemaakt dient hieronder ingevuld te worden.</p>
+            <p>{{ $trans('The API key created within the Gripp platform should be entered below.') }}</p>
           </BFormGroup>
 
           <BFormGroup
@@ -71,9 +69,7 @@
               size="sm"
               type="text"
               v-model="settings.gripp_webhook_password"></BFormInput>
-            <p>Het <strong>Webhook wachtwoord</strong> is een willekeurige reeks alfanumerieke tekens dat onderdeel
-              wordt van het verzoek dat het Gripp platform stuurt naar My24Service als verificatie dat het verzoek
-              daadwerkelijk van Gripp komt.</p>
+            <p>{{ $trans('The webhook password is a random string of alphanumeric characters that is included in the request the Gripp platform sends to My24Service to verify that the request actually comes from Gripp.') }}</p>
           </BFormGroup>
 
           <BFormGroup
@@ -86,7 +82,7 @@
               size="sm"
               type="text"
               v-model="settings.gripp_default_order_type"></BFormInput>
-            <p>Dit is het opdracht-type dat aan alle uit Gripp afkomstige opdrachten wordt toegewezen.</p>
+            <p>{{ $trans('This is the order type assigned to all orders originating from Gripp.') }}</p>
           </BFormGroup>
 
           <BFormGroup
@@ -99,7 +95,7 @@
               size="sm"
               type="number"
               v-model="settings.gripp_default_employee"></BFormInput>
-            <p>Dit is de standaard werknemer die aan de taken wordt toegewezen</p>
+             <p>{{ $trans('This is the default employee assigned to the tasks.') }}</p>
           </BFormGroup>
 
           <BFormGroup
@@ -112,8 +108,7 @@
               size="sm"
               type="number"
               v-model="settings.gripp_project_phase_match"></BFormInput>
-            <p>Als de Gripp opdracht in deze fase wordt gezet, alleen dan wordt deze opdracht volledig
-            binnen My24Service geimporteerd.</p>
+             <p>{{ $trans('Only when the Gripp order is placed in this phase will the order be fully imported into My24Service.') }}</p>
           </BFormGroup>
 
           <BFormGroup
@@ -126,9 +121,7 @@
               size="sm"
               type="number"
               v-model="settings.gripp_project_phase_workorder_signed"></BFormInput>
-            <p>Als de opdracht binnen My24Service in de status "werkbon getekend" wordt gezet, wordt
-              de opdracht naar Gripp gesynchroniseerd en krijgt deze binnen Gripp deze projectfase.
-            Als deze instelling leeg blijft, zal de fase niet worden aangepast.</p>
+             <p>{{ $trans('When the order within My24Service is set to the status "signed work order", the order is synchronized to Gripp and given this project phase within Gripp. If this setting is left empty, the phase will not be adjusted.') }}</p>
           </BFormGroup>
 
           <BFormGroup
@@ -141,9 +134,7 @@
               size="sm"
               type="number"
               v-model="settings.gripp_tasktype_hours"></BFormInput>
-            <p>De binnen My24Service geregistreerde uren zullen onder een aparte taak worden gesynchroniseerd
-            binnen Gripp. Deze taak heeft een taaktype nodig (dit kan bijvoorbeeld overeenkomen met Montage of Installatie).
-            Als deze instelling leeg of 0 is, wordt de taak (en bijbehorende uren) niet geëxporteerd.</p>
+           <p>{{ $trans('The hours registered within My24Service are synchronized within Gripp under a separate task. This task needs a task type (this could for example correspond to Assembly or Installation). If this setting is empty or 0, the task (and associated hours) is not exported.') }}</p>
           </BFormGroup>
 
           <BFormGroup
@@ -157,15 +148,12 @@
               type="number"
               v-model="settings.gripp_tasktype_travel"></BFormInput>
           </BFormGroup>
-          <p>De binnen My24Service geregistreerde uren zullen onder een aparte taak worden gesynchroniseerd
-            binnen Gripp. Deze taak heeft een taaktype nodig. Mogelijk dient een apart taaktype "Reizen" aangemaakt
-            worden. Als deze instelling leeg of 0 is, wordt de taak (en bijbehorende uren) niet geëxporteerd.</p>
+           <p>{{ $trans('The hours registered within My24Service are synchronized within Gripp under a separate task. This task needs a task type. A separate task type "Travel" may need to be created. If this setting is empty or 0, the task (and associated hours) is not exported.') }}</p>
         </div>
       </b-form>
 
       <h4 class="mt-2">{{ $trans('Automation settings') }}</h4>
-      <p>Deze gegevens moeten aan de kant van Gripp worden geconfigureerd bij de Automation opties. Dit zorgt ervoor
-      dat My24Service opdrachtgegevens kan ophalen op het moment dat deze wijzigen.</p>
+       <p>{{ $trans('This data must be configured on the Gripp side under the Automation options. This ensures My24Service can fetch order data when it changes.') }}</p>
       <b-alert variant="warning" v-if="!hasWebhookPassword">{{ $trans('No webhook password is set. Enter the details above and save them.') }}</b-alert>
       <table class="data-table" v-if="hasWebhookPassword" style="width:100%;">
         <tbody>
@@ -173,23 +161,21 @@
           <tr><td>{{ $trans('When') }}: </td><td><strong>{{ $trans('Order') }}</strong> {{ $trans('is') }} <strong>{{ $trans('modified') }}</strong></td></tr>
           <tr><td>{{ $trans('Action') }}: </td><td><strong>{{ $trans('Web request') }}</strong></td></tr>
           <tr><td>{{ $trans('Request method') }}:</td><td><strong>POST</strong></td></tr>
-          <tr><td>Headers:</td><td><strong>User-Agent: My24Service/Gripp<br/>Content-Type: application/json</strong></td></tr>
+                    <tr><td>Headers:</td><td><strong>User-Agent: My24Service/Gripp<br/>Content-Type: application/json</strong></td></tr>
           <tr><td>{{ $trans('Web address') }}:</td><td><code>https://{{member["companycode"]}}.my24service.com/api/connector/gripp/{{settings["gripp_webhook_password"]}}/automation-updated-order</code></td></tr>
-          <tr><td>Body:</td><td><code>{ "number": {nummer} }</code></td></tr>
+                    <tr><td>Body:</td><td><code>{ "number": {nummer} }</code></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 </template>
 <script>
-import {memberFieldDefaults} from '@/features/member/member/wire-defaults'
+import {memberFieldDefaults} from '@/features/member'
 import {
+  connectorGrippSettingsPartialUpdate,
+  connectorGrippSettingsRetrieve,
   memberMemberMeRetrieve,
-  memberMemberMySettingsRetrieve,
-  memberMemberMySettingsUpdate,
 } from '@/api/sdk.gen'
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, $trans} from "@/services/i18n";
 
 export default {
   setup() {
@@ -228,22 +214,16 @@ export default {
       this.isLoading = true
 
       try {
-        // If we don't send all the settings, all the other settings
-        // will be reset to defaults, so we /must/ include everything.
-        // Direct call into the generated client - #326 deleted the
-        // hand-written Member service this used to ride on.
-        const {data: allSettings} = await memberMemberMySettingsRetrieve({throwOnError: true})
-        const localKeys = Object.keys(this.settings);
-        for (const key in allSettings) {
-          if (localKeys.indexOf(key) > -1) {
-            allSettings[ key ] = this.settings[ key ];
-          }
+        // Only what changed goes over: the endpoint merges, and the two
+        // secrets never come back from the server, so an untouched empty
+        // field must not blank them.
+        const body = {}
+        for (const key in this.settings) {
+          if (this.settings[key] !== this.currentSettings[key]) body[key] = this.settings[key]
         }
-
-        // The generated client, called directly - see #326; the hand-written
-        // Member service is gone.
-        await memberMemberMySettingsUpdate({body: allSettings, throwOnError: true});
-        this.infoToast(this.$trans('Updated'), this.$trans('Settings updated'))
+        const {data} = await connectorGrippSettingsPartialUpdate({body, throwOnError: true})
+        this.applyServerSettings(data)
+        infoToast(this.create, $trans('Updated'), $trans('Settings updated'))
         this.buttonDisabled = false
         this.isLoading = false
       } catch(error) {
@@ -253,43 +233,23 @@ export default {
         this.buttonDisabled = false
       }
     },
+    applyServerSettings(data) {
+      // the secrets are write-only: the fields start empty
+      this.settings = {
+        gripp_api_key: '',
+        gripp_webhook_password: '',
+        ...data,
+      }
+      this.currentSettings = {...this.settings}
+    },
     async loadData() {
       this.isLoading = true
       const {data} = await memberMemberMeRetrieve()
       this.member = data
       try {
-
-        this.currentSettings = {};
-        this.settings = {
-          'gripp_api_enabled': false,
-          'gripp_api_key': '',
-          'gripp_default_order_type': '',
-          'gripp_webhook_password': '',
-          'gripp_default_order_types': '',
-          'gripp_default_employee': '',
-          'gripp_project_phase_match': '0',
-          'gripp_project_phase_workorder_signed': '',
-          'gripp_tasktype_hours': '',
-          'gripp_tasktype_travel': ''
-        };
-
-        const localKeys = Object.keys(this.settings);
-
-        // This fetches *all* the settings, we are only interested in a
-        // subset to show on this page.
-        const {data} = await memberMemberMySettingsRetrieve({throwOnError: true})
-        for (const key in data) {
-          if (localKeys.indexOf(key) > -1) {
-            this.settings[ key ] = data[ key ];
-          }
-        }
-
-        for (const key in this.settings) {
-          this.currentSettings[ key ] = this.settings[ key ];
-        }
-
+        const {data: grippSettings} = await connectorGrippSettingsRetrieve({throwOnError: true})
+        this.applyServerSettings(grippSettings)
         this.isLoading = false
-
       } catch(error) {
         console.log('error fetching settings', error)
         errorToast(this.create, $trans('Error fetching settings'))

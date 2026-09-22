@@ -6,7 +6,7 @@ class MemberSocket extends BaseSocket {
   name = 'MemberSocket'
   room: string | null = null
   socket: WebSocket | null = null
-  onmessageHandler: ((data: any) => void) | null = null
+  onmessageHandler: ((data: unknown) => void) | null = null
 
   async init() {
     this.room = await this._getRoom('/get-member-room/')

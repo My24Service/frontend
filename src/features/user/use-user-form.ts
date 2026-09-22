@@ -1,12 +1,10 @@
-import { computed, ref, watch } from 'vue'
-import type { QueryClient, UseMutationOptions } from '@tanstack/vue-query'
-
-import { mergeTakenVerdict } from '@/features/forms/use-availability-probe'
 import {
+  mergeTakenVerdict,
   useResourceForm,
   type ResourceFormCopy,
+  type ResourceFormWiring,
   type WriteContext,
-} from '@/features/forms/use-resource-form'
+} from '@/features/forms'
 import { useUsernameProbe } from './use-username-probe'
 
 export interface UserFormValuesBase {
@@ -15,19 +13,14 @@ export interface UserFormValuesBase {
   password2: string
 }
 
-export interface UseUserFormConfig<
+/** `useResourceForm`'s wiring (a resource, or the generated pieces by hand), plus the user forms' own. */
+export type UseUserFormConfig<
   TValues extends UserFormValuesBase,
   TRecord,
   TBody,
   TErrors extends Record<string, string | undefined>,
-> {
+> = ResourceFormWiring & {
   pk: () => string | number | null
-  retrieve: (id: number) => Record<string, unknown>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  create: UseMutationOptions<any, any, any>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  update: UseMutationOptions<any, any, any>
-  invalidate: (queryClient: QueryClient) => Promise<unknown>
   empty: () => TValues
   fromRecord: (record: TRecord) => TValues
   /** The per-type `validateXUserForm`. */
@@ -53,19 +46,17 @@ export function useUserForm<
   // referencing `base` inside its own initializer.
   const probeRef = {} as { current: ReturnType<typeof useUsernameProbe> }
 
+  // Everything but this wrapper's own concerns goes straight through - the
+  // wiring included, whichever shape the form chose.
+  const { validate, parse, takenMessage, prepare, ...passthrough } = config
+
   const base = useResourceForm<TValues, TRecord, TBody, TErrors>({
-    pk: config.pk,
-    retrieve: config.retrieve,
-    create: config.create,
-    update: config.update,
-    invalidate: config.invalidate,
-    empty: config.empty,
-    fromRecord: config.fromRecord,
+    ...passthrough,
     validate: async (values: TValues, context: WriteContext) => {
-      config.prepare?.(values)
+      prepare?.(values)
 
       const found: Record<string, string | undefined> = {
-        ...config.validate(values, context),
+        ...validate(values, context),
       }
 
       if (Object.keys(found).length > 0) return found as TErrors
@@ -77,7 +68,7 @@ export function useUserForm<
         read: () => values.username,
         original: originalUsername,
         field: 'username',
-        message: config.takenMessage,
+        message: takenMessage,
       })
       return found as TErrors
     },
@@ -85,12 +76,11 @@ export function useUserForm<
       // The wrapper's half of the password rule: the per-type parse is handed
       // the typed password, or nothing when the field is untouched.
       const password1 = values.password1
-      return config.parse(values, {
+      return parse(values, {
         ...context,
         password: password1 !== '' ? password1 : undefined,
       })
     },
-    copy: config.copy,
   })
 
   const liveProbe = useUsernameProbe(

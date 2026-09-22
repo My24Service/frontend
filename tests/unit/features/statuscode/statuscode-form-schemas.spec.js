@@ -3,13 +3,14 @@ import * as v from 'valibot'
 
 import { vStatuscodeRequest } from '@/api/valibot.gen'
 
-import { LABEL_PALETTE, labelTextColor } from '@/features/statuscode/statuscode/palette'
 import {
+  LABEL_PALETTE,
+  labelTextColor,
   emptyStatuscode,
   parseStatuscode,
   statuscodeFromRecord,
   validateStatuscode,
-} from '@/features/statuscode/statuscode/schemas'
+} from '@/features/statuscode'
 
 const valid = {
   statuscode: 'Aangemaakt',
@@ -19,6 +20,7 @@ const valid = {
   num_days: null,
   num_days_operator: '<',
   num_days_model_field: null,
+  roles: [],
 }
 
 describe('vStatuscodeRequest', () => {
@@ -31,8 +33,9 @@ describe('vStatuscodeRequest', () => {
     expect(v.safeParse(vStatuscodeRequest, valid).success).toBe(false)
   })
 
-  test('is lax about the colour — that rule is the form’s', () => {
-    expect(v.safeParse(vStatuscodeRequest, { ...valid, code_type: 'order', color: null }).success).toBe(true)
+  test('refuses a statuscode without a colour — dispatch could not draw it', () => {
+    expect(v.safeParse(vStatuscodeRequest, { ...valid, code_type: 'order', color: null }).success).toBe(false)
+    expect(v.safeParse(vStatuscodeRequest, { ...valid, code_type: 'order', color: '' }).success).toBe(false)
   })
 })
 
@@ -40,7 +43,7 @@ describe('emptyStatuscode', () => {
   test('is not yet submittable: it needs a statuscode and a colour', () => {
     expect(validateStatuscode(emptyStatuscode())).toEqual({
       statuscode: 'Please enter a statuscode',
-      color: 'Please choose a color',
+      color: 'Please select a label color',
     })
   })
 })
@@ -51,12 +54,12 @@ describe('validateStatuscode', () => {
   })
 
   test('blames the colour when none was picked', () => {
-    expect(validateStatuscode({ ...valid, color: '' })).toEqual({ color: 'Please choose a color' })
+    expect(validateStatuscode({ ...valid, color: '' })).toEqual({ color: 'Please select a label color' })
   })
 
   test('blames the number of days when it is not a whole number', () => {
     expect(validateStatuscode({ ...valid, num_days: '2.5', num_days_model_field: 'created' })).toEqual({
-      num_days: 'Please enter a valid integer',
+      num_days: 'Please enter a whole number',
     })
   })
 })
@@ -87,10 +90,19 @@ describe('parseStatuscode', () => {
     expect(body).toMatchObject({ num_days: 14, num_days_operator: '>=', num_days_model_field: 'created' })
   })
 
-  test('leaves the expiry condition off every other code type', () => {
+  test('carries the date trigger for an order', () => {
+    const body = parseStatuscode(
+      { ...valid, num_days: '14', num_days_operator: '<=', num_days_model_field: 'start_date' },
+      'order',
+    )
+
+    expect(body).toMatchObject({ num_days: 14, num_days_operator: '<=', num_days_model_field: 'start_date' })
+  })
+
+  test('leaves the date trigger off every other code type', () => {
     const body = parseStatuscode(
       { ...valid, num_days: '14', num_days_operator: '>=', num_days_model_field: 'created' },
-      'order',
+      'invoice',
     )
 
     expect('num_days' in body).toBe(false)
@@ -110,9 +122,10 @@ describe('statuscodeFromRecord', () => {
       ...valid,
       num_days: 7,
       num_days_model_field: 'created',
+      roles: ['quotation_sent_status'],
     })
 
-    expect(values).toEqual({ ...valid, num_days: 7, num_days_model_field: 'created' })
+    expect(values).toEqual({ ...valid, num_days: 7, num_days_model_field: 'created', roles: ['quotation_sent_status'] })
   })
 
   test('gives a record with no operator the form’s default', () => {

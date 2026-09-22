@@ -1,52 +1,51 @@
 <template>
+  <ValidatedForm
+    name="login"
+    v-model="credentials"
+    :errors="errors"
+    :labels="FIELD_LABELS"
+    :submitted="submitClicked"
+  >
     <form @submit="doLogin">
-      <BFormGroup
-        v-bind:label="$trans('Username')"
-        label-for="username-input"
-        v-bind:invalid-feedback="$trans('Username is required')"
-        :state="usernameState"
-      >
-        <BFormInput
-          id="username-input"
-          :autofocus="true"
-          v-model="username"
-          :state="usernameState"
-          :required="true"
-          autocomplete="username"
-        ></BFormInput>
-      </BFormGroup>
-      <BFormGroup
-        v-bind:label="$trans('Password')"
-        label-for="password-input"
-        v-bind:invalid-feedback="$trans('Password is required')"
-        :state="passwordState"
-      >
-        <BFormInput
-          id="password-input"
-          type="password"
-          autocomplete="current-password"
-          v-model="password"
-          :state="passwordState"
-          :required="true"
-          v-on:keyup.enter="doLogin"
-        ></BFormInput>
-      </BFormGroup>
+      <ValidatedFormField
+        name="username"
+        autocomplete="username"
+        autofocus
+      />
+      <ValidatedFormField
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        @keyup.enter="doLogin"
+      />
       <div class='flex-columns align-items-center justify-content-center'>
         <BButton type="submit" :disabled="isSubmitting">{{ $trans('Log in') }}</BButton>
         <BLink @click="forgotPassword">{{ $trans('Forgot password?') }}</BLink>
       </div>
     </form>
+  </ValidatedForm>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
 import { useLoading } from 'vue-loading-overlay'
-import { useRouter } from 'vue-router'
-import { useToast } from 'bootstrap-vue-next'
+import {
+  ValidatedForm,
+  ValidatedFormField,
+  type FieldLabels,
+  requiredMessage,
+  type FieldErrors,
+} from '@/features/forms'
+interface LoginFormValues {
+  username: string
+  password: string
+}
 
-import { useAuthStore } from '@/features/auth'
-import { useMainStore } from '@/stores/main'
-import { $trans, errorToast, infoToast } from '@/services/i18n'
+type LoginFieldErrors = FieldErrors<'username' | 'password'>
+
+const FIELD_LABELS = {
+  username: () => $trans('Username'),
+  password: () => $trans('Password'),
+} satisfies FieldLabels<'username' | 'password'>
 
 const $loading = useLoading()
 
@@ -55,8 +54,8 @@ const mainStore = useMainStore()
 const { create } = useToast()
 const router = useRouter()
 
-const username = ref('')
-const password = ref('')
+const credentials = ref<LoginFormValues>({ username: '', password: '' })
+const errors = ref<LoginFieldErrors>({})
 const submitClicked = ref(false)
 const isSubmitting = ref(false)
 
@@ -64,26 +63,27 @@ function forgotPassword() {
   router.push({ name: 'reset-password' })
 }
 
-const usernameFilled = computed(() => username.value.trim() !== '')
-const passwordFilled = computed(() => password.value !== '')
+const usernameFilled = computed(() => credentials.value.username.trim() !== '')
+const passwordFilled = computed(() => credentials.value.password !== '')
 const isValid = computed(() => usernameFilled.value && passwordFilled.value)
-
-// Per field, so a filled username is not flagged for an empty password.
-const usernameState = computed(() => (submitClicked.value ? usernameFilled.value : null))
-const passwordState = computed(() => (submitClicked.value ? passwordFilled.value : null))
 
 async function doLogin(event: Event) {
   event.preventDefault()
   if (isSubmitting.value) return
 
   submitClicked.value = true
+  // Per field, so a filled username is not flagged for an empty password.
+  errors.value = {
+    ...(usernameFilled.value ? {} : { username: requiredMessage(FIELD_LABELS.username()) }),
+    ...(passwordFilled.value ? {} : { password: requiredMessage(FIELD_LABELS.password()) }),
+  }
   if (!isValid.value) return
 
   isSubmitting.value = true
   const loader = $loading.show()
 
   try {
-    await authStore.login(username.value, password.value)
+    await authStore.login(credentials.value.username, credentials.value.password)
     await mainStore.getInitialData()
 
     infoToast(create, $trans('Logged in'), $trans('You are now logged in'))

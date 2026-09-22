@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import { computed, defineComponent, h, nextTick, ref } from 'vue'
 
-import { useUsernameProbe } from '@/features/user/use-username-probe'
+import { useUsernameProbe } from '@/features/user'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { serverError } from '../../support/list-harness.js'

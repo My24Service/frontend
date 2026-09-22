@@ -199,17 +199,16 @@ describe('read schema defaults', () => {
     expect(keys).not.toContain('order_email_extra')
   })
 
-  test('OrderDetailSchema is OrderSchema plus the org-order extras, minus quotation/materials', () => {
+  test('OrderDetailSchema is OrderSchema plus the org-order extras, minus materials', () => {
     // OrderDetailSerializer.Meta.fields (apps/order/serializers/order.py) does
     // NOT include `quotation` or `materials` - both are OrderSerializer-only.
     // `vOrderDetail` omits them; building the detail schema by spreading
     // `...OrderSchema.entries` would carry them over incorrectly.
     const detail = Object.keys(OrderDetailSchema.entries)
     for (const key of Object.keys(OrderSchema.entries)) {
-      if (key === 'quotation' || key === 'materials') continue
+      if (key === 'materials') continue
       expect(detail, `detail should contain ${key}`).toContain(key)
     }
-    expect(detail).not.toContain('quotation')
     expect(detail).not.toContain('materials')
     for (const key of [
       'planning_remarks',
@@ -247,6 +246,7 @@ describe('read schema defaults', () => {
         'workorder_pdf_url', 'workorder_pdf_url_partner', 'orderlines',
         'quotation', 'last_update',
         'last_status', 'last_status_full', 'last_status_date',
+        'statuscode_id', 'color', 'text_color',
       ].sort(),
     )
   })
@@ -394,6 +394,7 @@ describe('write schemas', () => {
         'order_name', 'order_address', 'order_postal', 'order_city', 'order_country_code',
         'order_tel', 'order_mobile', 'order_email', 'order_contact',
         'branch', 'customer_relation', 'quotation', 'order_email_extra', 'planning_remarks',
+        'orderlines', 'infolines',
       ].sort(),
     )
   })
@@ -441,7 +442,7 @@ describe('write schemas', () => {
   test('the required fields on the shared create schema are the common core', () => {
     // Nothing has been widened to let a blank form through, so each of these is
     // genuinely required and a submission missing one fails.
-    for (const key of ['order_type', 'start_date', 'end_date', 'order_name']) {
+    for (const key of ['start_date', 'end_date', 'order_name']) {
       const payload = {
         order_type: 'maintenance',
         start_date: '2026-01-08',
@@ -451,6 +452,21 @@ describe('write schemas', () => {
       delete payload[key]
       expect(() => v.parse(OrderCreateSchema, payload), `missing ${key}`).toThrow()
     }
+  })
+
+  test('a create without an order type parses: the API made the field optional', () => {
+    // Acknowledged here because this file pins the serializer contract on
+    // purpose. `order_type` is `CharField(max_length=30, null=True, blank=True)`
+    // and the four `OrderCreate*Request` components stopped requiring it, so the
+    // generated entries are `v.optional(v.string())` and this schema - which is
+    // built from them - follows. The order *forms* still ask for a type and
+    // refuse an empty one (`src/features/order/form/schemas.ts`); that rule
+    // lives in the form now, not in the wire contract.
+    expect(() => v.parse(OrderCreateSchema, {
+      start_date: '2026-01-08',
+      end_date: '2026-01-09',
+      order_name: 'Acme',
+    })).not.toThrow()
   })
 
   test('the nullable write fields accept null', () => {

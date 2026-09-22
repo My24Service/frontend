@@ -1,25 +1,16 @@
-import { computed, nextTick, ref, watch } from 'vue'
-import { refDebounced } from '@vueuse/core'
-import { useMutation, useQuery } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import {
-  customerMaintenanceEquipmentCreateMutation,
-  customerMaintenanceEquipmentDestroyMutation,
   customerMaintenanceEquipmentListOptions,
-  customerMaintenanceEquipmentPartialUpdateMutation,
   equipmentEquipmentAutocompleteListOptions,
   equipmentEquipmentCreateQuickCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import { useAuthStore } from '@/features/auth'
-import { useMainStore } from '@/stores/main'
-import { errorToast, $trans } from '@/services/i18n'
-import { rowDinero as sharedRowDinero, zeroDinero } from './dinero-helpers'
+import type { MaintenanceEquipment, MaintenanceEquipmentRowRequest } from '@/api/types.gen'
+import { toDinero } from '@/services/money'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {
   emptyEquipmentRow,
   equipmentRowErrors,
   equipmentRowFromRecord,
-  parseEquipmentBody,
+  parseEquipmentSetBody,
   type ContractFieldErrors,
   type EquipmentRowState,
 } from './schemas'
@@ -38,7 +29,6 @@ interface EquipmentStagingOptions {
 
 export function useEquipmentStaging(options: EquipmentStagingOptions) {
   const mainStore = useMainStore()
-  const authStore = useAuthStore()
   const {create} = useToast()
 
   const defaultCurrency = () => mainStore.getDefaultCurrency
@@ -46,34 +36,37 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   // The staged set ---------------------------------------------------------
 
   const rows = ref<EquipmentRowState[]>([])
-  const deletedIds = ref<number[]>([])
 
-  const createEquipmentRow = useMutation({...customerMaintenanceEquipmentCreateMutation()})
-  const updateEquipmentRow = useMutation({...customerMaintenanceEquipmentPartialUpdateMutation()})
-  const destroyEquipmentRow = useMutation({...customerMaintenanceEquipmentDestroyMutation()})
+  /**
+   * The staged set as the save's `equipment` list. The contract form puts it in
+   * the same body as the contract's own fields, so the whole set — the creates,
+   * the updates and, by their absence, the deletes — travels in one request and
+   * lands in the server's one transaction. No write is made from here: the save
+   * belongs to the form, which is the only party that knows the contract.
+   */
+  function equipmentBody(): MaintenanceEquipmentRowRequest[] {
+    return parseEquipmentSetBody(rows.value)
+  }
 
-  async function replay(contractPk: number) {
-    for (const row of rows.value) {
-      const body = parseEquipmentBody(row, contractPk)
-      if (row.id) {
-        await updateEquipmentRow.mutateAsync({path: {id: row.id}, body})
-      } else {
-        await createEquipmentRow.mutateAsync({body})
-      }
-    }
-    for (const id of deletedIds.value) {
-      await destroyEquipmentRow.mutateAsync({path: {id}})
-    }
+  /**
+   * Adopt the rows a save stored. The response carries them with their ids, so
+   * the staged set stops being a set of drafts the moment the write lands: a
+   * later save sends those ids and updates the stored rows instead of creating
+   * a second copy of every one of them. This is the same adoption the read
+   * below does with the rows the contract already has.
+   */
+  function adoptStoredRows(records: readonly MaintenanceEquipment[]) {
+    rows.value = records.map((row) => equipmentRowFromRecord(row, defaultCurrency()))
   }
 
   // The contract's equipment set -------------------------------------------
 
-  // The staged rows are replayed on save, so the form needs every row of the
-  // contract: a page-1 read would hide the ones past 20 and then leave them
-  // untouched on save. 1000 is the API's own ceiling
-  // (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:236`),
-  // which DRF clamps a larger value down to rather than rejecting it.
-  const WHOLE_COLLECTION_PAGE_SIZE = 1000
+  // A save sends the staged set as the contract's whole equipment set, so the
+  // form needs every row of the contract: a page-1 read would hide the ones
+  // past 20 and then send a set that deletes them. `WHOLE_COLLECTION_PAGE_SIZE`
+  // is the API's own ceiling (`My24Pagination.max_page_size`, my24service
+  // `source/apps/core/rest.py:236`), which DRF clamps a larger value down to
+  // rather than rejecting it.
 
   const equipmentQuery = useQuery(() => ({
     ...customerMaintenanceEquipmentListOptions({
@@ -86,10 +79,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
     () => equipmentQuery.data.value,
     (data) => {
       if (!data) return
-      rows.value = (data.results ?? []).map(
-        (row) => equipmentRowFromRecord(row, defaultCurrency()),
-      )
-      deletedIds.value = []
+      adoptStoredRows(data.results ?? [])
     },
     {immediate: true},
   )
@@ -160,10 +150,8 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   }
 
   function deleteEquipment(index: number) {
-    const row = rows.value[index]
-    if (row.id) {
-      deletedIds.value.push(row.id)
-    }
+    // Dropping the row is the whole delete: the save sends the staged set, and
+    // a stored row the set no longer names is what the server removes.
     rows.value.splice(index, 1)
     // The row being edited is tracked by index, so the ones after the deleted
     // row did not move.
@@ -180,11 +168,12 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   // Money ------------------------------------------------------------------
 
   function rowDinero(row: EquipmentRowState) {
-    return sharedRowDinero(row, defaultCurrency())
+    if (row.tariff_dinero) return row.tariff_dinero
+    return toDinero(row.tariff || '0.00', row.tariff_currency || defaultCurrency())
   }
 
   const totalDinero = computed(() => {
-    const base = zeroDinero(defaultCurrency())
+    const base = toDinero('0.00', defaultCurrency())
     if (!rows.value.length) return base
     return rows.value.reduce(
       (total, row) => total.add(rowDinero(row)),
@@ -206,11 +195,13 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
     deactivateEquipmentMultiselect()
 
     try {
-      const planning = authStore.isPlanning || authStore.isAdmin
+      const customerId = options.customerId()
+      if (customerId == null) {
+        errorToast(create, $trans('Error adding equipment'))
+        return
+      }
       const response = await quickCreateEquipment.mutateAsync({
-        body: planning
-          ? {customer: options.customerId() as number, name: newEquipmentName.value}
-          : {customer: 0, name: newEquipmentName.value},
+        body: {customer: customerId, name: newEquipmentName.value},
       })
 
       rowEdit.value.equipment = response.id
@@ -248,8 +239,8 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
 
   return {
     rows,
-    deletedIds,
-    replay,
+    equipmentBody,
+    adoptStoredRows,
     isLoading: computed(() => equipmentQuery.isLoading.value),
     equipmentOptions,
     searchTerm,
@@ -274,3 +265,6 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
     newEquipmentModal,
   }
 }
+
+/** What the contract form hands its equipment panel: the whole staged set. */
+export type EquipmentStaging = ReturnType<typeof useEquipmentStaging>

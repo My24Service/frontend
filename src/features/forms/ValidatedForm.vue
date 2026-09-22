@@ -3,15 +3,13 @@
 </template>
 
 <script setup lang="ts" generic="TValues extends object">
-import { computed } from 'vue'
-
 import {
   provideValidatedForm,
   type FieldValue,
   type FieldLabels,
   type ValidatedFormContext,
 } from './validated-form-context'
-import type { FieldMessages } from './validation'
+import { requiredMessage, type FieldMessages } from './validation'
 
 /**
  * The form the fields in its slot belong to. It renders only that slot — every
@@ -28,7 +26,18 @@ import type { FieldMessages } from './validation'
 const props = defineProps<{
   /** Prefixes every field id. Omitted when the ids carry no prefix. */
   name?: string
-  errors?: Partial<Record<keyof TValues & string, string | undefined>>
+  /**
+   * The values' path on the enclosing form. A form that models a sub-object —
+   * the register form's `student_user` — sets it, because `fieldErrors` keys an
+   * error by the field's whole path (`student_user.mobile`), and the nested
+   * form's fields are named relative to the sub-object.
+   */
+  path?: string
+  /**
+   * The form's errors, keyed by the field's path. A nested form's keys carry
+   * the `path` prefix; a top-level form's are the field names themselves.
+   */
+  errors?: Partial<Record<string, string | undefined>>
   /** The form's FIELD_MESSAGES: the copy shown under each field. */
   messages?: FieldMessages<keyof TValues & string>
   /** The form's FIELD_LABELS: what each field is called. */
@@ -50,12 +59,15 @@ provideValidatedForm({
   idOf: (field) => (props.name ? props.name + '_' + field : field),
   valueOf: (field) => bag.value[field],
   setValue: (field, value) => {
-    bag.value[field] = value as never
+    bag.value[field] = value
   },
-  errorOf: (field) => props.errors?.[field as keyof TValues & string],
+  errorOf: (field) => props.errors?.[props.path ? `${props.path}.${field}` : field],
   messageOf: (field) => {
     const message = props.messages?.[field as keyof TValues & string]
-    return typeof message === 'function' ? message() : undefined
+    if (typeof message === 'function') return message()
+    // With no copy of its own, a field's placeholder is its required line.
+    const label = props.labels?.[field as keyof TValues & string]
+    return label ? requiredMessage(label()) : undefined
   },
   labelOf: (field) => props.labels?.[field as keyof TValues & string]?.() ?? field,
   hasField: (field) => Object.prototype.hasOwnProperty.call(values.value, field),

@@ -1,24 +1,16 @@
 import * as v from 'valibot'
 import { objectOmit } from '@vueuse/core'
 
-import type { Member } from '@/api/types.gen'
+import type { Member, MemberRequest } from '@/api/types.gen'
 import { vMemberMemberCreateBody } from '@/api/valibot.gen'
-import { fieldsFromRecord } from '@/features/forms/record-fields'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
-import { $trans } from '@/services/i18n'
-
-export const memberFormSchema = v.object({
-  ...vMemberMemberCreateBody.entries,
-  // The API accepts a one-character company code; signup has always demanded
-  // two. Piped onto the generated entry rather than redeclared, so the
-  // maxLength(30) and any later addition upstream still apply.
-  companycode: v.pipe(vMemberMemberCreateBody.entries.companycode, v.minLength(2)),
-})
-
-export type MemberFormValues = v.InferInput<typeof memberFormSchema>
-
-export function emptyMember(): MemberFormValues {
+import {
+  fieldsFromRecord,
+  type FieldLabels,
+  fieldErrors,
+  selectMessage,
+  type FieldErrors,
+} from '@/features/forms'
+export function emptyMember(): MemberRequest {
   return {
     companycode: '',
     name: '',
@@ -43,64 +35,28 @@ export function emptyMember(): MemberFormValues {
   }
 }
 
-export function memberFromRecord(record: Member): MemberFormValues {
+export function memberFromRecord(record: Member): MemberRequest {
   // The record carries the logos as URLs; on the form they are the files a
   // user picks, and an untouched edit must not send the URLs back as files.
   // The upload fields show the current logos straight off the record.
   return {
     ...emptyMember(),
-    ...objectOmit(fieldsFromRecord(memberFormSchema, record), ['companylogo', 'companylogo_workorder']),
+    ...objectOmit(fieldsFromRecord(vMemberMemberCreateBody, record), ['companylogo', 'companylogo_workorder']),
   }
 }
 
-export type MemberFieldErrors = FieldErrors<keyof MemberFormValues & string>
+export type MemberFieldErrors = FieldErrors<keyof MemberRequest & string>
 
-const MESSAGES = {
-  companycode_required: () => $trans('Company code is required'),
-  companycode_min_length: () => $trans('Company code must have at least 2 characters'),
-  companycode_max_length: () => $trans('Company code must have at most 30 characters'),
-  name_required: () => $trans('Please enter a name'),
-  name_max_length: () => $trans('Please use at most 255 characters'),
-  address_required: () => $trans('Please enter an address'),
-  postal_required: () => $trans('Please enter a postal'),
-  city_required: () => $trans('Please enter a city'),
-  tel_required: () => $trans('Please enter a number'),
-  email_invalid: () => $trans('Please enter a valid email'),
-  www_invalid: () => $trans('Please enter a website'),
-  contacts_required: () => $trans('Please enter some contacts'),
-  activities_required: () => $trans('Please enter some activities'),
-  info_required: () => $trans('Please enter some info'),
-  companylogo_required: () => $trans('Please upload a company logo'),
-  companycode_taken: () => $trans('Company code is already in use'),
-} as const
+/** The one rule the schema cannot say: the API answered that the code is taken. */
+export const COMPANYCODE_TAKEN_MESSAGE = () => $trans('Company code is already in use')
 
-export const COMPANYCODE_TAKEN_MESSAGE = MESSAGES.companycode_taken
+/** The logo is asked for outside the schema (only on a create), with the same required line. */
+export const MEMBER_LOGO_REQUIRED_MESSAGE = () => selectMessage($trans('Company logo'))
 
-export const MEMBER_LOGO_REQUIRED_MESSAGE = MESSAGES.companylogo_required
-
-export const FIELD_MESSAGES = {
-  companycode: (issue?: v.BaseIssue<unknown>) => {
-    if (issue?.type === 'max_length') return MESSAGES.companycode_max_length()
-    if (issue?.type === 'min_length') {
-      return String(issue.input) === ''
-        ? MESSAGES.companycode_required()
-        : MESSAGES.companycode_min_length()
-    }
-    return MESSAGES.companycode_required()
-  },
-  name: (issue?: v.BaseIssue<unknown>) => issue?.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required(),
-  address: MESSAGES.address_required,
-  postal: MESSAGES.postal_required,
-  city: MESSAGES.city_required,
-  tel: MESSAGES.tel_required,
-  email: MESSAGES.email_invalid,
-  www: MESSAGES.www_invalid,
-  contacts: MESSAGES.contacts_required,
-  activities: MESSAGES.activities_required,
-  info: MESSAGES.info_required,
-} satisfies FieldMessages<keyof MemberFormValues & string>
+export const LOGO_UPLOAD_EXTENSIONS = ['png', 'jpg', 'jpeg']
 
 export const FIELD_LABELS = {
+  companycode: () => $trans('Company code'),
   name: () => $trans('Name'),
   address: () => $trans('Address'),
   postal: () => $trans('Postal'),
@@ -113,23 +69,23 @@ export const FIELD_LABELS = {
   contacts: () => $trans('Contacts'),
   activities: () => $trans('Activities'),
   info: () => $trans('Info'),
-} satisfies FieldLabels<keyof MemberFormValues & string>
+} satisfies FieldLabels<keyof MemberRequest & string>
 
 export const COMPANYCODE_DEBOUNCE_MS = 500
 
 export function validateMemberForm(
-  values: MemberFormValues,
+  values: MemberRequest,
   { requireLogo = false }: { requireLogo?: boolean } = {},
 ): MemberFieldErrors {
-  const errors: MemberFieldErrors = fieldErrors(memberFormSchema, values, FIELD_MESSAGES)
+  const errors: MemberFieldErrors = fieldErrors(vMemberMemberCreateBody, values, {}, FIELD_LABELS)
 
   if (requireLogo && !values.companylogo) {
-    errors.companylogo = MESSAGES.companylogo_required()
+    errors.companylogo = MEMBER_LOGO_REQUIRED_MESSAGE()
   }
 
   return errors
 }
 
-export function parseMemberForm(values: MemberFormValues): v.InferOutput<typeof memberFormSchema> {
-  return v.parse(memberFormSchema, values)
+export function parseMemberForm(values: MemberRequest): MemberRequest {
+  return v.parse(vMemberMemberCreateBody, values)
 }

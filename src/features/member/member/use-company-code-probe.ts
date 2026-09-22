@@ -1,10 +1,8 @@
-import type { Ref } from 'vue'
-
 import { memberCompanycodeExistsRetrieve } from '@/api/sdk.gen'
 import {
   useAvailabilityProbe,
   type UseAvailabilityProbeReturn,
-} from '@/features/forms/use-availability-probe'
+} from '@/features/forms'
 
 import { COMPANYCODE_DEBOUNCE_MS } from './schemas'
 

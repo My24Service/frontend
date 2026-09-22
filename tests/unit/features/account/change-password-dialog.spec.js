@@ -77,8 +77,8 @@ async function mountNav() {
     stubs: {
       Notification: { template: '<div />' },
       TokenRefresh: { template: '<div />' },
-      NavDefault: { template: '<div />' },
-      NavShltr: { template: '<div />' },
+      TheNav: { template: '<div />' },
+      TheSidebar: { template: '<div />' },
     },
   })
   await settle()

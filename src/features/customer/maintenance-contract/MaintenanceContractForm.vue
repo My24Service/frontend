@@ -93,7 +93,7 @@
                 id="maintenance_contract_contract_value"
                 size="sm"
                 readonly
-                :model-value="equipmentTotal.toFormat('$0.00')"
+                :model-value="formatMoney(equipmentTotal)"
               >
               </BFormInput>
             </BFormGroup>
@@ -107,10 +107,8 @@
           </div>
 
           <StagedEquipmentPanel
-            ref="equipmentPanel"
+            :staging="staging"
             :customer="customerRecord"
-            :contract-id="contractId"
-            :is-create="isCreate"
             :loading="isLoading"
             :error="contractErrors.equipment"
           />
@@ -121,34 +119,29 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, nextTick, ref, watch } from 'vue'
-import { refDebounced } from '@vueuse/core'
-import { useQuery } from '@tanstack/vue-query'
 import VueMultiselect from 'vue-multiselect'
 
 import {
   customerCustomerAutocompleteListOptions,
   customerCustomerRetrieveOptions,
-  customerMaintenanceContractCreateMutation,
-  customerMaintenanceContractPartialUpdateMutation,
-  customerMaintenanceContractRetrieveOptions,
   customerMaintenanceContractListQueryKey,
+  customerMaintenanceContractRetrieveOptions,
+  customerMaintenanceContractWithEquipmentCreateMutation,
+  customerMaintenanceContractWithEquipmentUpdateMutation,
   customerMaintenanceEquipmentListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { Customer, MaintenanceContract } from '@/api/types.gen'
+import type { Customer, MaintenanceContract, MaintenanceContractWithEquipmentRequestRequest, MaintenanceContractWithEquipmentResponse } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
-import { useMainStore } from '@/stores/main'
-import { $trans } from '@/services/i18n'
-import { zeroDinero } from './dinero-helpers'
-import { useResourceForm } from '@/features/forms/use-resource-form'
+import { formatMoney } from '@/services/money'
+import { useResourceForm } from '@/features/forms'
 import StagedEquipmentPanel from './StagedEquipmentPanel.vue'
+import { useEquipmentStaging } from './useEquipmentStaging'
 import {
   contractFromRecord,
   emptyContract,
-  parseContractBody,
+  parseContractWithEquipmentBody,
   validateContractForm,
   type ContractFieldErrors,
-  type MaintenanceContractBody,
   type MaintenanceContractFormValues,
 } from './schemas'
 
@@ -157,11 +150,6 @@ const props = withDefaults(defineProps<{
 }>(), {
   pk: null,
 })
-
-const mainStore = useMainStore()
-
-/** The panel renders unconditionally, so this ref is set before either callback runs. */
-const equipmentPanel = ref<InstanceType<typeof StagedEquipmentPanel> | null>(null)
 
 const {
   values: contract,
@@ -174,13 +162,18 @@ const {
 } = useResourceForm<
   MaintenanceContractFormValues,
   MaintenanceContract,
-  MaintenanceContractBody,
+  MaintenanceContractWithEquipmentRequestRequest,
   ContractFieldErrors
 >({
   pk: () => props.pk,
   retrieve: (id) => customerMaintenanceContractRetrieveOptions({path: {id}}),
-  create: customerMaintenanceContractCreateMutation(),
-  update: customerMaintenanceContractPartialUpdateMutation(),
+  // One request writes the contract and its whole equipment set, in the
+  // backend's one transaction. The pair differs only in the verb's address: an
+  // update POSTs to `/with-equipment/` as a create does, because this codebase
+  // disables PUT and keeps the pair on one verb (see my24service
+  // `apps/customer/mixins/maintenance_contract_with_equipment.py`).
+  create: customerMaintenanceContractWithEquipmentCreateMutation(),
+  update: customerMaintenanceContractWithEquipmentUpdateMutation(),
   invalidate: async (qc) => {
     await qc.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()})
     await qc.invalidateQueries({queryKey: customerMaintenanceEquipmentListQueryKey()})
@@ -189,14 +182,16 @@ const {
   fromRecord: (record) => contractFromRecord(record),
   validate: (values) => ({
     ...validateContractForm(values),
-    ...(equipmentPanel.value?.stagedErrors() ?? {}),
+    ...staging.stagedErrors(),
   }),
-  parse: (values) => parseContractBody(values),
-  onSaved: async (result, context) => {
-    // A create has no id yet, so the replayed rows take the one the response
-    // just handed back; an edit already knows the id it is writing.
-    const contractPk = context.isCreate ? Number((result as {id: number}).id) : context.id
-    await equipmentPanel.value?.replay(contractPk)
+  parse: (values) => parseContractWithEquipmentBody(values, staging.equipmentBody()),
+  onSaved: async (result) => {
+    // The response is the contract detail plus the stored equipment rows, ids
+    // and all — which is what makes a second save address the rows the first
+    // one wrote instead of creating them again.
+    staging.adoptStoredRows(
+      (result as MaintenanceContractWithEquipmentResponse).equipment,
+    )
   },
   copy: {
     fetchError: $trans('Error loading maintenance contract'),
@@ -210,6 +205,18 @@ const {
 })
 
 const customerRecord = ref<Partial<Customer>>({})
+
+/**
+ * The staged equipment set, owned here rather than read through the panel:
+ * the panel renders it, but the total, the validation and the equipment half
+ * of the save body are the form's own reads of its own state — no mount-order
+ * dependency, no first-render fallback.
+ */
+const staging = useEquipmentStaging({
+  contractId: () => contractId.value,
+  isCreate: () => isCreate.value,
+  customerId: () => contract.value.customer ?? undefined,
+})
 
 const customerId = computed(() => contract.value.customer)
 const customerQuery = useQuery(() => ({
@@ -254,15 +261,13 @@ function selectCustomer(option: {id: number; name: string; address?: string; cit
   nextTick(() => contractName.value?.focus())
 }
 
-/** The sum of the staged rows, which the equipment panel owns. */
-const equipmentTotal = computed(() =>
-  equipmentPanel.value?.totalDinero ?? zeroDinero(mainStore.getDefaultCurrency))
+/** The sum of the staged rows, which the equipment set owns. */
+const equipmentTotal = staging.totalDinero
 
 const contractName = ref<{focus: () => void} | null>(null)
 
 const isLoading = computed(() =>
-  baseIsLoading.value ||
-  (!isCreate.value && (equipmentPanel.value?.isLoading ?? false)),
+  baseIsLoading.value || staging.isLoading.value,
 )
 </script>
 <style>

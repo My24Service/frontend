@@ -1,25 +1,13 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-page">
-      <header>
-        <div class="page-title">
-          <h3>
-            <IBiPeople></IBiPeople>
-            <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
-            <strong> {{ planningUser.username }}</strong>
-            <span class="dimmed" v-if="isCreate && !planningUser.username">{{ $trans('new') }}</span>
-            <span class="dimmed" v-if="!isCreate && !planningUser.username">{{ $trans('edit') }}</span>
-          </h3>
-          <div class="flex-columns">
-            <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
-              {{ $trans('Cancel') }}</BButton>
-            <BButton @click="submitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</BButton>
-          </div>
-        </div>
-      </header>
+  <UserFormShell
+    :username="planningUser.username"
+    :is-create="isCreate"
+    :is-loading="isLoading"
+    :button-disabled="buttonDisabled"
+    @cancel="cancelForm"
+    @submit="submitForm"
+  >
 
-      <div class="page-detail">
         <div class="flex-columns">
           <div class="panel">
             <h6>{{ $trans('user info') }}</h6>
@@ -64,20 +52,14 @@
             </BFormGroup>
           </div>
         </div>
-      </div>
-    </div>
-  </b-overlay>
+  </UserFormShell>
 </template>
 
 <script lang="ts" setup>
+import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import {
-  companyPlanninguserCreateMutation,
-  companyPlanninguserListQueryKey,
-  companyPlanninguserPartialUpdateMutation,
-  companyPlanninguserRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { companyPlanninguser } from '@/api/resources.gen'
 import type { PlanningUser } from '@/api/types.gen'
 import { vPlanningUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
@@ -91,8 +73,6 @@ import {
   type PlanningUserFieldErrors,
   type PlanningUserFormValues,
 } from './schemas'
-import { $trans } from '@/services/i18n'
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {
@@ -123,10 +103,7 @@ const {
   PlanningUserFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id) => companyPlanninguserRetrieveOptions({path: {id}}),
-  create: companyPlanninguserCreateMutation(),
-  update: companyPlanninguserPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyPlanninguserListQueryKey()}),
+  resource: companyPlanninguser,
   empty: () => ({...emptyPlanningUser()}),
   fromRecord: planningUserFromRecord,
   validate: validatePlanningUserForm,

@@ -1,10 +1,8 @@
-import { $trans } from '@/services/i18n'
-
-import type { FieldErrors } from './validation'
+import { requiredMessage, type FieldErrors } from './validation'
 
 /** The two lines the rule can show. Thunks: `$trans` runs when a form asks. */
 export const PASSWORD_MESSAGES = {
-  password_required: () => $trans('Please enter a password'),
+  password_required: () => requiredMessage($trans('Password')),
   passwords_mismatch: () => $trans('Passwords do not match'),
 } as const
 

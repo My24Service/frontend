@@ -175,14 +175,31 @@ describe('preInsert / preUpdate', () => {
 describe('getListUrl', () => {
   test.each([
     ['all', '/order/order/'],
-    ['dispatch', '/order/order/dispatch_list_all/'],
-    ['inprogress', '/order/order/dispatch_list_inprogress/'],
-    ['finished', '/order/order/dispatch_list_finished/'],
+    ['dispatch', '/order/order/'],
+    ['inprogress', '/order/order/'],
+    ['finished', '/order/order/'],
     ['range', '/order/order/get_within_range/'],
-    ['unaccepted', '/order/order/all_for_customer_not_accepted/'],
+    ['unaccepted', '/order/order/'],
   ])('queryMode %s maps to %s', (queryMode, expected) => {
     service.queryMode = queryMode
     expect(service.getListUrl()).toBe(expected)
+  })
+
+  test.each([
+    ['dispatch', 'dispatch'],
+    ['inprogress', 'inprogress'],
+    ['finished', 'finished'],
+    ['unaccepted', 'unaccepted'],
+  ])('queryMode %s rides getQueryArgs as mode=%s', (queryMode, expected) => {
+    service.queryMode = queryMode
+    expect(service.getQueryArgs()).toMatchObject({ mode: expected })
+  })
+
+  test('the plain list and the range action send no mode', () => {
+    service.queryMode = 'all'
+    expect(service.getQueryArgs()).not.toHaveProperty('mode')
+    service.queryMode = 'range'
+    expect(service.getQueryArgs()).not.toHaveProperty('mode')
   })
 
   test('falls back to the plain list url for an unknown mode', () => {
@@ -193,33 +210,13 @@ describe('getListUrl', () => {
   })
 })
 
-describe('setAccepted / setRejected / getUnacceptedCount', () => {
+describe('getUnacceptedCount', () => {
   // These three used `new this.axios.post(...)`, which only worked by accident:
   // a constructor returning an object yields that object, so the promise
   // survived. TypeScript rejected it (TS7009).
   beforeEach(() => {
     client.get.mockResolvedValue({ data: { token: 'csrf' } })
     client.post.mockResolvedValue({ data: { ok: true } })
-  })
-
-  test('setAccepted posts to the accept action and unwraps data', async () => {
-    const result = await service.setAccepted(7)
-    expect(client.post).toHaveBeenCalledWith(
-      '/order/order/7/set_order_accepted/',
-      {},
-      expect.anything(),
-    )
-    expect(result).toEqual({ ok: true })
-  })
-
-  test('setRejected posts to the reject action and unwraps data', async () => {
-    const result = await service.setRejected(7)
-    expect(client.post).toHaveBeenCalledWith(
-      '/order/order/7/set_order_rejected/',
-      {},
-      expect.anything(),
-    )
-    expect(result).toEqual({ ok: true })
   })
 
   test('getUnacceptedCount unwraps data', async () => {
@@ -334,7 +331,12 @@ describe('write schemas', () => {
     const keys = Object.keys(OrderCreateSchema.entries)
     expect(keys).not.toContain('service_number')
     expect(keys).not.toContain('required_users')
-    expect(keys).not.toContain('orderlines')
+  })
+
+  test('carry the nested orderlines and infolines the backend writes', () => {
+    const keys = Object.keys(OrderCreateSchema.entries)
+    expect(keys).toContain('orderlines')
+    expect(keys).toContain('infolines')
   })
 
   test('a Date start_date is transformed to a string on parse', () => {

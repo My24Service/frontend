@@ -1,7 +1,5 @@
-import { watch } from 'vue'
-import type { Ref } from 'vue'
-import { useUrlSearchParams } from '@vueuse/core'
 import type { ColumnFiltersState, PaginationState, SortingState } from '@tanstack/vue-table'
+import { joinArrayItems } from '@/features/table/filters'
 import type { ServerPagedListQuery } from './server-paged-list'
 
 const RESERVED = new Set(['page', 'page_size', 'q', 'ordering'])
@@ -22,10 +20,16 @@ export function useUrlQuerySync(
 ) {
   const params = useUrlSearchParams('hash')
 
+  /**
+   * One URL parameter as text. A repeated parameter (`?tag=a&tag=b`) rides
+   * the escaped join — the same encoding the select filters and the
+   * backend's `ArrayFilter` read — so a value containing a comma survives
+   * the round-trip instead of merging with its neighbours.
+   */
   function asString(key: string): string {
     const value = params[key]
     if (value == null) return ''
-    return Array.isArray(value) ? value.join(',') : String(value)
+    return Array.isArray(value) ? joinArrayItems(value.map(String)) : String(value)
   }
 
   function sameFilters(a: ColumnFiltersState, b: ColumnFiltersState): boolean {
@@ -60,7 +64,10 @@ export function useUrlQuerySync(
 
     const filters: ColumnFiltersState = Object.entries(params)
       .filter(([key]) => !RESERVED.has(key))
-      .map(([key, value]) => ({id: key, value: Array.isArray(value) ? value.join(',') : String(value ?? '')}))
+      .map(([key, value]) => ({
+        id: key,
+        value: Array.isArray(value) ? joinArrayItems(value.map(String)) : String(value ?? ''),
+      }))
       .filter((filter) => String(filter.value) !== '')
     if (!sameFilters(filters, state.columnFilters.value)) {
       state.columnFilters.value = filters
@@ -77,7 +84,9 @@ export function useUrlQuerySync(
     if (query.ordering?.length) desired.ordering = query.ordering.join(',')
     for (const [key, value] of Object.entries(query)) {
       if (RESERVED.has(key) || value === '' || value == null) continue
-      desired[key] = String(value)
+      // An array wire value rides the escaped join, mirroring `asString`:
+      // the read side restores the same text, commas inside values intact.
+      desired[key] = Array.isArray(value) ? joinArrayItems(value.map(String)) : String(value)
     }
 
     for (const key of Object.keys(params)) {

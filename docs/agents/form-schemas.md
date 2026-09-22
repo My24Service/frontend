@@ -37,8 +37,20 @@ Three names look similar and are different artifacts:
 The annotation block above each const says which endpoints use it — the
 `npm run codegen` step writes them. `Request body:` is the one you want.
 
+One exception: an edit that saves the **whole record** may parse the create
+body (`vFooRequest`) instead of the patch body (`vPatchedFooRequest`) when
+the two have the same keys — the create body is the component that says
+what a whole record needs, and the body then sent is a superset of what
+PATCH requires. The branch and picture forms do this. It is a choice of
+which generated const to parse, not a rule on top of one, so it is not a
+strengthening. And check first whether the patch body already does the job:
+a `v.optional(v.pipe(v.string(), v.minLength(1)))` entry refuses a blank
+once the key is present, and a form that always sends the key needs no
+`v.required` for it.
+
 **Done when**: the schema the form parses is named in that annotation as the
-request body of the endpoint the form submits to.
+request body of the endpoint the form submits to, or is the create body of a
+whole-record edit whose keys match it.
 
 Use that const by its generated name everywhere — the components, the specs,
 this file. A local `export const fooFormSchema = vFooRequest` is a rename that
@@ -65,41 +77,59 @@ throws away every rule added upstream after you wrote it.
 **Done when**: no entry in the file names a base type (`v.string()`,
 `v.number()`) that codegen already named.
 
-### 4. Put the copy in `FIELD_MESSAGES`
+### 4. Put the labels in `FIELD_LABELS`; write copy only where a rule cannot say it
 
 Attaching `$trans(...)` to a rule is the most common reason a form redeclares
-an entry it did not need to. Messages live outside the schema:
+an entry it did not need to. Copy lives outside the schema, and most of it is
+not written per form at all: `fieldErrors` answers every issue with one line
+per valibot rule, with the field's label filled in — "Please enter a name",
+"Please select a customer", "Please use at most 255 characters", "Please
+enter a whole number", "Please enter a valid email". The templates are in
+`ruleMessage` (`src/features/forms/validation.ts`), and a form hands over its
+labels:
 
 ```ts
-export const FIELD_MESSAGES = {
-  name: (issue) => issue?.type === 'max_length'
-    ? MESSAGES.name_max_length()
-    : MESSAGES.name_required(),
-  module: MESSAGES.module_required,
-} satisfies FieldMessages<keyof ModuleFormValues & string>
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+  module: () => $trans('Module'),
+} satisfies FieldLabels<keyof ModulePartFormValues & string>
 
-export function validateModule(values: ModuleFormValues): ModuleFieldErrors {
-  return fieldErrors(vMemberModuleCreateBody, values, FIELD_MESSAGES)
+export function validateModulePart(values: ModulePartFormValues): ModulePartFieldErrors {
+  return fieldErrors(vMemberModulePartCreateBody, values, {}, FIELD_LABELS)
 }
 ```
 
-`fieldErrors` lives in `src/features/forms/validation.ts` and maps parse
-issues to one message per field. A message reads `issue.type` when blank and
-too-long need different words, and answers for `undefined` because the
-templates call it with no argument to show the same line as a hint.
+A `FIELD_MESSAGES` entry is for the field whose rule cannot be read off the
+issue: a time that must read `HH:mm`, a date of birth as `yyyy-mm-dd`, a
+picker the values drop before the schema sees its null (so the schema cannot
+tell "select" from "enter"), a uniqueness answer from the API. Build those
+from the same templates where one fits — `selectMessage(FIELD_LABELS.branch())`
+— so the msgid stays shared:
 
-**Done when**: `validate*` is one call to `fieldErrors`, and the file contains
-no hand-rolled loop over `result.issues`.
+```ts
+export const FIELD_MESSAGES = {
+  start_time: () => $trans('Please enter a valid start time HH:mm'),
+  branch: () => selectMessage(FIELD_LABELS.branch()),
+} satisfies FieldMessages<keyof OrderFieldErrors & string>
+```
 
-### 5. Put the labels in `FIELD_LABELS`
+A template that shows a hint under an untouched input reads it from
+`PLACEHOLDERS = requiredMessages(FIELD_LABELS)`; a `ValidatedForm` derives the
+same line from its labels on its own.
 
-A field's label is copy like any other, and it sits beside its messages:
+**Done when**: `validate*` is one call to `fieldErrors`, the file contains no
+hand-rolled loop over `result.issues`, and every `FIELD_MESSAGES` entry says
+something `ruleMessage` could not.
+
+### 5. Every label is a `$trans` literal
+
+A field's label is copy like any other, and it names the field in every rule line:
 
 ```ts
 export const FIELD_LABELS = {
   address: () => $trans('Address'),
   vat_number: () => $trans('VAT number'),
-} satisfies FieldLabels<keyof MemberFormValues & string>
+} satisfies FieldLabels<keyof MemberRequest & string>
 ```
 
 The keys are the form's own field names, so a label for a field that does not
@@ -113,8 +143,18 @@ no label is spelled at a call site except where a caller overrides one.
 
 ### 6. Derive the form-values type
 
-`v.InferInput<typeof schema>` is the form's state type. Name only the parts
-that genuinely differ from the wire:
+If the form holds the component's shape unchanged, use the generated
+request type directly — a type that adapts nothing needs no name of its
+own, so functions and the `useResourceForm` call sites say `ModuleRequest`:
+
+```ts
+export function emptyModule(): ModuleRequest {
+  return formDefaults(vMemberModuleCreateBody)   // step 8
+}
+```
+
+Otherwise `v.InferInput<typeof schema>` is the form's state type. Name only
+the parts that genuinely differ from the wire:
 
 ```ts
 // a picker that is empty rather than absent until chosen
@@ -145,12 +185,18 @@ a comment saying which:
 1. **The API is laxer than it should be.** A payload the form refuses is a
    payload the endpoint accepts — sometimes a 500 rather than a 400. Record it
    in `docs/schema-strengthenings.md` as case 1, with the serializer change it
-   needs, and settle it with evidence: count production rows before deciding
-   the code alone says a value should not exist.
+   needs, and settle it with evidence: count production rows, and grep the
+   Flutter app (`../my24-mobile`) for the endpoint, before deciding.
 2. **The API must be lax, the form need not be.** A cross-field rule, a
-   client-only field, a product rule the API has no opinion about, a column
-   that must stay nullable for a reason unrelated to this form. Record it in
-   `docs/schema-strengthenings.md` as case 2.
+   client-only field, a rule that depends on the tenant or the role rather
+   than the payload, a second client that sends what the form refuses. Record
+   it in `docs/schema-strengthenings.md` as case 2.
+
+A nullable **column** is not by itself case 2. The request schema comes from
+the serializer, and with `COMPONENT_SPLIT_REQUEST` its request side can
+refuse a null the column still stores (`extra_kwargs` on the serializer,
+`nullable_response_fields` to keep the response honest). Nine former case-2
+entries turned out to be that, and were retired on the backend.
 
 **Done when**: every rule in the file is one of those two, in writing.
 
@@ -163,7 +209,151 @@ API must stay lax about it or was simply too loose, and the backend change that
 would retire it. It is not duplicated here — this file is the procedure, that
 one is the record.
 
-Case 1 is empty today. All twelve surviving rules are case 2.
+Six rules survive, all case 2; nothing is owed by the backend.
+
+### 8. Derive the blank form; don't spell it out
+
+`empty*()` is the one part of the file that needs no judgement per field:
+the blank of a `v.nullish(...)` entry is `null`, of an array is `[]`, of a
+boolean is `false`. Derive it from the request component rather than listing
+it:
+
+```ts
+import { formDefaults } from '@/models/schema'
+
+export function emptyBranch(): BranchFormValues {
+  return formDefaults(vBranchRequest, {country_code: 'NL', image: null})
+}
+```
+
+A field the serializer gains then appears without anyone editing this file,
+and `formDefaults` checks the override keys against the schema's entries, so a
+field the backend renamed throws at import instead of quietly defaulting
+nothing.
+
+It returns the schema's own input with `Required` lifting the optional
+modifier, which is why the blank satisfies the form's declared type with no
+assertion: `Required` drops both the `?` and the `undefined` a nullish entry's
+input carries, and that is exactly the shape a form that fills every field
+holds.
+
+**`overrides` is where the form's judgement goes**, and it should only ever
+say something the type cannot imply:
+
+| The blank differs because | Override |
+| --- | --- |
+| a new record starts somewhere specific | `{country_code: 'NL'}`, `{member_type: 'maintenance'}` |
+| the entry is a *required* integer but the picker is unchosen | `{module: null}` |
+| the entry is **optional** and "no opinion" is not `0` | `{max_users: undefined}` |
+| a staged upload means "no file picked", not an absent key | `{image: null}` |
+
+The two directions of "blank" are the trap: `formDefaults` seeds every
+non-nullable scalar (`''`, `0`, `false`), so an `v.optional(v.number())` comes
+back as `0` when the form means *absent*, and a required integer whose input
+is an unchosen picker comes back as `0` when the form means `null`. Both are
+fixable only by an override, and both are worth a comment saying which claim
+is being made.
+
+**This is for a form that holds the whole component.** A form bound to a
+*subset* of a large serializer — the company-info screen against
+`vPatchedMemberRequest`, which carries 27 fields where the screen owns 15 —
+must not derive from the whole component: `formDefaults` would hand the form
+every field the serializer declares, including the twelve another screen owns.
+Those keep either their own literal or pick their keys first with
+`formSchema`, and the pick list is then the part worth reviewing.
+
+**Done when**: the file no longer lists a blank value for every field, and
+every override in it states a decision the schema cannot make. Where the
+derived blank happens to equal the literal exactly, keep whichever reads
+better; the point is not to convert files, it is to stop restating the
+schema's own types.
+
+### 9. Name the resource, not its parts
+
+A form writes through one of two bodies depending on whether it is creating or
+editing, and it used to say so twice - once in `validate`, once in `parse`:
+
+```ts
+export function validateBranch(values: BranchFormValues): BranchFieldErrors {
+  return fieldErrors(vBranchRequest, shaped(values), {}, FIELD_LABELS)
+}
+
+export function parseBranch(values: BranchFormValues, context: WriteContext) {
+  const body = shaped(values)
+  if (!context.isCreate) return v.parse(vPatchedBranchRequest, body)
+  return v.parse(vBranchRequest, body)
+}
+```
+
+And the component said it four more times: the retrieve options, the create
+and update mutations, the list key it invalidates. Six generated names that
+must belong to one resource, and every combination typechecks.
+
+`src/api/resources.gen.ts` binds them once. `npm run codegen` writes it from
+`openapi/schema.yaml` (`scripts/generate-resources.mjs`): one export per
+resource the API lists, creates or updates, carrying its reads as `{options,
+queryKey}`, its writes as `{mutation, body}`, and in `reads` the query-key id
+of every list and retrieve under its path. The form names the resource:
+
+```ts
+import { companyBranch } from '@/api/resources.gen'
+import { writeContract } from '@/features/forms/write-contract'
+
+export const branchWrite = writeContract(companyBranch, {
+  validateWith: companyBranch.create.body,
+  shape: shaped,
+  labels: FIELD_LABELS,
+})
+```
+
+and the component hands `useResourceForm` the same object, dropping its
+`retrieve`, `create`, `update` and `invalidate` lines:
+
+```ts
+const form = useResourceForm<...>({
+  pk: () => props.pk,
+  resource: companyBranch,
+  validate: branchWrite.validate,
+  parse: branchWrite.parse,
+  ...
+})
+```
+
+It is one or the other: a form wired by resource may not also name a
+`retrieve` or a mutation, and one wired by hand must name all of them. The
+types say so, so a mix does not compile.
+
+- The body schemas are hey-api's own `v<Operation>Body` aliases, reached as
+  `companyBranch.create.body`. Step 2's table still applies to what they
+  resolve to; you just no longer pick the const by hand. `formDefaults` and
+  `v.InferInput` take `resource.create.body` the same way they took the const.
+- `validateWith` is for the form whose validation is not the body it sends.
+  Two reasons qualify, and both should be written out in a comment: an edit
+  that saves the **whole record** validates against the create body (step 2's
+  exemption), and a form carrying a ledger rule validates against its
+  strengthened copy. Everything else validates what it submits.
+- `parseCreate` and `parseUpdate` are for the caller that hands a body straight
+  to one generated mutation - a union satisfies neither mutation's exact body
+  type. `parse(values, context)` is the union-returning one `useResourceForm`
+  wants.
+- A resource's `kind` says how its record is addressed. `useResourceForm`
+  reads it: a `singleton` (`branch-my`, `member/me`) has no path, so its update
+  sends only the body and the screen no longer writes `updateVars` for that.
+- `invalidate` defaults to `invalidateReads(resource)`: every read under the
+  resource's path - its list, its detail, the filtered views and counts beside
+  them (`user-sick-leave/admin/all_sick/`, `.../all_unconfirmed_count/`) - is a
+  read of the same rows, and the generator collected them. A list screen's
+  delete modal takes the same helper: `invalidate: invalidateReads(companyBranch)`.
+  What remains hand-written is the read the schema cannot connect to the write:
+  a module write changing what the *member* list returns, the dispatch board
+  under another resource's path. Those live in an `invalidation.ts` composed
+  with `invalidateReads`, and the module's comment says why the schema could
+  not know.
+
+**Done when**: the schemas file imports its resource from `resources.gen` and
+nothing from `valibot.gen` that the resource already carries, the component
+passes that resource instead of naming its options and mutations, and no
+`invalidation.ts` beside it restates the resource's own reads.
 
 ### The form a field is written into
 
@@ -176,7 +366,6 @@ and nothing else:
   name="member"
   v-model="member"
   :errors="errors"
-  :messages="FIELD_MESSAGES"
   :labels="FIELD_LABELS"
   :submitted="submitClicked"
 >
@@ -186,8 +375,9 @@ and nothing else:
 ```
 
 A field derives `id` as `<form name>_<field>`, `value` as `values[field]`,
-`error` as `errors[field]`, its placeholder as `FIELD_MESSAGES[field]()` and its
-label as `FIELD_LABELS[field]()`. Anything passed explicitly wins over the
+`error` as `errors[field]`, its label as `FIELD_LABELS[field]()` and its
+placeholder as the required line for that label (or `messages[field]()` when the
+form passes `:messages`). Anything passed explicitly wins over the
 derived value, and that is how the exceptions are said: `id` where the id is not
 the field's name, `label` where the caller overrides it, and `type`,
 `textarea`, `rows`, `autofocus` and `label-cols` for the field that is not a
@@ -199,13 +389,14 @@ the reference.
 For a straightforward form, all of it:
 
 ```ts
-export type ModuleFormValues = v.InferInput<typeof vMemberModuleCreateBody>
-export function emptyModule(): ModuleFormValues { return {name: ''} }
-// + FIELD_MESSAGES, validateModule, parseModule
+export function emptyModule(): ModuleRequest {
+  return formDefaults(vMemberModuleCreateBody)
+}
+// + FIELD_LABELS, validateModule, parseModule
 ```
 
 No schema is declared, because there is nothing to declare: the form parses
-`vMemberModuleCreateBody` and the file holds the blank-form default, the copy
+`vMemberModuleCreateBody` and the file holds the blank-form default, the labels
 and the two functions.
 
 If a form needs no strengthening, no per-field copy and no extra state, it
@@ -222,8 +413,11 @@ may import from the other to reach.
 
 ## Worked examples
 
-- `src/features/member/module/schemas.ts` — the whole file, 40 lines, no
-  strengthening at all.
+- `src/features/member/module/schemas.ts` — the whole file, ~30 lines, no
+  strengthening at all, and a blank derived from the request component.
+- `src/features/company/branch/schemas.ts` — a blank derived with two stated
+  overrides (`country_code`, the staged `image`) where the hand-written
+  literal listed all ten fields.
 - `src/features/user/sales/schemas.ts` with `../user-form.ts` — seven forms on
   one shared base, parsing the generated component directly, sharing the
   rules the schema cannot carry (password confirmation, the probe verdict).

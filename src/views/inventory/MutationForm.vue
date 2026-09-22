@@ -49,7 +49,6 @@
               </VueMultiselect>
             </BFormGroup>
 
-
             <BFormGroup
               label-size="sm"
               label-cols="12"
@@ -145,8 +144,6 @@ import VueMultiselect from 'vue-multiselect'
 
 import inventoryModel from '../../models/inventory/Inventory.js'
 import mutationModel from "../../models/inventory/Mutation";
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 const greaterThanZero = (value) => parseInt(value) > 0
 

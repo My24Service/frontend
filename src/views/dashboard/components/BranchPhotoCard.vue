@@ -38,7 +38,7 @@
             />
             <img v-else
                  :src="NO_IMAGE_URL"
-                 alt="No image"
+                 :alt="$trans('No image')"
             />
 
 

@@ -1,8 +1,5 @@
-import { h } from 'vue'
 import type { RowData } from '@tanstack/vue-table'
-import IconLinkDelete from '@/components/IconLinkDelete.vue'
-import IconLinkEdit from '@/components/IconLinkEdit.vue'
-import { $trans } from '@/services/i18n'
+import RowAction from '@/components/RowAction.vue'
 import type { createAppColumnHelper } from './table'
 
 type AnyColumnHelper<TData extends RowData> = ReturnType<typeof createAppColumnHelper<TData>>
@@ -12,7 +9,7 @@ export type ListRow<T extends {results?: unknown[]}> = NonNullable<T['results']>
 export function createActionColumn<TData extends RowData & {id: number}>(
   columnHelper: AnyColumnHelper<TData>,
   options: {
-    editRoute?: string
+    editRoute?: RouteName
     onDelete: (id: number) => void
     width?: string
   },
@@ -23,13 +20,13 @@ export function createActionColumn<TData extends RowData & {id: number}>(
     ...(options.width ? {meta: {width: options.width}} : {}),
     cell: (info) => h('div', {class: 'h2 float-end'}, [
       options.editRoute
-        ? h(IconLinkEdit, {
+        ? h(RowAction, {icon: 'edit',
             router_name: options.editRoute,
             router_params: {pk: info.row.original.id},
             title: $trans('Edit'),
           })
         : null,
-      h(IconLinkDelete, {
+      h(RowAction, {icon: 'delete',
         title: $trans('Delete'),
         method: () => options.onDelete(info.row.original.id),
       }),

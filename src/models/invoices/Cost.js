@@ -14,7 +14,6 @@ class CostModel {
   amount_duration
   amount_duration_read
   amount_duration_secs
-  use_price
 
   price = "0.00"
   price_dinero = null
@@ -39,6 +38,10 @@ class CostModel {
 
   updateTotals(priceDecimal, currency) {
     // console.log({priceDecimal, currency})
+    if (!priceDecimal) {
+      priceDecimal = '0.00'
+    }
+
     this.setPriceField('price', toDinero(priceDecimal, currency))
     const total = this.getTotal()
     // console.log({total, vat_type: this.vat_type})
@@ -51,18 +54,18 @@ class CostModel {
 
   getTotal() {
     switch (this.cost_type) {
-      case COST_TYPE_USED_MATERIALS:
+      case COST_TYPE.USED_MATERIALS:
         return this.price_dinero.multiply(this.amount_decimal)
-      case COST_TYPE_WORK_HOURS:
-      case COST_TYPE_TRAVEL_HOURS:
-      case COST_TYPE_EXTRA_WORK:
-      case COST_TYPE_ACTUAL_WORK:
+      case COST_TYPE.WORK_HOURS:
+      case COST_TYPE.TRAVEL_HOURS:
+      case COST_TYPE.EXTRA_WORK:
+      case COST_TYPE.ACTUAL_WORK:
         const seconds = this.amount_duration_secs ? this.amount_duration_secs : 0
         let total = this.price_dinero.multiply(seconds)
         return total.divide(60*60)
-      case COST_TYPE_DISTANCE:
+      case COST_TYPE.DISTANCE:
         return this.price_dinero.multiply(this.amount_int)
-      case COST_TYPE_CALL_OUT_COSTS:
+      case COST_TYPE.CALL_OUT_COSTS:
         return this.price_dinero.multiply(this.amount_int)
       default:
         throw `unknown cost type: ${this.cost_type}`
@@ -71,16 +74,16 @@ class CostModel {
 
   getAmount() {
     switch (this.cost_type) {
-      case COST_TYPE_USED_MATERIALS:
+      case COST_TYPE.USED_MATERIALS:
         return this.amount_decimal
-      case COST_TYPE_WORK_HOURS:
-      case COST_TYPE_TRAVEL_HOURS:
-      case COST_TYPE_EXTRA_WORK:
-      case COST_TYPE_ACTUAL_WORK:
+      case COST_TYPE.WORK_HOURS:
+      case COST_TYPE.TRAVEL_HOURS:
+      case COST_TYPE.EXTRA_WORK:
+      case COST_TYPE.ACTUAL_WORK:
         return this.amount_duration_read
-      case COST_TYPE_DISTANCE:
+      case COST_TYPE.DISTANCE:
         return this.amount_int
-      case COST_TYPE_CALL_OUT_COSTS:
+      case COST_TYPE.CALL_OUT_COSTS:
         return this.amount_int
       default:
         throw `unknown cost type: ${this.cost_type}`
@@ -103,8 +106,6 @@ class CostService extends BaseModel {
       vat_currency: this.default_currency,
       price_currency: this.default_currency,
       total_currency: this.default_currency,
-      price_other_currency: this.default_currency,
-      price_other: "0.00",
     }
   }
 
@@ -112,6 +113,8 @@ class CostService extends BaseModel {
   newModelFromMaterial(material, price, price_currency, defaultPropsView) {
     const user = material.is_partner ? null : material.user_id
     const user_full_name = material.is_partner ? material.full_name : null
+    material.material_id = material.id
+    delete material.id
     return new this.model({
       ...material,
       ...this.getDefaultCostProps(),
@@ -122,7 +125,7 @@ class CostService extends BaseModel {
       user_full_name,
       price,
       price_currency,
-      cost_type: COST_TYPE_USED_MATERIALS,
+      cost_type: COST_TYPE.USED_MATERIALS,
     })
   }
 
@@ -134,14 +137,14 @@ class CostService extends BaseModel {
       ...activity,
       ...this.getDefaultCostProps(),
       ...defaultPropsView,
-      amount_duration_read: activity.work,
-      amount_duration: activity.work_secs,
-      amount_duration_secs: parseInt(activity.work_secs),
+      amount_duration_read: activity.work_total,
+      amount_duration: activity.work_total_secs,
+      amount_duration_secs: parseInt(activity.work_total_secs),
       user,
       user_full_name,
       price,
       price_currency,
-      cost_type: COST_TYPE_WORK_HOURS,
+      cost_type: COST_TYPE.WORK_HOURS,
     })
   }
 
@@ -160,7 +163,7 @@ class CostService extends BaseModel {
       user_full_name,
       price,
       price_currency,
-      cost_type: COST_TYPE_TRAVEL_HOURS,
+      cost_type: COST_TYPE.TRAVEL_HOURS,
     })
   }
 
@@ -179,7 +182,7 @@ class CostService extends BaseModel {
       user_full_name,
       price,
       price_currency,
-      cost_type: COST_TYPE_EXTRA_WORK,
+      cost_type: COST_TYPE.EXTRA_WORK,
     })
   }
 
@@ -198,7 +201,7 @@ class CostService extends BaseModel {
       user_full_name,
       price,
       price_currency,
-      cost_type: COST_TYPE_ACTUAL_WORK,
+      cost_type: COST_TYPE.ACTUAL_WORK,
     })
   }
 
@@ -218,7 +221,7 @@ class CostService extends BaseModel {
       user_full_name,
       price,
       price_currency,
-      cost_type: COST_TYPE_DISTANCE,
+      cost_type: COST_TYPE.DISTANCE,
     })
   }
 
@@ -230,7 +233,7 @@ class CostService extends BaseModel {
       ...defaultPropsView,
       price,
       price_currency,
-      cost_type: COST_TYPE_CALL_OUT_COSTS,
+      cost_type: COST_TYPE.CALL_OUT_COSTS,
     })
   }
 
@@ -263,14 +266,16 @@ class CostService extends BaseModel {
   }
 }
 
-export { CostModel }
+export { CostModel, CostService }
 
 export default CostService
 
-export const COST_TYPE_USED_MATERIALS = 'used_materials'
-export const COST_TYPE_WORK_HOURS = 'work_hours'
-export const COST_TYPE_TRAVEL_HOURS = 'travel_hours'
-export const COST_TYPE_EXTRA_WORK = 'extra_work'
-export const COST_TYPE_ACTUAL_WORK = 'actual_work'
-export const COST_TYPE_DISTANCE = 'distance'
-export const COST_TYPE_CALL_OUT_COSTS = 'call_out_costs'
+export const COST_TYPE = {
+  USED_MATERIALS: 'used_materials',
+  WORK_HOURS: 'work_hours',
+  TRAVEL_HOURS: 'travel_hours',
+  EXTRA_WORK: 'extra_work',
+  ACTUAL_WORK: 'actual_work',
+  DISTANCE: 'distance',
+  CALL_OUT_COSTS: 'call_out_costs',
+}

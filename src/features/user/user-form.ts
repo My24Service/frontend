@@ -1,14 +1,15 @@
 import * as v from 'valibot'
 
-import { PASSWORD_MESSAGES, passwordErrors, type PasswordValues } from '@/features/forms/password-rules'
-import type { FieldLabels } from '@/features/forms/validated-form-context'
 import {
+  PASSWORD_MESSAGES,
+  passwordErrors,
+  type PasswordValues,
+  type FieldLabels,
   fieldErrors,
+  requiredMessage,
   type FieldErrors,
   type FieldMessages,
-} from '@/features/forms/validation'
-import { $trans } from '@/services/i18n'
-
+} from '@/features/forms'
 export function emptyUserIdentity() {
   return {
     username: '',
@@ -51,17 +52,16 @@ export function filledFrom<T extends object>(
 
 export type UserIdentityField = keyof UserIdentityValues
 
+/**
+ * The lines the rules cannot say on their own. The first and last name and
+ * the email read the rule's line under their label; the two password lines
+ * belong to the shared rule in `forms/password-rules.ts`.
+ */
 const USER_MESSAGES = {
-  username_required: () => $trans('Username is required'),
   username_taken: () => $trans('Username is already in use'),
   // The charset the API enforces, and which these forms stopped checking
   // when they redeclared `username` instead of using the generated entry.
   username_invalid: () => $trans('Please use only letters, digits and @ . + - _'),
-  first_name_required: () => $trans('Please enter a first name'),
-  last_name_required: () => $trans('Please enter a last name'),
-  email_invalid: () => $trans('Please enter a valid email'),
-  // The two password lines every user form shows; they belong to the shared
-  // rule, so they are declared in `forms/password-rules.ts`.
   ...PASSWORD_MESSAGES,
 } as const
 
@@ -72,7 +72,7 @@ export const USERNAME_PROBE_DEBOUNCE_MS = 500
 function usernameMessage(issue?: v.BaseIssue<unknown>): string {
   return issue?.type === 'regex'
     ? USER_MESSAGES.username_invalid()
-    : USER_MESSAGES.username_required()
+    : requiredMessage(IDENTITY_FIELD_LABELS.username())
 }
 
 export const USERNAME_TAKEN_MESSAGE = USER_MESSAGES.username_taken
@@ -80,9 +80,6 @@ export const USERNAME_TAKEN_MESSAGE = USER_MESSAGES.username_taken
 /** The copy for the identity block; a per-type map spreads it and adds its own. */
 export const IDENTITY_FIELD_MESSAGES = {
   username: usernameMessage,
-  first_name: USER_MESSAGES.first_name_required,
-  last_name: USER_MESSAGES.last_name_required,
-  email: USER_MESSAGES.email_invalid,
   password1: USER_MESSAGES.password_required,
   password2: USER_MESSAGES.passwords_mismatch,
 } satisfies FieldMessages<UserIdentityField>
@@ -90,10 +87,11 @@ export const IDENTITY_FIELD_MESSAGES = {
 /**
  * What the identity block calls its fields, written once because the panel draws
  * these rows for all seven forms. The two a single form renames stay the panel's
- * own overrides, and `username` is absent because the panel renders that row
- * itself.
+ * own overrides; the panel renders the `username` row itself, so its label only
+ * names the field in a validation line.
  */
 export const IDENTITY_FIELD_LABELS = {
+  username: () => $trans('Username'),
   password1: () => $trans('Password'),
   password2: () => $trans('Password again'),
   first_name: () => $trans('First name'),
@@ -109,9 +107,10 @@ function userFormErrors<K extends string>(
   payload: unknown,
   values: PasswordValues,
   messages: FieldMessages,
+  labels: FieldLabels,
   options: { isCreate: boolean },
 ): FieldErrors<K> & FieldErrors<'password1' | 'password2'> {
-  const errors: FieldErrors<K> = fieldErrors(schema, payload, messages)
+  const errors: FieldErrors<K> = fieldErrors(schema, payload, messages, labels)
   return {...errors, ...passwordErrors(values, options)}
 }
 
@@ -131,8 +130,7 @@ function withPassword<T extends object>(
  *
  * `payloadOf` shapes the values for the wire where a schema cannot take an
  * input blank (a nullish date, an optional-but-non-empty IBAN); most types
- * are wire-shaped as they are. `check` adds a rule the schema cannot
- * express, writing straight into the errors. The parse strips whatever the
+ * are wire-shaped as they are. The parse strips whatever the
  * schema does not declare — the passwords, a record's read-only companions
  * — and `withPassword` adds the one the wrapper assembled.
  */
@@ -143,19 +141,18 @@ export function userFormContract<
 >({
   schema,
   messages,
+  labels = IDENTITY_FIELD_LABELS,
   payloadOf = (values) => values,
-  check,
 }: {
   schema: S
   messages: FieldMessages
+  /** The identity labels, plus a type's own nested ones keyed by path. */
+  labels?: FieldLabels
   payloadOf?: (values: V) => unknown
-  check?: (values: V, errors: FieldErrors<K>) => void
 }) {
   return {
     validate(values: V, options: { isCreate: boolean }): FieldErrors<K> & FieldErrors<'password1' | 'password2'> {
-      const errors = userFormErrors<K>(schema, payloadOf(values), values, messages, options)
-      check?.(values, errors)
-      return errors
+      return userFormErrors<K>(schema, payloadOf(values), values, messages, labels, options)
     },
     parse(values: V, options: { isCreate: boolean; password?: string }): v.InferOutput<S> & { password?: string } {
       return withPassword(v.parse(schema, payloadOf(values)), values, options)

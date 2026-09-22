@@ -36,14 +36,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useTemplateRef } from 'vue'
 import {
   memberContractDestroyMutation,
   memberContractListOptions,
   memberContractListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { MemberContractListData, PaginatedContractList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
 import {
   ServerTable,
   baseListParams,

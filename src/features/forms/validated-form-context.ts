@@ -1,13 +1,16 @@
-import { inject, provide, type InjectionKey } from 'vue'
-
 /**
  * What a ValidatedForm hands down to the fields in its slot: a field asks for
  * what it needs by name and never sees the form's own props, so the derivation
  * rules live here rather than being re-spelled at every call site.
  */
 
-/** What a field of a form holds: what the one input underneath it accepts. */
-export type FieldValue = string | number | null | undefined
+/** What a field of a form holds: what the inputs underneath it accept.
+ *
+ * Text and number inputs hold `string | number`; a settings toggle holds a
+ * `boolean`; a date picker holds a `Date`; a roles or conditions list holds an
+ * array. `null` is the cleared value, `undefined` the absent one.
+ */
+export type FieldValue = string | number | boolean | Date | unknown[] | null | undefined
 
 /**
  * What each field of a form is called.
@@ -15,7 +18,7 @@ export type FieldValue = string | number | null | undefined
  * A thunk for the same reason a validation message is one: `$trans` reads a page
  * global, so the lookup happens when the label is read rather than when the
  * module holding it is imported. Keys are the form's own field names, so
- * `satisfies FieldLabels<keyof MemberFormValues & string>` rejects a label for a
+ * `satisfies FieldLabels<keyof MemberRequest & string>` rejects a label for a
  * field that does not exist.
  *
  * Every label is a `$trans('...')` literal and never a name derived from the
@@ -54,12 +57,12 @@ export function provideValidatedForm(context: ValidatedFormContext): void {
 }
 
 /**
- * The form this field belongs to, or null when it stands alone.
- *
- * The null is the whole of the backwards compatibility: a ValidatedFormField
- * outside a ValidatedForm keeps the explicit props it has always taken, so a
- * form moves over one field at a time and the two styles coexist in one file.
+ * The form the field belongs to. Every field renders inside a ValidatedForm,
+ * so a missing provider is a programming error, reported as one rather than
+ * read off an absent form.
  */
-export function useValidatedForm(): ValidatedFormContext | null {
-  return inject(VALIDATED_FORM, null)
+export function useValidatedForm(): ValidatedFormContext {
+  const form = inject(VALIDATED_FORM)
+  if (!form) throw new Error('ValidatedFormField must be used inside a ValidatedForm')
+  return form
 }

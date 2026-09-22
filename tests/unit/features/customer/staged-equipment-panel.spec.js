@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { defineComponent } from 'vue'
 
-import StagedEquipmentPanel from '@/features/customer/maintenance-contract/StagedEquipmentPanel.vue'
+import {
+  StagedEquipmentPanel,
+  useEquipmentStaging,
+} from '@/features/customer'
 import { vPaginatedMaintenanceEquipmentList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
@@ -64,8 +68,28 @@ const modalShellStub = {
   template: '<div><slot /><button type="button" class="quick-create-ok" @click="$emit(\'ok\')">OK</button></div>',
 }
 
+// The staged set is owned above the panel now: the harness builds it the
+// way the contract form does and hands it down, so the panel under test
+// renders the same staging the form saves. The exposed equipment body, staged
+// errors and total are the seam the form reads, pinned here - the rows
+// themselves are written by the form's one request, not by this composable.
+const Harness = defineComponent({
+  components: { StagedEquipmentPanel },
+  props: ['customer', 'contractId', 'isCreate', 'loading'],
+  setup(props, { expose }) {
+    const staging = useEquipmentStaging({
+      contractId: () => props.contractId,
+      isCreate: () => props.isCreate,
+      customerId: () => props.customer?.id,
+    })
+    expose({ equipmentBody: staging.equipmentBody, stagedErrors: staging.stagedErrors, totalDinero: staging.totalDinero })
+    return { staging }
+  },
+  template: '<StagedEquipmentPanel :staging="staging" :customer="customer" :loading="loading" />',
+})
+
 async function mountPanel({ props = {}, main = MAIN } = {}) {
-  const wrapper = mountForm(StagedEquipmentPanel, {
+  const wrapper = mountForm(Harness, {
     deep: true,
     main,
     auth: AUTH,
@@ -113,11 +137,11 @@ beforeEach(() => {
 })
 
 describe('StagedEquipmentPanel, the staged rows', () => {
-  // The panel stages the whole set and replays it on save, so it reads the
-  // contract's whole equipment set in one go: `page_size` 1000, the API's
-  // paginator ceiling (my24service `apps/core/rest.py`
-  // My24Pagination.max_page_size), which clamps a larger value rather than
-  // rejecting it. A page-1 read would hide every row past 20 from the editor.
+  // The staged set is the whole equipment set a save sends, so the panel reads
+  // the contract's in one go: `page_size` 1000, the API's paginator ceiling
+  // (my24service `apps/core/rest.py` My24Pagination.max_page_size), which clamps
+  // a larger value rather than rejecting it. A page-1 read would hide every row
+  // past 20 from the editor - and send a set that deletes them.
   test('reads the contract\'s whole equipment set', async () => {
     const wrapper = await mountPanel()
 
@@ -213,12 +237,18 @@ describe('StagedEquipmentPanel, the picker', () => {
     await setFrequency(wrapper, '4')
     await equipmentFooterButton(wrapper, 'Add equipment').trigger('click')
     await settle()
-    await wrapper.vm.replay(5)
 
-    const post = api.requests().find(
-      (request) => request.method === 'post' && request.path === '/api/customer/maintenance-equipment/',
-    )
-    expect(post.body).toMatchObject({ equipment: 21, equipment_name: 'Pump B', times_per_year: 4 })
+    // What the quick-created equipment has to reach is the set the form saves:
+    // the stored row keeps its id, the new one has none yet, and both travel in
+    // the one request the save makes - each with the currency its tariff is in,
+    // because a bare amount lets the server fall back to the column's default
+    // and relabel a USD or GBP tenant's tariffs.
+    expect(wrapper.vm.equipmentBody()).toEqual([
+      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00',
+        tariff_currency: 'EUR'},
+      {equipment: 21, equipment_name: 'Pump B', times_per_year: 4, tariff: '0.00',
+        tariff_currency: 'EUR'},
+    ])
   })
 
   test('refuses to quick-create equipment without a branch-capable tenant', async () => {
@@ -272,11 +302,10 @@ describe('StagedEquipmentPanel, editing a staged row', () => {
     expect(stagedRowTexts(wrapper)[0]).not.toContain('9')
     expect(equipmentFooterButton(wrapper, 'Add equipment')).toBeDefined()
 
-    await wrapper.vm.replay(5)
-    const patch = api.requests().find(
-      (request) => request.method === 'patch' && request.path.startsWith('/api/customer/maintenance-equipment/'),
-    )
-    expect(patch.body).toMatchObject({ times_per_year: 4 })
+    expect(wrapper.vm.equipmentBody()).toEqual([
+      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00',
+        tariff_currency: 'EUR'},
+    ])
   })
 
   test('commit writes the staged edit into the row', async () => {
@@ -316,7 +345,7 @@ describe('StagedEquipmentPanel, editing a staged row', () => {
 })
 
 describe('StagedEquipmentPanel, what the contract form reads from it', () => {
-  test('replays the staged set: updates, then creates, then deletions', async () => {
+  test('hands the form one set: kept rows, added rows, and the deleted row gone', async () => {
     api.get('/api/customer/maintenance-equipment/', paginated([
       equipmentRow(),
       equipmentRow({ id: 12, equipment: 23, equipment_name: 'Pump C', tariff: '10.00' }),
@@ -333,18 +362,17 @@ describe('StagedEquipmentPanel, what the contract form reads from it', () => {
     await settle()
     expect(stagedRowTexts(wrapper)).toHaveLength(2)
 
-    await wrapper.vm.replay(5)
-
-    expect(api.requests().slice(1)).toEqual([
-      { method: 'patch', path: '/api/customer/maintenance-equipment/11/', query: {}, body: expect.anything() },
-      {
-        method: 'post',
-        path: '/api/customer/maintenance-equipment/',
-        query: {},
-        body: expect.objectContaining({ contract: 5, equipment: 22, equipment_name: 'Pump B' }),
-      },
-      { method: 'delete', path: '/api/customer/maintenance-equipment/12/', query: {} },
+    // One list, and `id` says what each row is: row 11 is kept and so updates
+    // the stored one, Pump B has no id so it is created, and row 12 - which the
+    // deleted row left out - is what the endpoint deletes. Nothing here writes:
+    // the set is the contract form's to send, in its one request.
+    expect(wrapper.vm.equipmentBody()).toEqual([
+      {id: 11, equipment: 21, equipment_name: 'Pump A', times_per_year: 4, tariff: '40.00',
+        tariff_currency: 'EUR'},
+      {equipment: 22, equipment_name: 'Pump B', times_per_year: 2, tariff: '0.00',
+        tariff_currency: 'EUR'},
     ])
+    expect(api.requests().slice(1)).toEqual([])
   })
 
   test('reports the staged failure that has to block the contract write', async () => {

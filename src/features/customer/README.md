@@ -4,8 +4,9 @@ Six screens in two groups — the customer list, the customer form (create/
 edit, with its documents panel and branch-partner section) and the customer
 detail view, which doubles as the customer-type user's dashboard; plus the
 maintenance-contract list, its create/edit form (whose equipment rows are
-staged client-side and replayed on save) and its detail view, whose orders
-tab hands equipment lines to the maintenance order form. This directory follows the Member Slice
+staged client-side and saved with the contract in one request) and its detail
+view, whose orders tab hands equipment lines to the maintenance order form.
+This directory follows the Member Slice
 (`src/features/member/`, the reference implementation): the same rules, the
 same testing bar. Read
 this file for what the Customer Slice adds on top.
@@ -40,7 +41,7 @@ address to the state.
 
 `src/models/customer/Customer.js` is the Shim beside its
 callers (quotation, order, invoice, equipment and company screens); it
-keeps `CustomerModel`, `CustomerPriceModel`, the autocomplete `search` and
+keeps `CustomerModel`, the autocomplete `search` and
 `getMyCustomer`.
 
 The equipment/location/building screens the customer router also mounts are
@@ -93,7 +94,10 @@ assert the routes verbatim.
 | Contract list | A search term goes in the URL, not just component state | The kit's `urlSync` |
 | Contract list | The dead `#cell(totals)` counters slot is dropped | No `totals` column exists, so the counters never rendered |
 | Contract form | Bodies carry exactly the write schemas' fields (contract and equipment rows) | The parse drops the readonly response fields, the counts, the dinero objects, `priceFields` |
-| Contract form | Equipment rows send `contract` as the number the schema declares | DRF coerced the string form too |
+| Contract form | The save is one request to `maintenance-contract[/{id}]/with-equipment/`, not a contract write followed by one request per equipment row | The endpoint writes both halves in one transaction; a mid-loop failure used to leave a partial set, `sum_tariffs` is derived from those rows, and the retry re-created every earlier row and re-DELETEd ids it had already deleted |
+| Contract form | Equipment rows carry neither `contract` nor `tariff_currency` | The nested row component declares neither: the endpoint fills the contract from the one in its URL, and the contract's own currency is what prices a row. The per-row `/api/customer/maintenance-equipment/` writes the loop used are gone from the client |
+| Contract form | A deleted row is deleted by leaving it out of the saved set, with no DELETE request | The endpoint treats the list as the whole set: a stored row it does not name is removed in the same transaction |
+| Contract form | The staged row ids are adopted from the save's response | The response is the contract detail plus the stored rows, so a later save sends their ids and updates them instead of writing a second copy of each |
 | Contract form | Equipment rows send `times_per_year` as the number the schema declares | An untouched frequency stays absent |
 | Contract form | Quick-created equipment reaches the staged row | The old flow POSTed and then threw on a misnamed property, so the created equipment never reached the form |
 | Contract form | The contract-value input shows the running total | The old input bound `:value`, which the current `BFormInput` no longer consumes |
@@ -105,7 +109,7 @@ assert the routes verbatim.
 | Contract view | The dead `#cell(tariff_total)` slot is dropped | No `tariff_total` column exists, so the slot never rendered |
 | Contract view | The orders-tab search modal is gone | OK-ing it threw; same family as the customer detail's dead wiring |
 | Contract view | The orders read rides the generated `orderOrderMaintenanceOrdersList` op (`contract`/`page`/`page_size` → `PaginatedOrderList`) | The backend declares the params and the paginated 200 |
-| Lists + forms | Headers, panels, delete modals and form runtimes come from the shared kits | Same toolbar markup (download kept), same modal ids, same copy, same wire bodies; staged equipment rows still replay in order through `onSaved` |
+| Lists + forms | Headers, panels, delete modals and form runtimes come from the shared kits | Same toolbar markup (download kept), same modal ids, same copy, same wire bodies; the contract form's staged equipment rows travel in the contract's own write |
 | Contract form | The load-failure toast carries no backend suffix | The shared kit supports a static fetch string only. No spec covers the path |
 | Form, view, documents | Every embedded read asks for the whole collection (`page_size=1000`), not the API's first page | A tenant past 20 rows lost picker choices and table rows. 1000 is the API's own ceiling — see *The whole-collection bound* below |
 

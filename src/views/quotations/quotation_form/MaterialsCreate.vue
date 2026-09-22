@@ -81,29 +81,11 @@
                   v-bind:label="$trans('Price')"
                   label-for="material-price"
                 >
-                  <BFormRadioGroup
-                    @change="updateTotals"
-                    v-model="cost.use_price"
-                  >
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_PURCHASE">
-                      {{ $trans('Pur.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_PURCHASE).toFormat('$0.00') }}
-                    </BFormRadio>
-
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_SELLING">
-                      {{ $trans('Sel.') }} {{ getMaterialPriceFor(cost, usePriceOptions.USE_PRICE_SELLING).toFormat('$0.00') }}
-                    </BFormRadio>
-
-                    <BFormRadio :value="usePriceOptions.USE_PRICE_OTHER">
-                      {{ $trans("Other") }}
-                      <PriceInput
-                        style="margin-left: -24px; margin-top: 2px;"
-                        v-model="cost.price_other"
-                        :currency="cost.price_other_currency"
-                        @priceChanged="(val) => otherPriceChanged(val, cost)"
-                        @receivedFocus="cost.use_price = usePriceOptions.USE_PRICE_OTHER"
-                      />
-                    </BFormRadio>
-                  </BFormRadioGroup>
+                  <PriceInput
+                    v-model="cost.price"
+                    :currency="cost.price_currency"
+                    @priceChanged="(val) => priceChanged(val, cost)"
+                  />
                 </BFormGroup>
               </b-col>
               <b-col cols="2">
@@ -122,7 +104,7 @@
                   <BFormInput
                     readonly
                     disabled
-                    :value="cost.vat_dinero.toFormat('$0.00')"
+                    :value="formatMoney(cost.vat_dinero)"
                     class="text-right pr-0"
                   ></BFormInput>
                 </BFormGroup>
@@ -134,7 +116,7 @@
                   <BFormInput
                     readonly
                     disabled
-                    :value="cost.total_dinero.toFormat('$0.00')"
+                    :value="formatMoney(cost.total_dinero)"
                     class="text-right pr-0"
                   ></BFormInput>
                 </BFormGroup>
@@ -209,28 +191,26 @@
 <script>
 import VueMultiselect from 'vue-multiselect'
 import AwesomeDebouncePromise from "awesome-debounce-promise";
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/services/i18n";
+
+import {formatMoney} from "@/services/money";
 
 import PriceInput from "@/components/PriceInput";
 
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {
-  COST_TYPE_USED_MATERIALS,
+  COST_TYPE,
   CostModel,
   CostService
 } from "@/models/quotations/Cost";
 import {MaterialModel, MaterialService} from "@/models/inventory/Material";
 
 import quotationMixin from "./mixin.js";
-import {USE_PRICE_OTHER, USE_PRICE_PURCHASE, USE_PRICE_SELLING} from "./constants";
 import VAT from "./VAT";
 import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
 import SectionHeader from "./SectionHeader.vue";
-import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {
@@ -289,17 +269,12 @@ export default {
       totalVAT_dinero: null,
       totalAmount: null,
       costService: new CostService(),
-      usePriceOptions: {
-        USE_PRICE_PURCHASE,
-        USE_PRICE_SELLING,
-        USE_PRICE_OTHER,
-      },
       default_currency: this.mainStore.getDefaultCurrency,
       default_vat: this.mainStore.getQuotationDefaultVat,
       hasStoredData: false,
       getMaterialsDebounced: '',
       parentHasQuotationLines: false,
-      quotationLineType: COST_TYPE_USED_MATERIALS,
+      quotationLineType: COST_TYPE.USED_MATERIALS,
       quotationLineService: new QuotationLineService(),
       materialService: new MaterialService(),
       fetchingMaterials: false,
@@ -315,7 +290,7 @@ export default {
 
     if (this.chapter.id) {
       this.costService.addListArg(`chapter=${this.chapter.id}`)
-      this.costService.addListArg(`cost_type=${COST_TYPE_USED_MATERIALS}`)
+      this.costService.addListArg(`cost_type=${COST_TYPE.USED_MATERIALS}`)
       await this.loadData()
     }
 
@@ -323,8 +298,9 @@ export default {
   },
   methods: {
     $trans,
-    otherPriceChanged(priceDinero, cost) {
-      cost.setPriceField('price_other', priceDinero)
+    formatMoney,
+    priceChanged(priceDinero, cost) {
+      cost.setPriceField('price', priceDinero)
       this.updateTotals()
       this.hasChanges = true
     },
@@ -334,10 +310,7 @@ export default {
         ...this.costService.getDefaultCostProps(),
         ...this.getDefaultProps(),
         price_currency: this.default_currency,
-        use_price: this.usePriceOptions.USE_PRICE_SELLING,
-        price_other_currency: this.default_currency,
-        cost_type: COST_TYPE_USED_MATERIALS,
-        margin_perc: 0
+        cost_type: COST_TYPE.USED_MATERIALS
       })
     },
     addCost() {
@@ -361,7 +334,7 @@ export default {
         this.costService.collection = this.costService.collection.filter(
           (cost) => cost.material !== null
         )
-        await this.costService.updateCollection()
+        await this.replaceCostRows()
         infoToast(this.create, $trans('Updated'), $trans('Materials costs have been updated'))
         await this.loadData()
         this.isLoading = false
@@ -380,8 +353,7 @@ export default {
 
         this.materialModels.push(
           new MaterialModel({
-            ...data,
-            margin_perc: 0
+            ...data
           })
         )
 
@@ -389,19 +361,16 @@ export default {
         data.material_name = data.name
         delete data.id
 
-        const price = this.getPrice(
-          {...data, use_price: this.usePriceOptions.USE_PRICE_PURCHASE})
+        // A chosen material seeds the line with its selling price.
         const newCollection = this.costService.collection
         newCollection[index] = new this.costService.model({
           ...data,
           ...this.costService.getDefaultCostProps(),
           ...this.getDefaultProps(),
-          price,
-          price_currency: this.getCurrency(
-            {...data, use_price: this.usePriceOptions.USE_PRICE_PURCHASE}),
+          price: data.price_selling_ex,
+          price_currency: data.price_selling_ex_currency || this.default_currency,
           amount_decimal: "0.00",
-          cost_type: COST_TYPE_USED_MATERIALS,
-          margin_perc: 0
+          cost_type: COST_TYPE.USED_MATERIALS
         })
         this.materialChosen = true
         this.hasChanges = true
@@ -451,10 +420,6 @@ export default {
         let materialIds = []
         await this.costService.loadCollection()
         const costs = this.costService.collection.map((cost) => {
-          if (cost.use_price === this.usePriceOptions.USE_PRICE_OTHER) {
-            cost.price_other = cost.price
-            cost.price_other_currency = cost.price_currency
-          }
           materialIds.push(cost.material)
           return new CostModel(cost)
         })
@@ -483,8 +448,7 @@ export default {
         data = await this.materialService.detail(id)
         this.materialModels.push(
           new MaterialModel({
-            ...data,
-            margin_perc: 0
+            ...data
           })
         )
       }
@@ -492,53 +456,16 @@ export default {
     },
     getDefaultProps() {
       return {
-        use_price: this.usePriceOptions.USE_PRICE_SELLING,
         quotation: this.chapter.quotation,
         chapter: this.chapter.id,
         vat_type: this.default_vat
       }
     },
     getPrice(cost) {
-      let model
-
-      switch (cost.use_price) {
-        case this.usePriceOptions.USE_PRICE_PURCHASE:
-          model = this.materialModels.find((m) => m.id === cost.material)
-          return model.price_purchase_ex
-        case this.usePriceOptions.USE_PRICE_SELLING:
-          model = this.materialModels.find((m) => m.id === cost.material)
-          return model.price_selling_ex
-        case this.usePriceOptions.USE_PRICE_OTHER:
-          return cost.price_other
-        default:
-          console.log(`getPrice - unknown use price: ${cost.use_price}`)
-          return "0.00"
-      }
+      return cost.price
     },
-    getCurrency(material_cost) {
-      let model
-
-      switch (material_cost.use_price) {
-        case this.usePriceOptions.USE_PRICE_PURCHASE:
-          model = this.materialModels.find((m) => m.id === material_cost.material)
-          return model.price_purchase_ex_currency
-        case this.usePriceOptions.USE_PRICE_SELLING:
-          model = this.materialModels.find((m) => m.id === material_cost.material)
-          return model.price_selling_ex_currency
-        case this.usePriceOptions.USE_PRICE_OTHER:
-          return material_cost.price_currency
-        default:
-          console.log(`getCurrency - unknown use price: ${material_cost.use_price}`)
-          return this.default_currency
-      }
-    },
-    getMaterialPriceFor(used_material, use_price) {
-      const model = this.materialModels.find((m) => m.id === used_material.material)
-      if (model) {
-        return use_price === this.usePriceOptions.USE_PRICE_PURCHASE ? model.price_purchase_ex_dinero : model.price_selling_ex_dinero
-      } else {
-        console.error('MATERIAL MODEL NOT FOUND for ', used_material)
-      }
+    getCurrency(cost) {
+      return cost.price_currency || this.default_currency
     },
     updateTotals() {
       // to make sure our computed gets triggered

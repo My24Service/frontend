@@ -3,14 +3,23 @@ import {
   themePreprocessorPlugin,
   themePreprocessorHmrPlugin
 } from "vite-plugin-theme-preprocessor/dist";
-import vue from '@vitejs/plugin-vue'
+import Vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import Components from 'unplugin-vue-components/vite'
+import {
+  VueUseComponentsResolver,
+  VueUseDirectiveResolver,
+} from 'unplugin-vue-components/resolvers'
 import {BootstrapVueNextResolver} from 'bootstrap-vue-next/resolvers'
 import IconsResolve from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import * as path from "node:path";
-import {ExternalPackageIconLoader} from "unplugin-icons/loaders";
+import * as fs from "node:fs";
+import { ExternalPackageIconLoader } from "unplugin-icons/loaders";
+import AutoImport from 'unplugin-auto-import/vite'
+import { autoImportEntries } from './auto-imports.config.js'
+import VueRouter from 'vue-router/vite'
+import { insertHandWrittenRoutes } from './vite/typed-routes.js'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
@@ -37,6 +46,13 @@ export default defineConfig(({ mode }) => {
       host: '0.0.0.0',
       port: 3000,
       allowedHosts,
+      fs: {
+        // A worktree symlinks node_modules to the main checkout, and Vite
+        // serves a dependency's own assets (bootstrap-icons' woff2, pulled in
+        // by its css) from the resolved real path, which lies outside the
+        // worktree. Allow the real node_modules alongside the project root.
+        allow: ['.', fs.realpathSync(path.resolve('node_modules'))],
+      },
       proxy: {
         // in production the Django backend serves /media on the same origin,
         // locally it runs separately so forward it to the backend
@@ -54,14 +70,38 @@ export default defineConfig(({ mode }) => {
       }
     },
     plugins: [
-      vue(),
+      VueRouter({
+        dts: 'src/route-map.d.ts',
+        routesFolder: [],
+        beforeWriteFiles: (root) => insertHandWrittenRoutes(root, process.cwd()),
+      }),
+      Vue(),
       tailwindcss(),
+      AutoImport({
+        imports: autoImportEntries,
+        vueTemplate: true,
+        vueDirectives: true,
+        viteOptimizeDeps: true,
+        dumpUnimportItems: './auto-imports.json',
+        dirs: [
+          {
+            glob: 'src/composables/**',
+            types: true,
+          }
+        ],
+      }),
       Components({
         resolvers: [
           BootstrapVueNextResolver(),
+          VueUseComponentsResolver(),
+          VueUseDirectiveResolver(),
           IconsResolve()
         ],
         dts: true,
+        // No `types` entry for vue-router: it declares RouterLink/RouterView
+        // in GlobalComponents itself, and the plugin auto-detects it anyway.
+        // The empty array switches that auto-detection off.
+        types: [],
       }),
       Icons({
         compiler: 'vue3',

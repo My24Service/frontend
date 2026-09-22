@@ -31,10 +31,11 @@
               </b-col>
             </b-row>
             <!-- The nested half of the form: the values live under
-                 `student_user`, but the errors the API reports are flat, so this
-                 provider models the nested object and is handed the outer errors. -->
+                 `student_user`, so this provider models the nested object and
+                 names the path its errors are keyed under. -->
             <ValidatedForm
               name="studentuser"
+              path="student_user"
               v-model="values.student_user"
               :errors="errors"
               :messages="REGISTRATION_FIELD_MESSAGES.student_user"
@@ -110,15 +111,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { useMutation } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-
 import { accountsRegisterCreateMutation } from '@/api/@tanstack/vue-query.gen'
-import ValidatedForm from '@/features/forms/ValidatedForm.vue'
-import ValidatedFormField from '@/features/forms/ValidatedFormField.vue'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
-
+import {
+  ValidatedForm,
+  ValidatedFormField,
+} from '@/features/forms'
 import { COUNTRY_OPTIONS } from './options'
 import {
   emptyStudentRegistration,

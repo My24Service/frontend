@@ -7,7 +7,7 @@ import {
   emptyStudentUser,
   parseStudentUserForm,
   validateStudentUserForm,
-} from '@/features/user/student/schemas'
+} from '@/features/user'
 
 // The form holds the write body's own shape, plus the two client-only
 // password fields.
@@ -130,7 +130,7 @@ describe('emptyStudentUser', () => {
 
   test('the defaults are not yet submittable on create', () => {
     const errors = validateStudentUserForm(emptyStudentUser(), {isCreate: true})
-    expect(errors.username).toBe('Username is required')
+    expect(errors.username).toBe('Please enter a username')
     expect(errors.first_name).toBe('Please enter a first name')
     expect(errors.email).toBe('Please enter a valid email')
     expect(errors.password1).toBe('Please enter a password')
@@ -148,7 +148,7 @@ describe('validateStudentUserForm', () => {
 
   test('blames each blank field by name', () => {
     expect(validateStudentUserForm({...valid, username: ''}, {isCreate: true}).username)
-      .toBe('Username is required')
+      .toBe('Please enter a username')
     expect(validateStudentUserForm({...valid, email: 'nope'}, {isCreate: true}).email)
       .toBe('Please enter a valid email')
     expect(validateStudentUserForm({...valid, first_name: ''}, {isCreate: true}).first_name)
@@ -159,19 +159,19 @@ describe('validateStudentUserForm', () => {
 
   test('a mistyped date of birth is refused at the dob input', () => {
     // The message is addressed to `student_user.dob`, so the error is keyed by
-    // the leaf the form renders it at — not by the sub-object's own key.
+    // that whole path.
     expect(validateStudentUserForm(withProfile({dob: 'yesterday'}), {isCreate: true}))
-      .toEqual({dob: 'Please use yyyy-mm-dd for the date of birth'})
+      .toEqual({'student_user.dob': 'Please use yyyy-mm-dd for the date of birth'})
   })
 
-  test('a sub-object failure the form has no copy for keeps the sub-object key', () => {
+  test('a sub-object failure the form has no copy for keys by its whole path', () => {
     // `country_code` is the one other sub-object entry an input can empty
     // (`iban` rides absent when blank and `dob` null). It has no message of
-    // its own, so the issue falls back to the first path segment.
+    // its own, so the issue is keyed by the path valibot reported.
     const errors = validateStudentUserForm(withProfile({country_code: ''}), {isCreate: true})
 
-    expect(Object.keys(errors)).toEqual(['student_user'])
-    expect(errors.student_user).toEqual(expect.any(String))
+    expect(Object.keys(errors)).toEqual(['student_user.country_code'])
+    expect(errors['student_user.country_code']).toEqual(expect.any(String))
   })
 
   test('on create both passwords are required and must match', () => {

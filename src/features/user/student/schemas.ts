@@ -1,17 +1,19 @@
 import { vStudentUserWriteRequestWritable } from '@/api/valibot.gen'
-import { normalizePhone } from '@/features/forms/phone'
-import { type FieldMessages } from '@/features/forms/validation'
+import {
+  normalizePhone,
+  type FieldMessages,
+  type FieldLabels,
+} from '@/features/forms'
 import {
   emptyUserIdentity,
+  IDENTITY_FIELD_LABELS,
   IDENTITY_FIELD_MESSAGES,
   userFormContract,
   type UserFieldErrors,
   type UserFormValues,
 } from '../user-form'
-import { $trans } from '@/services/i18n'
-
 export type StudentUserFormValues = UserFormValues<typeof vStudentUserWriteRequestWritable>
-export type StudentUserFieldErrors = UserFieldErrors<'dob' | 'mobile' | 'student_user'>
+export type StudentUserFieldErrors = UserFieldErrors<'student_user.dob' | 'student_user.mobile' | 'student_user'>
 
 export function emptyStudentUser(): StudentUserFormValues {
   return {
@@ -39,10 +41,15 @@ export function emptyStudentUser(): StudentUserFormValues {
 export const FIELD_MESSAGES = {
   ...IDENTITY_FIELD_MESSAGES,
   student_user: {
+    // A shape the rule's line would not say.
     dob: () => $trans('Please use yyyy-mm-dd for the date of birth'),
-    mobile: () => $trans('Please provide a valid mobile'),
   },
 } satisfies FieldMessages
+
+export const FIELD_LABELS = {
+  ...IDENTITY_FIELD_LABELS,
+  'student_user.mobile': () => $trans('Mobile'),
+} satisfies FieldLabels
 
 /**
  * Only the inputs the schema cannot take as typed need shaping. `dob` is
@@ -58,15 +65,16 @@ function payloadOf(values: StudentUserFormValues) {
       ...sub,
       dob: dob === '' ? null : dob,
       ...(iban ? { iban } : {}),
-      mobile: normalizePhone(mobile ?? ''),
+      mobile: normalizePhone(mobile ?? '', '+31'),
     },
   }
 }
 
 export const { validate: validateStudentUserForm, parse: parseStudentUserForm } = userFormContract<
-  typeof vStudentUserWriteRequestWritable, StudentUserFormValues, 'dob' | 'mobile' | 'student_user'
+  typeof vStudentUserWriteRequestWritable, StudentUserFormValues, 'student_user.dob' | 'student_user.mobile' | 'student_user'
 >({
   schema: vStudentUserWriteRequestWritable,
   messages: FIELD_MESSAGES,
+  labels: FIELD_LABELS,
   payloadOf,
 })

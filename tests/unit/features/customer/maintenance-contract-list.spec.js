@@ -35,7 +35,7 @@ function contractPage({ count = 30 } = {}) {
   return paginated(
     [
       contractRow(),
-      contractRow({id: 10, name: 'Basic 2026', sum_tariffs: '', remarks: null}),
+      contractRow({id: 10, name: 'Basic 2026', sum_tariffs: '0.00', remarks: null}),
     ],
     { count },
   )
@@ -102,11 +102,13 @@ describe('MaintenanceContractList, wire contract', () => {
     expect(firstRow.text()).toContain('Includes weekend cover')
   })
 
-  test('an absent contract value renders an empty cell, not an error', async () => {
+  test('a zero contract value renders as zero money, with no empty-cell special case', async () => {
+    // sum_tariffs is required on the contract, so an absent value is a wire
+    // violation, not a UI state: the second row carries a genuine zero.
     const wrapper = await mountTable()
 
     const secondRow = wrapper.findAll('tbody tr')[1]
-    expect(secondRow.text()).not.toContain('€')
+    expect(secondRow.text()).toContain('€0.00')
   })
 
   test('a sort click sorts the wire through the ordering allow-list', async () => {

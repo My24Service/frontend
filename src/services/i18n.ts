@@ -34,7 +34,7 @@ declare global {
  */
 type ToastCreator = (options: { title: string, body: string, variant: 'success' | 'danger' }) => unknown
 
-function $trans(text: string) {
+export function $trans(text: string) {
   if (!window.django) {
     return text
   }
@@ -46,16 +46,21 @@ function $trans(text: string) {
   return django.gettext(text)
 }
 
-function infoToast(create: ToastCreator, title: string, body: string) {
+/**
+ * Fills `%(name)s` placeholders, the format Django's own `interpolate` reads,
+ * so a translator sees the placeholder in the .po and may move it. Written
+ * here rather than read off the jsi18n bundle so it works when the bundle
+ * is absent (tests, the login page before the catalogue loads).
+ */
+export function interpolate(format: string, params: Record<string, string | number>) {
+  return format.replace(/%\((\w+)\)s/g, (match, name: string) =>
+    name in params ? String(params[name]) : match)
+}
+
+export function infoToast(create: ToastCreator, title: string, body: string) {
   create({title, body, variant: 'success'})
 }
 
-function errorToast(create: ToastCreator, body: string, title=$trans('Error')) {
+export function errorToast(create: ToastCreator, body: string, title=$trans('Error')) {
   create({title, body, variant: 'danger'})
-}
-
-export {
-  $trans,
-  infoToast,
-  errorToast,
 }

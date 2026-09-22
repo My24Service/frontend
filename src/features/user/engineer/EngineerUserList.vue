@@ -37,16 +37,12 @@
 </template>
 
 <script lang="ts" setup>
-import { useTemplateRef } from 'vue'
-
 import {
   companyEngineerDestroyMutation,
   companyEngineerListOptions,
   companyEngineerListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyEngineerListData, PaginatedEngineerList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-import { useAuthStore } from '@/features/auth'
 import {
   ServerTable,
   baseListParams,

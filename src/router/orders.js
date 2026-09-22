@@ -1,26 +1,25 @@
-import TheAppLayoutEmpty from '../components/TheAppLayoutEmpty.vue'
-import Workorder from '../views/orders/Workorder.vue'
-
 import TheAppLayout from '../components/TheAppLayout.vue'
-import SubNavOrders from '../components/SubNavOrders.vue'
+import SubNav from '../components/SubNav.vue'
 
-import OrderList from '../views/orders/OrderList.vue'
-import OrderForm from '../views/orders/OrderForm.vue'
-import OrderView from '../views/orders/OrderView.vue'
-
-import YearStats from '../views/orders/YearStats.vue'
-import MonthStats from '../views/orders/MonthStats.vue'
 import {AUTH_LEVELS} from "@/constants";
 
-import OrdersSchedule from "../views/orders/Schedule.vue";
-
-import {USER_FILTER_TYPE_ORDER} from "@/models/base_user_filter";
+import {USER_FILTER_TYPE} from "@/models/base_user_filter";
 import {createUserFilterRoutes} from "./helpers";
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const MonthStats = () => import('@/features/order/stats/MonthStats.vue')
+const OrderForm = () => import('@/features/order/OrderFormByTenant.vue')
+const OrderList = () => import('@/features/order/order/OrderList.vue')
+const OrderView = () => import('@/features/order/OrderViewByTenant.vue')
+const OrdersSchedule = () => import('@/features/order/schedule/OrdersSchedule.vue')
+const WorkorderPage = () => import('@/features/order/workorder/WorkorderPage.vue')
+const YearStats = () => import('@/features/order/stats/YearStats.vue')
 
 export default [
   // orders
   {
-    component: TheAppLayoutEmpty,
+    component: TheAppLayout,
+    props: { bare: true },
     path: '/orders',
     children: [
       {
@@ -28,7 +27,7 @@ export default [
         name: 'workorder-view',
         path: 'orders/workorder/:uuid',
         components: {
-          'app-content': Workorder,
+          'app-content': WorkorderPage,
         },
         props: {
           'app-content': route => ({...route.params})
@@ -50,7 +49,10 @@ export default [
             path: '',
             components: {
               'app-content': OrderList,
-              'app-subnav': SubNavOrders
+              'app-subnav': SubNav
+            },
+            props: {
+              'app-subnav': { section: 'orders' },
             },
           },
           {
@@ -61,11 +63,11 @@ export default [
                 path: '',
                 components: {
                   'app-content': OrderForm,
-                  'app-subnav': SubNavOrders
+                  'app-subnav': SubNav
                 },
                 props: {
                   'app-content': route => ({...route.params}),
-                  'app-subnav': true
+                  'app-subnav': { section: 'orders' }
                 },
               },
               {
@@ -73,11 +75,11 @@ export default [
                 path: ':pk(\\d+)',
                 props: {
                   'app-content': route => ({...route.params}),
-                  'app-subnav': true
+                  'app-subnav': { section: 'orders' }
                 },
                 components: {
                   'app-content': OrderForm,
-                  'app-subnav': SubNavOrders
+                  'app-subnav': SubNav
                 },
               },
             ],
@@ -87,37 +89,37 @@ export default [
             path: 'form-maintenance',
             components: {
               'app-content': OrderForm,
-              'app-subnav': SubNavOrders
+              'app-subnav': SubNav
             },
             props: {
               'app-content': {maintenance: true},
-              'app-subnav': true
+              'app-subnav': { section: 'orders' }
             },
-            children: [
-              {
-                name: 'order-add-quotation',
-                path: ':quotation_id',
-                components: {
-                  'app-content': OrderForm,
-                  'app-subnav': SubNavOrders
-                },
-                props: {
-                  'app-content': route => ({...route.params, from_quotation: true}),
-                  'app-subnav': true
-                },
-              },
-            ],
+          },
+          // A sibling, not a child of the maintenance route: the form renders
+          // no nested router-view, so a child's props never reached it.
+          {
+            name: 'order-add-quotation',
+            path: 'form-maintenance/:quotation_id',
+            components: {
+              'app-content': OrderForm,
+              'app-subnav': SubNav
+            },
+            props: {
+              'app-content': route => ({quotationId: route.params.quotation_id, fromQuotation: true}),
+              'app-subnav': { section: 'orders' }
+            },
           },
           {
             name: 'order-view',
             path: 'view/:pk',
             props: {
               'app-content': route => ({...route.params}),
-              'app-subnav': true
+              'app-subnav': { section: 'orders' }
             },
             components: {
               'app-content': OrderView,
-              'app-subnav': SubNavOrders
+              'app-subnav': SubNav
             },
           },
           {
@@ -125,11 +127,11 @@ export default [
             path: 'detail/:uuid',
             props: {
               'app-content': route => ({...route.params}),
-              'app-subnav': true
+              'app-subnav': { section: 'orders' }
             },
             components: {
               'app-content': OrderView,
-              'app-subnav': SubNavOrders
+              'app-subnav': SubNav
             },
           },
         ],
@@ -142,11 +144,11 @@ export default [
         path: 'schedule/:start/:end',
         components: {
           'app-content': OrdersSchedule,
-          'app-subnav': SubNavOrders
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': true
+          'app-subnav': { section: 'orders' }
         },
       },
       {
@@ -156,11 +158,11 @@ export default [
         path: 'schedule',
         components: {
           'app-content': OrdersSchedule,
-          'app-subnav': SubNavOrders
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': true
+          'app-subnav': { section: 'orders' }
         },
       },
 
@@ -171,11 +173,11 @@ export default [
         path: 'year-stats',
         components: {
           'app-content': YearStats,
-          'app-subnav': SubNavOrders
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': {}
+          'app-subnav': { section: 'orders' }
         },
       },
       {
@@ -184,11 +186,11 @@ export default [
         path: 'month-stats',
         components: {
           'app-content': MonthStats,
-          'app-subnav': SubNavOrders
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params}),
-          'app-subnav': {}
+          'app-subnav': { section: 'orders' }
         },
       },
       {
@@ -197,15 +199,15 @@ export default [
         path: 'orders-not-accepted',
         components: {
           'app-content': OrderList,
-          'app-subnav': SubNavOrders
+          'app-subnav': SubNav
         },
         props: {
           'app-content': route => ({...route.params, queryMode: 'unaccepted'}),
-          'app-subnav': true
+          'app-subnav': { section: 'orders' }
         }
       },
       // filters
-      ...createUserFilterRoutes('order', 'orders', USER_FILTER_TYPE_ORDER),
+      ...createUserFilterRoutes('order', 'orders', USER_FILTER_TYPE.ORDER),
 
     ],
   }

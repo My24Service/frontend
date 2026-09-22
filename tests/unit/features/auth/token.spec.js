@@ -33,16 +33,19 @@ beforeEach(() => {
 /**
  * What a change made outside this document looks like to the ref.
  *
- * VueUse listens on two channels and picks by how it finds the storage: for a
- * real `Storage` (every browser) it listens for the native `storage` event a
- * browser delivers to the other tabs, and otherwise - happy-dom's localStorage
- * is a MemoryStorage, not a Storage - for its same-document equivalent, which
- * carries the same `{key, oldValue, newValue}` payload. Both routes run the
- * same update, which is what these specs drive.
+ * VueUse picks its sync channel by how it finds the storage: for a real
+ * `Storage` it listens for the native `storage` event a browser delivers to
+ * the other tabs, and otherwise for its own same-document
+ * `vueuse-storage` CustomEvent. The test storage is a real `Storage`
+ * (tests/unit/setupTests.js), so this is the native event - the channel a
+ * browser actually uses - carrying the same `{key, oldValue, newValue}`.
  */
 function storageEvent(newValue, oldValue = 'jwt-abc') {
-  return new CustomEvent('vueuse-storage', {
-    detail: { key: TOKEN_KEY, oldValue, newValue, storageArea: localStorage },
+  return new StorageEvent('storage', {
+    key: TOKEN_KEY,
+    oldValue,
+    newValue,
+    storageArea: localStorage,
   })
 }
 

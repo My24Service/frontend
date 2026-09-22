@@ -43,6 +43,15 @@ export function modal(id) {
       input.dispatchEvent(new Event('change', { bubbles: true }))
     },
 
+    /** Type `value` into the modal's input or textarea matching `selector`. */
+    typeInto(selector, value) {
+      const input = root().querySelector(selector)
+      if (!input) throw new Error(`modal '${id}' has no '${selector}'`)
+      input.value = value
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+      input.dispatchEvent(new Event('change', { bubbles: true }))
+    },
+
     /** Click the footer's primary button — the one labelled OK. */
     ok() {
       root().querySelector('.modal-footer .btn-primary').click()

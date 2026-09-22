@@ -5,7 +5,7 @@ import {
   LABEL_PALETTE,
   labelTextColor,
   isPaletteColor,
-} from '@/features/statuscode/statuscode/palette'
+} from '@/features/statuscode'
 
 const HEX = /^#[0-9a-f]{6}$/
 const ALL = [...LABEL_PALETTE.light, ...LABEL_PALETTE.mid, ...LABEL_PALETTE.dark]

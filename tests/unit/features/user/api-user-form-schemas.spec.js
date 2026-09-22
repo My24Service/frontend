@@ -7,7 +7,7 @@ import {
   emptyApiUser,
   parseApiUserForm,
   validateApiUserForm,
-} from '@/features/user/api/schemas'
+} from '@/features/user'
 
 const valid = {
   username: 'api-jan',
@@ -26,7 +26,7 @@ describe('vApiUserRequestWritable', () => {
         password: 'secret-password',
         api_user: {
           name: 'Jan integration',
-          expire_start_dt: '2026-01-01T00:00:00Z',
+          expire_start_dt: '2026-01-01',
           expire_in_days: 365,
         },
       }).success,
@@ -93,8 +93,8 @@ describe('emptyApiUser', () => {
 
   test('the defaults are not yet submittable on create', () => {
     const errors = validateApiUserForm(emptyApiUser(), {isCreate: true})
-    expect(errors.username).toBe('Username is required')
-    expect(errors.name).toBe('Name is required')
+    expect(errors.username).toBe('Please enter a username')
+    expect(errors['api_user.name']).toBe('Please enter a name')
     expect(errors.password1).toBe('Please enter a password')
   })
 })
@@ -106,20 +106,20 @@ describe('validateApiUserForm', () => {
 
   test('blames each blank field by name', () => {
     expect(validateApiUserForm({...valid, username: ''}, {isCreate: true}).username)
-      .toBe('Username is required')
-    expect(validateApiUserForm({...valid, name: ''}, {isCreate: true}).name)
-      .toBe('Name is required')
-    expect(validateApiUserForm({...valid, expire_start_dt: ''}, {isCreate: true}).expire_start_dt)
-      .toBe('Please enter date')
-    expect(validateApiUserForm({...valid, expire_in_days: ''}, {isCreate: true}).expire_in_days)
-      .toBe('Please enter the number of days')
+      .toBe('Please enter a username')
+    expect(validateApiUserForm({...valid, name: ''}, {isCreate: true})['api_user.name'])
+      .toBe('Please enter a name')
+    expect(validateApiUserForm({...valid, expire_start_dt: 'not-a-date'}, {isCreate: true})['api_user.expire_start_dt'])
+      .toBe('Please enter a date')
+    expect(validateApiUserForm({...valid, expire_in_days: ''}, {isCreate: true})['api_user.expire_in_days'])
+      .toBe('Please enter an expire in days')
   })
 
   test('refuses token lifetimes the API would refuse', () => {
-    expect(validateApiUserForm({...valid, expire_in_days: -1}, {isCreate: true}).expire_in_days)
-      .toBe('Please enter the number of days')
-    expect(validateApiUserForm({...valid, expire_in_days: 1.5}, {isCreate: true}).expire_in_days)
-      .toBe('Please enter the number of days')
+    expect(validateApiUserForm({...valid, expire_in_days: -1}, {isCreate: true})['api_user.expire_in_days'])
+      .toBe('Please enter a value of at least 0')
+    expect(validateApiUserForm({...valid, expire_in_days: 1.5}, {isCreate: true})['api_user.expire_in_days'])
+      .toBe('Please enter a whole number')
   })
 
   test('on create both passwords are required and must match', () => {
@@ -157,18 +157,19 @@ describe('username charset', () => {
 })
 
 /**
- * `expire_start_dt` is optional on the wire but required on the form: a token
- * without a start has no validity window to display. The strengthening lives
- * on the composed schema, not as a redeclared entry.
+ * `expire_start_dt` is optional on the wire and on the form: the column
+ * defaults to now, so a cleared date rides absent and the token starts today
+ * - which is what the prefilled date said anyway.
  */
-describe('valid-from strengthening', () => {
-  test('the form refuses what the endpoint would accept', () => {
+describe('valid-from', () => {
+  test('a cleared date is not an error and leaves the key off the body', () => {
     expect(v.safeParse(vApiUserRequestWritable, {
       username: 'api-jan',
       api_user: {name: 'Jan integration', expire_in_days: 365},
     }).success).toBe(true)
-    expect(validateApiUserForm({...valid, expire_start_dt: ''}, {isCreate: true}).expire_start_dt)
-      .toBe('Please enter date')
+    expect(validateApiUserForm({...valid, expire_start_dt: ''}, {isCreate: true})).toEqual({})
+    expect(parseApiUserForm({...valid, expire_start_dt: ''}, {isCreate: true}).api_user)
+      .not.toHaveProperty('expire_start_dt')
   })
 })
 
@@ -178,7 +179,7 @@ describe('parseApiUserForm', () => {
       username: 'api-jan',
       api_user: {
         name: 'Jan integration',
-        expire_start_dt: '2026-01-01T00:00:00Z',
+        expire_start_dt: '2026-01-01',
         expire_in_days: 365,
       },
       password: 'secret-password',
@@ -190,7 +191,7 @@ describe('parseApiUserForm', () => {
     expect(body).not.toHaveProperty('password')
     expect(body.api_user).toEqual({
       name: 'Jan integration',
-      expire_start_dt: '2026-01-01T00:00:00Z',
+      expire_start_dt: '2026-01-01',
       expire_in_days: 365,
     })
   })

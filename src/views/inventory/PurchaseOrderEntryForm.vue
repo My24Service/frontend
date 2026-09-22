@@ -344,8 +344,6 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import VueMultiselect from 'vue-multiselect'
@@ -356,8 +354,7 @@ import purchaseorderEntryModel from '../../models/inventory/PurchaseOrderEntry.j
 import purchaseOrderModel from '../../models/inventory/PurchaseOrder.js'
 import stockLocationModel from '../../models/inventory/StockLocation'
 import materialModel from '../../models/inventory/Material.js'
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/services/i18n";
+import { inventoryPurchaseorderEntryBulkCreate } from '@/api/sdk.gen'
 
 const greaterThanZero = (value) => parseInt(value) > 0
 
@@ -397,8 +394,6 @@ const entriesFields = [
 
 const editIndex = ref(null)
 const isEditEntry = ref(false)
-const deletedEntries = ref([])
-
 const purchaseOrderMaterials = ref([])
 const selectedPurchaseOrderMaterial = ref({
   material_view: materialModel.getFields()
@@ -465,8 +460,9 @@ function formatEntryDate(entry_date) {
   return moment(entry_date).format('YYYY-MM-DD')
 }
 
+// A removed entry is just gone from the list: the bulk endpoint creates what it
+// is handed, and these rows were never saved, so there is nothing to delete.
 function deleteEntry(index) {
-  deletedEntries.value.push(purchaseorderEntries.value[index])
   purchaseorderEntries.value.splice(index, 1)
 }
 
@@ -543,15 +539,23 @@ async function submitForm() {
   buttonDisabled.value = true
 
   if (isCreate.value) {
+    // One request for the whole list, so a failure books nothing in rather
+    // than leaving the entries before it already saved. The rows come out of
+    // the model, which is where the date and amount conversions live.
+    const rows = purchaseorderEntryModel.requestRows(purchaseorderEntries.value)
+
     try {
-      // The hook fires per entry as updateCollection works through the
-      // collection, so entries saved before a later failure keep their
-      // toasts - which is what the hand-rolled loop this replaced did.
-      purchaseorderEntryModel.collection = purchaseorderEntries.value
-      purchaseorderEntryModel.deletedItems = deletedEntries.value
-      await purchaseorderEntryModel.updateCollection({
-        onInserted: () => infoToast(create, $trans('Created'), $trans('Entry has been created')),
-      })
+      // Nothing staged is nothing to send, and nothing to report either - the
+      // create branch does not validate, so an empty list simply goes back.
+      if (rows.length) {
+        await inventoryPurchaseorderEntryBulkCreate({
+          // throwOnError: the SDK resolves with `{error}` otherwise, which a
+          // try/catch would read as a save that worked.
+          throwOnError: true,
+          body: rows,
+        })
+        infoToast(create, $trans('Created'), $trans('Entry has been created'))
+      }
 
       buttonDisabled.value = false
       isLoading.value = false
@@ -632,7 +636,6 @@ init()
 defineExpose({
   entry,
   purchaseorderEntries,
-  deletedEntries,
   stockLocations,
   defaultLocation,
   editIndex,

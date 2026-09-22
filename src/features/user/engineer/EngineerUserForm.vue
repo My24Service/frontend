@@ -1,25 +1,13 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-page">
-      <header>
-        <div class="page-title">
-          <h3>
-            <IBiPeople></IBiPeople>
-            <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
-            <strong> {{ engineer.username }}</strong>
-            <span class="dimmed" v-if="isCreate && !engineer.username">{{ $trans('new') }}</span>
-            <span class="dimmed" v-if="!isCreate && !engineer.username">{{ $trans('edit') }}</span>
-          </h3>
-          <div class="flex-columns">
-            <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
-              {{ $trans('Cancel') }}</BButton>
-            <BButton @click="submitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</BButton>
-          </div>
-        </div>
-      </header>
+  <UserFormShell
+    :username="engineer.username"
+    :is-create="isCreate"
+    :is-loading="isLoading"
+    :button-disabled="buttonDisabled"
+    @cancel="cancelForm"
+    @submit="submitForm"
+  >
 
-      <div class="page-detail">
         <div class="flex-columns">
           <div class="panel">
             <h6>{{ $trans('User info')}}</h6>
@@ -46,12 +34,12 @@
                 id="engineer_mobile"
                 size="sm"
                 v-model="engineer.engineer.mobile"
-                :state="submitClicked ? !errors.mobile : null"
+                :state="submitClicked ? !errors['engineer.mobile'] : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="engineer_mobile-feedback"
-                :state="submitClicked ? !errors.mobile : null">
-                {{ errors.mobile || FIELD_MESSAGES.engineer.mobile() }}
+                :state="submitClicked ? !errors['engineer.mobile'] : null">
+                {{ errors['engineer.mobile'] }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -192,19 +180,6 @@
             <BFormGroup
               label-size="sm"
               label-cols="4"
-              :label="$trans('Hourly rate')"
-              label-for="engineer_hourly_rate"
-            >
-              <PriceInput
-                v-model="engineer.engineer.hourly_rate"
-                :currency="hourlyRateCurrency"
-                @priceChanged="(dinero) => applyPrice(dinero)"
-              />
-            </BFormGroup>
-
-            <BFormGroup
-              label-size="sm"
-              label-cols="4"
               :label="$trans('Preferred location')"
               label-for="engineer_preferred_location"
             >
@@ -218,8 +193,8 @@
               ></BFormSelect>
               <b-form-invalid-feedback
                 id="engineer_preferred_location-feedback"
-                :state="submitClicked ? !errors.preferred_location : null">
-                {{ errors.preferred_location || FIELD_MESSAGES.engineer.preferred_location() }}
+                :state="submitClicked ? !errors['engineer.preferred_location'] : null">
+                {{ errors['engineer.preferred_location'] || selectMessage(FIELD_LABELS['engineer.preferred_location']()) }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -265,33 +240,28 @@
             </BFormGroup>
           </div>
         </div>
-      </div>
-    </div>
-  </b-overlay>
+  </UserFormShell>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useToast } from 'bootstrap-vue-next'
-import type Dinero from 'dinero.js'
+import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
 import {
-  companyEngineerCreateMutation,
-  companyEngineerListQueryKey,
-  companyEngineerPartialUpdateMutation,
-  companyEngineerRetrieveOptions,
   inventoryStockLocationCreateMutation,
   inventoryStockLocationListOptions,
   inventoryStockLocationListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
+import { companyEngineer } from '@/api/resources.gen'
 import type { Engineer } from '@/api/types.gen'
 import { vEngineerRequestWritable } from '@/api/valibot.gen'
-import PriceInput from '@/components/PriceInput.vue'
-import { useMainStore } from '@/stores/main'
+import {
+  selectMessage,
+  useQueryErrorToast,
+} from '@/features/forms'
 import {
   emptyEngineerUser,
+  FIELD_LABELS,
   FIELD_MESSAGES,
   parseEngineerUserForm,
   validateEngineerUserForm,
@@ -301,9 +271,6 @@ import {
 import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
-import { errorToast, $trans } from '@/services/i18n'
-import { useQueryErrorToast } from '@/features/forms/use-query-error-toast'
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {
@@ -328,10 +295,7 @@ function engineerUserFromRecord(record: Engineer): EngineerUserFormValues {
 
 const form = useUserForm<EngineerUserFormValues, Engineer, v.InferOutput<typeof vEngineerRequestWritable>, EngineerUserFieldErrors>({
   pk: () => props.pk,
-  retrieve: (id) => companyEngineerRetrieveOptions({path: {id}}),
-  create: companyEngineerCreateMutation(),
-  update: companyEngineerPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyEngineerListQueryKey()}),
+  resource: companyEngineer,
   empty: emptyEngineerUser,
   fromRecord: engineerUserFromRecord,
   validate: validateEngineerUserForm,
@@ -350,9 +314,6 @@ const form = useUserForm<EngineerUserFormValues, Engineer, v.InferOutput<typeof 
 
 const engineer = form.values
 
-// Read-only on the wire: the currency the rate is shown in comes with the
-// record, not the form.
-const hourlyRateCurrency = computed(() => form.record.value?.engineer?.hourly_rate_currency ?? 'EUR')
 const {errors, submitClicked, buttonDisabled, isCreate, probe, submitForm, cancelForm} = form
 
 const countries = computed(() => mainStore.getCountries)
@@ -394,12 +355,6 @@ async function createLocation() {
     // The mutation's onError already told the user; staying on the form is
     // the contract, not a silent swallow.
   }
-}
-
-// The hourly rate rides the wire as a decimal string; the PriceInput speaks
-// dinero. Same handoff as the customer form's `applyPrice`.
-function applyPrice(dinero: Dinero.Dinero) {
-  engineer.value.engineer.hourly_rate = dinero.toFormat('0.00')
 }
 
 const isLoading = computed(() =>

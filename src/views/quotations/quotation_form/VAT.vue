@@ -9,8 +9,6 @@
 </template>
 
 <script>
-import {useMainStore} from "@/stores/main";
-
 export default {
   setup() {
     const mainStore = useMainStore()

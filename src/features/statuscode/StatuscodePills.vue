@@ -4,7 +4,7 @@
       v-for="type in CODE_TYPES"
       :key="type"
       :active="type === active"
-      :to="{name: routeNamesFor(type, fromSettings).list}"
+      :to="toRoute(routeNamesFor(type, fromSettings).list)"
     >
       {{ codeTypeLabel(type) }}
     </b-nav-item>
@@ -13,7 +13,6 @@
 
 <script lang="ts" setup>
 import { CODE_TYPES, codeTypeLabel, routeNamesFor, type CodeType } from './code-types'
-
 /**
  * One pill per code type, linking to that type's list in the tree the screen
  * was mounted from. The legacy pills sent every company-tree pill to the

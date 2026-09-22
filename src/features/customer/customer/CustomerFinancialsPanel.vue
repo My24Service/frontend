@@ -47,34 +47,6 @@
       </BFormCheckbox>
     </BFormGroup>
 
-    <BFormGroup
-      label-size="sm"
-      label-cols="6"
-      v-bind:label="$trans('Hourly rate engineer')"
-      label-for="customer_hourly_rate_engineer"
-    >
-      <PriceInput
-        v-model="values.hourly_rate_engineer"
-        :currency="values.hourly_rate_engineer_currency"
-        :allow-empty="isCreate"
-        @priceChanged="(dinero) => applyPrice('hourly_rate_engineer', dinero)"
-      />
-    </BFormGroup>
-
-    <BFormGroup
-      label-size="sm"
-      label-cols="6"
-      v-bind:label="$trans('Call out costs')"
-      label-for="customer_hourly_rate_engineer"
-    >
-      <PriceInput
-        v-model="values.call_out_costs"
-        :currency="values.call_out_costs_currency"
-        :allow-empty="isCreate"
-        @priceChanged="(dinero) => applyPrice('call_out_costs', dinero)"
-      />
-    </BFormGroup>
-
     <DocumentsComponent
       v-if="values.id"
       :customer="values"
@@ -84,13 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-import type Dinero from 'dinero.js'
-
-import PriceInput from '@/components/PriceInput.vue'
-import DocumentsComponent from '../document/DocumentPanel.vue'
-import { $trans } from '@/services/i18n'
-import type { CurrencyEnum } from '@/api/types.gen'
+import { DocumentPanel as DocumentsComponent } from '@/features/customer/document'
 import type { CustomerFormValues } from './schemas'
 
 const values = defineModel<CustomerFormValues>('values', { required: true })
@@ -115,10 +81,4 @@ const standardHoursHour = computed({
       : parsed
   },
 })
-
-function applyPrice(field: 'hourly_rate_engineer' | 'call_out_costs', dinero: Dinero.Dinero) {
-  values.value[field] = dinero.toFormat('0.00')
-  values.value[`${field}_currency` as 'hourly_rate_engineer_currency' | 'call_out_costs_currency'] =
-    dinero.getCurrency() as CurrencyEnum
-}
 </script>

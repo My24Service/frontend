@@ -25,6 +25,9 @@
     /* Resolution */
     "resolveJsonModule": true,
     "baseUrl": ".",
+    /* Lets the sfc-typed-router Volar plugin match page files to the
+       project-relative keys in src/route-map.d.ts. */
+    "rootDir": ".",
     "paths": {
       "@/*": ["src/*"]
     },
@@ -41,7 +44,14 @@
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.vue",
-    "src/**/*.js"
+    "src/**/*.js",
+    "auto-imports.d.ts",
+    "components.d.ts"
   ],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist"],
+  "vueCompilerOptions": {
+    "plugins": [
+      "vue-router/volar/sfc-typed-router",
+    ],
+  },
 }

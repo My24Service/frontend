@@ -36,15 +36,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, useTemplateRef } from 'vue'
-
 import {
   companyEmployeeuserDestroyMutation,
   companyEmployeeuserListOptions,
   companyEmployeeuserListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyEmployeeuserListData, PaginatedEmployeeUserList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
 import {
   ServerTable,
   baseListParams,

@@ -29,7 +29,6 @@
 </template>
 
 <script lang="ts" setup>
-import { $trans } from '@/services/i18n'
 import type { Customer } from '@/api/types.gen'
 
 type CustomerCardRecord = Partial<Pick<Customer,

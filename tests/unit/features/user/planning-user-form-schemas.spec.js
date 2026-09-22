@@ -6,7 +6,7 @@ import { vPlanningUserRequestWritable } from '@/api/valibot.gen'
 import {
   emptyPlanningUser,
   validatePlanningUserForm,
-} from '@/features/user/planning/schemas'
+} from '@/features/user'
 
 const valid = {
   username: 'plan-jan',
@@ -96,7 +96,7 @@ describe('emptyPlanningUser', () => {
 
   test('the defaults are not yet submittable on create', () => {
     const errors = validatePlanningUserForm(emptyPlanningUser(), {isCreate: true})
-    expect(errors.username).toBe('Username is required')
+    expect(errors.username).toBe('Please enter a username')
     expect(errors.first_name).toBe('Please enter a first name')
     expect(errors.email).toBe('Please enter a valid email')
     expect(errors.password1).toBe('Please enter a password')
@@ -110,7 +110,7 @@ describe('validatePlanningUserForm', () => {
 
   test('blames each blank field by name', () => {
     expect(validatePlanningUserForm({...valid, username: ''}, {isCreate: true}).username)
-      .toBe('Username is required')
+      .toBe('Please enter a username')
     expect(validatePlanningUserForm({...valid, email: 'nope'}, {isCreate: true}).email)
       .toBe('Please enter a valid email')
     expect(validatePlanningUserForm({...valid, first_name: ''}, {isCreate: true}).first_name)

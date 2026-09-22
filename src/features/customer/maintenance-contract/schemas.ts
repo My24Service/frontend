@@ -1,27 +1,21 @@
 import * as v from 'valibot'
 import type Dinero from 'dinero.js'
 
-import type { MaintenanceContract, MaintenanceEquipment } from '@/api/types.gen'
+import type { MaintenanceContract, MaintenanceContractWithEquipmentRequestRequest, MaintenanceEquipment, MaintenanceEquipmentRowRequest } from '@/api/types.gen'
 import {
   vMaintenanceContractRequest,
+  vMaintenanceContractWithEquipmentRequestRequest,
+  vMaintenanceEquipmentRowRequest,
   vMaintenanceEquipmentRequest,
 } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
-import { $trans } from '@/services/i18n'
-
-
-
-export const maintenanceContractSchema = v.object({
-  ...vMaintenanceContractRequest.entries,
-  name: v.pipe(v.unwrap(vMaintenanceContractRequest.entries.name), v.minLength(1)),
-})
-
-export type MaintenanceContractBody = v.InferOutput<typeof maintenanceContractSchema>
-
+import {
+  fieldErrors,
+  type FieldErrors,
+  type FieldLabels,
+} from '@/features/forms'
 /** The wire shape, except that the picker is empty until a customer is chosen. */
 export type MaintenanceContractFormValues =
-  Omit<v.InferInput<typeof maintenanceContractSchema>, 'customer'> & {customer: number | null}
-
+  Omit<v.InferInput<typeof vMaintenanceContractRequest>, 'customer'> & {customer: number | null}
 
 export function emptyContract(): MaintenanceContractFormValues {
   return {
@@ -29,7 +23,6 @@ export function emptyContract(): MaintenanceContractFormValues {
     name: '',
   }
 }
-
 
 export function contractFromRecord(
   record: MaintenanceContract,
@@ -41,38 +34,18 @@ export function contractFromRecord(
   }
 }
 
-
 export type ContractFieldErrors = FieldErrors<'customer' | 'name' | 'remarks' | 'equipment'>
 
-
-const FIELD_MESSAGES = {
-  customer: () => $trans('Please select a customer'),
-  name: () => $trans('Please enter a contract name'),
-} satisfies FieldMessages<'customer' | 'name'>
-
+const FIELD_LABELS = {
+  customer: () => $trans('Customer'),
+  name: () => $trans('Contract name'),
+} satisfies FieldLabels<'customer' | 'name'>
 
 export function validateContractForm(
   values: MaintenanceContractFormValues,
 ): ContractFieldErrors {
-  return fieldErrors(maintenanceContractSchema, values, FIELD_MESSAGES)
+  return fieldErrors(vMaintenanceContractRequest, values, {}, FIELD_LABELS)
 }
-
-
-export function parseContractBody(
-  values: MaintenanceContractFormValues,
-): MaintenanceContractBody {
-  return v.parse(maintenanceContractSchema, values)
-}
-
-
-
-export const maintenanceEquipmentSchema = v.object({
-  ...vMaintenanceEquipmentRequest.entries,
-  equipment: v.unwrap(vMaintenanceEquipmentRequest.entries.equipment),
-})
-
-export type MaintenanceEquipmentBody = v.InferOutput<typeof maintenanceEquipmentSchema>
-
 
 export type EquipmentRowState = {
   id?: number
@@ -85,7 +58,6 @@ export type EquipmentRowState = {
   tariff_dinero?: Dinero.Dinero
 }
 
-
 export function emptyEquipmentRow(defaultCurrency: string): EquipmentRowState {
   return {
     equipment: null,
@@ -95,7 +67,6 @@ export function emptyEquipmentRow(defaultCurrency: string): EquipmentRowState {
     tariff_currency: defaultCurrency,
   }
 }
-
 
 export function equipmentRowFromRecord(
   record: MaintenanceEquipmentRow,
@@ -112,16 +83,18 @@ export function equipmentRowFromRecord(
   }
 }
 
-
 export type MaintenanceEquipmentRow = MaintenanceEquipment
 
-
-export function parseEquipmentBody(
-  row: EquipmentRowState,
-  contractId: number,
-): MaintenanceEquipmentBody {
-  return v.parse(maintenanceEquipmentSchema, {
-    contract: contractId,
+/**
+ * The row as the replace-set body takes it. Two things a row does not carry:
+ * the contract, which the endpoint fills from the one in its URL, and the
+ * currency, which is the contract's own. The frequency rides as a string in the
+ * row state so an empty input can be told from a zero; it leaves the key absent,
+ * which the schema's `optional` accepts and the API defaults to one.
+ */
+function shapeEquipmentRow(row: EquipmentRowState) {
+  return {
+    ...(row.id === undefined ? {} : {id: row.id}),
     equipment: row.equipment,
     equipment_name: row.equipment_name,
     ...(row.times_per_year !== '' && row.times_per_year !== undefined
@@ -129,15 +102,59 @@ export function parseEquipmentBody(
       : {}),
     ...(row.remarks ? {remarks: row.remarks} : {}),
     tariff: row.tariff,
-  })
+    // The tariff's currency, when the row carries one: the server reads the
+    // companion off the raw row and otherwise keeps the column's default, so
+    // dropping it would relabel a USD or GBP tenant's tariffs as EUR. A staged
+    // row always has one - it comes from the record or the tenant's default.
+    ...(row.tariff_currency ? {tariff_currency: row.tariff_currency} : {}),
+  }
 }
 
+/**
+ * The staged set as the `equipment` list of a save. The whole protocol is
+ * `id`: a row carrying one updates that stored row, a row without one is
+ * created, and a stored row absent from the list is deleted — which is why
+ * every staged row goes in, a deleted one simply gone.
+ */
+export function parseEquipmentSetBody(
+  rows: readonly EquipmentRowState[],
+): MaintenanceEquipmentRowRequest[] {
+  return rows.map((row) => v.parse(vMaintenanceEquipmentRowRequest, shapeEquipmentRow(row)))
+}
 
-export function equipmentRowErrors(row: EquipmentRowState): Partial<Record<'equipment' | 'times_per_year', string>> {
-  const errors: Partial<Record<'equipment' | 'times_per_year', string>> = {}
-  if (row.equipment === null) errors.equipment = $trans('Please select an equipment')
-  if (row.times_per_year !== '' && !(parseInt(row.times_per_year) > 0)) {
-    errors.times_per_year = $trans('Please enter a number')
+/**
+ * The body of a save: the contract's own fields joined to the staged set,
+ * already shaped by `parseEquipmentSetBody`, and parsed as the request
+ * component of the pair the form submits to — `POST
+ * maintenance-contract/with-equipment/` and `POST
+ * maintenance-contract/{id}/with-equipment/`, which declare one body between
+ * them. It is one body because the backend writes both halves in one
+ * transaction, so a failed save leaves no rows behind and no `sum_tariffs`
+ * derived from rows it does not have.
+ */
+export function parseContractWithEquipmentBody(
+  values: MaintenanceContractFormValues,
+  equipment: MaintenanceEquipmentRowRequest[],
+): MaintenanceContractWithEquipmentRequestRequest {
+  return v.parse(vMaintenanceContractWithEquipmentRequestRequest, {...values, equipment})
+}
+
+const EQUIPMENT_ROW_LABELS = {
+  equipment: () => $trans('Equipment'),
+  times_per_year: () => $trans('Times / year'),
+} satisfies FieldLabels<'equipment' | 'times_per_year'>
+
+/**
+ * A staged row is checked while it is still a draft, before any save names it.
+ * Only the two fields the user fills are reported: the name is copied from the
+ * picked equipment and the tariff comes from a price input, so neither can be
+ * wrong on its own.
+ */
+export function equipmentRowErrors(row: EquipmentRowState): FieldErrors<'equipment' | 'times_per_year'> {
+  const {equipment, times_per_year} = fieldErrors<'equipment' | 'times_per_year'>(
+    vMaintenanceEquipmentRequest, shapeEquipmentRow(row), {}, EQUIPMENT_ROW_LABELS)
+  return {
+    ...(equipment ? {equipment} : {}),
+    ...(times_per_year ? {times_per_year} : {}),
   }
-  return errors
 }

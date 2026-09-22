@@ -1,32 +1,37 @@
 import * as v from 'valibot'
 
+import type { ContractCreateRequest } from '@/api/types.gen'
 import { vMemberContractCreateBody } from '@/api/valibot.gen'
-import { fieldErrors, type FieldErrors, type FieldMessages } from '@/features/forms/validation'
-import { $trans } from '@/services/i18n'
-
-export type ContractFormValues = v.InferInput<typeof vMemberContractCreateBody>
-
-export function emptyContract(): ContractFormValues {
-  return { name: '', module_paths_pks: '' }
+import {
+  fieldErrors,
+  requiredMessages,
+  type FieldErrors,
+  type FieldLabels,
+} from '@/features/forms'
+import { formDefaults } from '@/models/schema'
+/**
+ * The blank form, derived from the request component. `max_users` is the one
+ * field the schema cannot decide: the entry is optional, so its inferred blank
+ * is `0`, and a create has no opinion about it rather than an opinion of zero.
+ */
+export function emptyContract(): ContractCreateRequest {
+  return formDefaults(vMemberContractCreateBody, {max_users: undefined})
 }
 
-export type ContractFieldErrors = FieldErrors<keyof ContractFormValues & string>
+export type ContractFieldErrors = FieldErrors<keyof ContractCreateRequest & string>
 
-const MESSAGES = {
-  name_required: () => $trans('Please enter a name'),
-  name_max_length: () => $trans('Please use at most 255 characters'),
-  paths_required: () => $trans('Please select at least one module part'),
-} as const
+export const FIELD_LABELS = {
+  name: () => $trans('Name'),
+  module_paths: () => $trans('Module parts'),
+} satisfies FieldLabels<keyof ContractCreateRequest & string>
 
-export const FIELD_MESSAGES = {
-  name: (issue?: v.BaseIssue<unknown>) => issue?.type === 'max_length' ? MESSAGES.name_max_length() : MESSAGES.name_required(),
-  module_paths_pks: MESSAGES.paths_required,
-} satisfies FieldMessages<keyof ContractFormValues & string>
+/** The line under an untouched field: the same required line the validation shows. */
+export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)
 
-export function validateContract(values: ContractFormValues): ContractFieldErrors {
-  return fieldErrors(vMemberContractCreateBody, values, FIELD_MESSAGES)
+export function validateContract(values: ContractCreateRequest): ContractFieldErrors {
+  return fieldErrors(vMemberContractCreateBody, values, {}, FIELD_LABELS)
 }
 
-export function parseContract(values: ContractFormValues): v.InferOutput<typeof vMemberContractCreateBody> {
+export function parseContract(values: ContractCreateRequest): ContractCreateRequest {
   return v.parse(vMemberContractCreateBody, values)
 }

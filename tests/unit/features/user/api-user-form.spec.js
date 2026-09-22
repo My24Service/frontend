@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import ApiUserForm from '@/features/user/api/ApiUserForm.vue'
+import { ApiUserForm } from '@/features/user'
 import { vApiUser } from '@/api/valibot.gen'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
@@ -36,7 +36,7 @@ const RECORD = fixtureFor(vApiUser, {
     uuid: '123e4567-e89b-12d3-a456-426614174000',
     name: 'Jan integration',
     token: 'tok-active-1',
-    expire_start_dt: '2026-01-01T00:00:00Z',
+    expire_start_dt: '2026-01-01',
     expire_in_days: 30,
     token_is_revoked: false,
   },
@@ -128,7 +128,7 @@ describe('ApiUserForm, creating an API user', () => {
     expect(posts[0].body.password).toBe('secret-password')
     expect(posts[0].body.api_user).toEqual({
       name: 'Jan integration',
-      expire_start_dt: '2026-01-01T00:00:00Z',
+      expire_start_dt: '2026-01-01',
       expire_in_days: 365,
     })
   })
@@ -138,8 +138,8 @@ describe('ApiUserForm, creating an API user', () => {
 
     await submit(wrapper)
 
-    expect(refused(wrapper, 'Username is required')).toBe(true)
-    expect(refused(wrapper, 'Name is required')).toBe(true)
+    expect(refused(wrapper, 'Please enter a username')).toBe(true)
+    expect(refused(wrapper, 'Please enter a name')).toBe(true)
     expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
   })
 

@@ -11,27 +11,20 @@
       {{ getAmountDisplayValue(data.item.amount_decimal) }}
     </template>
     <template #cell(price)="data">
-      {{ data.item.price_dinero.toFormat('$0.00') }} ({{ data.item.use_price }})
+      {{ formatMoney(data.item.price_dinero) }}
     </template>
     <template #cell(vat)="data">
-      {{ data.item.vat_dinero.toFormat('$0.00') }} ({{ data.item.vat_type }}%)
+      {{ formatMoney(data.item.vat_dinero) }} ({{ data.item.vat_type }}%)
     </template>
     <template #cell(total)="data">
-      {{ data.item.total_dinero.toFormat('$0.00') }}
+      {{ formatMoney(data.item.total_dinero) }}
     </template>
   </b-table>
 </template>
 
 <script>
-import {
-  COST_TYPE_ACTUAL_WORK,
-  COST_TYPE_CALL_OUT_COSTS,
-  COST_TYPE_DISTANCE,
-  COST_TYPE_EXTRA_WORK,
-  COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_USED_MATERIALS,
-  COST_TYPE_WORK_HOURS
-} from "@/models/invoices/Cost";
+import {COST_TYPE} from "@/models/quotations/Cost";
+import {formatMoney} from "@/services/money";
 
 export default {
   name: "CostsTable",
@@ -73,18 +66,13 @@ export default {
         {key: 'vat', label: $trans('VAT')},
         {key: 'total', label: $trans('Total')},
       ],
-      COST_TYPE_ACTUAL_WORK,
-      COST_TYPE_CALL_OUT_COSTS,
-      COST_TYPE_DISTANCE,
-      COST_TYPE_EXTRA_WORK,
-      COST_TYPE_TRAVEL_HOURS,
-      COST_TYPE_USED_MATERIALS,
-      COST_TYPE_WORK_HOURS
+      COST_TYPE,
     }
   },
   methods: {
+    formatMoney,
     getAmountDisplayValue(amount) {
-      if (this.type === this.COST_TYPE_USED_MATERIALS) {
+      if (this.type === this.COST_TYPE.USED_MATERIALS) {
         return Math.round(amount)
       }
 
@@ -93,19 +81,19 @@ export default {
   },
   created() {
     switch (this.type) {
-      case COST_TYPE_USED_MATERIALS:
+      case COST_TYPE.USED_MATERIALS:
         this.tableFields = this.tableFieldsUsedMaterials
         break
-      case COST_TYPE_WORK_HOURS:
-      case COST_TYPE_TRAVEL_HOURS:
-      case COST_TYPE_EXTRA_WORK:
-      case COST_TYPE_ACTUAL_WORK:
+      case COST_TYPE.WORK_HOURS:
+      case COST_TYPE.TRAVEL_HOURS:
+      case COST_TYPE.EXTRA_WORK:
+      case COST_TYPE.ACTUAL_WORK:
         this.tableFields = this.tableFieldsHours
         break
-      case COST_TYPE_DISTANCE:
+      case COST_TYPE.DISTANCE:
         this.tableFields = this.tableFieldsDistance
         break
-      case COST_TYPE_CALL_OUT_COSTS:
+      case COST_TYPE.CALL_OUT_COSTS:
         this.tableFields = this.tableFieldsCallOutCosts
         break
       default:

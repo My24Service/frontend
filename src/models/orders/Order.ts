@@ -6,6 +6,28 @@ import { OrderCreateSchema, toApiDate } from './order-schemas'
 export * from './order-schemas'
 
 /**
+ * TEMPORARY SHIM — do not extend.
+ *
+ * The order screens moved to `src/features/order/`, on the generated client;
+ * what remains here is exactly what the not-yet-rewritten dashboard,
+ * equipment, building, branch, invoice and mobile screens
+ * still call, plus `utils.js`'s unaccepted count:
+ *
+ *   - `OrderService.list()` with `queryMode`, `search`, `detail`, `insert`,
+ *     `update`, `getAllForEquipmentLocation`, `getUnacceptedCount` and the
+ *     twenty stats readers the dashboard and the equipment/location/branch
+ *     views chart.
+ *   - `OrderModel` / `OrderFormSchema` / `orderFormDefaults` — the shape the
+ *     dispatch screen still builds. The engineer-event modal stopped building
+ *     it when it moved to `src/features/field-service/engineer-event/`, and
+ *     now sends the generated request schema's fields.
+ *
+ * Each caller drops off this file when its own slice moves; the last one
+ * deletes it. The order form's own schemas are in
+ * `src/features/order/form/schemas.ts`.
+ */
+
+/**
  * The default start/end date: the next working day.
  *
  * A function rather than a module-level constant: computed once at import
@@ -36,9 +58,10 @@ export function nextWorkingDay(from: Date = new Date()): Date {
  *
  * - `service_number`   bound in OrderFormMaintenanceCustomer.vue; there is no
  *                      such column on the Order model at all.
- * - `required_users`   bound in OrderFormTemps.vue and present on the model and
- *                      the read serializers, but absent from
- *                      OrderCreateSerializer and OrderUpdateSerializer.
+ * - `required_users`   present on the model and the read serializers, but
+ *                      absent from OrderCreateSerializer and
+ *                      OrderUpdateSerializer. Its only binding was the temps
+ *                      order form, retired 2026-09-13.
  */
 const discardedByBackendEntries = {
   service_number: str(),
@@ -114,15 +137,15 @@ export const orderFormDefaults = () => formDefaults(OrderFormSchema, ORDER_FORM_
  */
 const OrderModel = class {
   constructor(data: Partial<OrderForm> = {}) {
-    Object.assign(this, formDefaults(OrderFormSchema, ORDER_FORM_DEFAULTS), data)
+    Object.assign(this, orderFormDefaults(), data)
   }
   // The defaults are assigned in the constructor rather than declared as class
   // properties, so the construct signature is asserted to describe the result.
-} as new (data?: Partial<OrderForm>) => OrderForm
+} as new (data?: unknown) => OrderForm
 
 class OrderService extends BaseModel {
   model = OrderModel
-  fields = formDefaults(OrderFormSchema, ORDER_FORM_DEFAULTS)
+  fields = orderFormDefaults()
 
   url = '/order/order/'
   queryMode = 'all'
@@ -132,21 +155,17 @@ class OrderService extends BaseModel {
    * instance, so without this a long-lived session would keep handing out the
    * date that was "tomorrow" when the service was constructed.
    */
-  postCopyFields(fields: Record<string, any>) {
+  postCopyFields(fields: Record<string, unknown>) {
     fields.start_date = nextWorkingDay()
     fields.end_date = nextWorkingDay()
     return fields
-  }
-
-  recreateWorkorderPdfGotenberg(pk: number | string) {
-    return this.axios.post(`${this.url}${pk}/recreate_pdf/?gotenberg=1`)
   }
 
   /**
    * Normalise an order for the API: drop the read-only timestamps and convert
    * the datepicker's Date objects to the `YYYY-MM-DD` the DateFields expect.
    */
-  private toApiPayload(order: Record<string, any>) {
+  private toApiPayload(order: Record<string, unknown>) {
     delete order.created
     delete order.modified
 
@@ -161,26 +180,22 @@ class OrderService extends BaseModel {
     return order
   }
 
-  preInsert(order: Record<string, any>) {
+  preInsert(order: Record<string, unknown>) {
     return this.toApiPayload(order)
   }
 
-  preUpdate(order: Record<string, any>) {
+  preUpdate(order: Record<string, unknown>) {
     return this.toApiPayload(order)
   }
 
   getListUrl() {
     switch (this.queryMode) {
-      case 'dispatch':
-        return '/order/order/dispatch_list_all/'
-      case 'inprogress':
-        return '/order/order/dispatch_list_inprogress/'
-      case 'finished':
-        return '/order/order/dispatch_list_finished/'
       case 'range':
         return '/order/order/get_within_range/'
+      case 'dispatch':
+      case 'inprogress':
+      case 'finished':
       case 'unaccepted':
-        return '/order/order/all_for_customer_not_accepted/'
       case 'all':
         return '/order/order/'
       default:
@@ -189,12 +204,18 @@ class OrderService extends BaseModel {
     }
   }
 
-  search(query: string) {
-    return this.axios.get(`${this.url}autocomplete/?q=${query}`).then((response) => response.data)
+  getQueryArgs() {
+    const args = super.getQueryArgs()
+    // The list modes ride `?mode=` on the plain list; `range` keeps its
+    // action (see getListUrl) and anything else sends no mode.
+    if (['dispatch', 'inprogress', 'finished', 'unaccepted'].includes(this.queryMode)) {
+      args['mode'] = this.queryMode
+    }
+    return args
   }
 
-  getWorkorderData(uuid: string) {
-    return this.axios.get(`/order/workorder-data/${uuid}/`).then((response) => response.data)
+  search(query: string) {
+    return this.axios.get(`${this.url}autocomplete/?q=${query}`).then((response) => response.data)
   }
 
   /**
@@ -307,14 +328,6 @@ class OrderService extends BaseModel {
   getCountsYearOrdertypeStatsBuilding(buildingPk: number | string) {
     return this.statsRequiredFilter('counts_year_order_type_stats', 'building', buildingPk)
   }
-  async getTopXCustomers() {
-    const response = await this.axios.get(`${this.url}get_top_x_customers/`)
-    return response.data.get_top_x_customers
-  }
-
-  detailUuid(uuid: string) {
-    return this.axios.get(`${this.url}detail/${uuid}/`).then((response) => response.data)
-  }
 
   /**
    * Read a paginated list response, recording the pagination counters the way
@@ -334,39 +347,10 @@ class OrderService extends BaseModel {
     return response.data
   }
 
-  getAllForCustomer(customer_pk: number | string) {
-    const baseUrl = `${this.url}all_for_customer_web/?customer_id=${customer_pk}`
-    return this.listFrom(`${baseUrl}&${this.getListArgs().join('&')}`)
-  }
-
   getAllForEquipmentLocation(equipment_id?: number | string | null, location_id?: number | string | null) {
     const filter = equipment_id ? `equipment=${equipment_id}` : `location=${location_id}`
-    const baseUrl = `${this.url}all_for_equipment_location/?${filter}`
+    const baseUrl = `${this.url}?mode=equipment_location&${filter}`
     return this.listFrom(`${baseUrl}&${this.getListArgs().join('&')}`)
-  }
-
-  async setAccepted(order_pk: number | string) {
-    const token = await this.getCsrfToken()
-    const headers = this.getHeaders(token)
-
-    return this.axios
-      .post(`${this.url}${order_pk}/set_order_accepted/`, {}, headers)
-      .then((response) => response.data)
-  }
-
-  async setRejected(order_pk: number | string) {
-    const token = await this.getCsrfToken()
-    const headers = this.getHeaders(token)
-
-    return this.axios
-      .post(`${this.url}${order_pk}/set_order_rejected/`, {}, headers)
-      .then((response) => response.data)
-  }
-
-  getUnacceptedCount() {
-    return this.axios
-      .get(`${this.url}all_for_customer_not_accepted_count/`)
-      .then((response) => response.data)
   }
 
   getListArgs() {
@@ -392,6 +376,13 @@ class OrderService extends BaseModel {
 
     return listArgs
   }
+
+  getUnacceptedCount() {
+    return this.axios
+      .get(`${this.url}all_for_customer_not_accepted_count/`)
+      .then((response) => response.data)
+  }
+
 }
 
 const orderService = new OrderService()

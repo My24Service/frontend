@@ -153,7 +153,7 @@
                 <Hours
                   :chapter="loadChapterModel"
                   :customer="customer"
-                  :type="COST_TYPE_WORK_HOURS"
+                  :type="COST_TYPE.WORK_HOURS"
                   :quotationLinesParent="quotationLines"
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
@@ -165,7 +165,7 @@
                 <Hours
                   :chapter="loadChapterModel"
                   :customer="customer"
-                  :type="COST_TYPE_TRAVEL_HOURS"
+                  :type="COST_TYPE.TRAVEL_HOURS"
                   :quotationLinesParent="quotationLines"
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
@@ -218,26 +218,19 @@
 <script>
 import {useVuelidate} from "@vuelidate/core";
 
-import StatusesComponent from "@/components/StatusesComponent.vue";
+import { StatusesComponent } from '@/features/shared'
 
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import {ChapterService} from "@/models/quotations/Chapter";
-import {useToast} from "bootstrap-vue-next";
-import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 import CustomerForm from './quotation_form/CustomerForm.vue'
 import Hours from './quotation_form/Hours.vue'
 import Distance from './quotation_form/Distance.vue'
 import MaterialsCreate from './quotation_form/MaterialsCreate.vue'
 import CallOutCosts from './quotation_form/CallOutCosts.vue'
-import CostService, {
-  COST_TYPE_ACTUAL_WORK,
-  COST_TYPE_EXTRA_WORK,
-  COST_TYPE_TRAVEL_HOURS,
-  COST_TYPE_WORK_HOURS,
-} from "@/models/orders/Cost";
+import {COST_TYPE} from "@/models/quotations/Cost";
 
 import QuotationData from "./quotation_form/QuotationData.vue";
 import Chapter from "./quotation_form/Chapter.vue";
@@ -245,7 +238,6 @@ import QuotationLine from "./quotation_form/QuotationLine.vue";
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
 import CustomerView from "./CustomerView.vue";
 import QuotationPDFViewer from "./QuotationPDFViewer.vue";
-import {useMainStore} from "@/stores/main";
 
 export default {
   name: 'QuotationForm',
@@ -294,10 +286,7 @@ export default {
   },
   data () {
     return {
-      COST_TYPE_WORK_HOURS,
-      COST_TYPE_TRAVEL_HOURS,
-      COST_TYPE_EXTRA_WORK,
-      COST_TYPE_ACTUAL_WORK,
+      COST_TYPE,
       isLoading: false,
       submitClicked: false,
       errorMessage: null,
@@ -305,7 +294,6 @@ export default {
       quotation: new QuotationModel({}),
       default_currency: this.mainStore.getDefaultCurrency,
       invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
-      invoice_default_margin: this.mainStore.getInvoiceDefaultMargin,
       invoice_default_term_of_payment_days: this.mainStore.getInvoiceDefaultTermOfPaymentDays,
       customerPk: null,
       customer: null,
@@ -313,7 +301,6 @@ export default {
       customerService: new CustomerService(),
       quotationService: new QuotationService(),
       chapterService: new ChapterService(),
-      costService: new CostService(),
       quotationLineService: new QuotationLineService(),
       quotationLines: [],
     }

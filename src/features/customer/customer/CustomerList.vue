@@ -25,14 +25,14 @@
     >
       <template #icon><IBiBuilding></IBiBuilding></template>
       <template #toolbar-extra>
-        <ButtonLinkDownload
+        <ActionButton icon="download"
           :method="downloadList"
           :title="$trans('Download')"
         />
       </template>
       <template #add>
         <router-link
-          :to="{name: 'customer-add'}"
+          :to="toRoute('customer-add')"
           class="btn btn-primary"
         >
           <IBiBuilding></IBiBuilding>{{$trans('Add customer')}}
@@ -43,20 +43,16 @@
 </template>
 
 <script lang="ts" setup>
-import { h, useTemplateRef } from 'vue'
-import type { VNode, VNodeChild } from 'vue'
+import { hLink } from '@/components/render'
+import type { VNodeChild } from 'vue'
 import { RouterLink } from 'vue-router'
-import { BLink } from 'bootstrap-vue-next'
 
 import {
   customerCustomerDestroyMutation,
   customerCustomerListOptions,
+  customerCustomerListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerCustomerListData, PaginatedCustomerList } from '@/api/types.gen'
-import ButtonLinkDownload from '@/components/ButtonLinkDownload.vue'
-import my24 from '@/services/my24'
-import { $trans } from '@/services/i18n'
-import { customerCustomerListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import {
   ServerTable,
   baseListParams,
@@ -65,7 +61,6 @@ import {
   useServerTable,
   type ListRow,
 } from '@/features/table'
-
 type CustomerRow = ListRow<PaginatedCustomerList>
 
 // The screen's handle on the table: the icon column calls the delete modal
@@ -92,7 +87,7 @@ function branchCell(row: CustomerRow) {
     contact.push(
       h('br'),
       `${$trans('Email')}: `,
-      h(BLink, {class: 'px-1', href: `mailto:${email}`}, () => email),
+      hLink({class: 'px-1', href: `mailto:${email}`}, () => email),
     )
   }
   const tel = branchText(branch.tel)
@@ -105,7 +100,7 @@ function branchCell(row: CustomerRow) {
   }
 
   return h('div', {class: 'listing-item'}, [
-    h(RouterLink, {to: {name: 'customer-view', params: {pk: row.id}}}, () => [
+    h(RouterLink, {to: toRoute('customer-view', {pk: row.id})}, () => [
       `${branchText(branch.name)}, ${branchText(branch.city)}, ${branchText(branch.country_code)} (`,
       h('span', {class: 'branch'}, $trans('Branch')),
       ')',
@@ -124,13 +119,12 @@ const columns = columnHelper.columns([
   columnHelper.accessor('name', {
     header: $trans('Company'),
     filterFn: 'includesString',
-    enableColumnFilter: true,
-    meta: {filterVariant: 'text'},
+    meta: {filter: {variant: 'text'}},
     cell: (info) => {
       const row = info.row.original
       if (row.branch_view) return branchCell(row)
       return h('span', {class: 'listing-item', title: `${$trans('Customer ID:')} ${row.customer_id}`}, [
-        h(RouterLink, {to: {name: 'customer-view', params: {pk: row.id}}}, () => row.name),
+        h(RouterLink, {to: toRoute('customer-view', {pk: row.id})}, () => row.name),
       ])
     },
   }),
@@ -153,22 +147,17 @@ const columns = columnHelper.columns([
   columnHelper.accessor('city', {
     header: '',
     filterFn: 'includesString',
-    enableColumnFilter: true,
-    meta: {filterVariant: 'text'},
+    meta: {filter: {variant: 'text', label: $trans('City')}},
   }),
   columnHelper.accessor('num_orders', {
     header: $trans('Orders'),
     filterFn: 'equalsString',
-    enableColumnFilter: true,
-
-    meta: {filterVariant: 'text', filterPlaceholder: '25 or 18...80'},
+    meta: {filter: {variant: 'number'}},
   }),
   columnHelper.accessor('remarks', {
     header: $trans('Remarks'),
     filterFn: 'includesString',
-    enableColumnFilter: true,
-    meta: {filterVariant: 'text'},
-
+    meta: {filter: {variant: 'text'}},
     cell: (info) => {
       const remarks = info.getValue()
       return remarks && remarks.trim() !== ''
@@ -180,9 +169,8 @@ const columns = columnHelper.columns([
   columnHelper.accessor('contact', {
     header: $trans('Contact'),
     filterFn: 'includesString',
-    enableColumnFilter: true,
     enableSorting: false,
-    meta: {filterVariant: 'text'},
+    meta: {filter: {variant: 'text'}},
   }),
   createActionColumn(columnHelper, {
     onDelete: (id) => tableRef.value?.showDeleteModal(id),

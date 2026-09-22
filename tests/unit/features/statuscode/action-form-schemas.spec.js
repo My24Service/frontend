@@ -9,7 +9,7 @@ import {
   emptyAction,
   parseAction,
   validateAction,
-} from '@/features/statuscode/action/schemas'
+} from '@/features/statuscode'
 
 const valid = {
   name: 'mail planning',

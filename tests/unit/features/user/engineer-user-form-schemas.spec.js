@@ -6,7 +6,7 @@ import { vEngineerRequestWritable } from '@/api/valibot.gen'
 import {
   emptyEngineerUser,
   validateEngineerUserForm,
-} from '@/features/user/engineer/schemas'
+} from '@/features/user'
 
 const valid = {
   username: 'eng-jan',
@@ -27,7 +27,6 @@ const valid = {
     cost_price: '10.00',
     license_plate: 'AB-123-C',
     contract_hours_week: '38.00',
-    hourly_rate: '25.00',
     preferred_location: 7,
     hide_from_dispatch: false,
   },
@@ -48,8 +47,7 @@ describe('vEngineerRequestWritable', () => {
         last_name: 'Monteur',
         engineer: {
           mobile: '+31612345678',
-          hourly_rate: '25.00',
-          preferred_location: 7,
+                preferred_location: 7,
           hide_from_dispatch: false,
         },
       }).success,
@@ -62,7 +60,7 @@ describe('vEngineerRequestWritable', () => {
       email: 'eng-jan@example.test',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00' },
+      engineer: { preferred_location: 7 },
     }).success).toBe(false)
 
     expect(v.safeParse(vEngineerRequestWritable, {
@@ -70,7 +68,7 @@ describe('vEngineerRequestWritable', () => {
       email: 'not-an-email',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00' },
+      engineer: { preferred_location: 7 },
     }).success).toBe(false)
 
     expect(v.safeParse(vEngineerRequestWritable, {
@@ -78,18 +76,20 @@ describe('vEngineerRequestWritable', () => {
       email: 'eng-jan@example.test',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00' },
+      engineer: { preferred_location: 7 },
     }).success).toBe(true)
   })
 
-  test('the preferred location stays optional — engineers without one are legal', () => {
-    expect(v.safeParse(vEngineerRequestWritable, {
-      username: 'eng-jan',
-      email: 'eng-jan@example.test',
-      first_name: 'Jan',
-      last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00', preferred_location: null },
-    }).success).toBe(true)
+  test('a preferred location is required on the write — the stored nulls are read-side only', () => {
+    for (const engineer of [{ preferred_location: null }, {}]) {
+      expect(v.safeParse(vEngineerRequestWritable, {
+        username: 'eng-jan',
+        email: 'eng-jan@example.test',
+        first_name: 'Jan',
+        last_name: 'Monteur',
+        engineer,
+      }).success).toBe(false)
+    }
   })
 
   test('strips fields the request schema does not declare', () => {
@@ -98,12 +98,12 @@ describe('vEngineerRequestWritable', () => {
       email: 'eng-jan@example.test',
       first_name: 'Jan',
       last_name: 'Monteur',
-      engineer: { hourly_rate: '25.00' },
+      engineer: { preferred_location: 7 },
       password1: 'secret-password',
       password2: 'secret-password',
       id: 41,
       full_name: 'Jan Monteur',
-      hourly_rate_currency: 'EUR',
+      picture_url: null,
     })
     expect(Object.keys(result).sort()).toEqual(
       ['email', 'engineer', 'first_name', 'last_name', 'username'],
@@ -132,7 +132,6 @@ describe('emptyEngineerUser', () => {
         cost_price: '0.00',
         license_plate: '',
         contract_hours_week: '38.00',
-        hourly_rate: '0.00',
         preferred_location: null,
         hide_from_dispatch: false,
       },
@@ -141,11 +140,11 @@ describe('emptyEngineerUser', () => {
 
   test('the defaults are not yet submittable on create', () => {
     const errors = validateEngineerUserForm(emptyEngineerUser(), {isCreate: true})
-    expect(errors.username).toBe('Username is required')
+    expect(errors.username).toBe('Please enter a username')
     expect(errors.first_name).toBe('Please enter a first name')
     expect(errors.email).toBe('Please enter a valid email')
     expect(errors.password1).toBe('Please enter a password')
-    expect(errors.preferred_location).toBe('Please select a preferred location')
+    expect(errors['engineer.preferred_location']).toBe('Please select a preferred location')
   })
 })
 
@@ -156,7 +155,7 @@ describe('validateEngineerUserForm', () => {
 
   test('blames each blank field by name', () => {
     expect(validateEngineerUserForm({...valid, username: ''}, {isCreate: true}).username)
-      .toBe('Username is required')
+      .toBe('Please enter a username')
     expect(validateEngineerUserForm({...valid, email: 'nope'}, {isCreate: true}).email)
       .toBe('Please enter a valid email')
     expect(validateEngineerUserForm({...valid, first_name: ''}, {isCreate: true}).first_name)
@@ -187,9 +186,9 @@ describe('validateEngineerUserForm', () => {
   })
 
   test('refuses an unchosen preferred location, on create and on edit', () => {
-    expect(validateEngineerUserForm(withEngineer({preferred_location: null}), {isCreate: true}).preferred_location)
+    expect(validateEngineerUserForm(withEngineer({preferred_location: null}), {isCreate: true})['engineer.preferred_location'])
       .toBe('Please select a preferred location')
-    expect(validateEngineerUserForm(withEngineer({preferred_location: null}), {isCreate: false}).preferred_location)
+    expect(validateEngineerUserForm(withEngineer({preferred_location: null}), {isCreate: false})['engineer.preferred_location'])
       .toBe('Please select a preferred location')
   })
 })

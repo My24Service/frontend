@@ -1,25 +1,13 @@
 <template>
-  <b-overlay :show="isLoading" rounded="sm">
-    <div class="app-page">
-      <header>
-        <div class="page-title">
-          <h3>
-            <IBiPeople></IBiPeople>
-            <span class="backlink" @click="cancelForm">{{ $trans("People") }}</span> /
-            <strong> {{ apiUser.username }}</strong>
-            <span class="dimmed" v-if="isCreate && !apiUser.username">{{ $trans('new') }}</span>
-            <span class="dimmed" v-if="!isCreate && !apiUser.username">{{ $trans('edit') }}</span>
-          </h3>
-          <div class="flex-columns">
-            <BButton @click="cancelForm" type="button" variant="secondary" class="outline">
-              {{ $trans('Cancel') }}</BButton>
-            <BButton @click="submitForm" :disabled="buttonDisabled" type="button" variant="primary">
-              {{ $trans('Submit') }}</BButton>
-          </div>
-        </div>
-      </header>
+  <UserFormShell
+    :username="apiUser.username"
+    :is-create="isCreate"
+    :is-loading="isLoading"
+    :button-disabled="buttonDisabled"
+    @cancel="cancelForm"
+    @submit="submitForm"
+  >
 
-      <div class="page-detail">
         <div class="flex-columns">
           <div class="panel">
             <h6>{{ $trans('User info')}}</h6>
@@ -47,12 +35,12 @@
                 id="apiuser_name"
                 size="sm"
                 v-model="apiUser.name"
-                :state="submitClicked ? !errors.name : null"
+                :state="submitClicked ? !errors['api_user.name'] : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="apiuser_name-feedback"
-                :state="submitClicked ? !errors.name : null">
-                {{ errors.name || FIELD_MESSAGES.api_user.name() }}
+                :state="submitClicked ? !errors['api_user.name'] : null">
+                {{ errors['api_user.name'] || PLACEHOLDERS['api_user.name']() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -67,12 +55,12 @@
                 size="sm"
                 type="date"
                 v-model="apiUser.expire_start_dt"
-                :state="submitClicked ? !errors.expire_start_dt : null"
+                :state="submitClicked ? !errors['api_user.expire_start_dt'] : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="apiuser_expire_start_dt-feedback"
-                :state="submitClicked ? !errors.expire_start_dt : null">
-                {{ errors.expire_start_dt || FIELD_MESSAGES.api_user.expire_start_dt() }}
+                :state="submitClicked ? !errors['api_user.expire_start_dt'] : null">
+                {{ errors['api_user.expire_start_dt'] || PLACEHOLDERS['api_user.expire_start_dt']() }}
               </b-form-invalid-feedback>
             </BFormGroup>
 
@@ -87,35 +75,30 @@
                 size="sm"
                 type="number"
                 v-model.number="apiUser.expire_in_days"
-                :state="submitClicked ? !errors.expire_in_days : null"
+                :state="submitClicked ? !errors['api_user.expire_in_days'] : null"
               ></BFormInput>
               <b-form-invalid-feedback
                 id="apiuser_expire_in_days-feedback"
-                :state="submitClicked ? !errors.expire_in_days : null">
-                {{ errors.expire_in_days || FIELD_MESSAGES.api_user.expire_in_days() }}
+                :state="submitClicked ? !errors['api_user.expire_in_days'] : null">
+                {{ errors['api_user.expire_in_days'] || PLACEHOLDERS['api_user.expire_in_days']() }}
               </b-form-invalid-feedback>
             </BFormGroup>
           </div>
         </div>
-      </div>
-    </div>
-  </b-overlay>
+  </UserFormShell>
 </template>
 
 <script lang="ts" setup>
+import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import {
-  companyApiuserCreateMutation,
-  companyApiuserListQueryKey,
-  companyApiuserPartialUpdateMutation,
-  companyApiuserRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+import { companyApiuser } from '@/api/resources.gen'
 import type { ApiUser } from '@/api/types.gen'
 import { vApiUserRequestWritable } from '@/api/valibot.gen'
 import {
   emptyApiUser,
   FIELD_MESSAGES,
+  PLACEHOLDERS,
   parseApiUserForm,
   validateApiUserForm,
   type ApiUserFieldErrors,
@@ -124,8 +107,6 @@ import {
 import { USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
-import { $trans } from '@/services/i18n'
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {
@@ -138,8 +119,7 @@ function apiUserFromRecord(record: ApiUser): ApiUserFormValues {
     password1: '',
     password2: '',
     name: record.api_user?.name ?? '',
-    // The wire carries a timestamp; the date input takes the day part.
-    expire_start_dt: record.api_user?.expire_start_dt?.slice(0, 10) ?? '',
+    expire_start_dt: record.api_user?.expire_start_dt ?? '',
     expire_in_days: record.api_user?.expire_in_days ?? 365,
   }
 }
@@ -165,10 +145,7 @@ const {
   ApiUserFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id: number) => companyApiuserRetrieveOptions({path: {id}}),
-  create: companyApiuserCreateMutation(),
-  update: companyApiuserPartialUpdateMutation(),
-  invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()}),
+  resource: companyApiuser,
   empty: emptyApiUser,
   fromRecord: apiUserFromRecord,
   validate: validateApiUserForm,

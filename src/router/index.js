@@ -1,5 +1,5 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
-import {useMainStore} from "@/stores/main";
+
 import TheIndexLayout from '../components/TheIndexLayout.vue'
 
 import orders from './orders'
@@ -16,10 +16,8 @@ import budget from './budget'
 import catchall from './catchall'
 import webshop from './webshop'
 import bim from './bim'
-import docks from './docks'
 import {AUTH_LEVELS} from "@/constants";
-import {getUserAuthLevel, hasAccessRouteAuthLevel} from "@/features/auth/auth-levels";
-import { useAuthStore } from '@/features/auth'
+import { getUserAuthLevel, hasAccessRouteAuthLevel } from '@/features/auth'
 import dashboard from "@/router/dashboard.js";
 import settings from "@/router/settings";
 
@@ -43,7 +41,6 @@ const routes = [
   ...account,
   ...budget,
   ...catchall,
-  ...docks,
   ...dashboard,
   ...settings
 ]
@@ -53,7 +50,7 @@ export const router = createRouter({
   routes,
 })
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
   const mainStore = useMainStore()
 
@@ -69,29 +66,26 @@ router.beforeEach(async (to, from, next) => {
 
   if (!needsAuth) {
     console.debug('route allowed, no auth needed', {path})
-    next()
     return
   }
 
   if (!isAllowedMemberPath) {
     console.warn('route not allowed because of member', {path});
-    next(`/no-access?next=${to.path}`)
-    return
+    return `/no-access?next=${to.path}`
   }
 
   if (!userIsLoggedIn) {
     console.warn('route not allowed for user (not logged in)',{path, needsAuth, userIsLoggedIn})
-    next(`/no-access?next=${to.path}`)
-    return
+    return `/no-access?next=${to.path}`
   }
 
   // check user type if needed
   if (hasAccessRouteAuthLevel(authLevelNeeded)) {
     console.debug('route allowed', {path, pathAuthLevel, userAuthLevel})
-    next()
     return
   }
 
   console.warn('route not allowed because of user auth level', {path, pathAuthLevel, userAuthLevel})
-  next(`/no-access?next=${to.path}`)
+
+  return `/no-access?next=${to.path}`
 });

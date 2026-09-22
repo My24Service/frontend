@@ -2,10 +2,12 @@ import { describe, expect, test, vi } from 'vitest'
 import { defineComponent } from 'vue'
 
 import { vPaginatedSalesUserList } from '@/api/valibot.gen'
-import ServerDataTable from '@/features/table/ServerDataTable.vue'
-import { createActionColumn } from '@/features/table/list-columns'
-import { createAppColumnHelper } from '@/features/table/table'
-import { useServerTable } from '@/features/table/use-server-table'
+import {
+  ServerDataTable,
+  createActionColumn,
+  createAppColumnHelper,
+  useServerTable,
+} from '@/features/table'
 import { fixtureFor, itemSchemaOf } from '../../helpers/schema-fixture.js'
 import { settle } from '../../support/api-seam/index.js'
 import { mountListView } from '../../support/form-harness.js'

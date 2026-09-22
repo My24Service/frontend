@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest'
 import { defineComponent, ref } from 'vue'
 
-import ListPageHeader from '@/features/table/ListPageHeader.vue'
+import { ListPageHeader } from '@/features/table'
 import { mountForm } from '../../support/form-harness.js'
 
 /**
