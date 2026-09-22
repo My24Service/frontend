@@ -90,7 +90,7 @@
       <BNavItem
         :active="isTopActive('company')"
         v-if="showCompany"
-        :to="{name: getCompanyRouteTo}"
+        :to="toRoute(getCompanyRouteTo)"
         class="has-children">
         <IBiBookmarkStar v-if="!isTopActive('company')"></IBiBookmarkStar>
         <IBiBookmarkStarFill v-else></IBiBookmarkStarFill>
@@ -280,7 +280,6 @@ import {
   SETTINGS_USER_ROUTES,
   locationRoutes,
 } from '@/components/navSections'
-
 // One sidebar menu for the three shells TheSidebar switches between:
 // mode "default", "branch" and "settings". Guards, links, badges and outlets are unchanged per
 // mode; the setup/stores/requestedCount fetch that was copied across all three
@@ -333,13 +332,13 @@ const navLists = {
 const modeClass = computed<string>(() =>
   props.mode === 'branch' ? 'branch' : props.mode === 'settings' ? 'branch-settings' : '')
 
-const getCompanyRouteTo = computed<string>(() =>
+const getCompanyRouteTo = computed<RouteName>(() =>
   isBranchEmployee.value ? 'employee-dashboard' : 'company-dashboard')
 
-const usersRoute = computed<{ name: string }>(() =>
+const usersRoute = computed(() =>
   isBranchEmployee.value
-    ? { name: 'settings-users-employees' }
-    : { name: 'settings-users-planningusers' })
+    ? toRoute('settings-users-employees')
+    : toRoute('settings-users-planningusers'))
 
 const hasOrders = computed<boolean>(() => hasAccessToModule('orders'))
 const hasCustomers = computed<boolean>(() => hasAccessToModule('customers'))

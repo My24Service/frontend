@@ -70,11 +70,20 @@ const helper = createAppColumnHelper<Invoice>()
 const columns = helper.columns([
   helper.accessor('invoice_id', {
     header: $trans('ID'),
-    cell: ({row}) => h(RouterLink, {
-      to: row.original.preliminary
+    cell: ({row}) => {
+      const label = '#' + row.original.invoice_id
+      // Definitive invoices always carry a uuid; a preliminary one that
+      // somehow lacks it falls back to plain text rather than a dead link.
+      const to: RouteTo | undefined = row.original.preliminary
         ? {name: 'invoice-edit', params: {pk: row.original.id, uuid: row.original.order_uuid}}
-        : {name: 'invoice-view', params: {uuid: row.original.uuid}},
-    }, () => '#' + row.original.invoice_id),
+        : row.original.uuid
+          ? {name: 'invoice-view', params: {uuid: row.original.uuid}}
+          : undefined
+
+      return to
+        ? h(RouterLink, {to: fromRouteTo(to)}, () => label)
+        : label
+    },
   }),
   helper.accessor('created_by_fullname', {header: $trans('Created by')}),
   helper.accessor('term_of_payment_days', {header: $trans('Term of payment')}),

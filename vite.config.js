@@ -3,7 +3,7 @@ import {
   themePreprocessorPlugin,
   themePreprocessorHmrPlugin
 } from "vite-plugin-theme-preprocessor/dist";
-import vue from '@vitejs/plugin-vue'
+import Vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import Components from 'unplugin-vue-components/vite'
 import {
@@ -18,6 +18,8 @@ import * as fs from "node:fs";
 import { ExternalPackageIconLoader } from "unplugin-icons/loaders";
 import AutoImport from 'unplugin-auto-import/vite'
 import { autoImportEntries } from './auto-imports.config.js'
+import VueRouter from 'vue-router/vite'
+import { insertHandWrittenRoutes } from './vite/typed-routes.js'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_')
@@ -68,7 +70,12 @@ export default defineConfig(({ mode }) => {
       }
     },
     plugins: [
-      vue(),
+      VueRouter({
+        dts: 'src/route-map.d.ts',
+        routesFolder: [],
+        beforeWriteFiles: (root) => insertHandWrittenRoutes(root, process.cwd()),
+      }),
+      Vue(),
       tailwindcss(),
       AutoImport({
         imports: autoImportEntries,

@@ -27,7 +27,7 @@
         <StatuscodePills :active="codeType" :from-settings="fromSettings" />
       </template>
       <template #add>
-        <router-link :to="{name: routeNames.add}" class="btn btn-primary">
+        <router-link :to="toRoute(routeNames.add)" class="btn btn-primary">
           <IBiFileEarmarkPlus></IBiFileEarmarkPlus>{{ $trans('Add statuscode') }}
         </router-link>
       </template>
@@ -91,7 +91,7 @@ const columns = columnHelper.columns([
     enableSorting: false,
     meta: {width: '15%'},
     cell: (info) => h(RouterLink, {
-      to: {name: routeNames.value.edit, params: {pk: info.row.original.id}},
+      to: toRoute(routeNames.value.edit, {pk: info.row.original.id}),
     }, () => info.getValue()),
   }),
   columnHelper.display({
@@ -125,7 +125,7 @@ const columns = columnHelper.columns([
     cell: (info) => h('ul', {class: 'statuscode-actions'}, info.row.original.actions.map((action) =>
       h('li', {key: action.id}, [
         h(RouterLink, {
-          to: {name: routeNames.value.actionEdit, params: {pk: action.id}},
+          to: toRoute(routeNames.value.actionEdit, {pk: action.id}),
         }, () => `${action.name} (${action.type})`),
       ]))),
   }),

@@ -16,8 +16,6 @@
 </template>
 
 <script lang="ts" setup>
-import type { RouteParamValueRaw } from 'vue-router'
-
 import IBiPencil from '~icons/bi/pencil'
 import IBiPersonCheckFill from '~icons/bi/person-check-fill'
 import IBiPlus from '~icons/bi/plus'
@@ -30,10 +28,10 @@ const props = defineProps<{
   icon: RowActionIcon
   title?: string
   method?: () => void
-  router_name?: string
+  router_name?: RouteName
   router_params?: Record<string, RouteParamValueRaw>
   /** Router location, preferred over router_name/router_params when both are given. */
-  to?: RouteLocationRaw
+  to?: RouteTo
   /** Header cell (replaces IconLinkPlus type="th"): icon-th styling, no dimmed edit-icon. */
   header?: boolean
 }>()
@@ -50,9 +48,11 @@ const icons = {
 } as const
 
 // A single BButton with :to: never a router-link wrapped around a BButton.
-const linkTo = computed<RouteLocationRaw | undefined>(
-  () => props.to ?? (props.router_name ? {name: props.router_name, params: props.router_params} : undefined),
-)
+const linkTo = computed<RouteLocationRaw | undefined>(() => {
+  if (props.to) return fromRouteTo(props.to)
+  if (props.router_name) return toRoute(props.router_name, props.router_params)
+  return undefined
+})
 
 function onClick(event: MouseEvent) {
   props.method?.()

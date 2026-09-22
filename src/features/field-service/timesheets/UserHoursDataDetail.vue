@@ -63,11 +63,11 @@ import {useUserHoursPivot} from './useUserHoursPivot'
 
 const props = withDefaults(defineProps<{
   /** The route the breadcrumb links back to; the parent's router owns the name. */
-  main_grid_router_name?: string
+  main_grid_router_name?: RouteName
   breadcrumb_main_grid_title?: string
   breadcrumb_grid_title?: string
 }>(), {
-  main_grid_router_name: '',
+  main_grid_router_name: undefined,
   breadcrumb_main_grid_title: '',
   breadcrumb_grid_title: '',
 })
@@ -85,7 +85,9 @@ const pivot = useUserHoursPivot(displayDurationFromSeconds)
 const breadcrumb = computed(() => [
   {
     text: props.breadcrumb_main_grid_title,
-    to: {name: props.main_grid_router_name, query: {date: startDate.value}},
+    to: props.main_grid_router_name
+      ? toRoute(props.main_grid_router_name, undefined, {date: startDate.value})
+      : undefined,
   },
   {
     text: props.breadcrumb_grid_title,

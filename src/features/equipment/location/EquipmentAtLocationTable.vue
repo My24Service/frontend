@@ -9,7 +9,7 @@
     class="data-table"
   >
     <template #cell(name)="data">
-      <router-link :to="{name: props.viewRoute, params: {pk: data.item.id}}">
+      <router-link :to="toRoute(props.viewRoute, {pk: data.item.id})">
         {{ data.item.name }}
       </router-link><br>
     </template>
@@ -30,7 +30,6 @@
 import { equipmentEquipmentListOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
-
 /**
  * The equipment standing at one location, shown on the location's detail page.
  *
@@ -45,7 +44,7 @@ import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 const props = defineProps<{
   locationId: number
   /** The route `location_view`'s equipment links resolve to. */
-  viewRoute: string
+  viewRoute: RouteName
   isLoading?: boolean
 }>()
 

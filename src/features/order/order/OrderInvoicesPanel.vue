@@ -12,12 +12,18 @@
           :key="invoice.uuid"
         >
           <router-link
-            v-if="invoice.preliminary"
+            v-if="invoice.preliminary && order.uuid"
             :to="{name: 'invoice-edit', params: {pk: invoice.id, uuid: order.uuid}}"
             class="listing-item"
           >
             {{ $trans('Invoice') }} {{ invoice.invoice_id }}
           </router-link>
+          <span
+            v-else-if="invoice.preliminary"
+            class="listing-item"
+          >
+            {{ $trans('Invoice') }} {{ invoice.invoice_id }}
+          </span>
           <router-link
             v-else
             :to="{name: 'invoice-view', params: {uuid: invoice.uuid}}"
@@ -33,7 +39,7 @@
     >
       <small class="dimmed">{{ $trans('No invoice(s) for this order yet.') }}</small> <br><br>
       <router-link
-        v-if="order.customer_relation"
+        v-if="order.customer_relation && order.uuid"
         class="btn btn-primary"
         :title="$trans('Create invoice')"
         :to="{name: 'invoice-create', params: {uuid: order.uuid}}"

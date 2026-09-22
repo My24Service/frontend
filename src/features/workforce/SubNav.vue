@@ -5,7 +5,7 @@
         v-for="item in items"
         :key="item.name"
         :active="route.name === item.name"
-        :to="{name: item.name}"
+        :to="toRoute(item.name)"
       >
         {{ item.label() }}
       </b-nav-item>
@@ -27,7 +27,7 @@
  */
 const route = useRoute()
 
-const items: {name: string; label: () => string}[] = [
+const items: {name: RouteName; label: () => string}[] = [
   {name: 'company-time-registration', label: () => $trans('Time registration')},
   {name: 'leave-requests', label: () => $trans('Leave requests')},
   {name: 'leave-list', label: () => $trans('Leave')},

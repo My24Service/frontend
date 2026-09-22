@@ -31,7 +31,7 @@
       </template>
       <template #add>
         <router-link
-          :to="{name: `${route_prefix}-add`}"
+          :to="addRoute"
           class="btn btn-primary"
         >{{ $trans('Add location') }}</router-link>
       </template>
@@ -69,6 +69,8 @@ const authStore = useAuthStore()
 // customer. Those two roles see no owner column.
 const planning = !authStore.isEmployee && !authStore.isCustomer
 
+const addRoute = computed(() => toRoute(`${props.route_prefix}-add` as RouteName))
+
 const helper = createAppColumnHelper<LocationRow>()
 
 // "Name · City" as one dimmed suffix, the shape both owner cells share.
@@ -82,7 +84,7 @@ const columns = helper.columns([
   helper.accessor('name', {
     header: $trans('Name'),
     cell: ({row}) => h(RouterLink, {
-      to: {name: `${props.route_prefix}-view`, params: {pk: row.original.id}},
+      to: toRoute(`${props.route_prefix}-view` as RouteName, {pk: row.original.id}),
     }, () => row.original.name),
   }),
   // The endpoint declares no `ordering` parameter (the legacy screen's sort
@@ -102,7 +104,7 @@ const columns = helper.columns([
       if (!label) return '-'
       // The legacy cell passed the row's own id to a route that resolves a
       // branch. Preserved as-is: see the module README's preserved-defects list.
-      return h(RouterLink, {to: {name: 'company-branch-view', params: {pk: row.original.id}}}, () => label)
+      return h(RouterLink, {to: toRoute('company-branch-view', {pk: row.original.id})}, () => label)
     },
   })] : []),
   helper.accessor('created', {
@@ -114,7 +116,7 @@ const columns = helper.columns([
     cell: ({row}) => h('small', row.original.modified),
   }),
   ...(props.from_settings ? [createActionColumn(helper, {
-    editRoute: `${props.route_prefix}-edit`,
+    editRoute: `${props.route_prefix}-edit` as RouteName,
     onDelete: (id) => tableRef.value?.showDeleteModal(id),
   })] : []),
 ])

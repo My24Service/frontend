@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { BLink } from 'bootstrap-vue-next'
+import { hLink } from '@/components/render'
 import IBiCheckLg from '~icons/bi/check-lg'
 import IBiXLg from '~icons/bi/x-lg'
 import {
@@ -100,11 +100,11 @@ const columns = helper.columns([
     header: '',
     enableSorting: false,
     cell: ({row}) => h('div', {class: 'h2 float-end'}, [
-      h(BLink, {
+      hLink({
         title: $trans('Accept'),
         onClick: () => showAcceptModal(row.original.id),
       }, () => h(IBiCheckLg, {class: 'edit-icon'})),
-      h(BLink, {
+      hLink({
         title: $trans('Reject'),
         onClick: () => showRejectModal(row.original.id),
       }, () => h(IBiXLg, {class: 'edit-icon'})),

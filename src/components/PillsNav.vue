@@ -4,7 +4,7 @@
       v-for="item in visibleItems"
       :key="item.to.name"
       :active="route.name === item.to.name"
-      :to="item.to"
+      :to="toRoute(item.to.name)"
     >
       {{ item.label }}
     </BNavItem>
@@ -22,7 +22,7 @@ import { hasAccessToModule } from '@/utils'
  */
 export interface PillNavItem {
   label: string
-  to: { name: string }
+  to: { name: RouteName }
   guard?: boolean
 }
 

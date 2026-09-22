@@ -32,7 +32,7 @@
       </template>
       <template #add>
         <router-link
-          :to="{name: 'customer-add'}"
+          :to="toRoute('customer-add')"
           class="btn btn-primary"
         >
           <IBiBuilding></IBiBuilding>{{$trans('Add customer')}}
@@ -43,9 +43,9 @@
 </template>
 
 <script lang="ts" setup>
+import { hLink } from '@/components/render'
 import type { VNodeChild } from 'vue'
 import { RouterLink } from 'vue-router'
-import { BLink } from 'bootstrap-vue-next'
 
 import {
   customerCustomerDestroyMutation,
@@ -61,7 +61,6 @@ import {
   useServerTable,
   type ListRow,
 } from '@/features/table'
-
 type CustomerRow = ListRow<PaginatedCustomerList>
 
 // The screen's handle on the table: the icon column calls the delete modal
@@ -88,7 +87,7 @@ function branchCell(row: CustomerRow) {
     contact.push(
       h('br'),
       `${$trans('Email')}: `,
-      h(BLink, {class: 'px-1', href: `mailto:${email}`}, () => email),
+      hLink({class: 'px-1', href: `mailto:${email}`}, () => email),
     )
   }
   const tel = branchText(branch.tel)
@@ -101,7 +100,7 @@ function branchCell(row: CustomerRow) {
   }
 
   return h('div', {class: 'listing-item'}, [
-    h(RouterLink, {to: {name: 'customer-view', params: {pk: row.id}}}, () => [
+    h(RouterLink, {to: toRoute('customer-view', {pk: row.id})}, () => [
       `${branchText(branch.name)}, ${branchText(branch.city)}, ${branchText(branch.country_code)} (`,
       h('span', {class: 'branch'}, $trans('Branch')),
       ')',
@@ -125,7 +124,7 @@ const columns = columnHelper.columns([
       const row = info.row.original
       if (row.branch_view) return branchCell(row)
       return h('span', {class: 'listing-item', title: `${$trans('Customer ID:')} ${row.customer_id}`}, [
-        h(RouterLink, {to: {name: 'customer-view', params: {pk: row.id}}}, () => row.name),
+        h(RouterLink, {to: toRoute('customer-view', {pk: row.id})}, () => row.name),
       ])
     },
   }),

@@ -70,6 +70,8 @@ export default defineConfig({
     // specs fail with "ReferenceError: ref is not defined".
     AutoImport({
       imports: autoImportEntries,
+      // Templates call auto-imported helpers too (`:to="toRoute(...)"`).
+      vueTemplate: true,
       dirs: [
         {
           glob: 'src/composables/**',

@@ -254,7 +254,7 @@ async function importAll() {
     infoToast(toast, $trans('Imported'), $trans('Data has been imported'))
     await invalidateReads(companyImport)(queryClient)
     importModal.value?.hide()
-    await router.push({ name: `${props.route_prefix}-list` })
+    await router.push(toRoute(`${props.route_prefix}-list` as RouteName))
   } catch {
     errorToast(toast, $trans('Error importing data'))
   } finally {
@@ -263,6 +263,6 @@ async function importAll() {
 }
 
 async function cancel() {
-  await router.push({ name: `${props.route_prefix}-list` })
+  await router.push(toRoute(`${props.route_prefix}-list` as RouteName))
 }
 </script>

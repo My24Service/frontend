@@ -10,7 +10,7 @@
         <BButton-toolbar>
           <router-link
             class="btn btn-primary"
-            :to="{name: 'maintenance-contract-edit', params:{ pk: pk}}"
+            :to="{name: 'maintenance-contract-edit', params:{ pk: contractId}}"
           >
             {{ $trans("Edit contract") }}
           </router-link>

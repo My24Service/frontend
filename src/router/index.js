@@ -50,7 +50,7 @@ export const router = createRouter({
   routes,
 })
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
   const mainStore = useMainStore()
 
@@ -66,29 +66,26 @@ router.beforeEach(async (to, from, next) => {
 
   if (!needsAuth) {
     console.debug('route allowed, no auth needed', {path})
-    next()
     return
   }
 
   if (!isAllowedMemberPath) {
     console.warn('route not allowed because of member', {path});
-    next(`/no-access?next=${to.path}`)
-    return
+    return `/no-access?next=${to.path}`
   }
 
   if (!userIsLoggedIn) {
     console.warn('route not allowed for user (not logged in)',{path, needsAuth, userIsLoggedIn})
-    next(`/no-access?next=${to.path}`)
-    return
+    return `/no-access?next=${to.path}`
   }
 
   // check user type if needed
   if (hasAccessRouteAuthLevel(authLevelNeeded)) {
     console.debug('route allowed', {path, pathAuthLevel, userAuthLevel})
-    next()
     return
   }
 
   console.warn('route not allowed because of user auth level', {path, pathAuthLevel, userAuthLevel})
-  next(`/no-access?next=${to.path}`)
+
+  return `/no-access?next=${to.path}`
 });

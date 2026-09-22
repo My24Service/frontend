@@ -88,7 +88,8 @@ export default [
     {
       meta: { authLevelNeeded: AUTH_LEVELS.STAFF },
       name: 'member-request',
-      path: '/members/members/form',
+      // Its own path: sharing member-add's meant a reload matched member-add.
+      path: '/members/members/request-form',
       components: {
         'app-content': MemberForm,
         'app-subnav': SubNav

@@ -24,7 +24,8 @@
 // Rules per file under src/ (skips generated src/api and *.d.ts):
 // - value specifier X from P: dropped iff the contract maps X -> P.
 // - type specifier (`type X`, or X inside `import type {...}`): dropped iff
-//   the contract maps type X -> P.
+//   the contract maps type X -> P, or X is a local type and P is one of its
+//   providers (same resolution as for values, below).
 // - `X as Y` aliases: kept (the global name differs from local use) + reported.
 // - component/directive names (B*, IBi*, RouterLink/View, vBModal): dropped
 //   iff template-only, i.e. absent from <script> AND from template
@@ -89,11 +90,14 @@ function resolveSpecifier(spec, fromFile) {
   return null
 }
 
-/** `export { a, default as b } from 'X'` in one file: [[exportedName, localKind], ...] */
+/**
+ * `export { a, default as b } from 'X'` in one file, type-only forms included
+ * (`export type { T }`, `export { type T }`): [[exportedName, localKind], ...]
+ */
 function reExportsOf(src) {
   const out = []
-  for (const m of src.matchAll(/^export\s*\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/gm)) {
-    for (const raw of m[1].split(',').map(x => x.trim()).filter(Boolean)) {
+  for (const m of src.matchAll(/^export(?:\s+type)?\s*\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/gm)) {
+    for (const raw of m[1].split(',').map(x => x.trim().replace(/^type\s+/, '')).filter(Boolean)) {
       const aliased = raw.match(/^([\w$]+)\s+as\s+([\w$]+)$/)
       const source = aliased ? aliased[1] : raw
       const exported = aliased ? aliased[2] : raw
@@ -111,8 +115,9 @@ const addProvider = (name, file, kind) => {
   providers.get(name).set(file, kind)
 }
 
-// Seed: the names the plugin serves out of a local module.
-for (const [name, spec] of values) {
+// Seed: the names the plugin serves out of a local module - types too, since
+// the barrel re-exports those from their origin just the same.
+for (const [name, spec] of [...values, ...types]) {
   if (!spec.startsWith('./') && !spec.startsWith('../')) continue
   const abs = resolveSpecifier(spec, path.join(REPO, '_.ts'))
   if (abs) addProvider(name, abs, 'named')
@@ -258,6 +263,7 @@ for (const file of walk(path.join(REPO, 'src'))) {
       const isType = Boolean(typeM) || Boolean(typeMod)
       if (isType) {
         if (types.get(name) === source) continue // globally typed -> drop
+        if (types.has(name) && providedLocally(name, source, file, false)) continue // same type via a barrel -> drop
         keep.push(raw); continue
       }
       // value specifier
@@ -318,7 +324,9 @@ for (const file of walk(path.join(REPO, 'src'))) {
       const typeM = raw.match(/^type\s+(\w+)$/)
       const name = typeM ? typeM[1] : raw
       if (typeM || typeMod) {
-        if (types.get(name) === source) remaining.push(`${rel}: type ${name} from '${source}'`)
+        if (types.get(name) === source || (types.has(name) && providedLocally(name, source, file, false))) {
+          remaining.push(`${rel}: type ${name} from '${source}'`)
+        }
       } else if (values.get(name) === source || providedLocally(name, source, file, false)) {
         remaining.push(`${rel}: ${name} from '${source}'`)
       } else if ((components.has(name) || directives.has(name)) && templateOnly(name)) {

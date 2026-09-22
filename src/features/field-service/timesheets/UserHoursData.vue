@@ -41,14 +41,13 @@
       </template>
       <template #cell(full_name)="data">
         <router-link
+          v-if="props.detail_route_name"
           class="px-1"
-          :to="{
-            name: detail_route_name,
-            params: {user_id: data.item.user_id},
-            query: {date: startDate}}"
+          :to="toRoute(props.detail_route_name, {user_id: data.item.user_id}, {date: startDate})"
         >
           {{ data.item.full_name }}
         </router-link>
+        <span v-else class="px-1">{{ data.item.full_name }}</span>
       </template>
     </BTable>
   </div>
@@ -75,9 +74,9 @@ interface SortBy {
   order: 'asc' | 'desc'
 }
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   /** The route the user names link to; the parent's router owns the name. */
-  detail_route_name?: string
+  detail_route_name?: RouteName
 }>(), {
   detail_route_name: undefined,
 })

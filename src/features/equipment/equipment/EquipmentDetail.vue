@@ -126,7 +126,6 @@ import {
   useDetailChrome,
   useDetailOrders,
 } from '@/features/shared'
-
 /**
  * The equipment detail page for both product families.
  *
@@ -169,10 +168,12 @@ const {hasQr, qrUrl, download, recreateQr} = useQrCode({kind: 'equipment', id, r
 const layout = computed(() => (mainStore.getProductFamily === 'default' ? DetailLayoutSidebar : DetailLayoutCards))
 const isDefaultFamily = computed(() => mainStore.getProductFamily === 'default')
 
-const editRoute = computed(() => ({
-  name: isDefaultFamily.value ? `${props.route_prefix}-edit` : `${props.route_prefix}-edit-${props.type}`,
-  params: {pk: props.pk},
-}))
+const editRoute = computed(() => toRoute(
+  (isDefaultFamily.value
+    ? `${props.route_prefix}-edit`
+    : `${props.route_prefix}-edit-${props.type}`) as RouteName,
+  {pk: props.pk},
+))
 
 moment.locale(String(mainStore.getCurrentLanguage))
 

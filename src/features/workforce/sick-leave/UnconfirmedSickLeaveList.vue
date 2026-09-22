@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { BLink } from 'bootstrap-vue-next'
+import { hLink } from '@/components/render'
 import IBiCheckLg from '~icons/bi/check-lg'
 import {
   companyUserSickLeaveAdminAllUnconfirmedListOptions,
@@ -87,7 +87,7 @@ const columns = helper.columns([
     header: '',
     enableSorting: false,
     cell: ({row}) => h('div', {class: 'h2 float-end'}, [
-      h(BLink, {
+      hLink({
         title: $trans('Confirm'),
         onClick: () => showConfirmModal(row.original.id),
       }, () => h(IBiCheckLg, {class: 'edit-icon'})),

@@ -21,7 +21,7 @@
         </h3>
         <BButton-toolbar>
           <router-link
-            :to="{name: `${props.route_prefix}-edit`, params: {pk: props.pk}}"
+            :to="editRoute"
             :class="isDefaultFamily ? 'btn btn-primary' : 'btn'"
           >{{ `${$trans('Edit')} ${$trans('location')}` }}</router-link>
         </BButton-toolbar>
@@ -110,7 +110,6 @@ import {
   useDetailOrders,
 } from '@/features/shared'
 import EquipmentAtLocationTable from './EquipmentAtLocationTable.vue'
-
 /**
  * The location detail page for both product families.
  *
@@ -152,7 +151,10 @@ const detailFields = computed<DetailField[]>(() =>
  * built it, including the mount where the name it produces is not registered -
  * see the module README's preserved-defects list.
  */
-const equipmentViewRoute = computed(() => `${props.route_prefix.replace('location', 'equipment')}-view`)
+const equipmentViewRoute = computed(() =>
+  `${props.route_prefix.replace('location', 'equipment')}-view` as RouteName)
+
+const editRoute = computed(() => toRoute(`${props.route_prefix}-edit` as RouteName, {pk: props.pk}))
 
 const {handleSearchOk, showSearchModal, refreshAll, goBack} = useDetailChrome({
   orders: {setSearch, refresh},

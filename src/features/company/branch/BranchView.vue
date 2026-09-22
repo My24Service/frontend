@@ -19,12 +19,12 @@
           </h3>
           <router-link
             v-if="!isEmployee"
-            :to="{name: editRoute, params: {pk: subjectId}}"
+            :to="editLocation"
             class="btn"
           >{{ $trans('Edit branch') }}</router-link>
           <router-link
             v-else
-            :to="{name: myRoute}"
+            :to="toRoute(myRoute)"
             class="btn"
           >{{ $trans('Edit branch') }}</router-link>
         </div>
@@ -247,8 +247,12 @@ const ownId = computed(() => authStore.branchEmployeeBranch as number | null)
 const subjectId = computed(() => (isEmployee.value ? ownId.value : (props.pk == null ? null : Number(props.pk))))
 const hasSubject = computed(() => subjectId.value != null)
 
-const editRoute = computed(() => (props.from_settings ? 'settings-branch-edit' : 'company-branch-edit'))
-const myRoute = computed(() => (props.from_settings ? 'settings-my-branch' : 'company-my-branch'))
+const editRoute = computed<RouteName>(() => (props.from_settings ? 'settings-branch-edit' : 'company-branch-edit'))
+const myRoute = computed<RouteName>(() => (props.from_settings ? 'settings-my-branch' : 'company-my-branch'))
+// `record` only ever populates through `branchQuery`, which is enabled solely
+// when `hasSubject` - so `subjectId` is guaranteed non-null wherever this
+// (v-if="record") link renders.
+const editLocation = computed(() => toRoute(editRoute.value, { pk: subjectId.value! }))
 
 // One read switching between the two generated retrieve options by role,
 // through `useQueryOf`: a ternary between the two is a union `useQuery`

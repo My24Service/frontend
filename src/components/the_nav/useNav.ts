@@ -37,7 +37,7 @@ export function useNav(): UseNav {
     // .startsWith on it directly.
     const name = typeof route.name === 'string' ? route.name : ''
     if (!groups.some((group) => name.startsWith(group))) return false
-    if (route.params && route.params.type) return route.params.type === type
+    if ('type' in route.params && route.params.type) return route.params.type === type
     return name.endsWith(`-${type}`)
   }
 

@@ -1690,14 +1690,20 @@
   {
     "from": "vue-router",
     "type": true,
-    "name": "LocationQueryValue",
-    "as": "LocationQueryValue"
+    "name": "RouteLocationRaw",
+    "as": "RouteLocationRaw"
   },
   {
     "from": "vue-router",
     "type": true,
-    "name": "RouteLocationRaw",
-    "as": "RouteLocationRaw"
+    "name": "RouteParamValueRaw",
+    "as": "RouteParamValueRaw"
+  },
+  {
+    "from": "vue-router",
+    "type": true,
+    "name": "LocationQueryValue",
+    "as": "LocationQueryValue"
   },
   {
     "from": "vue-router",
@@ -1793,6 +1799,32 @@
     "name": "my24",
     "as": "my24",
     "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "__source": "dir"
+  },
+  {
+    "name": "fromRouteTo",
+    "as": "fromRouteTo",
+    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "__source": "dir"
+  },
+  {
+    "name": "toRoute",
+    "as": "toRoute",
+    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "__source": "dir"
+  },
+  {
+    "name": "RouteName",
+    "as": "RouteName",
+    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "type": true,
+    "__source": "dir"
+  },
+  {
+    "name": "RouteTo",
+    "as": "RouteTo",
+    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "type": true,
     "__source": "dir"
   }
 ]

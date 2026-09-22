@@ -34,8 +34,8 @@
 </template>
 
 <script setup lang="ts">
+import { hLink } from '@/components/render'
 import { RouterLink } from 'vue-router'
-import { BLink } from 'bootstrap-vue-next'
 import IBiEnvelope from '~icons/bi/envelope'
 import {
   companyBranchDestroyMutation,
@@ -83,7 +83,7 @@ const columns = helper.columns([
       const contact = row.original.contact?.trim() ? row.original.contact : null
       if (!contact) return null
       if (row.original.email) {
-        return h(BLink, { class: 'px-1', href: `mailto:${row.original.email}` }, () => [
+        return hLink({ class: 'px-1', href: `mailto:${row.original.email}` }, () => [
           contact,
           ' ',
           h(IBiEnvelope),

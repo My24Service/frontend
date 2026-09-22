@@ -28,7 +28,7 @@
             <IBiPencil font-scale="0.95" /> &nbsp; {{ $trans('Edit order') }}
           </router-link>
           <router-link
-            v-if="order.customer_relation"
+            v-if="order.customer_relation && order.uuid"
             class="btn"
             :title="$trans('Create invoice')"
             :to="{name: 'invoice-create', params: {uuid: order.uuid}}"

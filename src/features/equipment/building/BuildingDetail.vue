@@ -86,7 +86,6 @@ import {
   useDetailChrome,
   useDetailOrders,
 } from '@/features/shared'
-
 /**
  * The building detail page.
  *
@@ -116,7 +115,7 @@ const {orders, count, perPage, page, isLoading, statsData, setSearch, refresh} =
 // this screen. The legacy breadcrumb branched to an undefined
 // `customers-building-list` for a member without branches.
 const breadcrumb = computed(() => [
-  {text: $trans('Buildings'), to: {name: 'equipment-building-list'}},
+  {text: $trans('Buildings'), to: toRoute('equipment-building-list')},
   {text: $trans('Detail'), active: true},
 ])
 

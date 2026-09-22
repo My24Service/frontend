@@ -184,7 +184,9 @@ async function doMakeDefinitive() {
     await Promise.all([invalidateAfterPdfChange(), invalidateReads(invoiceInvoice)(queryClient)])
     isLoading.value = false
     infoToast(create, $trans('Success'), $trans('Invoice is now definitive'))
-    await router.push({name: 'invoice-view', params: {uuid: props.invoice.uuid}})
+    if (props.invoice.uuid) {
+      await router.push({name: 'invoice-view', params: {uuid: props.invoice.uuid}})
+    }
   } catch (error) {
     isLoading.value = false
     const data = (error as {response?: {data?: PdfBlobError}})?.response?.data

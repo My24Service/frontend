@@ -9,7 +9,7 @@ export type ListRow<T extends {results?: unknown[]}> = NonNullable<T['results']>
 export function createActionColumn<TData extends RowData & {id: number}>(
   columnHelper: AnyColumnHelper<TData>,
   options: {
-    editRoute?: string
+    editRoute?: RouteName
     onDelete: (id: number) => void
     width?: string
   },

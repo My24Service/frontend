@@ -70,7 +70,7 @@
       <template #add>
         <router-link
           v-if="from_settings || !hasBranches"
-          :to="{name: `${route_prefix}-add`}"
+          :to="addRoute"
           class="btn btn-primary"
         >{{ $trans('Add Equipment') }}</router-link>
       </template>
@@ -119,12 +119,14 @@ const authStore = useAuthStore()
 // the brand column.
 const planning = computed(() => !authStore.isEmployee && !authStore.isCustomer)
 
+const addRoute = computed(() => toRoute(`${props.route_prefix}-add` as RouteName))
+
 const helper = createAppColumnHelper<EquipmentRow>()
 
 // The owner column is the only difference between the customer and branch
 // variants. It is also the one cell that links on a foreign key - the row's
 // `customer`/`branch` - rather than on the row's own id.
-function ownerColumn(key: 'customer' | 'branch', routeName: string) {
+function ownerColumn(key: 'customer' | 'branch', routeName: RouteName) {
   return helper.display({
     id: key,
     header: key === 'customer' ? $trans('Customer') : $trans('Branch'),
@@ -138,7 +140,7 @@ function ownerColumn(key: 'customer' | 'branch', routeName: string) {
       // the label is what the user needs, so it stays as plain text.
       const ownerId = row.original[key]
       if (ownerId == null) return label
-      return h(RouterLink, {to: {name: routeName, params: {pk: ownerId}}}, () => label)
+      return h(RouterLink, {to: toRoute(routeName, {pk: ownerId})}, () => label)
     },
   })
 }
@@ -148,8 +150,8 @@ const columns = helper.columns([
     header: $trans('Equipment'),
     cell: ({row}) => h(RouterLink, {
       to: hasBranches.value
-        ? {name: `${props.route_prefix}-view-${props.type}`, params: {pk: row.original.id}}
-        : {name: `${props.route_prefix}-view`, params: {pk: row.original.id}},
+        ? toRoute(`${props.route_prefix}-view-${props.type}` as RouteName, {pk: row.original.id})
+        : toRoute(`${props.route_prefix}-view` as RouteName, {pk: row.original.id}),
     }, () => row.original.name),
   }),
   ...(planning.value && hasBranches.value ? [ownerColumn('branch', 'company-branch-view')] : []),
@@ -182,9 +184,9 @@ const columns = helper.columns([
         method: () => showAddStateModal(row.original.id),
       }),
       h(RowAction, {icon: 'edit',
-        router_name: hasBranches.value
+        router_name: (hasBranches.value
           ? `${props.route_prefix}-edit-${props.type}`
-          : `${props.route_prefix}-edit`,
+          : `${props.route_prefix}-edit`) as RouteName,
         router_params: {pk: row.original.id},
         title: $trans('Edit'),
       }),

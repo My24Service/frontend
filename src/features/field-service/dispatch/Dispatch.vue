@@ -496,12 +496,14 @@ async function openActionsModal(userId: number, order_pk: number, assignedorder:
 
 async function viewOrder() {
   await actionsModal.value?.hide()
-  router.push({name: 'order-view', params: {pk: selectedOrder.value?.id}})
+  if (!selectedOrder.value?.id) return
+  router.push({name: 'order-view', params: {pk: selectedOrder.value.id}})
 }
 
 async function editOrder() {
   await actionsModal.value?.hide()
-  router.push({name: 'order-edit', params: {pk: selectedOrder.value?.id}})
+  if (!selectedOrder.value?.id) return
+  router.push({name: 'order-edit', params: {pk: selectedOrder.value.id}})
 }
 
 // change date ----------------------------------------------------------------

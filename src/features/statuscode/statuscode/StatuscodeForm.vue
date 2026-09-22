@@ -4,7 +4,7 @@
       <div class="page-title">
         <h3>
           <IBiFileEarmarkCheckFill></IBiFileEarmarkCheckFill>
-          <router-link :to="{name: routeNames.list}">{{ $trans('Statuscodes') }}</router-link>
+          <router-link :to="toRoute(routeNames.list)">{{ $trans('Statuscodes') }}</router-link>
           /
           <strong>{{ statuscode.statuscode }}</strong>
           <span class="dimmed">

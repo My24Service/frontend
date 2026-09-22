@@ -83,11 +83,9 @@
             <router-link
               v-if="data.item.user_id"
               class="px-1"
-              :to="{
-                name: 'company-time-registration-detail',
-                params: {user_id: data.item.user_id},
-                query: {date: anchor.format('YYYY-MM-DD'), mode}
-              }"
+              :to="toRoute('company-time-registration-detail',
+                {user_id: data.item.user_id},
+                {date: anchor.format('YYYY-MM-DD'), mode})"
             >
               {{ data.item.full_name }}
             </router-link>
@@ -233,7 +231,6 @@ import {
 } from './pivot'
 import { correctionBody, normaliseCorrection, parseCorrection } from './schemas'
 import { timeWindowQuery } from './time-window'
-
 /**
  * The time-registration screen: the hours the tenant's people registered, over
  * a week, a month or a year, and - on a user window - that user's worked hours
@@ -391,11 +388,9 @@ function cellSlot(field: string): string {
 }
 
 function drillLink(userId: string | number, index: number) {
-  return {
-    name: 'company-time-registration-detail',
-    params: {user_id: userId},
-    query: {date: intervalMoments(dateList.value)[index].format('YYYY-MM-DD'), mode: drillMode.value},
-  }
+  return toRoute('company-time-registration-detail',
+    {user_id: userId},
+    {date: intervalMoments(dateList.value)[index].format('YYYY-MM-DD'), mode: drillMode.value})
 }
 
 // the correction ----------------------------------------------------------

@@ -44,7 +44,7 @@
       <template #subnav><PillsNav :items="partnerPills" /></template>
       <template #add>
         <router-link
-          :to="{name: 'partner-request-add'}"
+          :to="toRoute('partner-request-add')"
           class="btn"
         >{{ $trans('New partner request') }}</router-link>
       </template>
@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { BButton } from 'bootstrap-vue-next'
+import { hButton } from '@/components/render'
 import {
   companyPartnerRequestAcceptPartialUpdateMutation,
   companyPartnerRequestDestroyMutation,
@@ -111,14 +111,14 @@ const columns = helper.columns([
     cell: ({ row }) => {
       if (row.original.status === 'requested') {
         return h('div', { class: 'h2 float-right' }, [
-          h(BButton, {
+          hButton({
             type: 'button',
             size: 'sm',
             variant: 'secondary',
             onClick: () => showAcceptModal(row.original.id),
           }, () => $trans('Accept')),
           ' ',
-          h(BButton, {
+          hButton({
             type: 'button',
             size: 'sm',
             variant: 'warning',

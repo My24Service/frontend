@@ -34,7 +34,7 @@
       <template #icon><IBiFileArrowDown /></template>
       <template #add>
         <router-link
-          :to="{name: `${route_prefix}-add`}"
+          :to="toRoute(`${route_prefix}-add` as RouteName)"
           class="btn btn-primary"
         ><IBiFileArrowDown />{{ $trans('Add import') }}</router-link>
       </template>
@@ -43,9 +43,9 @@
 </template>
 
 <script setup lang="ts">
+import { hLink } from '@/components/render'
 import { Fragment } from 'vue'
 import { RouterLink } from 'vue-router'
-import { BLink } from 'bootstrap-vue-next'
 import IBiArrowCounterclockwise from '~icons/bi/arrow-counterclockwise'
 import {
   companyImportDestroyMutation,
@@ -94,7 +94,7 @@ const columns = helper.columns([
     cell: ({ row }) => (isExecuted(row.original.result_inserts)
       ? (row.original.name ?? '')
       : h(RouterLink, {
-        to: { name: `${props.route_prefix}-preview`, params: { pk: row.original.id } },
+        to: toRoute(`${props.route_prefix}-preview` as RouteName, { pk: row.original.id }),
       }, () => row.original.name ?? '')),
   }),
   helper.display({
@@ -123,7 +123,7 @@ const columns = helper.columns([
     cell: ({ row }) => {
       if (isExecuted(row.original.result_inserts)) {
         return h('div', { class: 'h2 float-right' }, [
-          h(BLink, {
+          hLink({
             title: $trans('Revert import'),
             onClick: () => showRevertModal(row.original.id),
           }, () => h(IBiArrowCounterclockwise)),
@@ -131,7 +131,7 @@ const columns = helper.columns([
       }
       return h('div', { class: 'h2 float-right' }, [
         h(RowAction, {icon: 'edit',
-          router_name: `${props.route_prefix}-edit`,
+          router_name: `${props.route_prefix}-edit` as RouteName,
           router_params: { pk: row.original.id },
           title: $trans('Edit'),
         }),

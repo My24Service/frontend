@@ -6,7 +6,7 @@
         v-for="item in items"
         :key="item.name"
         :active="route.name === item.name"
-        :to="{name: item.name}"
+        :to="toRoute(item.name)"
       >
         {{ item.label() }}
       </BNavItem>
@@ -45,7 +45,7 @@ import PillsNav, {useCompanyUserPills} from '@/components/PillsNav.vue'
 const route = useRoute()
 const userPills = useCompanyUserPills()
 
-const items: {name: string; label: () => string}[] = [
+const items: {name: RouteName; label: () => string}[] = [
   {name: 'users-engineers', label: () => $trans('List')},
   {name: 'engineer-event-list', label: () => $trans('Events')},
   {name: 'engineer-event-type-list', label: () => $trans('Event types')},

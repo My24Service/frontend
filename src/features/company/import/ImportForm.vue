@@ -147,9 +147,9 @@ const form = useResourceForm<ImportFormValues, Import, unknown, ImportFormErrors
   afterSave: async () => {
     const id = isCreateRoute ? savedId.value : Number(props.pk)
     if (continueToPreview.value && id != null) {
-      await router.push({ name: `${props.route_prefix}-preview`, params: { pk: id } })
+      await router.push(toRoute(`${props.route_prefix}-preview` as RouteName, { pk: id }))
     } else {
-      await router.push({ name: `${props.route_prefix}-list` })
+      await router.push(toRoute(`${props.route_prefix}-list` as RouteName))
     }
   },
   copy: {

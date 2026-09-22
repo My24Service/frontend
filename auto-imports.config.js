@@ -23,8 +23,9 @@ export const autoImportEntries = [
   {
     from: 'vue-router',
     imports: [
-      'LocationQueryValue',
       'RouteLocationRaw',
+      'RouteParamValueRaw',
+      'LocationQueryValue',
       'RouteLocationNormalizedLoaded',
     ],
     type: true,
