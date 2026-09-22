@@ -175,6 +175,58 @@ outsider might validly need. A subfolder's door is what a sibling, the parent
 door or a test may reach for; a Slice's door is the outside surface, and the
 parent reaches its subfolders through their doors rather than past them.
 
+### Correction (2026-09-22): a route screen is named by its own module
+
+The 2026-09-21 correction says the router imports a Slice through
+`@/features/<slice>`. That is now false for one kind of import, and true for
+every other.
+
+A route no longer holds a screen; it holds a loader:
+
+```js
+const OrderList = () => import('@/features/order/order/OrderList.vue')
+```
+
+The reason is code splitting, and it is a property of the bundler rather than a
+preference. A **static** import of a door is tree-shaken: Rollup follows the one
+binding a caller names and drops the rest of the re-export list. A **dynamic**
+import cannot be - the module object has to exist at runtime with every export
+on it, so `import('@/features/order')` pulls the whole Slice into the chunk.
+Routing the loaders through the doors therefore produces one chunk per Slice: on
+this repository the largest came to 360 kB, which every visitor to any one
+screen in that Slice downloaded in order to reach it.
+
+Both were built and measured before choosing. Entry chunk against the concrete
+modules: 3,264 kB before splitting, 1,344 kB after - and the same 1,344 kB
+through the doors, because what differs is not what the entry holds but how the
+rest divides. Through the doors: 140 chunks, one per Slice. Against the concrete
+modules: 281 chunks, one per screen, and the 360 kB Slice chunk is gone. Total
+bytes rise about 6% either way, which is chunk overhead and the trade the split
+is for.
+
+So the rule gains one exception, and it is deliberately the narrowest one that
+buys the split:
+
+- **A lazy route loader in `src/router/` names the module that defines the
+  screen**, `@/features/<slice>/<path>/<Screen>.vue`. Nothing else may.
+- **Every other import the router makes still goes through the door.** The
+  values it needs at module scope - `CODE_TYPES` from `@/features/statuscode`,
+  `getUserAuthLevel` and `hasAccessRouteAuthLevel` from `@/features/auth` - are
+  unchanged, and so is every import made by anything that is not the router.
+
+What this costs is honest to state: the router now knows where inside a Slice a
+screen lives, so moving a file within a folder can break a route. That is a
+rename the tests catch - `tests/unit/router/` asserts the route table, and a
+loader that resolves to nothing fails the build - and it is the price of not
+shipping a Slice's other screens to someone who opened one of them.
+
+What it does not cost is the boundary the decision is about. The door is still
+the Slice's public surface for every consumer and every other import; what the
+router names concretely is a *screen the route already owns* - the route table
+is where that screen's existence is declared in the first place. No wiring,
+store, schema or helper moved, and `eslint.config.js` still forbids the doors to
+state-only leaf modules, which is the hazard the whole rule exists for.
+
 ## Consequences
 
 - A reviewer reads one directory per Slice instead of four disjoint trees.
