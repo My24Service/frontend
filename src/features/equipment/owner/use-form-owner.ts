@@ -11,7 +11,6 @@ import {
   useQueryErrorToast,
   useQueryOf,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import type { OwnedRecord, OwnedValues, OwnerKind } from './owner-kind'
 
 /** An autocomplete row from either owner endpoint: they share id/name/city. */

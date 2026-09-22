@@ -56,8 +56,6 @@
 import moment from 'moment/moment'
 import { nl } from 'date-fns/locale'
 
-import { $trans } from '@/services/i18n'
-
 /**
  * The order's dates, edited in place from the search results.
  *

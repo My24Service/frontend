@@ -56,7 +56,6 @@
 </template>
 
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
 import type { ColumnFilterSpec, FilterOption } from '../table'
 import { joinArrayItems, splitArrayItems } from './filter-grammar'
 import { focusFirstControl } from './focus-first-control'

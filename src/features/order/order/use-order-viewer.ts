@@ -1,6 +1,3 @@
-import { useAuthStore } from '@/features/auth'
-import { useMainStore } from '@/stores/main'
-
 /**
  * Who is looking at an order, and what their tenant has: the flags the
  * detail's panels show and hide their rows by.

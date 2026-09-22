@@ -274,8 +274,6 @@ import materialService from '../../models/inventory/Material.js'
 import supplierModel from '../../models/inventory/Supplier'
 import {NO_IMAGE_URL} from "@/constants"
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-
 const props = defineProps({
   pk: {
     type: [String, Number],

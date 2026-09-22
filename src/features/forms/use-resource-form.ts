@@ -1,6 +1,5 @@
 import { type QueryClient } from '@tanstack/vue-query'
 import type { ActionResource, CollectionResource, Resource, SingletonResource } from '@/api/resources.gen'
-import { errorToast, infoToast } from '@/services/i18n'
 import { useRoutePk } from './use-route-pk'
 import { useQueryErrorToast } from './use-query-error-toast'
 

@@ -1,11 +1,8 @@
-import my24 from './services/my24'
 import {OrderService} from './models/orders/Order'
 
 // Deep import on purpose: the "@/features/auth" door re-exports LoginForm.vue,
 // which pulls bootstrap-vue-next into this module's graph and deadlocks specs
 // that mock it through tests/unit/support/form-harness.js.
-import {useAuthStore} from "@/features/auth/store";
-import {useMainStore} from "@/stores/main";
 
 function isEmpty(obj) {
   return obj && Object.keys(obj).length === 0 && obj.constructor === Object

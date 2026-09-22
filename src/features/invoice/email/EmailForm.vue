@@ -99,7 +99,6 @@ import {
   ValidatedFormField,
 } from '@/features/forms'
 import { downloadBlob } from '@/features/shared'
-import { $trans, errorToast, infoToast } from '@/services/i18n'
 import { emailFormSchema, FIELD_LABELS, FIELD_MESSAGES, validateEmail, tagValidator } from './schemas'
 
 const route = useRoute()

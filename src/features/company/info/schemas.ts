@@ -7,8 +7,6 @@ import {
   type FieldErrors,
   type FieldLabels,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * The company info form's own state: the dozen text fields the screen owns,
  * plus the two staged logos. The record's own logos (URLs the write endpoint

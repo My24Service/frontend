@@ -86,8 +86,6 @@
 <script>
 import stockLocationModel from '@/models/inventory/StockLocation'
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-
 export default {
   setup() {
     const {create} = useToast()

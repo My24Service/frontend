@@ -6,19 +6,11 @@ import userSocket from '../services/websocket/UserSocket'
 import memberSocket from '../services/websocket/MemberSocket'
 import { NEW_DATA_EVENTS } from '@/constants'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket'
-import {
-  errorToast,
-  infoToast,
-  $trans
-} from "@/services/i18n";
+
 import {
   doFetchUnacceptedCountAndUpdateStore,
   hasAccessToModule
 } from "@/utils";
-
-import {useAuthStore} from '@/features/auth';
-
-import {useMainStore} from "@/stores/main";
 
 const memberNewDataSocket = new MemberNewDataSocket();
 const authStore = useAuthStore()

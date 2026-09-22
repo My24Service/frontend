@@ -41,8 +41,6 @@
 
 <script setup lang="ts">
 import { NO_IMAGE_URL } from '@/constants'
-import { $trans } from '@/services/i18n'
-
 // The QR block inside a detail page's `#qr` slot: the linked code with its
 // download, or the placeholder while there is none, and the recreate button.
 // Presentational on purpose - the create-QR mutation and the download live in

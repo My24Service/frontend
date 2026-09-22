@@ -1,7 +1,5 @@
 import * as v from 'valibot'
 
-import { $trans, interpolate } from '@/services/i18n'
-
 import type { FieldLabels } from './validated-form-context'
 
 export type FieldMessage = (issue?: v.BaseIssue<unknown>) => string

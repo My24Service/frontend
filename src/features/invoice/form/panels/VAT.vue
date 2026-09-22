@@ -7,8 +7,6 @@
 </template>
 
 <script setup lang="ts">
-import { useMainStore } from '@/stores/main'
-
 const mainStore = useMainStore()
 const defaultVat = mainStore.getInvoiceDefaultVat
 const props = withDefaults(defineProps<{

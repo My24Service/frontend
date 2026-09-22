@@ -41,8 +41,6 @@
 
 <script setup>
 import KpiTileShltr from './KpiTileShltr.vue'
-import {$trans} from '@/services/i18n'
-
 // The KPI row as a snapping carousel: four tiles per view (two on mobile),
 // the rest reachable by scrolling. Snapping is pure CSS — scroll-snap-type on
 // the scroller, scroll-snap-align on each tile — so the only script here is

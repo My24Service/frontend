@@ -79,8 +79,6 @@ import {
   BarChart,
   PieChart,
 } from '@/features/shared'
-import { useMainStore } from '@/stores/main'
-import { $trans } from '@/services/i18n'
 import {
   type ChartData,
   type SliceTally,

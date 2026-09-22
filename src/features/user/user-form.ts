@@ -10,8 +10,6 @@ import {
   type FieldErrors,
   type FieldMessages,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 export function emptyUserIdentity() {
   return {
     username: '',

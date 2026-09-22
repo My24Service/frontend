@@ -123,7 +123,6 @@
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
 
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/services/i18n";
 
 export default {
   setup() {

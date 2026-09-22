@@ -52,9 +52,6 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/features/auth'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import { type MemberInfo } from '@/components/NavBrand.vue'
 
 // The sidebar for both product families. The shltr layout is the base; the

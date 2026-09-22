@@ -52,11 +52,10 @@
 
 <script>
 import {StatusesService} from '@/models/orders/Status.js'
-import {useMainStore} from "@/stores/main/index.js";
-import my24 from "@/services/my24.js";
+
 import DashboardBlock from "./DashboardBlock.vue";
 import DashboardBlockShltr from "./DashboardBlockShltr.vue";
-import {$trans} from "@/services/i18n";
+
 import componentMixin from "@/mixins/common";
 
 export default {

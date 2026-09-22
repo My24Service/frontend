@@ -29,8 +29,6 @@
 
 <script lang="ts" setup>
 import type { WorkorderDocument } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-
 /**
  * One of the "Workorder documents" blocks on the order detail: a heading
  * and a list of PDF links, or the heading dimmed when there is nothing.

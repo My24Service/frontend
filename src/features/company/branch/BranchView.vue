@@ -215,9 +215,6 @@ import {
   useQueryOf,
   useQueryErrorToast,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-import { useAuthStore } from '@/features/auth'
-
 /**
  * The branch detail page, mounted by the company router, the settings layout
  * and the employee dashboard.

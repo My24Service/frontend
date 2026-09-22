@@ -17,8 +17,6 @@
 </template>
 
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
-
 /**
  * The Reject / Save & accept pair both order forms show for a
  * customer-placed order awaiting confirmation. Whether it shows is the

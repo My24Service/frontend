@@ -57,8 +57,6 @@
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import { nl } from 'date-fns/locale'
 
-import { $trans } from '@/services/i18n'
-
 /**
  * One planning moment on the order: a date picker beside a free-typed
  * `HH:mm` with a clock picker that fills it. The start and the end are two

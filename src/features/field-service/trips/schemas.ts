@@ -12,8 +12,6 @@ import {
   type FieldMessages,
   type FieldLabels,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * A staged order row: the one key the write body carries, plus the fields the
  * table above the picker shows. `vTripRequest` declares `order` alone, so the

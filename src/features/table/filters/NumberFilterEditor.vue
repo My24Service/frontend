@@ -56,7 +56,6 @@
 </template>
 
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
 import type { ColumnFilterSpec } from '../table'
 import { formatNumberFilter, parseNumberFilter, type NumberFilterValue } from './filter-grammar'
 

@@ -29,10 +29,8 @@
 </template>
 
 <script setup>
-import { LoginForm, useAuthStore } from '@/features/auth';
+import { LoginForm } from '@/features/auth';
 import AppVersion from "./AppVersion.vue"
-
-import {useMainStore} from "@/stores/main";
 
 const authStore = useAuthStore()
 const mainStore = useMainStore()

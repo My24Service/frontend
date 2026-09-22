@@ -6,7 +6,6 @@ import {memberMemberMeRetrieve} from "@/api/sdk.gen";
 import {OrderService} from '@/models/orders/Order'
 import {DocumentService} from "@/models/equipment/Document";
 import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
-import {useMainStore} from "@/stores/main";
 
 let d = new Date()
 

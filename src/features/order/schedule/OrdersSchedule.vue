@@ -102,8 +102,6 @@ import type { CalendarOptions } from '@fullcalendar/core'
 import bootstrap5Plugin from '@fullcalendar/bootstrap5'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import ScheduleOrderModal from './ScheduleOrderModal.vue'
 import { useSchedule } from './use-schedule'
 

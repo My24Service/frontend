@@ -1,6 +1,3 @@
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
-
 /**
  * The order-type select options both order forms draw: the blank "Select
  * order type" row plus the tenant's own types. One copy — the two forms

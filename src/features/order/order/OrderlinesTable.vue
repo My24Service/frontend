@@ -32,8 +32,6 @@
 
 <script setup lang="ts">
 import type { OrderLine } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-
 /**
  * The read-only orderlines table both order details render: the temps
  * view over the record's own lines, the maintenance contents panel over

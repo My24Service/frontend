@@ -46,7 +46,6 @@
 import {TeamleaderService} from "@/models/company/Teamleader";
 
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/services/i18n";
 
 export default {
   name: "DocumentTemplateChooser",

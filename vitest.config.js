@@ -70,6 +70,12 @@ export default defineConfig({
     // specs fail with "ReferenceError: ref is not defined".
     AutoImport({
       imports: autoImportEntries,
+      dirs: [
+        {
+          glob: 'src/composables/**',
+          types: true,
+        }
+      ],
       // The app build owns auto-imports.d.ts; tests must not rewrite it.
       dts: false,
     }),

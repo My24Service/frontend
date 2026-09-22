@@ -176,8 +176,6 @@ import {
   type DocumentRow,
 } from './use-document-collection'
 import { fileListOf, readAsDataUrl } from '@/features/shared'
-import { $trans, errorToast, infoToast } from '@/services/i18n'
-
 /**
  * The one document editor: the customer, equipment, location and quotation
  * panels are all this component with a different resource.

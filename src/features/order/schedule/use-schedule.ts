@@ -10,7 +10,6 @@ import {
   orderOrderRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { OrderDetail, OrderEvent } from '@/api/types.gen'
-import { useMainStore } from '@/stores/main'
 import { toApiDate } from '@/features/forms'
 
 /**

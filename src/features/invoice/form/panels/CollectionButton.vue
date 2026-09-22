@@ -12,8 +12,6 @@
 </template>
 
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
-
 /**
  * The one button a cost collection shows: saving the drafts, or removing
  * the stored rows. Two containers a line apart did this with the same

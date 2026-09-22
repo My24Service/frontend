@@ -61,10 +61,7 @@ import {
 import type { Invoice } from '@/api/types.gen'
 import { invoiceInvoice } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
-import { useAuthStore } from '@/features/auth'
 import { downloadBlob } from '@/features/shared'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
-
 type PdfBlobError = { template_error?: string; error?: string; details?: string }
 
 // The editor's and viewer's records come from two retrieve endpoints; the

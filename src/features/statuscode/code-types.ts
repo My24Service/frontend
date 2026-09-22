@@ -1,6 +1,4 @@
 import type { CodeTypeEnum } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-
 /**
  * The code types this Slice edits, in the order the pills show them.
  *

@@ -25,8 +25,6 @@
 </template>
 
 <script lang="ts" setup>
-import { $trans } from '@/services/i18n'
-
 /**
  * The editable metadata every document editor shares: name and description.
  *

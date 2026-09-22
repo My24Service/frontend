@@ -26,7 +26,6 @@
 <script setup>
 import { VERSION } from '@/version'
 
-import {$trans} from "@/services/i18n";
 import axios from "axios";
 
 const version = VERSION

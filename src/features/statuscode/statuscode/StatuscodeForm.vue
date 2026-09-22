@@ -109,8 +109,6 @@ import {
   ValidatedForm,
   ValidatedFormField,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 import { routeNamesFor, type CodeType } from '../code-types'
 import { invalidateStatuscodeLists } from '../invalidation'
 import StatuscodeLabel from '../StatuscodeLabel.vue'

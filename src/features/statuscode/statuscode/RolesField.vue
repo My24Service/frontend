@@ -28,8 +28,6 @@
 
 <script lang="ts" setup>
 import { statuscodeStatuscodeRolesRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import { $trans } from '@/services/i18n'
-
 import type { CodeType } from '../code-types'
 import { roleLabel } from './roles'
 

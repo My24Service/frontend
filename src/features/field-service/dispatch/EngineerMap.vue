@@ -29,8 +29,6 @@
 <script setup lang="ts">
 import { companyEngineerGetLocationsListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { EngineerLocation } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-
 /**
  * Where the engineers are, on a HERE map.
  *

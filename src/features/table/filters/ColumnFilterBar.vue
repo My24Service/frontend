@@ -53,7 +53,6 @@
 
 <script setup lang="ts" generic="TData extends RowData">
 import type { ColumnFiltersState, RowData, VueTable } from '@tanstack/vue-table'
-import { $trans } from '@/services/i18n'
 import type { AppFeatures, FilterOption } from '../table'
 import { filterableColumns, type FilterableColumn } from './column-filter'
 import { splitArrayItems } from './filter-grammar'

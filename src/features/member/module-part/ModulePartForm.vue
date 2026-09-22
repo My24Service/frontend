@@ -92,7 +92,6 @@ import {
   type ModulePartFormValues,
 } from './schemas'
 import { invalidateModulePartListQueries } from '../invalidation'
-import { $trans } from '@/services/i18n'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 const props = withDefaults(defineProps<{

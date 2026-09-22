@@ -214,7 +214,6 @@
 <script lang="ts" setup>
 import VueMultiselect from 'vue-multiselect'
 
-import { $trans } from '@/services/i18n'
 import { formatMoney } from '@/services/money'
 import type { EquipmentStaging } from './useEquipmentStaging'
 

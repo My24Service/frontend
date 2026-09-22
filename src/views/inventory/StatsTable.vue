@@ -84,7 +84,7 @@
 import materialModel from '../../models/inventory/Material.js'
 import ActionButton from '../../components/ActionButton.vue'
 import SearchModal from '../../components/SearchModal.vue'
-import my24 from "../../services/my24";
+
 import componentMixin from "@/mixins/common";
 
 let d = new Date();

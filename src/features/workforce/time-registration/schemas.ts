@@ -2,8 +2,6 @@ import * as v from 'valibot'
 
 import { vPatchedTimeCorrectionRequest } from '@/api/valibot.gen'
 import type { TimeRegistrationWorkhourRow } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-
 /**
  * The work-hours correction: what the planner types, and what rides.
  *

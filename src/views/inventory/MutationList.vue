@@ -66,7 +66,6 @@
 <script>
 import mutationModel from '@/models/inventory/Mutation'
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/services/i18n";
 
 export default {
   setup() {

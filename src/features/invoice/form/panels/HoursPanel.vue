@@ -79,8 +79,6 @@
 
 <script setup lang="ts">
 import type { ActivityUserTotal } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
 import CostCollectionShell from './CostCollectionShell.vue'

@@ -21,8 +21,6 @@
 import { ImageUploadField } from '@/features/forms'
 import { LOGO_UPLOAD_EXTENSIONS, MEMBER_LOGO_REQUIRED_MESSAGE } from './schemas'
 import { NO_IMAGE_URL } from '@/constants'
-import { $trans } from '@/services/i18n'
-
 type LogoValue = string | null | undefined
 
 const companyLogo = defineModel<LogoValue>('companyLogo', { required: true })

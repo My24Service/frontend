@@ -99,8 +99,6 @@ import {
   equipmentLocationRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import { DocumentsComponent } from '@/features/equipment/documents'
 import {
   DetailLayoutSidebar,

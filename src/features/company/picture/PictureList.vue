@@ -44,8 +44,6 @@ import { companyPicture } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
 import { NO_IMAGE_URL } from '@/constants'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
-import { $trans } from '@/services/i18n'
-
 type PictureRow = ListRow<PaginatedPictureList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')

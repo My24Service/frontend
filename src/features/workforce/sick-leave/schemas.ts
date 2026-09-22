@@ -9,8 +9,6 @@ import {
   type FieldLabels,
   writeContract,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * A sick leave as the form holds it: the person it is about and the day it
  * starts, taken from the create component.

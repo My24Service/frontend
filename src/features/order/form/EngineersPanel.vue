@@ -52,7 +52,6 @@
 import VueMultiselect from 'vue-multiselect'
 
 import type { AssignedUserInfo } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
 import { useEngineerAssignment } from './use-engineer-assignment'
 
 /**

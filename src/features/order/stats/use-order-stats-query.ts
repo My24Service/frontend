@@ -3,8 +3,6 @@ import {
   useQueryErrorToast,
   useQueryOf,
 } from '@/features/forms'
-import { useMainStore } from '@/stores/main'
-
 /**
  * The read both stats periods share: the order-type filter, the query built
  * from it, its error toast, and the tenant's statuscodes the charts colour

@@ -28,7 +28,6 @@
 
 <script lang="ts" setup>
 import { useLoading } from 'vue-loading-overlay'
-import { useAuthStore } from '@/features/auth'
 import {
   ValidatedForm,
   ValidatedFormField,
@@ -36,9 +35,6 @@ import {
   requiredMessage,
   type FieldErrors,
 } from '@/features/forms'
-import { useMainStore } from '@/stores/main'
-import { $trans, errorToast, infoToast } from '@/services/i18n'
-
 interface LoginFormValues {
   username: string
   password: string

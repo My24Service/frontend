@@ -122,7 +122,6 @@ import {required} from "@vuelidate/validators";
 import {QuotationModel} from '@/models/quotations/Quotation.js';
 
 import quotationMixin from "./mixin";
-import {useMainStore} from "@/stores/main";
 
 export default {
   name: 'QuotationDataForm',

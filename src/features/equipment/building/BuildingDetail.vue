@@ -82,8 +82,6 @@
 <script setup lang="ts">
 import { equipmentBuildingRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import {
   useDetailChrome,
   useDetailOrders,

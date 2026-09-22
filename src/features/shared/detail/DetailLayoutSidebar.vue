@@ -43,7 +43,6 @@
 </template>
 
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
 import type { DetailField } from './detail-fields'
 
 // The sidebar-and-tabs frame of a detail page (equipment, location): a

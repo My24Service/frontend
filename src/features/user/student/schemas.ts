@@ -12,8 +12,6 @@ import {
   type UserFieldErrors,
   type UserFormValues,
 } from '../user-form'
-import { $trans } from '@/services/i18n'
-
 export type StudentUserFormValues = UserFormValues<typeof vStudentUserWriteRequestWritable>
 export type StudentUserFieldErrors = UserFieldErrors<'student_user.dob' | 'student_user.mobile' | 'student_user'>
 

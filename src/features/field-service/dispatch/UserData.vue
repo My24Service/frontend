@@ -34,9 +34,6 @@
 <script setup lang="ts">
 import moment from 'moment/min/moment-with-locales'
 
-import my24 from '@/services/my24'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import OrderInfo from './OrderInfo.vue'
 import { truncateTime } from '@/features/forms'
 import type { AssignedUser } from '@/features/field-service/assignment'

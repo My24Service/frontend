@@ -11,8 +11,6 @@ import {
   type UserFieldErrors,
   type UserFormValues,
 } from '../user-form'
-import { $trans } from '@/services/i18n'
-
 type EngineerWireValues = UserFormValues<typeof vEngineerRequestWritable>
 
 /** The wire shape, except that the location picker is empty until one is chosen. */

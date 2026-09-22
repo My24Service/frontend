@@ -106,7 +106,6 @@
 </template>
 
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
 import type { DetailField } from './detail-fields'
 
 // The card-grid frame of a detail page (equipment, location): cards on a

@@ -176,7 +176,6 @@
 <script setup lang="ts">
 import { nl } from 'date-fns/locale'
 
-import { $trans } from '@/services/i18n'
 import type { TripFieldErrors, TripFormValues } from './schemas'
 
 /**

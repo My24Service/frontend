@@ -11,6 +11,16 @@
 // - components.d.ts: GlobalComponents / GlobalDirectives = names the
 //   Components plugin resolves in templates.
 //
+// When P is a local module rather than a package - the `dirs` option, which
+// points the plugin at src/composables - the name is not tied to that one
+// specifier. The barrel re-exports it from somewhere else, and the files that
+// use it import it from that origin (or from a further barrel: `useAuthStore`
+// arrives via '@/features/auth' as often as '@/features/auth/store'). So every
+// module that re-exports the name is resolved to a file path, and an import
+// from any of them is dropped - they are all the same binding. The providers
+// themselves are skipped, which is also what keeps the barrel from importing
+// from itself.
+//
 // Rules per file under src/ (skips generated src/api and *.d.ts):
 // - value specifier X from P: dropped iff the contract maps X -> P.
 // - type specifier (`type X`, or X inside `import type {...}`): dropped iff
@@ -24,18 +34,23 @@
 //   as values from their packages.
 // - @/components/*.vue and relative imports: left alone (tests stub them
 //   by component name, which only works with explicit local imports).
+// - the app entry modules (the `<script type="module">` of each HTML entry)
+//   are skipped entirely; see ENTRY_MODULES below.
 //
 // After running, verify with `npm run typecheck` and `npm test`.
 import fs from 'node:fs'
 import path from 'node:path'
 
 const REPO = process.cwd()
+// `--dry` reports what would change without writing; the verify pass then
+// necessarily fails, which is the point of looking first.
+const DRY = process.argv.includes('--dry')
 
 // ---- contract ----
 function parseContract() {
   const auto = fs.readFileSync(path.join(REPO, 'auto-imports.d.ts'), 'utf8')
   const values = new Map() // name -> package
-  for (const m of auto.matchAll(/const (\w+): typeof import\('([^']+)'\)/g)) {
+  for (const m of auto.matchAll(/const ([\w$]+): typeof import\('([^']+)'\)/g)) {
     values.set(m[1], m[2])
   }
   const types = new Map() // name -> package
@@ -57,6 +72,124 @@ function parseContract() {
 }
 const { values, types, components, directives } = parseContract()
 console.log(`contract: ${values.size} values, ${types.size} types, ${components.size} components, ${directives.size} directives`)
+
+// ---- local module resolution ----
+const SRC = path.join(REPO, 'src')
+
+/** A module specifier as an absolute file path, or null for a bare package. */
+function resolveSpecifier(spec, fromFile) {
+  let base
+  if (spec.startsWith('@/')) base = path.join(SRC, spec.slice(2))
+  else if (spec.startsWith('./') || spec.startsWith('../')) base = path.resolve(path.dirname(fromFile), spec)
+  else return null
+  for (const c of [base, `${base}.ts`, `${base}.js`, `${base}.vue`,
+                   path.join(base, 'index.ts'), path.join(base, 'index.js')]) {
+    try { if (fs.statSync(c).isFile()) return c } catch { /* next candidate */ }
+  }
+  return null
+}
+
+/** `export { a, default as b } from 'X'` in one file: [[exportedName, localKind], ...] */
+function reExportsOf(src) {
+  const out = []
+  for (const m of src.matchAll(/^export\s*\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/gm)) {
+    for (const raw of m[1].split(',').map(x => x.trim()).filter(Boolean)) {
+      const aliased = raw.match(/^([\w$]+)\s+as\s+([\w$]+)$/)
+      const source = aliased ? aliased[1] : raw
+      const exported = aliased ? aliased[2] : raw
+      out.push([exported, source === 'default' ? 'default' : 'named', m[2]])
+    }
+  }
+  return out
+}
+
+// name -> Map<absolute file, 'named'|'default'>: every module the name can
+// legitimately be imported from, because they all hand back the same binding.
+const providers = new Map()
+const addProvider = (name, file, kind) => {
+  if (!providers.has(name)) providers.set(name, new Map())
+  providers.get(name).set(file, kind)
+}
+
+// Seed: the names the plugin serves out of a local module.
+for (const [name, spec] of values) {
+  if (!spec.startsWith('./') && !spec.startsWith('../')) continue
+  const abs = resolveSpecifier(spec, path.join(REPO, '_.ts'))
+  if (abs) addProvider(name, abs, 'named')
+}
+
+// Fixpoint: a module that re-exports a provided name is itself a provider.
+const allFiles = []
+for (let pass = 0; ; pass++) {
+  let grew = false
+  if (!allFiles.length) for (const f of walk(SRC)) allFiles.push(f)
+  for (const file of allFiles) {
+    const src = fs.readFileSync(file, 'utf8')
+    if (!src.includes('export')) continue
+    for (const [exported, kind, spec] of reExportsOf(src)) {
+      const known = providers.get(exported)
+      if (!known) continue
+      const target = resolveSpecifier(spec, file)
+      if (!target) continue
+      // down: this file serves the name, so the module behind it does too
+      if (known.has(file) && !known.has(target)) {
+        addProvider(exported, target, kind)
+        grew = true
+      }
+      // up: the module behind it serves the name, so this file re-serves it -
+      // always as a named export, whatever it was called on the way in
+      if (known.get(target) === kind && !known.has(file)) {
+        addProvider(exported, file, 'named')
+        grew = true
+      }
+    }
+  }
+  if (!grew || pass > 8) break
+}
+
+// A provider must keep its own imports: stripping them would make it
+// auto-import the name it is itself the source of.
+const PROVIDER_FILES = new Set([...providers.values()].flatMap(m => [...m.keys()]))
+if (providers.size) {
+  console.log(`local names: ${[...providers.keys()].join(', ')}`)
+  console.log(`provider modules (left untouched):`)
+  for (const f of [...PROVIDER_FILES].sort()) console.log(`  ${path.relative(REPO, f)}`)
+}
+
+/** Is `name`, imported from `spec` by `file`, already auto-provided? */
+function providedLocally(name, spec, file, wantDefault) {
+  const known = providers.get(name)
+  if (!known) return false
+  const target = resolveSpecifier(spec, file)
+  if (!target) return false
+  return known.get(target) === (wantDefault ? 'default' : 'named')
+}
+
+/**
+ * The modules each HTML entry loads - `src/main.ts`, via index.html's
+ * `/src/main.js`.
+ *
+ * Their imports stay, auto-provided or not. Vite pre-bundles dependencies by
+ * crawling the entry with esbuild, and that scan does not run the auto-import
+ * transform: a package the entry only reaches through an injected import is
+ * never discovered, and the optimized graph comes out inconsistent with what
+ * the served modules expect. It surfaces as 504 "Outdated Optimize Dep" and a
+ * `TypeError` from inside a `node_modules/.vite/deps` chunk, which reads as a
+ * broken install rather than as a missing import. `createApp` in main.ts is
+ * the one that bit us; the rule is the entry, not that one name.
+ */
+const ENTRY_MODULES = new Set()
+for (const html of fs.readdirSync(REPO).filter((f) => f.endsWith('.html'))) {
+  const markup = fs.readFileSync(path.join(REPO, html), 'utf8')
+  for (const m of markup.matchAll(/<script[^>]*type=["']module["'][^>]*src=["']([^"']+)["']/g)) {
+    // index.html names `/src/main.js`; the file on disk is main.ts.
+    const spec = m[1].replace(/^\//, './')
+    const abs = resolveSpecifier(spec, path.join(REPO, '_.ts'))
+      || resolveSpecifier(spec.replace(/\.js$/, ''), path.join(REPO, '_.ts'))
+    if (abs) ENTRY_MODULES.add(abs)
+  }
+}
+console.log(`entry modules (left untouched): ${[...ENTRY_MODULES].map((f) => path.relative(REPO, f)).join(', ') || 'none found'}`)
 
 // vue-router registers these globally at runtime AND in its own
 // GlobalComponents augmentation; the Components plugin no longer emits them.
@@ -100,6 +233,7 @@ const aliases = []
 const report = []
 
 for (const file of walk(path.join(REPO, 'src'))) {
+  if (PROVIDER_FILES.has(file) || ENTRY_MODULES.has(file)) continue
   const src = fs.readFileSync(file, 'utf8')
   const isVue = file.endsWith('.vue')
   const scriptBody = scriptBodyWithoutImports(src, isVue)
@@ -128,6 +262,7 @@ for (const file of walk(path.join(REPO, 'src'))) {
       }
       // value specifier
       if (values.get(name) === source) continue // auto-imported -> drop
+      if (providedLocally(name, source, file, false)) continue // same binding via a barrel -> drop
       if (components.has(name) || directives.has(name)) {
         if (templateOnly(name)) continue // pure template tag usage -> drop
         keep.push(raw); continue
@@ -143,27 +278,33 @@ for (const file of walk(path.join(REPO, 'src'))) {
       notes.push(`~ ${stmt.trim().slice(0, 90)}`)
     }
   }
-  // default imports: only ~icons/* component defaults are covered
-  for (const m of [...src.matchAll(/^import\s+(\w+)\s+from\s*['"](~icons[^'"]*)['"]\s*;?/gm)]) {
-    const [stmt, local] = m
-    if ((components.has(local) || /^IBi[A-Z]/.test(local)) && templateOnly(local)) {
+  // default imports: ~icons/* component defaults, and a local default the
+  // barrel re-exports under a name (`export { default as my24 }`).
+  for (const m of [...src.matchAll(/^import\s+(\w+)\s+from\s*['"]([^'"]+)['"]\s*;?/gm)]) {
+    const [stmt, local, source] = m
+    const isIcon = source.startsWith('~icons') && (components.has(local) || /^IBi[A-Z]/.test(local))
+    if (isIcon ? templateOnly(local) : providedLocally(local, source, file, true)) {
       out = out.replace(stmt, '')
       notes.push(`- ${stmt.trim().slice(0, 110)}`)
     }
   }
   if (notes.length) {
     out = out.replace(/\n{3,}/g, '\n\n')
-    fs.writeFileSync(file, out)
+    // Dropping the first import in a block leaves the tag hanging over a blank
+    // line; the run above cannot see it because the tag is only one newline away.
+    out = out.replace(/(<script[^>]*>)\n\s*\n/g, '$1\n')
+    if (!DRY) fs.writeFileSync(file, out)
     changed++
     report.push(`${path.relative(REPO, file)}:\n  ${notes.join('\n  ')}`)
   }
 }
-console.log(`changed ${changed} files`)
+console.log(`${DRY ? 'would change' : 'changed'} ${changed} files`)
 console.log(report.join('\n'))
 
 // ---- verify: re-scan with the same contract; anything still covered is a bug ----
 const remaining = []
 for (const file of walk(path.join(REPO, 'src'))) {
+  if (PROVIDER_FILES.has(file) || ENTRY_MODULES.has(file)) continue
   const src = fs.readFileSync(file, 'utf8')
   const isVue = file.endsWith('.vue')
   const rel = path.relative(REPO, file)
@@ -178,17 +319,21 @@ for (const file of walk(path.join(REPO, 'src'))) {
       const name = typeM ? typeM[1] : raw
       if (typeM || typeMod) {
         if (types.get(name) === source) remaining.push(`${rel}: type ${name} from '${source}'`)
-      } else if (values.get(name) === source) {
+      } else if (values.get(name) === source || providedLocally(name, source, file, false)) {
         remaining.push(`${rel}: ${name} from '${source}'`)
       } else if ((components.has(name) || directives.has(name)) && templateOnly(name)) {
         remaining.push(`${rel}: template-only component ${name} from '${source}'`)
       }
     }
   }
-  for (const m of [...src.matchAll(/^import\s+(\w+)\s+from\s*['"](~icons[^'"]*)['"]/gm)]) {
-    const [, local] = m
-    if ((components.has(local) || /^IBi[A-Z]/.test(local)) && templateOnly(local)) {
-      remaining.push(`${rel}: template-only icon ${local}`)
+  for (const m of [...src.matchAll(/^import\s+(\w+)\s+from\s*['"]([^'"]+)['"]/gm)]) {
+    const [, local, source] = m
+    if (source.startsWith('~icons')) {
+      if ((components.has(local) || /^IBi[A-Z]/.test(local)) && templateOnly(local)) {
+        remaining.push(`${rel}: template-only icon ${local}`)
+      }
+    } else if (providedLocally(local, source, file, true)) {
+      remaining.push(`${rel}: default ${local} from '${source}'`)
     }
   }
 }

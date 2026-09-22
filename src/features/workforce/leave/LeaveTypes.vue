@@ -77,8 +77,6 @@
 </template>
 
 <script setup lang="ts">
-import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
-import IBiFileEarmarkPlus from '~icons/bi/file-earmark-plus'
 import IBiPencil from '~icons/bi/pencil'
 import {
   companyLeaveTypeCreateMutation,
@@ -91,7 +89,6 @@ import { companyLeaveType } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
 import SubNav from '../SubNav.vue'
 import {
   LEAVE_TYPE_LABELS,

@@ -84,9 +84,7 @@ import { invalidateReads } from '@/features/forms'
 import type { Budget, PaginatedBudgetList } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { formatMoney, formatMoneyPlain, toDinero } from '@/services/money'
-import { useMainStore } from '@/stores/main'
 import {
   budgetModalFromRecord,
   budgetWrite,

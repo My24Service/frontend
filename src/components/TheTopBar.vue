@@ -17,7 +17,6 @@
 
 <script>
 import componentMixin from "@/mixins/common";
-import {useMainStore} from "@/stores/main";
 
 // Section titles for the top bar. Keyed by the leading segment of the route
 // name, so `orders-list`, `orders-view` etc. all resolve to one title.

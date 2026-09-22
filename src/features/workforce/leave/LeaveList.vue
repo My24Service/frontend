@@ -36,7 +36,6 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
 import {
   companyUserLeaveHoursAdminDestroyMutation,
   companyUserLeaveHoursAdminListOptions,
@@ -45,7 +44,6 @@ import type { PaginatedUserLeaveHoursList } from '@/api/types.gen'
 import { companyUserLeaveHoursAdmin } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
-import { $trans } from '@/services/i18n'
 import SubNav from '../SubNav.vue'
 
 /**

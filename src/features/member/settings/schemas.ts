@@ -10,8 +10,6 @@ import {
   type FieldErrors,
   type FieldMessages,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * The typed tenant settings, as the settings screen edits them: every key
  * of the generated `MemberSettings`, grouped. The two lists ride the form

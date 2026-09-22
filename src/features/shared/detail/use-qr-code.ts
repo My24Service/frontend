@@ -4,10 +4,6 @@ import {
   equipmentLocationCreateQrCreateMutation,
   equipmentLocationRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import { $trans, errorToast } from '@/services/i18n'
-import my24 from '@/services/my24'
-import { useMainStore } from '@/stores/main'
-
 /**
  * The sliver of a detail record the QR block reads: the display name, the
  * file the download names itself after, and the two URL shapes the API sends.

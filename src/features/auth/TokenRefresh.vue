@@ -4,7 +4,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useAuthStore } from '@/features/auth'
 import { useAuthToken } from './token'
 
 // 'SLIDING_TOKEN_LIFETIME': timedelta(days=2),

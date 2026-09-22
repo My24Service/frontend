@@ -1,5 +1,3 @@
-import { $trans } from '@/services/i18n'
-
 import { requiredMessage, type FieldErrors } from './validation'
 
 /** The two lines the rule can show. Thunks: `$trans` runs when a form asks. */

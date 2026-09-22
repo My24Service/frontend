@@ -2,8 +2,6 @@ import type { RowData } from '@tanstack/vue-table'
 
 import type { MinimalMember } from '@/api/types.gen'
 import type { createAppColumnHelper } from '@/features/table'
-import { $trans } from '@/services/i18n'
-
 type AnyColumnHelper<TData extends RowData> = ReturnType<typeof createAppColumnHelper<TData>>
 
 /** The member views a partner row can nest. */

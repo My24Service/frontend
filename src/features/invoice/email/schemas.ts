@@ -7,8 +7,6 @@ import {
   type FieldMessages,
   type FieldLabels,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 export const tagValidator = (tag: string) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(tag)
 
 export const emailFormSchema = v.object({

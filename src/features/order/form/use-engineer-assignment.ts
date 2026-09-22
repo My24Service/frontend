@@ -1,6 +1,5 @@
 import { mobileAssignUserCreateMutation, mobileUnassignUserCreateMutation } from '@/api/@tanstack/vue-query.gen'
 import type { AssignedUserInfo, EngineerForSelect } from '@/api/types.gen'
-import { $trans, infoToast } from '@/services/i18n'
 import { useEngineerOptions } from './use-order-pickers'
 
 /** The backend refused to unassign: the engineer has booked hours or materials. */

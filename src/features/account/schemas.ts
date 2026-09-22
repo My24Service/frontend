@@ -12,8 +12,6 @@ import {
   type FieldMessages,
   type FieldLabels,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 import type { AccountLinkParams } from './link-params'
 
 export const sendResetLinkSchema = v.required(vAccountsSendResetPasswordLinkCreateBody, ['email'])

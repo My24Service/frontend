@@ -1,6 +1,4 @@
 import { AUTH_LEVELS } from '@/constants'
-import { useAuthStore } from './store'
-
 type AuthLevel = (typeof AUTH_LEVELS)[keyof typeof AUTH_LEVELS]
 
 // The levels that sit above the operational roles and satisfy any array-form

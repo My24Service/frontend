@@ -25,7 +25,6 @@
 <script>
 import {TeamleaderService} from "@/models/company/Teamleader";
 
-import {errorToast} from "@/services/i18n";
 import componentMixin from "@/mixins/common";
 
 export default {

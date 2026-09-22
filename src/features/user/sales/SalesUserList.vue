@@ -43,8 +43,6 @@ import {
   companySalesuserListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanySalesuserListData, PaginatedSalesUserList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-import { useAuthStore } from '@/features/auth'
 import {
   ServerTable,
   baseListParams,

@@ -8,8 +8,6 @@ import {
   fieldErrors,
   type FieldErrors,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 import type { CodeType } from '../code-types'
 
 type WireValues = v.InferInput<typeof vActionRequest>

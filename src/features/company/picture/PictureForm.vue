@@ -74,7 +74,6 @@ import {
   ImageUploadField,
   useResourceForm,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import {
   emptyPicture,
   pictureFromRecord,

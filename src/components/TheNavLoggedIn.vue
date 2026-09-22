@@ -108,11 +108,8 @@ import memberSocket from '../services/websocket/MemberSocket'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket'
 import {NEW_DATA_EVENTS} from "@/constants";
 
-import { TokenRefresh, useAuthStore } from '@/features/auth'
+import { TokenRefresh } from '@/features/auth'
 import componentMixin from "@/mixins/common";
-import {errorToast, infoToast} from "@/services/i18n";
-
-import {useMainStore} from "@/stores/main";
 
 import PasswordMeter from "vue-simple-password-meter";
 

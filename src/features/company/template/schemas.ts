@@ -7,8 +7,6 @@ import {
   type FieldLabels,
   writeContract,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * The template form's own state. The file rides a staged data URL while one
  * is picked and stays null otherwise - the record's own file never enters

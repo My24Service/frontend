@@ -99,10 +99,7 @@ import {
 import type { Budget, BudgetCostsResponse, BudgetExpectedCostsResponse } from '@/api/types.gen'
 import { PieChart } from '@/features/shared'
 import { useQueryErrorToast } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import { formatMoneyEuropean as formatDinero, toDinero } from '@/services/money'
-import { useMainStore } from '@/stores/main'
-
 /**
  * The budget detail page: the budget's size against its actual and expected
  * costs, as progress bars and breakdown pies.

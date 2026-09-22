@@ -295,8 +295,6 @@ import {
   inventorySupplierReservationWithMaterialsPartialUpdate,
 } from '@/api/sdk.gen'
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-
 const greaterThanZero = (value) => parseInt(value) > 0
 
 const props = defineProps({

@@ -15,7 +15,6 @@
 </template>
 
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
 import type { ColumnFilterSpec } from '../table'
 import { focusFirstControl } from './focus-first-control'
 

@@ -12,8 +12,6 @@
 </template>
 
 <script lang="ts">
-import { useMainStore } from '@/stores/main'
-import { $trans } from '@/services/i18n'
 import { hasAccessToModule } from '@/utils'
 
 /**

@@ -6,8 +6,6 @@ import {
   type FieldErrors,
   type FieldLabels,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * The new-request form's own state: the picked member's id, null until
  * chosen. The request's `from_member` is the sending tenant, which the

@@ -262,7 +262,6 @@ import {
   useResourceForm,
 } from '@/features/forms'
 import { chosenFile, fileNameOf, readAsDataUrl } from '@/features/shared'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
 import {
   emptyTemplate,
   templateFromRecord,

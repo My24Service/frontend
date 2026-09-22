@@ -79,7 +79,6 @@ import inventoryModel from '../../models/inventory/Inventory.js'
 import {NO_IMAGE_URL} from "@/constants";
 
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/services/i18n";
 
 export default {
   setup() {

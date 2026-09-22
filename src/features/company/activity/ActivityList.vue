@@ -22,8 +22,6 @@
 import { companyActivityListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedActivityList } from '@/api/types.gen'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
-import { $trans } from '@/services/i18n'
-
 /**
  * The activity log: a read-only, server-paged list. No form, no row actions -
  * the legacy screen's icons column was empty - so no delete modal and no

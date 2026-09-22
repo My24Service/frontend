@@ -98,7 +98,6 @@
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
 
 import componentMixin from "@/mixins/common";
-import {errorToast} from "@/services/i18n";
 
 export default {
   setup() {

@@ -257,9 +257,6 @@ import {
   type MemberFieldErrors,
 } from './schemas'
 import { useCompanyCodeProbe, type UseCompanyCodeProbeReturn } from './use-company-code-probe'
-import { useAuthStore } from '@/features/auth'
-import { useMainStore } from '@/stores/main'
-import { $trans } from '@/services/i18n'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 const props = withDefaults(defineProps<{

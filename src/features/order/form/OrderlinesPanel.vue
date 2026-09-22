@@ -217,7 +217,6 @@
 import VueMultiselect from 'vue-multiselect'
 
 import type { OrderLine, OrderLineNested } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
 import QuickCreateModal from './QuickCreateModal.vue'
 import {
   emptyOrderline,

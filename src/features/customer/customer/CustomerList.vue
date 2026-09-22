@@ -53,8 +53,6 @@ import {
   customerCustomerListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CustomerCustomerListData, PaginatedCustomerList } from '@/api/types.gen'
-import my24 from '@/services/my24'
-import { $trans } from '@/services/i18n'
 import {
   ServerTable,
   baseListParams,

@@ -170,9 +170,6 @@ import { required } from '@vuelidate/validators'
 import { useLoading } from 'vue-loading-overlay'
 
 import { TeamleaderService } from '@/models/company/Teamleader'
-import { $trans, errorToast } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
-
 interface ChooserMaterial {
   id: number
   name?: string | null

@@ -150,8 +150,6 @@
 import { orderOrder } from '@/api/resources.gen'
 import type { OrderCreate, OrderDetail, OrderUpdate } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import {
   ContactPanel,
   DateTimeFields,

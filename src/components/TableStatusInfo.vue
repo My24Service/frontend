@@ -26,9 +26,6 @@
   </BOverlay>
 </template>
 <script setup lang="ts">
-import my24 from '@/services/my24.js'
-import { $trans, errorToast } from '@/services/i18n'
-
 const props = withDefaults(defineProps<{
   statusCodeService?: { insert?: (s: unknown) => Promise<unknown> }
   statusService: { insert: (s: Record<string, unknown>) => Promise<unknown> }

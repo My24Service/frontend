@@ -21,8 +21,6 @@
 
 <script setup lang="ts">
 import type { OrderDetail } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-
 /**
  * The read-only contact block both order details render: the temps view
  * and the maintenance summary panel wrote it out identically.

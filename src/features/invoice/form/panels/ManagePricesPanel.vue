@@ -37,7 +37,6 @@
 
 <script setup lang="ts">
 import type { Material, ProductList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
 import { formatMoneyPlain, type Money } from '@/services/money'
 import { useMaterialPriceUpdates } from '../use-material-prices'
 

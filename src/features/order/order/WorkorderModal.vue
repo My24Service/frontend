@@ -57,8 +57,6 @@
 
 <script lang="ts" setup>
 import { orderOrderRecreatePdfCreateMutation } from '@/api/@tanstack/vue-query.gen'
-import { $trans, errorToast, infoToast } from '@/services/i18n'
-
 /**
  * The workorder as the customer sees it, in an iframe on the public
  * `workorder-view` route, with the PDF download and — for planning — the

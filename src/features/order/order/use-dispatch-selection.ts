@@ -1,6 +1,4 @@
 import type { Order } from '@/api/types.gen'
-import { useMainStore } from '@/stores/main'
-
 export type SelectedOrder = Pick<Order, 'id' | 'order_id'>
 
 /**

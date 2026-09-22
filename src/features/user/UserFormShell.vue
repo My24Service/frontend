@@ -27,8 +27,6 @@
 </template>
 
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
-
 /**
  * The header chrome the seven user forms wrote out by hand: the loading
  * overlay, the People backlink with the edited username, the new/edit

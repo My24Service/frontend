@@ -77,9 +77,6 @@ import {
   ValidatedForm,
   ValidatedFormField,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
-
 import {
   FIELD_LABELS,
   FIELD_MESSAGES,

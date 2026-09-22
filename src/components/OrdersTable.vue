@@ -88,9 +88,6 @@
 
 <script setup lang="ts">
 import { StatusService } from '@/models/orders/Status.js'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
-
 interface AssignedUserInfo {
   full_name: string
   license_plate?: string | null

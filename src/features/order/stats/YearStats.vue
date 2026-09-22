@@ -31,8 +31,6 @@
 <script lang="ts" setup>
 import { orderOrderYearListRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import type { YearListResponse } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import ChartPairRow from './ChartPairRow.vue'
 import StatsPage from './StatsPage.vue'
 import { yearCharts } from './chart-data'

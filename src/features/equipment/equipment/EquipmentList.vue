@@ -90,12 +90,7 @@ import { equipmentEquipment } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
 import RowAction from '@/components/RowAction.vue'
 import { EQUIPMENT_TYPES } from '@/constants'
-import { useAuthStore } from '@/features/auth'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
-import { $trans, errorToast, infoToast } from '@/services/i18n'
-import my24 from '@/services/my24'
-import { useMainStore } from '@/stores/main'
-
 const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions and the add link. */
   from_settings?: boolean

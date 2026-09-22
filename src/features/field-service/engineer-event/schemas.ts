@@ -8,8 +8,6 @@ import {
   type FieldErrors,
   type FieldMessages,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * The event-type form's own state: the request component's three fields, with
  * the two the form holds differently spelled out. The generated entries widen

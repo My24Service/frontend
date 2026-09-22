@@ -73,9 +73,6 @@
 </template>
 
 <script lang="ts" setup>
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
-
 /**
  * The frame both stats pages share: the year/month switch, the period
  * stepper, the order-type select, and the charts in the default slot.

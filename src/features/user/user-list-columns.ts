@@ -1,7 +1,6 @@
 import { RouterLink } from 'vue-router'
 import type { RowData } from '@tanstack/vue-table'
 
-import { $trans } from '@/services/i18n'
 import type { createAppColumnHelper } from '@/features/table'
 
 export type UserListRow = {

@@ -149,7 +149,6 @@
 <script>
 import PriceInput from "@/components/PriceInput";
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {formatMoney} from "@/services/money";
 
 import {COST_TYPE, CostService} from "@/models/quotations/Cost";
@@ -162,7 +161,6 @@ import AddToQuotationLines from './AddToQuotationLines.vue'
 import SectionHeader from "./SectionHeader.vue";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
 import CostsTable from "./CostsTable.vue";
-import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {

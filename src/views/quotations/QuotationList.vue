@@ -134,8 +134,6 @@
 </template>
 
 <script>
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-
 import {QuotationService} from '@/models/quotations/Quotation.js'
 import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
 import { StatusService } from '@/models/quotations/Status.js'

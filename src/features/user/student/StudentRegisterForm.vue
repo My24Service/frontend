@@ -116,8 +116,6 @@ import {
   ValidatedForm,
   ValidatedFormField,
 } from '@/features/forms'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
-
 import { COUNTRY_OPTIONS } from './options'
 import {
   emptyStudentRegistration,

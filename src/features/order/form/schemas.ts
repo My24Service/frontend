@@ -21,8 +21,6 @@ import {
   toApiDate,
   completeTime,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * Who is filling the order form. The backend has one create serializer per
  * role (and, for planning, per tenant shape), and the generated request

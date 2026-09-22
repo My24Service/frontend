@@ -41,11 +41,7 @@ import {
 import type { PaginatedBuildingList } from '@/api/types.gen'
 import { equipmentBuilding } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
-import { useAuthStore } from '@/features/auth'
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
-
 type BuildingRow = ListRow<PaginatedBuildingList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')

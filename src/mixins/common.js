@@ -1,12 +1,4 @@
-import my24 from "@/services/my24";
-import {$trans} from "@/services/i18n";
-// Deep import on purpose: the "@/features/auth" door re-exports LoginForm.vue,
-// which pulls bootstrap-vue-next into the stores graph and deadlocks specs
-// that mock it through tests/unit/support/form-harness.js. See 2.4/2.7.
-import {useAuthStore} from "@/features/auth/store";
-import {useMainStore} from "@/stores/main";
-
-let componentMixin = {
+export default {
   computed: {
     // The product family from the server profile (`default` or `shltr`).
     // Family differences in a component are CSS or a branch on this.
@@ -95,6 +87,3 @@ let componentMixin = {
     },
   }
 }
-
-
-export default componentMixin

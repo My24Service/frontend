@@ -39,8 +39,6 @@
 <script lang="ts" setup>
 import { orderOrderMonthListRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import type { MonthListResponse } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import ChartPairRow from './ChartPairRow.vue'
 import StatsPage from './StatsPage.vue'
 import { monthCharts } from './chart-data'

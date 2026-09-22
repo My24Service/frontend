@@ -8,8 +8,6 @@ import {
   type FieldLabels,
 } from '@/features/forms'
 import { formDefaults } from '@/models/schema'
-import { $trans } from '@/services/i18n'
-
 export type ModulePartFormValues =
   Omit<v.InferInput<typeof vMemberModulePartCreateBody>, 'module'> & {module: number | null}
 

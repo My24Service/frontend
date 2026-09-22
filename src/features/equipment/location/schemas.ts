@@ -1,4 +1,3 @@
-import { $trans } from '@/services/i18n'
 import type {
   FieldErrors,
   FieldLabels,

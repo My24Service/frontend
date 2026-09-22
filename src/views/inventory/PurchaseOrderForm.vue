@@ -463,9 +463,6 @@ import {
   inventoryPurchaseorderWithMaterialsPartialUpdate,
 } from '@/api/sdk.gen'
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-import {useMainStore} from "@/stores/main";
-
 const greaterThanZero = (value) => parseInt(value) > 0
 
 const props = defineProps({

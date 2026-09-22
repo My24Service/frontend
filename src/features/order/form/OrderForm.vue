@@ -207,10 +207,7 @@
 <script lang="ts" setup>
 import { orderOrder } from '@/api/resources.gen'
 import type { OrderCreate, OrderDetail, OrderUpdate } from '@/api/types.gen'
-import { useAuthStore } from '@/features/auth'
 import { useResourceForm } from '@/features/forms'
-import { $trans, errorToast } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import ContactPanel from './ContactPanel.vue'
 import DateTimeFields from './DateTimeFields.vue'
 import EngineersPanel from './EngineersPanel.vue'

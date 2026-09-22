@@ -70,12 +70,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
-
 import type { NumDaysOperatorEnum } from '@/api/types.gen'
 import { vNumDaysOperatorEnum } from '@/api/valibot.gen'
-import { $trans } from '@/services/i18n'
-
 import type { CodeType } from '../code-types'
 import { ORDER_DATE_TRIGGER_FIELDS } from './schemas'
 

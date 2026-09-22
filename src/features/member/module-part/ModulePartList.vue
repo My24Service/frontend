@@ -42,7 +42,6 @@ import {
   memberModulePartListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { MemberModulePartListData, PaginatedModulePartList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
 import { invalidateModulePartListQueries } from '../invalidation'
 import {
   ServerTable,

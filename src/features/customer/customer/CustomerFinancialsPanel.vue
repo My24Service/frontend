@@ -47,7 +47,6 @@
       </BFormCheckbox>
     </BFormGroup>
 
-
     <DocumentsComponent
       v-if="values.id"
       :customer="values"
@@ -58,7 +57,6 @@
 
 <script lang="ts" setup>
 import { DocumentPanel as DocumentsComponent } from '@/features/customer/document'
-import { $trans } from '@/services/i18n'
 import type { CustomerFormValues } from './schemas'
 
 const values = defineModel<CustomerFormValues>('values', { required: true })

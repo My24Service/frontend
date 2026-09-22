@@ -2,9 +2,6 @@ import moment from 'moment/min/moment-with-locales'
 
 import {mobileAssignedorderListTimesheetTotalsRetrieveOptions} from '@/api/@tanstack/vue-query.gen'
 import type {ListTimesheetTotalsResponse} from '@/api/types.gen'
-import {$trans} from '@/services/i18n'
-import {useMainStore} from '@/stores/main'
-
 /**
  * The week's totals for the two Timesheet screens, and the materials booked
  * against that week.

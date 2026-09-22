@@ -27,8 +27,6 @@
 
 <script setup lang="ts">
 import type { Statuscode } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-
 /**
  * The coloured status select the invoice and order lists share: the dot in
  * the row's colour and a select of the statuscodes, under the same element

@@ -122,8 +122,6 @@
 <script>
 import supplierReservationModel from '@/models/inventory/SupplierReservation.js'
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-
 export default {
   setup() {
     const {create} = useToast()

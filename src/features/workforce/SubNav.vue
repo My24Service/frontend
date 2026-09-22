@@ -14,8 +14,6 @@
 </template>
 
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
-
 /**
  * The pills every screen in this Slice carries. The route names are the legacy
  * screen's, verbatim - a bookmark and every spec depend on them.

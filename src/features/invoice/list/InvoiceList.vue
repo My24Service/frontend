@@ -52,7 +52,6 @@ import {
   useServerTable,
   WHOLE_COLLECTION_PAGE_SIZE,
 } from '@/features/table'
-import { $trans } from '@/services/i18n'
 import InvoiceStatusCell from './InvoiceStatusCell.vue'
 
 const route = useRoute()

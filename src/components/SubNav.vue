@@ -15,9 +15,6 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/features/auth'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import { hasAccessToModule as checkModuleAccess } from '@/utils'
 import { SUBNAV_SECTIONS, type NavCtx, type SubNavItem } from '@/components/navSections'
 import { useRequestedCount } from '@/components/the_nav/useNav'

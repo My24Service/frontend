@@ -15,7 +15,6 @@
 <script lang="ts" setup>
 import { orderStatusCreateMutation } from '@/api/@tanstack/vue-query.gen'
 import type { Order, Statuscode } from '@/api/types.gen'
-import { $trans, errorToast } from '@/services/i18n'
 import {
   StatusCell,
   useStatusCell,

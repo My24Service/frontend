@@ -1752,5 +1752,47 @@
     "type": true,
     "name": "*",
     "as": "TF"
+  },
+  {
+    "name": "useMainStore",
+    "as": "useMainStore",
+    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "__source": "dir"
+  },
+  {
+    "name": "useAuthStore",
+    "as": "useAuthStore",
+    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "__source": "dir"
+  },
+  {
+    "name": "$trans",
+    "as": "$trans",
+    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "__source": "dir"
+  },
+  {
+    "name": "interpolate",
+    "as": "interpolate",
+    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "__source": "dir"
+  },
+  {
+    "name": "errorToast",
+    "as": "errorToast",
+    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "__source": "dir"
+  },
+  {
+    "name": "infoToast",
+    "as": "infoToast",
+    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "__source": "dir"
+  },
+  {
+    "name": "my24",
+    "as": "my24",
+    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
+    "__source": "dir"
   }
 ]

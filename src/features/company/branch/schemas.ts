@@ -6,8 +6,6 @@ import {
   writeContract,
 } from '@/features/forms'
 import { formDefaults } from '@/models/schema'
-import { $trans } from '@/services/i18n'
-
 /**
  * The form's own state. The generated request carries the image as an
  * optional base64 string; the form holds the staged upload as `string | null`

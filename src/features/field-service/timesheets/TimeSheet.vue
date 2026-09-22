@@ -25,7 +25,6 @@
 
 <script setup lang="ts">
 import {useQueryErrorToast} from '@/features/forms'
-import {$trans} from '@/services/i18n'
 import UserHoursData from './UserHoursData.vue'
 import {useTimesheetWeek, type TimesheetChildHandle} from './use-timesheet-week'
 

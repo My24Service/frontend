@@ -38,7 +38,6 @@
 
 <script setup lang="ts">
 import VueMultiselect from 'vue-multiselect'
-import { $trans } from '@/services/i18n'
 import type { OwnerOption } from './use-form-owner'
 
 /**

@@ -33,8 +33,6 @@ import { RouterLink } from 'vue-router'
 
 import { mobileAssignedorderFinishedListListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedAssignedOrderViewList } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import {
   ServerTable,
   baseListParams,

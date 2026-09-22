@@ -84,10 +84,6 @@
 import {QuotationModel, QuotationService} from "@/models/quotations/Quotation";
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-
-import my24 from "@/services/my24";
-
 class PdfBlobError {
   template_error
   error

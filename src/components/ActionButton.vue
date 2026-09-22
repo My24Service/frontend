@@ -19,8 +19,6 @@ import IBiArrowRepeat from '~icons/bi/arrow-repeat'
 import IBiCloudDownload from '~icons/bi/cloud-download'
 import IBiPlus from '~icons/bi/plus'
 import IBiSearch from '~icons/bi/search'
-import { $trans } from '@/services/i18n'
-
 /** The toolbar button this renders: add, download, refresh or search. */
 export type ActionButtonIcon = 'add' | 'download' | 'refresh' | 'search'
 

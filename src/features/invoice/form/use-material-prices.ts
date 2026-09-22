@@ -1,6 +1,4 @@
 import { inventoryMaterialPartialUpdateMutation } from '@/api/@tanstack/vue-query.gen'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
-
 /**
  * The material price write the Manage-prices panel performs: the record being
  * edited plus the patch body captured from the PriceInput events, reported

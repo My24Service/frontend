@@ -54,7 +54,6 @@
 
 <script lang="ts" setup>
 import { useQueryErrorToast } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import OrderContentsPanel from './OrderContentsPanel.vue'
 import OrderInvoicesPanel from './OrderInvoicesPanel.vue'
 import OrderSummaryPanel from './OrderSummaryPanel.vue'

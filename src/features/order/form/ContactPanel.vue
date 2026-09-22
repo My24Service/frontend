@@ -186,8 +186,6 @@
 <script lang="ts" setup>
 import VueMultiselect from 'vue-multiselect'
 
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import type { FormRole, OrderFieldErrors, OrderFormValues } from './schemas'
 import { addressLabel, useOwnerPicker } from './use-order-pickers'
 

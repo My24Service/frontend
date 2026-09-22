@@ -10,8 +10,6 @@ import {
   type FieldErrors,
   type FieldMessages,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 import type { CodeType } from '../code-types'
 import { labelTextColor } from './palette'
 

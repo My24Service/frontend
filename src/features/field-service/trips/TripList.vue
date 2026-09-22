@@ -33,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
 import {
   mobileTripDestroyMutation,
   mobileTripListOptions,
@@ -49,8 +48,6 @@ import {
   useServerTable,
   type ListRow,
 } from '@/features/table'
-import { $trans } from '@/services/i18n'
-
 type TripRow = ListRow<PaginatedTripList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')

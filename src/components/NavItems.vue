@@ -268,9 +268,6 @@
 
 <script setup lang="ts">
 import { EQUIPMENT_TYPES } from '@/constants'
-import { useAuthStore } from '@/features/auth'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import { hasAccessToModule } from '@/utils'
 import { useNav, useRequestedCount } from '@/components/the_nav/useNav'
 import {

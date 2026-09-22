@@ -1,5 +1,3 @@
-import { useMainStore } from '@/stores/main'
-
 /**
  * Whether the session's tenant is a temps agency (`profile.flavour: 'temps'`)
  * rather than a maintenance company. The one flag the temps screens hang

@@ -20,12 +20,6 @@
 </template>
 
 <script setup lang="ts">
-import {useAuthStore} from '@/features/auth'
-import TheNavLoggedIn from './TheNavLoggedIn.vue'
-import NavBrand from './NavBrand.vue'
-import TheTopBar from './TheTopBar.vue'
-import {useMainStore} from '@/stores/main'
-
 const layoutProps = withDefaults(defineProps<{
   bare?: boolean
   settings?: boolean

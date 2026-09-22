@@ -223,9 +223,6 @@ import {
   invalidateReads,
   useResourceForm,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-import { useAuthStore } from '@/features/auth'
-import { useMainStore } from '@/stores/main'
 import {
   branchFromRecord,
   branchWrite,

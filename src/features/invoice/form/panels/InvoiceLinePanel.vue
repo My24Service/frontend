@@ -126,8 +126,6 @@ import {
 import type { InvoiceLine, InvoiceLineRequest } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoney, formatMoneyPlain, toDinero } from '@/services/money'
-import { $trans, infoToast } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import { calculateInvoiceLine, hydrateInvoicePrices, type InvoiceLineDraft } from '../calculations'
 import VAT from './VAT.vue'
 

@@ -1,9 +1,6 @@
 import moment from 'moment/min/moment-with-locales'
 import type {Moment} from 'moment'
 
-import {$trans} from '@/services/i18n'
-import {useMainStore} from '@/stores/main'
-
 /**
  * The week the two UserHours screens show, and the arrows that move it.
  *

@@ -1,6 +1,4 @@
 import { orderOrderAllForCustomerNotAcceptedCountRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import { useMainStore } from '@/stores/main'
-
 /**
  * How many of the customer's orders await acceptance — the badge on the
  * orders sub-navigation reads it from the store, so the count is written

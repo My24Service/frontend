@@ -89,7 +89,6 @@
 import { mobileTripTripAvailabilityDetailRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import type { AvailabilityUserRow } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms'
-import { $trans, errorToast, infoToast } from '@/services/i18n'
 import { useTripAssignment } from '@/features/field-service/assignment'
 
 /**

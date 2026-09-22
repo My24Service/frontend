@@ -4,8 +4,6 @@ import {
   equipmentEquipmentCreateQuickCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { MaintenanceEquipment, MaintenanceEquipmentRowRequest } from '@/api/types.gen'
-import { useMainStore } from '@/stores/main'
-import { errorToast, $trans } from '@/services/i18n'
 import { toDinero } from '@/services/money'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {

@@ -87,7 +87,6 @@
 <script lang="ts" setup>
 import { StatusesComponent } from '@/features/shared'
 import { useQueryErrorToast } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import {
   useOrderDetail,
   OrderContactBlock,

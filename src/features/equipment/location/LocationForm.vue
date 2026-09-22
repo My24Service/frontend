@@ -122,7 +122,6 @@ import {
   useQueryErrorToast,
   useResourceForm,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import { DocumentsComponent } from '@/features/equipment/documents'
 import {
   OwnerPanel,

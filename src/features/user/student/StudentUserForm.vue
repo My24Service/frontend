@@ -258,8 +258,6 @@ import { COUNTRY_OPTIONS } from './options'
 import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
-import { $trans } from '@/services/i18n'
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {

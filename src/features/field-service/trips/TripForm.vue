@@ -133,8 +133,6 @@ import {
   useSearch,
 } from '@/features/forms'
 import { useStagedRows } from '@/features/order'
-import { $trans, interpolate } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import {
   conditionsOf,
   emptyTrip,

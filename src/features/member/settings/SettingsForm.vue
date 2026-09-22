@@ -45,8 +45,6 @@ import {
   ValidatedForm,
   ValidatedFormField,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 import {
   emptySettings,
   FIELD_LABELS,

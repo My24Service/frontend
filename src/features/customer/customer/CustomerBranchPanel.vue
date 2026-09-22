@@ -84,7 +84,6 @@ import {
   companyPartnerCopyCustomerOrdersCreateMutation,
   companyPartnerListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
 import type { CustomerFormValues } from './schemas'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 

@@ -17,8 +17,6 @@
 </template>
 
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
-
 interface StatusEntry {
   id: number | string
   status: string

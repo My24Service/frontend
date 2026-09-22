@@ -5,8 +5,6 @@ import {
   type FieldLabels,
   writeContract,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * The budget modal's own state. The year rides the input as text and is
  * shaped to a number for the wire; the amount rides the `PriceInput` as the

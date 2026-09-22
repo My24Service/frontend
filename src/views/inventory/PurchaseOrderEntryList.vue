@@ -87,8 +87,6 @@
 <script>
 import purchaseorderEntryModel from '@/models/inventory/PurchaseOrderEntry.js'
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-
 export default {
   setup() {
     const {create} = useToast()

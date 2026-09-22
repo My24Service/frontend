@@ -44,8 +44,6 @@ import type { PaginatedTemplateList } from '@/api/types.gen'
 import { companyTemplate } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
-import { $trans } from '@/services/i18n'
-
 /**
  * The template list. The route names are the legacy `customer-template-*`
  * family: URLs stay stable across the migration, so they keep their names.

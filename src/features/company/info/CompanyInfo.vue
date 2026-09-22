@@ -359,8 +359,6 @@ import {
   useResourceForm,
   useStagedImage,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import {
   emptyInfo,
   infoFromRecord,

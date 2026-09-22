@@ -46,8 +46,6 @@
 <script lang="ts" setup>
 import moment from 'moment'
 
-import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
-
 import {
   companyEngineereventDestroyMutation,
   companyEngineereventListOptions,
@@ -63,8 +61,6 @@ import {
   useServerTable,
   type ListRow,
 } from '@/features/table'
-import { infoToast, $trans } from '@/services/i18n'
-import my24 from '@/services/my24'
 import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 
 import { displayDurationFromSeconds } from '@/features/field-service/timesheets'

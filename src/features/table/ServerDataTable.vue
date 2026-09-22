@@ -64,7 +64,6 @@ import {
   type RowData,
   type VueTable,
 } from '@tanstack/vue-table'
-import { $trans } from '@/services/i18n'
 import type { AppFeatures } from './table'
 
 const props = defineProps<{

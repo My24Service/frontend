@@ -12,8 +12,6 @@ import {
   type FieldMessages,
   type FieldLabels,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 const requiredCustomerId = <E extends {customer_id: v.NullishSchema<v.GenericSchema<string>, undefined>}>(
   entries: E,
 ) => v.pipe(v.unwrap(entries.customer_id), v.minLength(1))
@@ -61,7 +59,6 @@ export function customerFromRecord(record: Customer): CustomerFormValues {
 
 export type CustomerFieldErrors = FieldErrors<keyof CustomerFormValues & string>
 
-
 export const FIELD_LABELS = {
   customer_id: () => $trans('Customer ID'),
   name: () => $trans('Name'),
@@ -93,11 +90,9 @@ function toWire(values: CustomerFormValues): CustomerFormValues {
   }
 }
 
-
 export function validateCustomerForm(values: CustomerFormValues): CustomerFieldErrors {
   return fieldErrors(customerFormSchema, toWire(values), FIELD_MESSAGES, FIELD_LABELS)
 }
-
 
 export function parseCustomerCreate(
   values: CustomerFormValues,

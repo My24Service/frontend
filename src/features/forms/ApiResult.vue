@@ -20,8 +20,6 @@
   </div>
 </template>
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
-
 /** The little of an axios failure this reports on. */
 interface ApiError {
   response?: {

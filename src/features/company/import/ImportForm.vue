@@ -101,7 +101,6 @@ import {
   useResourceForm,
 } from '@/features/forms'
 import { readAsDataUrl } from '@/features/shared'
-import { $trans } from '@/services/i18n'
 import {
   emptyImport,
   importFromRecord,

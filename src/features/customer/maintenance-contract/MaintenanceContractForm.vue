@@ -132,7 +132,6 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Customer, MaintenanceContract, MaintenanceContractWithEquipmentRequestRequest, MaintenanceContractWithEquipmentResponse } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
-import { $trans } from '@/services/i18n'
 import { formatMoney } from '@/services/money'
 import { useResourceForm } from '@/features/forms'
 import StagedEquipmentPanel from './StagedEquipmentPanel.vue'

@@ -265,9 +265,7 @@ import {INVOICE_LINE_TYPE} from "./constants";
 
 import {quotationQuotationLineChapterCreate} from "@/api/sdk.gen";
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {formatMoney} from "@/services/money";
-import {useMainStore} from "@/stores/main";
 
 /**
  * One row of the replace-set body `POST quotation-line/chapter/{chapter_id}/`

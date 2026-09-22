@@ -13,14 +13,9 @@ import {
   type FieldErrors,
   type FieldLabels,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
-
-
 /** The wire shape, except that the picker is empty until a customer is chosen. */
 export type MaintenanceContractFormValues =
   Omit<v.InferInput<typeof vMaintenanceContractRequest>, 'customer'> & {customer: number | null}
-
 
 export function emptyContract(): MaintenanceContractFormValues {
   return {
@@ -28,7 +23,6 @@ export function emptyContract(): MaintenanceContractFormValues {
     name: '',
   }
 }
-
 
 export function contractFromRecord(
   record: MaintenanceContract,
@@ -40,22 +34,18 @@ export function contractFromRecord(
   }
 }
 
-
 export type ContractFieldErrors = FieldErrors<'customer' | 'name' | 'remarks' | 'equipment'>
-
 
 const FIELD_LABELS = {
   customer: () => $trans('Customer'),
   name: () => $trans('Contract name'),
 } satisfies FieldLabels<'customer' | 'name'>
 
-
 export function validateContractForm(
   values: MaintenanceContractFormValues,
 ): ContractFieldErrors {
   return fieldErrors(vMaintenanceContractRequest, values, {}, FIELD_LABELS)
 }
-
 
 export type EquipmentRowState = {
   id?: number
@@ -68,7 +58,6 @@ export type EquipmentRowState = {
   tariff_dinero?: Dinero.Dinero
 }
 
-
 export function emptyEquipmentRow(defaultCurrency: string): EquipmentRowState {
   return {
     equipment: null,
@@ -78,7 +67,6 @@ export function emptyEquipmentRow(defaultCurrency: string): EquipmentRowState {
     tariff_currency: defaultCurrency,
   }
 }
-
 
 export function equipmentRowFromRecord(
   record: MaintenanceEquipmentRow,
@@ -95,9 +83,7 @@ export function equipmentRowFromRecord(
   }
 }
 
-
 export type MaintenanceEquipmentRow = MaintenanceEquipment
-
 
 /**
  * The row as the replace-set body takes it. Two things a row does not carry:
@@ -124,7 +110,6 @@ function shapeEquipmentRow(row: EquipmentRowState) {
   }
 }
 
-
 /**
  * The staged set as the `equipment` list of a save. The whole protocol is
  * `id`: a row carrying one updates that stored row, a row without one is
@@ -136,7 +121,6 @@ export function parseEquipmentSetBody(
 ): MaintenanceEquipmentRowRequest[] {
   return rows.map((row) => v.parse(vMaintenanceEquipmentRowRequest, shapeEquipmentRow(row)))
 }
-
 
 /**
  * The body of a save: the contract's own fields joined to the staged set,
@@ -155,12 +139,10 @@ export function parseContractWithEquipmentBody(
   return v.parse(vMaintenanceContractWithEquipmentRequestRequest, {...values, equipment})
 }
 
-
 const EQUIPMENT_ROW_LABELS = {
   equipment: () => $trans('Equipment'),
   times_per_year: () => $trans('Times / year'),
 } satisfies FieldLabels<'equipment' | 'times_per_year'>
-
 
 /**
  * A staged row is checked while it is still a draft, before any save names it.

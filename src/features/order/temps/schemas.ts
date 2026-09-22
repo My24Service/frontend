@@ -1,7 +1,6 @@
 import * as v from 'valibot'
 
 import type { OrderDetail } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
 import {
   emptyOrder,
   orderFromRecord,

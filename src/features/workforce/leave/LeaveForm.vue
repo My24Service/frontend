@@ -234,7 +234,6 @@
 import moment from 'moment'
 import { nl } from 'date-fns/locale'
 import VueMultiselect from 'vue-multiselect'
-import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
 import { companyLeaveTypeListOptions } from '@/api/@tanstack/vue-query.gen'
 import { companyUserLeaveHoursAdminGetTotalsCreate } from '@/api/sdk.gen'
 import type { LeaveHoursTotals, UserLeaveHours, UserSelectRow } from '@/api/types.gen'
@@ -244,7 +243,6 @@ import {
   useQueryErrorToast,
   useResourceForm,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import { useUserSearch } from '../use-user-search'
 import {
   FIELD_LABELS,

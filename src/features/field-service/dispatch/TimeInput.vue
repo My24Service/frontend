@@ -24,7 +24,6 @@
 </template>
 
 <script setup lang="ts">
-import { $trans } from '@/services/i18n'
 import { truncateTime } from '@/features/forms'
 
 /**

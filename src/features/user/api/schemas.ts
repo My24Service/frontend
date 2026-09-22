@@ -12,8 +12,6 @@ import {
   IDENTITY_FIELD_MESSAGES,
   userFormContract,
 } from '../user-form'
-import { $trans } from '@/services/i18n'
-
 export function emptyApiUser() {
   return {
     username: '',

@@ -16,8 +16,6 @@ import {
   type FieldLabels,
   type WriteContext,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * A leave as the form holds it.
  *

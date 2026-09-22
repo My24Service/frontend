@@ -328,9 +328,6 @@
 <script lang="ts" setup>
 import { orderWorkorderDataRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
-
 /**
  * The workorder as a printable page, on the public `workorder-view` route
  * (no login: the address is what the customer's e-mail carries). One read,

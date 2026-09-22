@@ -76,7 +76,6 @@
 import type { Building } from '@/api/types.gen'
 import { equipmentBuilding } from '@/api/resources.gen'
 import { useResourceForm } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import {
   OwnerPanel,
   useOwnerContext,

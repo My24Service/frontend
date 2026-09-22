@@ -5,7 +5,6 @@ import type {
   FieldErrors,
   FieldLabels,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import {
   vEquipmentBranchCreateRequest,
   vEquipmentCustomerCreateRequest,

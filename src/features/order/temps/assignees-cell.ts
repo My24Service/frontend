@@ -1,5 +1,3 @@
-import { $trans } from '@/services/i18n'
-
 export interface HeadcountRow {
   assigned_count: number
   required_assigned: string

@@ -9,8 +9,6 @@ import {
   type FieldLabels,
 } from '@/features/forms'
 import { formDefaults } from '@/models/schema'
-import { $trans } from '@/services/i18n'
-
 /**
  * The blank form, derived from the request component. `max_users` is the one
  * field the schema cannot decide: the entry is optional, so its inferred blank

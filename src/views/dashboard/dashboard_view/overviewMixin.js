@@ -1,10 +1,7 @@
 import componentMixin from "@/mixins/common"
-import my24 from "@/services/my24"
 import {OrderService} from "@/models/orders/Order"
 import dashboardStatsModel from "@/models/company/DashboardStats"
 import {toDinero} from "@/services/money"
-import {useMainStore} from "@/stores/main"
-
 const RECENT_ORDERS_SHOWN = 5
 
 // Placeholder until Material grows a real per-material minimum_stock field.

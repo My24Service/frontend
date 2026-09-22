@@ -11,13 +11,10 @@ import {
   equipmentLocationCreateQuickCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { BranchAutocomplete, CustomerAutocomplete } from '@/api/types.gen'
-import { useAuthStore } from '@/features/auth'
 import {
   useSearch,
   useQueryErrorToast,
 } from '@/features/forms'
-import { $trans, errorToast } from '@/services/i18n'
-import { useMainStore } from '@/stores/main'
 import type { OrderContactBlock, OrderFormValues } from './schemas'
 
 /** The read's rows are the options as they are. */

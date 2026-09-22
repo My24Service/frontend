@@ -352,9 +352,7 @@ import {
   useQueryErrorToast,
   useResourceForm,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import { formatMoneyPlain, toDinero } from '@/services/money'
-import { useMainStore } from '@/stores/main'
 import { DocumentsComponent } from '@/features/equipment/documents'
 import {
   OwnerDetails,

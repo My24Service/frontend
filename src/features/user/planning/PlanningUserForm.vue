@@ -73,8 +73,6 @@ import {
   type PlanningUserFieldErrors,
   type PlanningUserFormValues,
 } from './schemas'
-import { $trans } from '@/services/i18n'
-
 const props = withDefaults(defineProps<{
   pk?: string | number | null
 }>(), {

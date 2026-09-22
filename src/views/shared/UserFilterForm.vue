@@ -298,8 +298,6 @@ import {
 import {OrderFilterModel, OrderFilterService} from "@/models/orders/OrderFilter";
 import VueMultiselect from "vue-multiselect";
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-
 export default {
   name: "UserFilterForm",
   setup() {

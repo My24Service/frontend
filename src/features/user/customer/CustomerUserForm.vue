@@ -122,7 +122,6 @@ import {
   type CustomerUserFieldErrors,
   type CustomerUserFormValues,
 } from './schemas'
-import { $trans } from '@/services/i18n'
 import { useQueryErrorToast } from '@/features/forms'
 
 const props = withDefaults(defineProps<{

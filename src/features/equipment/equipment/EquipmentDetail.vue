@@ -115,9 +115,7 @@ import {
 import type { EquipmentTypeEnum } from '@/api/types.gen'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useQueryErrorToast } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import { formatMoney, toDinero } from '@/services/money'
-import { useMainStore } from '@/stores/main'
 import { DocumentsComponent } from '@/features/equipment/documents'
 import {
   DetailLayoutSidebar,

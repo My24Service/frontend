@@ -84,9 +84,7 @@
 <script lang="ts" setup>
 import { orderOrderDestroyMutation, orderOrderListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES } from '@/constants'
-import { useAuthStore } from '@/features/auth'
 import { ServerTable, useServerTable } from '@/features/table'
-import { $trans } from '@/services/i18n'
 import { useMemberNewData } from '../use-member-new-data'
 import { isListMode, listOptionsFor, listQueryFrom, userFilterFrom, type ListMode } from './list-modes'
 import { useDispatchSelection } from './use-dispatch-selection'

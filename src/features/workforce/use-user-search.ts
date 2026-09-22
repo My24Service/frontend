@@ -1,9 +1,5 @@
-import { refDebounced } from '@vueuse/core'
-
 import { companyUserListListOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * The "type to search a user" picker the leave and sick-leave forms both carry.
  *

@@ -10,8 +10,6 @@ import {
   selectMessage,
   type FieldErrors,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 export function emptyMember(): MemberRequest {
   return {
     companycode: '',

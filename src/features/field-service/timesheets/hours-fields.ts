@@ -1,7 +1,5 @@
 import moment from 'moment/min/moment-with-locales'
 
-import { $trans } from '@/services/i18n'
-
 /**
  * The vocabulary the two Timesheet screens share.
  *

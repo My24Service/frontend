@@ -43,7 +43,6 @@ import {
   companyStudentuserListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { CompanyStudentuserListData, PaginatedStudentUserList } from '@/api/types.gen'
-import { errorToast, $trans } from '@/services/i18n'
 import {
   ServerTable,
   baseListParams,

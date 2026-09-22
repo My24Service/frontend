@@ -1,6 +1,5 @@
 import type { RowData } from '@tanstack/vue-table'
 import RowAction from '@/components/RowAction.vue'
-import { $trans } from '@/services/i18n'
 import type { createAppColumnHelper } from './table'
 
 type AnyColumnHelper<TData extends RowData> = ReturnType<typeof createAppColumnHelper<TData>>

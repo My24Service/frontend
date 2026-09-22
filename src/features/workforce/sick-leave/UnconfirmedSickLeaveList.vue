@@ -31,7 +31,6 @@
 <script setup lang="ts">
 import { BLink } from 'bootstrap-vue-next'
 import IBiCheckLg from '~icons/bi/check-lg'
-import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
 import {
   companyUserSickLeaveAdminAllUnconfirmedListOptions,
   companyUserSickLeaveAdminSetConfirmedCreateMutation,
@@ -40,7 +39,6 @@ import type { PaginatedUserSickLeaveList } from '@/api/types.gen'
 import { companyUserSickLeaveAdmin } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
 import SubNav from '../SubNav.vue'
 
 /**

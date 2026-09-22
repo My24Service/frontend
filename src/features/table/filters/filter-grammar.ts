@@ -17,8 +17,6 @@
  * catalogue for its few words.
  */
 import { format } from 'date-fns'
-import { $trans } from '@/services/i18n'
-
 // ---------------------------------------------------------------- selects
 
 /** The wire value of several picks: comma-joined, a comma inside a pick escaped. */

@@ -266,8 +266,6 @@ import {
   type CustomerFieldErrors,
   type CustomerFormValues,
 } from './schemas'
-import { useMainStore } from '@/stores/main'
-import { $trans } from '@/services/i18n'
 import { useResourceForm } from '@/features/forms'
 
 const props = withDefaults(defineProps<{

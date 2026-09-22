@@ -209,7 +209,6 @@ import {memberShape} from '@/features/member'
 
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
 import {formatMoney} from "@/services/money";
-import {useMainStore} from "@/stores/main";
 
 export default {
   setup() {

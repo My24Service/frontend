@@ -58,7 +58,6 @@ import {
   subYears,
 } from 'date-fns'
 import { nl } from 'date-fns/locale'
-import { $trans } from '@/services/i18n'
 import type { ColumnFilterSpec } from '../table'
 import {
   formatDateFilter,

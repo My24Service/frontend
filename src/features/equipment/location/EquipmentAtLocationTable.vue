@@ -29,9 +29,6 @@
 <script setup lang="ts">
 import { equipmentEquipmentListOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-import { useAuthStore } from '@/features/auth'
-import { useMainStore } from '@/stores/main'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 /**

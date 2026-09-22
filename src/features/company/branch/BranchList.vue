@@ -45,8 +45,6 @@ import type { PaginatedBranchList } from '@/api/types.gen'
 import { companyBranch } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
-import { $trans } from '@/services/i18n'
-
 /**
  * The branch list, mounted by the company router and the settings layout.
  * The mount is a boolean rather than a route stem: both mounts answer the

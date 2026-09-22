@@ -10,7 +10,6 @@
 <script setup lang="ts">
 import TheNavLoggedIn from './TheNavLoggedIn.vue'
 import TheIndex from './TheIndex.vue'
-import {useAuthStore} from '@/features/auth';
 
 const store = useAuthStore()
 

@@ -1,6 +1,5 @@
 import type { QueryClient } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
 import { useConfirmedAction } from './use-confirmed-action'
 
 export function useListDelete({

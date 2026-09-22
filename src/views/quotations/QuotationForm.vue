@@ -225,8 +225,6 @@ import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import {ChapterService} from "@/models/quotations/Chapter";
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-
 import CustomerForm from './quotation_form/CustomerForm.vue'
 import Hours from './quotation_form/Hours.vue'
 import Distance from './quotation_form/Distance.vue'
@@ -240,7 +238,6 @@ import QuotationLine from "./quotation_form/QuotationLine.vue";
 import DocumentsComponent from "./quotation_form/DocumentsComponent.vue";
 import CustomerView from "./CustomerView.vue";
 import QuotationPDFViewer from "./QuotationPDFViewer.vue";
-import {useMainStore} from "@/stores/main";
 
 export default {
   name: 'QuotationForm',

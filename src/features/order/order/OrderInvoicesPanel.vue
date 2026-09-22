@@ -99,7 +99,6 @@
 </template>
 
 <script lang="ts" setup>
-import { $trans } from '@/services/i18n'
 import PurchaseInvoicesPanel from './PurchaseInvoicesPanel.vue'
 import WorkorderDocumentList from './WorkorderDocumentList.vue'
 import { useOrderViewer } from './use-order-viewer'

@@ -59,7 +59,6 @@
 
 <script lang="ts" setup>
 import type { EngineerInfoLine, EngineerInfoLineNested } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
 import { infolineFromRecord, type InfolineRow } from './schemas'
 import { useStagedRows } from './use-staged-rows'
 

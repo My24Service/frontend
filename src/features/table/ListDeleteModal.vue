@@ -12,7 +12,6 @@
 <script lang="ts" setup>
 import type { QueryClient } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
-import { $trans } from '@/services/i18n'
 import { useListDelete } from './use-list-delete'
 
 const props = defineProps<{

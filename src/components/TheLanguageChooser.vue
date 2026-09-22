@@ -9,7 +9,6 @@
 
 <script>
 import {setLanguageCreate} from '@/api/sdk.gen'
-import {useMainStore} from "@/stores/main";
 
 export default {
   name: "TheLanguageChooser",

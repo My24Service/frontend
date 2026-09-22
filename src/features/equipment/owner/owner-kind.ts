@@ -1,6 +1,3 @@
-import { useAuthStore } from '@/features/auth'
-import { useMainStore } from '@/stores/main'
-
 /** Which of the two owner foreign keys a record hangs off. */
 export type OwnerKind = 'customer' | 'branch'
 

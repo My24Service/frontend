@@ -5,8 +5,6 @@ import {
   type FieldLabels,
   writeContract,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * The form's own state. The generated request carries `picture` as an optional
  * base64 string and `name` as required; the form holds the staged upload as

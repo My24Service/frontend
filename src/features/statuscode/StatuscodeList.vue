@@ -44,7 +44,6 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedStatuscodeList, StatuscodeStatuscodeListData } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
-import { $trans } from '@/services/i18n'
 import {
   ServerTable,
   baseListParams,

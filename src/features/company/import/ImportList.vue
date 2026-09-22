@@ -58,8 +58,6 @@ import { invalidateReads } from '@/features/forms'
 import RowAction from '@/components/RowAction.vue'
 import { fileNameOf } from '@/features/shared'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
-
 /**
  * The import list, mounted by the company router and the settings layout.
  * The mount answers one route stem (`company-import`, `settings-company-import`),

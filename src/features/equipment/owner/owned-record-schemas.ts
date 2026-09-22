@@ -6,7 +6,6 @@ import {
   type FieldLabels,
   type WriteContext,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import type { OwnedValues, OwnerKind } from './owner-kind'
 
 /** Who the owner is for this write: the key the tenant's variant carries, and whether this user chose it. */

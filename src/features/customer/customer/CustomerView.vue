@@ -267,11 +267,8 @@ import {
   equipmentEquipmentListOptions,
   equipmentLocationListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import { useAuthStore } from '@/features/auth'
 import { formatMoney, toDinero } from '@/services/money'
-import { useMainStore } from '@/stores/main'
 import CustomerCard from '../CustomerCard.vue'
-import { $trans } from '@/services/i18n'
 import { useQueryErrorToast } from '@/features/forms'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 

@@ -1,5 +1,3 @@
-import { errorToast } from '@/services/i18n'
-
 export type QueryErrorMessage = string | ((error: unknown) => string)
 
 export function useQueryErrorToast(error: Ref<unknown>, message: QueryErrorMessage): void {

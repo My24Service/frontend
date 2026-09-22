@@ -1,5 +1,5 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
-import {useMainStore} from "@/stores/main";
+
 import TheIndexLayout from '../components/TheIndexLayout.vue'
 
 import orders from './orders'
@@ -17,11 +17,7 @@ import catchall from './catchall'
 import webshop from './webshop'
 import bim from './bim'
 import {AUTH_LEVELS} from "@/constants";
-import {
-  getUserAuthLevel,
-  hasAccessRouteAuthLevel,
-  useAuthStore,
-} from '@/features/auth'
+import { getUserAuthLevel, hasAccessRouteAuthLevel } from '@/features/auth'
 import dashboard from "@/router/dashboard.js";
 import settings from "@/router/settings";
 

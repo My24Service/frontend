@@ -61,7 +61,6 @@ import {
   ValidatedForm,
   ValidatedFormField,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import { IDENTITY_FIELD_LABELS } from './user-form'
 
 /**

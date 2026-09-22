@@ -34,9 +34,6 @@
 </template>
 
 <script lang="ts" setup>
-import IBiFileEarmarkCheckFill from '~icons/bi/file-earmark-check-fill'
-import IBiFileEarmarkPlus from '~icons/bi/file-earmark-plus'
-
 import {
   companyEngineerEventTypeDestroyMutation,
   companyEngineerEventTypeListOptions,
@@ -44,7 +41,6 @@ import {
 import type { CompanyEngineerEventTypeListData, PaginatedEngineerEventTypeList } from '@/api/types.gen'
 import { companyEngineerEventType } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
-import { $trans } from '@/services/i18n'
 import {
   ServerTable,
   baseListParams,

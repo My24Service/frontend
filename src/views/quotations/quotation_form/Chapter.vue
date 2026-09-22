@@ -147,8 +147,6 @@ import {required} from "@vuelidate/validators";
 import {QuotationModel} from '@/models/quotations/Quotation.js'
 import {ChapterModel, ChapterService} from '@/models/quotations/Chapter'
 
-import {errorToast, infoToast, $trans} from "@/services/i18n";
-
 export default {
   name: 'ChapterComponent',
   emits: [

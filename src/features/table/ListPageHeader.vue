@@ -24,8 +24,6 @@
 </template>
 
 <script lang="ts" setup>
-import { $trans } from '@/services/i18n'
-
 withDefaults(defineProps<{
   title: string
   searchLabel: string

@@ -30,8 +30,6 @@ import {
   accountsVerifyRegistrationCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import { readLinkParams } from '@/features/account'
-import { errorToast, infoToast, $trans } from '@/services/i18n'
-
 /**
  * The activation link a registrant follows from their email: verify the
  * signed params on arrival, then let them ask for the link that sets their

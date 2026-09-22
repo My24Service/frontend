@@ -9,8 +9,6 @@ import {
   type FieldErrors,
   type FieldMessages,
 } from '@/features/forms'
-import { $trans } from '@/services/i18n'
-
 /**
  * The public registration form: a student signing themselves up, before any
  * account exists. `POST /accounts/register/` has its own request body — no

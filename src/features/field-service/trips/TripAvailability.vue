@@ -28,8 +28,6 @@ import {
   useServerTable,
   type ListRow,
 } from '@/features/table'
-import { $trans } from '@/services/i18n'
-
 /**
  * Who can be put on a trip, read as the trip collection.
  *

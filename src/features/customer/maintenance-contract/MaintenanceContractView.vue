@@ -176,8 +176,6 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Customer, MaintenanceContract, MaintenanceEquipment } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
-import { useMainStore } from '@/stores/main'
-import { $trans } from '@/services/i18n'
 import { formatMoney, toDinero } from '@/services/money'
 import { useQueryErrorToast } from '@/features/forms'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'

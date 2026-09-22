@@ -19,8 +19,6 @@
 
 <script lang="ts" setup>
 import type { OrderDetail } from '@/api/types.gen'
-import { $trans } from '@/services/i18n'
-
 /** The order an event click opens: who, where, when. */
 defineProps<{
   order: OrderDetail | null

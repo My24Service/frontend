@@ -41,8 +41,6 @@
 </template>
 
 <script setup lang="ts">
-import { useMainStore } from '@/stores/main'
-
 export interface MemberInfo {
   name: string
   companylogo?: string

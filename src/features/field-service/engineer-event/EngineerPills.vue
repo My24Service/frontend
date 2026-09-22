@@ -16,8 +16,6 @@
 
 <script lang="ts" setup>
 import PillsNav, {useCompanyUserPills} from '@/components/PillsNav.vue'
-import { $trans } from '@/services/i18n'
-
 /**
  * The chrome both event screens carry: the company-user pills row above, and
  * this Slice's own List / Events / Event types row below it, one size down.

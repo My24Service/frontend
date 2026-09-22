@@ -9,8 +9,6 @@ import {
   type FieldLabels,
 } from '@/features/forms'
 import { formDefaults } from '@/models/schema'
-import { $trans } from '@/services/i18n'
-
 /**
  * The blank form, derived from the request component rather than spelled out:
  * a field the serializer gains shows up here without anyone editing this file,

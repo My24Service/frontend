@@ -194,7 +194,6 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import { statuscodeAction } from '@/api/resources.gen'
 import type { Action, ActionRequest, CompanyPartnerListData } from '@/api/types.gen'
-import { useAuthStore } from '@/features/auth'
 import {
   useResourceForm,
   ValidatedForm,
@@ -204,10 +203,6 @@ import {
   useConfirmedAction,
   WHOLE_COLLECTION_PAGE_SIZE,
 } from '@/features/table'
-import { $trans, errorToast, infoToast } from '@/services/i18n'
-import my24 from '@/services/my24'
-import { useMainStore } from '@/stores/main'
-
 import type { CodeType } from '../code-types'
 import { invalidateStatuscodeLists } from '../invalidation'
 import {

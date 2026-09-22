@@ -17,7 +17,6 @@
 </template>
 
 <script>
-import {$trans} from "@/services/i18n";
 import {formatMoney} from "@/services/money";
 
 export default {
