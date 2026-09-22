@@ -87,7 +87,6 @@
 </template>
 
 <script setup lang="ts">
-import TableStatusInfo from '@/components/TableStatusInfo.vue'
 import { StatusService } from '@/models/orders/Status.js'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'

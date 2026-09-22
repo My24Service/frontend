@@ -181,8 +181,6 @@
 
 <script>
 import { BarChart } from '@/features/shared'
-import WorkOrdersTable from "@/components/WorkOrdersTable.vue"
-import OrderTypesPie from "@/components/OrderTypesPie.vue"
 import LogComponent from "./components/LogComponent.vue"
 import BranchPhotoCard from "./components/BranchPhotoCard.vue"
 import BranchPhotoCardShltr from "./components/BranchPhotoCardShltr.vue"
@@ -199,8 +197,6 @@ export default {
   components: {
     LogComponent,
     BarChart,
-    WorkOrdersTable,
-    OrderTypesPie,
   },
   data() {
     return {

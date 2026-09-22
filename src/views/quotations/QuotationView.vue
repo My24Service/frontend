@@ -199,7 +199,6 @@
   </b-overlay>
 </template>
 <script>
-import TotalsInputs from "@/components/TotalsInputs.vue";
 import { StatusesComponent } from '@/features/shared'
 import QuotationPDFViewer from "@/views/quotations/QuotationPDFViewer.vue";
 
@@ -224,7 +223,6 @@ export default {
   name: "QuotationView",
   components: {
     QuotationPDFViewer,
-    TotalsInputs,
     DocumentsComponent,
     StatusesComponent
   },

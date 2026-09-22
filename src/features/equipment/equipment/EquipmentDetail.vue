@@ -113,8 +113,6 @@ import {
   equipmentEquipmentRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { EquipmentTypeEnum } from '@/api/types.gen'
-import SearchModal from '@/components/SearchModal.vue'
-import WorkOrdersTable from '@/components/WorkOrdersTable.vue'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useQueryErrorToast } from '@/features/forms'
 import { $trans } from '@/services/i18n'

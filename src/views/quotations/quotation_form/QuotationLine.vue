@@ -256,15 +256,11 @@
 <script>
 import {useVuelidate} from "@vuelidate/core";
 
-import PriceInput from "@/components/PriceInput";
-import TotalsInputs from "@/components/TotalsInputs";
-import RowAction from "@/components/RowAction.vue"
-
 import {QuotationModel} from '@/models/quotations/Quotation.js';
 import {ChapterModel} from '@/models/quotations/Chapter'
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js';
 
-import VAT from "../quotation_form/VAT";
+import VAT from "../quotation_form/VAT.vue";
 import {INVOICE_LINE_TYPE} from "./constants";
 
 import {quotationQuotationLineChapterCreate} from "@/api/sdk.gen";
@@ -310,10 +306,7 @@ function quotationLineRow(line) {
 export default {
   name: 'QuotationLineForm',
   components: {
-    RowAction,
-    PriceInput,
     VAT,
-    TotalsInputs,
   },
   emits: [
     'quotationLineDeleted',

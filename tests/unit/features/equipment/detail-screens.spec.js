@@ -4,7 +4,6 @@ import {
   vCustomer,
   vEquipment,
   vEquipmentDashboardResponse,
-  vEquipmentDocument,
   vLocation,
   vLocationDashboardResponse,
   vOrder,

@@ -158,10 +158,6 @@
 
 <script>
 import purchaseOrderModel from '@/models/inventory/PurchaseOrder.js'
-import RowAction from '@/components/RowAction.vue'
-import ActionButton from '@/components/ActionButton.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import Pagination from "@/components/Pagination.vue"
 
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
@@ -173,12 +169,6 @@ export default {
     return {
       create
     }
-  },
-  components: {
-    RowAction,
-    ActionButton,
-    SearchModal,
-    Pagination,
   },
   data() {
     return {

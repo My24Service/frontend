@@ -29,7 +29,6 @@
 <script setup lang="ts">
 import { companyEngineerGetLocationsListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { EngineerLocation } from '@/api/types.gen'
-import ActionButton from '@/components/ActionButton.vue'
 import { $trans } from '@/services/i18n'
 
 /**

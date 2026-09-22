@@ -134,19 +134,11 @@
 </template>
 
 <script>
-import RowAction from '@/components/RowAction.vue'
-import ActionButton from '@/components/ActionButton.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import Pagination from "@/components/Pagination.vue"
-import SearchForm from "@/components/SearchForm.vue";
-import TableStatusInfo from '@/components/TableStatusInfo.vue'
-
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 import {QuotationService} from '@/models/quotations/Quotation.js'
 import {QuotationStatuscodeService} from '@/models/quotations/QuotationStatuscode.js'
 import { StatusService } from '@/models/quotations/Status.js'
-import PillsNav from "@/components/PillsNav.vue";
 
 export default {
   setup() {
@@ -158,15 +150,6 @@ export default {
     }
   },
   name: 'QuotationList',
-  components: {
-    PillsNav,
-    SearchForm,
-    RowAction,
-    ActionButton,
-    SearchModal,
-    Pagination,
-    TableStatusInfo
-  },
   data() {
     return {
       quotationService: new QuotationService(),

@@ -3,7 +3,6 @@ import SubNav from '@/components/SubNav.vue'
 import {OrderList} from '@/features/order'
 import {
   AssignedFinished,
-  AssignedOrderMaterial,
   Dispatch,
   EngineerMap,
   TimeSheet,
@@ -21,10 +20,6 @@ import {
  * they are; everything else here is the field-service Slice's, imported through
  * its door. Every name and path is unchanged — they are bookmarked, and the
  * specs assert them verbatim.
- *
- * `AssignedOrderMaterial` is imported and mounted at no route, exactly as the
- * legacy router did: the screen exists, nothing links to it, and giving it a URL
- * would be inventing one. See the slice README.
  */
 export default [
 {

@@ -9,6 +9,51 @@ import { ExternalPackageIconLoader } from 'unplugin-icons/loaders'
 import * as path from 'node:path'
 import { autoImportEntries } from './auto-imports.config.js'
 
+/**
+ * Give every SFC a `__name` derived from its filename, the way the compiler
+ * already does for `<script setup>` components.
+ *
+ * Without this, a component used through auto-import cannot be stubbed. The
+ * component plugin rewrites `<WorkOrdersTable />` into a direct import binding
+ * rather than a `resolveComponent('WorkOrdersTable')` call, so the component
+ * never lands in any `components` registry. Vue Test Utils resolves a stub by
+ * the name it is registered under, then by the component's own `name`/`__name`
+ * (see its getComponentName) - and an Options-API SFC that declares no `name`
+ * has none of the three. The stub silently misses and the real component
+ * mounts, fetches included.
+ *
+ * `_sfc_main` is the object the SFC's default export is built from, and
+ * `_export_sfc` returns that same object, so assigning to it here reaches the
+ * exported component. Appending leaves every existing line in place, which is
+ * why no source map is rewritten. Components that already carry a `name` or a
+ * `__name` are left alone.
+ *
+ * Test-only, and deliberately so: the app build has no stubs to resolve, and
+ * this should not be a reason for production output to differ.
+ */
+function nameSfcsForStubbing() {
+  return {
+    name: 'name-sfcs-for-stubbing',
+    enforce: 'post',
+    transform(code, id) {
+      const [file, query] = id.split('?')
+      // Only the SFC's main request; its `?vue&type=template` etc. blocks have
+      // already been folded into this one.
+      if (query !== undefined || !file.endsWith('.vue')) return null
+      if (!/\b_sfc_main\b/.test(code)) return null
+
+      const name = path.basename(file, '.vue')
+      return {
+        code:
+          code +
+          `\n;if (_sfc_main && typeof _sfc_main === 'object' && !_sfc_main.name && !_sfc_main.__name) ` +
+          `_sfc_main.__name = ${JSON.stringify(name)};\n`,
+        map: null,
+      }
+    },
+  }
+}
+
 // Deliberately separate from vite.config.js: the app build pulls in the theme
 // preprocessor and tailwind, neither of which the tests need. Vitest 4 no
 // longer reads a `test` block out of vite.config.js.
@@ -39,6 +84,7 @@ export default defineConfig({
         ...ExternalPackageIconLoader('bootstrap-icons'),
       },
     }),
+    nameSfcsForStubbing(),
   ],
   resolve: {
     extensions: ['.ts', '.js', '.json', '.vue'],
@@ -60,7 +106,7 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['tests/unit/setupTests.js'],
-    include: ['tests/unit/**/*.spec.js'],
+    include: ['tests/unit/**/*.spec.{js,ts}'],
     silent: 'passed-only',
 
     // Persist transformed modules between runs. Without it every run re-does

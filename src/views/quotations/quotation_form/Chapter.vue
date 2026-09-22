@@ -144,8 +144,6 @@
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 
-import RowAction from "@/components/RowAction.vue"
-
 import {QuotationModel} from '@/models/quotations/Quotation.js'
 import {ChapterModel, ChapterService} from '@/models/quotations/Chapter'
 
@@ -153,10 +151,6 @@ import {errorToast, infoToast, $trans} from "@/services/i18n";
 
 export default {
   name: 'ChapterComponent',
-  components: {
-    RowAction,
-    RowAction
-  },
   emits: [
     'chapterCreated',
     'loadChapterClicked'

@@ -65,9 +65,6 @@
 
 <script>
 import mutationModel from '@/models/inventory/Mutation'
-import ActionButton from '@/components/ActionButton.vue'
-import SearchModal from '@/components/SearchModal.vue'
-import Pagination from "@/components/Pagination.vue"
 import componentMixin from "@/mixins/common";
 import {errorToast} from "@/services/i18n";
 
@@ -79,11 +76,6 @@ export default {
     return {
       create
     }
-  },
-  components: {
-    ActionButton,
-    SearchModal,
-    Pagination,
   },
   mixins: [componentMixin],
   data() {

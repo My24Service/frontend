@@ -5,6 +5,7 @@ import my24 from "@/services/my24";
 // that mock it through tests/unit/support/form-harness.js. See 2.4/2.7.
 import {useAuthStore} from "@/features/auth/store";
 import {setProductFamily} from "@/theme";
+import * as v from 'valibot'
 
 function isEmpty(obj) {
   return obj && Object.keys(obj).length === 0 && obj.constructor === Object

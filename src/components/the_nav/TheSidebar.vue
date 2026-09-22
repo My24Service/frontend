@@ -55,9 +55,7 @@
 import { useAuthStore } from '@/features/auth'
 import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
-import NavItems from '@/components/NavItems.vue'
-import NavBrand, { type MemberInfo } from '@/components/NavBrand.vue'
-import AppVersion from '@/components/AppVersion.vue'
+import { type MemberInfo } from '@/components/NavBrand.vue'
 
 // The sidebar for both product families. The shltr layout is the base; the
 // default family branches on `profile.family` for its root class, brand,

@@ -150,13 +150,11 @@ import moment from 'moment'
 import {errorToast, infoToast, $trans} from "@/services/i18n";
 import {formatMoney} from "@/services/money";
 
-import DurationInput from "@/components/DurationInput.vue"
-import PriceInput from "@/components/PriceInput";
 import {QuotationLineService} from "@/models/quotations/QuotationLine";
 import {COST_TYPE, CostService} from "@/models/quotations/Cost";
 
 import quotationMixin from "./mixin.js";
-import VAT from "./VAT";
+import VAT from "./VAT.vue";
 import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import SectionHeader from "./SectionHeader.vue";
@@ -181,10 +179,7 @@ export default {
     CostsTable,
     EmptyQuotationLinesContainer,
     SectionHeader,
-    PriceInput,
     VAT,
-    TotalRow,
-    DurationInput,
     AddToQuotationLines
   },
   props: {

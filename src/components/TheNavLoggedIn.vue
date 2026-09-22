@@ -108,9 +108,6 @@ import memberSocket from '../services/websocket/MemberSocket'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket'
 import {NEW_DATA_EVENTS} from "@/constants";
 
-import TheLanguageChooser from "../components/TheLanguageChooser.vue"
-import TheSidebar from "./the_nav/TheSidebar.vue"
-import NotificationListener from '../components/NotificationListener.vue'
 import { TokenRefresh, useAuthStore } from '@/features/auth'
 import componentMixin from "@/mixins/common";
 import {errorToast, infoToast} from "@/services/i18n";
@@ -142,9 +139,6 @@ export default {
   mixins: [componentMixin],
   components: {
     PasswordMeter,
-    TheLanguageChooser,
-    TheSidebar,
-    NotificationListener,
     TokenRefresh,
   },
   validations() {
