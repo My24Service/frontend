@@ -69,7 +69,7 @@
     <b-row>
       <b-col size="6"></b-col>
       <b-col size="6" class="text-right">
-        <BLink class="px-1" title="clear" v-on:click="emit('clear')">
+        <BLink class="px-1" :title="$trans('clear')" v-on:click="emit('clear')">
           {{ $trans('clear') }}
         </BLink>
       </b-col>

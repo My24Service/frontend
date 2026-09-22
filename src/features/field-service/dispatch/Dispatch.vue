@@ -82,7 +82,7 @@
         <div class="flex-columns" style="justify-content: space-between;">
 
           <BLink class="px-1" @click.prevent="timeBackWeek" v-bind:title="$trans('Week back')">
-            <IBiArrowLeftSquareFill font-scale="1.2"></IBiArrowLeftSquareFill> week {{ startWeek - 1 }}
+            <IBiArrowLeftSquareFill font-scale="1.2"></IBiArrowLeftSquareFill> {{ $trans('week') }} {{ startWeek - 1 }}
           </BLink>
 
           <span class="flex-columns">
@@ -108,7 +108,7 @@
           </span>
 
           <BLink class="" @click.prevent="timeForwardWeek" v-bind:title="$trans('Week forward') ">
-            week {{ startWeek + 1 }}
+            {{ $trans('week') }} {{ startWeek + 1 }}
             <IBiArrowRightSquareFill font-scale="1.2"></IBiArrowRightSquareFill>
           </BLink>
 
