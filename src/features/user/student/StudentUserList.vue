@@ -142,7 +142,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => companyStudentuserListOptions({
     query: {
       ...baseListParams(query),
-    } as StudentUserListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading student users'),

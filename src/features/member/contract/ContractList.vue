@@ -82,7 +82,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => memberContractListOptions({
     query: {
       ...baseListParams(query),
-    } as ContractListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading contracts'),

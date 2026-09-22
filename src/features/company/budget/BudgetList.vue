@@ -171,7 +171,7 @@ function showAddModal() {
 
 async function showEditModal(id: number) {
   const record = await queryClient.fetchQuery(companyBudget.retrieve.options({ path: { id } }))
-  modal.value = { ...budgetModalFromRecord(record as Budget), id, currency: (record as Budget).amount_currency }
+  modal.value = { ...budgetModalFromRecord(record), id, currency: (record).amount_currency }
   modalErrors.value = {}
   submitClicked.value = false
   modelModal.value?.show()

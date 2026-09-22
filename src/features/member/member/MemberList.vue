@@ -162,7 +162,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
     query: {
       ...variantDefinition.value.filters(),
       ...baseListParams(query),
-    } as MemberListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading members'),

@@ -98,7 +98,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => companyPlanninguserListOptions({
     query: {
       ...baseListParams(query),
-    } as PlanningUserListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading planning users'),

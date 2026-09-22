@@ -89,7 +89,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => memberModulePartListOptions({
     query: {
       ...baseListParams(query),
-    } as ModulePartListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading module parts'),

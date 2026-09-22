@@ -209,7 +209,7 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
       // Always sent: the endpoint scopes the list by type, and the legacy
       // screen sent its default (`technical`) the same way.
       type: props.type,
-    } as EquipmentListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading equipment'),

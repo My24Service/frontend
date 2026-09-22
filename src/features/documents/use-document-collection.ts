@@ -91,8 +91,8 @@ export function useDocumentCollection(
 
   return {
     rows,
-    isLoading: computed(() => listQuery.isLoading.value) as Ref<boolean>,
-    error: computed(() => listQuery.error.value) as Ref<unknown>,
+    isLoading: computed(() => listQuery.isLoading.value),
+    error: computed(() => listQuery.error.value),
     refetch: () => listQuery.refetch(),
     invalidate: () => queryClient.invalidateQueries({queryKey: resource.queryKey(), refetchType: 'none'}),
     create: async (row, parent) =>

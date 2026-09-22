@@ -135,9 +135,9 @@ const lookupQuery = useQuery(companyImportGetLookupFieldsRetrieveOptions())
 useQueryErrorToast(previewQuery.error, $trans('Error loading import preview'))
 useQueryErrorToast(lookupQuery.error, $trans('Error loading import preview'))
 
-const importData = computed(() => previewQuery.data.value as ImportResult | undefined)
+const importData = computed(() => previewQuery.data.value)
 const lookupFields = computed<Record<string, string[]>>(
-  () => (lookupQuery.data.value ?? {}) as Record<string, string[]>)
+  () => (lookupQuery.data.value ?? {}))
 const isLoading = computed(() => previewQuery.isLoading.value || lookupQuery.isLoading.value)
 
 const pillTitles: Record<SheetKey, string> = {

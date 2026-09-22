@@ -379,10 +379,10 @@ useQueryErrorToast(quotationPreviewQuery.error, $trans('Error fetching results')
 
 const previewOptions = computed<{ uuid: string, label: string }[]>(() => {
   if (previewType.value === 'invoice') {
-    return ((invoicePreviewQuery.data.value ?? []) as InvoiceAutocomplete[])
+    return ((invoicePreviewQuery.data.value ?? []))
       .map((row) => ({ uuid: row.uuid, label: row.name }))
   }
-  return ((quotationPreviewQuery.data.value ?? []) as QuotationAutocompleteRow[])
+  return ((quotationPreviewQuery.data.value ?? []))
     .map((row) => ({ uuid: row.uuid, label: row.name }))
 })
 const isSearchingPreview = computed(() =>
@@ -401,7 +401,7 @@ async function previewPdf() {
     const blob = await previewMutation.mutateAsync({
       body: { id: Number(props.pk), uuid: previewResult.value.uuid, template_type: record.value?.template_type ?? '' },
     })
-    previewBlob.value = blob as Blob
+    previewBlob.value = blob
     // `useObjectUrl` derives the URL in a watcher, so it is only current once
     // the scheduler has run. Revoking the previous URL cannot break the popup
     // it was handed to: that tab has the PDF already.

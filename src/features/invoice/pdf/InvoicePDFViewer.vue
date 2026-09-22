@@ -105,7 +105,7 @@ async function decodePdfError(error: unknown): Promise<PdfBlobError> {
       return JSON.parse(new TextDecoder('utf-8').decode(await raw.arrayBuffer())) as PdfBlobError
     } catch { /* fall through to the generic envelope */ }
   }
-  if (raw && typeof raw === 'object') return raw as PdfBlobError
+  if (raw && typeof raw === 'object') return raw
   return {error: '', details: ''}
 }
 

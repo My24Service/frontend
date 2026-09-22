@@ -345,7 +345,7 @@ async function probeTotals(): Promise<void> {
       body: leaveProbeBody(values.value),
     })
     if (error || !data) throw new Error('leave totals probe failed')
-    const totals = (data as LeaveHoursTotals).result
+    const totals = data.result
     values.value.total_time = humanizeDuration(totals.total_hours, totals.total_minutes)
   } catch {
     // The totals are a preview: a tenant whose settings refuse the window

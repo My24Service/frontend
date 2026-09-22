@@ -27,6 +27,11 @@ export const autoImportEntries = [
     type: true,
   },
   {
+    from: '@/api/types.gen',
+    imports: [['*', 'Api']],
+    type: true,
+  },
+  {
     from: 'vue',
     imports: ['CSSProperties'],
     type: true,
@@ -56,9 +61,7 @@ export const autoImportEntries = [
   },
   {
     from: 'type-fest',
-    imports: [
-      ['*', 'TF']
-    ],
+    imports: [['*', 'TF']],
     type: true,
   },
 ]

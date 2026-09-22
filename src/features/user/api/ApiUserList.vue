@@ -168,7 +168,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => companyApiuserListOptions({
     query: {
       ...baseListParams(query),
-    } as ApiUserListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading API users'),

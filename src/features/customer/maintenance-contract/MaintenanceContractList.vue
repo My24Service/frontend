@@ -103,7 +103,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => customerMaintenanceContractListOptions({
     query: {
       ...baseListParams(query),
-    } as MaintenanceContractListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading maintenance contracts'),

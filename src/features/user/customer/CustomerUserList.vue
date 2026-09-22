@@ -103,7 +103,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => companyCustomeruserListOptions({
     query: {
       ...baseListParams(query),
-    } as CustomerUserListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading customer users'),

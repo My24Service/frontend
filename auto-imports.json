@@ -1744,6 +1744,12 @@
     "as": "RouteTo"
   },
   {
+    "from": "@/api/types.gen",
+    "type": true,
+    "name": "*",
+    "as": "Api"
+  },
+  {
     "from": "vue",
     "type": true,
     "name": "CSSProperties",

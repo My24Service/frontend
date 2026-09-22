@@ -83,7 +83,7 @@ async function submitForm() {
   errors.value = found
   if (Object.keys(found).length > 0) return
 
-  const link = readLinkParams(route.query as Record<string, unknown>)
+  const link = readLinkParams(route.query)
   if (!link) {
     errorToast(create, $trans('Something went wrong, please try again'))
     return

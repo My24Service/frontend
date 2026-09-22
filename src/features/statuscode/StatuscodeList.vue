@@ -156,7 +156,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
     query: {
       ...baseListParams(query),
       code_type: props.codeType,
-    } as StatuscodeListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading statuscodes'),

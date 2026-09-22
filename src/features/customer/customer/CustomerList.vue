@@ -195,7 +195,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh, gl
       ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
       ...(query.remarks ? {remarks: String(query.remarks)} : {}),
       ...(query.contact ? {contact: String(query.contact)} : {}),
-    } as CustomerListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading customers'),

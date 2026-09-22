@@ -10,9 +10,9 @@
     "dev": "vite",
     "codegen": "openapi-ts && node scripts/annotate-endpoints.mjs && node scripts/generate-resources.mjs",
     "cleanup-imports": "node scripts/remove-auto-imports.mjs",
-    "lint": "eslint --concurrency auto src",
-    "lint:fix": "eslint --concurrency auto --fix src",
-    "lint:i18n": "eslint --config eslint.i18n.config.js --concurrency auto src",
+    "lint": "eslint --cache --concurrency auto src",
+    "lint:fix": "eslint --cache --concurrency auto --fix src",
+    "lint:i18n": "eslint --cache --config eslint.i18n.config.js --concurrency auto src",
     "typecheck": "vue-tsc --noEmit",
     "usage-gate": "node scripts/usage-gate.mjs",
     "test": "vitest run",
@@ -43,6 +43,7 @@
     "chartjs-plugin-datalabels": "^2.2.0",
     "date-fns": "^4.1.0",
     "dinero.js": "^1.9.1",
+    "moment": "^2.31.0",
     "pinia": "^3.0.4",
     "popper.js": "^2.0.0-next.4",
     "valibot": "^1.4.2",
@@ -76,7 +77,9 @@
     "eslint": "^9.26.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-vue": "^10.8.0",
+    "globals": "^17.12.0",
     "happy-dom": "^20.11.2",
+    "jsonc-eslint-parser": "^3.3.0",
     "msw": "^2.15.0",
     "sass": "^1.49.8",
     "stryker-vue-ignorer": "github:davidlandais/stryker-vue-ignorer",
@@ -92,7 +95,8 @@
     "vitest": "^4.1.10",
     "vue-eslint-parser": "^10.4.1",
     "vue-tsc": "^3.3.9",
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.0",
+    "yaml-eslint-parser": "^2.1.0"
   },
   "allowScripts": {
     "vue-demi@0.14.10": true,
@@ -100,5 +104,11 @@
     "@parcel/watcher@2.5.6": true,
     "esbuild@0.27.2": true,
     "fsevents@2.3.3": true
+  },
+  "allowBuilds": {
+    "@parcel/watcher": true,
+    "esbuild": true,
+    "msw": true,
+    "vue-demi": true
   }
 }

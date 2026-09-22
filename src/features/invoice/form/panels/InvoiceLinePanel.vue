@@ -262,7 +262,7 @@ async function saveCollection(invoiceId = Number(props.invoicePk)) {
   saving.value = true
   try {
     while (deletedIds.value.length) {
-      const id = deletedIds.value[0]!
+      const id = deletedIds.value[0]
       await deleteLine.mutateAsync({ path: { id } })
       deletedIds.value.shift()
       savedBodies.delete(id)

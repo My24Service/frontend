@@ -20,5 +20,5 @@ export function fieldsFromRecord<S extends v.GenericSchema & { entries: object }
   for (const key of Object.keys(schema.entries)) {
     if (source[key] != null) fields[key] = source[key]
   }
-  return fields as Partial<v.InferInput<S>>
+  return fields
 }

@@ -31,3 +31,4 @@ public/assets/version.json
 /reports
 
 *.har
+.eslintcache

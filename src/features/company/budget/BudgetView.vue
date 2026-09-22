@@ -138,9 +138,9 @@ useQueryErrorToast(detailQuery.error, $trans('Error fetching budget'))
 useQueryErrorToast(costsQuery.error, $trans('Error fetching budget costs'))
 useQueryErrorToast(expectedQuery.error, $trans('Error fetching expected costs'))
 
-const record = computed(() => detailQuery.data.value as Budget | undefined)
-const costs = computed(() => costsQuery.data.value as BudgetCostsResponse | undefined)
-const expected = computed(() => expectedQuery.data.value as BudgetExpectedCostsResponse | undefined)
+const record = computed(() => detailQuery.data.value)
+const costs = computed(() => costsQuery.data.value)
+const expected = computed(() => expectedQuery.data.value)
 
 const isLoading = computed(() =>
   detailQuery.isLoading.value || costsQuery.isLoading.value || expectedQuery.isLoading.value)

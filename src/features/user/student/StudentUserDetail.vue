@@ -101,11 +101,11 @@ useQueryErrorToast(detailQuery.error, $trans('Error loading studentuser'))
 
 const isLoading = computed(() => detailQuery.isLoading.value)
 
-const student = computed(() => detailQuery.data.value ?? ({} as Partial<StudentUser>))
+const student = computed(() => ({ ...detailQuery.data.value }))
 
 // The profile fields ride under `student_user`; the legacy page read them off
 // the top of the record and rendered every one of these rows blank.
-const profile = computed(() => student.value.student_user ?? ({} as Partial<StudentSub>))
+const profile = computed(() => ({ ...student.value.student_user }))
 
 const address = computed(() =>
   [profile.value.street, profile.value.house_number, profile.value.house_number_addition]

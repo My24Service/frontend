@@ -45,7 +45,7 @@ const phase = ref<Phase>('verifying')
 
 // A bad link never reaches the network. Same fail-fast as the shared
 // set-password form.
-const link = readLinkParams(route.query as Record<string, unknown>)
+const link = readLinkParams(route.query)
 
 const verifyMutation = useMutation(accountsVerifyRegistrationCreateMutation())
 const sendLinkMutation = useMutation(accountsSendResetPasswordLinkCreateMutation())

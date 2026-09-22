@@ -283,7 +283,7 @@ const actionTypes = computed(() => actionTypesFor(props.codeType, {hasGripp: has
 type PartnerListQueryParams = NonNullable<CompanyPartnerListData['query']>
 
 const partnersQuery = useQuery(() => ({
-  ...companyPartnerListOptions({query: {page_size: WHOLE_COLLECTION_PAGE_SIZE} as PartnerListQueryParams}),
+  ...companyPartnerListOptions({query: {page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
   enabled: props.codeType === 'order',
 }))
 

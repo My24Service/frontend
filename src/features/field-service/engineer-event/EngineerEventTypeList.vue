@@ -105,7 +105,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => companyEngineerEventTypeListOptions({
     query: {
       ...baseListParams(query),
-    } as EventTypeListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading event types'),

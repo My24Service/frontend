@@ -99,7 +99,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => companyEngineerListOptions({
     query: {
       ...baseListParams(query),
-    } as EngineerUserListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading engineers'),

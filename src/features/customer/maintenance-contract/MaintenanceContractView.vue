@@ -194,7 +194,7 @@ const contractId = computed(() => Number(props.pk))
 const detailQuery = useQuery(() =>
   customerMaintenanceContractRetrieveOptions({path: {id: contractId.value}}),
 )
-const maintenanceContract = computed(() => detailQuery.data.value as MaintenanceContract | undefined)
+const maintenanceContract = computed(() => detailQuery.data.value)
 
 const customerRecord = computed<Customer>(() => maintenanceContract.value?.customer_view ?? ({} as Customer))
 

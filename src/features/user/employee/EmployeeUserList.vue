@@ -100,7 +100,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => companyEmployeeuserListOptions({
     query: {
       ...baseListParams(query),
-    } as EmployeeUserListQueryParams,
+    },
   }),
   urlSync: true,
   loadError: $trans('Error loading employees'),

@@ -115,7 +115,7 @@ const branchPartners = computed(() => {
     ...partners
       .filter((partner) => partner.partner_view.has_branches)
       .map((partner) => ({
-        value: partner.id as number,
+        value: partner.id,
         text: `${partner.partner_view.companycode} - ${partner.partner_view.city}`,
       })),
   ]

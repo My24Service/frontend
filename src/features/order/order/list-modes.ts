@@ -45,7 +45,7 @@ export function listQueryFrom(query: ServerPagedListQuery): OrderListQuery {
     const value = query[name]
     if (value != null && value !== '') filters[name] = String(value)
   }
-  return {...baseListParams(query), ...filters} as OrderListQuery
+  return {...baseListParams(query), ...filters}
 }
 
 /** The saved filter (`/order/filter/`) a plain-list query names, if a valid id. */
