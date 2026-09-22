@@ -3,18 +3,17 @@ import SubNav from '../components/SubNav.vue'
 
 // The whole Member Slice — lists and forms, #321-#325 — lives in the feature
 // folder; this file only routes it.
-import {
-  ContractForm,
-  ContractList,
-  MemberForm,
-  MemberList,
-  ModuleForm,
-  ModuleList,
-  ModulePartForm,
-  ModulePartList,
-} from '@/features/member'
 import {AUTH_LEVELS} from "@/constants";
 
+// Route screens, split per chunk: the router holds a loader, not the module.
+const ContractForm = () => import('@/features/member/contract/ContractForm.vue')
+const ContractList = () => import('@/features/member/contract/ContractList.vue')
+const MemberForm = () => import('@/features/member/member/MemberForm.vue')
+const MemberList = () => import('@/features/member/member/MemberList.vue')
+const ModuleForm = () => import('@/features/member/module/ModuleForm.vue')
+const ModuleList = () => import('@/features/member/module/ModuleList.vue')
+const ModulePartForm = () => import('@/features/member/module-part/ModulePartForm.vue')
+const ModulePartList = () => import('@/features/member/module-part/ModulePartList.vue')
 
 export default [
 {

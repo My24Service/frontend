@@ -1,7 +1,9 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import DashboardView from "../views/dashboard/DashboardView.vue";
-import DashboardOverview from "../views/dashboard/DashboardOverview.vue";
 import {AUTH_LEVELS} from "../constants";
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const DashboardOverview = () => import('../views/dashboard/DashboardOverview.vue')
+const DashboardView = () => import('../views/dashboard/DashboardView.vue')
 
 export default [
   {

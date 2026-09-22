@@ -1,17 +1,17 @@
 import TheAppLayout from '@/components/TheAppLayout.vue'
 import SubNav from '@/components/SubNav.vue'
-import {OrderList} from '@/features/order'
-import {
-  AssignedFinished,
-  Dispatch,
-  EngineerMap,
-  TimeSheet,
-  TimeSheetDetail,
-  TripAvailability,
-  TripAvailabilityDetail,
-  TripForm,
-  TripList,
-} from '@/features/field-service'
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const AssignedFinished = () => import('@/features/field-service/dispatch/AssignedFinished.vue')
+const Dispatch = () => import('@/features/field-service/dispatch/Dispatch.vue')
+const EngineerMap = () => import('@/features/field-service/dispatch/EngineerMap.vue')
+const OrderList = () => import('@/features/order/order/OrderList.vue')
+const TimeSheet = () => import('@/features/field-service/timesheets/TimeSheet.vue')
+const TimeSheetDetail = () => import('@/features/field-service/timesheets/TimeSheetDetail.vue')
+const TripAvailability = () => import('@/features/field-service/trips/TripAvailability.vue')
+const TripAvailabilityDetail = () => import('@/features/field-service/trips/TripAvailabilityDetail.vue')
+const TripForm = () => import('@/features/field-service/trips/TripForm.vue')
+const TripList = () => import('@/features/field-service/trips/TripList.vue')
 
 /**
  * The mobile section's routes.

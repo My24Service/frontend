@@ -1,20 +1,19 @@
-import {
-  EquipmentList,
-  EquipmentForm,
-  LocationList,
-  LocationForm,
-  EquipmentDetail,
-  LocationDetail,
-  BuildingList,
-  BuildingForm,
-  BuildingDetail,
-} from '@/features/equipment'
 
 
 import SubNav from "../components/SubNav.vue";
 import TheAppLayout from "../components/TheAppLayout.vue";
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "../constants";
 
+// Route screens, split per chunk: the router holds a loader, not the module.
+const BuildingDetail = () => import('@/features/equipment/building/BuildingDetail.vue')
+const BuildingForm = () => import('@/features/equipment/building/BuildingForm.vue')
+const BuildingList = () => import('@/features/equipment/building/BuildingList.vue')
+const EquipmentDetail = () => import('@/features/equipment/equipment/EquipmentDetail.vue')
+const EquipmentForm = () => import('@/features/equipment/equipment/EquipmentForm.vue')
+const EquipmentList = () => import('@/features/equipment/equipment/EquipmentList.vue')
+const LocationDetail = () => import('@/features/equipment/location/LocationDetail.vue')
+const LocationForm = () => import('@/features/equipment/location/LocationForm.vue')
+const LocationList = () => import('@/features/equipment/location/LocationList.vue')
 
 export default [
   {

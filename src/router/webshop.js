@@ -1,5 +1,7 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import Webshop from '../views/webshop/WebshopIframe.vue';
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const Webshop = () => import('../views/webshop/WebshopIframe.vue')
 
 export default [
   {

@@ -1,7 +1,8 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import NotFound from "../views/shared/NotFound";
-import ComingSoon from "../views/shared/ComingSoon";
 
+// Route screens, split per chunk: the router holds a loader, not the module.
+const ComingSoon = () => import('../views/shared/ComingSoon')
+const NotFound = () => import('../views/shared/NotFound')
 
 export default [{
   path: '/:pathMatch(.*)*',

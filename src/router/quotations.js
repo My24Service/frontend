@@ -1,12 +1,14 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNav from '../components/SubNav.vue'
 
-import QuotationList from '../views/quotations/QuotationList.vue'
-import QuotationForm from '../views/quotations/QuotationForm.vue'
 import {AUTH_LEVELS} from "@/constants";
-import QuotationView from "@/views/quotations/QuotationView.vue";
-import QuotationDetail from "@/views/quotations/QuotationDetail.vue";
-import OfferForm from "@/views/quotations/OfferForm.vue";
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const OfferForm = () => import('@/views/quotations/OfferForm.vue')
+const QuotationDetail = () => import('@/views/quotations/QuotationDetail.vue')
+const QuotationForm = () => import('../views/quotations/QuotationForm.vue')
+const QuotationList = () => import('../views/quotations/QuotationList.vue')
+const QuotationView = () => import('@/views/quotations/QuotationView.vue')
 
 export default [
 {

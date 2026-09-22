@@ -1,37 +1,30 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNav from '../components/SubNav.vue'
 
-import PurchaseOrderList from '../views/inventory/PurchaseOrderList.vue'
-import PurchaseOrderForm from '../views/inventory/PurchaseOrderForm.vue'
-import PurchaseOrderView from '../views/inventory/PurchaseOrderView.vue'
-
-import MaterialList from '../views/inventory/MaterialList.vue'
-import MaterialView from '../views/inventory/MaterialView.vue'
-import MaterialForm from '../views/inventory/MaterialForm.vue'
-import MaterialMoveForm from '../views/inventory/MaterialMoveForm.vue'
-
-import SupplierList from '../views/inventory/SupplierList.vue'
-import SupplierForm from '../views/inventory/SupplierForm.vue'
-import SupplierView from '../views/inventory/SupplierView.vue'
-
-import StockLocationList from '../views/inventory/StockLocationList.vue'
-import StockLocationView from '../views/inventory/StockLocationView.vue'
-import StockLocationForm from '../views/inventory/StockLocationForm.vue'
-
-import MutationList from '../views/inventory/MutationList.vue'
-import MutationForm from '../views/inventory/MutationForm.vue'
-
-import PurchaseOrderEntryList from '../views/inventory/PurchaseOrderEntryList.vue'
-import PurchaseOrderEntryView from '../views/inventory/PurchaseOrderEntryView.vue'
-import PurchaseOrderEntryForm from '../views/inventory/PurchaseOrderEntryForm.vue'
-
-import SupplierReservationList from '../views/inventory/SupplierReservationList.vue'
-import SupplierReservationForm from '../views/inventory/SupplierReservationForm.vue'
-import SupplierReservationView from '../views/inventory/SupplierReservationView.vue'
-
-import InventoryStats from '../views/inventory/InventoryStats.vue'
-import StatsTable from "../views/inventory/StatsTable";
-
+// Route screens, split per chunk: the router holds a loader, not the module.
+const InventoryStats = () => import('../views/inventory/InventoryStats.vue')
+const MaterialForm = () => import('../views/inventory/MaterialForm.vue')
+const MaterialList = () => import('../views/inventory/MaterialList.vue')
+const MaterialMoveForm = () => import('../views/inventory/MaterialMoveForm.vue')
+const MaterialView = () => import('../views/inventory/MaterialView.vue')
+const MutationForm = () => import('../views/inventory/MutationForm.vue')
+const MutationList = () => import('../views/inventory/MutationList.vue')
+const PurchaseOrderEntryForm = () => import('../views/inventory/PurchaseOrderEntryForm.vue')
+const PurchaseOrderEntryList = () => import('../views/inventory/PurchaseOrderEntryList.vue')
+const PurchaseOrderEntryView = () => import('../views/inventory/PurchaseOrderEntryView.vue')
+const PurchaseOrderForm = () => import('../views/inventory/PurchaseOrderForm.vue')
+const PurchaseOrderList = () => import('../views/inventory/PurchaseOrderList.vue')
+const PurchaseOrderView = () => import('../views/inventory/PurchaseOrderView.vue')
+const StatsTable = () => import('../views/inventory/StatsTable')
+const StockLocationForm = () => import('../views/inventory/StockLocationForm.vue')
+const StockLocationList = () => import('../views/inventory/StockLocationList.vue')
+const StockLocationView = () => import('../views/inventory/StockLocationView.vue')
+const SupplierForm = () => import('../views/inventory/SupplierForm.vue')
+const SupplierList = () => import('../views/inventory/SupplierList.vue')
+const SupplierReservationForm = () => import('../views/inventory/SupplierReservationForm.vue')
+const SupplierReservationList = () => import('../views/inventory/SupplierReservationList.vue')
+const SupplierReservationView = () => import('../views/inventory/SupplierReservationView.vue')
+const SupplierView = () => import('../views/inventory/SupplierView.vue')
 
 export default [
   {

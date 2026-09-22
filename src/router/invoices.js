@@ -1,13 +1,13 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNav from '../components/SubNav.vue'
 
-import {
-  InvoiceForm,
-  InvoiceView,
-  InvoiceList,
-  EmailForm,
-} from '@/features/invoice'
 import {AUTH_LEVELS} from "@/constants";
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const EmailForm = () => import('@/features/invoice/email/EmailForm.vue')
+const InvoiceForm = () => import('@/features/invoice/form/InvoiceForm.vue')
+const InvoiceList = () => import('@/features/invoice/list/InvoiceList.vue')
+const InvoiceView = () => import('@/features/invoice/detail/InvoiceView.vue')
 
 export default [
 {

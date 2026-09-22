@@ -1,61 +1,79 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNav from '../components/SubNav.vue'
 
-import CompanyDashboard from '../views/company/CompanyDashboard.vue'
-import {
-  CompanyInfo,
-  PartnerList,
-  PartnerRequestsSentList,
-  PartnerRequestsSentForm,
-  PartnerRequestsReceivedList,
-  ActivityList,
-  PictureList,
-  PictureForm,
-  BranchList,
-  BranchForm,
-  BranchView,
-  BudgetList,
-  BudgetView,
-  TemplateList,
-  TemplateForm,
-  ImportList,
-  ImportForm,
-  ImportPreview,
-} from '@/features/company'
-import { SettingsForm } from '@/features/member'
-
 // The user screens live in the feature folder; this file only routes them
 // (ADR-0002). The student registration's set-password step is the account
 // slice's reset-password screen, reached through the link the backend mails.
-import { ApiUserForm, ApiUserList, CustomerUserForm, CustomerUserList, EmployeeUserForm, EmployeeUserList, EngineerUserForm, EngineerUserList, PlanningUserForm, PlanningUserList, SalesUserForm, SalesUserList, StudentRegisterForm, StudentRegisterVerify, StudentUserDetail, StudentUserForm, StudentUserList } from '@/features/user'
-import { ResetPasswordConfirmView } from '@/features/account'
-
-
-
 
 // The engineer-event screens (the events list, its event types and the event
 // type form) live in the field-service feature folder; this file only routes
 // them (ADR-0002). The attach-order modal the list mounts comes with it.
-import { EngineerEventList, EngineerEventTypeForm, EngineerEventTypeList } from '@/features/field-service'
 
 import {AUTH_LEVELS} from "../constants";
-
-
 
 // The workforce screens (time registration, leave, sick leave) live in the
 // feature folder; this file only routes them (ADR-0002). The backend split them
 // into apps/workforce and the frontend mirrors that split.
-import { LeaveForm, LeaveList, LeaveRequestsList, LeaveTypes, SickLeaveForm, SickLeaveList, TimeRegistration, UnconfirmedSickLeaveList } from '@/features/workforce'
 
+import { CODE_TYPES } from '@/features/statuscode';
 
-import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from '@/features/statuscode';
-
-
-import GrippSettings from "../views/company/ConnectorGrippSettings.vue";
-
-import TeamleaderSettings from "@/views/company/TeamleaderSettings.vue";
-import TeamleaderCallback from "@/views/company/TeamleaderCallback.vue";
-import ComingSoon from "@/views/shared/ComingSoon.vue";
+// Route screens, split per chunk: the router holds a loader, not the module.
+const ActionForm = () => import('@/features/statuscode/action/ActionForm.vue')
+const ActivityList = () => import('@/features/company/activity/ActivityList.vue')
+const ApiUserForm = () => import('@/features/user/api/ApiUserForm.vue')
+const ApiUserList = () => import('@/features/user/api/ApiUserList.vue')
+const BranchForm = () => import('@/features/company/branch/BranchForm.vue')
+const BranchList = () => import('@/features/company/branch/BranchList.vue')
+const BranchView = () => import('@/features/company/branch/BranchView.vue')
+const BudgetList = () => import('@/features/company/budget/BudgetList.vue')
+const BudgetView = () => import('@/features/company/budget/BudgetView.vue')
+const ComingSoon = () => import('@/views/shared/ComingSoon.vue')
+const CompanyDashboard = () => import('../views/company/CompanyDashboard.vue')
+const CompanyInfo = () => import('@/features/company/info/CompanyInfo.vue')
+const CustomerUserForm = () => import('@/features/user/customer/CustomerUserForm.vue')
+const CustomerUserList = () => import('@/features/user/customer/CustomerUserList.vue')
+const EmployeeUserForm = () => import('@/features/user/employee/EmployeeUserForm.vue')
+const EmployeeUserList = () => import('@/features/user/employee/EmployeeUserList.vue')
+const EngineerEventList = () => import('@/features/field-service/engineer-event/EngineerEventList.vue')
+const EngineerEventTypeForm = () => import('@/features/field-service/engineer-event/EngineerEventTypeForm.vue')
+const EngineerEventTypeList = () => import('@/features/field-service/engineer-event/EngineerEventTypeList.vue')
+const EngineerUserForm = () => import('@/features/user/engineer/EngineerUserForm.vue')
+const EngineerUserList = () => import('@/features/user/engineer/EngineerUserList.vue')
+const GrippSettings = () => import('../views/company/ConnectorGrippSettings.vue')
+const ImportForm = () => import('@/features/company/import/ImportForm.vue')
+const ImportList = () => import('@/features/company/import/ImportList.vue')
+const ImportPreview = () => import('@/features/company/import/ImportPreview.vue')
+const LeaveForm = () => import('@/features/workforce/leave/LeaveForm.vue')
+const LeaveList = () => import('@/features/workforce/leave/LeaveList.vue')
+const LeaveRequestsList = () => import('@/features/workforce/leave/LeaveRequestsList.vue')
+const LeaveTypes = () => import('@/features/workforce/leave/LeaveTypes.vue')
+const PartnerList = () => import('@/features/company/partner/PartnerList.vue')
+const PartnerRequestsReceivedList = () => import('@/features/company/partner/PartnerRequestsReceivedList.vue')
+const PartnerRequestsSentForm = () => import('@/features/company/partner/PartnerRequestsSentForm.vue')
+const PartnerRequestsSentList = () => import('@/features/company/partner/PartnerRequestsSentList.vue')
+const PictureForm = () => import('@/features/company/picture/PictureForm.vue')
+const PictureList = () => import('@/features/company/picture/PictureList.vue')
+const PlanningUserForm = () => import('@/features/user/planning/PlanningUserForm.vue')
+const PlanningUserList = () => import('@/features/user/planning/PlanningUserList.vue')
+const ResetPasswordConfirmView = () => import('@/features/account/ResetPasswordConfirmView.vue')
+const SalesUserForm = () => import('@/features/user/sales/SalesUserForm.vue')
+const SalesUserList = () => import('@/features/user/sales/SalesUserList.vue')
+const SettingsForm = () => import('@/features/member/settings/SettingsForm.vue')
+const SickLeaveForm = () => import('@/features/workforce/sick-leave/SickLeaveForm.vue')
+const SickLeaveList = () => import('@/features/workforce/sick-leave/SickLeaveList.vue')
+const StatuscodeForm = () => import('@/features/statuscode/statuscode/StatuscodeForm.vue')
+const StatuscodeList = () => import('@/features/statuscode/StatuscodeList.vue')
+const StudentRegisterForm = () => import('@/features/user/student/StudentRegisterForm.vue')
+const StudentRegisterVerify = () => import('@/features/user/student/StudentRegisterVerify.vue')
+const StudentUserDetail = () => import('@/features/user/student/StudentUserDetail.vue')
+const StudentUserForm = () => import('@/features/user/student/StudentUserForm.vue')
+const StudentUserList = () => import('@/features/user/student/StudentUserList.vue')
+const TeamleaderCallback = () => import('@/views/company/TeamleaderCallback.vue')
+const TeamleaderSettings = () => import('@/views/company/TeamleaderSettings.vue')
+const TemplateForm = () => import('@/features/company/template/TemplateForm.vue')
+const TemplateList = () => import('@/features/company/template/TemplateList.vue')
+const TimeRegistration = () => import('@/features/workforce/time-registration/TimeRegistration.vue')
+const UnconfirmedSickLeaveList = () => import('@/features/workforce/sick-leave/UnconfirmedSickLeaveList.vue')
 
 const DEFAULT_STATUSCODE_TYPE = 'order'
 

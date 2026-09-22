@@ -1,8 +1,10 @@
 import type { RouteLocationNormalized } from 'vue-router'
 
-import UserFilterList from "../views/shared/UserFilterList.vue";
 import SubNav from "../components/SubNav.vue";
-import UserFilterForm from "../views/shared/UserFilterForm.vue";
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const UserFilterForm = () => import('../views/shared/UserFilterForm.vue')
+const UserFilterList = () => import('../views/shared/UserFilterList.vue')
 
 function createUserFilterRoutes(name_part: string, path_part: string, filter_type: string, from_settings = false) {
   return [

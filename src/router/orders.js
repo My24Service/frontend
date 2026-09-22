@@ -1,13 +1,19 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNav from '../components/SubNav.vue'
 
-import {MonthStats, OrderForm, OrderList, OrderView, OrdersSchedule, WorkorderPage, YearStats} from '@/features/order'
-
 import {AUTH_LEVELS} from "@/constants";
-
 
 import {USER_FILTER_TYPE} from "@/models/base_user_filter";
 import {createUserFilterRoutes} from "./helpers";
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const MonthStats = () => import('@/features/order/stats/MonthStats.vue')
+const OrderForm = () => import('@/features/order/OrderFormByTenant.vue')
+const OrderList = () => import('@/features/order/order/OrderList.vue')
+const OrderView = () => import('@/features/order/OrderViewByTenant.vue')
+const OrdersSchedule = () => import('@/features/order/schedule/OrdersSchedule.vue')
+const WorkorderPage = () => import('@/features/order/workorder/WorkorderPage.vue')
+const YearStats = () => import('@/features/order/stats/YearStats.vue')
 
 export default [
   // orders

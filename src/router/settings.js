@@ -1,26 +1,30 @@
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "@/constants";
-import { SettingsForm } from '@/features/member';
-import {
-  ImportList,
-  ImportForm,
-  ImportPreview,
-  BranchList,
-  BranchForm,
-  BranchView,
-} from '@/features/company'
 import {createUserFilterRoutes} from "@/router/helpers";
 import {USER_FILTER_TYPE} from "@/models/base_user_filter";
-import { EmployeeUserForm, EmployeeUserList, PlanningUserForm, PlanningUserList } from '@/features/user';
 import TheAppLayout from "@/components/TheAppLayout.vue";
-import {
-  EquipmentList,
-  EquipmentForm,
-  EquipmentDetail,
-  LocationList,
-  LocationForm,
-  LocationDetail,
-} from '@/features/equipment'
-import { ActionForm, CODE_TYPES, StatuscodeForm, StatuscodeList } from '@/features/statuscode';
+import { CODE_TYPES } from '@/features/statuscode';
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const ActionForm = () => import('@/features/statuscode/action/ActionForm.vue')
+const BranchForm = () => import('@/features/company/branch/BranchForm.vue')
+const BranchList = () => import('@/features/company/branch/BranchList.vue')
+const BranchView = () => import('@/features/company/branch/BranchView.vue')
+const EmployeeUserForm = () => import('@/features/user/employee/EmployeeUserForm.vue')
+const EmployeeUserList = () => import('@/features/user/employee/EmployeeUserList.vue')
+const EquipmentDetail = () => import('@/features/equipment/equipment/EquipmentDetail.vue')
+const EquipmentForm = () => import('@/features/equipment/equipment/EquipmentForm.vue')
+const EquipmentList = () => import('@/features/equipment/equipment/EquipmentList.vue')
+const ImportForm = () => import('@/features/company/import/ImportForm.vue')
+const ImportList = () => import('@/features/company/import/ImportList.vue')
+const ImportPreview = () => import('@/features/company/import/ImportPreview.vue')
+const LocationDetail = () => import('@/features/equipment/location/LocationDetail.vue')
+const LocationForm = () => import('@/features/equipment/location/LocationForm.vue')
+const LocationList = () => import('@/features/equipment/location/LocationList.vue')
+const PlanningUserForm = () => import('@/features/user/planning/PlanningUserForm.vue')
+const PlanningUserList = () => import('@/features/user/planning/PlanningUserList.vue')
+const SettingsForm = () => import('@/features/member/settings/SettingsForm.vue')
+const StatuscodeForm = () => import('@/features/statuscode/statuscode/StatuscodeForm.vue')
+const StatuscodeList = () => import('@/features/statuscode/StatuscodeList.vue')
 
 // The Statuscode Slice (src/features/statuscode/), mounted a second time
 // under /settings; fromSettings switches the screens' route names. The

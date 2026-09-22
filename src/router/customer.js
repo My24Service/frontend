@@ -7,26 +7,22 @@ import SubNav from '../components/SubNav.vue'
 // router/equipment.js and router/settings.js, which is why that Slice owns all
 // three name families. Their forms are still the legacy views until the
 // equipment Slice's form step.
-import {
-  CustomerForm,
-  CustomerList,
-  CustomerView,
-  MaintenanceContractForm,
-  MaintenanceContractList,
-  MaintenanceContractView,
-} from '@/features/customer'
-
-import {
-  EquipmentList,
-  EquipmentForm,
-  LocationList,
-  LocationForm,
-  EquipmentDetail,
-  LocationDetail,
-} from '@/features/equipment'
-
 
 import {AUTH_LEVELS, EQUIPMENT_TYPES} from "@/constants";
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const CustomerForm = () => import('@/features/customer/customer/CustomerForm.vue')
+const CustomerList = () => import('@/features/customer/customer/CustomerList.vue')
+const CustomerView = () => import('@/features/customer/customer/CustomerView.vue')
+const EquipmentDetail = () => import('@/features/equipment/equipment/EquipmentDetail.vue')
+const EquipmentForm = () => import('@/features/equipment/equipment/EquipmentForm.vue')
+const EquipmentList = () => import('@/features/equipment/equipment/EquipmentList.vue')
+const LocationDetail = () => import('@/features/equipment/location/LocationDetail.vue')
+const LocationForm = () => import('@/features/equipment/location/LocationForm.vue')
+const LocationList = () => import('@/features/equipment/location/LocationList.vue')
+const MaintenanceContractForm = () => import('@/features/customer/maintenance-contract/MaintenanceContractForm.vue')
+const MaintenanceContractList = () => import('@/features/customer/maintenance-contract/MaintenanceContractList.vue')
+const MaintenanceContractView = () => import('@/features/customer/maintenance-contract/MaintenanceContractView.vue')
 
 export default [
 {

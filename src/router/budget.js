@@ -1,5 +1,7 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import ComingSoon from '../views/shared/ComingSoon.vue';
+
+// Route screens, split per chunk: the router holds a loader, not the module.
+const ComingSoon = () => import('../views/shared/ComingSoon.vue')
 
 export default [
   {
