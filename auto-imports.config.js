@@ -14,6 +14,17 @@ export const autoImportEntries = [
   {
     'bootstrap-vue-next': ['useToast'],
     '@tanstack/vue-query': ['useMutation', 'useQuery', 'useQueryClient'],
+    '@/api/valibot.gen': [['*', 'schemas']],
+    '@/stores/main': ['useMainStore'],
+    '@/features/auth/store': ['useAuthStore'],
+    '@/services/i18n': ['$trans', 'interpolate', 'errorToast', 'infoToast'],
+    '@/router/types': ['fromRouteTo', 'toRoute'],
+    '@/services/my24': [['default', 'my24']],
+  },
+  {
+    from: '@/router/types',
+    imports: ['RouteName', 'RouteTo'],
+    type: true,
   },
   {
     from: 'vue',

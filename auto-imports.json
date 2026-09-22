@@ -1682,6 +1682,68 @@
     "as": "useQueryClient"
   },
   {
+    "from": "@/api/valibot.gen",
+    "name": "*",
+    "as": "schemas"
+  },
+  {
+    "from": "@/stores/main",
+    "name": "useMainStore",
+    "as": "useMainStore"
+  },
+  {
+    "from": "@/features/auth/store",
+    "name": "useAuthStore",
+    "as": "useAuthStore"
+  },
+  {
+    "from": "@/services/i18n",
+    "name": "$trans",
+    "as": "$trans"
+  },
+  {
+    "from": "@/services/i18n",
+    "name": "interpolate",
+    "as": "interpolate"
+  },
+  {
+    "from": "@/services/i18n",
+    "name": "errorToast",
+    "as": "errorToast"
+  },
+  {
+    "from": "@/services/i18n",
+    "name": "infoToast",
+    "as": "infoToast"
+  },
+  {
+    "from": "@/router/types",
+    "name": "fromRouteTo",
+    "as": "fromRouteTo"
+  },
+  {
+    "from": "@/router/types",
+    "name": "toRoute",
+    "as": "toRoute"
+  },
+  {
+    "from": "@/services/my24",
+    "name": "default",
+    "as": "my24"
+  },
+  {
+    "from": "@/router/types",
+    "type": true,
+    "name": "RouteName",
+    "as": "RouteName"
+  },
+  {
+    "from": "@/router/types",
+    "type": true,
+    "name": "RouteTo",
+    "as": "RouteTo"
+  },
+  {
     "from": "vue",
     "type": true,
     "name": "CSSProperties",
@@ -1758,73 +1820,5 @@
     "type": true,
     "name": "*",
     "as": "TF"
-  },
-  {
-    "name": "useMainStore",
-    "as": "useMainStore",
-    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
-    "__source": "dir"
-  },
-  {
-    "name": "useAuthStore",
-    "as": "useAuthStore",
-    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
-    "__source": "dir"
-  },
-  {
-    "name": "$trans",
-    "as": "$trans",
-    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
-    "__source": "dir"
-  },
-  {
-    "name": "interpolate",
-    "as": "interpolate",
-    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
-    "__source": "dir"
-  },
-  {
-    "name": "errorToast",
-    "as": "errorToast",
-    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
-    "__source": "dir"
-  },
-  {
-    "name": "infoToast",
-    "as": "infoToast",
-    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
-    "__source": "dir"
-  },
-  {
-    "name": "my24",
-    "as": "my24",
-    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
-    "__source": "dir"
-  },
-  {
-    "name": "fromRouteTo",
-    "as": "fromRouteTo",
-    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
-    "__source": "dir"
-  },
-  {
-    "name": "toRoute",
-    "as": "toRoute",
-    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
-    "__source": "dir"
-  },
-  {
-    "name": "RouteName",
-    "as": "RouteName",
-    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
-    "type": true,
-    "__source": "dir"
-  },
-  {
-    "name": "RouteTo",
-    "as": "RouteTo",
-    "from": "/Users/evert/Sites/My24Service/frontend/src/composables/index.ts",
-    "type": true,
-    "__source": "dir"
   }
 ]
