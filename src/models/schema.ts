@@ -188,7 +188,7 @@ export function formDefaults<S extends AnyObjectSchema>(
   }
 
   const existing = v.getDefaults(schema) as Record<string, unknown> | undefined
-  const result: Record<string, any> = {}
+  const result: Record<string, unknown> = {}
 
   for (const [key, entry] of Object.entries(entries)) {
     if (key in overrides) {

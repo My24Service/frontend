@@ -10,7 +10,7 @@ import {useMainStore} from "@/stores/main";
 
 let d = new Date()
 
-// All data loading for views/dashboard/Dashboard.vue (and its overview).
+// All data loading for views/dashboard/DashboardView.vue (and its overview).
 // Only the markup differs per product family.
 //
 // Note: mainStore is a computed rather than a setup() return, because Vue 3

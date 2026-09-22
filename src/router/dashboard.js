@@ -1,5 +1,5 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
-import Dashboard from "../views/dashboard/Dashboard.vue";
+import DashboardView from "../views/dashboard/DashboardView.vue";
 import DashboardOverview from "../views/dashboard/DashboardOverview.vue";
 import {AUTH_LEVELS} from "../constants";
 
@@ -16,7 +16,7 @@ export default [
         name: 'dashboard',
         meta: { authLevelNeeded: AUTH_LEVELS.EMPLOYEE },
         components: {
-          'app-content': Dashboard,
+          'app-content': DashboardView,
         },
       },
       {

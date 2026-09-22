@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import dashboardMixin from '@/views/dashboard/dashboard_view/dashboardMixin'
-import DashboardView from '@/views/company/Dashboard.vue'
+import CompanyDashboard from '@/views/company/CompanyDashboard.vue'
 
 import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
 import { requestShapes } from '../../support/request-recorder.js'
@@ -18,7 +18,7 @@ import { requestShapes } from '../../support/request-recorder.js'
 // The surrounding document/purchase-invoice loads are BaseModel CRUD and are
 // only seeded so the flow reaches the migrated calls.
 //
-// Dashboard.vue (company) replaced OrderService.get{OrderTypesStats,MonthsStats,
+// CompanyDashboard.vue replaced OrderService.get{OrderTypesStats,MonthsStats,
 // OrderTypesMonthsStats,CountsYearOrdertypeStats}Branch() - all four unfiltered
 // GETs on `/order/order/<action>/` - with the four @/models/orders/order-stats
 // wrappers called without a filter; the generated endpoints keep the same URLs
@@ -86,7 +86,7 @@ describe('dashboardMixin.loadData', () => {
   })
 })
 
-describe('Dashboard (company)', () => {
+describe('CompanyDashboard', () => {
   const DASHBOARD = {
     top_50_customers: [],
     order_status_counts: {},
@@ -110,7 +110,7 @@ describe('Dashboard (company)', () => {
     resetFakeHttp(fakeHttp, ROUTES)
     const year = new Date().getFullYear()
 
-    mountForm(DashboardView, { main: { getMemberHasBranches: false } })
+    mountForm(CompanyDashboard, { main: { getMemberHasBranches: false } })
     await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalledTimes(5))
 
     expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([

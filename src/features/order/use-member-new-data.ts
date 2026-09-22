@@ -1,11 +1,7 @@
-import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
+import MemberNewDataSocket, { type MemberNewDataMessage } from '@/services/websocket/MemberNewDataSocket'
 import type { NEW_DATA_EVENTS } from '@/constants'
 
-export interface MemberNewDataMessage {
-  type: string
-  data_type: string
-  [key: string]: unknown
-}
+export type { MemberNewDataMessage }
 
 type NewDataEvent = (typeof NEW_DATA_EVENTS)[keyof typeof NEW_DATA_EVENTS]
 

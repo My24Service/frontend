@@ -1,6 +1,6 @@
 <template>
   <div class="main-menu logged-in">
-    <Notification v-if="isLoggedIn && !isCustomer" />
+    <NotificationListener v-if="isLoggedIn && !isCustomer" />
     <TokenRefresh />
     <b-modal
       id="password-change-modal"
@@ -110,7 +110,7 @@ import {NEW_DATA_EVENTS} from "@/constants";
 
 import TheLanguageChooser from "../components/TheLanguageChooser.vue"
 import TheSidebar from "./the_nav/TheSidebar.vue"
-import Notification from '../components/Notification'
+import NotificationListener from '../components/NotificationListener.vue'
 import { TokenRefresh, useAuthStore } from '@/features/auth'
 import componentMixin from "@/mixins/common";
 import {errorToast, infoToast} from "@/services/i18n";
@@ -144,7 +144,7 @@ export default {
     PasswordMeter,
     TheLanguageChooser,
     TheSidebar,
-    Notification,
+    NotificationListener,
     TokenRefresh,
   },
   validations() {

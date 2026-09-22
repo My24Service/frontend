@@ -29,7 +29,7 @@ import SupplierReservationList from '../views/inventory/SupplierReservationList.
 import SupplierReservationForm from '../views/inventory/SupplierReservationForm.vue'
 import SupplierReservationView from '../views/inventory/SupplierReservationView.vue'
 
-import Stats from '../views/inventory/Stats.vue'
+import InventoryStats from '../views/inventory/InventoryStats.vue'
 import StatsTable from "../views/inventory/StatsTable";
 
 
@@ -387,7 +387,7 @@ export default [
         name: 'inventory-stats',
         path: '/inventory/stats',
         components: {
-          'app-content': Stats,
+          'app-content': InventoryStats,
           'app-subnav': SubNav
         },
         props: {

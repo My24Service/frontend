@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div :class="['app-page start-page dashboard-shltr', isDefaultFamily ? 'family-default' : '']">
     <header></header>
@@ -195,7 +194,7 @@ import dashboardMixin from "./dashboard_view/dashboardMixin"
 // the default family swaps in its own card primitives, its own stats tile,
 // its section order and its scoped styles (all on `profile.family`).
 export default {
-  name: 'Dashboard',
+  name: 'DashboardView',
   mixins: [dashboardMixin],
   components: {
     LogComponent,

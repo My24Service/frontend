@@ -1,18 +1,46 @@
 import type { AxiosInstance, AxiosResponse } from 'axios'
 import client from '@/services/api'
 
+/**
+ * What the base class needs to know about the objects it manages: they carry an
+ * optional `id`, the collection editor stamps `hasChanges` on them, and the
+ * rest is whatever the subclass's `model` constructor produced. Deliberately
+ * not a generic - the subclasses are still mostly untyped JS, and an index
+ * signature is what lets their valibot-derived shapes flow in unchanged.
+ */
+interface ModelInstance {
+  id?: number | string
+  hasChanges?: boolean
+  [key: string]: unknown
+}
+
+/**
+ * A body on its way to the API. `created`/`modified` are declared - rather than
+ * left to the index signature - because `delete obj.created` is only legal on a
+ * property TypeScript knows to be optional.
+ */
+interface WritePayload {
+  created?: unknown
+  modified?: unknown
+  [key: string]: unknown
+}
+
 // The default `model`: a placeholder for subclasses that never set one. It
 // ignores whatever it is constructed with, so it takes no parameters - a
-// zero-arg constructor is still assignable to `model`'s type below.
-class VoidModel {}
+// zero-arg constructor is still assignable to `model`'s type below. The index
+// signature is declared because a class - unlike an object literal type - gets
+// none implicitly, and `ModelInstance` has one.
+class VoidModel {
+  [key: string]: unknown
+}
 
 class BaseModel {
   axios: AxiosInstance = client
-  component: any = null
-  fields: Record<string, any> = {}
+  component: unknown = null
+  fields: Record<string, unknown> = {}
   url = ''
   listArgs: string[] = []
-  queryArgs: Record<string, any> = {}
+  queryArgs: Record<string, unknown> = {}
   searchQuery: string | null = null
   userFilter: string | null = null
   sort: string | null = null
@@ -22,22 +50,26 @@ class BaseModel {
   numPages = 0
   perPage = 20
 
-  model: new (data?: any) => any = VoidModel
-  collection: any[] = []
-  deletedItems: any[] = []
+  model: new (data?: unknown) => ModelInstance = VoidModel
+  collection: ModelInstance[] = []
+  deletedItems: ModelInstance[] = []
   editIndex: number | null = null
   isEdit = false
   editPk: number | string | null = null
-  editItem: any = null
-  modelDefaults: Record<string, any> = {}
-  beforeEditModel: any
+  // Null until the first `newEditItem()`, which every flow that reads it runs
+  // first (via `emptyCollectionItem`); the declared type skips the null so
+  // those reads need no guard.
+  editItem: ModelInstance = null as unknown as ModelInstance
+  modelDefaults: Record<string, unknown> = {}
+  // Assigned by `editCollectionItem` before any read of it.
+  beforeEditModel!: ModelInstance
   collectionHasChanges = false
   sortField: string | null = null
   sortOrder = 'asc'
 
   // TODO: finish this for managing items in invoice form
   // TODO: also implement this for orderlines/infolines/etc
-  newEditItem(data?: any) {
+  newEditItem(data?: unknown) {
     if (!data) {
       data = this.modelDefaults
     }
@@ -65,7 +97,7 @@ class BaseModel {
     this.collection = this.collection.filter((m) => m.id !== id)
     this.collectionHasChanges = true
   }
-  editCollectionItem(item: any, index: number) {
+  editCollectionItem(item: ModelInstance, index: number) {
     this.beforeEditModel = {...item}
     this.editIndex = index
     this.isEdit = true
@@ -84,7 +116,7 @@ class BaseModel {
     this.editPk = null
   }
   doEditCollectionItem() {
-    const newItem: any = new this.model({
+    const newItem: ModelInstance = new this.model({
       ...this.editItem
     })
 
@@ -107,7 +139,7 @@ class BaseModel {
   }
 
   async doDirectEditCollectionItem() {
-    await this.update(this.editItem.id, this.editItem)
+    await this.update(this.editItem.id as number | string, this.editItem)
     this.editIndex = null
     this.isEdit = false
     this.emptyCollectionItem()
@@ -139,11 +171,11 @@ class BaseModel {
     return this.postCopyFields(JSON.parse(JSON.stringify(this.fields)))
   }
 
-  postCopyFields(fields: Record<string, any>) {
+  postCopyFields(fields: Record<string, unknown>) {
     return fields
   }
 
-  setComponent(component: any) {
+  setComponent(component: unknown) {
     this.component = component
   }
 
@@ -155,8 +187,8 @@ class BaseModel {
     this.listArgs = this.listArgs.filter(thisArg => arg !== thisArg)
   }
 
-  setListArgs(listArgs: string[]) {
-    this.listArgs = [listArgs] as any
+  setListArgs(listArgs: string) {
+    this.listArgs = [listArgs]
   }
 
   resetListArgs() {
@@ -262,7 +294,7 @@ class BaseModel {
     // After searching, or changing orders the `page=xxx` values starts accumulating to something
     // like `page=1&page=1&page=1`, which is not desired. So an extra pass is done here to ensure
     // that each key is only added once to the listArgs.
-    const sanitizedArgs: Record<string, any> = {};
+    const sanitizedArgs: Record<string, unknown> = {};
 
     for (const argIndex in this.listArgs) {
       // HVG20250319:
@@ -332,7 +364,7 @@ class BaseModel {
   async getSelectOptions({ valueField = 'id', textField = 'name' }: { valueField?: string, textField?: string } = {}) {
     const data = await this.list()
 
-    return data.results.map((result: any) => ({
+    return data.results.map((result: Record<string, unknown>) => ({
       value: result[valueField],
       text: result[textField],
     }))
@@ -340,7 +372,7 @@ class BaseModel {
 
   async loadCollection() {
     const response = await this.list()
-    this.collection = response.results.map((c: any) => new this.model(c))
+    this.collection = response.results.map((c: unknown) => new this.model(c))
     this.collectionHasChanges = false
     this.deletedItems = []
   }
@@ -353,7 +385,7 @@ class BaseModel {
     return this.axios.get(this.getDetailUrl(pk)).then((response) => response.data)
   }
 
-  preInsert(obj: any) {
+  preInsert(obj: WritePayload) {
     if (obj.hasOwnProperty('created')) {
       delete obj.created
     }
@@ -363,20 +395,20 @@ class BaseModel {
     return obj
   }
 
-  async insert(obj: any) {
+  async insert(obj: WritePayload) {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
     return this.axios.post(this.url, this.preInsert(obj), headers).then((response: AxiosResponse) => response.data)
   }
 
-  preUpdate(obj: any) {
+  preUpdate(obj: WritePayload) {
     delete obj.created
     delete obj.modified
     return obj
   }
 
-  async update(pk: number | string, obj: any) {
+  async update(pk: number | string, obj: WritePayload) {
     return this.axios.patch(`${this.url}${pk}/`, this.preUpdate(obj))
       .then((response: AxiosResponse) => response.data)
   }

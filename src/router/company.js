@@ -1,7 +1,7 @@
 import TheAppLayout from '../components/TheAppLayout.vue'
 import SubNav from '../components/SubNav.vue'
 
-import Dashboard from '../views/company/Dashboard.vue'
+import CompanyDashboard from '../views/company/CompanyDashboard.vue'
 import {
   CompanyInfo,
   PartnerList,
@@ -150,7 +150,7 @@ export default [
       name: 'company-dashboard',
       path: '/company/dashboard',
       components: {
-        'app-content': Dashboard,
+        'app-content': CompanyDashboard,
         'app-subnav': SubNav
       },
       props: {

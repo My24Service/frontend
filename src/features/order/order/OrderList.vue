@@ -17,7 +17,7 @@
         modalId: 'delete-order-modal',
         confirmText: $trans('Are you sure you want to delete this order?'),
         destroyMutation: () => orderOrderDestroyMutation(),
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: listQueryKeyFor(mode)}),
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: orderOrderListQueryKey()}),
         deletedDetail: $trans('Order has been deleted'),
         deleteError: $trans('Error deleting order'),
       }"
@@ -82,13 +82,13 @@
 </template>
 
 <script lang="ts" setup>
-import { orderOrderDestroyMutation } from '@/api/@tanstack/vue-query.gen'
+import { orderOrderDestroyMutation, orderOrderListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES } from '@/constants'
 import { useAuthStore } from '@/features/auth'
 import { ServerTable, useServerTable } from '@/features/table'
 import { $trans } from '@/services/i18n'
 import { useMemberNewData } from '../use-member-new-data'
-import { isListMode, listOptionsFor, listQueryFrom, listQueryKeyFor, userFilterFrom, type ListMode } from './list-modes'
+import { isListMode, listOptionsFor, listQueryFrom, userFilterFrom, type ListMode } from './list-modes'
 import { useDispatchSelection } from './use-dispatch-selection'
 import { useOrderColumns, type OrderRow } from './use-order-columns'
 import { useSavedFilterPills } from './use-saved-filter-pills'

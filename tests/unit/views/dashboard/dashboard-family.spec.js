@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
-import Dashboard from '@/views/dashboard/Dashboard.vue'
+import DashboardView from '@/views/dashboard/DashboardView.vue'
 import BranchPhotoCard from '@/views/dashboard/components/BranchPhotoCard.vue'
 import BranchPhotoCardShltr from '@/views/dashboard/components/BranchPhotoCardShltr.vue'
 import DashboardBlock from '@/views/dashboard/components/DashboardBlock.vue'
@@ -38,7 +38,7 @@ beforeEach(() => {
 })
 
 async function mountDashboard(family) {
-  const wrapper = mountForm(Dashboard, {
+  const wrapper = mountForm(DashboardView, {
     auth: { isBranchEmployee: false },
     main: { getProductFamily: family },
   })
@@ -47,7 +47,7 @@ async function mountDashboard(family) {
   return wrapper
 }
 
-describe('Dashboard per product family', () => {
+describe('DashboardView per product family', () => {
   test('default: own card primitives, bootstrap stats cards, documents before work orders', async () => {
     const wrapper = await mountDashboard('default')
 

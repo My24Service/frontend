@@ -39,7 +39,7 @@
       <li class="tw:text-center" :class="isDefaultFamily ? '' : 'tw:px-4 tw:py-1 tw:text-xs tw:text-slate-500'">
         {{ memberInfo?.name }}
       </li>
-      <li><span class="dropdown-item"><Version /></span></li>
+      <li><span class="dropdown-item"><AppVersion /></span></li>
       <BDropdownDivider></BDropdownDivider>
       <BDropdownItem :to="settingsRoute" v-if="hasBranches">
         {{ $trans('Settings') }}
@@ -57,7 +57,7 @@ import { $trans } from '@/services/i18n'
 import { useMainStore } from '@/stores/main'
 import NavItems from '@/components/NavItems.vue'
 import NavBrand, { type MemberInfo } from '@/components/NavBrand.vue'
-import Version from '@/components/Version.vue'
+import AppVersion from '@/components/AppVersion.vue'
 
 // The sidebar for both product families. The shltr layout is the base; the
 // default family branches on `profile.family` for its root class, brand,

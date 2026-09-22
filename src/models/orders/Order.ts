@@ -137,15 +137,15 @@ export const orderFormDefaults = () => formDefaults(OrderFormSchema, ORDER_FORM_
  */
 const OrderModel = class {
   constructor(data: Partial<OrderForm> = {}) {
-    Object.assign(this, formDefaults(OrderFormSchema, ORDER_FORM_DEFAULTS), data)
+    Object.assign(this, orderFormDefaults(), data)
   }
   // The defaults are assigned in the constructor rather than declared as class
   // properties, so the construct signature is asserted to describe the result.
-} as new (data?: Partial<OrderForm>) => OrderForm
+} as new (data?: unknown) => OrderForm
 
 class OrderService extends BaseModel {
   model = OrderModel
-  fields = formDefaults(OrderFormSchema, ORDER_FORM_DEFAULTS)
+  fields = orderFormDefaults()
 
   url = '/order/order/'
   queryMode = 'all'
@@ -155,7 +155,7 @@ class OrderService extends BaseModel {
    * instance, so without this a long-lived session would keep handing out the
    * date that was "tomorrow" when the service was constructed.
    */
-  postCopyFields(fields: Record<string, any>) {
+  postCopyFields(fields: Record<string, unknown>) {
     fields.start_date = nextWorkingDay()
     fields.end_date = nextWorkingDay()
     return fields
@@ -165,7 +165,7 @@ class OrderService extends BaseModel {
    * Normalise an order for the API: drop the read-only timestamps and convert
    * the datepicker's Date objects to the `YYYY-MM-DD` the DateFields expect.
    */
-  private toApiPayload(order: Record<string, any>) {
+  private toApiPayload(order: Record<string, unknown>) {
     delete order.created
     delete order.modified
 
@@ -180,11 +180,11 @@ class OrderService extends BaseModel {
     return order
   }
 
-  preInsert(order: Record<string, any>) {
+  preInsert(order: Record<string, unknown>) {
     return this.toApiPayload(order)
   }
 
-  preUpdate(order: Record<string, any>) {
+  preUpdate(order: Record<string, unknown>) {
     return this.toApiPayload(order)
   }
 

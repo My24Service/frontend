@@ -1,7 +1,4 @@
-import {
-  orderOrderListOptions,
-  orderOrderListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
+import { orderOrderListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { OrderOrderListData } from '@/api/types.gen'
 import { baseListParams, type ServerPagedListQuery } from '@/features/table'
 
@@ -62,10 +59,4 @@ export function listOptionsFor(mode: ListMode, query: OrderListQuery, plainListO
   // and only the plain list additionally names a saved filter.
   if (mode === 'all') return orderOrderListOptions({query: {...query, ...plainListOnly}})
   return orderOrderListOptions({query: {...query, mode}})
-}
-
-export function listQueryKeyFor(_mode: ListMode) {
-  // Every mode shares the list's key: the mode is part of the query the
-  // options carry, so invalidating the list refreshes all of them.
-  return orderOrderListQueryKey()
 }

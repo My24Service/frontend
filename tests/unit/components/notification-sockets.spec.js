@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { nextTick } from 'vue'
 
-import Notification from '@/components/Notification.vue'
+import NotificationListener from '@/components/NotificationListener.vue'
 
 import { mountForm } from '../support/form-harness.js'
 
@@ -64,9 +64,9 @@ beforeEach(() => {
   for (const socket of all()) socket.events = []
 })
 
-describe('Notification', () => {
+describe('NotificationListener', () => {
   test('registers and connects one handler per socket on mount', async () => {
-    mountForm(Notification)
+    mountForm(NotificationListener)
     await flush()
 
     for (const socket of all()) {
@@ -75,7 +75,7 @@ describe('Notification', () => {
   })
 
   test('drops every handler, and closes every socket, on unmount', async () => {
-    const wrapper = mountForm(Notification)
+    const wrapper = mountForm(NotificationListener)
     await flush()
 
     wrapper.unmount()
