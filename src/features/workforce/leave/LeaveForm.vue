@@ -287,7 +287,7 @@ const leaveTypes = computed(() => leaveTypesQuery.data.value?.results ?? [])
 
 const {term, options, loading: searching} = useUserSearch()
 
-const form = useResourceForm<LeaveFormValues, UserLeaveHours, unknown, LeaveFieldErrors>({
+const form = useResourceForm({
   pk: () => props.pk,
   resource: companyUserLeaveHoursAdmin,
   empty: () => emptyLeave(today, now),

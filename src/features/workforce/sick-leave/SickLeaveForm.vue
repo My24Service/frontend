@@ -147,7 +147,7 @@ const props = withDefaults(defineProps<{
 const today = moment().format('YYYY-MM-DD')
 const {term, options, loading: searching} = useUserSearch()
 
-const form = useResourceForm<SickLeaveFormValues, UserSickLeave, unknown, SickLeaveFieldErrors>({
+const form = useResourceForm({
   pk: () => props.pk,
   resource: companyUserSickLeaveAdmin,
   empty: () => emptySickLeave(today),

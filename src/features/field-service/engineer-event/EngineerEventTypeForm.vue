@@ -127,12 +127,7 @@ const {
   buttonDisabled,
   submitForm,
   cancelForm,
-} = useResourceForm<
-  EngineerEventTypeFormValues,
-  EngineerEventType,
-  EngineerEventTypeRequest,
-  EngineerEventTypeFieldErrors
->({
+} = useResourceForm({
   pk: () => props.pk,
   resource: companyEngineerEventType,
   empty: emptyEngineerEventType,

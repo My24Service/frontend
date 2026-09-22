@@ -198,7 +198,7 @@ function withStagedOrders(values: TripFormValues): TripFormValues {
   return {...values, trip_orders: stagedOrders.rows.value.map((row) => ({...row}))}
 }
 
-const form = useResourceForm<TripFormValues, Trip, TripBody, TripFieldErrors>({
+const form = useResourceForm({
   pk: () => props.pk,
   // The availability detail is a second read model of one trip - its
   // description, date and headcount are what a write changes - and it sits

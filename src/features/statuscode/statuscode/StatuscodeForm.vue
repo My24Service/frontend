@@ -147,7 +147,7 @@ const {
   buttonDisabled,
   submitForm,
   cancelForm,
-} = useResourceForm<StatuscodeFormValues, Statuscode, StatuscodeRequest, StatuscodeFieldErrors>({
+} = useResourceForm({
   pk: () => props.pk,
   resource: statuscodeStatuscode,
   invalidate: invalidateStatuscodeLists,

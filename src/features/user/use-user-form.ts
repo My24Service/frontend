@@ -50,7 +50,7 @@ export function useUserForm<
   // wiring included, whichever shape the form chose.
   const { validate, parse, takenMessage, prepare, ...passthrough } = config
 
-  const base = useResourceForm<TValues, TRecord, TBody, TErrors>({
+  const base = useResourceForm({
     ...passthrough,
     validate: async (values: TValues, context: WriteContext) => {
       prepare?.(values)

@@ -400,7 +400,7 @@ const nameInput = useTemplateRef<{focus?: () => void}>('name')
 /** The document panel, which only a create has to hand an id to. */
 const documents = useTemplateRef<{parentCreated: (pk: number) => Promise<unknown>}>('documents')
 
-const form = useResourceForm<EquipmentFormValues, Equipment, unknown, EquipmentFieldErrors>({
+const form = useResourceForm({
   pk: () => props.pk,
   resource: equipmentEquipment,
   empty: () => emptyEquipment(defaultCurrency.value),

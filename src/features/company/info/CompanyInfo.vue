@@ -384,7 +384,7 @@ const mainStore = useMainStore()
 const isEditing = ref(false)
 const countries = computed(() => mainStore.getCountries)
 
-const form = useResourceForm<InfoFormValues, Member, unknown, InfoFormErrors>({
+const form = useResourceForm({
   // No `:pk` on this route and no create: a truthy pseudo-pk holds the kit's
   // edit path, which the retrieve and update below never read.
   pk: () => 'me',

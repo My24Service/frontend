@@ -108,7 +108,7 @@ const props = withDefaults(defineProps<{
 const nameInput = useTemplateRef<{focus?: () => void}>('name')
 const {wireKind, chooses} = useOwnerContext()
 
-const form = useResourceForm<BuildingFormValues, Building, unknown, BuildingFieldErrors>({
+const form = useResourceForm({
   pk: () => props.pk,
   resource: equipmentBuilding,
   empty: emptyBuilding,

@@ -99,7 +99,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const form = useResourceForm<PictureFormValues, Picture, unknown, PictureFieldErrors>({
+const form = useResourceForm({
   pk: () => props.pk,
   resource: companyPicture,
   empty: emptyPicture,

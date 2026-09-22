@@ -302,7 +302,7 @@ const {
   saving,
   submitForm,
   cancelForm,
-} = useResourceForm<OrderFormValues, OrderDetail, OrderBody, OrderFieldErrors>({
+} = useResourceForm({
   pk: () => props.pk,
   resource: orderOrder,
   empty: emptyOrder,

@@ -305,7 +305,7 @@ const templateTypes = [
   { value: 'quotation', text: $trans('Quotation') },
 ]
 
-const form = useResourceForm<TemplateFormValues, Template, unknown, TemplateFormErrors>({
+const form = useResourceForm({
   pk: () => props.pk,
   resource: companyTemplate,
   empty: emptyTemplate,

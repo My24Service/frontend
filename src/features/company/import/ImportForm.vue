@@ -132,7 +132,7 @@ const router = useRouter()
 /** The route decides the write once, at setup: no pk, a create. */
 const isCreateRoute = props.pk == null
 
-const form = useResourceForm<ImportFormValues, Import, unknown, ImportFormErrors>({
+const form = useResourceForm({
   pk: () => props.pk ?? null,
   resource: companyImport,
   empty: emptyImport,

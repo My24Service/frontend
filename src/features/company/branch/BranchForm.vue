@@ -281,7 +281,7 @@ const branchConfig = {
   copy: branchCopy,
 }
 
-const form = useResourceForm<BranchFormValues, Branch, unknown, BranchFieldErrors>(isMyBranch.value
+const form = useResourceForm(isMyBranch.value
   ? {
     ...branchConfig,
     // No `:pk` on this route, but always an edit: a truthy pseudo-pk holds

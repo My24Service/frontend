@@ -161,7 +161,7 @@ const nameInput = useTemplateRef<{focus?: () => void}>('name')
 const documents = useTemplateRef<{parentCreated: (pk: number) => Promise<unknown>}>('documents')
 const {wireKind, chooses} = useOwnerContext()
 
-const form = useResourceForm<LocationFormValues, Location, unknown, LocationFieldErrors>({
+const form = useResourceForm({
   pk: () => props.pk,
   resource: equipmentLocation,
   empty: emptyLocation,

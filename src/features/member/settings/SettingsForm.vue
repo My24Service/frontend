@@ -68,7 +68,7 @@ const {
   isLoading,
   buttonDisabled,
   submitForm,
-} = useResourceForm<SettingsFormValues, MemberSettings, PatchedMemberSettingsRequest, SettingsFieldErrors>({
+} = useResourceForm({
   // The settings are one record per tenant: no pk on the route, no create.
   // `pk` is a constant so the composable treats every save as an update, and
   // the generated client refuses a path on an endpoint that has none, so only

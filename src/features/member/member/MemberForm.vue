@@ -317,7 +317,7 @@ const {
   submitForm,
   cancelForm,
   record,
-} = useResourceForm<MemberRequest, Member, ReturnType<typeof parseMemberForm>, MemberFieldErrors>({
+} = useResourceForm({
   pk: () => props.pk,
   resource: memberMember,
   empty: emptyMember,
