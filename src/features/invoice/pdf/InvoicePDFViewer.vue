@@ -56,6 +56,7 @@ import {
   invoiceInvoiceGeneratePreviewPdfCreateMutation,
   invoiceInvoiceMakeDefinitiveCreateMutation,
   invoiceInvoiceRecreatePdfCreateMutation,
+  invoiceInvoiceRetrieveOptions,
   invoiceInvoiceRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Invoice } from '@/api/types.gen'
@@ -184,8 +185,14 @@ async function doMakeDefinitive() {
     await Promise.all([invalidateAfterPdfChange(), invalidateReads(invoiceInvoice)(queryClient)])
     isLoading.value = false
     infoToast(create, $trans('Success'), $trans('Invoice is now definitive'))
-    if (props.invoice.uuid) {
-      await router.push({name: 'invoice-view', params: {uuid: props.invoice.uuid}})
+    // make_definitive's response carries no uuid and the prop still holds the
+    // record from before it, so read the invoice fresh for where to go next.
+    const {uuid} = await queryClient.fetchQuery({
+      ...invoiceInvoiceRetrieveOptions({path: {id: props.invoice.id}}),
+      staleTime: 0,
+    })
+    if (uuid) {
+      await router.push({name: 'invoice-view', params: {uuid}})
     }
   } catch (error) {
     isLoading.value = false

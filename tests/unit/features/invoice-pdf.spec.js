@@ -11,9 +11,9 @@ vi.mock('bootstrap-vue-next', async (original) => ({...(await original()), useTo
 const api = installApiSeam()
 const base = '/api/invoice/invoice/{id}/'
 const uuid = '00000000-0000-4000-8000-000000000021'
-const invoice = (preliminary = false) => fixtureFor(vInvoice, {
+const invoice = (preliminary = false, overrides = {}) => fixtureFor(vInvoice, {
   id: 8, uuid, invoice_id: 'INV-8', order: 42, preliminary,
-  invoice_pdf_from_docx_filename: 'invoice.pdf',
+  invoice_pdf_from_docx_filename: 'invoice.pdf', ...overrides,
 })
 const Parent = defineComponent({
   components: {InvoicePDFViewer},
@@ -32,16 +32,17 @@ beforeEach(() => {
   api.post(base + 'download_pdf/', pdf)
   api.post(base + 'recreate_pdf/', new HttpResponse(null, {status: 200}))
   api.post(base + 'make_definitive/', {result: true})
+  api.get(base, invoice(false))
 })
 afterEach(() => {
   wrappers.splice(0).forEach(wrapper => wrapper.unmount())
   vi.restoreAllMocks()
 })
-async function openViewer({preliminary = false, isView = true, auth = {isPlanning: true}} = {}) {
+async function openViewer({preliminary = false, isView = true, auth = {isPlanning: true}, overrides = {}} = {}) {
   const wrapper = mountForm(Parent, {
     deep: true,
     routes: [{name: 'invoice-view', path: '/view/:uuid', component: {template: '<div />'}}],
-    props: {invoice: invoice(preliminary), isView}, auth,
+    props: {invoice: invoice(preliminary, overrides), isView}, auth,
   })
   wrappers.push(wrapper)
   await wrapper.get('#open-pdf').trigger('click')
@@ -94,6 +95,17 @@ test('make definitive requires rendered confirmation then navigates', async () =
   expect(wrapper.vm.$router.currentRoute.value.name).toBe('invoice-view')
   expect(wrapper.vm.$router.currentRoute.value.params.uuid).toBe(uuid)
   expect(toasts().map(t => t.body)).toContain('Invoice is now definitive')
+})
+test('make definitive navigates to the uuid the server has now, not the stale prop', async () => {
+  const fresh = '00000000-0000-4000-8000-000000000099'
+  api.get(base, invoice(false, {uuid: fresh}))
+  const wrapper = await openViewer({preliminary: true, isView: false, overrides: {uuid: undefined}})
+  await click('Make definitive')
+  document.querySelector('#invoice-definitive-modal .modal-footer .btn-primary').click()
+  await settle()
+  expect(posts('make_definitive')).toHaveLength(1)
+  expect(wrapper.vm.$router.currentRoute.value.name).toBe('invoice-view')
+  expect(wrapper.vm.$router.currentRoute.value.params.uuid).toBe(fresh)
 })
 test('download button makes one additional request and releases download URL', async () => {
   await openViewer()
