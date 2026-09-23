@@ -4247,7 +4247,7 @@ export const vNotFoundResponse = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: PatchedStatuscodeRequest, Statuscode, StatuscodeRequest
+ * Nested in: Action, ActionRequest, PatchedActionRequest, PatchedStatuscodeRequest, Statuscode, StatuscodeRequest
  */
 /**
  * * `<` - <
@@ -8134,8 +8134,8 @@ export const vProductRequest = v.object({
  * What product a tenant is: the web client themes and gates on this.
  *
  * Instance is a Member. `modules` is the plain list of module names in the
- * tenant's contract, empty when there is no contract. `module_parts` maps
- * each module in the contract's module paths to its enabled parts.
+ * tenant's contract's module paths, empty when there is no contract.
+ * `module_parts` maps each of those modules to its enabled parts.
  */
 export const vProfile = v.object({
     family: vProductFamilyEnum,
@@ -8616,7 +8616,10 @@ export const vAction = v.object({
     statuscode: v.pipe(v.number(), v.integer()),
     destination: v.nullable(v.pipe(v.string(), v.readonly())),
     conditions: v.pipe(v.string(), v.readonly()),
-    override_status: v.optional(v.boolean())
+    override_status: v.optional(v.boolean()),
+    num_days: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    num_days_operator: v.optional(vNumDaysOperatorEnum),
+    num_days_model_field: v.nullish(v.pipe(v.string(), v.maxLength(255)))
 });
 
 /**
@@ -8635,7 +8638,10 @@ export const vActionRequest = v.object({
     json_conditions: v.nullish(v.array(vActionConditionRequest)),
     querymode: v.nullish(vQuerymodeEnum),
     statuscode: v.pipe(v.number(), v.integer()),
-    override_status: v.optional(v.boolean())
+    override_status: v.optional(v.boolean()),
+    num_days: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    num_days_operator: v.optional(vNumDaysOperatorEnum),
+    num_days_model_field: v.nullish(v.pipe(v.string(), v.maxLength(255)))
 });
 
 /**
@@ -8725,7 +8731,10 @@ export const vPatchedActionRequest = v.object({
     json_conditions: v.nullish(v.array(vActionConditionRequest)),
     querymode: v.nullish(vQuerymodeEnum),
     statuscode: v.optional(v.pipe(v.number(), v.integer())),
-    override_status: v.optional(v.boolean())
+    override_status: v.optional(v.boolean()),
+    num_days: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    num_days_operator: v.optional(vNumDaysOperatorEnum),
+    num_days_model_field: v.nullish(v.pipe(v.string(), v.maxLength(255)))
 });
 
 /**
@@ -12955,7 +12964,10 @@ export const vActionWritable = v.object({
     json_conditions: v.nullish(v.array(vActionCondition)),
     querymode: v.nullish(vQuerymodeEnum),
     statuscode: v.pipe(v.number(), v.integer()),
-    override_status: v.optional(v.boolean())
+    override_status: v.optional(v.boolean()),
+    num_days: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    num_days_operator: v.optional(vNumDaysOperatorEnum),
+    num_days_model_field: v.nullish(v.pipe(v.string(), v.maxLength(255)))
 });
 
 /**
@@ -16195,8 +16207,8 @@ export const vProductListWritable = v.object({
  * What product a tenant is: the web client themes and gates on this.
  *
  * Instance is a Member. `modules` is the plain list of module names in the
- * tenant's contract, empty when there is no contract. `module_parts` maps
- * each module in the contract's module paths to its enabled parts.
+ * tenant's contract's module paths, empty when there is no contract.
+ * `module_parts` maps each of those modules to its enabled parts.
  */
 export const vProfileWritable = v.object({
     family: vProductFamilyEnum,

@@ -16,23 +16,19 @@ import { labelTextColor } from './palette'
 type WireValues = v.InferInput<typeof vStatuscodeRequest>
 
 /**
- * The three fields of a date trigger: `num_days`, compared with
- * `num_days_operator`, from the date in `num_days_model_field`. For an order
- * the backend sets the statuscode on the orders in that window (a reminder
- * mail "14 days before `start_date`"); for a quotation it says when the
- * quotation expires.
+ * A quotation's expiry condition: `num_days`, compared with
+ * `num_days_operator`, from the date in `num_days_model_field` ("14 days
+ * after `sent`"). The order date trigger ("mail 14 days before `start_date`")
+ * lives on the action instead, see `../action/schemas.ts`.
  */
 const DATE_TRIGGER_FIELDS = ['num_days', 'num_days_operator', 'num_days_model_field'] as const
 
-/** The code types whose statuscodes carry a date trigger. */
-export const DATE_TRIGGER_TYPES: readonly CodeType[] = ['order', 'quotation']
+/** The code types whose statuscodes carry an expiry condition. */
+export const DATE_TRIGGER_TYPES: readonly CodeType[] = ['quotation']
 
 export function hasDateTrigger(codeType: CodeType): boolean {
   return DATE_TRIGGER_TYPES.includes(codeType)
 }
-
-/** The order date fields a trigger can count from; the backend accepts no others. */
-export const ORDER_DATE_TRIGGER_FIELDS = ['start_date', 'end_date'] as const
 
 /**
  * The form's state. `code_type` is not on it: the screen is mounted per type

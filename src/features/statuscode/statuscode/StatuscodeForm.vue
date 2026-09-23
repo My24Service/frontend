@@ -87,7 +87,6 @@
 
             <ExpiryConditionFields
               v-if="hasDateTrigger(codeType)"
-              :code-type="codeType"
               v-model:num-days="statuscode.num_days"
               v-model:operator="statuscode.num_days_operator"
               v-model:model-field="statuscode.num_days_model_field"

@@ -90,24 +90,17 @@ describe('parseStatuscode', () => {
     expect(body).toMatchObject({ num_days: 14, num_days_operator: '>=', num_days_model_field: 'created' })
   })
 
-  test('carries the date trigger for an order', () => {
-    const body = parseStatuscode(
-      { ...valid, num_days: '14', num_days_operator: '<=', num_days_model_field: 'start_date' },
-      'order',
-    )
+  test('leaves the expiry condition off every other code type — an order\'s date trigger is on its actions', () => {
+    for (const codeType of ['order', 'invoice']) {
+      const body = parseStatuscode(
+        { ...valid, num_days: '14', num_days_operator: '>=', num_days_model_field: 'created' },
+        codeType,
+      )
 
-    expect(body).toMatchObject({ num_days: 14, num_days_operator: '<=', num_days_model_field: 'start_date' })
-  })
-
-  test('leaves the date trigger off every other code type', () => {
-    const body = parseStatuscode(
-      { ...valid, num_days: '14', num_days_operator: '>=', num_days_model_field: 'created' },
-      'invoice',
-    )
-
-    expect('num_days' in body).toBe(false)
-    expect('num_days_operator' in body).toBe(false)
-    expect('num_days_model_field' in body).toBe(false)
+      expect('num_days' in body).toBe(false)
+      expect('num_days_operator' in body).toBe(false)
+      expect('num_days_model_field' in body).toBe(false)
+    }
   })
 })
 

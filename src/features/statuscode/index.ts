@@ -15,6 +15,7 @@ export {
   ActionForm,
   actionFromRecord,
   actionTypesFor,
+  dateTriggerFieldsFor,
   emptyAction,
   parseAction,
   validateAction,

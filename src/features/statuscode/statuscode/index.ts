@@ -7,7 +7,6 @@ export { roleLabel } from './roles'
 export {
   DATE_TRIGGER_TYPES,
   hasDateTrigger,
-  ORDER_DATE_TRIGGER_FIELDS,
   emptyStatuscode,
   statuscodeFromRecord,
   FIELD_MESSAGES,

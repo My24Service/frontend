@@ -21412,6 +21412,17 @@ components:
           readOnly: true
         override_status:
           type: boolean
+        num_days:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        num_days_operator:
+          $ref: '#/components/schemas/NumDaysOperatorEnum'
+        num_days_model_field:
+          type: string
+          nullable: true
+          maxLength: 255
       required:
       - conditions
       - destination
@@ -21503,6 +21514,17 @@ components:
           type: integer
         override_status:
           type: boolean
+        num_days:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        num_days_operator:
+          $ref: '#/components/schemas/NumDaysOperatorEnum'
+        num_days_model_field:
+          type: string
+          nullable: true
+          maxLength: 255
       required:
       - name
       - statuscode
@@ -35243,6 +35265,17 @@ components:
           type: integer
         override_status:
           type: boolean
+        num_days:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        num_days_operator:
+          $ref: '#/components/schemas/NumDaysOperatorEnum'
+        num_days_model_field:
+          type: string
+          nullable: true
+          maxLength: 255
     PatchedActivityRequest:
       type: object
       properties:
@@ -38535,8 +38568,8 @@ components:
         What product a tenant is: the web client themes and gates on this.
 
         Instance is a Member. `modules` is the plain list of module names in the
-        tenant's contract, empty when there is no contract. `module_parts` maps
-        each module in the contract's module paths to its enabled parts.
+        tenant's contract's module paths, empty when there is no contract.
+        `module_parts` maps each of those modules to its enabled parts.
       properties:
         family:
           $ref: '#/components/schemas/ProductFamilyEnum'

@@ -6,6 +6,7 @@ import { vActionRequest } from '@/api/valibot.gen'
 import {
   actionFromRecord,
   actionTypesFor,
+  dateTriggerFieldsFor,
   emptyAction,
   parseAction,
   validateAction,
@@ -69,6 +70,44 @@ describe('parseAction', () => {
 
     expect(body).toMatchObject({ address: null, subject: null, template: null, description: null })
   })
+
+  test('carries a date trigger with the days as a number', () => {
+    const body = parseAction(
+      { ...valid, num_days: '14', num_days_operator: '<=', num_days_model_field: 'start_date' },
+      { isCreate: true, statuscodePk: '3' },
+    )
+
+    expect(body).toMatchObject({ num_days: 14, num_days_operator: '<=', num_days_model_field: 'start_date' })
+  })
+
+  test('without a date field sends no days either', () => {
+    const body = parseAction(
+      { ...valid, num_days: '14', num_days_model_field: '' },
+      { isCreate: true, statuscodePk: '3' },
+    )
+
+    expect(body).toMatchObject({ num_days: null, num_days_model_field: null })
+  })
+})
+
+describe('validateAction, the date trigger', () => {
+  test('wants the number of days once a date field is picked', () => {
+    expect(validateAction({ ...valid, num_days: '', num_days_model_field: 'start_date' }))
+      .toEqual({ num_days: 'Please enter a whole number' })
+  })
+
+  test('refuses a number of days that is not whole', () => {
+    expect(validateAction({ ...valid, num_days: '2.5', num_days_model_field: 'start_date' }))
+      .toHaveProperty('num_days')
+  })
+})
+
+describe('dateTriggerFieldsFor', () => {
+  test('offers the date fields the backend accepts, and none for other types', () => {
+    expect(dateTriggerFieldsFor('order')).toEqual(['start_date', 'end_date'])
+    expect(dateTriggerFieldsFor('invoice')).toEqual(['definitive_date'])
+    expect(dateTriggerFieldsFor('quotation')).toEqual([])
+  })
 })
 
 describe('actionFromRecord', () => {
@@ -77,7 +116,9 @@ describe('actionFromRecord', () => {
       id: 7, ...valid, statuscode: 3, destination: null, conditions: '',
     })
 
-    expect(values).toEqual({ ...valid, statuscode: 3 })
+    expect(values).toEqual({
+      ...valid, statuscode: 3, num_days: null, num_days_operator: '<=', num_days_model_field: null,
+    })
   })
 
   test('gives a record with null conditions an empty list to add to', () => {

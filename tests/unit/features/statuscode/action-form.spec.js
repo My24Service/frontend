@@ -131,6 +131,9 @@ describe('ActionForm, creating an action', () => {
           querymode: 'or',
           statuscode: 3,
           override_status: false,
+          num_days: null,
+          num_days_operator: '<=',
+          num_days_model_field: null,
         },
       },
     ])
@@ -222,6 +225,45 @@ describe('ActionForm, the action types per code type', () => {
   })
 })
 
+describe('ActionForm, the date trigger', () => {
+  test('an order picks from its date fields, and the trigger rides the wire', async () => {
+    const wrapper = await mountActionForm({ codeType: 'order', statuscodePk: '3' })
+
+    expect(wrapper.text()).toContain('Date trigger')
+    const field = wrapper.get('select#action_num_days_model_field')
+    expect(field.findAll('option').slice(1).map((o) => o.element.value)).toEqual(['start_date', 'end_date'])
+
+    await type(wrapper, '#action_name', 'herinnering')
+    await field.setValue('start_date')
+    await wrapper.get('#action_num_days_operator').setValue('<=')
+    await type(wrapper, '#action_num_days', '14')
+    await submit(wrapper)
+
+    expect(api.requests().at(-1).body).toMatchObject({
+      num_days: 14,
+      num_days_operator: '<=',
+      num_days_model_field: 'start_date',
+    })
+  })
+
+  test('a picked date field without days is refused, and nothing is sent', async () => {
+    const wrapper = await mountActionForm({ codeType: 'order', statuscodePk: '3' })
+
+    await type(wrapper, '#action_name', 'herinnering')
+    await wrapper.get('select#action_num_days_model_field').setValue('start_date')
+    await submit(wrapper)
+
+    expect(api.requests().filter((r) => r.method === 'post')).toEqual([])
+  })
+
+  test('a type without date fields offers no trigger', async () => {
+    const wrapper = await mountActionForm({ codeType: 'quotation', statuscodePk: '3' })
+
+    expect(wrapper.text()).not.toContain('Date trigger')
+    expect(wrapper.find('#action_num_days').exists()).toBe(false)
+  })
+})
+
 describe('ActionForm, conditions', () => {
   test('a condition typed in and added rides the wire; a removed one does not', async () => {
     const wrapper = await mountActionForm({ statuscodePk: '3' })
@@ -292,6 +334,9 @@ describe('ActionForm, editing an action', () => {
           querymode: 'or',
           statuscode: 3,
           override_status: false,
+          num_days: null,
+          num_days_operator: '<=',
+          num_days_model_field: null,
         },
       },
     ])

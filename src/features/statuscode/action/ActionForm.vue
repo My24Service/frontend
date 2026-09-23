@@ -105,6 +105,16 @@
             <BFormGroup label-size="sm" :label="$trans('Condition handling')" label-for="action_querymode">
               <BFormSelect id="action_querymode" v-model="action.querymode" :options="QUERYMODES" size="sm" />
             </BFormGroup>
+
+            <DateTriggerFields
+              v-if="dateTriggerFieldsFor(codeType).length"
+              :code-type="codeType"
+              v-model:num-days="action.num_days"
+              v-model:operator="action.num_days_operator"
+              v-model:model-field="action.num_days_model_field"
+              :error="errors.num_days"
+              :submitted="submitClicked"
+            />
           </div>
 
           <div class="panel">
@@ -204,9 +214,11 @@ import {
 } from '@/features/table'
 import type { CodeType } from '../code-types'
 import { invalidateStatuscodeLists } from '../invalidation'
+import DateTriggerFields from './DateTriggerFields.vue'
 import {
   actionFromRecord,
   actionTypesFor,
+  dateTriggerFieldsFor,
   emptyAction,
   FIELD_LABELS,
   parseAction,

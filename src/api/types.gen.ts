@@ -19,6 +19,9 @@ export type Action = {
     readonly destination: string | null;
     readonly conditions: string;
     override_status?: boolean;
+    num_days?: number | null;
+    num_days_operator?: NumDaysOperatorEnum;
+    num_days_model_field?: string | null;
 };
 
 /**
@@ -63,6 +66,9 @@ export type ActionRequest = {
     querymode?: QuerymodeEnum | null;
     statuscode: number;
     override_status?: boolean;
+    num_days?: number | null;
+    num_days_operator?: NumDaysOperatorEnum;
+    num_days_model_field?: string | null;
 };
 
 /**
@@ -5604,6 +5610,9 @@ export type PatchedActionRequest = {
     querymode?: QuerymodeEnum | null;
     statuscode?: number;
     override_status?: boolean;
+    num_days?: number | null;
+    num_days_operator?: NumDaysOperatorEnum;
+    num_days_model_field?: string | null;
 };
 
 export type PatchedActivityRequest = {
@@ -6935,8 +6944,8 @@ export type ProductRequest = {
  * What product a tenant is: the web client themes and gates on this.
  *
  * Instance is a Member. `modules` is the plain list of module names in the
- * tenant's contract, empty when there is no contract. `module_parts` maps
- * each module in the contract's module paths to its enabled parts.
+ * tenant's contract's module paths, empty when there is no contract.
+ * `module_parts` maps each of those modules to its enabled parts.
  */
 export type Profile = {
     family: ProductFamilyEnum;
@@ -9515,6 +9524,9 @@ export type ActionWritable = {
     querymode?: QuerymodeEnum | null;
     statuscode: number;
     override_status?: boolean;
+    num_days?: number | null;
+    num_days_operator?: NumDaysOperatorEnum;
+    num_days_model_field?: string | null;
 };
 
 export type ActivityWritable = {
@@ -12206,8 +12218,8 @@ export type ProductListWritable = {
  * What product a tenant is: the web client themes and gates on this.
  *
  * Instance is a Member. `modules` is the plain list of module names in the
- * tenant's contract, empty when there is no contract. `module_parts` maps
- * each module in the contract's module paths to its enabled parts.
+ * tenant's contract's module paths, empty when there is no contract.
+ * `module_parts` maps each of those modules to its enabled parts.
  */
 export type ProfileWritable = {
     family: ProductFamilyEnum;
