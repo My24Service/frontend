@@ -1808,29 +1808,6 @@ export const vEngineerEventTypeRequest = v.object({
     statuscode: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
-export const vEngineerEventXls = v.object({
-    engineer_name: v.pipe(v.string(), v.readonly()),
-    event_dts: v.optional(v.pipe(v.string(), v.isoTimestamp())),
-    event_type: v.pipe(v.string(), v.maxLength(255)),
-    measure_last_event_type: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    secs_since_last_measure_event_type: v.nullish(v.number()),
-    last_measure_event: v.nullish(v.pipe(v.number(), v.integer())),
-    assigned_order_name: v.nullable(v.pipe(v.string(), v.readonly())),
-    created: v.pipe(v.string(), v.readonly())
-});
-
-export const vEngineerExcel = v.object({
-    email: v.pipe(v.string(), v.readonly()),
-    username: v.pipe(v.string(), v.readonly()),
-    first_name: v.pipe(v.string(), v.readonly()),
-    last_name: v.pipe(v.string(), v.readonly()),
-    address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100)))
-});
-
 /**
  * @endpoints
  * Response:
@@ -2136,7 +2113,7 @@ export const vEquipmentStateRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: Equipment, EquipmentBranchCreateRequest, EquipmentCreate, EquipmentCreateQuickRequest, EquipmentCustomerCreateRequest, EquipmentOrderLine, +2 more
+ * Nested in: Equipment, EquipmentBranchCreateRequest, EquipmentCreate, EquipmentCreateQuickRequest, EquipmentCustomerCreateRequest, EquipmentOrderLine, +1 more
  */
 /**
  * * `technical` - Technical
@@ -2365,16 +2342,6 @@ export const vEquipment = v.object({
     documents: v.pipe(v.array(vEquipmentDocument), v.readonly()),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly())
-});
-
-export const vEquipmentQr = v.object({
-    name: v.pipe(v.string(), v.maxLength(255)),
-    type: v.optional(vEquipmentTypeEnum),
-    branch_customer: v.nullable(v.pipe(v.string(), v.readonly())),
-    brand: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    installation_date: v.nullish(v.pipe(v.string(), v.isoDate())),
-    location: v.nullable(v.pipe(v.string(), v.readonly())),
-    deep_link: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -3358,12 +3325,6 @@ export const vLocation = v.object({
     modified: v.pipe(v.string(), v.readonly())
 });
 
-export const vLocationQr = v.object({
-    branch_customer: v.nullable(v.pipe(v.string(), v.readonly())),
-    name: v.pipe(v.string(), v.maxLength(255)),
-    deep_link: v.nullable(v.pipe(v.string(), v.readonly()))
-});
-
 /**
  * @endpoints
  * Request body:
@@ -3633,25 +3594,6 @@ export const vMaterialCreateRequest = v.object({
     price_selling_alt_ex_currency: v.optional(vCurrencyEnum),
     external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     image: v.nullish(v.string())
-});
-
-export const vMaterialStatsTableExcel = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    supplier_name: v.nullable(v.pipe(v.string(), v.readonly())),
-    num_sales_without_tax_true: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    num_sales_without_tax_false: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    num_sales: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    turnover_without_tax_true: v.pipe(v.number(), v.readonly()),
-    turnover_without_tax_false: v.pipe(v.number(), v.readonly()),
-    turnover: v.pipe(v.number(), v.readonly()),
-    num_entries: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    profit: v.pipe(v.number(), v.readonly()),
-    sum_price_purchase: v.pipe(v.number(), v.readonly()),
-    margin_product: v.pipe(v.number(), v.readonly()),
-    current_stock: v.pipe(v.number(), v.readonly()),
-    sum_inventory: v.pipe(v.record(v.string(), v.number()), v.readonly()),
-    num_purchase: v.pipe(v.pipe(v.number(), v.integer()), v.readonly())
 });
 
 /**
@@ -8446,26 +8388,6 @@ export const vPatchedPurchaseOrderWithMaterialsUpdateRequest = v.object({
     materials: v.optional(v.array(vPurchaseOrderMaterialRowRequest))
 });
 
-export const vPurchaseOrderMaterialTotalCustomer = v.object({
-    sum_amount: v.number(),
-    sum_price_purchase: v.number(),
-    sum_price_selling: v.number(),
-    profit: v.number(),
-    amount_perc: v.number(),
-    amount_selling_perc: v.number(),
-    customer_name: v.string()
-});
-
-export const vPurchaseOrderMaterialTotalSupplier = v.object({
-    sum_amount: v.number(),
-    sum_price_purchase: v.number(),
-    sum_price_selling: v.number(),
-    profit: v.number(),
-    amount_perc: v.number(),
-    amount_selling_perc: v.number(),
-    supplier_name: v.string()
-});
-
 /**
  * @endpoints
  * Response:
@@ -9887,23 +9809,6 @@ export const vStreamInfoResponse = v.object({
     token: v.string(),
     channel_id: v.string(),
     channel_title: v.string()
-});
-
-export const vStudentExcel = v.object({
-    email: v.pipe(v.string(), v.readonly()),
-    username: v.pipe(v.string(), v.readonly()),
-    first_name: v.pipe(v.string(), v.readonly()),
-    last_name: v.pipe(v.string(), v.readonly()),
-    street: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    house_number: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    house_number_addition: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
-    remarks: v.nullish(v.string()),
-    info: v.optional(v.string()),
-    rating_avg: v.nullable(v.pipe(v.number(), v.readonly())),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(128)))
 });
 
 /**
@@ -13597,22 +13502,6 @@ export const vEngineerEventTypeWritable = v.object({
     statuscode: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
-export const vEngineerEventXlsWritable = v.object({
-    event_dts: v.optional(v.pipe(v.string(), v.isoTimestamp())),
-    event_type: v.pipe(v.string(), v.maxLength(255)),
-    measure_last_event_type: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    secs_since_last_measure_event_type: v.nullish(v.number()),
-    last_measure_event: v.nullish(v.pipe(v.number(), v.integer()))
-});
-
-export const vEngineerExcelWritable = v.object({
-    address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(100)))
-});
-
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read const is used instead.
@@ -13829,13 +13718,6 @@ export const vEquipmentOrderLineWritable = v.object({
     serialnumber: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
-});
-
-export const vEquipmentQrWritable = v.object({
-    name: v.pipe(v.string(), v.maxLength(255)),
-    type: v.optional(vEquipmentTypeEnum),
-    brand: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    installation_date: v.nullish(v.pipe(v.string(), v.isoDate()))
 });
 
 /**
@@ -14151,10 +14033,6 @@ export const vLocationOrderLineWritable = v.object({
     name: v.pipe(v.string(), v.maxLength(255))
 });
 
-export const vLocationQrWritable = v.object({
-    name: v.pipe(v.string(), v.maxLength(255))
-});
-
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read const is used instead.
@@ -14271,10 +14149,6 @@ export const vMaterialCreateWritable = v.object({
     price_selling_alt_ex_currency: v.optional(vCurrencyEnum),
     external_identifier: v.nullish(v.pipe(v.string(), v.maxLength(100))),
     image: v.nullish(v.string())
-});
-
-export const vMaterialStatsTableExcelWritable = v.object({
-    name: v.nullish(v.pipe(v.string(), v.maxLength(255)))
 });
 
 /**
@@ -16821,18 +16695,6 @@ export const vStreamInfoResponseWritable = v.object({
     channel_title: v.string()
 });
 
-export const vStudentExcelWritable = v.object({
-    street: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    house_number: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    house_number_addition: v.nullish(v.pipe(v.string(), v.maxLength(100))),
-    postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
-    city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    country_code: v.optional(v.pipe(v.string(), v.maxLength(2))),
-    remarks: v.nullish(v.string()),
-    info: v.optional(v.string()),
-    mobile: v.nullish(v.pipe(v.string(), v.maxLength(128)))
-});
-
 /**
  * @endpoints
  * Not used directly by an endpoint.
@@ -18051,6 +17913,8 @@ export const vCompanyEngineerEventTypeStatsListQuery = v.object({
 
 export const vCompanyEngineerEventTypeStatsListResponse = v.array(vEngineerEventType);
 
+export const vCompanyEngineerExportXlsRetrieveResponse = v.string();
+
 export const vCompanyEngineerDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
@@ -18135,6 +17999,8 @@ export const vCompanyEngineereventCreateOrderCreatePath = v.object({
 });
 
 export const vCompanyEngineereventCreateOrderCreateResponse = vEngineerEventCreateOrderResponse;
+
+export const vCompanyEventsExportXlsRetrieveResponse = v.string();
 
 export const vCompanyIbanCheckCreateBody = vIbanCheckRequestRequest;
 
@@ -18640,6 +18506,8 @@ export const vCompanyStreamInfoRetrieveResponse = vStreamInfoResponse;
 export const vCompanyStreamPrivateChannelCreateCreateBody = vCreatePrivateChannelRequestRequest;
 
 export const vCompanyStreamPrivateChannelCreateCreateResponse = vChannelCreatedResponse;
+
+export const vCompanyStudentExportXlsRetrieveResponse = v.string();
 
 export const vCompanyStudentuserListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -19227,9 +19095,11 @@ export const vCustomerDocumentPartialUpdatePath = v.object({
 
 export const vCustomerDocumentPartialUpdateResponse = vCustomerDocument;
 
-export const vCustomerExportListQuery = v.object({
+export const vCustomerExportRetrieveQuery = v.object({
     q: v.optional(v.string())
 });
+
+export const vCustomerExportRetrieveResponse = v.string();
 
 export const vCustomerMaintenanceContractListQuery = v.object({
     customer: v.optional(v.pipe(v.number(), v.integer())),
@@ -19481,10 +19351,12 @@ export const vEquipmentEquipmentDocumentPartialUpdatePath = v.object({
 
 export const vEquipmentEquipmentDocumentPartialUpdateResponse = vEquipmentDocument;
 
-export const vEquipmentEquipmentExportQrListQuery = v.object({
+export const vEquipmentEquipmentExportQrRetrieveQuery = v.object({
     q: v.optional(v.string()),
     type: v.optional(v.picklist(['facility', 'technical']))
 });
+
+export const vEquipmentEquipmentExportQrRetrieveResponse = v.string();
 
 export const vEquipmentEquipmentStateListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer()))
@@ -19616,9 +19488,11 @@ export const vEquipmentLocationDocumentPartialUpdatePath = v.object({
 
 export const vEquipmentLocationDocumentPartialUpdateResponse = vLocationDocument;
 
-export const vEquipmentLocationExportQrListQuery = v.object({
+export const vEquipmentLocationExportQrRetrieveQuery = v.object({
     q: v.optional(v.string())
 });
+
+export const vEquipmentLocationExportQrRetrieveResponse = v.string();
 
 export const vEquipmentLocationDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -19995,6 +19869,13 @@ export const vInventoryPurchaseorderWithMaterialsCreateBody = vPurchaseOrderWith
 
 export const vInventoryPurchaseorderWithMaterialsCreateResponse = vPurchaseOrderDetail;
 
+export const vInventoryStatsTableExportRetrieveQuery = v.object({
+    q: v.optional(v.string()),
+    year: v.optional(v.pipe(v.number(), v.integer()))
+});
+
+export const vInventoryStatsTableExportRetrieveResponse = v.string();
+
 export const vInventoryStockLocationListHeaders = v.object({
     Authorization: v.optional(v.string())
 });
@@ -20205,6 +20086,10 @@ export const vInventorySupplierAutocompleteListQuery = v.object({
 });
 
 export const vInventorySupplierAutocompleteListResponse = v.array(vSupplierAutocomplete);
+
+export const vInventoryTotalSalesPerCustomerExportRetrieveResponse = v.string();
+
+export const vInventoryTotalSalesPerSupplierExportRetrieveResponse = v.string();
 
 export const vInvoiceEmailListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),

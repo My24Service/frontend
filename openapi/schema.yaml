@@ -1553,7 +1553,7 @@ paths:
           description: ''
   /api/company/engineer-export-xls/:
     get:
-      operationId: company_engineer_export_xls_list
+      operationId: company_engineer_export_xls_retrieve
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
@@ -1561,7 +1561,11 @@ paths:
       - company
       responses:
         '200':
-          content: {}
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
           description: ''
   /api/company/engineer/{id}/:
     get:
@@ -1915,7 +1919,7 @@ paths:
           description: ''
   /api/company/events-export-xls/:
     get:
-      operationId: company_events_export_xls_list
+      operationId: company_events_export_xls_retrieve
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
@@ -1923,7 +1927,11 @@ paths:
       - company
       responses:
         '200':
-          content: {}
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
           description: ''
   /api/company/iban-check/:
     post:
@@ -3737,7 +3745,7 @@ paths:
           description: ''
   /api/company/student-export-xls/:
     get:
-      operationId: company_student_export_xls_list
+      operationId: company_student_export_xls_retrieve
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
@@ -3745,7 +3753,11 @@ paths:
       - company
       responses:
         '200':
-          content: {}
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
           description: ''
   /api/company/studentuser/:
     get:
@@ -6033,7 +6045,7 @@ paths:
           description: No response body
   /api/customer/export/:
     get:
-      operationId: customer_export_list
+      operationId: customer_export_retrieve
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
@@ -6048,7 +6060,11 @@ paths:
       - customer
       responses:
         '200':
-          content: {}
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
           description: ''
   /api/customer/maintenance-contract/:
     get:
@@ -6984,7 +7000,7 @@ paths:
           description: No response body
   /api/equipment/equipment-export-qr/:
     get:
-      operationId: equipment_equipment_export_qr_list
+      operationId: equipment_equipment_export_qr_retrieve
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
@@ -7006,7 +7022,11 @@ paths:
       - equipment
       responses:
         '200':
-          content: {}
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
           description: ''
   /api/equipment/equipment-state/:
     get:
@@ -7502,7 +7522,7 @@ paths:
           description: No response body
   /api/equipment/location-export-qr/:
     get:
-      operationId: equipment_location_export_qr_list
+      operationId: equipment_location_export_qr_retrieve
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
@@ -7516,7 +7536,11 @@ paths:
       - equipment
       responses:
         '200':
-          content: {}
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
           description: ''
   /api/equipment/location/{id}/:
     get:
@@ -9164,15 +9188,30 @@ paths:
           description: Validation error.
   /api/inventory/stats_table_export/:
     get:
-      operationId: inventory_stats_table_export_list
+      operationId: inventory_stats_table_export_retrieve
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match narrowing the sales.
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: The year the sales columns cover. Defaults to this year.
       tags:
       - inventory
       responses:
         '200':
-          content: {}
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
           description: ''
   /api/inventory/stock-location/:
     get:
@@ -10154,7 +10193,7 @@ paths:
           description: ''
   /api/inventory/total_sales_per_customer_export/:
     get:
-      operationId: inventory_total_sales_per_customer_export_list
+      operationId: inventory_total_sales_per_customer_export_retrieve
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
@@ -10162,11 +10201,15 @@ paths:
       - inventory
       responses:
         '200':
-          content: {}
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
           description: ''
   /api/inventory/total_sales_per_supplier_export/:
     get:
-      operationId: inventory_total_sales_per_supplier_export_list
+      operationId: inventory_total_sales_per_supplier_export_retrieve
       description: |-
         Mixin which allows the override of the filename being
         passed back to the user when the spreadsheet is downloaded.
@@ -10174,7 +10217,11 @@ paths:
       - inventory
       responses:
         '200':
-          content: {}
+          content:
+            application/xlsx:
+              schema:
+                type: string
+                format: binary
           description: ''
   /api/invoice/email/:
     get:
@@ -24941,82 +24988,6 @@ components:
           nullable: true
       required:
       - event_type
-    EngineerEventXls:
-      type: object
-      properties:
-        engineer_name:
-          type: string
-          readOnly: true
-        event_dts:
-          type: string
-          format: date-time
-        event_type:
-          type: string
-          maxLength: 255
-        measure_last_event_type:
-          type: string
-          nullable: true
-          maxLength: 255
-        secs_since_last_measure_event_type:
-          type: number
-          format: double
-          nullable: true
-        last_measure_event:
-          type: integer
-          nullable: true
-        assigned_order_name:
-          type: string
-          nullable: true
-          readOnly: true
-        created:
-          type: string
-          readOnly: true
-          description: Display string in the tenant's configured date_format, not
-            an ISO-8601 value.
-      required:
-      - assigned_order_name
-      - created
-      - engineer_name
-      - event_type
-    EngineerExcel:
-      type: object
-      properties:
-        email:
-          type: string
-          readOnly: true
-        username:
-          type: string
-          readOnly: true
-        first_name:
-          type: string
-          readOnly: true
-        last_name:
-          type: string
-          readOnly: true
-        address:
-          type: string
-          nullable: true
-          maxLength: 255
-        postal:
-          type: string
-          nullable: true
-          maxLength: 20
-        city:
-          type: string
-          nullable: true
-          maxLength: 255
-        country_code:
-          type: string
-          maxLength: 2
-        mobile:
-          type: string
-          nullable: true
-          maxLength: 100
-      required:
-      - email
-      - first_name
-      - last_name
-      - username
     EngineerForSelect:
       type: object
       properties:
@@ -25927,39 +25898,6 @@ components:
       - created
       - id
       - modified
-      - name
-    EquipmentQR:
-      type: object
-      properties:
-        name:
-          type: string
-          maxLength: 255
-        type:
-          $ref: '#/components/schemas/EquipmentTypeEnum'
-        branch_customer:
-          type: string
-          nullable: true
-          readOnly: true
-        brand:
-          type: string
-          nullable: true
-          maxLength: 100
-        installation_date:
-          type: string
-          format: date
-          nullable: true
-        location:
-          type: string
-          nullable: true
-          readOnly: true
-        deep_link:
-          type: string
-          nullable: true
-          readOnly: true
-      required:
-      - branch_customer
-      - deep_link
-      - location
       - name
     EquipmentQrTypeEnum:
       enum:
@@ -28004,24 +27942,6 @@ components:
       - id
       - modified
       - name
-    LocationQR:
-      type: object
-      properties:
-        branch_customer:
-          type: string
-          nullable: true
-          readOnly: true
-        name:
-          type: string
-          maxLength: 255
-        deep_link:
-          type: string
-          nullable: true
-          readOnly: true
-      required:
-      - branch_customer
-      - deep_link
-      - name
     LocationToAddressRequestRequest:
       type: object
       description: The body LocationToAddress reads.
@@ -28690,84 +28610,6 @@ components:
       - sum_price_purchase
       - supplier
       - turnover
-    MaterialStatsTableExcel:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        name:
-          type: string
-          nullable: true
-          maxLength: 255
-        supplier_name:
-          type: string
-          nullable: true
-          readOnly: true
-        num_sales_without_tax_true:
-          type: integer
-          readOnly: true
-        num_sales_without_tax_false:
-          type: integer
-          readOnly: true
-        num_sales:
-          type: integer
-          readOnly: true
-        turnover_without_tax_true:
-          type: number
-          format: double
-          readOnly: true
-        turnover_without_tax_false:
-          type: number
-          format: double
-          readOnly: true
-        turnover:
-          type: number
-          format: double
-          readOnly: true
-        num_entries:
-          type: integer
-          readOnly: true
-        profit:
-          type: number
-          format: double
-          readOnly: true
-        sum_price_purchase:
-          type: number
-          format: double
-          readOnly: true
-        margin_product:
-          type: number
-          format: double
-          readOnly: true
-        current_stock:
-          type: number
-          format: double
-          readOnly: true
-        sum_inventory:
-          type: object
-          additionalProperties:
-            type: number
-          readOnly: true
-        num_purchase:
-          type: integer
-          readOnly: true
-      required:
-      - current_stock
-      - id
-      - margin_product
-      - num_entries
-      - num_purchase
-      - num_sales
-      - num_sales_without_tax_false
-      - num_sales_without_tax_true
-      - profit
-      - sum_inventory
-      - sum_price_purchase
-      - supplier_name
-      - turnover
-      - turnover_without_tax_false
-      - turnover_without_tax_true
     MaterialStatsTableResponse:
       type: object
       description: The dict MaterialViewset.stats_table returns.
@@ -39322,68 +39164,6 @@ components:
           maxLength: 255
       required:
       - material
-    PurchaseOrderMaterialTotalCustomer:
-      type: object
-      properties:
-        sum_amount:
-          type: number
-          format: double
-        sum_price_purchase:
-          type: number
-          format: double
-        sum_price_selling:
-          type: number
-          format: double
-        profit:
-          type: number
-          format: double
-        amount_perc:
-          type: number
-          format: double
-        amount_selling_perc:
-          type: number
-          format: double
-        customer_name:
-          type: string
-      required:
-      - amount_perc
-      - amount_selling_perc
-      - customer_name
-      - profit
-      - sum_amount
-      - sum_price_purchase
-      - sum_price_selling
-    PurchaseOrderMaterialTotalSupplier:
-      type: object
-      properties:
-        sum_amount:
-          type: number
-          format: double
-        sum_price_purchase:
-          type: number
-          format: double
-        sum_price_selling:
-          type: number
-          format: double
-        profit:
-          type: number
-          format: double
-        amount_perc:
-          type: number
-          format: double
-        amount_selling_perc:
-          type: number
-          format: double
-        supplier_name:
-          type: string
-      required:
-      - amount_perc
-      - amount_selling_perc
-      - profit
-      - sum_amount
-      - sum_price_purchase
-      - sum_price_selling
-      - supplier_name
     PurchaseOrderStatus:
       type: object
       properties:
@@ -41344,64 +41124,6 @@ components:
       - member_user_id
       - token
       - user
-    StudentExcel:
-      type: object
-      properties:
-        email:
-          type: string
-          readOnly: true
-        username:
-          type: string
-          readOnly: true
-        first_name:
-          type: string
-          readOnly: true
-        last_name:
-          type: string
-          readOnly: true
-        street:
-          type: string
-          nullable: true
-          maxLength: 255
-        house_number:
-          type: string
-          nullable: true
-          maxLength: 100
-        house_number_addition:
-          type: string
-          nullable: true
-          maxLength: 100
-        postal:
-          type: string
-          nullable: true
-          maxLength: 20
-        city:
-          type: string
-          nullable: true
-          maxLength: 255
-        country_code:
-          type: string
-          maxLength: 2
-        remarks:
-          type: string
-          nullable: true
-        info:
-          type: string
-        rating_avg:
-          type: number
-          format: double
-          nullable: true
-          readOnly: true
-        mobile:
-          type: string
-          nullable: true
-          maxLength: 128
-      required:
-      - email
-      - first_name
-      - last_name
-      - rating_avg
-      - username
     StudentSub:
       type: object
       properties:

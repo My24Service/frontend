@@ -1615,32 +1615,6 @@ export type EngineerEventTypeRequest = {
     statuscode?: number | null;
 };
 
-export type EngineerEventXls = {
-    readonly engineer_name: string;
-    event_dts?: string;
-    event_type: string;
-    measure_last_event_type?: string | null;
-    secs_since_last_measure_event_type?: number | null;
-    last_measure_event?: number | null;
-    readonly assigned_order_name: string | null;
-    /**
-     * Display string in the tenant's configured date_format, not an ISO-8601 value.
-     */
-    readonly created: string;
-};
-
-export type EngineerExcel = {
-    readonly email: string;
-    readonly username: string;
-    readonly first_name: string;
-    readonly last_name: string;
-    address?: string | null;
-    postal?: string | null;
-    city?: string | null;
-    country_code?: string;
-    mobile?: string | null;
-};
-
 export type EngineerForSelect = {
     readonly user_id: number;
     readonly full_name: string;
@@ -1997,16 +1971,6 @@ export type EquipmentOrderLine = {
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
     readonly modified: string;
-};
-
-export type EquipmentQr = {
-    name: string;
-    type?: EquipmentTypeEnum;
-    readonly branch_customer: string | null;
-    brand?: string | null;
-    installation_date?: string | null;
-    readonly location: string | null;
-    readonly deep_link: string | null;
 };
 
 /**
@@ -2880,12 +2844,6 @@ export type LocationOrderLine = {
     readonly modified: string;
 };
 
-export type LocationQr = {
-    readonly branch_customer: string | null;
-    name: string;
-    readonly deep_link: string | null;
-};
-
 /**
  * The body LocationToAddress reads.
  */
@@ -3110,27 +3068,6 @@ export type MaterialStatsTable = {
     readonly num_entries: number | null;
     readonly num_sales: number;
     readonly turnover: number;
-    readonly profit: number;
-    readonly sum_price_purchase: number;
-    readonly margin_product: number;
-    readonly current_stock: number;
-    readonly sum_inventory: {
-        [key: string]: number;
-    };
-    readonly num_purchase: number;
-};
-
-export type MaterialStatsTableExcel = {
-    readonly id: number;
-    name?: string | null;
-    readonly supplier_name: string | null;
-    readonly num_sales_without_tax_true: number;
-    readonly num_sales_without_tax_false: number;
-    readonly num_sales: number;
-    readonly turnover_without_tax_true: number;
-    readonly turnover_without_tax_false: number;
-    readonly turnover: number;
-    readonly num_entries: number;
     readonly profit: number;
     readonly sum_price_purchase: number;
     readonly margin_product: number;
@@ -7198,26 +7135,6 @@ export type PurchaseOrderMaterialRowRequest = {
     remarks?: string | null;
 };
 
-export type PurchaseOrderMaterialTotalCustomer = {
-    sum_amount: number;
-    sum_price_purchase: number;
-    sum_price_selling: number;
-    profit: number;
-    amount_perc: number;
-    amount_selling_perc: number;
-    customer_name: string;
-};
-
-export type PurchaseOrderMaterialTotalSupplier = {
-    sum_amount: number;
-    sum_price_purchase: number;
-    sum_price_selling: number;
-    profit: number;
-    amount_perc: number;
-    amount_selling_perc: number;
-    supplier_name: string;
-};
-
 export type PurchaseOrderStatus = {
     readonly id: number;
     purchase_order: number;
@@ -8003,23 +7920,6 @@ export type StreamInfoResponse = {
     token: string;
     channel_id: string;
     channel_title: string;
-};
-
-export type StudentExcel = {
-    readonly email: string;
-    readonly username: string;
-    readonly first_name: string;
-    readonly last_name: string;
-    street?: string | null;
-    house_number?: string | null;
-    house_number_addition?: string | null;
-    postal?: string | null;
-    city?: string | null;
-    country_code?: string;
-    remarks?: string | null;
-    info?: string;
-    readonly rating_avg: number | null;
-    mobile?: string | null;
 };
 
 export type StudentSub = {
@@ -10105,22 +10005,6 @@ export type EngineerEventTypeWritable = {
     statuscode?: number | null;
 };
 
-export type EngineerEventXlsWritable = {
-    event_dts?: string;
-    event_type: string;
-    measure_last_event_type?: string | null;
-    secs_since_last_measure_event_type?: number | null;
-    last_measure_event?: number | null;
-};
-
-export type EngineerExcelWritable = {
-    address?: string | null;
-    postal?: string | null;
-    city?: string | null;
-    country_code?: string;
-    mobile?: string | null;
-};
-
 export type EngineerInfoLineWritable = {
     order: number;
     info?: string | null;
@@ -10299,13 +10183,6 @@ export type EquipmentOrderLineWritable = {
     serialnumber?: string | null;
     standard_hours?: string | null;
     default_replace_months?: number;
-};
-
-export type EquipmentQrWritable = {
-    name: string;
-    type?: EquipmentTypeEnum;
-    brand?: string | null;
-    installation_date?: string | null;
 };
 
 export type EquipmentStateWritable = {
@@ -10588,10 +10465,6 @@ export type LocationOrderLineWritable = {
     name: string;
 };
 
-export type LocationQrWritable = {
-    name: string;
-};
-
 export type MaintenanceContractWritable = {
     customer: number;
     name: string | null;
@@ -10669,10 +10542,6 @@ export type MaterialCreateWritable = {
 export type MaterialStatsTableWritable = {
     name?: string | null;
     supplier: SupplierWritable;
-};
-
-export type MaterialStatsTableExcelWritable = {
-    name?: string | null;
 };
 
 /**
@@ -12551,18 +12420,6 @@ export type StreamInfoResponseWritable = {
     channel_title: string;
 };
 
-export type StudentExcelWritable = {
-    street?: string | null;
-    house_number?: string | null;
-    house_number_addition?: string | null;
-    postal?: string | null;
-    city?: string | null;
-    country_code?: string;
-    remarks?: string | null;
-    info?: string;
-    mobile?: string | null;
-};
-
 export type StudentSubWritable = {
     street?: string | null;
     house_number?: string | null;
@@ -14161,16 +14018,18 @@ export type CompanyEngineerEventTypeStatsListResponses = {
 
 export type CompanyEngineerEventTypeStatsListResponse = CompanyEngineerEventTypeStatsListResponses[keyof CompanyEngineerEventTypeStatsListResponses];
 
-export type CompanyEngineerExportXlsListData = {
+export type CompanyEngineerExportXlsRetrieveData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/company/engineer-export-xls/';
 };
 
-export type CompanyEngineerExportXlsListResponses = {
-    200: unknown;
+export type CompanyEngineerExportXlsRetrieveResponses = {
+    200: Blob | File;
 };
+
+export type CompanyEngineerExportXlsRetrieveResponse = CompanyEngineerExportXlsRetrieveResponses[keyof CompanyEngineerExportXlsRetrieveResponses];
 
 export type CompanyEngineerDestroyData = {
     body?: never;
@@ -14406,16 +14265,18 @@ export type CompanyEngineereventCreateOrderCreateResponses = {
 
 export type CompanyEngineereventCreateOrderCreateResponse = CompanyEngineereventCreateOrderCreateResponses[keyof CompanyEngineereventCreateOrderCreateResponses];
 
-export type CompanyEventsExportXlsListData = {
+export type CompanyEventsExportXlsRetrieveData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/company/events-export-xls/';
 };
 
-export type CompanyEventsExportXlsListResponses = {
-    200: unknown;
+export type CompanyEventsExportXlsRetrieveResponses = {
+    200: Blob | File;
 };
+
+export type CompanyEventsExportXlsRetrieveResponse = CompanyEventsExportXlsRetrieveResponses[keyof CompanyEventsExportXlsRetrieveResponses];
 
 export type CompanyIbanCheckCreateData = {
     body: IbanCheckRequestRequest;
@@ -15759,16 +15620,18 @@ export type CompanyStreamPrivateChannelCreateCreateResponses = {
 
 export type CompanyStreamPrivateChannelCreateCreateResponse = CompanyStreamPrivateChannelCreateCreateResponses[keyof CompanyStreamPrivateChannelCreateCreateResponses];
 
-export type CompanyStudentExportXlsListData = {
+export type CompanyStudentExportXlsRetrieveData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/company/student-export-xls/';
 };
 
-export type CompanyStudentExportXlsListResponses = {
-    200: unknown;
+export type CompanyStudentExportXlsRetrieveResponses = {
+    200: Blob | File;
 };
+
+export type CompanyStudentExportXlsRetrieveResponse = CompanyStudentExportXlsRetrieveResponses[keyof CompanyStudentExportXlsRetrieveResponses];
 
 export type CompanyStudentuserListData = {
     body?: never;
@@ -17458,7 +17321,7 @@ export type CustomerDocumentPartialUpdateResponses = {
 
 export type CustomerDocumentPartialUpdateResponse = CustomerDocumentPartialUpdateResponses[keyof CustomerDocumentPartialUpdateResponses];
 
-export type CustomerExportListData = {
+export type CustomerExportRetrieveData = {
     body?: never;
     path?: never;
     query?: {
@@ -17470,9 +17333,11 @@ export type CustomerExportListData = {
     url: '/api/customer/export/';
 };
 
-export type CustomerExportListResponses = {
-    200: unknown;
+export type CustomerExportRetrieveResponses = {
+    200: Blob | File;
 };
+
+export type CustomerExportRetrieveResponse = CustomerExportRetrieveResponses[keyof CustomerExportRetrieveResponses];
 
 export type CustomerMaintenanceContractListData = {
     body?: never;
@@ -18091,7 +17956,7 @@ export type EquipmentEquipmentDocumentPartialUpdateResponses = {
 
 export type EquipmentEquipmentDocumentPartialUpdateResponse = EquipmentEquipmentDocumentPartialUpdateResponses[keyof EquipmentEquipmentDocumentPartialUpdateResponses];
 
-export type EquipmentEquipmentExportQrListData = {
+export type EquipmentEquipmentExportQrRetrieveData = {
     body?: never;
     path?: never;
     query?: {
@@ -18107,9 +17972,11 @@ export type EquipmentEquipmentExportQrListData = {
     url: '/api/equipment/equipment-export-qr/';
 };
 
-export type EquipmentEquipmentExportQrListResponses = {
-    200: unknown;
+export type EquipmentEquipmentExportQrRetrieveResponses = {
+    200: Blob | File;
 };
+
+export type EquipmentEquipmentExportQrRetrieveResponse = EquipmentEquipmentExportQrRetrieveResponses[keyof EquipmentEquipmentExportQrRetrieveResponses];
 
 export type EquipmentEquipmentStateListData = {
     body?: never;
@@ -18462,7 +18329,7 @@ export type EquipmentLocationDocumentPartialUpdateResponses = {
 
 export type EquipmentLocationDocumentPartialUpdateResponse = EquipmentLocationDocumentPartialUpdateResponses[keyof EquipmentLocationDocumentPartialUpdateResponses];
 
-export type EquipmentLocationExportQrListData = {
+export type EquipmentLocationExportQrRetrieveData = {
     body?: never;
     path?: never;
     query?: {
@@ -18474,9 +18341,11 @@ export type EquipmentLocationExportQrListData = {
     url: '/api/equipment/location-export-qr/';
 };
 
-export type EquipmentLocationExportQrListResponses = {
-    200: unknown;
+export type EquipmentLocationExportQrRetrieveResponses = {
+    200: Blob | File;
 };
+
+export type EquipmentLocationExportQrRetrieveResponse = EquipmentLocationExportQrRetrieveResponses[keyof EquipmentLocationExportQrRetrieveResponses];
 
 export type EquipmentLocationDestroyData = {
     body?: never;
@@ -19639,16 +19508,27 @@ export type InventoryPurchaseorderWithMaterialsCreateResponses = {
 
 export type InventoryPurchaseorderWithMaterialsCreateResponse = InventoryPurchaseorderWithMaterialsCreateResponses[keyof InventoryPurchaseorderWithMaterialsCreateResponses];
 
-export type InventoryStatsTableExportListData = {
+export type InventoryStatsTableExportRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match narrowing the sales.
+         */
+        q?: string;
+        /**
+         * The year the sales columns cover. Defaults to this year.
+         */
+        year?: number;
+    };
     url: '/api/inventory/stats_table_export/';
 };
 
-export type InventoryStatsTableExportListResponses = {
-    200: unknown;
+export type InventoryStatsTableExportRetrieveResponses = {
+    200: Blob | File;
 };
+
+export type InventoryStatsTableExportRetrieveResponse = InventoryStatsTableExportRetrieveResponses[keyof InventoryStatsTableExportRetrieveResponses];
 
 export type InventoryStockLocationListData = {
     body?: never;
@@ -20282,27 +20162,31 @@ export type InventorySupplierAutocompleteListResponses = {
 
 export type InventorySupplierAutocompleteListResponse = InventorySupplierAutocompleteListResponses[keyof InventorySupplierAutocompleteListResponses];
 
-export type InventoryTotalSalesPerCustomerExportListData = {
+export type InventoryTotalSalesPerCustomerExportRetrieveData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/inventory/total_sales_per_customer_export/';
 };
 
-export type InventoryTotalSalesPerCustomerExportListResponses = {
-    200: unknown;
+export type InventoryTotalSalesPerCustomerExportRetrieveResponses = {
+    200: Blob | File;
 };
 
-export type InventoryTotalSalesPerSupplierExportListData = {
+export type InventoryTotalSalesPerCustomerExportRetrieveResponse = InventoryTotalSalesPerCustomerExportRetrieveResponses[keyof InventoryTotalSalesPerCustomerExportRetrieveResponses];
+
+export type InventoryTotalSalesPerSupplierExportRetrieveData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/inventory/total_sales_per_supplier_export/';
 };
 
-export type InventoryTotalSalesPerSupplierExportListResponses = {
-    200: unknown;
+export type InventoryTotalSalesPerSupplierExportRetrieveResponses = {
+    200: Blob | File;
 };
+
+export type InventoryTotalSalesPerSupplierExportRetrieveResponse = InventoryTotalSalesPerSupplierExportRetrieveResponses[keyof InventoryTotalSalesPerSupplierExportRetrieveResponses];
 
 export type InvoiceEmailListData = {
     body?: never;

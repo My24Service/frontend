@@ -82,8 +82,6 @@ import {
   companyEngineerEventTypeRetrieveQueryKey,
   companyEngineerEventTypeStatsListOptions,
   companyEngineerEventTypeStatsListQueryKey,
-  companyEngineerExportXlsListOptions,
-  companyEngineerExportXlsListQueryKey,
   companyEngineerGetLocationsListOptions,
   companyEngineerGetLocationsListQueryKey,
   companyEngineerListForSelectListOptions,
@@ -100,8 +98,6 @@ import {
   companyEngineereventUpdatePartialUpdateMutation,
   companyEngineereventUpdateRetrieveOptions,
   companyEngineereventUpdateRetrieveQueryKey,
-  companyEventsExportXlsListOptions,
-  companyEventsExportXlsListQueryKey,
   companyIbanCheckCreateMutation,
   companyImportCreateMutation,
   companyImportDestroyMutation,
@@ -185,8 +181,6 @@ import {
   companySalesusercustomerRetrieveOptions,
   companySalesusercustomerRetrieveQueryKey,
   companyStreamPrivateChannelCreateCreateMutation,
-  companyStudentExportXlsListOptions,
-  companyStudentExportXlsListQueryKey,
   companyStudentuserCreateMutation,
   companyStudentuserDestroyMutation,
   companyStudentuserListOptions,
@@ -282,8 +276,6 @@ import {
   customerDocumentPartialUpdateMutation,
   customerDocumentRetrieveOptions,
   customerDocumentRetrieveQueryKey,
-  customerExportListOptions,
-  customerExportListQueryKey,
   customerMaintenanceContractCreateMutation,
   customerMaintenanceContractDestroyMutation,
   customerMaintenanceContractListOptions,
@@ -322,8 +314,6 @@ import {
   equipmentEquipmentDocumentPartialUpdateMutation,
   equipmentEquipmentDocumentRetrieveOptions,
   equipmentEquipmentDocumentRetrieveQueryKey,
-  equipmentEquipmentExportQrListOptions,
-  equipmentEquipmentExportQrListQueryKey,
   equipmentEquipmentListOptions,
   equipmentEquipmentListQueryKey,
   equipmentEquipmentPartialUpdateMutation,
@@ -344,8 +334,6 @@ import {
   equipmentLocationDocumentPartialUpdateMutation,
   equipmentLocationDocumentRetrieveOptions,
   equipmentLocationDocumentRetrieveQueryKey,
-  equipmentLocationExportQrListOptions,
-  equipmentLocationExportQrListQueryKey,
   equipmentLocationListForSelectListOptions,
   equipmentLocationListForSelectListQueryKey,
   equipmentLocationListOptions,
@@ -400,8 +388,6 @@ import {
   inventoryPurchaseorderStatusRetrieveOptions,
   inventoryPurchaseorderStatusRetrieveQueryKey,
   inventoryPurchaseorderWithMaterialsCreateMutation,
-  inventoryStatsTableExportListOptions,
-  inventoryStatsTableExportListQueryKey,
   inventoryStockLocationCreateMutation,
   inventoryStockLocationDestroyMutation,
   inventoryStockLocationListOptions,
@@ -438,10 +424,6 @@ import {
   inventorySupplierReservationmaterialRetrieveQueryKey,
   inventorySupplierRetrieveOptions,
   inventorySupplierRetrieveQueryKey,
-  inventoryTotalSalesPerCustomerExportListOptions,
-  inventoryTotalSalesPerCustomerExportListQueryKey,
-  inventoryTotalSalesPerSupplierExportListOptions,
-  inventoryTotalSalesPerSupplierExportListQueryKey,
   invoiceEmailCreateMutation,
   invoiceEmailDestroyMutation,
   invoiceEmailGetDocumentsListOptions,
@@ -1307,15 +1289,6 @@ export const companyEngineerEventTypeStats = {
   reads: ['companyEngineerEventTypeStatsList'],
 } as const satisfies Resource
 
-/** `api/company/engineer-export-xls` */
-export const companyEngineerExportXls = {
-  path: 'api/company/engineer-export-xls',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyEngineerExportXlsListOptions, queryKey: companyEngineerExportXlsListQueryKey},
-  reads: ['companyEngineerExportXlsList'],
-} as const satisfies Resource
-
 /** `api/company/engineer/get_locations` */
 export const companyEngineerGetLocations = {
   path: 'api/company/engineer/get_locations',
@@ -1353,15 +1326,6 @@ export const companyEngineereventUpdate = {
   retrieve: {options: companyEngineereventUpdateRetrieveOptions, queryKey: companyEngineereventUpdateRetrieveQueryKey},
   update: {mutation: companyEngineereventUpdatePartialUpdateMutation, body: vCompanyEngineereventUpdatePartialUpdateBody},
   reads: ['companyEngineereventUpdateRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/events-export-xls` */
-export const companyEventsExportXls = {
-  path: 'api/company/events-export-xls',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyEventsExportXlsListOptions, queryKey: companyEventsExportXlsListQueryKey},
-  reads: ['companyEventsExportXlsList'],
 } as const satisfies Resource
 
 /** `api/company/iban-check` */
@@ -1554,15 +1518,6 @@ export const companyStreamPrivateChannelCreate = {
   kind: 'action',
   create: {mutation: companyStreamPrivateChannelCreateCreateMutation, body: vCompanyStreamPrivateChannelCreateCreateBody},
   reads: [],
-} as const satisfies Resource
-
-/** `api/company/student-export-xls` */
-export const companyStudentExportXls = {
-  path: 'api/company/student-export-xls',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyStudentExportXlsListOptions, queryKey: companyStudentExportXlsListQueryKey},
-  reads: ['companyStudentExportXlsList'],
 } as const satisfies Resource
 
 /** `api/company/studentuser` */
@@ -1837,15 +1792,6 @@ export const customerDocument = {
   reads: ['customerDocumentList', 'customerDocumentRetrieve'],
 } as const satisfies Resource
 
-/** `api/customer/export` */
-export const customerExport = {
-  path: 'api/customer/export',
-  kind: 'collection',
-  id: 'number',
-  list: {options: customerExportListOptions, queryKey: customerExportListQueryKey},
-  reads: ['customerExportList'],
-} as const satisfies Resource
-
 /** `api/customer/maintenance-contract` */
 export const customerMaintenanceContract = {
   path: 'api/customer/maintenance-contract',
@@ -1954,15 +1900,6 @@ export const equipmentEquipmentDocument = {
   reads: ['equipmentEquipmentDocumentList', 'equipmentEquipmentDocumentRetrieve'],
 } as const satisfies Resource
 
-/** `api/equipment/equipment-export-qr` */
-export const equipmentEquipmentExportQr = {
-  path: 'api/equipment/equipment-export-qr',
-  kind: 'collection',
-  id: 'number',
-  list: {options: equipmentEquipmentExportQrListOptions, queryKey: equipmentEquipmentExportQrListQueryKey},
-  reads: ['equipmentEquipmentExportQrList'],
-} as const satisfies Resource
-
 /** `api/equipment/equipment-state` */
 export const equipmentEquipmentState = {
   path: 'api/equipment/equipment-state',
@@ -2014,15 +1951,6 @@ export const equipmentLocationDocument = {
   update: {mutation: equipmentLocationDocumentPartialUpdateMutation, body: vEquipmentLocationDocumentPartialUpdateBody},
   destroy: {mutation: equipmentLocationDocumentDestroyMutation},
   reads: ['equipmentLocationDocumentList', 'equipmentLocationDocumentRetrieve'],
-} as const satisfies Resource
-
-/** `api/equipment/location-export-qr` */
-export const equipmentLocationExportQr = {
-  path: 'api/equipment/location-export-qr',
-  kind: 'collection',
-  id: 'number',
-  list: {options: equipmentLocationExportQrListOptions, queryKey: equipmentLocationExportQrListQueryKey},
-  reads: ['equipmentLocationExportQrList'],
 } as const satisfies Resource
 
 /** `api/equipment/location/list_for_select` */
@@ -2160,15 +2088,6 @@ export const inventoryPurchaseorderWithMaterials = {
   reads: [],
 } as const satisfies Resource
 
-/** `api/inventory/stats_table_export` */
-export const inventoryStatsTableExport = {
-  path: 'api/inventory/stats_table_export',
-  kind: 'collection',
-  id: 'number',
-  list: {options: inventoryStatsTableExportListOptions, queryKey: inventoryStatsTableExportListQueryKey},
-  reads: ['inventoryStatsTableExportList'],
-} as const satisfies Resource
-
 /** `api/inventory/stock-location` */
 export const inventoryStockLocation = {
   path: 'api/inventory/stock-location',
@@ -2255,24 +2174,6 @@ export const inventorySupplierReservationmaterial = {
   update: {mutation: inventorySupplierReservationmaterialPartialUpdateMutation, body: vInventorySupplierReservationmaterialPartialUpdateBody},
   destroy: {mutation: inventorySupplierReservationmaterialDestroyMutation},
   reads: ['inventorySupplierReservationmaterialList', 'inventorySupplierReservationmaterialRetrieve'],
-} as const satisfies Resource
-
-/** `api/inventory/total_sales_per_customer_export` */
-export const inventoryTotalSalesPerCustomerExport = {
-  path: 'api/inventory/total_sales_per_customer_export',
-  kind: 'collection',
-  id: 'number',
-  list: {options: inventoryTotalSalesPerCustomerExportListOptions, queryKey: inventoryTotalSalesPerCustomerExportListQueryKey},
-  reads: ['inventoryTotalSalesPerCustomerExportList'],
-} as const satisfies Resource
-
-/** `api/inventory/total_sales_per_supplier_export` */
-export const inventoryTotalSalesPerSupplierExport = {
-  path: 'api/inventory/total_sales_per_supplier_export',
-  kind: 'collection',
-  id: 'number',
-  list: {options: inventoryTotalSalesPerSupplierExportListOptions, queryKey: inventoryTotalSalesPerSupplierExportListQueryKey},
-  reads: ['inventoryTotalSalesPerSupplierExportList'],
 } as const satisfies Resource
 
 /** `api/invoice/email` */
