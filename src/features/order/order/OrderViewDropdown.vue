@@ -52,7 +52,7 @@ const emit = defineEmits<{(event: 'select', view: OrderViewOption): void}>()
   padding: 0 0.75rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  border-radius: 9999px;
+  border-radius: var(--bs-border-radius, 0.375rem);
   background-color: white;
   border: 1px solid var(--shltr-slate-200, #e2e8f0);
   color: var(--shltr-slate-700, #334155);

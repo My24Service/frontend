@@ -1,10 +1,11 @@
 <template>
   <BDropdown
-    v-if="available.length > 0"
+    v-if="columns.length > 0"
     class="column-filter-menu"
     size="sm"
     variant="outline-secondary"
     toggle-class="add-filter-toggle"
+    :disabled="available.length === 0"
     :aria-label="$trans('Add filter')"
   >
     <template #button-content>
@@ -42,7 +43,7 @@ const props = defineProps<{
   table: VueTable<AppFeatures, TData>
 }>()
 
-const { available, add } = useColumnFilters(props.table)
+const { columns, available, add } = useColumnFilters(props.table)
 </script>
 
 <style scoped>
@@ -54,7 +55,10 @@ const { available, add } = useColumnFilters(props.table)
   padding: 0 0.75rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  border-radius: 9999px;
+  /* The neighbours' radius, not a pill: the control sits in a row of ordinary
+     buttons (the search field, the add link), and a pill among them reads as a
+     different kind of thing. */
+  border-radius: var(--bs-border-radius, 0.375rem);
   background-color: white;
   border: 1px solid var(--shltr-slate-200, #e2e8f0);
   color: var(--shltr-slate-700, #334155);
@@ -74,12 +78,8 @@ const { available, add } = useColumnFilters(props.table)
   outline-offset: 1px;
 }
 
-:deep(.add-filter-toggle.show),
-:deep(.add-filter-toggle[aria-expanded="true"]) {
-  background-color: var(--shltr-teal-50, rgba(48, 191, 191, 0.08));
-  border-color: var(--bs-primary, #30BFBF);
-  color: var(--shltr-teal-700, #0f766e);
-}
+/* No accent while the menu is open: it sits beside the view dropdown, which
+   does not take one either, and an open menu is legible without it. */
 
 :deep(.add-filter-toggle::after) {
   margin-left: 0.25rem;

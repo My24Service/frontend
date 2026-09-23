@@ -62,6 +62,12 @@ export type ColumnFilterSpec =
     /** A day, month or year, or a range of those. */
     variant: 'date'
     label?: string
+    /**
+     * The calendar's year range, `[first, last]`. Left out, the picker offers
+     * its own default (1900–2100), which for a date column with a known life —
+     * an order's start date, say — is mostly years nothing can be in.
+     */
+    years?: [number, number]
   }
   | {
     /**

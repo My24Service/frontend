@@ -144,7 +144,15 @@ export function useOrderColumns(actions: OrderColumnActions) {
     }),
     columnHelper.accessor('start_date', {
       header: $trans('start date'),
-      meta: {filter: {variant: 'date', label: $trans('Start date')}},
+      meta: {
+        filter: {
+          variant: 'date',
+          label: $trans('Start date'),
+          // Orders do not reach back to 1900, and a maintenance plan can run a
+          // few years ahead; the picker's own 1900–2100 is mostly dead years.
+          years: [2010, new Date().getFullYear() + 5],
+        },
+      },
       cell: (info) => {
         const row = info.row.original
         const time = row.start_time ? ` ${row.start_time}` : ''

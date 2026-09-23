@@ -39,6 +39,25 @@ export function useUrlQuerySync(
     })
   }
 
+  /** Does this query narrow on anything beyond the reserved parameters? */
+  function narrows(query: ServerPagedListQuery): boolean {
+    return Object.entries(query).some(([key, value]) => (
+      !RESERVED.has(key) && value != null && value !== ''
+    ))
+  }
+
+  /**
+   * Whether the filtered view already has a history entry of its own.
+   *
+   * The address is written with `replaceState` (VueUse's default), so filters
+   * never pile up an entry per keystroke — but that also means the list as it
+   * was before the first filter is gone, and Back cannot return to it. So the
+   * FIRST filter a user sets gets a fresh entry: pushing a copy of the current
+   * address here leaves the unfiltered one behind it, and the write that
+   * follows replaces the new entry. Every later change replaces again.
+   */
+  let filterEntryPushed = false
+
   function apply() {
     const q = asString('q')
     if (state.globalFilter.value !== q) {
@@ -77,6 +96,12 @@ export function useUrlQuerySync(
 
   function write() {
     const query = wireQuery.value
+
+    if (!filterEntryPushed && narrows(query)) {
+      filterEntryPushed = true
+      window.history.pushState(window.history.state, '', window.location.href)
+    }
+
     const desired: Record<string, string> = {}
     if (query.page !== 1) desired.page = String(query.page)
     if (query.page_size !== options.defaultPageSize) desired.page_size = String(query.page_size)

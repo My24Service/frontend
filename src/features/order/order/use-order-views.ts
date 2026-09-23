@@ -1,4 +1,5 @@
 import type { ColumnFiltersState } from '@tanstack/vue-table'
+import type { LocationQueryRaw } from 'vue-router'
 import { orderFilterSimpleListListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { ListMode } from './list-modes'
 
@@ -72,6 +73,7 @@ export function useOrderViews(options: {
   columnFilters: Ref<ColumnFiltersState>
 }) {
   const router = useRouter()
+  const route = useRoute()
   const query = useQuery(orderFilterSimpleListListOptions())
   const filters = computed<SavedFilter[]>(() => query.data.value ?? [])
 
@@ -88,27 +90,60 @@ export function useOrderViews(options: {
     activeFilterId: activeFilterId.value,
   }))
 
-  const plainList = computed<RouteLocationRaw>(() => ({
-    name: options.mobile.value ? 'mobile-orders' : 'order-list',
-  }))
+  /**
+   * The query the target view lands on: everything the address carries now —
+   * the column filters, the search term, the sort, the page — minus the saved
+   * filter, which each view sets for itself. Changing view is a navigation, so
+   * without this the filters in force would be left behind on the old address.
+   *
+   * The kit's own filters are merged in on top of the address: the list queries
+   * from the kit's state, and a navigation is not the only thing that can move
+   * between views, so the state is the channel that always holds them.
+   *
+   * `user_filter` is the one parameter that does not travel: it narrows the
+   * plain list only (`listOptionsFor` drops it in every other mode), so a view
+   * that does not take it resets it, and a picked saved filter re-adds it.
+   */
+  function targetQuery(next: number | null): LocationQueryRaw {
+    const target: LocationQueryRaw = {...route.query}
 
-  function setUserFilter(id: number | null) {
-    options.columnFilters.value = [
-      ...options.columnFilters.value.filter((filter) => filter.id !== USER_FILTER),
-      ...(id == null ? [] : [{id: USER_FILTER, value: String(id)}]),
-    ]
+    for (const filter of options.columnFilters.value) {
+      if (filter.id === USER_FILTER) continue
+      if (filter.value != null && filter.value !== '') target[filter.id] = String(filter.value)
+    }
+
+    delete target.user_filter
+    if (next != null) target.user_filter = String(next)
+
+    return target
   }
 
   function select(view: OrderViewOption) {
-    if (view.id.startsWith('filter:')) {
-      const id = Number(view.id.slice('filter:'.length))
-      setUserFilter(activeFilterId.value === id ? null : id)
-      if (options.mode.value !== 'all') router.push(plainList.value)
+    const wasActive = activeFilterId.value
+    const picked = view.id.startsWith('filter:') ? Number(view.id.slice('filter:'.length)) : null
+    // Picking the view already in force clears it, as the pill did.
+    const next = picked == null || picked === wasActive ? null : picked
+
+    // The saved filter is written to the kit's state FIRST, and the address
+    // second. The two channels cover the two cases a view change can be: the
+    // list stays mounted and keeps querying from its state (the state write is
+    // what makes it filter), or it is mounted fresh and reads the address (the
+    // navigation is what makes it filter). Writing the state after the
+    // navigation would touch a ref the old instance no longer owns.
+    options.columnFilters.value = [
+      ...options.columnFilters.value.filter((filter) => filter.id !== USER_FILTER),
+      ...(next == null ? [] : [{id: USER_FILTER, value: String(next)}]),
+    ]
+
+    const query = targetQuery(next)
+    if (view.id === 'unaccepted') {
+      router.push({name: 'orders-not-accepted', query})
       return
     }
-
-    setUserFilter(null)
-    router.push(view.id === 'unaccepted' ? {name: 'orders-not-accepted'} : plainList.value)
+    // The literal names, not a computed one: the router is typed per route,
+    // and a widened RouteName cannot satisfy any single one of them.
+    if (options.mobile.value) router.push({name: 'mobile-orders', query})
+    else router.push({name: 'order-list', query})
   }
 
   return {views: computed(() => state.value.views), active: computed(() => state.value.active), select}

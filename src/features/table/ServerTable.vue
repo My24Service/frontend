@@ -164,6 +164,10 @@ const { chips } = useColumnFilters(props.table)
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+  /* The page gutter, outside any theme: the strip carries the filter chips as
+     well as a screen's own pills, and without this it runs to the window edge
+     on the plain layouts (the shltr theme sets its own gutter on top). */
+  padding: 0 1.5rem;
   margin: 0 0 20px;
 }
 </style>

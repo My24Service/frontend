@@ -34,6 +34,7 @@
       :year-picker="mode === 'year'"
       :range="mode === 'between'"
       :six-weeks="mode !== 'month' && mode !== 'year'"
+      :year-range="spec.years"
       :aria-labels="{calendarWrap: `Filter ${columnId}`}"
       @update:model-value="onPick"
     />
