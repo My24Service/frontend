@@ -486,28 +486,21 @@ export default {
           }]
         }
 
-        if (this.hasBranches) {
-          const orderTypeStatsData = await this.orderService.getOrderTypesStatsBranch()
-          const monthsStatsData = await this.orderService.getMonthsStatsBranch()
-          const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsBranch()
-          const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsBranch()
-
-          this.statsData = {
-            orderTypeStatsData,
-            monthsStatsData,
-            orderTypesMonthStatsData,
-            countsYearOrdertypeStats
-          }
-
-          this.isLoading = false
-
-          return
-        }
-
-        const orderTypeStatsData = await this.orderService.getOrderTypesStatsCustomer()
-        const monthsStatsData = await this.orderService.getMonthsStatsCustomer()
-        const orderTypesMonthStatsData = await this.orderService.getOrderTypesMonthsStatsCustomer()
-        const countsYearOrdertypeStats = await this.orderService.getCountsYearOrdertypeStatsCustomer()
+        // The four stats are independent reads, so they go out together.
+        const orders = this.orderService
+        const [
+          orderTypeStatsData, monthsStatsData, orderTypesMonthStatsData, countsYearOrdertypeStats,
+        ] = await Promise.all(this.hasBranches ? [
+          orders.getOrderTypesStatsBranch(),
+          orders.getMonthsStatsBranch(),
+          orders.getOrderTypesMonthsStatsBranch(),
+          orders.getCountsYearOrdertypeStatsBranch(),
+        ] : [
+          orders.getOrderTypesStatsCustomer(),
+          orders.getMonthsStatsCustomer(),
+          orders.getOrderTypesMonthsStatsCustomer(),
+          orders.getCountsYearOrdertypeStatsCustomer(),
+        ])
 
         this.statsData = {
           orderTypeStatsData,

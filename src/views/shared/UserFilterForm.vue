@@ -367,27 +367,30 @@ export default {
       this.model = OrderFilterModel
     }
 
-    // allowed filter fields
-    this.fieldsConfig = await this.service.getFields()
-    this.allFields = [...this.fieldsConfig.model, ...this.fieldsConfig.related]
+    // The filter's building blocks are independent reads, so they go out
+    // together; `examples` only matter to a new filter.
+    const [
+      fieldsConfig, nonTextFieldTypes, operators, statuscodes, statusFields, baseFilterOptions, examples,
+    ] = await Promise.all([
+      this.service.getFields(),
+      this.service.getNonTextFieldTypes(),
+      this.service.getOperators(),
+      this.service.getStatuses(),
+      this.service.getStatusFields(),
+      this.service.getBaseFilterOptions(),
+      this.isCreate ? this.service.getExamples() : null,
+    ])
 
-    // field types
-    this.nonTextFieldTypes = await this.service.getNonTextFieldTypes()
-
-    // operators that are supported
-    this.operators = await this.service.getOperators()
-
-    // statuses that can be used
-    this.statuscodes = await this.service.getStatuses()
-
-    // status fields
-    this.statusFields = await this.service.getStatusFields()
-
-    // base filters
-    this.baseFilterOptions = await this.service.getBaseFilterOptions()
+    this.fieldsConfig = fieldsConfig
+    this.allFields = [...fieldsConfig.model, ...fieldsConfig.related]
+    this.nonTextFieldTypes = nonTextFieldTypes
+    this.operators = operators
+    this.statuscodes = statuscodes
+    this.statusFields = statusFields
+    this.baseFilterOptions = baseFilterOptions
 
     if (this.isCreate) {
-      this.examples = await this.service.getExamples()
+      this.examples = examples
       this.filter = new this.model({json_conditions: []})
     } else {
       await this.loadData()
