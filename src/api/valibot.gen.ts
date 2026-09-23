@@ -19382,9 +19382,9 @@ export const vCustomerMaintenanceEquipmentPartialUpdatePath = v.object({
 export const vCustomerMaintenanceEquipmentPartialUpdateResponse = vMaintenanceEquipment;
 
 export const vEquipmentBuildingListQuery = v.object({
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     created: v.optional(v.string()),
-    customer: v.optional(v.string()),
+    customer: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     modified: v.optional(v.string()),
     name: v.optional(v.string()),
     ordering: v.optional(v.array(v.picklist([
@@ -19456,9 +19456,9 @@ export const vEquipmentBuildingAutocompleteListQuery = v.object({
 export const vEquipmentBuildingAutocompleteListResponse = v.array(vBuildingAutocomplete);
 
 export const vEquipmentBuildingListForSelectListQuery = v.object({
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     created: v.optional(v.string()),
-    customer: v.optional(v.string()),
+    customer: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     modified: v.optional(v.string()),
     name: v.optional(v.string()),
     q: v.optional(v.string())
@@ -19467,12 +19467,12 @@ export const vEquipmentBuildingListForSelectListQuery = v.object({
 export const vEquipmentBuildingListForSelectListResponse = v.array(vBuilding);
 
 export const vEquipmentEquipmentListQuery = v.object({
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     brand: v.optional(v.string()),
-    customer: v.optional(v.string()),
+    customer: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     description: v.optional(v.string()),
     identifier: v.optional(v.string()),
-    location: v.optional(v.string()),
+    location: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     name: v.optional(v.string()),
     num_orders: v.optional(v.string()),
     ordering: v.optional(v.array(v.picklist([
@@ -19615,7 +19615,7 @@ export const vEquipmentEquipmentAutocompleteListQuery = v.object({
     customer: v.optional(v.pipe(v.number(), v.integer())),
     description: v.optional(v.string()),
     identifier: v.optional(v.string()),
-    location: v.optional(v.string()),
+    location: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     name: v.optional(v.string()),
     num_orders: v.optional(v.string()),
     q: v.optional(v.string()),
@@ -19630,9 +19630,9 @@ export const vEquipmentEquipmentCreateQuickCreateBody = vEquipmentCreateQuickReq
 export const vEquipmentEquipmentCreateQuickCreateResponse = vCreateQuickResponse;
 
 export const vEquipmentLocationListQuery = v.object({
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     created: v.optional(v.string()),
-    customer: v.optional(v.string()),
+    customer: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     modified: v.optional(v.string()),
     name: v.optional(v.string()),
     ordering: v.optional(v.array(v.picklist([
@@ -21595,10 +21595,10 @@ export const vOrderOrderListHeaders = v.object({
 
 export const vOrderOrderListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     building: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -21776,9 +21776,9 @@ export const vOrderOrderSetOrderRejectedCreateResponse = vResultResponse;
 
 export const vOrderOrderAllForCustomerNotAcceptedListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -21842,9 +21842,9 @@ export const vOrderOrderAllForCustomerNotAcceptedCountRetrieveResponse = vCountR
 
 export const vOrderOrderAllForCustomerV2ListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -21870,9 +21870,9 @@ export const vOrderOrderAllForCustomerV2ListResponse = vPaginatedOrderCustomerHi
 
 export const vOrderOrderAllForEquipmentLocationListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -21900,9 +21900,9 @@ export const vOrderOrderAllForEquipmentLocationListResponse = vPaginatedOrderLis
 
 export const vOrderOrderAssignableListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -21964,9 +21964,9 @@ export const vOrderOrderAssignableListResponse = vPaginatedOrderDispatchList;
 
 export const vOrderOrderAutocompleteListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -21998,9 +21998,9 @@ export const vOrderOrderCountsYearOrderTypeStatsRetrieveResponse = vCountsYearOr
 
 export const vOrderOrderDispatchListAllListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -22062,9 +22062,9 @@ export const vOrderOrderDispatchListAllListResponse = vPaginatedOrderDispatchLis
 
 export const vOrderOrderDispatchListFinishedListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -22126,9 +22126,9 @@ export const vOrderOrderDispatchListFinishedListResponse = vPaginatedOrderDispat
 
 export const vOrderOrderDispatchListInprogressListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -22190,9 +22190,9 @@ export const vOrderOrderDispatchListInprogressListResponse = vPaginatedOrderDisp
 
 export const vOrderOrderDispatchListUnassignedListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -22256,9 +22256,9 @@ export const vOrderOrderGetTopXCustomersRetrieveResponse = vTopCustomersResponse
 
 export const vOrderOrderGetWithinRangeListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -22288,10 +22288,10 @@ export const vOrderOrderMaintenanceOrdersListHeaders = v.object({
 
 export const vOrderOrderMaintenanceOrdersListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     contract: v.optional(v.pipe(v.number(), v.integer())),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -22319,9 +22319,9 @@ export const vOrderOrderMaintenanceOrdersEventsRetrieveResponse = vOrder;
 
 export const vOrderOrderMonthEventsListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end: v.string(),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
@@ -22367,9 +22367,9 @@ export const vOrderOrderNewRetrieveResponse = vOrderSeedResponse;
 
 export const vOrderOrderOrderAvailabilityListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -22431,9 +22431,9 @@ export const vOrderOrderOrderTypesStatsRetrieveResponse = vOrderTypesStatsRespon
 
 export const vOrderOrderPastListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),
@@ -22459,9 +22459,9 @@ export const vOrderOrderPastListResponse = vPaginatedOrderList;
 
 export const vOrderOrderSalesOrdersListQuery = v.object({
     assigned_count: v.optional(v.string()),
-    branch: v.optional(v.string()),
+    branch: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     customer_reference: v.optional(v.string()),
-    customer_relation: v.optional(v.string()),
+    customer_relation: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     end_date: v.optional(v.string()),
     end_date__from: v.optional(v.string()),
     end_date__until: v.optional(v.string()),

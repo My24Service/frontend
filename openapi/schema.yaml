@@ -6487,7 +6487,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: created
         schema:
@@ -6495,7 +6501,13 @@ paths:
       - in: query
         name: customer
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: modified
         schema:
@@ -6749,7 +6761,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: created
         schema:
@@ -6757,7 +6775,13 @@ paths:
       - in: query
         name: customer
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: modified
         schema:
@@ -6791,7 +6815,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: brand
         schema:
@@ -6799,7 +6829,13 @@ paths:
       - in: query
         name: customer
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: description
         schema:
@@ -6811,7 +6847,13 @@ paths:
       - in: query
         name: location
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: name
         schema:
@@ -7316,7 +7358,13 @@ paths:
       - in: query
         name: location
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: name
         schema:
@@ -7387,7 +7435,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: created
         schema:
@@ -7395,7 +7449,13 @@ paths:
       - in: query
         name: customer
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: modified
         schema:
@@ -15135,7 +15195,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: building
         schema:
@@ -15148,7 +15214,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -15830,7 +15902,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -15838,7 +15916,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -16045,7 +16129,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -16053,7 +16143,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -16170,7 +16266,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -16178,7 +16280,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -16305,7 +16413,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -16313,7 +16427,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -16507,7 +16627,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -16515,7 +16641,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -16640,7 +16772,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -16648,7 +16786,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -16842,7 +16986,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -16850,7 +17000,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -17044,7 +17200,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -17052,7 +17214,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -17246,7 +17414,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -17254,7 +17428,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -17461,7 +17641,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -17469,7 +17655,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -17596,7 +17788,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: contract
         schema:
@@ -17610,7 +17808,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -17747,7 +17951,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -17755,7 +17965,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end
         schema:
@@ -17959,7 +18175,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -17967,7 +18189,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -18246,7 +18474,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -18254,7 +18488,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:
@@ -18371,7 +18611,13 @@ paths:
       - in: query
         name: branch
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: customer_reference
         schema:
@@ -18379,7 +18625,13 @@ paths:
       - in: query
         name: customer_relation
         schema:
-          type: string
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: end_date
         schema:

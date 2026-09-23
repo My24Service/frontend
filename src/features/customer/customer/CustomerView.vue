@@ -346,7 +346,7 @@ const locationsQuery = useQuery(() => ({
     query: {
       page: 1,
       page_size: WHOLE_COLLECTION_PAGE_SIZE,
-      ...(isCustomer.value ? {} : {customer: String(customerId.value)}),
+      ...(isCustomer.value ? {} : {customer: customerId.value}),
     },
   }),
 }))
@@ -357,7 +357,7 @@ const equipmentQuery = useQuery(() => ({
     query: {
       page: 1,
       page_size: WHOLE_COLLECTION_PAGE_SIZE,
-      ...(isCustomer.value ? {} : {customer: String(customerId.value)}),
+      ...(isCustomer.value ? {} : {customer: customerId.value}),
     },
   }),
 }))

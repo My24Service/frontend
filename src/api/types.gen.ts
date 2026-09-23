@@ -17757,9 +17757,15 @@ export type EquipmentBuildingListData = {
     body?: never;
     path?: never;
     query?: {
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         created?: string;
-        customer?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer?: number | string;
         modified?: string;
         name?: string;
         /**
@@ -17932,9 +17938,15 @@ export type EquipmentBuildingListForSelectListData = {
     body?: never;
     path?: never;
     query?: {
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         created?: string;
-        customer?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer?: number | string;
         modified?: string;
         name?: string;
         /**
@@ -17955,12 +17967,21 @@ export type EquipmentEquipmentListData = {
     body?: never;
     path?: never;
     query?: {
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         brand?: string;
-        customer?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer?: number | string;
         description?: string;
         identifier?: string;
-        location?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        location?: number | string;
         name?: string;
         num_orders?: string;
         /**
@@ -18312,7 +18333,10 @@ export type EquipmentEquipmentAutocompleteListData = {
         customer?: number;
         description?: string;
         identifier?: string;
-        location?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        location?: number | string;
         name?: string;
         num_orders?: string;
         /**
@@ -18352,9 +18376,15 @@ export type EquipmentLocationListData = {
     body?: never;
     path?: never;
     query?: {
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         created?: string;
-        customer?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer?: number | string;
         modified?: string;
         name?: string;
         /**
@@ -23894,13 +23924,19 @@ export type OrderOrderListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         /**
          * Only orders with an orderline on equipment in this building id.
          */
         building?: number;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -24265,9 +24301,15 @@ export type OrderOrderAllForCustomerNotAcceptedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -24360,9 +24402,15 @@ export type OrderOrderAllForCustomerV2ListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -24412,9 +24460,15 @@ export type OrderOrderAllForEquipmentLocationListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -24472,9 +24526,15 @@ export type OrderOrderAssignableListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -24554,9 +24614,15 @@ export type OrderOrderAutocompleteListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -24624,9 +24690,15 @@ export type OrderOrderDispatchListAllListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -24706,9 +24778,15 @@ export type OrderOrderDispatchListFinishedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -24788,9 +24866,15 @@ export type OrderOrderDispatchListInprogressListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -24870,9 +24954,15 @@ export type OrderOrderDispatchListUnassignedListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         /**
          * Only rows whose end_date falls in this period. A date YYYY-MM-DD, month YYYY-MM or year YYYY. Partial values name the whole period they spell. A range over periods: `end_date=2026-09...2026-10` the inclusive months, `end_date=2026-09..2026-11` the exclusive same, `end_date=2026-11...` open-ended.
          */
@@ -24965,9 +25055,15 @@ export type OrderOrderGetWithinRangeListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -25023,13 +25119,19 @@ export type OrderOrderMaintenanceOrdersListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         /**
          * Only orders with order lines under this maintenance contract. Omit for orders under any maintenance contract.
          */
         contract?: number;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -25099,9 +25201,15 @@ export type OrderOrderMonthEventsListData = {
     path?: never;
     query: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         /**
          * Inclusive end bound (YYYY-MM-DD).
          */
@@ -25223,9 +25331,15 @@ export type OrderOrderOrderAvailabilityListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -25403,9 +25517,15 @@ export type OrderOrderPastListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
@@ -25455,9 +25575,15 @@ export type OrderOrderSalesOrdersListData = {
     path?: never;
     query?: {
         assigned_count?: string;
-        branch?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        branch?: number | string;
         customer_reference?: string;
-        customer_relation?: string;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer_relation?: number | string;
         end_date?: string;
         end_date__from?: string;
         end_date__until?: string;
