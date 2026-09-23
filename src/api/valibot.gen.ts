@@ -19382,8 +19382,19 @@ export const vCustomerMaintenanceEquipmentPartialUpdatePath = v.object({
 export const vCustomerMaintenanceEquipmentPartialUpdateResponse = vMaintenanceEquipment;
 
 export const vEquipmentBuildingListQuery = v.object({
-    branch: v.optional(v.pipe(v.number(), v.integer())),
-    customer: v.optional(v.pipe(v.number(), v.integer())),
+    branch: v.optional(v.string()),
+    created: v.optional(v.string()),
+    customer: v.optional(v.string()),
+    modified: v.optional(v.string()),
+    name: v.optional(v.string()),
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-modified',
+        '-name',
+        'created',
+        'modified',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
@@ -19435,27 +19446,33 @@ export const vEquipmentBuildingDashboardRetrieveResponse = vBuildingDashboardRes
 
 export const vEquipmentBuildingAutocompleteListQuery = v.object({
     branch: v.optional(v.pipe(v.number(), v.integer())),
+    created: v.optional(v.string()),
     customer: v.optional(v.pipe(v.number(), v.integer())),
+    modified: v.optional(v.string()),
+    name: v.optional(v.string()),
     q: v.optional(v.string())
 });
 
 export const vEquipmentBuildingAutocompleteListResponse = v.array(vBuildingAutocomplete);
 
 export const vEquipmentBuildingListForSelectListQuery = v.object({
-    branch: v.optional(v.pipe(v.number(), v.integer())),
-    customer: v.optional(v.pipe(v.number(), v.integer())),
+    branch: v.optional(v.string()),
+    created: v.optional(v.string()),
+    customer: v.optional(v.string()),
+    modified: v.optional(v.string()),
+    name: v.optional(v.string()),
     q: v.optional(v.string())
 });
 
 export const vEquipmentBuildingListForSelectListResponse = v.array(vBuilding);
 
 export const vEquipmentEquipmentListQuery = v.object({
-    branch: v.optional(v.pipe(v.number(), v.integer())),
+    branch: v.optional(v.string()),
     brand: v.optional(v.string()),
-    customer: v.optional(v.pipe(v.number(), v.integer())),
+    customer: v.optional(v.string()),
     description: v.optional(v.string()),
     identifier: v.optional(v.string()),
-    location: v.optional(v.pipe(v.number(), v.integer())),
+    location: v.optional(v.string()),
     name: v.optional(v.string()),
     num_orders: v.optional(v.string()),
     ordering: v.optional(v.array(v.picklist([
@@ -19598,7 +19615,7 @@ export const vEquipmentEquipmentAutocompleteListQuery = v.object({
     customer: v.optional(v.pipe(v.number(), v.integer())),
     description: v.optional(v.string()),
     identifier: v.optional(v.string()),
-    location: v.optional(v.pipe(v.number(), v.integer())),
+    location: v.optional(v.string()),
     name: v.optional(v.string()),
     num_orders: v.optional(v.string()),
     q: v.optional(v.string()),
@@ -19613,8 +19630,19 @@ export const vEquipmentEquipmentCreateQuickCreateBody = vEquipmentCreateQuickReq
 export const vEquipmentEquipmentCreateQuickCreateResponse = vCreateQuickResponse;
 
 export const vEquipmentLocationListQuery = v.object({
-    branch: v.optional(v.pipe(v.number(), v.integer())),
-    customer: v.optional(v.pipe(v.number(), v.integer())),
+    branch: v.optional(v.string()),
+    created: v.optional(v.string()),
+    customer: v.optional(v.string()),
+    modified: v.optional(v.string()),
+    name: v.optional(v.string()),
+    ordering: v.optional(v.array(v.picklist([
+        '-created',
+        '-modified',
+        '-name',
+        'created',
+        'modified',
+        'name'
+    ]))),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
     q: v.optional(v.string())
@@ -19720,7 +19748,10 @@ export const vEquipmentLocationUuidRetrieveResponse = vLocation;
 
 export const vEquipmentLocationAutocompleteListQuery = v.object({
     branch: v.optional(v.pipe(v.number(), v.integer())),
+    created: v.optional(v.string()),
     customer: v.optional(v.pipe(v.number(), v.integer())),
+    modified: v.optional(v.string()),
+    name: v.optional(v.string()),
     q: v.optional(v.string())
 });
 
@@ -19732,7 +19763,10 @@ export const vEquipmentLocationCreateQuickCreateResponse = vCreateQuickResponse;
 
 export const vEquipmentLocationListForSelectListQuery = v.object({
     branch: v.optional(v.pipe(v.number(), v.integer())),
+    created: v.optional(v.string()),
     customer: v.optional(v.pipe(v.number(), v.integer())),
+    modified: v.optional(v.string()),
+    name: v.optional(v.string()),
     q: v.optional(v.string())
 });
 

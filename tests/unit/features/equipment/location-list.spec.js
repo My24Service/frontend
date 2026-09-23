@@ -8,6 +8,8 @@ import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 import { captureDownloads, xlsxResponse } from '../../support/downloads.js'
 
+import { addFilter, editorInput } from '../../support/column-filters.js'
+
 vi.mock('bootstrap-vue-next', async (importOriginal) => ({
   ...(await importOriginal()), useToast: () => ({create: toastCreate}),
 }))
@@ -81,25 +83,37 @@ describe('LocationList', () => {
     expect(wrapper.get('h3').text()).toContain('Locations')
   })
 
-  test('offers no sortable headers, because the endpoint declares no ordering', async () => {
+  test('sorts on the columns the endpoint orders by, and not on the owner', async () => {
     const wrapper = await mountLocations()
+
+    // name/created/modified are the endpoint's ordering allow-list
+    // (apps/equipment/views.py). The owner column is a display column showing
+    // the related name while filtering on the key, so ordering by it would sort
+    // by id and not match the labels the table shows - it offers no sort.
+    expect(wrapper.find('th[aria-label="Sort by created"]').exists()).toBe(true)
+    expect(wrapper.find('th[aria-label="Sort by modified"]').exists()).toBe(true)
+    expect(wrapper.find('th[aria-label="Sort by customer"]').exists()).toBe(false)
+    expect(wrapper.find('th[aria-label="Sort by branch"]').exists()).toBe(false)
+
+    await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
     await settle()
 
-    // The legacy screen rendered sort icons and sent sort_field/sort_dir, which
-    // the backend had no mixin to read. Rather than keep a control that cannot
-    // be honoured, the port turns sorting off - see the module README.
-    expect(wrapper.findAll('th.sortable-header')).toHaveLength(0)
-    expect(listRequests()[0].query).not.toHaveProperty('ordering')
+    // The term the header click put on the wire names an allowed column (the
+    // kit's toggle decides which direction this click landed on), and the page
+    // resets to the first.
+    const query = listRequests().at(-1).query
+    expect(query.ordering).toMatch(/^-?name$/)
+    expect(query.page).toBe('1')
   })
 
-  test('never forwards ordering even when a shared address carries one', async () => {
+  test('keeps the ordering a shared address carries', async () => {
     window.history.replaceState(null, '', '/#/?ordering=name')
     await mountLocations()
     await settle()
 
-    // `ordering` is not a declared parameter on this endpoint; URL sync would
-    // otherwise restore it into the sort state and put it on the wire.
-    expect(listRequests()[0].query).not.toHaveProperty('ordering')
+    // `ordering` is a declared parameter on this endpoint now, so URL sync
+    // restores it into the sort state and it rides the wire.
+    expect(listRequests()[0].query).toMatchObject({ordering: 'name'})
   })
 
   test('a search term is debounced onto the wire', async () => {
@@ -206,5 +220,25 @@ describe('LocationList QR export', () => {
     const exports = api.requests().filter((request) => request.path === '/api/equipment/location-export-qr/')
     expect(exports.map((request) => request.query)).toEqual([{ q: 'berg & ruimte' }])
     expect(saved).toEqual(['locations.xlsx'])
+  })
+})
+
+describe('LocationList column filters', () =>
+{
+  test('a column filter rides the wire under its bare column name', async () =>
+  {
+    const wrapper = await mountLocations()
+    await settle()
+
+    await addFilter(wrapper, 'Name')
+    await editorInput(wrapper, 'name').setValue('Bergruimte')
+    // The kit commits the search and the filters on a 300 ms debounce.
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await settle()
+
+    expect(listRequests().at(-1).query).toMatchObject({name: 'Bergruimte'})
+
+    // The kit mirrors the filters into the address, so a shared link restores them.
+    expect(window.location.hash).toContain('name=Bergruimte')
   })
 })

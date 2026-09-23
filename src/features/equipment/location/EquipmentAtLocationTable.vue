@@ -60,7 +60,7 @@ const fields = computed(() => [
 ])
 
 const listQuery = useQuery(equipmentEquipmentListOptions({
-  query: {location: props.locationId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
+  query: {location: String(props.locationId), page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
 }))
 useQueryErrorToast(listQuery.error, $trans('Error loading equipment'))
 

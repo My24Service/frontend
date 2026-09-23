@@ -96,10 +96,15 @@ async function pastDebounce() {
   await settle()
 }
 
-function pill(wrapper, text) {
-  const link = wrapper.findAll('.subnav-pills a').find((a) => a.text() === text)
-  if (!link) throw new Error(`no pill '${text}'`)
-  return link
+/** Pick a view from the header's dropdown: the control the pills were replaced by. */
+async function pickView(wrapper, label) {
+  await wrapper.get('.order-view-dropdown .dropdown-toggle').trigger('click')
+  await flushPromises()
+  const items = wrapper.findAll('.order-view-dropdown .dropdown-item')
+  const item = items.find((candidate) => candidate.text() === label)
+  if (!item) throw new Error(`no view '${label}'; it offers ${JSON.stringify(items.map((candidate) => candidate.text()))}`)
+  await item.trigger('click')
+  await pastDebounce()
 }
 
 const listRequests = (path = '/api/order/order/') => api.requests().filter((r) => r.path === path)
@@ -404,26 +409,41 @@ describe('OrderList column filters', () => {
 })
 
 describe('OrderList saved filters', () => {
-  test('shows a pill per saved filter; picking one rides the wire as user_filter and the address bar', async () => {
+  test('picking a saved filter rides the wire as user_filter and the address bar', async () => {
     const wrapper = await mountList()
 
-    await pill(wrapper, 'Mine').trigger('click')
-    await pastDebounce()
+    await pickView(wrapper, 'Mine')
 
     expect(listRequests().at(-1).query).toMatchObject({ page: '1', user_filter: '7' })
     expect(window.location.hash).toContain('user_filter=7')
   })
 
-  test('picking the active pill again clears it', async () => {
+  test('picking the active view again clears it', async () => {
     seedUrl('user_filter=7')
     const wrapper = await mountList()
     expect(listRequests()[0].query).toMatchObject({ user_filter: '7' })
 
-    await pill(wrapper, 'Mine').trigger('click')
-    await pastDebounce()
+    await pickView(wrapper, 'Mine')
 
     expect(listRequests().at(-1).query).toEqual({ page: '1', page_size: '20' })
     expect(window.location.hash).not.toContain('user_filter')
+  })
+
+  test('the saved filter in force is the only active view, never All as well', async () => {
+    // The pills let the router mark "All" active on a route-name match, so a
+    // saved filter — which only changes the query — left both highlighted.
+    seedUrl('user_filter=7')
+    const wrapper = await mountList()
+    expect(listRequests()[0].query).toMatchObject({ user_filter: '7' })
+
+    expect(wrapper.get('.order-view-dropdown .dropdown-toggle').text()).toBe('Mine')
+
+    await wrapper.get('.order-view-dropdown .dropdown-toggle').trigger('click')
+    await flushPromises()
+    const active = wrapper.findAll('.order-view-dropdown .dropdown-item')
+      .filter((item) => item.classes().includes('active'))
+
+    expect(active.map((item) => item.text())).toEqual(['Mine'])
   })
 
   test('the not-accepted list drops a saved filter its mode does not take', async () => {

@@ -3806,6 +3806,7 @@ export const customerMaintenanceEquipmentPartialUpdate = <ThrowOnError extends b
  * Viewset that supports all normal viewset functionality.
  */
 export const equipmentBuildingList = <ThrowOnError extends boolean = false>(options?: Options<EquipmentBuildingListData, ThrowOnError>): RequestResult<EquipmentBuildingListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<EquipmentBuildingListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),
@@ -4194,6 +4195,7 @@ export const equipmentEquipmentCreateQuickCreate = <ThrowOnError extends boolean
  * Viewset that supports all normal viewset functionality.
  */
 export const equipmentLocationList = <ThrowOnError extends boolean = false>(options?: Options<EquipmentLocationListData, ThrowOnError>): RequestResult<EquipmentLocationListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<EquipmentLocationListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { ordering: { array: { explode: false } } } },
     requestValidator: async (data) => await v.parseAsync(v.object({
         body: v.optional(v.never()),
         path: v.optional(v.never()),

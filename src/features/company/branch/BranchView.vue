@@ -294,11 +294,11 @@ const {
 // `locationsQuery` does it: it is the arguments that differ by role, not the
 // options object, which is the shape generated `*Options` calls support.
 const equipmentQuery = useQuery(() => ({
-  ...equipmentEquipmentListOptions({query: isEmployee.value ? {page: 1} : {branch: subjectId.value ?? 0, page: 1}}),
+  ...equipmentEquipmentListOptions({query: isEmployee.value ? {page: 1} : {branch: String(subjectId.value ?? 0), page: 1}}),
   enabled: isEmployee.value || hasSubject.value,
 }))
 const locationsQuery = useQuery(() => ({
-  ...equipmentLocationListOptions({query: isEmployee.value ? {page: 1} : {branch: subjectId.value ?? 0, page: 1}}),
+  ...equipmentLocationListOptions({query: isEmployee.value ? {page: 1} : {branch: String(subjectId.value ?? 0), page: 1}}),
   enabled: isEmployee.value || hasSubject.value,
 }))
 useQueryErrorToast(equipmentQuery.error, $trans('Error fetching equipment'))

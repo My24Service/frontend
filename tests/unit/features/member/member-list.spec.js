@@ -132,7 +132,7 @@ describe('MemberList, the mirrored columns', () => {
   test('the screen renders no column filter bar at all', async () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
 
-    expect(wrapper.find('.column-filter-bar').exists()).toBe(false)
+    expect(wrapper.find('.column-filter-menu').exists()).toBe(false)
     expect(wrapper.find('tr.filter-row').exists()).toBe(false)
   })
 })

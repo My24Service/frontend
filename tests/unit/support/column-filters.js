@@ -1,9 +1,10 @@
 import { flushPromises } from '@vue/test-utils'
 
 /**
- * Driving the column-filter bar (src/features/table/filters/) from a spec,
- * through its DOM: the "Filter" menu adds a chip, the chip opens its editor
- * in a popover, the editor applies as it goes.
+ * Driving the column filters (src/features/table/filters/) from a spec,
+ * through its DOM: the header's "Filter" menu adds a chip, the chip shows in
+ * the list's subnav area and opens its editor in a popover, the editor
+ * applies as it goes.
  *
  * `BPopover` renders in place unless told to teleport, so — unlike the
  * modals in ./modal.js — the editor is inside the mounted wrapper and
@@ -24,13 +25,13 @@ export async function settleTransitions() {
   await flushPromises()
 }
 
-/** Pick `label` from the bar's "Filter" menu; its chip appears with the editor open. */
+/** Pick `label` from the header's "Filter" menu; its chip appears with the editor open. */
 export async function addFilter(wrapper, label) {
-  await wrapper.get('.column-filter-bar .dropdown-toggle').trigger('click')
+  await wrapper.get('.column-filter-menu .dropdown-toggle').trigger('click')
   await flushPromises()
-  const item = wrapper.findAll('.column-filter-bar .dropdown-item').find((candidate) => candidate.text() === label)
+  const item = wrapper.findAll('.column-filter-menu .dropdown-item').find((candidate) => candidate.text() === label)
   if (!item) {
-    const labels = wrapper.findAll('.column-filter-bar .dropdown-item').map((candidate) => candidate.text())
+    const labels = wrapper.findAll('.column-filter-menu .dropdown-item').map((candidate) => candidate.text())
     throw new Error(`no filter '${label}' in the menu — it offers ${JSON.stringify(labels)}`)
   }
   await item.trigger('click')
@@ -40,11 +41,11 @@ export async function addFilter(wrapper, label) {
 
 /** The labels the "Filter" menu offers right now. */
 export async function offeredFilters(wrapper) {
-  const toggle = wrapper.find('.column-filter-bar .dropdown-toggle')
+  const toggle = wrapper.find('.column-filter-menu .dropdown-toggle')
   if (!toggle.exists()) return []
   await toggle.trigger('click')
   await flushPromises()
-  const labels = wrapper.findAll('.column-filter-bar .dropdown-item').map((item) => item.text())
+  const labels = wrapper.findAll('.column-filter-menu .dropdown-item').map((item) => item.text())
   await toggle.trigger('click')
   await flushPromises()
   return labels

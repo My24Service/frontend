@@ -32,34 +32,14 @@
           <IBiFileEarmarkPlus></IBiFileEarmarkPlus> {{ $trans('Add order') }}
         </router-link>
       </template>
+      <template #header-actions>
+        <OrderViewDropdown
+          :views="views"
+          :active="activeView"
+          @select="selectView"
+        />
+      </template>
       <template #subnav>
-        <div class="order-filter-links">
-          <b-nav pills>
-            <b-nav-item
-              :active="isAllActive"
-              :to="{name: isMobile ? 'mobile-orders' : 'order-list'}"
-            >
-              {{ $trans('All') }}
-            </b-nav-item>
-            <b-nav-item
-              v-if="!isMobile"
-              :active="mode === 'unaccepted' && !activeUserFilter"
-              :to="{name: 'orders-not-accepted'}"
-            >
-              {{ $trans('Not accepted') }}
-            </b-nav-item>
-            <b-nav-item
-              v-for="filter in userFilters"
-              :key="filter.id"
-              :active="filter.id === activeUserFilter"
-              :aria-label="`${$trans('Filter')} ${filter.name}`"
-              @click.prevent="toggleUserFilter(filter.id)"
-            >
-              {{ filter.name }}
-            </b-nav-item>
-          </b-nav>
-        </div>
-
         <div v-if="canAssign && selectedOrders.length > 0" class="selected-orders">
           <span class="dimmed">{{ $trans('Selected orders') }} ({{ selectedOrders.length }}):</span>
           <span
@@ -89,8 +69,9 @@ import { useMemberNewData } from '../use-member-new-data'
 import { isListMode, listOptionsFor, listQueryFrom, userFilterFrom, type ListMode } from './list-modes'
 import { useDispatchSelection } from './use-dispatch-selection'
 import { useOrderColumns, type OrderRow } from './use-order-columns'
-import { useSavedFilterPills } from './use-saved-filter-pills'
+import { useOrderViews } from './use-order-views'
 import { useUnacceptedCount } from './use-unaccepted-count'
+import OrderViewDropdown from './OrderViewDropdown.vue'
 
 /**
  * The order list: one screen for the five list modes (see ./list-modes.ts),
@@ -143,8 +124,7 @@ function reload() {
   unaccepted.refetch()
 }
 
-const {filters: userFilters, active: activeUserFilter, toggle: toggleUserFilter} = useSavedFilterPills(columnFilters)
-const isAllActive = computed(() => mode.value === 'all' && !activeUserFilter.value)
+const {views, active: activeView, select: selectView} = useOrderViews({mode, mobile: isMobile, columnFilters})
 
 useMemberNewData(NEW_DATA_EVENTS.UNACCEPTED_ORDER, (message) => {
   if (message.type !== NEW_DATA_EVENTS.UNACCEPTED_ORDER) return
@@ -158,11 +138,6 @@ useMemberNewData(NEW_DATA_EVENTS.UNACCEPTED_ORDER, (message) => {
 </script>
 
 <style scoped>
-.order-filter-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1ex 2ex;
-}
 .selected-orders {
   display: flex;
   align-items: center;

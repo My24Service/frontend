@@ -90,9 +90,9 @@ import {
 import type { EquipmentTypeEnum, PaginatedEquipmentList } from '@/api/types.gen'
 import { equipmentEquipment } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
-import RowAction from '@/components/RowAction.vue'
 import { EQUIPMENT_TYPES } from '@/constants'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
+import { useEquipmentColumns } from './use-equipment-columns'
 const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions and the add link. */
   from_settings?: boolean
@@ -123,82 +123,14 @@ const planning = computed(() => !authStore.isEmployee && !authStore.isCustomer)
 
 const addRoute = computed(() => toRoute(`${props.route_prefix}-add` as RouteName))
 
-const helper = createAppColumnHelper<EquipmentRow>()
-
-// The owner column is the only difference between the customer and branch
-// variants. It is also the one cell that links on a foreign key - the row's
-// `customer`/`branch` - rather than on the row's own id.
-function ownerColumn(key: 'customer' | 'branch', routeName: RouteName) {
-  return helper.display({
-    id: key,
-    header: key === 'customer' ? $trans('Customer') : $trans('Branch'),
-    cell: ({row}) => {
-      const owner = row.original.customer_branch_view
-      if (!owner) return ''
-      const label = `${owner.name} - ${owner.city}`
-      // The FK is nullable in the generated type, and a <router-link> with a
-      // null param cannot resolve at all - it throws while the row renders.
-      // The legacy screen linked unconditionally and would have thrown here;
-      // the label is what the user needs, so it stays as plain text.
-      const ownerId = row.original[key]
-      if (ownerId == null) return label
-      return h(RouterLink, {to: toRoute(routeName, {pk: ownerId})}, () => label)
-    },
-  })
-}
-
-const columns = helper.columns([
-  helper.accessor('name', {
-    header: $trans('Equipment'),
-    cell: ({row}) => h(RouterLink, {
-      to: hasBranches.value
-        ? toRoute(`${props.route_prefix}-view-${props.type}` as RouteName, {pk: row.original.id})
-        : toRoute(`${props.route_prefix}-view` as RouteName, {pk: row.original.id}),
-    }, () => row.original.name),
-  }),
-  ...(planning.value && hasBranches.value ? [ownerColumn('branch', 'company-branch-view')] : []),
-  ...(planning.value && !hasBranches.value ? [ownerColumn('customer', 'customer-view')] : []),
-  // `name`, `brand` and `num_orders` are each in the endpoint's ordering
-  // allow-list, so they sort on the wire. `customer` and `branch` are not, so
-  // those headers stay unsortable rather than sending an `ordering` term the
-  // contract does not admit - the legacy screen sorted on them through the
-  // older `sort_field` contract, which took any column name.
-  ...(planning.value ? [helper.accessor('brand', {header: $trans('Brand')})] : []),
-  helper.accessor('location_name', {header: $trans('Location')}),
-  // State is the row's latest child record, not a column: nothing to sort or
-  // filter on.
-  helper.display({
-    id: 'latest_state',
-    header: $trans('State'),
-    cell: ({row}) => {
-      const latest = row.original.latest_state
-      if (!latest) return ''
-      return `${latest.state} (${$trans('replace in ')} ${latest.replace_months} ${$trans('months')})`
-    },
-  }),
-  helper.accessor('num_orders', {header: $trans('Orders')}),
-  ...(props.from_settings ? [helper.display({
-    id: 'icons',
-    header: '',
-    cell: ({row}) => h('div', {class: 'h2 float-right icons'}, [
-      h(RowAction, {icon: 'plus',
-        title: $trans('Add state'),
-        method: () => showAddStateModal(row.original.id),
-      }),
-      h(RowAction, {icon: 'edit',
-        router_name: (hasBranches.value
-          ? `${props.route_prefix}-edit-${props.type}`
-          : `${props.route_prefix}-edit`) as RouteName,
-        router_params: {pk: row.original.id},
-        title: $trans('Edit'),
-      }),
-      h(RowAction, {icon: 'delete',
-        title: $trans('Delete'),
-        method: () => tableRef.value?.showDeleteModal(row.original.id),
-      }),
-    ]),
-  })] : []),
-])
+const columns = useEquipmentColumns({
+  routePrefix: props.route_prefix,
+  type: props.type,
+  fromSettings: props.from_settings,
+  planning: planning.value,
+  onDelete: (id) => tableRef.value?.showDeleteModal(id),
+  onAddState: (id) => showAddStateModal(id),
+})
 
 const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetching, refresh} = useServerTable<EquipmentRow>({
   key: 'equipment-table',
@@ -206,6 +138,12 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
   listOptions: (query) => equipmentEquipmentListOptions({
     query: {
       ...baseListParams(query),
+
+      ...(query.name ? {name: String(query.name)} : {}),
+      ...(query.brand ? {brand: String(query.brand)} : {}),
+      ...(query.customer ? {customer: String(query.customer)} : {}),
+      ...(query.branch ? {branch: String(query.branch)} : {}),
+      ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
       // Always sent: the endpoint scopes the list by type, and the legacy
       // screen sent its default (`technical`) the same way.
       type: props.type,

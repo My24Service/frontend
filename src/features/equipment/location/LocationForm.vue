@@ -206,7 +206,7 @@ const {ownerId, isResolvingOwner} = formOwner
  */
 const buildingsQuery = useQuery(() => ({
   ...equipmentBuildingListForSelectListOptions({
-    query: wireKind.value === 'branch' ? {branch: ownerId.value ?? 0} : {customer: ownerId.value ?? 0},
+    query: wireKind.value === 'branch' ? {branch: String(ownerId.value ?? 0)} : {customer: String(ownerId.value ?? 0)},
   }),
   enabled: ownerId.value != null,
 }))

@@ -1,5 +1,6 @@
-export { default as ColumnFilterBar } from './ColumnFilterBar.vue'
+export { default as ColumnFilterChips } from './ColumnFilterChips.vue'
 export { default as ColumnFilterChip } from './ColumnFilterChip.vue'
+export { default as ColumnFilterMenu } from './ColumnFilterMenu.vue'
 export { default as DateFilterEditor } from './DateFilterEditor.vue'
 export { default as NumberFilterEditor } from './NumberFilterEditor.vue'
 export { default as SelectFilterEditor } from './SelectFilterEditor.vue'
@@ -29,3 +30,4 @@ export {
   type DateFilterValue,
 } from './filter-grammar'
 export { focusFirstControl } from './focus-first-control'
+export { useColumnFilters, type ColumnFilters, type FilterChip } from './use-column-filters'

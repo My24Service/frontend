@@ -17757,8 +17757,15 @@ export type EquipmentBuildingListData = {
     body?: never;
     path?: never;
     query?: {
-        branch?: number;
-        customer?: number;
+        branch?: string;
+        created?: string;
+        customer?: string;
+        modified?: string;
+        name?: string;
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-modified' | '-name' | 'created' | 'modified' | 'name'>;
         /**
          * A page number within the paginated result set.
          */
@@ -17900,10 +17907,13 @@ export type EquipmentBuildingAutocompleteListData = {
          * Only rows for this branch id.
          */
         branch?: number;
+        created?: string;
         /**
          * Only rows for this customer id.
          */
         customer?: number;
+        modified?: string;
+        name?: string;
         /**
          * Case-insensitive substring match on the name.
          */
@@ -17922,8 +17932,11 @@ export type EquipmentBuildingListForSelectListData = {
     body?: never;
     path?: never;
     query?: {
-        branch?: number;
-        customer?: number;
+        branch?: string;
+        created?: string;
+        customer?: string;
+        modified?: string;
+        name?: string;
         /**
          * A search term.
          */
@@ -17942,12 +17955,12 @@ export type EquipmentEquipmentListData = {
     body?: never;
     path?: never;
     query?: {
-        branch?: number;
+        branch?: string;
         brand?: string;
-        customer?: number;
+        customer?: string;
         description?: string;
         identifier?: string;
-        location?: number;
+        location?: string;
         name?: string;
         num_orders?: string;
         /**
@@ -18299,7 +18312,7 @@ export type EquipmentEquipmentAutocompleteListData = {
         customer?: number;
         description?: string;
         identifier?: string;
-        location?: number;
+        location?: string;
         name?: string;
         num_orders?: string;
         /**
@@ -18339,8 +18352,15 @@ export type EquipmentLocationListData = {
     body?: never;
     path?: never;
     query?: {
-        branch?: number;
-        customer?: number;
+        branch?: string;
+        created?: string;
+        customer?: string;
+        modified?: string;
+        name?: string;
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-modified' | '-name' | 'created' | 'modified' | 'name'>;
         /**
          * A page number within the paginated result set.
          */
@@ -18630,10 +18650,13 @@ export type EquipmentLocationAutocompleteListData = {
          * Only rows for this branch id.
          */
         branch?: number;
+        created?: string;
         /**
          * Only rows for this customer id.
          */
         customer?: number;
+        modified?: string;
+        name?: string;
         /**
          * Case-insensitive substring match on the name.
          */
@@ -18669,10 +18692,13 @@ export type EquipmentLocationListForSelectListData = {
          * Only rows for this branch id.
          */
         branch?: number;
+        created?: string;
         /**
          * Only rows for this customer id.
          */
         customer?: number;
+        modified?: string;
+        name?: string;
         /**
          * A search term.
          */

@@ -12,6 +12,7 @@
 
   <ListPageHeader
     v-model:search-draft="searchDraft"
+    :table="table"
     :title="title"
     :search-label="searchLabel"
     :refresh="refresh"
@@ -23,14 +24,20 @@
     <template #toolbar-extra>
       <slot name="toolbar-extra" />
     </template>
+    <template #header-actions>
+      <slot name="header-actions" />
+    </template>
     <template #add>
       <slot name="add" />
     </template>
   </ListPageHeader>
 
-  <!-- Between the title bar and the table: the tabs or pills a screen uses to
-       switch between kinds of the same list (the statuscode types). -->
-  <div v-if="$slots.subnav" class="subnav-pills">
+  <!-- Between the title bar and the table: the filters in force, then the tabs
+       or pills a screen uses to switch between kinds of the same list (the
+       statuscode types). Above the panel, not inside its overflow-auto box
+       below, which would clip the chips' editor popovers. -->
+  <div v-if="$slots.subnav || chips.length > 0" class="subnav-pills">
+    <ColumnFilterChips :table="table" />
     <slot name="subnav" />
   </div>
 
@@ -38,11 +45,6 @@
     :is="pageDetails ? 'div' : NoPanelWrapper"
     :class="pageDetails ? 'page-details panel' : undefined"
   >
-    <!-- The column filters, in the panel above the table (not inside the
-         table's overflow-auto box, which would clip the editors' popovers).
-         Renders nothing when no column declares one (table.ts, ColumnMeta.filter). -->
-    <ColumnFilterBar :table="table" />
-
     <div class="app-detail panel overflow-auto">
       <div class="data-table">
         <ServerDataTable
@@ -70,14 +72,15 @@
 import type { PaginationState, RowData, VueTable } from '@tanstack/vue-table'
 import type { QueryClient } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
-import { ColumnFilterBar } from '@/features/table/filters'
+import { ColumnFilterChips } from '@/features/table/filters'
+import { useColumnFilters } from '@/features/table/filters/use-column-filters'
 import ListDeleteModal from './ListDeleteModal.vue'
 import ListPageHeader from './ListPageHeader.vue'
 import ServerDataTable from './ServerDataTable.vue'
 import ServerTablePagination from './ServerTablePagination.vue'
 import type { AppFeatures } from './table'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   /** The instance `useServerTable` returned. */
   table: VueTable<AppFeatures, TData>
   /** The page the engine is on — the table state itself is the engine's. */
@@ -145,10 +148,22 @@ function showDeleteModal(id: number) {
 defineExpose({showDeleteModal})
 
 const searchDraft = defineModel<string>('searchDraft', {required: true})
+
+/**
+ * The same filter state the header's menu and the chips read. The subnav area
+ * is here, so the question "is there anything to show between the title bar
+ * and the table" is answered here: the page's own subnav got the area, or a
+ * filter in force did.
+ */
+const { chips } = useColumnFilters(props.table)
 </script>
 
 <style scoped>
 .subnav-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
   margin: 0 0 20px;
 }
 </style>

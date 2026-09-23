@@ -7,6 +7,8 @@ import { mountListView, toastCreate, toasts } from '../../support/form-harness.j
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
+import { addFilter, editorInput } from '../../support/column-filters.js'
+
 vi.mock('bootstrap-vue-next', async (importOriginal) => ({
   ...(await importOriginal()), useToast: () => ({create: toastCreate}),
 }))
@@ -71,11 +73,19 @@ describe('BuildingList', () => {
     expect(wrapper.get('h3').text()).toContain('Buildings')
   })
 
-  test('offers no sortable headers, because the endpoint declares no ordering', async () => {
+  test('sorts on the columns the endpoint orders by', async () => {
     const wrapper = await mountBuildings()
+    await settle()
 
-    expect(wrapper.findAll('th.sortable-header')).toHaveLength(0)
-    expect(listRequests()[0].query).not.toHaveProperty('ordering')
+    // name/created/modified are the endpoint's ordering allow-list
+    // (apps/equipment/views.py).
+    expect(wrapper.find('th[aria-label="Sort by created"]').exists()).toBe(true)
+    expect(wrapper.find('th[aria-label="Sort by modified"]').exists()).toBe(true)
+
+    await wrapper.get('th[aria-label="Sort by name"]').trigger('click')
+    await settle()
+
+    expect(listRequests().at(-1).query).toMatchObject({ordering: 'name', page: '1'})
   })
 
   test('a search term is debounced onto the wire', async () => {
@@ -159,5 +169,25 @@ describe('BuildingList delete', () => {
 
     expect(wrapper.get('tbody').text()).toContain('Hoofdgebouw')
     expect(bodies()).toContain('Error deleting building')
+  })
+})
+
+describe('BuildingList column filters', () =>
+{
+  test('a column filter rides the wire under its bare column name', async () =>
+  {
+    const wrapper = await mountBuildings()
+    await settle()
+
+    await addFilter(wrapper, 'Name')
+    await editorInput(wrapper, 'name').setValue('Hoofdgebouw')
+    // The kit commits the search and the filters on a 300 ms debounce.
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await settle()
+
+    expect(listRequests().at(-1).query).toMatchObject({name: 'Hoofdgebouw'})
+
+    // The kit mirrors the filters into the address, so a shared link restores them.
+    expect(window.location.hash).toContain('name=Hoofdgebouw')
   })
 })

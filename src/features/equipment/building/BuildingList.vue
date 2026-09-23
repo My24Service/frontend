@@ -41,13 +41,12 @@ import {
 import type { PaginatedBuildingList } from '@/api/types.gen'
 import { equipmentBuilding } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
-import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
+import { useBuildingColumns } from './use-building-columns'
 type BuildingRow = ListRow<PaginatedBuildingList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
-// Read once, as the legacy screen read them in `created()`.
-const hasBranches = useMainStore().getMemberHasBranches
 const authStore = useAuthStore()
 // "Planning" in the legacy screen's sense: neither a branch employee nor a
 // customer. Those two roles see no owner column.
@@ -59,66 +58,27 @@ const planning = !authStore.isEmployee && !authStore.isCustomer
 // ever defined those names - so those links were dead. A customer-facing
 // buildings section would have to mount these screens before that prefix could
 // mean anything.
-const editLink = 'equipment-building-edit'
-const viewLink = 'equipment-building-view'
 const newLink = 'equipment-building-add'
 
-const helper = createAppColumnHelper<BuildingRow>()
-
-// Both owner cells pass the row's own id where the legacy screen did, which is
-// not the related entity's id; preserved, see the README. The guard is not
-// optional: the generated `customer_branch_view` is nullable, and the legacy
-// template dereferenced it unguarded.
-function ownerLabel(row: BuildingRow) {
-  const owner = row.customer_branch_view
-  if (!owner) return null
-  return `${owner.name} - ${owner.city}`
-}
-
-const columns = helper.columns([
-  ...(planning && !hasBranches ? [helper.display({
-    id: 'customer',
-    header: $trans('Customer'),
-    cell: ({row}) => {
-      const label = ownerLabel(row.original)
-      if (!label) return ''
-      return h(RouterLink, {to: {name: 'customer-view', params: {pk: row.original.id}}}, () => label)
-    },
-  })] : []),
-  ...(planning && hasBranches ? [helper.display({
-    id: 'branch',
-    header: $trans('Branch'),
-    cell: ({row}) => {
-      const label = ownerLabel(row.original)
-      if (!label) return ''
-      return h(RouterLink, {to: {name: 'company-branch-view', params: {pk: row.original.id}}}, () => label)
-    },
-  })] : []),
-  helper.accessor('name', {
-    header: $trans('Name'),
-    cell: ({row}) => h(RouterLink, {
-      to: {name: viewLink, params: {pk: row.original.id}},
-    }, () => row.original.name),
-  }),
-  helper.accessor('created', {header: $trans('Created')}),
-  helper.accessor('modified', {header: $trans('Modified')}),
-  createActionColumn(helper, {
-    editRoute: editLink,
-    onDelete: (id) => tableRef.value?.showDeleteModal(id),
-  }),
-])
+const columns = useBuildingColumns({
+  planning,
+  onDelete: (id) => tableRef.value?.showDeleteModal(id),
+})
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<BuildingRow>({
   key: 'building-table',
   columns,
-  // The endpoint declares no `ordering` parameter, so the kit's sort state is
-  // never forwarded - it would be an undeclared parameter.
-  enableSorting: false,
+  // The endpoint declares search, paging, `ordering` and the column filters
+  // (apps/equipment/views.py), so the kit forwards all three.
   listOptions: (query) => equipmentBuildingListOptions({
     query: {
-      page: query.page,
-      page_size: query.page_size,
-      ...(query.q ? {q: query.q} : {}),
+      ...baseListParams(query),
+
+      ...(query.name ? {name: String(query.name)} : {}),
+      ...(query.customer ? {customer: String(query.customer)} : {}),
+      ...(query.branch ? {branch: String(query.branch)} : {}),
+      ...(query.created ? {created: String(query.created)} : {}),
+      ...(query.modified ? {modified: String(query.modified)} : {}),
     },
   }),
   urlSync: true,

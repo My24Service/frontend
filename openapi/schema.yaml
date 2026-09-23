@@ -6487,11 +6487,40 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
+      - in: query
+        name: created
+        schema:
+          type: string
       - in: query
         name: customer
         schema:
-          type: integer
+          type: string
+      - in: query
+        name: modified
+        schema:
+          type: string
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -modified
+            - -name
+            - created
+            - modified
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -6680,10 +6709,22 @@ paths:
           type: integer
         description: Only rows for this branch id.
       - in: query
+        name: created
+        schema:
+          type: string
+      - in: query
         name: customer
         schema:
           type: integer
         description: Only rows for this customer id.
+      - in: query
+        name: modified
+        schema:
+          type: string
+      - in: query
+        name: name
+        schema:
+          type: string
       - in: query
         name: q
         schema:
@@ -6708,11 +6749,23 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
+      - in: query
+        name: created
+        schema:
+          type: string
       - in: query
         name: customer
         schema:
-          type: integer
+          type: string
+      - in: query
+        name: modified
+        schema:
+          type: string
+      - in: query
+        name: name
+        schema:
+          type: string
       - name: q
         required: false
         in: query
@@ -6738,7 +6791,7 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
       - in: query
         name: brand
         schema:
@@ -6746,7 +6799,7 @@ paths:
       - in: query
         name: customer
         schema:
-          type: integer
+          type: string
       - in: query
         name: description
         schema:
@@ -6758,7 +6811,7 @@ paths:
       - in: query
         name: location
         schema:
-          type: integer
+          type: string
       - in: query
         name: name
         schema:
@@ -7263,7 +7316,7 @@ paths:
       - in: query
         name: location
         schema:
-          type: integer
+          type: string
       - in: query
         name: name
         schema:
@@ -7334,11 +7387,40 @@ paths:
       - in: query
         name: branch
         schema:
-          type: integer
+          type: string
+      - in: query
+        name: created
+        schema:
+          type: string
       - in: query
         name: customer
         schema:
-          type: integer
+          type: string
+      - in: query
+        name: modified
+        schema:
+          type: string
+      - in: query
+        name: name
+        schema:
+          type: string
+      - in: query
+        name: ordering
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - -created
+            - -modified
+            - -name
+            - created
+            - modified
+            - name
+        description: Fields to sort by, in order of precedence. Prefix a field with
+          `-` for descending.
+        explode: false
+        style: form
       - name: page
         required: false
         in: query
@@ -7716,10 +7798,22 @@ paths:
           type: integer
         description: Only rows for this branch id.
       - in: query
+        name: created
+        schema:
+          type: string
+      - in: query
         name: customer
         schema:
           type: integer
         description: Only rows for this customer id.
+      - in: query
+        name: modified
+        schema:
+          type: string
+      - in: query
+        name: name
+        schema:
+          type: string
       - in: query
         name: q
         schema:
@@ -7771,10 +7865,22 @@ paths:
           type: integer
         description: Only rows for this branch id.
       - in: query
+        name: created
+        schema:
+          type: string
+      - in: query
         name: customer
         schema:
           type: integer
         description: Only rows for this customer id.
+      - in: query
+        name: modified
+        schema:
+          type: string
+      - in: query
+        name: name
+        schema:
+          type: string
       - name: q
         required: false
         in: query

@@ -1,10 +1,20 @@
 # Column filters
 
-The filter bar a list screen gets above its table: a **Filter** menu of the
-columns that can be narrowed, one **chip** per filter in force (`Company:
-acme ×`), and *Clear all*. Clicking a chip opens its editor in a popover;
-the editor applies as it goes, so closing is only ever dismissal. The bar
-renders nothing on a screen whose columns declare no filter.
+The column filters a list screen gets: a **Filter** menu beside the search
+field in the page title bar, one **chip** per filter in force (`Company: acme
+×`) in the subnav strip above the table, and *Clear all* on the chips.
+Clicking a chip opens its editor in a popover; the editor applies as it goes,
+so closing is only ever dismissal. Neither half renders anything on a screen
+whose columns declare no filter.
+
+The two halves are one state. `ColumnFilterMenu` (in the header) and
+`ColumnFilterChips` (in the subnav) each call `useColumnFilters(table)`, which
+caches one state per table instance — that is what lets the menu open the
+editor of the column it just added. `ServerTable` mounts them in those two
+places, and shows the subnav strip for the chips even when the page passes no
+`subnav` of its own; `ListPageHeader` takes the `table` and renders the menu.
+Both places sit outside the table's `overflow-auto` box, so an open editor's
+popover is not clipped.
 
 The state is the table's own `columnFilters` — `useServerTable` commits it
 on a debounce, sends it on the wire under the bare column name, and mirrors

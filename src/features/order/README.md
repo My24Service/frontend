@@ -22,7 +22,8 @@ order/
   OrderList.vue           the list, on the shared server-paged table kit
   list-modes.ts           queryMode → generated list op; the kit's query as the op's
   use-order-columns.ts    the columns, with the statuses read the status filter offers
-  use-saved-filter-pills.ts  the legacy saved filters as pills over a `user_filter` column filter
+  use-order-views.ts      the view control's state: saved filters (a `user_filter` column filter), All and Not accepted, with exactly one active
+  OrderViewDropdown.vue   that control's markup, in the page header beside the Filter menu
   use-dispatch-selection.ts  the rows picked on the mobile lists, handed to the dispatch screen
   OrderStatusCell.vue     the status column: a coloured select that posts a new status
   status-color.ts         which statuscode a status names, and its colour

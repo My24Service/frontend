@@ -214,8 +214,8 @@ describe('CustomerList column filters', () => {
     const wrapper = await mountTable()
 
     expect(wrapper.find('tr.filter-row').exists()).toBe(false)
-    await wrapper.get('.column-filter-bar .dropdown-toggle').trigger('click')
-    expect(wrapper.findAll('.column-filter-bar .dropdown-item').map((item) => item.text()))
+    await wrapper.get('.column-filter-menu .dropdown-toggle').trigger('click')
+    expect(wrapper.findAll('.column-filter-menu .dropdown-item').map((item) => item.text()))
       .toEqual(['Company', 'City', 'Orders', 'Remarks', 'Contact'])
   })
 

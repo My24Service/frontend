@@ -50,7 +50,8 @@ import {
 import type { PaginatedLocationList } from '@/api/types.gen'
 import { equipmentLocation } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
-import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
+import { useLocationColumns } from './use-location-columns'
 const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions. */
   from_settings?: boolean
@@ -64,8 +65,6 @@ type LocationRow = ListRow<PaginatedLocationList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
-// Read once, as the legacy screen read them in `created()`.
-const hasBranches = useMainStore().getMemberHasBranches
 const authStore = useAuthStore()
 // "Planning" in the legacy screen's sense: neither a branch employee nor a
 // customer. Those two roles see no owner column.
@@ -73,68 +72,28 @@ const planning = !authStore.isEmployee && !authStore.isCustomer
 
 const addRoute = computed(() => toRoute(`${props.route_prefix}-add` as RouteName))
 
-const helper = createAppColumnHelper<LocationRow>()
-
-// "Name · City" as one dimmed suffix, the shape both owner cells share.
-function ownerLabel(row: LocationRow) {
-  const owner = row.customer_branch_view
-  if (!owner) return null
-  return [owner.name, h('span', {class: 'dimmed'}, ` · ${owner.city}`)]
-}
-
-const columns = helper.columns([
-  helper.accessor('name', {
-    header: $trans('Name'),
-    cell: ({row}) => h(RouterLink, {
-      to: toRoute(`${props.route_prefix}-view` as RouteName, {pk: row.original.id}),
-    }, () => row.original.name),
-  }),
-  // The endpoint declares no `ordering` parameter (the legacy screen's sort
-  // headers were sent as `sort_field`/`sort_dir` and dropped by the backend),
-  // so this list turns sorting off wholesale rather than rendering headers that
-  // cannot be honoured. See the module README.
-  ...(planning && !hasBranches ? [helper.display({
-    id: 'customer',
-    header: $trans('Customer'),
-    cell: ({row}) => ownerLabel(row.original) ?? '-',
-  })] : []),
-  ...(planning && hasBranches ? [helper.display({
-    id: 'branch',
-    header: $trans('Branch'),
-    cell: ({row}) => {
-      const label = ownerLabel(row.original)
-      if (!label) return '-'
-      // The legacy cell passed the row's own id to a route that resolves a
-      // branch. Preserved as-is: see the module README's preserved-defects list.
-      return h(RouterLink, {to: toRoute('company-branch-view', {pk: row.original.id})}, () => label)
-    },
-  })] : []),
-  helper.accessor('created', {
-    header: $trans('Created'),
-    cell: ({row}) => h('small', row.original.created),
-  }),
-  helper.accessor('modified', {
-    header: $trans('Modified'),
-    cell: ({row}) => h('small', row.original.modified),
-  }),
-  ...(props.from_settings ? [createActionColumn(helper, {
-    editRoute: `${props.route_prefix}-edit` as RouteName,
-    onDelete: (id) => tableRef.value?.showDeleteModal(id),
-  })] : []),
-])
+const columns = useLocationColumns({
+  routePrefix: props.route_prefix,
+  fromSettings: props.from_settings,
+  planning,
+  onDelete: (id) => tableRef.value?.showDeleteModal(id),
+})
 
 const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetching, refresh} = useServerTable<LocationRow>({
   key: 'location-table',
   columns,
-  // The endpoint offers search and paging but no ordering, so the kit's sort
-  // state is never forwarded - sending it would be an undeclared parameter,
-  // which URL sync could otherwise restore from a shared address.
-  enableSorting: false,
+  // The endpoint declares search, paging, `ordering` and the column filters
+  // (apps/equipment/views.py), so the kit forwards all three: the sort state
+  // and the filters both travel in the query and in the address bar.
   listOptions: (query) => equipmentLocationListOptions({
     query: {
-      page: query.page,
-      page_size: query.page_size,
-      ...(query.q ? {q: query.q} : {}),
+      ...baseListParams(query),
+
+      ...(query.name ? {name: String(query.name)} : {}),
+      ...(query.customer ? {customer: String(query.customer)} : {}),
+      ...(query.branch ? {branch: String(query.branch)} : {}),
+      ...(query.created ? {created: String(query.created)} : {}),
+      ...(query.modified ? {modified: String(query.modified)} : {}),
     },
   }),
   urlSync: true,

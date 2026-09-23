@@ -153,7 +153,7 @@ describe('ColumnFilterBar', () => {
   test('renders nothing when no column declares a filter', async () => {
     const wrapper = await mountBar({ withFilters: false })
 
-    expect(wrapper.find('.column-filter-bar').exists()).toBe(false)
+    expect(wrapper.find('.column-filter-menu').exists()).toBe(false)
   })
 
   test('the menu offers the filterable columns by label, not the plain one', async () => {
@@ -233,7 +233,7 @@ describe('ColumnFilterBar', () => {
     await closeEditor(wrapper)
     expect(chipTexts(wrapper)).toEqual(['Name: acme', 'Kind: Alpha'])
 
-    await wrapper.get('.column-filter-bar .clear-all').trigger('click')
+    await wrapper.get('.column-filter-chips .clear-all').trigger('click')
 
     expect(chipTexts(wrapper)).toEqual([])
     const query = await lastQuery(wrapper)

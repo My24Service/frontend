@@ -540,33 +540,31 @@ $font-size-base: 0.9rem;
     }
 
     /*
-     * The column filter bar of a list, between the pills strip and the card.
+     * The filters of a list, in the pills strip above the card.
      *
      * The list's outer .panel holds the card (the .app-detail below it), so
-     * the rule above makes it a transparent container with the page gutter,
-     * and the bar sits in that gutter aligned with the title. The card keeps
-     * its own top margin as the gap to the bar; under the pills strip the
-     * container's is trimmed so the bar does not float halfway between the
-     * strip and the card (under the bare header it keeps the full gutter).
+     * the rule above makes it a transparent container with the page gutter.
+     * The chips are no longer a bar of their own between the strip and the
+     * card: they render inside the strip (ServerTable's .subnav-pills, before
+     * the page's own subnav content), so the strip needs no margin of its own
+     * and the card keeps its own top margin as the gap. Where the strip
+     * carries chips, the container's top margin is trimmed and the card's is
+     * tightened, the spacing the bar used to have.
      */
     > .subnav-pills {
       margin-bottom: 0 !important;
     }
-    > .subnav-pills + .panel:has(> .column-filter-bar),
-    > .subnav-pills + .column-filter-bar {
+    > .subnav-pills:has(.column-filter-chips) + .panel {
       margin-top: 1rem !important;
     }
-    > .panel > .column-filter-bar {
-      margin-bottom: 0;
-    }
-    > .panel > .column-filter-bar + .app-detail,
-    > .column-filter-bar + .app-detail {
+    > .subnav-pills:has(.column-filter-chips) + .panel > .app-detail,
+    > .subnav-pills:has(.column-filter-chips) + .app-detail {
       margin-top: .75rem !important;
     }
 
     // When the table card (.app-detail) sits inside the outer panel
     // (.page-details.panel), it fills the outer panel completely so it
-    // is horizontally aligned with the filter bar above it.
+    // is horizontally aligned with the strip above it.
     > .panel > .app-detail {
       width: 100% !important;
       max-width: 100% !important;
@@ -574,9 +572,9 @@ $font-size-base: 0.9rem;
       margin-right: 0 !important;
     }
 
-    // A column filter bar directly in .app-page (pageDetails: false) receives
-    // the outer page gutter aligned with the card below it.
-    > .column-filter-bar {
+    // A chips strip directly in .app-page (pageDetails: false) receives the
+    // outer page gutter aligned with the card below it.
+    > .subnav-pills:has(.column-filter-chips) {
       max-width: 1400px;
       width: calc(100% - 3rem);
       margin: 1rem auto 0 !important;

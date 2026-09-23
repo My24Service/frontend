@@ -35,5 +35,5 @@ export {
   type OrderAddress,
 } from './use-order-detail'
 export { useOrderViewer } from './use-order-viewer'
-export { useSavedFilterPills } from './use-saved-filter-pills'
+export { useOrderViews, orderViews, type OrderViewOption, type SavedFilter } from './use-order-views'
 export { useUnacceptedCount } from './use-unaccepted-count'

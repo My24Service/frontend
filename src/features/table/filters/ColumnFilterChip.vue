@@ -101,7 +101,7 @@ const props = defineProps<{
   spec: ColumnFilterSpec
   /** The wire value; `''` for a chip just added and not yet filled in. */
   value: string
-  /** Select labels the bar has learned, by value — see ColumnFilterBar. */
+  /** Select labels the chips have learned, by value — see ColumnFilterChips. */
   labels?: ReadonlyMap<string, string>
   /** Open the editor as soon as the chip appears — the chip the "+ Filter" menu just added. */
   autoOpen?: boolean

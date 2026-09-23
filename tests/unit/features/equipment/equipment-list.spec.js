@@ -8,6 +8,8 @@ import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 import { captureDownloads, xlsxResponse } from '../../support/downloads.js'
 
+import { addFilter, editorInput } from '../../support/column-filters.js'
+
 vi.mock('bootstrap-vue-next', async (importOriginal) => ({
   ...(await importOriginal()), useToast: () => ({create: toastCreate}),
 }))
@@ -352,5 +354,23 @@ describe('EquipmentList QR export', () => {
     await settle()
 
     expect(exports()).toEqual([{ type: 'facility' }])
+  })
+})
+
+describe('EquipmentList column filters', () => {
+  test('a column filter rides the wire under its bare column name', async () => {
+    const wrapper = await mountEquipment()
+    await settle()
+
+    await addFilter(wrapper, 'Equipment')
+    await editorInput(wrapper, 'name').setValue('Ketel')
+    // The kit commits the search and the filters on a 300 ms debounce.
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await settle()
+
+    expect(listRequests().at(-1).query).toMatchObject({name: 'Ketel'})
+
+    // The kit mirrors the filters into the address, so a shared link restores them.
+    expect(window.location.hash).toContain('name=Ketel')
   })
 })
