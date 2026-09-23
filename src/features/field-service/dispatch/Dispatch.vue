@@ -301,7 +301,7 @@ import {
 import DispatchWeek from './DispatchWeek.vue'
 import SearchAndAssign from './SearchAndAssign.vue'
 import AssignedOrderDatesForm, { type AssignedOrderDates } from './AssignedOrderDatesForm.vue'
-import type { DispatchBoardAssignedOrder, DispatchBoardOrder } from './dispatch-window'
+import type { DispatchBoardAssignedOrder } from './dispatch-window'
 
 /**
  * The dispatch week board: the planning screen for the mobile workforce.
@@ -576,8 +576,6 @@ async function changeDateSubmit() {
 
 /** The split's dates, and the order they belong to. */
 function newSplitModel(): AssignedOrderDates {
-  const assigned = selectedAssignedOrder.value
-
   return {
     ...newDatesModel(),
     order: selectedOrder.value?.id,
@@ -721,7 +719,7 @@ async function assignToUsers() {
     cancelAssign()
     buttonDisabled.value = false
     showOverlay.value = false
-  } catch (error) {
+  } catch {
     errorToast(toast, $trans('Error assigning order(s)'))
     showOverlay.value = false
     buttonDisabled.value = false

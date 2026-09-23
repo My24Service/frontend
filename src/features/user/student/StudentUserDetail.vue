@@ -87,7 +87,6 @@
 
 <script lang="ts" setup>
 import { companyStudentuserRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import type { StudentSub, StudentUser } from '@/api/types.gen'
 import { useQueryErrorToast } from '@/features/forms'
 const props = defineProps<{
   pk: string | number

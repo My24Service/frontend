@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { EngineerEventType, EngineerEventTypeRequest, Statuscode } from '@/api/types.gen'
+import type { Statuscode } from '@/api/types.gen'
 import { companyEngineerEventType } from '@/api/resources.gen'
 import {
   useResourceForm,
@@ -84,8 +84,6 @@ import {
   engineerEventTypeFromRecord,
   parseEngineerEventType,
   validateEngineerEventType,
-  type EngineerEventTypeFieldErrors,
-  type EngineerEventTypeFormValues,
 } from './schemas'
 
 /**

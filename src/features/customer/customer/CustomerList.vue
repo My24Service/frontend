@@ -52,7 +52,7 @@ import {
   customerCustomerListOptions,
   customerCustomerListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { CustomerCustomerListData, PaginatedCustomerList } from '@/api/types.gen'
+import type { PaginatedCustomerList } from '@/api/types.gen'
 import {
   ServerTable,
   baseListParams,
@@ -180,8 +180,6 @@ const columns = columnHelper.columns([
 function rowClass(row: CustomerRow) {
   return row.branch_view ? 'branch' : ''
 }
-
-type CustomerListQueryParams = NonNullable<CustomerCustomerListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh, globalFilter} = useServerTable<CustomerRow>({
   key: 'customer-table',

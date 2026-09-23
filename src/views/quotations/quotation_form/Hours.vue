@@ -154,7 +154,6 @@ import {COST_TYPE, CostService} from "@/models/quotations/Cost";
 
 import quotationMixin from "./mixin.js";
 import VAT from "./VAT.vue";
-import TotalRow from "./TotalRow";
 import AddToQuotationLines from './AddToQuotationLines.vue'
 import SectionHeader from "./SectionHeader.vue";
 import EmptyQuotationLinesContainer from "./EmptyQuotationLinesContainer.vue";
@@ -317,14 +316,14 @@ export default {
       try {
         await this.costService.loadCollection()
         this.costService.collection = this.costService.collection.map((cost) => {
-          cost.savedHours = true
-          return new this.costService.model(cost)
-        })
-        if (this.costService.collection.length === 0) {
-          this.addCost()
-        }
-        this.updateTotals()
-        this.checkParentHasQuotationLines(this.quotationLinesParent)
+        cost.savedHours = true
+        return new this.costService.model(cost)
+      })
+      if (this.costService.collection.length === 0) {
+        this.addCost()
+      }
+      this.updateTotals()
+      this.checkParentHasQuotationLines(this.quotationLinesParent)
         this.isLoading = false
         this.isLoaded = true
       } catch(error) {

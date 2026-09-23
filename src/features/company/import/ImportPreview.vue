@@ -98,7 +98,6 @@ import {
   companyImportGetLookupFieldsRetrieveOptions,
   companyImportPreviewRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { ImportResult } from '@/api/types.gen'
 import { companyImport } from '@/api/resources.gen'
 import {
   invalidateReads,

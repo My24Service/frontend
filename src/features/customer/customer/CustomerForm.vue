@@ -250,7 +250,6 @@ import type { Customer } from '@/api/types.gen'
 
 import {
   customerCustomerCheckCustomerIdHandlingRetrieveOptions,
-  customerCustomerListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import { customerCustomer } from '@/api/resources.gen'
 import { customerCustomerGetNewCustomerIdFromLatestRetrieve } from '@/api/sdk.gen'

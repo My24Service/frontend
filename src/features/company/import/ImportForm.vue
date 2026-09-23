@@ -95,7 +95,6 @@
 <script setup lang="ts">
 import { companyImportGetAllowedExtensionsRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { companyImport } from '@/api/resources.gen'
-import type { Import } from '@/api/types.gen'
 import {
   useQueryErrorToast,
   useResourceForm,
@@ -105,8 +104,6 @@ import {
   emptyImport,
   importFromRecord,
   importWrite,
-  type ImportFormErrors,
-  type ImportFormValues,
 } from './schemas'
 
 /**

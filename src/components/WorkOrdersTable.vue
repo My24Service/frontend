@@ -44,7 +44,6 @@
 <script>
 import componentMixin from '@/mixins/common.js'
 import {OrderlineService} from '@/models/orders/Orderline.js'
-import {integer} from "@vuelidate/validators";
 
 export default {
   mixins: [componentMixin],

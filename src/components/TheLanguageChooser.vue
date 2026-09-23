@@ -26,7 +26,7 @@ export default {
     }
   },
   methods: {
-    async setLanguage(event) {
+    async setLanguage() {
       try {
         await setLanguageCreate({body: {language: this.selected}, throwOnError: true})
         this.mainStore.setLanguage(this.selected)

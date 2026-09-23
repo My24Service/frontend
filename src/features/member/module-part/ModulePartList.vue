@@ -41,7 +41,7 @@ import {
   memberModulePartDestroyMutation,
   memberModulePartListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { MemberModulePartListData, PaginatedModulePartList } from '@/api/types.gen'
+import type { PaginatedModulePartList } from '@/api/types.gen'
 import { invalidateModulePartListQueries } from '../invalidation'
 import {
   ServerTable,
@@ -80,8 +80,6 @@ const columns = columnHelper.columns([
     width: '10%',
   }),
 ])
-
-type ModulePartListQueryParams = NonNullable<MemberModulePartListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ModulePartRow>({
   key: 'module-part-table',

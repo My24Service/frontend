@@ -42,7 +42,7 @@ import {
   customerMaintenanceContractListOptions,
   customerMaintenanceContractListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { CustomerMaintenanceContractListData, PaginatedMaintenanceContractList } from '@/api/types.gen'
+import type { PaginatedMaintenanceContractList } from '@/api/types.gen'
 import { formatMoney, toDinero } from '@/services/money'
 import {
   ServerTable,
@@ -94,8 +94,6 @@ const columns = columnHelper.columns([
     onDelete: (id) => tableRef.value?.showDeleteModal(id),
   }),
 ])
-
-type MaintenanceContractListQueryParams = NonNullable<CustomerMaintenanceContractListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ContractRow>({
   key: 'maintenance-contract-table',

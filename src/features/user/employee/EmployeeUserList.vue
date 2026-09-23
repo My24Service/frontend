@@ -41,7 +41,7 @@ import {
   companyEmployeeuserListOptions,
   companyEmployeeuserListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { CompanyEmployeeuserListData, PaginatedEmployeeUserList } from '@/api/types.gen'
+import type { PaginatedEmployeeUserList } from '@/api/types.gen'
 import {
   ServerTable,
   baseListParams,
@@ -91,8 +91,6 @@ const columns = columnHelper.columns([
     width: '10%',
   }),
 ])
-
-type EmployeeUserListQueryParams = NonNullable<CompanyEmployeeuserListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<EmployeeUserRow>({
   key: 'employee-user-table',

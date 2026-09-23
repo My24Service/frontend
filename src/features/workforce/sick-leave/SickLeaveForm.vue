@@ -118,15 +118,13 @@ import moment from 'moment'
 import { nl } from 'date-fns/locale'
 import VueMultiselect from 'vue-multiselect'
 import { companyUserSickLeaveAdmin } from '@/api/resources.gen'
-import type { UserSelectRow, UserSickLeave } from '@/api/types.gen'
+import type { UserSelectRow } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms'
 import { useUserSearch } from '../use-user-search'
 import {
   emptySickLeave,
   sickLeaveFromRecord,
   sickLeaveWrite,
-  type SickLeaveFieldErrors,
-  type SickLeaveFormValues,
 } from './schemas'
 
 /**

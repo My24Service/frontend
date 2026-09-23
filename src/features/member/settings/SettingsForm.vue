@@ -39,7 +39,6 @@
 <script lang="ts" setup>
 import { memberMemberMySettingsRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { memberMemberMySettings } from '@/api/resources.gen'
-import type { MemberSettings, PatchedMemberSettingsRequest } from '@/api/types.gen'
 import {
   useResourceForm,
   ValidatedForm,
@@ -55,8 +54,6 @@ import {
   settingLabel,
   settingsFromRecord,
   validateSettings,
-  type SettingsFieldErrors,
-  type SettingsFormValues,
 } from './schemas'
 
 const queryClient = useQueryClient()

@@ -38,7 +38,7 @@ import {
   companyEngineerEventTypeDestroyMutation,
   companyEngineerEventTypeListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { CompanyEngineerEventTypeListData, PaginatedEngineerEventTypeList } from '@/api/types.gen'
+import type { PaginatedEngineerEventTypeList } from '@/api/types.gen'
 import { companyEngineerEventType } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
 import {
@@ -95,8 +95,6 @@ const columns = columnHelper.columns([
     onDelete: (id) => tableRef.value?.showDeleteModal(id),
   }),
 ])
-
-type EventTypeListQueryParams = NonNullable<CompanyEngineerEventTypeListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<EventTypeRow>({
   key: 'engineer-event-type-table',

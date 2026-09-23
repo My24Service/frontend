@@ -280,7 +280,7 @@ export default {
   },
   watch: {
     '$route.name': {
-      handler: function(search) {
+      handler: function() {
         if (this.$route.name === 'preliminary-quotations') {
           this.quotationService.queryMode = 'preliminary'
         } else if(this.$route.name === 'quotations-sent') {

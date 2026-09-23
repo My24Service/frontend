@@ -119,7 +119,6 @@
 import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 
-import {QuotationModel} from '@/models/quotations/Quotation.js';
 
 import quotationMixin from "./mixin";
 

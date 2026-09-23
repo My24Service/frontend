@@ -96,7 +96,7 @@ export type ColumnFilterSpec =
   }
 
 declare module '@tanstack/vue-table' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line unused-imports/no-unused-vars
   interface ColumnMeta<in out TFeatures extends TableFeatures, in out TData extends RowData, TValue extends CellData = CellData> {
     /** Present on a column the filter bar offers; absent columns cannot be filtered from the screen. */
     filter?: ColumnFilterSpec

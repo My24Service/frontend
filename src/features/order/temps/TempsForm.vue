@@ -148,7 +148,7 @@
 
 <script lang="ts" setup>
 import { orderOrder } from '@/api/resources.gen'
-import type { OrderCreate, OrderDetail, OrderUpdate } from '@/api/types.gen'
+import type { OrderCreate, OrderUpdate } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms'
 import {
   ContactPanel,
@@ -165,9 +165,6 @@ import {
   parseTempsBody,
   tempsFromRecord,
   validateTempsForm,
-  type TempsBody,
-  type TempsFieldErrors,
-  type TempsFormValues,
 } from './schemas'
 
 /**

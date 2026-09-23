@@ -102,7 +102,6 @@ const props = withDefaults(defineProps<{
 })
 
 const id = Number(props.pk)
-const mainStore = useMainStore()
 
 const detailQuery = useQuery(equipmentBuildingRetrieveOptions({path: {id}}))
 useQueryErrorToast(detailQuery.error, $trans('Error fetching building detail'))

@@ -229,7 +229,6 @@ const customerId = computed(() => props.customer?.id)
 
 const {
   rows,
-  isLoading,
   equipmentOptions,
   searchTerm,
   selectEquipment,

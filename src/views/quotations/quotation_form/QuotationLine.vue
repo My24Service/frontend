@@ -256,8 +256,6 @@
 <script>
 import {useVuelidate} from "@vuelidate/core";
 
-import {QuotationModel} from '@/models/quotations/Quotation.js';
-import {ChapterModel} from '@/models/quotations/Chapter'
 import {QuotationLineModel, QuotationLineService} from '@/models/quotations/QuotationLine.js';
 
 import VAT from "../quotation_form/VAT.vue";
@@ -508,7 +506,7 @@ export default {
           this.quotationLineService.collection = []
           await this.loadData()
           this.$emit('quotationLineSubmitted')
-        } catch(error) {
+        } catch {
           errorToast(this.create, $trans('Error updating chapter'))
           this.isLoading = false
       }

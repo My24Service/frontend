@@ -47,7 +47,7 @@ export default {
         page: val,
       }
 
-      this.$router.push({ query }).catch(e => {})
+      this.$router.push({ query }).catch(() => {})
     }
   },
   created() {

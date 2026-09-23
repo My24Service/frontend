@@ -83,7 +83,7 @@ const props = withDefaults(defineProps<{
 
 const route = useRoute()
 
-const {startDate, today, week, goToWeek, nextWeek, backWeek} = useHoursWeekNav()
+const {startDate, today, week, nextWeek, backWeek} = useHoursWeekNav()
 
 const data = ref<Record<string, string | number>[]>([])
 const fields = ref<TableField[]>([])

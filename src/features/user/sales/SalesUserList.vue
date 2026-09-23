@@ -42,7 +42,7 @@ import {
   companySalesuserListOptions,
   companySalesuserListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { CompanySalesuserListData, PaginatedSalesUserList } from '@/api/types.gen'
+import type { PaginatedSalesUserList } from '@/api/types.gen'
 import {
   ServerTable,
   baseListParams,
@@ -79,8 +79,6 @@ const columns = columnHelper.columns([
     width: '10%',
   }),
 ])
-
-type SalesUserListQueryParams = NonNullable<CompanySalesuserListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<SalesUserRow>({
   key: 'sales-user-table',

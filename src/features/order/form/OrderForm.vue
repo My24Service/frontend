@@ -206,7 +206,7 @@
 
 <script lang="ts" setup>
 import { orderOrder } from '@/api/resources.gen'
-import type { OrderCreate, OrderDetail, OrderUpdate } from '@/api/types.gen'
+import type { OrderCreate, OrderUpdate } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms'
 import ContactPanel from './ContactPanel.vue'
 import DateTimeFields from './DateTimeFields.vue'
@@ -223,9 +223,6 @@ import {
   parseOrderBody,
   validateOrderForm,
   type FormRole,
-  type OrderBody,
-  type OrderFieldErrors,
-  type OrderFormValues,
 } from './schemas'
 import { UnassignRefused } from './use-engineer-assignment'
 import { useOrderSeeds } from './use-order-seeds'

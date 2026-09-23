@@ -68,7 +68,6 @@
 
 <script setup lang="ts">
 import { companyPicture } from '@/api/resources.gen'
-import type { Picture } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import {
   ImageUploadField,
@@ -78,8 +77,6 @@ import {
   emptyPicture,
   pictureFromRecord,
   pictureWrite,
-  type PictureFieldErrors,
-  type PictureFormValues,
 } from './schemas'
 
 /**

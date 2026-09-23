@@ -103,7 +103,6 @@
 
 <script lang="ts" setup>
 import { statuscodeStatuscode } from '@/api/resources.gen'
-import type { Statuscode, StatuscodeRequest } from '@/api/types.gen'
 import {
   useResourceForm,
   ValidatedForm,
@@ -123,8 +122,6 @@ import {
   parseStatuscode,
   statuscodeFromRecord,
   validateStatuscode,
-  type StatuscodeFieldErrors,
-  type StatuscodeFormValues,
 } from './schemas'
 
 const props = withDefaults(defineProps<{

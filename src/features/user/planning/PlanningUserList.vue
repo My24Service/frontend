@@ -41,7 +41,7 @@ import {
   companyPlanninguserListOptions,
   companyPlanninguserListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { CompanyPlanninguserListData, PaginatedPlanningUserList } from '@/api/types.gen'
+import type { PaginatedPlanningUserList } from '@/api/types.gen'
 import {
   ServerTable,
   baseListParams,
@@ -89,8 +89,6 @@ const columns = columnHelper.columns([
     width: '10%',
   }),
 ])
-
-type PlanningUserListQueryParams = NonNullable<CompanyPlanninguserListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<PlanningUserRow>({
   key: 'planning-user-table',

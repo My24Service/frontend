@@ -61,7 +61,7 @@ import type { CustomerFormValues } from './schemas'
 
 const values = defineModel<CustomerFormValues>('values', { required: true })
 
-const props = defineProps<{
+defineProps<{
   isCreate: boolean
 }>()
 

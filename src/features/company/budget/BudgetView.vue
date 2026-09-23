@@ -96,7 +96,6 @@ import {
   companyBudgetExpectedCostsRetrieveOptions,
   companyBudgetRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { Budget, BudgetCostsResponse, BudgetExpectedCostsResponse } from '@/api/types.gen'
 import { PieChart } from '@/features/shared'
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoneyEuropean as formatDinero, toDinero } from '@/services/money'

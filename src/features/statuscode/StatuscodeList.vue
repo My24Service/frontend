@@ -42,7 +42,7 @@ import {
   statuscodeStatuscodeDestroyMutation,
   statuscodeStatuscodeListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedStatuscodeList, StatuscodeStatuscodeListData } from '@/api/types.gen'
+import type { PaginatedStatuscodeList } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
 import {
   ServerTable,
@@ -146,8 +146,6 @@ const columns = columnHelper.columns([
     ]),
   }),
 ])
-
-type StatuscodeListQueryParams = NonNullable<StatuscodeStatuscodeListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<StatuscodeRow>({
   key: 'statuscode-table',

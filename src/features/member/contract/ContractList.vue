@@ -41,7 +41,7 @@ import {
   memberContractListOptions,
   memberContractListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { MemberContractListData, PaginatedContractList } from '@/api/types.gen'
+import type { PaginatedContractList } from '@/api/types.gen'
 import {
   ServerTable,
   baseListParams,
@@ -73,8 +73,6 @@ const columns = columnHelper.columns([
     width: '10%',
   }),
 ])
-
-type ContractListQueryParams = NonNullable<MemberContractListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ContractRow>({
   key: 'contract-table',

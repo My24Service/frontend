@@ -113,7 +113,8 @@ withDefaults(defineProps<{
     // matching note; a generated destroy-mutation factory's shape is
     // per-resource and restating it here would reject exactly the factories
     // this exists to accept.
-    destroyMutation: () => UseMutationOptions<any, AxiosError<any>, any>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    destroyMutation: () => UseMutationOptions<void, AxiosError<any>, any>
     invalidate: (queryClient: QueryClient) => Promise<unknown> | void
     deletedDetail: string
     deleteError: string

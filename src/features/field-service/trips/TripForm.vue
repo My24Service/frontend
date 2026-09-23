@@ -141,8 +141,6 @@ import {
   tripFromRecord,
   tripOrderRowsFromRecord,
   validateTripForm,
-  type TripBody,
-  type TripFieldErrors,
   type TripFormValues,
   type TripOrderFormRow,
 } from './schemas'

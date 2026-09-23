@@ -256,7 +256,6 @@ import {
   quotationQuotationAutocompleteListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import { companyTemplate } from '@/api/resources.gen'
-import type { InvoiceAutocomplete, QuotationAutocompleteRow, Template } from '@/api/types.gen'
 import {
   useQueryErrorToast,
   useResourceForm,
@@ -266,8 +265,6 @@ import {
   emptyTemplate,
   templateFromRecord,
   templateWrite,
-  type TemplateFormErrors,
-  type TemplateFormValues,
 } from './schemas'
 
 /**

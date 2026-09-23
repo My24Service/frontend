@@ -42,7 +42,7 @@ import {
   companyStudentuserPartialUpdateMutation,
   companyStudentuserListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { CompanyStudentuserListData, PaginatedStudentUserList } from '@/api/types.gen'
+import type { PaginatedStudentUserList } from '@/api/types.gen'
 import {
   ServerTable,
   baseListParams,
@@ -133,8 +133,6 @@ const columns = columnHelper.columns([
     width: '10%',
   }),
 ])
-
-type StudentUserListQueryParams = NonNullable<CompanyStudentuserListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<StudentUserRow>({
   key: 'student-user-table',

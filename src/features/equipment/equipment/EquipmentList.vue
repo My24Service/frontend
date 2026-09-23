@@ -85,7 +85,7 @@ import {
   equipmentEquipmentListOptions,
   equipmentEquipmentStateCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import type { EquipmentEquipmentListData, EquipmentTypeEnum, PaginatedEquipmentList } from '@/api/types.gen'
+import type { EquipmentTypeEnum, PaginatedEquipmentList } from '@/api/types.gen'
 import { equipmentEquipment } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
 import RowAction from '@/components/RowAction.vue'
@@ -197,8 +197,6 @@ const columns = helper.columns([
     ]),
   })] : []),
 ])
-
-type EquipmentListQueryParams = NonNullable<EquipmentEquipmentListData['query']>
 
 const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetching, refresh} = useServerTable<EquipmentRow>({
   key: 'equipment-table',

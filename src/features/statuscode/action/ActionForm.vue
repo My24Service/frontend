@@ -193,7 +193,6 @@ import {
   statuscodeActionDestroyMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import { statuscodeAction } from '@/api/resources.gen'
-import type { Action, ActionRequest, CompanyPartnerListData } from '@/api/types.gen'
 import {
   useResourceForm,
   ValidatedForm,
@@ -213,8 +212,6 @@ import {
   parseAction,
   validateAction,
   type ActionCondition,
-  type ActionFieldErrors,
-  type ActionFormValues,
 } from './schemas'
 
 const props = withDefaults(defineProps<{
@@ -279,8 +276,6 @@ const hasGripp = computed(() => my24.hasAccessToModule({
 const actionTypes = computed(() => actionTypesFor(props.codeType, {hasGripp: hasGripp.value}))
 
 // partners, for the order type's copy action --------------------------------
-
-type PartnerListQueryParams = NonNullable<CompanyPartnerListData['query']>
 
 const partnersQuery = useQuery(() => ({
   ...companyPartnerListOptions({query: {page_size: WHOLE_COLLECTION_PAGE_SIZE}}),

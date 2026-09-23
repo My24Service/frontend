@@ -1,6 +1,7 @@
 import vueI18n from "@intlify/eslint-plugin-vue-i18n";
 import vue from "eslint-plugin-vue";
 import tseslint from "typescript-eslint";
+import unusedImports from "eslint-plugin-unused-imports";
 import globals from "globals";
 import { defineConfig } from "eslint/config";
 
@@ -244,7 +245,24 @@ export default defineConfig({
       extraFileExtensions: ["vue"],
     },
   },
+  plugins: { "unused-imports": unusedImports },
   rules: {
+    // The plugin's pair replaces @typescript-eslint/no-unused-vars: the same
+    // check, split so that unused imports are autofixable (`eslint --fix`
+    // removes them) while other unused bindings still need a human.
+    "@typescript-eslint/no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "error",
+    // A leading underscore marks a parameter that a callback's signature
+    // requires but this implementation ignores.
+    "unused-imports/no-unused-vars": [
+      "error",
+      {
+        vars: "all",
+        varsIgnorePattern: "^_",
+        args: "after-used",
+        argsIgnorePattern: "^_",
+      },
+    ],
     // A warning, not an error, for the same reason tsconfig.json starts at
     // relaxed strictness: files are being converted from JS one at a time
     // and their untyped .js subclasses still pass whatever they like. An

@@ -116,7 +116,6 @@
 
 <script setup lang="ts">
 import { equipmentBuildingListForSelectListOptions } from '@/api/@tanstack/vue-query.gen'
-import type { Location } from '@/api/types.gen'
 import { equipmentLocation } from '@/api/resources.gen'
 import {
   useQueryErrorToast,
@@ -133,8 +132,6 @@ import {
   locationFromRecord,
   parseLocation,
   validateLocation,
-  type LocationFieldErrors,
-  type LocationFormValues,
 } from './schemas'
 
 /**

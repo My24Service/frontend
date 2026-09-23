@@ -55,7 +55,7 @@ import {
   companyApiuserListQueryKey,
   companyApiuserRevokeCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import type { CompanyApiuserListData, PaginatedApiUserList } from '@/api/types.gen'
+import type { PaginatedApiUserList } from '@/api/types.gen'
 import {
   ServerTable,
   baseListParams,
@@ -159,8 +159,6 @@ const columns = columnHelper.columns([
     width: '10%',
   }),
 ])
-
-type ApiUserListQueryParams = NonNullable<CompanyApiuserListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ApiUserRow>({
   key: 'api-user-table',

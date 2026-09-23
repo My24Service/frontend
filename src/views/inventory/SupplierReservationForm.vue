@@ -418,10 +418,6 @@ function selectMaterial(option) {
   amount.value.focus()
 }
 
-function materialLabel(material) {
-  return `${material.name}`
-}
-
 function selectSupplier(option) {
   supplierReservation.value.supplier = option.id
   selectedSupplier.value = option

@@ -91,7 +91,6 @@ import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 import {
-  LEAVE_TYPE_LABELS,
   emptyLeaveType,
   leaveTypeFromRecord,
   parseLeaveType,

@@ -73,7 +73,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Building } from '@/api/types.gen'
 import { equipmentBuilding } from '@/api/resources.gen'
 import { useResourceForm } from '@/features/forms'
 import {
@@ -86,8 +85,6 @@ import {
   emptyBuilding,
   parseBuilding,
   validateBuilding,
-  type BuildingFieldErrors,
-  type BuildingFormValues,
 } from './schemas'
 
 /**

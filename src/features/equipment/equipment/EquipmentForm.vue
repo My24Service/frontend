@@ -345,7 +345,6 @@
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import { nl } from 'date-fns/locale'
 import { equipmentLocationListForSelectListOptions } from '@/api/@tanstack/vue-query.gen'
-import type { Equipment } from '@/api/types.gen'
 import { equipmentEquipment } from '@/api/resources.gen'
 import { EQUIPMENT_TYPES } from '@/constants'
 import {
@@ -367,8 +366,6 @@ import {
   pickerDate,
   validateEquipment,
   wireDate,
-  type EquipmentFieldErrors,
-  type EquipmentFormValues,
 } from './schemas'
 
 /**

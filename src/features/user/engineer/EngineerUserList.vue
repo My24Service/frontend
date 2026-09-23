@@ -42,7 +42,7 @@ import {
   companyEngineerListOptions,
   companyEngineerListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { CompanyEngineerListData, PaginatedEngineerList } from '@/api/types.gen'
+import type { PaginatedEngineerList } from '@/api/types.gen'
 import {
   ServerTable,
   baseListParams,
@@ -90,8 +90,6 @@ const columns = columnHelper.columns([
     width: '10%',
   }),
 ])
-
-type EngineerUserListQueryParams = NonNullable<CompanyEngineerListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<EngineerUserRow>({
   key: 'engineer-user-table',

@@ -211,10 +211,10 @@ export default {
     BarChart,
   },
   watch: {
-    currentMode: function(val) {
+    currentMode: function() {
       this.loadData()
     },
-    graphField: function(val) {
+    graphField: function() {
       this.loadData()
     }
   },

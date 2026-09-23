@@ -236,7 +236,7 @@ import { nl } from 'date-fns/locale'
 import VueMultiselect from 'vue-multiselect'
 import { companyLeaveTypeListOptions } from '@/api/@tanstack/vue-query.gen'
 import { companyUserLeaveHoursAdminGetTotalsCreate } from '@/api/sdk.gen'
-import type { LeaveHoursTotals, UserLeaveHours, UserSelectRow } from '@/api/types.gen'
+import type { UserSelectRow } from '@/api/types.gen'
 import { companyUserLeaveHoursAdmin } from '@/api/resources.gen'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {
@@ -245,15 +245,12 @@ import {
 } from '@/features/forms'
 import { useUserSearch } from '../use-user-search'
 import {
-  FIELD_LABELS,
   emptyLeave,
   humanizeDuration,
   leaveFromRecord,
   leaveProbeBody,
   parseLeave,
   validateLeave,
-  type LeaveFieldErrors,
-  type LeaveFormValues,
 } from './schemas'
 
 /**

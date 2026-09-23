@@ -216,7 +216,6 @@
 
 <script setup lang="ts">
 import { companyBranch, companyBranchMy } from '@/api/resources.gen'
-import type { Branch } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import {
   ImageUploadField,
@@ -227,8 +226,6 @@ import {
   branchFromRecord,
   branchWrite,
   emptyBranch,
-  type BranchFieldErrors,
-  type BranchFormValues,
 } from './schemas'
 
 /**

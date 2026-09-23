@@ -237,7 +237,6 @@
 import { vEquipmentQrTypeEnum, vMemberTypeEnum } from '@/api/valibot.gen'
 import { memberContractListOptions } from '@/api/@tanstack/vue-query.gen'
 import { memberMember } from '@/api/resources.gen'
-import type { Member, MemberRequest } from '@/api/types.gen'
 import MemberLogoFields from './MemberLogoFields.vue'
 import {
   ValidatedForm,
@@ -254,7 +253,6 @@ import {
   memberFromRecord,
   parseMemberForm,
   validateMemberForm,
-  type MemberFieldErrors,
 } from './schemas'
 import { useCompanyCodeProbe, type UseCompanyCodeProbeReturn } from './use-company-code-probe'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'

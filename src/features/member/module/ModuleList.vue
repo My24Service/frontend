@@ -40,7 +40,7 @@ import {
   memberModuleDestroyMutation,
   memberModuleListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import type { MemberModuleListData, PaginatedModuleList } from '@/api/types.gen'
+import type { PaginatedModuleList } from '@/api/types.gen'
 import { invalidateModuleListQueries } from '../invalidation'
 import {
   ServerTable,
@@ -70,8 +70,6 @@ const columns = columnHelper.columns([
     width: '10%',
   }),
 ])
-
-type ModuleListQueryParams = NonNullable<MemberModuleListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ModuleRow>({
   key: 'module-table',

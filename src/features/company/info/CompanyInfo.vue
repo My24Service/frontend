@@ -353,7 +353,6 @@
 
 <script setup lang="ts">
 import { memberMemberMe } from '@/api/resources.gen'
-import type { Member } from '@/api/types.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import {
   useResourceForm,
@@ -364,8 +363,6 @@ import {
   infoFromRecord,
   parseInfo,
   validateInfo,
-  type InfoFormErrors,
-  type InfoFormValues,
 } from './schemas'
 
 /**

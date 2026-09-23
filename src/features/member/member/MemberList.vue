@@ -50,7 +50,7 @@ import {
   memberMemberListOptions,
   memberMemberListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { MemberMemberListData, PaginatedMemberList } from '@/api/types.gen'
+import type { PaginatedMemberList } from '@/api/types.gen'
 import {
   ServerTable,
   baseListParams,
@@ -152,8 +152,6 @@ const columns = columnHelper.columns([
     width: '10%',
   }),
 ])
-
-type MemberListQueryParams = NonNullable<MemberMemberListData['query']>
 
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<MemberRow>({
   key: 'member-table',

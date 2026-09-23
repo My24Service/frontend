@@ -72,7 +72,7 @@ const props = withDefaults(defineProps<{
   breadcrumb_grid_title: '',
 })
 
-const {startDate, today, week, goToWeek, nextWeek, backWeek} = useHoursWeekNav()
+const {startDate, today, week, nextWeek, backWeek} = useHoursWeekNav()
 
 const fullName = ref<string | null>(null)
 const data = ref<Record<string, string | number | null | undefined>[]>([])

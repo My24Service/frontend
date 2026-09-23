@@ -202,7 +202,7 @@ import {
   CostModel,
   CostService
 } from "@/models/quotations/Cost";
-import {MaterialModel, MaterialService} from "@/models/inventory/Material";
+import {MaterialService} from "@/models/inventory/Material";
 
 import quotationMixin from "./mixin.js";
 import VAT from "./VAT";

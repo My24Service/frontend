@@ -74,7 +74,7 @@ async function submitForm() {
     await sendLinkMutation.mutateAsync({ body: parseSendResetLink(values.value) })
     infoToast(create, $trans('Reset link sent'), $trans('Password reset link has been sent'))
     router.go(-1)
-  } catch (error) {
+  } catch {
     errorToast(create, $trans('Something went wrong, please try again'))
   }
 }
