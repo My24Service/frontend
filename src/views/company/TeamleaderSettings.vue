@@ -326,7 +326,8 @@ export default {
         {key: 'description', label: this.$trans('Description')},
         {key: 'rate', label: this.$trans('Rate')},
       ],
-      hoursProductTypeIsWork: false
+      hoursProductTypeIsWork: false,
+      authPoll: null,
     }
   },
   computed: {
@@ -360,6 +361,9 @@ export default {
   },
   created() {
     this.loadData()
+  },
+  beforeUnmount() {
+    this.stopAuthPoll()
   },
   methods: {
     isEmpty(val) {
@@ -400,20 +404,35 @@ export default {
       await this.$refs['delete-tokens'].show()
     },
     // API
+    /**
+     * Send the user to Teamleader to grant access, and watch for the tokens.
+     *
+     * The grant lands server-side, so the settings are re-read until they
+     * carry tokens. The watch ends once they do, after five minutes, or when
+     * the page is left. Whether the Teamleader window was closed is not
+     * checked: a page sending Cross-Origin-Opener-Policy makes it read as
+     * closed at once.
+     */
     async authorize() {
       const result = await this.service.authorize()
       if (result.status === 'auth') {
         window.open(result.authorization_url, '_blank')
-        const id = setInterval(async () => {
+        const giveUpAt = Date.now() + 5 * 60 * 1000
+        this.stopAuthPoll()
+        this.authPoll = setInterval(async () => {
           this.settings = await this.service.configDetail()
-          if (this.settings.has_tokens) {
-            clearInterval(id)
+          if (this.settings.has_tokens || Date.now() > giveUpAt) {
+            this.stopAuthPoll()
           }
         }, 1000)
       }
       if (result.status === 'ok') {
         infoToast(this.create, 'Status', 'Tokens aanwezig')
       }
+    },
+    stopAuthPoll() {
+      clearInterval(this.authPoll)
+      this.authPoll = null
     },
     async doEmptyTokens() {
       // not used at the moment
