@@ -3540,6 +3540,26 @@ export type Offer = {
     sent_date?: string | null;
 };
 
+/**
+ * One file an offer is sent with: the quotation's generated PDF (no id,
+ * it is not a stored document) or one of its uploaded documents.
+ */
+export type OfferAttachment = {
+    id: number | null;
+    name: string;
+    is_pdf: boolean;
+};
+
+/**
+ * The quotation an offer is sent for, as the offer form shows it.
+ */
+export type OfferQuotation = {
+    readonly id: number;
+    quotation_id?: string;
+    quotation_name?: string | null;
+    quotation_email?: string | null;
+};
+
 export type OfferRequest = {
     quotation: number;
     recipients?: string | null;
@@ -7341,6 +7361,58 @@ export type QuotationCostRowRequest = {
     total_currency?: CurrencyEnum;
 };
 
+export type QuotationDetail = {
+    readonly id: number;
+    uuid?: string;
+    quotation_id?: string;
+    quotation_type?: string | null;
+    name?: string | null;
+    quotation_name?: string | null;
+    quotation_address?: string | null;
+    quotation_postal?: string | null;
+    quotation_city?: string | null;
+    quotation_country_code?: string | null;
+    quotation_po_box?: string | null;
+    quotation_email?: string | null;
+    quotation_tel?: string | null;
+    quotation_mobile?: string | null;
+    quotation_contact?: string | null;
+    quotation_reference?: string | null;
+    description?: string | null;
+    signature_engineer?: string | null;
+    signature_customer?: string | null;
+    signature_name_engineer?: string | null;
+    signature_name_customer?: string | null;
+    customer_id?: string | null;
+    customer_relation?: number | null;
+    preliminary?: boolean;
+    accepted?: boolean;
+    vat_type?: string;
+    total?: string;
+    readonly total_currency: string;
+    vat?: string;
+    readonly vat_currency: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly created: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly modified: string;
+    quotation_expire_days?: number;
+    readonly statuses: Array<QuotationStatus>;
+    definitive_date?: string | null;
+    definitive_pdf_filename?: string | null;
+    readonly is_sent: boolean;
+    readonly last_status: string;
+    readonly last_status_full: string | null;
+    readonly last_status_date: string | null;
+    readonly statuscode_id: number | null;
+    readonly color: string | null;
+    readonly text_color: string | null;
+};
+
 export type QuotationDocument = {
     readonly id: number;
     quotation: number;
@@ -8908,6 +8980,15 @@ export type UnassignTripRequestRequest = {
 
 export type UnauthorizedResponse = {
     detail?: string;
+};
+
+/**
+ * What the offer form opens with (OfferViewset.get_unsent_offer).
+ */
+export type UnsentOfferResponse = {
+    offer: Offer | null;
+    quotation: OfferQuotation;
+    documents: Array<OfferAttachment>;
 };
 
 /**
@@ -10675,6 +10756,15 @@ export type OfferWritable = {
 };
 
 /**
+ * The quotation an offer is sent for, as the offer form shows it.
+ */
+export type OfferQuotationWritable = {
+    quotation_id?: string;
+    quotation_name?: string | null;
+    quotation_email?: string | null;
+};
+
+/**
  * Main Order serializer for list views with all standard fields.
  */
 export type OrderWritable = {
@@ -12258,6 +12348,39 @@ export type QuotationCostWritable = {
     chapter?: number | null;
 };
 
+export type QuotationDetailWritable = {
+    uuid?: string;
+    quotation_id?: string;
+    quotation_type?: string | null;
+    name?: string | null;
+    quotation_name?: string | null;
+    quotation_address?: string | null;
+    quotation_postal?: string | null;
+    quotation_city?: string | null;
+    quotation_country_code?: string | null;
+    quotation_po_box?: string | null;
+    quotation_email?: string | null;
+    quotation_tel?: string | null;
+    quotation_mobile?: string | null;
+    quotation_contact?: string | null;
+    quotation_reference?: string | null;
+    description?: string | null;
+    signature_engineer?: string | null;
+    signature_customer?: string | null;
+    signature_name_engineer?: string | null;
+    signature_name_customer?: string | null;
+    customer_id?: string | null;
+    customer_relation?: number | null;
+    preliminary?: boolean;
+    accepted?: boolean;
+    vat_type?: string;
+    total?: string;
+    vat?: string;
+    quotation_expire_days?: number;
+    definitive_date?: string | null;
+    definitive_pdf_filename?: string | null;
+};
+
 export type QuotationDocumentWritable = {
     quotation: number;
     name?: string | null;
@@ -12831,6 +12954,15 @@ export type TripStatuscodeActionWritable = {
      * Actions
      */
     statuscode: number;
+};
+
+/**
+ * What the offer form opens with (OfferViewset.get_unsent_offer).
+ */
+export type UnsentOfferResponseWritable = {
+    offer: OfferWritable | null;
+    quotation: OfferQuotationWritable;
+    documents: Array<OfferAttachment>;
 };
 
 export type UserLeaveHoursWritable = {
@@ -26132,28 +26264,17 @@ export type QuotationOfferPartialUpdateResponses = {
 
 export type QuotationOfferPartialUpdateResponse = QuotationOfferPartialUpdateResponses[keyof QuotationOfferPartialUpdateResponses];
 
-export type QuotationOfferGetDocumentsRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/quotation/offer/get_documents/';
-};
-
-export type QuotationOfferGetDocumentsRetrieveResponses = {
-    200: Offer;
-};
-
-export type QuotationOfferGetDocumentsRetrieveResponse = QuotationOfferGetDocumentsRetrieveResponses[keyof QuotationOfferGetDocumentsRetrieveResponses];
-
 export type QuotationOfferGetUnsentOfferRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        quotationId: number;
+    };
     url: '/api/quotation/offer/get_unsent_offer/';
 };
 
 export type QuotationOfferGetUnsentOfferRetrieveResponses = {
-    200: Offer;
+    200: UnsentOfferResponse;
 };
 
 export type QuotationOfferGetUnsentOfferRetrieveResponse = QuotationOfferGetUnsentOfferRetrieveResponses[keyof QuotationOfferGetUnsentOfferRetrieveResponses];
@@ -26608,7 +26729,7 @@ export type QuotationQuotationDownloadDefinitivePdfCreateResponses = {
 export type QuotationQuotationDownloadDefinitivePdfCreateResponse = QuotationQuotationDownloadDefinitivePdfCreateResponses[keyof QuotationQuotationDownloadDefinitivePdfCreateResponses];
 
 export type QuotationQuotationGenerateDefinitivePdfCreateData = {
-    body?: QuotationRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this quotation.
@@ -26619,8 +26740,15 @@ export type QuotationQuotationGenerateDefinitivePdfCreateData = {
     url: '/api/quotation/quotation/{id}/generate_definitive_pdf/';
 };
 
+export type QuotationQuotationGenerateDefinitivePdfCreateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
+};
+
 export type QuotationQuotationGenerateDefinitivePdfCreateResponses = {
-    200: Quotation;
+    200: QuotationDetail;
 };
 
 export type QuotationQuotationGenerateDefinitivePdfCreateResponse = QuotationQuotationGenerateDefinitivePdfCreateResponses[keyof QuotationQuotationGenerateDefinitivePdfCreateResponses];

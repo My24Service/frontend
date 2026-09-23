@@ -2975,7 +2975,7 @@ export const quotationOffer = {
   create: {mutation: quotationOfferCreateMutation, body: vQuotationOfferCreateBody},
   update: {mutation: quotationOfferPartialUpdateMutation, body: vQuotationOfferPartialUpdateBody},
   destroy: {mutation: quotationOfferDestroyMutation},
-  reads: ['quotationOfferGetDocumentsRetrieve', 'quotationOfferGetUnsentOfferRetrieve', 'quotationOfferList', 'quotationOfferRetrieve'],
+  reads: ['quotationOfferGetUnsentOfferRetrieve', 'quotationOfferList', 'quotationOfferRetrieve'],
 } as const satisfies Resource
 
 /** `api/quotation/quotation` */

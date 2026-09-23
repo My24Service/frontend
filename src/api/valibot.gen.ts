@@ -4287,13 +4287,11 @@ export const vOciUrl = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/quotation/offer/get_documents/
- *   GET /api/quotation/offer/get_unsent_offer/
  *   GET /api/quotation/offer/{id}/
  *   PATCH /api/quotation/offer/{id}/
  *   POST /api/quotation/offer/
  *
- * Nested in: PaginatedOfferList
+ * Nested in: PaginatedOfferList, UnsentOfferResponse
  */
 export const vOffer = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -4304,6 +4302,38 @@ export const vOffer = v.object({
     body: v.nullish(v.string()),
     is_sent: v.optional(v.boolean()),
     sent_date: v.nullish(v.pipe(v.string(), v.isoDate()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: UnsentOfferResponse
+ */
+/**
+ * One file an offer is sent with: the quotation's generated PDF (no id,
+ * it is not a stored document) or one of its uploaded documents.
+ */
+export const vOfferAttachment = v.object({
+    id: v.nullable(v.pipe(v.number(), v.integer())),
+    name: v.string(),
+    is_pdf: v.boolean()
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: UnsentOfferResponse
+ */
+/**
+ * The quotation an offer is sent for, as the offer form shows it.
+ */
+export const vOfferQuotation = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    quotation_id: v.optional(v.pipe(v.string(), v.maxLength(50))),
+    quotation_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    quotation_email: v.nullish(v.pipe(v.string(), v.email(), v.maxLength(180)))
 });
 
 /**
@@ -8717,7 +8747,6 @@ export const vPatchedOrderFilterRequest = v.object({
  *   PATCH /api/quotation/quotation/{id}/
  *   POST /api/quotation/quotation/
  *   POST /api/quotation/quotation/{id}/download_definitive_pdf/
- *   POST /api/quotation/quotation/{id}/generate_definitive_pdf/
  *   POST /api/quotation/quotation/{id}/generate_preview_pdf/
  *
  * Nested in: PaginatedQuotationList
@@ -9201,7 +9230,6 @@ export const vPaginatedQuotationPreliminaryResponseList = v.object({
  * Request body:
  *   POST /api/quotation/quotation/
  *   POST /api/quotation/quotation/{id}/download_definitive_pdf/
- *   POST /api/quotation/quotation/{id}/generate_definitive_pdf/
  *   POST /api/quotation/quotation/{id}/generate_preview_pdf/
  *   POST /api/quotation/quotation/{id}/make_definitive/
  */
@@ -9242,6 +9270,8 @@ export const vQuotationRequest = v.object({
  * @endpoints
  * Response:
  *   POST /api/quotation/status/
+ *
+ * Nested in: QuotationDetail
  */
 export const vQuotationStatus = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -9249,6 +9279,57 @@ export const vQuotationStatus = v.object({
     status: v.pipe(v.string(), v.maxLength(255)),
     modified: v.pipe(v.string(), v.readonly()),
     created: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/quotation/quotation/{id}/generate_definitive_pdf/
+ */
+export const vQuotationDetail = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    quotation_id: v.optional(v.pipe(v.string(), v.maxLength(50))),
+    quotation_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    quotation_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    quotation_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    quotation_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    quotation_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    quotation_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    quotation_po_box: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    quotation_email: v.nullish(v.pipe(v.string(), v.email(), v.maxLength(180))),
+    quotation_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    quotation_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    quotation_contact: v.nullish(v.string()),
+    quotation_reference: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    description: v.nullish(v.string()),
+    signature_engineer: v.nullish(v.pipe(v.string(), v.url())),
+    signature_customer: v.nullish(v.pipe(v.string(), v.url())),
+    signature_name_engineer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    preliminary: v.optional(v.boolean()),
+    accepted: v.optional(v.boolean()),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,4}(?:\.\d{0,1})?$/))),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total_currency: v.pipe(v.string(), v.readonly()),
+    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat_currency: v.pipe(v.string(), v.readonly()),
+    created: v.pipe(v.string(), v.readonly()),
+    modified: v.pipe(v.string(), v.readonly()),
+    quotation_expire_days: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    statuses: v.pipe(v.array(vQuotationStatus), v.readonly()),
+    definitive_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    definitive_pdf_filename: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    is_sent: v.pipe(v.boolean(), v.readonly()),
+    last_status: v.pipe(v.string(), v.readonly()),
+    last_status_full: v.nullable(v.pipe(v.string(), v.readonly())),
+    last_status_date: v.nullable(v.pipe(v.pipe(v.string(), v.isoTimestamp()), v.readonly())),
+    statuscode_id: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    color: v.nullable(v.pipe(v.string(), v.readonly())),
+    text_color: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -11406,6 +11487,20 @@ export const vUnassignTripRequestRequest = v.object({
  */
 export const vUnauthorizedResponse = v.object({
     detail: v.optional(v.string(), 'Authentication credentials were not provided.')
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/quotation/offer/get_unsent_offer/
+ */
+/**
+ * What the offer form opens with (OfferViewset.get_unsent_offer).
+ */
+export const vUnsentOfferResponse = v.object({
+    offer: v.nullable(vOffer),
+    quotation: vOfferQuotation,
+    documents: v.array(vOfferAttachment)
 });
 
 /**
@@ -14278,7 +14373,7 @@ export const vModulePartWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read const is used instead.
  *
- * Nested in: PaginatedOfferList
+ * Nested in: PaginatedOfferList, UnsentOfferResponse
  */
 export const vOfferWritable = v.object({
     quotation: v.pipe(v.number(), v.integer()),
@@ -14287,6 +14382,21 @@ export const vOfferWritable = v.object({
     body: v.nullish(v.string()),
     is_sent: v.optional(v.boolean()),
     sent_date: v.nullish(v.pipe(v.string(), v.isoDate()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: UnsentOfferResponse
+ */
+/**
+ * The quotation an offer is sent for, as the offer form shows it.
+ */
+export const vOfferQuotationWritable = v.object({
+    quotation_id: v.optional(v.pipe(v.string(), v.maxLength(50))),
+    quotation_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    quotation_email: v.nullish(v.pipe(v.string(), v.email(), v.maxLength(180)))
 });
 
 /**
@@ -16361,6 +16471,43 @@ export const vPaginatedQuotationCostListWritable = v.object({
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read const is used instead.
+ */
+export const vQuotationDetailWritable = v.object({
+    uuid: v.optional(v.pipe(v.string(), v.uuid())),
+    quotation_id: v.optional(v.pipe(v.string(), v.maxLength(50))),
+    quotation_type: v.nullish(v.pipe(v.string(), v.maxLength(30))),
+    name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    quotation_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    quotation_address: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    quotation_postal: v.nullish(v.pipe(v.string(), v.maxLength(20))),
+    quotation_city: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    quotation_country_code: v.nullish(v.pipe(v.string(), v.maxLength(2))),
+    quotation_po_box: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    quotation_email: v.nullish(v.pipe(v.string(), v.email(), v.maxLength(180))),
+    quotation_tel: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    quotation_mobile: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    quotation_contact: v.nullish(v.string()),
+    quotation_reference: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    description: v.nullish(v.string()),
+    signature_engineer: v.nullish(v.pipe(v.string(), v.url())),
+    signature_customer: v.nullish(v.pipe(v.string(), v.url())),
+    signature_name_engineer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    customer_id: v.nullish(v.pipe(v.string(), v.maxLength(100))),
+    customer_relation: v.nullish(v.pipe(v.number(), v.integer())),
+    preliminary: v.optional(v.boolean()),
+    accepted: v.optional(v.boolean()),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,4}(?:\.\d{0,1})?$/))),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    quotation_expire_days: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    definitive_date: v.nullish(v.pipe(v.string(), v.isoDate())),
+    definitive_pdf_filename: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
  *
  * Nested in: PaginatedQuotationDocumentList
  */
@@ -16466,6 +16613,8 @@ export const vPaginatedQuotationLineImageListWritable = v.object({
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read const is used instead.
+ *
+ * Nested in: QuotationDetail
  */
 export const vQuotationStatusWritable = v.object({
     quotation: v.pipe(v.number(), v.integer()),
@@ -17317,6 +17466,19 @@ export const vPaginatedTripStatuscodeActionListWritable = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vTripStatuscodeActionWritable))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ */
+/**
+ * What the offer form opens with (OfferViewset.get_unsent_offer).
+ */
+export const vUnsentOfferResponseWritable = v.object({
+    offer: v.nullable(vOfferWritable),
+    quotation: vOfferQuotationWritable,
+    documents: v.array(vOfferAttachment)
 });
 
 /**
@@ -22585,9 +22747,11 @@ export const vQuotationOfferPartialUpdatePath = v.object({
 
 export const vQuotationOfferPartialUpdateResponse = vOffer;
 
-export const vQuotationOfferGetDocumentsRetrieveResponse = vOffer;
+export const vQuotationOfferGetUnsentOfferRetrieveQuery = v.object({
+    quotationId: v.pipe(v.number(), v.integer())
+});
 
-export const vQuotationOfferGetUnsentOfferRetrieveResponse = vOffer;
+export const vQuotationOfferGetUnsentOfferRetrieveResponse = vUnsentOfferResponse;
 
 export const vQuotationQuotationListQuery = v.object({
     customer_relation: v.optional(v.pipe(v.number(), v.integer())),
@@ -22760,13 +22924,11 @@ export const vQuotationQuotationDownloadDefinitivePdfCreatePath = v.object({
 
 export const vQuotationQuotationDownloadDefinitivePdfCreateResponse = vQuotation;
 
-export const vQuotationQuotationGenerateDefinitivePdfCreateBody = vQuotationRequest;
-
 export const vQuotationQuotationGenerateDefinitivePdfCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vQuotationQuotationGenerateDefinitivePdfCreateResponse = vQuotation;
+export const vQuotationQuotationGenerateDefinitivePdfCreateResponse = vQuotationDetail;
 
 export const vQuotationQuotationGeneratePreviewPdfCreateBody = vQuotationRequest;
 
