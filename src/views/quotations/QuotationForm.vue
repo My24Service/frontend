@@ -81,7 +81,6 @@
               <CustomerForm
                 v-show="!isView"
                 :quotation-data="quotation"
-                :customer="customer"
                 ref="customerFormComponent"
               />
               <CustomerView
@@ -140,7 +139,6 @@
                 <h5>{{ $trans("Chapter costs") }}</h5>
 
                 <MaterialsCreate
-                  :customer="customer"
                   :chapter="loadChapterModel"
                   :quotationLinesParent="quotationLines"
                   :is-view="isView"
@@ -152,7 +150,6 @@
 
                 <Hours
                   :chapter="loadChapterModel"
-                  :customer="customer"
                   :type="COST_TYPE.WORK_HOURS"
                   :quotationLinesParent="quotationLines"
                   :is-view="isView"
@@ -164,7 +161,6 @@
 
                 <Hours
                   :chapter="loadChapterModel"
-                  :customer="customer"
                   :type="COST_TYPE.TRAVEL_HOURS"
                   :quotationLinesParent="quotationLines"
                   :is-view="isView"
@@ -177,7 +173,6 @@
                 <Distance
                   :quotation_pk="quotation.id"
                   :chapter="loadChapterModel"
-                  :customer="customer"
                   :quotationLinesParent="quotationLines"
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
@@ -188,7 +183,6 @@
 
                 <CallOutCosts
                   :chapter="loadChapterModel"
-                  :customer="customer"
                   :quotationLinesParent="quotationLines"
                   :is-view="isView"
                   @quotationLinesCreated="quotationLinesCreated"
@@ -222,7 +216,6 @@ import { StatusesComponent } from '@/features/shared'
 
 import {QuotationLineService} from '@/models/quotations/QuotationLine.js'
 import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
-import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 import {ChapterService} from "@/models/quotations/Chapter";
 
 import CustomerForm from './quotation_form/CustomerForm.vue'
@@ -295,10 +288,7 @@ export default {
       default_currency: this.mainStore.getDefaultCurrency,
       invoice_default_vat: this.mainStore.getInvoiceDefaultVat,
       invoice_default_term_of_payment_days: this.mainStore.getInvoiceDefaultTermOfPaymentDays,
-      customerPk: null,
-      customer: null,
       loadChapterModel: null,
-      customerService: new CustomerService(),
       quotationService: new QuotationService(),
       chapterService: new ChapterService(),
       quotationLineService: new QuotationLineService(),
@@ -366,16 +356,11 @@ export default {
       this.loadChapterModel = chapter
     },
 
-    async getCustomer(pk) {
-      const customerData = await this.customerService.detail(pk)
-      this.customer = new CustomerModel(customerData)
-    },
     async loadQuotation() {
       this.isLoading = true
 
       try {
         this.quotation = new QuotationModel(await this.quotationService.detail(this.quotationPK))
-        await this.getCustomer(this.quotation.customer_relation)
         this.isLoading = false
       } catch(error) {
         console.log('error fetching quotation', error)

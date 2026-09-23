@@ -201,10 +201,6 @@ export default {
     loading: {
       type: Boolean,
       default: false,
-    },
-    customer:{
-      type: Object,
-      default: null
     }
   },
   watch: {

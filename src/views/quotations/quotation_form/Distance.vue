@@ -189,10 +189,6 @@ export default {
       type: Object,
       default: null
     },
-    customer:{
-      type: Object,
-      default: null
-    },
     quotationLinesParent: {
       type: [Array],
       default: null

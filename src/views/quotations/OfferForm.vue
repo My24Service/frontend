@@ -105,7 +105,6 @@ import {useVuelidate} from "@vuelidate/core";
 import {required} from "@vuelidate/validators";
 
 import {OfferModel, OfferService} from "@/models/quotations/Offer.js";
-import {QuotationModel, QuotationService} from '@/models/quotations/Quotation'
 
 export default {
   setup() {
@@ -131,8 +130,6 @@ export default {
   },
   async mounted() {
     await this.loadData()
-    await this.loadDocuments()
-    await this.loadQuotation()
   },
   data() {
     return {
@@ -140,7 +137,6 @@ export default {
       isLoading: false,
       loadingPdf: false,
       isSubmitClicked: false,
-      quotationService: new QuotationService(),
       offerService: new OfferService(),
       recipients: [],
       offer: new OfferModel({}),
@@ -153,19 +149,28 @@ export default {
     tagValidator(tag) {
       return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(tag)
     },
+    /**
+     * The unsent offer if there is one, else a new one, with the quotation it
+     * is for and the files it goes out with - all in one answer.
+     */
     async loadData() {
       this.isLoading = true;
 
       try {
-        this.offer = await this.offerService.getUnsentOffer(this.$route.query.quotationId);
-        this.offer.quotation = this.$route.query.quotationId
-        this.recipients = this.offer.recipients.split(",")
-        this.isLoading = false;
+        const {offer, quotation, documents} = await this.offerService.getUnsentOffer(this.$route.query.quotationId);
+        this.offer = offer ?? new OfferModel({})
+        this.offer.quotation = quotation.id
+        this.quotation = quotation
+        this.documents = documents
+        this.recipients = this.offer.recipients ? this.offer.recipients.split(",") : []
+        if (quotation.quotation_email && !this.recipients.includes(quotation.quotation_email)) {
+          this.recipients.push(quotation.quotation_email)
+        }
       } catch (error) {
         console.log("error fetching unsent offer", error);
         errorToast(this.create, $trans("Error fetching unsent offer"));
-        this.isLoading = false;
       }
+      this.isLoading = false;
     },
     cancelForm() {
       this.$router.go(-1)
@@ -189,41 +194,6 @@ export default {
         'post'
       )
     },
-    async loadQuotation() {
-      this.isLoading = true
-
-      try {
-        this.quotation = new QuotationModel(
-          await this.quotationService.detail(this.$route.query.quotationId)
-        )
-        if (!this.recipients.includes(this.quotation.quotation_email)) {
-          this.recipients.push(this.quotation.quotation_email)
-        }
-        this.isLoading = false
-      } catch(error) {
-        console.log('error fetching quotation', error)
-        errorToast(this.create, $trans('Error fetching quotation'))
-        this.isLoading = false
-      }
-    },
-    async loadDocuments() {
-      if (!this.offer.quotation) {
-        return
-      }
-
-      this.isLoading = true;
-
-      try {
-        this.documents = await this.offerService.getDocuments(
-          this.offer.quotation
-        )
-        this.isLoading = false;
-      } catch (error) {
-        console.log("Error fetching documents", error);
-        errorToast(this.create, $trans("Error fetching documents"));
-        this.isLoading = false;
-      }
-    },
     async submitForm() {
       this.isSubmitClicked = true;
       this.recipientInvalid = false;
@@ -242,45 +212,23 @@ export default {
 
       this.offer.recipients = validatedEmails
       this.isLoading = true;
-      const sentTitle = $trans("Sent")
-      const sentBody = $trans("Quotation has been sent")
       const errorBody = $trans("Error sending quotation")
 
-      if (this.isCreate) {
-        this.offer.quotation = this.$route.query.quotationId
-        try {
-          this.offer = await this.offerService.insert(this.offer);
-          this.isLoading = false;
-
-          if (!this.offer.is_sent) {
-            errorToast(this.create, errorBody);
-            return;
-          }
-          infoToast(this.create, sentTitle, sentBody);
-          await this.$router.push({name: 'quotations-sent'});
-        } catch (error) {
-          console.log("Error sending quotation", error);
-          errorToast(this.create, errorBody);
-          this.isLoading = false;
-        }
-        return
-      }
-
       try {
-        this.offer = await this.offerService.update(
-          this.offer.id, this.offer
-        )
-
+        this.offer = this.isCreate
+          ? await this.offerService.insert(this.offer)
+          : await this.offerService.update(this.offer.id, this.offer)
         this.isLoading = false
+
         if (!this.offer.is_sent) {
           errorToast(this.create, errorBody);
           return;
         }
-        infoToast(this.create, sentTitle, sentBody);
+        infoToast(this.create, $trans("Sent"), $trans("Quotation has been sent"));
         await this.$router.push({name: 'quotations-sent'});
-      } catch(error) {
+      } catch (error) {
         console.log("Error sending quotation", error);
-        errorToast(this.create, $trans(errorBody));
+        errorToast(this.create, errorBody);
         this.isLoading = false;
       }
     },

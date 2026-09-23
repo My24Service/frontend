@@ -82,7 +82,6 @@
 
 <script>
 import {QuotationModel, QuotationService} from "@/models/quotations/Quotation";
-import {CustomerModel, CustomerService} from "@/models/customer/Customer";
 
 class PdfBlobError {
   template_error
@@ -127,7 +126,6 @@ export default {
   data() {
     return {
       quotationService: new QuotationService(),
-      customerService: new CustomerService(),
       isLoading: false,
       quotationURL: null,
       quotation: null,
@@ -158,8 +156,8 @@ export default {
       this.isLoading = true
 
       try {
-        await this.quotationService.generatePdf(this.quotation.id)
-        await this.loadQuotation()
+        // Generating answers with the quotation, new PDF filename included.
+        this.quotation = new QuotationModel(await this.quotationService.generatePdf(this.quotation.id))
         const result_ok = await this.downloadPdfBlob()
         this.isLoading = false
         if (!result_ok) {
@@ -246,23 +244,6 @@ export default {
         this.$refs['quotation-viewer'].show()
       } else {
         this.$refs['pdf-error-modal'].show()
-      }
-    },
-    async getCustomer(pk) {
-      const customerData = await this.customerService.detail(pk)
-      this.customer = new CustomerModel(customerData)
-    },
-    async loadQuotation() {
-      this.isLoading = true
-
-      try {
-        this.quotation = new QuotationModel(await this.quotationService.detail(this.quotation.id))
-        await this.getCustomer(this.quotation.customer_relation)
-        this.isLoading = false
-      } catch(error) {
-        console.log('error fetching quotation', error)
-        errorToast(this.create, $trans('Error fetching quotation'))
-        this.isLoading = false
       }
     },
   },
