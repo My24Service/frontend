@@ -212,15 +212,17 @@ export default {
 
       try {
         this.authStore.logout();
-        await this.mainStore.getInitialData()
-
-        loader.hide()
 
         // The notification sockets close with NotificationListener, which
         // leaves with the session; this component only owns the contract one.
         this.closeContractSocket()
 
+        // Leave the logged-in page before the anonymous initial data (no member
+        // settings) replaces the store, or its still-mounted screen re-renders on it.
         await this.$router.push({path: '/'})
+        await this.mainStore.getInitialData()
+
+        loader.hide()
       } catch (error) {
         console.log(error)
         loader.hide()

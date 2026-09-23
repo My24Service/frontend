@@ -9,9 +9,11 @@ import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
  * Behaviour characterisation for the logout sequence
  * (src/components/TheNavLoggedIn.vue, doLogout).
  *
- * Seams under test: logout wipes the session locally, re-runs the bootstrap
- * as anonymous, and returns home. It makes no server call. Socket teardown
- * runs between bootstrap and navigation. The shell stays in app chrome: the
+ * Seams under test: logout wipes the session locally, tears down the socket,
+ * returns home, and only then re-runs the bootstrap as anonymous. It makes no
+ * server call. Navigation must come first: the anonymous bootstrap has no
+ * member settings, and a still-mounted logged-in screen crashes re-rendering
+ * on it. The shell stays in app chrome: the
  * sequence composes session, member and socket state, so it is not slice
  * logic. These specs pin the ordering it must keep.
  */
@@ -97,6 +99,7 @@ describe('TheNavLoggedIn logout', () => {
     expect(localStorage.getItem('accessToken')).toBeNull()
     expect(MAIN.getInitialData).toHaveBeenCalled()
     expect(push).toHaveBeenCalledWith({ path: '/' })
+    expect(push.mock.invocationCallOrder[0]).toBeLessThan(MAIN.getInitialData.mock.invocationCallOrder[0])
   })
 
   test('it makes no server call', async () => {
