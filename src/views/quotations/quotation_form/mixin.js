@@ -123,30 +123,6 @@ let quotationMixin = {
 
       return data
     },
-    async emptyCollection() {
-      this.isLoading = true
-      try {
-        // An empty set deletes every stored row of this cost type.
-        await this.replaceCostRows([])
-        await this.loadData()
-      } catch (e) {
-        console.log(e)
-        errorToast(this.create, $trans('Error removing costs'))
-      }
-      this.isLoading = false
-    },
-    async saveCollection() {
-      this.isLoading = true
-      try {
-        await this.replaceCostRows()
-        await this.loadData()
-        infoToast(this.create, $trans('Saved'), $trans('Costs saved'))
-      } catch (e) {
-        console.log(e)
-        errorToast(this.create, $trans('Error saving costs'))
-      }
-      this.isLoading = false
-    },
     createQuotationLinesClicked(selected) {
       this.useOnQuotationSelected = selected
       this.createQuotationLines()

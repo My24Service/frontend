@@ -274,9 +274,8 @@ export default {
     async saveCosts() {
       try {
         this.isLoading = true
-        await this.replaceCostRows()
+        this.applyCosts(await this.replaceCostRows())
         infoToast(this.create, $trans('Created'), $trans('Call-out costs have been updated'))
-        await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
@@ -290,6 +289,18 @@ export default {
       this.updateTotals()
       this.hasChanges = true
     },
+    /** Show `rows` - the stored costs, as the list or a save answers with them. */
+    applyCosts(rows) {
+      this.costService.collection = rows.map((cost) => {
+        cost.callOutCostSaved = true
+        return new this.costService.model(cost)
+      })
+      this.updateTotals()
+      this.checkParentHasQuotationLines(this.quotationLinesParent)
+      if (this.costService.collection.length === 0) {
+        this.addCost()
+      }
+    },
     async loadData() {
       this.costService.collection = []
       this.isLoading = true
@@ -297,15 +308,7 @@ export default {
 
       try {
         await this.costService.loadCollection()
-        this.costService.collection = this.costService.collection.map((cost) => {
-          cost.callOutCostSaved = true
-          return new this.costService.model(cost)
-        })
-        this.updateTotals()
-        this.checkParentHasQuotationLines(this.quotationLinesParent)
-        if (this.costService.collection.length === 0) {
-          this.addCost()
-        }
+        this.applyCosts(this.costService.collection)
         this.isLoading = false
         this.isLoaded = true
       } catch(error) {

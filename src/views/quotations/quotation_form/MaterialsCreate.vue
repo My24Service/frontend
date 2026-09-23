@@ -264,7 +264,6 @@ export default {
       materialChosen: false,
       isLoading: false,
       materials: [],
-      materialModels: [],
       total_dinero: null,
       totalVAT_dinero: null,
       totalAmount: null,
@@ -334,9 +333,8 @@ export default {
         this.costService.collection = this.costService.collection.filter(
           (cost) => cost.material !== null
         )
-        await this.replaceCostRows()
+        this.applyCosts(await this.replaceCostRows())
         infoToast(this.create, $trans('Updated'), $trans('Materials costs have been updated'))
-        await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
@@ -350,12 +348,6 @@ export default {
       try {
         this.isLoading = true
         const data = await this.materialService.detail(material.id)
-
-        this.materialModels.push(
-          new MaterialModel({
-            ...data
-          })
-        )
 
         data.material = data.id
         data.material_name = data.name
@@ -407,29 +399,14 @@ export default {
       this.updateTotals()
       this.hasChanges = true
     },
-    getMaterialName(material_id) {
-      const material = this.materialModels.find((m) => m.id === material_id)
-      return material ? material.name : $trans("unknown")
-    },
     async loadData() {
       this.costService.collection = []
       this.isLoading = true
       this.isLoaded = false
 
       try {
-        let materialIds = []
         await this.costService.loadCollection()
-        const costs = this.costService.collection.map((cost) => {
-          materialIds.push(cost.material)
-          return new CostModel(cost)
-        })
-        await this.loadMaterials(materialIds)
-        this.costService.collection = costs
-        this.updateTotals()
-        this.checkParentHasQuotationLines(this.quotationLinesParent)
-        if (this.costService.collection.length === 0) {
-          this.addCost()
-        }
+        this.applyCosts(this.costService.collection)
         this.isLoading = false
         this.isLoaded = true
         this.hasChanges = false
@@ -440,19 +417,17 @@ export default {
         this.isLoaded = true
       }
     },
-    async loadMaterials(materialIds) {
-      let data
-
-      this.isLoading = true
-      for (let id of materialIds) {
-        data = await this.materialService.detail(id)
-        this.materialModels.push(
-          new MaterialModel({
-            ...data
-          })
-        )
+    /**
+     * Show `rows` - the stored costs, as the list or a save answers with them.
+     * Each row carries its `material_name`, so no material is fetched to label it.
+     */
+    applyCosts(rows) {
+      this.costService.collection = rows.map((cost) => new CostModel(cost))
+      this.updateTotals()
+      this.checkParentHasQuotationLines(this.quotationLinesParent)
+      if (this.costService.collection.length === 0) {
+        this.addCost()
       }
-      this.isLoading = false
     },
     getDefaultProps() {
       return {
@@ -489,7 +464,7 @@ export default {
       )
     },
     getDescriptionUserTotalsQuotationLine(cost) {
-      return `${$trans("material")}: ${this.getMaterialName(cost.material)}`
+      return `${$trans("material")}: ${cost.material_name || $trans("unknown")}`
     },
     getDescriptionOnlyTotalQuotationLine() {
       return `${$trans("Materials")}`

@@ -275,9 +275,8 @@ export default {
     async saveCosts() {
       try {
         this.isLoading = true
-        await this.replaceCostRows()
+        this.applyCosts(await this.replaceCostRows())
         infoToast(this.create, $trans('Created'), $trans('Distance costs updated'))
-        await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
@@ -291,6 +290,18 @@ export default {
       this.updateTotals()
       this.hasChanges = true
     },
+    /** Show `rows` - the stored costs, as the list or a save answers with them. */
+    applyCosts(rows) {
+      this.costService.collection = rows.map((cost) => {
+        cost.distanceSaved = true
+        return new this.costService.model(cost)
+      })
+      this.updateTotals()
+      this.checkParentHasQuotationLines(this.quotationLinesParent)
+      if (this.costService.collection.length === 0) {
+        this.addCost()
+      }
+    },
     async loadData() {
       this.costService.collection = []
       this.isLoading = true
@@ -298,15 +309,7 @@ export default {
 
       try {
         const response = await this.costService.list()
-        this.costService.collection = response.results.map((cost) => {
-          cost.distanceSaved = true
-          return new this.costService.model(cost)
-        })
-        this.updateTotals()
-        this.checkParentHasQuotationLines(this.quotationLinesParent)
-        if (this.costService.collection.length === 0) {
-          this.addCost()
-        }
+        this.applyCosts(response.results)
         this.isLoading = false
         this.isLoaded = true
       } catch(error) {

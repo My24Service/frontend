@@ -3,6 +3,7 @@ import { HttpResponse } from 'msw'
 
 import MaterialsCreate from '@/views/quotations/quotation_form/MaterialsCreate.vue'
 import Distance from '@/views/quotations/quotation_form/Distance.vue'
+import CallOutCosts from '@/views/quotations/quotation_form/CallOutCosts.vue'
 import Hours from '@/views/quotations/quotation_form/Hours.vue'
 import QuotationLine from '@/views/quotations/quotation_form/QuotationLine.vue'
 
@@ -208,6 +209,40 @@ test('a refused set toasts an error and falls back to no per-row writes', async 
   expect(toasts().map((toast) => toast.body)).toContain('Error updating distance costs')
   expect(api.requests().filter((request) => request.method === 'patch')).toEqual([])
   expect(perRowWrites()).toEqual([])
+})
+
+test('opening the materials panel names its rows from the cost list, not one material request per row', async () => {
+  const wrapper = await openPanel(MaterialsCreate, {
+    saved: [
+      storedCost({ id: 71, cost_type: 'used_materials', material: 15, material_name: 'Bolt', amount_decimal: '2.00' }),
+      storedCost({ id: 72, cost_type: 'used_materials', material: 16, material_name: 'Nut', amount_decimal: '1.00' }),
+    ],
+  })
+
+  expect(api.requests().filter((request) => request.path.startsWith('/api/inventory/material/'))).toEqual([])
+  expect(wrapper.vm.costService.collection.map((cost) => cost.material_name)).toEqual(['Bolt', 'Nut'])
+  expect(wrapper.vm.getDescriptionUserTotalsQuotationLine(wrapper.vm.costService.collection[1]))
+    .toBe('material: Nut')
+})
+
+// The replace-set answers with the stored rows, ids included, so a save shows
+// that answer instead of reading the list back.
+test.each([
+  ['materials', MaterialsCreate, {}, 'used_materials', { material: 15, material_name: 'Bolt', amount_decimal: '2.00' }],
+  ['distance', Distance, {}, 'distance', {}],
+  ['call-out costs', CallOutCosts, {}, 'call_out_costs', {}],
+  ['hours', Hours, { type: 'work_hours' }, 'work_hours', { amount_int: null, amount_duration: '02:00:00' }],
+])('the %s panel shows the saved set from the save response, without re-reading the list', async (_, component, props, costType, row) => {
+  const wrapper = await openPanel(component, { props, saved: [storedCost({ id: 71, cost_type: costType, ...row })] })
+  const listReads = () => api.requests().filter((request) => request.method === 'get' && request.path === costBase)
+  expect(listReads()).toHaveLength(1)
+
+  api.post(costBulk, ({ body }) => body.map((stored) => storedCost({ ...stored, cost_type: costType, ...row, id: 99 })))
+  await wrapper.vm.saveCosts()
+
+  expect(listReads()).toHaveLength(1)
+  expect(wrapper.vm.costService.collection.map((cost) => cost.id)).toEqual([99])
+  expect(wrapper.vm.hasChanges ?? false).toBe(false)
 })
 
 test('the chapter editor saves its lines in one request, ids included', async () => {

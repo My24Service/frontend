@@ -286,9 +286,8 @@ export default {
     async saveCosts() {
       try {
         this.isLoading = true
-        await this.replaceCostRows()
+        this.applyCosts(await this.replaceCostRows())
         infoToast(this.create, $trans('Created'), $trans('Hours costs have been updated'))
-        await this.loadData()
         this.isLoading = false
         this.hasChanges = false
       } catch(error) {
@@ -308,14 +307,9 @@ export default {
       this.updateTotals()
       this.hasChanges = true
     },
-    async loadData() {
-      this.costService.collection = []
-      this.isLoading = true
-      this.isLoaded = false
-
-      try {
-        await this.costService.loadCollection()
-        this.costService.collection = this.costService.collection.map((cost) => {
+    /** Show `rows` - the stored costs, as the list or a save answers with them. */
+    applyCosts(rows) {
+      this.costService.collection = rows.map((cost) => {
         cost.savedHours = true
         return new this.costService.model(cost)
       })
@@ -324,6 +318,15 @@ export default {
       }
       this.updateTotals()
       this.checkParentHasQuotationLines(this.quotationLinesParent)
+    },
+    async loadData() {
+      this.costService.collection = []
+      this.isLoading = true
+      this.isLoaded = false
+
+      try {
+        await this.costService.loadCollection()
+        this.applyCosts(this.costService.collection)
         this.isLoading = false
         this.isLoaded = true
       } catch(error) {
