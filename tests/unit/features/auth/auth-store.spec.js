@@ -7,6 +7,12 @@ import {
   useAuthToken,
 } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
+import { forgetSocketRooms } from '@/services/websocket/BaseSocket.js'
+
+vi.mock('@/services/websocket/BaseSocket.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  forgetSocketRooms: vi.fn(),
+}))
 
 /**
  * Behaviour characterisation for the session lifecycle.
@@ -115,6 +121,12 @@ describe('auth store logout', () => {
     expect(authStore.userInfo).toBeNull()
     expect(localStorage.getItem('accessToken')).toBeNull()
     expect(adapter).not.toHaveBeenCalled()
+  })
+
+  test('it forgets the websocket rooms, which belong to the user leaving', () => {
+    useAuthStore().logout()
+
+    expect(forgetSocketRooms).toHaveBeenCalled()
   })
 })
 

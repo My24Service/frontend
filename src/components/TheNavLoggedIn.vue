@@ -103,8 +103,6 @@ import { required, sameAs } from '@vuelidate/validators'
 
 import { changePasswordCreate } from '@/api/sdk.gen'
 
-import userSocket from '../services/websocket/UserSocket'
-import memberSocket from '../services/websocket/MemberSocket'
 import MemberNewDataSocket from '../services/websocket/MemberNewDataSocket'
 import {NEW_DATA_EVENTS} from "@/constants";
 
@@ -218,30 +216,20 @@ export default {
 
         loader.hide()
 
-        await userSocket.init()
-        userSocket.removeOnmessageHandler()
-        userSocket.removeSocket()
+        // The notification sockets close with NotificationListener, which
+        // leaves with the session; this component only owns the contract one.
+        this.closeContractSocket()
 
-        await memberSocket.init()
-        memberSocket.removeOnmessageHandler()
-        memberSocket.removeSocket()
-
-        await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
-        this.memberNewDataSocket.removeOnmessageHandler()
-        this.memberNewDataSocket.removeSocket()
-
-        await this.memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
-        this.memberNewDataSocket.removeOnmessageHandler()
-        this.memberNewDataSocket.removeSocket()
-
-        if(this.$router.currentRoute.path !== '/') {
-          await this.$router.push({path: '/'})
-        }
+        await this.$router.push({path: '/'})
       } catch (error) {
         console.log(error)
         loader.hide()
         errorToast(this.create, this.$trans('Error logging you out'))
       }
+    },
+    closeContractSocket() {
+      this.memberNewDataSocket.removeOnmessageHandler()
+      this.memberNewDataSocket.removeSocket()
     },
     onContractChange(data) {
       if (data.type === NEW_DATA_EVENTS.CONTRACT) {
@@ -255,14 +243,8 @@ export default {
     this.memberNewDataSocket.setOnmessageHandler(this.onContractChange)
     this.memberNewDataSocket.getSocket()
   },
-  async beforeUnmount() {
-    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.UNACCEPTED_ORDER)
-    this.memberNewDataSocket.removeOnmessageHandler()
-    this.memberNewDataSocket.removeSocket()
-
-    await this.memberNewDataSocket.init(NEW_DATA_EVENTS.CONTRACT)
-    this.memberNewDataSocket.removeOnmessageHandler()
-    this.memberNewDataSocket.removeSocket()
+  beforeUnmount() {
+    this.closeContractSocket()
   }
 }
 </script>

@@ -108,4 +108,14 @@ describe('TheNavLoggedIn logout', () => {
 
     expect(fakeHttp.post.mock.calls.length).toBe(0)
   })
+
+  test('it looks up no websocket room to close the sockets', async () => {
+    const wrapper = await mountNav()
+    fakeHttp.get.mockClear()
+
+    await wrapper.vm.doLogout()
+    await flush()
+
+    expect(fakeHttp.get.mock.calls.map(([url]) => url).filter((url) => url.includes('room'))).toEqual([])
+  })
 })

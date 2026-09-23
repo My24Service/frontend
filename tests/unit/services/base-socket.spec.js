@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import BaseSocket from '@/services/websocket/BaseSocket.js'
+import BaseSocket, { forgetSocketRooms } from '@/services/websocket/BaseSocket.js'
+
+const roomHttp = vi.hoisted(() => ({ get: vi.fn() }))
+vi.mock('@/services/api', () => ({ default: roomHttp }))
 
 // The base socket's _connect is disabled under NODE_ENV=test and returns a real
 // WebSocket otherwise. Overriding it lets the specs drive close events on a
@@ -103,5 +106,45 @@ describe('BaseSocket reconnect lifecycle', () => {
 
     expect(socket.sockets).toHaveLength(1)
     expect(socket.socket).toBeNull()
+  })
+})
+
+// A room is the secret a websocket channel is addressed by, and the user room
+// belongs to one user. It used to be cached in localStorage under a key naming
+// only the endpoint, so it survived a logout: the next user to sign in on the
+// same browser was put in the previous user's room.
+describe('BaseSocket room cache', () => {
+  beforeEach(() => {
+    forgetSocketRooms()
+    localStorage.clear()
+    roomHttp.get.mockReset()
+    roomHttp.get.mockResolvedValueOnce({ data: { room: 'room-jan' } })
+      .mockResolvedValueOnce({ data: { room: 'room-piet' } })
+  })
+
+  test('asks the backend once, then reuses the room', async () => {
+    const socket = new TestSocket()
+
+    expect(await socket._getRoom('/get-user-room/')).toBe('room-jan')
+    expect(await socket._getRoom('/get-user-room/')).toBe('room-jan')
+
+    expect(roomHttp.get).toHaveBeenCalledTimes(1)
+  })
+
+  test('forgets the rooms when told, so the next user gets their own', async () => {
+    const socket = new TestSocket()
+    await socket._getRoom('/get-user-room/')
+
+    forgetSocketRooms()
+
+    expect(await socket._getRoom('/get-user-room/')).toBe('room-piet')
+  })
+
+  test('keeps no room in localStorage, and ignores one left there', async () => {
+    localStorage.setItem('get-user-room', JSON.stringify('room-of-someone-else'))
+    const socket = new TestSocket()
+
+    expect(await socket._getRoom('/get-user-room/')).toBe('room-jan')
+    expect(Object.keys(localStorage).filter((key) => key !== 'get-user-room')).toEqual([])
   })
 })

@@ -6,6 +6,8 @@ import { vJwtTokenCreateResponse, vJwtTokenRefreshCreateResponse } from '@/api/v
 
 import type { UserInfoResponse } from '@/api/types.gen'
 
+import { forgetSocketRooms } from '@/services/websocket/BaseSocket.js'
+
 import { useAuthToken } from './token'
 
 export type SessionUserInfo = UserInfoResponse
@@ -78,6 +80,7 @@ export const useAuthStore = defineStore('auth', {
     logout(): void {
       useAuthToken().value = null
       this.userInfo = null
+      forgetSocketRooms()
     },
     async login(username: string, password: string): Promise<void> {
       const { data } = await jwtTokenCreate({

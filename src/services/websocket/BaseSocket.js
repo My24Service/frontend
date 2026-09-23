@@ -6,6 +6,21 @@ if (document.location.port !== '') {
   BASE_URL = BASE_URL.replace('3000', '8000')
 }
 
+/**
+ * The rooms asked for this session, by endpoint.
+ *
+ * A room is the secret a channel is addressed by, and the user room belongs to
+ * one user, so the cache lives in memory and is dropped on logout
+ * (`forgetSocketRooms`). It used to live in localStorage under a key naming only
+ * the endpoint, which handed the next user on the browser the previous one's
+ * room.
+ */
+const rooms = new Map()
+
+export function forgetSocketRooms() {
+  rooms.clear()
+}
+
 class BaseSocket {
   protocol = document.location.protocol.indexOf('https') !== -1 ? 'wss' : 'ws'
   host = BASE_URL
@@ -48,32 +63,9 @@ class BaseSocket {
     this.socket = null
   }
 
-  _getStorageKey(url) {
-    return url.replaceAll('/', '')
-  }
-
-  _storeRoom(url, room) {
-    if (room) {
-      const key = this._getStorageKey(url)
-      localStorage.setItem(key, JSON.stringify(room))
-    }
-  }
-
-  _getRoomFromStorage(url, room) {
-    const key = this._getStorageKey(url)
-    const val = localStorage.getItem(key)
-    if (typeof val === "string" && val !== "undefined") {
-      return JSON.parse(val)
-    }
-  }
-
   async _getRoom(url) {
-    const room = this._getRoomFromStorage(url)
-    if (room) {
-      if (this.debug) {
-        console.log(`${this.name}: got room from storage: ${room}`)
-      }
-      return room
+    if (rooms.has(url)) {
+      return rooms.get(url)
     }
 
     const response = await axios.get(url)
@@ -82,7 +74,9 @@ class BaseSocket {
       if (this.debug) {
         console.log(`${this.name}: got room from backend: ${result.room}`)
       }
-      this._storeRoom(url, result.room)
+      if (result.room) {
+        rooms.set(url, result.room)
+      }
 
       return result.room
     } else {
