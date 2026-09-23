@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vCustomer, vLocation } from '@/api/valibot.gen'
 import { LocationList } from '@/features/equipment'
-import my24 from '@/services/my24'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
+import { captureDownloads, xlsxResponse } from '../../support/downloads.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => ({
   ...(await importOriginal()), useToast: () => ({create: toastCreate}),
@@ -189,8 +189,11 @@ describe('LocationList row actions', () => {
 })
 
 describe('LocationList QR export', () => {
-  test('exports the committed search term, encoded', async () => {
-    const download = vi.spyOn(my24, 'downloadItemAuth').mockImplementation(() => {})
+  afterEach(() => vi.restoreAllMocks())
+
+  test('exports the committed search term and saves the spreadsheet', async () => {
+    const saved = captureDownloads()
+    api.get('/api/equipment/location-export-qr/', xlsxResponse)
     const wrapper = await mountLocations()
     await settle()
 
@@ -198,10 +201,10 @@ describe('LocationList QR export', () => {
     await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
     await wrapper.get('button[title="Download QR-codes"]').trigger('click')
+    await settle()
 
-    expect(download).toHaveBeenCalledWith(
-      '/api/equipment/location-export-qr/?q=berg+%26+ruimte',
-      'locations.xlsx',
-    )
+    const exports = api.requests().filter((request) => request.path === '/api/equipment/location-export-qr/')
+    expect(exports.map((request) => request.query)).toEqual([{ q: 'berg & ruimte' }])
+    expect(saved).toEqual(['locations.xlsx'])
   })
 })

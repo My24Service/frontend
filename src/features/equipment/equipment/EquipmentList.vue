@@ -80,6 +80,8 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { equipmentEquipmentExportQrRetrieve } from '@/api/sdk.gen'
+import { useFileDownload, XLSX_MIME } from '@/features/shared'
 import {
   equipmentEquipmentDestroyMutation,
   equipmentEquipmentListOptions,
@@ -249,23 +251,21 @@ async function addState() {
   }
 }
 
+const download = useFileDownload()
+
 function downloadList() {
   // Commit the toolbar's 300 ms debounce first, or a term typed and exported
   // straight away is still only in the draft and the file answers a different
   // question than the one on screen.
   globalFilter.value = searchDraft.value
 
-  // URLSearchParams rather than concatenation: a term with '&' in it would
-  // otherwise end the query.
-  const params = new URLSearchParams()
-  if (globalFilter.value) params.set('q', globalFilter.value)
-
   // The type too, and always: this screen is mounted per type and lists one
   // type's rows, so a spreadsheet covering both answers a different question
   // than the one on screen. The legacy export forwarded the search term alone.
-  params.set('type', props.type)
-
-  my24.downloadItemAuth(`/api/equipment/equipment-export-qr/?${params.toString()}`, 'equipment.xlsx')
+  const q = globalFilter.value
+  download.fromApi(
+    () => equipmentEquipmentExportQrRetrieve({query: {...(q ? {q} : {}), type: props.type}, throwOnError: true}),
+    'equipment.xlsx', XLSX_MIME)
 }
 </script>
 

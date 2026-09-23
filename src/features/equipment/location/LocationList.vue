@@ -41,6 +41,8 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { equipmentLocationExportQrRetrieve } from '@/api/sdk.gen'
+import { useFileDownload, XLSX_MIME } from '@/features/shared'
 import {
   equipmentLocationDestroyMutation,
   equipmentLocationListOptions,
@@ -139,12 +141,14 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
   loadError: $trans('Error loading locations'),
 })
 
+const download = useFileDownload()
+
 function downloadList() {
   globalFilter.value = searchDraft.value
 
-  const params = new URLSearchParams()
-  if (globalFilter.value) params.set('q', globalFilter.value)
-
-  my24.downloadItemAuth(`/api/equipment/location-export-qr/?${params.toString()}`, 'locations.xlsx')
+  const q = globalFilter.value
+  download.fromApi(
+    () => equipmentLocationExportQrRetrieve({query: q ? {q} : {}, throwOnError: true}),
+    'locations.xlsx', XLSX_MIME)
 }
 </script>

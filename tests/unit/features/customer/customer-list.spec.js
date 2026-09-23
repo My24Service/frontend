@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { CustomerList } from '@/features/customer'
 import { vPaginatedCustomerList } from '@/api/valibot.gen'
-import my24 from '@/services/my24'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
+import { captureDownloads, xlsxResponse } from '../../support/downloads.js'
 import { customerRoutes } from '../../support/customer-routes.js'
 import { addFilter, chip, chipTexts, closeEditor, editorInput, pickMode } from '../../support/column-filters.js'
 
@@ -564,59 +564,66 @@ describe('CustomerList delete', () => {
 
 describe('CustomerList export', () => {
   /**
-   * The export URL is built by the screen and handed to
-   * `my24.downloadItemAuth`, which GETs it. `/api/customer/export/` declares
-   * no query parameter in openapi/schema.yaml (the `q` it honours is missing
-   * from the spec), so the strict API seam would reject the request as
-   * undeclared — the URL is asserted at the call that sends it.
+   * The export goes through the generated `customerExportRetrieve`, which the
+   * schema now declares as a file with its `q` filter, so the strict seam
+   * checks the request and the saved file is the spreadsheet it answered.
    */
-  function spyOnDownload() {
-    return vi.spyOn(my24, 'downloadItemAuth').mockImplementation(() => {})
-  }
+  let saved
 
-  /** happy-dom has no `window.confirm` at all, so the stub replaces nothing. */
-  function acceptConfirmation() {
+  beforeEach(() => {
+    saved = captureDownloads()
+    api.get('/api/customer/export/', xlsxResponse)
+    // happy-dom has no `window.confirm` at all, so the stub replaces nothing.
     vi.stubGlobal('confirm', vi.fn(() => true))
-  }
+  })
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.restoreAllMocks()
   })
 
-  test('encodes the export term, so a term with & survives the query string', async () => {
-    const download = spyOnDownload()
-    acceptConfirmation()
+  const exports = () => api.requests().filter((request) => request.path === '/api/customer/export/')
 
+  test('exports with the search term and saves the spreadsheet', async () => {
     const wrapper = await mountTable()
     await wrapper.get('input[aria-label="Search customers"]').setValue('Acme & Co')
     await pastDebounce()
 
     await wrapper.get('button[title="Download"]').trigger('click')
+    await settle()
 
-    expect(download).toHaveBeenCalledWith('/api/customer/export/?q=Acme+%26+Co', 'customers.xlsx')
+    expect(exports().map((request) => request.query)).toEqual([{ q: 'Acme & Co' }])
+    expect(saved).toEqual(['customers.xlsx'])
   })
 
   test('commits the search draft before exporting, so the term exported is the term on screen', async () => {
-    const download = spyOnDownload()
-    acceptConfirmation()
-
     const wrapper = await mountTable()
     await wrapper.get('input[aria-label="Search customers"]').setValue('Acme & Co')
     // Deliberately no debounce wait: the export reads the committed value, and
     // a term typed and exported at once must not export the previous one.
     await wrapper.get('button[title="Download"]').trigger('click')
+    await settle()
 
-    expect(download).toHaveBeenCalledWith('/api/customer/export/?q=Acme+%26+Co', 'customers.xlsx')
+    expect(exports().map((request) => request.query)).toEqual([{ q: 'Acme & Co' }])
   })
 
   test('a bare list exports the whole customer set', async () => {
-    const download = spyOnDownload()
-    acceptConfirmation()
-
     const wrapper = await mountTable()
     await wrapper.get('button[title="Download"]').trigger('click')
+    await settle()
 
-    expect(download).toHaveBeenCalledWith('/api/customer/export/?', 'customers.xlsx')
+    expect(exports().map((request) => request.query)).toEqual([{}])
+    expect(saved).toEqual(['customers.xlsx'])
+  })
+
+  test('a failed export says so and saves nothing', async () => {
+    api.get('/api/customer/export/', serverError)
+    const wrapper = await mountTable()
+    await wrapper.get('button[title="Download"]').trigger('click')
+    await settle()
+
+    expect(saved).toEqual([])
+    expect(toasts().map((toast) => toast.body)).toContain('Error downloading file')
   })
 })
 

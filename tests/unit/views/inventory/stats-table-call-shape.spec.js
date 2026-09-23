@@ -6,6 +6,7 @@ import StatsTable from '@/views/inventory/StatsTable.vue'
 
 import { requestShapes } from '../../support/request-recorder.js'
 import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
+import { captureDownloads } from '../../support/downloads.js'
 
 // CALL-SHAPE SPEC.
 //
@@ -29,6 +30,11 @@ vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
 vi.mock('@/api/client.gen', async () => {
   const { apiClientMock } = await import('../../support/api-client-mock.js')
   return apiClientMock(fakeHttp)
+})
+
+vi.mock('bootstrap-vue-next', async (importOriginal) => {
+  const { toastCreate: create } = await import('../../support/form-harness.js')
+  return { ...(await importOriginal()), useToast: () => ({ create }) }
 })
 
 const ROUTES = {
@@ -120,5 +126,29 @@ describe('StatsTable - stats table call shape', () => {
     expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
       { method: 'get', path: '/api/inventory/material/stats_table/', query: { year: String(YEAR) }, body: undefined },
     ])
+  })
+})
+
+describe('StatsTable - export', () => {
+  // REGRESSION. The export fetched `/inventory/stats_table_export/`, outside
+  // `/api/`, with the search term pasted into the query unencoded.
+  test('exports the year and search term through the export endpoint', async () => {
+    const saved = captureDownloads()
+    fakeHttp.get.mockImplementation(async () => ({ data: new Blob(['xlsx']), status: 200 }))
+    const wrapper = mountForm(StatsTable)
+    await flush()
+    fakeHttp.get.mockClear()
+
+    wrapper.vm.model.setSearchQuery('bout & moer')
+    await wrapper.vm.downloadList()
+
+    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+      {
+        method: 'get', path: '/api/inventory/stats_table_export/',
+        query: { year: String(YEAR), q: 'bout & moer' }, body: undefined,
+      },
+    ])
+    expect(saved).toEqual(['stats_table.xlsx'])
+    vi.restoreAllMocks()
   })
 })

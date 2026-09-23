@@ -10,7 +10,7 @@ import {
   EquipmentDetail,
   LocationDetail,
 } from '@/features/equipment'
-import my24 from '@/services/my24'
+import { captureDownloads } from '../../support/downloads.js'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toastCreate, toasts } from '../../support/form-harness.js'
@@ -25,7 +25,7 @@ const api = installApiSeam()
 /**
  * The handles crossing the `QrPanel`/`useQrCode` seam, pinned where they
  * live: the recreate mutation's write-back into the detail cache, and the
- * download's arguments to `my24.downloadItem`.
+ * file the download fetches and the name it saves it under.
  */
 const stubs = {
   OrdersTable: {template: '<div class="orders-table-stub" />'},
@@ -82,7 +82,21 @@ beforeEach(() => {
   api.post('/api/equipment/equipment/{id}/create_qr/', {qr_path: '/media/qr/11-new.png', qr_url: 'https://example.test/qr/11-new.png'})
   api.post('/api/equipment/location/{id}/create_qr/', {qr_path: '/media/qr/21-new.png', qr_url: 'https://example.test/qr/21-new.png'})
 })
+/**
+ * The QR image is a stored file, not an API operation, so it is fetched
+ * outside the generated client; record which URLs were asked for.
+ */
+function stubQrFetch() {
+  const fetched = []
+  vi.stubGlobal('fetch', vi.fn(async (url) => {
+    fetched.push(url)
+    return new Response(new Uint8Array([137, 80, 78, 71]), {headers: {'Content-Type': 'image/png'}})
+  }))
+  return fetched
+}
+
 afterEach(() => {
+  vi.unstubAllGlobals()
   vi.restoreAllMocks()
   window.history.replaceState(null, '', '/')
 })
@@ -149,24 +163,30 @@ describe('QrPanel handles', () => {
   })
 
   test('the equipment download names the file from name and uuid', async () => {
-    const download = vi.spyOn(my24, 'downloadItem').mockImplementation(() => {})
+    const saved = captureDownloads()
+    const fetched = stubQrFetch()
     const wrapper = mountView(EquipmentDetail, {pk: '11', route_prefix: 'equipment-equipment'})
     await settle()
 
     await downloadLink(wrapper).trigger('click')
+    await settle()
 
-    expect(download).toHaveBeenCalledWith('/media/qr/11.png', 'Ketel 3000 9f2c1a40-1111-4222-8333-444455556666.png')
+    expect(fetched).toEqual(['/media/qr/11.png'])
+    expect(saved).toEqual(['Ketel 3000 9f2c1a40-1111-4222-8333-444455556666.png'])
   })
 
   test('the location download names the file from the name alone', async () => {
-    const download = vi.spyOn(my24, 'downloadItem').mockImplementation(() => {})
+    const saved = captureDownloads()
+    const fetched = stubQrFetch()
     const wrapper = mountView(LocationDetail, {pk: '21', route_prefix: 'equipment-location'})
     await settle()
 
     await downloadLink(wrapper).trigger('click')
+    await settle()
 
     // The location serializer exposes no uuid; the legacy name interpolated
     // an undefined there.
-    expect(download).toHaveBeenCalledWith('/media/qr/21.png', 'Bergruimte.png')
+    expect(fetched).toEqual(['/media/qr/21.png'])
+    expect(saved).toEqual(['Bergruimte.png'])
   })
 })

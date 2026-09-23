@@ -50,3 +50,38 @@ export function downloadBlob(data: BlobPart, filename: string, mime = 'applicati
     URL.revokeObjectURL(url)
   }
 }
+
+/** The media type of the backend's spreadsheet exports. */
+export const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+/**
+ * Save the file at a plain URL - a stored file such as a QR image, not an API
+ * operation. A response that is not ok throws, so the caller can say so
+ * instead of saving an error page under the file's name.
+ */
+export async function downloadUrl(url: string, filename: string): Promise<void> {
+  const response = await fetch(url)
+  if (!response.ok) throw new Error(`${response.status} fetching ${url}`)
+  downloadBlob(await response.blob(), filename, response.headers.get('content-type') ?? undefined)
+}
+
+/** What the backend answers a failed PDF request with. */
+export type PdfBlobError = { template_error?: string; error?: string; details?: string }
+
+/**
+ * The error body of a failed PDF request.
+ *
+ * A PDF request asks for a blob, so its JSON error arrives as a blob too and
+ * has to be decoded; one that already came back as an object is taken as is.
+ * Anything unreadable becomes the empty envelope rather than a second error.
+ */
+export async function decodePdfError(error: unknown): Promise<PdfBlobError> {
+  const raw = (error as {response?: {data?: unknown}})?.response?.data
+  if (raw instanceof Blob) {
+    try {
+      return JSON.parse(new TextDecoder('utf-8').decode(await raw.arrayBuffer())) as PdfBlobError
+    } catch { /* fall through to the generic envelope */ }
+  }
+  if (raw && typeof raw === 'object') return raw
+  return {error: '', details: ''}
+}

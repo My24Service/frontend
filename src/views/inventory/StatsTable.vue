@@ -86,6 +86,8 @@ import ActionButton from '../../components/ActionButton.vue'
 import SearchModal from '../../components/SearchModal.vue'
 
 import componentMixin from "@/mixins/common";
+import {inventoryStatsTableExportRetrieve} from "@/api/sdk.gen";
+import {useFileDownload, XLSX_MIME} from "@/features/shared";
 
 let d = new Date();
 
@@ -96,6 +98,9 @@ export default {
     SearchModal,
   },
   mixins: [componentMixin],
+  setup() {
+    return {download: useFileDownload()}
+  },
   data() {
     return {
       model: materialModel,
@@ -125,8 +130,10 @@ export default {
   methods: {
     // download
     downloadList() {
-      const url = this.model.getStatsTableUrl(this.year)
-      my24.downloadItem(url, 'stats_table.xlsx')
+      const q = this.model.searchQuery
+      return this.download.fromApi(
+        () => inventoryStatsTableExportRetrieve({query: {year: this.year, ...(q ? {q} : {})}, throwOnError: true}),
+        'stats_table.xlsx', XLSX_MIME)
     },
     // search
     handleSearchOk(val) {

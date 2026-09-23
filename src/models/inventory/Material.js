@@ -178,15 +178,6 @@ class MaterialService extends BaseModel {
       .then((response) => response.data)
   }
 
-  getStatsTableUrl(year) {
-    let listArgs = [`year=${year}`]
-
-    if (this.searchQuery) {
-      listArgs.push(`q=${this.searchQuery}`)
-    }
-
-    return `/inventory/stats_table_export/?${listArgs.join('&')}`
-  }
 }
 
 let materialService = new MaterialService()

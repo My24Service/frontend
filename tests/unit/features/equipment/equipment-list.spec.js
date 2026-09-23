@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { vCustomer, vEquipment, vEquipmentState } from '@/api/valibot.gen'
 import { EquipmentList } from '@/features/equipment'
-import my24 from '@/services/my24'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
+import { captureDownloads, xlsxResponse } from '../../support/downloads.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => ({
   ...(await importOriginal()), useToast: () => ({create: toastCreate}),
@@ -293,58 +293,64 @@ describe('EquipmentList add state', () => {
 
 describe('EquipmentList QR export', () => {
   /**
-   * The export URL is built by the screen and handed to
-   * `my24.downloadItemAuth`, which GETs it outside the generated client and so
-   * outside the seam. It is asserted here on the boundary the screen owns.
+   * The export goes through the generated `equipmentEquipmentExportQrRetrieve`;
+   * the schema declares it as a file with its `q` and `type` filters, so the
+   * strict seam checks the request.
    */
-  function spyDownload() {
-    return vi.spyOn(my24, 'downloadItemAuth').mockImplementation(() => {})
-  }
+  let saved
 
-  test('exports the committed search term, encoded', async () => {
-    const download = spyDownload()
+  beforeEach(() => {
+    saved = captureDownloads()
+    api.get('/api/equipment/equipment-export-qr/', xlsxResponse)
+  })
+
+  afterEach(() => vi.restoreAllMocks())
+
+  const exports = () => api.requests()
+    .filter((request) => request.path === '/api/equipment/equipment-export-qr/')
+    .map((request) => request.query)
+
+  test('exports the committed search term', async () => {
     const wrapper = await mountEquipment()
     await wrapper.get('input[aria-label="Search equipment"]').setValue('ketel & pomp')
     await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     await wrapper.get('button[title="Download QR-codes"]').trigger('click')
+    await settle()
 
-    expect(download).toHaveBeenCalledWith(
-      '/api/equipment/equipment-export-qr/?q=ketel+%26+pomp&type=technical', 'equipment.xlsx')
+    expect(exports()).toEqual([{ q: 'ketel & pomp', type: 'technical' }])
+    expect(saved).toEqual(['equipment.xlsx'])
   })
 
   test('commits the search draft before exporting, so the file answers the screen', async () => {
-    const download = spyDownload()
     const wrapper = await mountEquipment()
 
     // Deliberately no debounce wait: the export must not ship the previous term.
     await wrapper.get('input[aria-label="Search equipment"]').setValue('ketel')
     await wrapper.get('button[title="Download QR-codes"]').trigger('click')
+    await settle()
 
-    expect(download).toHaveBeenCalledWith(
-      '/api/equipment/equipment-export-qr/?q=ketel&type=technical', 'equipment.xlsx')
+    expect(exports()).toEqual([{ q: 'ketel', type: 'technical' }])
   })
 
   test('an unfiltered export still scopes to the type on screen', async () => {
-    const download = spyDownload()
     const wrapper = await mountEquipment()
 
     await wrapper.get('button[title="Download QR-codes"]').trigger('click')
+    await settle()
 
     // The type is not a filter the user set, it is which screen this is: a
     // facility list exports facility QR codes.
-    expect(download).toHaveBeenCalledWith(
-      '/api/equipment/equipment-export-qr/?type=technical', 'equipment.xlsx')
+    expect(exports()).toEqual([{ type: 'technical' }])
   })
 
   test('a facility mount exports facility QR codes', async () => {
-    const download = spyDownload()
     const wrapper = await mountEquipment({props: {route_prefix: 'equipment-equipment', type: 'facility'}})
 
     await wrapper.get('button[title="Download QR-codes"]').trigger('click')
+    await settle()
 
-    expect(download).toHaveBeenCalledWith(
-      '/api/equipment/equipment-export-qr/?type=facility', 'equipment.xlsx')
+    expect(exports()).toEqual([{ type: 'facility' }])
   })
 })

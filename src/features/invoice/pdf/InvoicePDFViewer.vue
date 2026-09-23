@@ -62,8 +62,7 @@ import {
 import type { Invoice } from '@/api/types.gen'
 import { invoiceInvoice } from '@/api/resources.gen'
 import { invalidateReads } from '@/features/forms'
-import { downloadBlob } from '@/features/shared'
-type PdfBlobError = { template_error?: string; error?: string; details?: string }
+import { decodePdfError, downloadBlob, type PdfBlobError } from '@/features/shared'
 
 // The editor's and viewer's records come from two retrieve endpoints; the
 // uuid-keyed detail read leaves order_uuid off the record. Only id (all
@@ -97,17 +96,6 @@ const previewMutation = useMutation(invoiceInvoiceGeneratePreviewPdfCreateMutati
 const downloadMutation = useMutation(invoiceInvoiceDownloadPdfCreateMutation())
 const recreateMutation = useMutation(invoiceInvoiceRecreatePdfCreateMutation())
 const definitiveMutation = useMutation(invoiceInvoiceMakeDefinitiveCreateMutation())
-
-async function decodePdfError(error: unknown): Promise<PdfBlobError> {
-  const raw = (error as {response?: {data?: unknown}})?.response?.data
-  if (raw instanceof Blob) {
-    try {
-      return JSON.parse(new TextDecoder('utf-8').decode(await raw.arrayBuffer())) as PdfBlobError
-    } catch { /* fall through to the generic envelope */ }
-  }
-  if (raw && typeof raw === 'object') return raw
-  return {error: '', details: ''}
-}
 
 async function loadBlob(): Promise<boolean> {
   isLoading.value = true

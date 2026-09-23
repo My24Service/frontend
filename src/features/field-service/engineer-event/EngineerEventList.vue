@@ -61,6 +61,8 @@ import {
   useServerTable,
   type ListRow,
 } from '@/features/table'
+import { companyEventsExportXlsRetrieve } from '@/api/sdk.gen'
+import { useFileDownload, XLSX_MIME } from '@/features/shared'
 import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 
 import { displayDurationFromSeconds } from '@/features/field-service/timesheets'
@@ -178,11 +180,12 @@ function assignedOk() {
   infoToast(toast, $trans('Assigned'), $trans('Order created and assigned'))
 }
 
+const download = useFileDownload()
+
 /** The events as a spreadsheet, through the endpoint that renders one. */
-function downloadList() {
-  if (confirm($trans('Are you sure you want to export all events?'))) {
-    my24.downloadItem('/company/events-export-xls/', 'events.xlsx')
-  }
+async function downloadList() {
+  if (!confirm($trans('Are you sure you want to export all events?'))) return
+  await download.fromApi(() => companyEventsExportXlsRetrieve({throwOnError: true}), 'events.xlsx', XLSX_MIME)
 }
 
 // the websocket -------------------------------------------------------------

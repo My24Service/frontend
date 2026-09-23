@@ -3,13 +3,13 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { EngineerEventList } from '@/features/field-service'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { vEngineer, vEngineerEvent } from '@/api/valibot.gen'
-import my24 from '@/services/my24'
 
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts, toastCreate } from '../../support/form-harness.js'
 import { fieldServiceRoutes } from '../../support/field-service-routes.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
+import { captureDownloads, xlsxResponse } from '../../support/downloads.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => ({
   ...(await importOriginal()), useToast: () => ({create: toastCreate}),
@@ -165,14 +165,21 @@ describe('EngineerEventList', () => {
   })
 
   test('the export downloads the whole event list', async () => {
-    const download = vi.spyOn(Object.getPrototypeOf(my24), 'downloadItem').mockImplementation(() => {})
+    // REGRESSION. The legacy call fetched `/company/events-export-xls/`,
+    // outside `/api/`, where nothing serves the export: what came back was
+    // saved as events.xlsx whatever it was.
+    const saved = captureDownloads()
+    api.get('/api/company/events-export-xls/', xlsxResponse)
     vi.stubGlobal('confirm', () => true)
     const wrapper = await mountList()
 
-    wrapper.vm.downloadList()
+    await wrapper.vm.downloadList()
+    await settle()
 
-    expect(download).toHaveBeenCalledWith('/company/events-export-xls/', 'events.xlsx')
-    download.mockRestore()
+    expect(api.requests().filter((request) => request.path === '/api/company/events-export-xls/')).toHaveLength(1)
+    expect(saved).toEqual(['events.xlsx'])
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
   })
 
   test('delete confirms, sends the row id and refetches', async () => {

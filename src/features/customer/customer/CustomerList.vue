@@ -46,6 +46,8 @@
 import { hLink } from '@/components/render'
 import type { VNodeChild } from 'vue'
 import { RouterLink } from 'vue-router'
+import { customerExportRetrieve } from '@/api/sdk.gen'
+import { useFileDownload, XLSX_MIME } from '@/features/shared'
 
 import {
   customerCustomerDestroyMutation,
@@ -199,6 +201,8 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh, gl
   loadError: $trans('Error loading customers'),
 })
 
+const download = useFileDownload()
+
 function downloadList() {
   if (!confirm($trans('Are you sure you want to export all customers?'))) return
 
@@ -207,12 +211,10 @@ function downloadList() {
   // the file answers a different question than the one on screen.
   globalFilter.value = searchDraft.value
 
-  // URLSearchParams, not string concatenation: a term with '&' or '+' in it
-  // would otherwise end the query or decode as a space on the backend.
-  const params = new URLSearchParams()
-  if (globalFilter.value) params.set('q', globalFilter.value)
-
-  my24.downloadItemAuth(`/api/customer/export/?${params.toString()}`, 'customers.xlsx')
+  const q = globalFilter.value
+  download.fromApi(
+    () => customerExportRetrieve({query: q ? {q} : {}, throwOnError: true}),
+    'customers.xlsx', XLSX_MIME)
 }
 </script>
 

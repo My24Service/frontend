@@ -66,7 +66,8 @@ interceptor is load-bearing, not the call site).
 ### The Excel export's `q` parameter
 
 The list's Excel export (`/api/customer/export/`) takes the toolbar search as
-`q` and downloads through `my24.downloadItemAuth`.
+`q` and downloads through the generated `customerExportRetrieve`, saved with
+`useFileDownload` from `features/shared`.
 
 ## Declared exceptions — the ledger
 

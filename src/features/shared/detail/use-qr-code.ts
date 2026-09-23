@@ -4,6 +4,7 @@ import {
   equipmentLocationCreateQrCreateMutation,
   equipmentLocationRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
+import { useFileDownload } from '../use-file-download'
 /**
  * The sliver of a detail record the QR block reads: the display name, the
  * file the download names itself after, and the two URL shapes the API sends.
@@ -71,10 +72,12 @@ export function useQrCode({kind, id, record}: {
   const hasQr = computed(() => mainStore.getEquipmentQrType !== 'none')
   const qrUrl = computed(() => record.value?.qr_url ?? record.value?.qr_path ?? undefined)
 
-  function download() {
+  const files = useFileDownload()
+
+  async function download() {
     const current = record.value
     if (!current?.qr_path) return
-    my24.downloadItem(current.qr_path, resource.filename(current))
+    await files.fromUrl(current.qr_path, resource.filename(current))
   }
 
   async function recreateQr() {
