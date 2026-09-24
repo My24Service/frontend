@@ -73,7 +73,7 @@
     "@vuelidate/core": "^2.0.3",
     "@vuelidate/validators": "^2.0.4",
     "color": "^5.0.3",
-    "eslint": "^9.26.0",
+    "eslint": "^10.11.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-unused-imports": "^4.4.1",
     "eslint-plugin-vue": "^10.8.0",
