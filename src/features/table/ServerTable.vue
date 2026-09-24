@@ -126,7 +126,7 @@ const props = withDefaults(defineProps<{
   count: 0,
   isLoading: false,
   isFetching: false,
-  pageDetails: true,
+  pageDetails: false,
   label: '',
   searchable: true,
   pageSizeOptions: () => [10, 20, 50],
@@ -164,6 +164,10 @@ const { chips } = useColumnFilters(props.table)
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
-  margin: 0 2rem 20px;
+  margin: 0 1.5rem 20px;
+
+  &:empty {
+    display: none;
+  }
 }
 </style>

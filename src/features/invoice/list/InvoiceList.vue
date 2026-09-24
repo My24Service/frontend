@@ -8,7 +8,6 @@
       :count="count"
       :is-loading="isLoading"
       :is-fetching="isFetching"
-      :page-details="false"
       :title="pageTitle"
       :search-label="$trans('Search invoices')"
       :label="$trans('Invoice')"

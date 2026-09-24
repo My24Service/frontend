@@ -8,7 +8,6 @@
       :count="count"
       :is-loading="isLoading"
       :is-fetching="isFetching"
-      :page-details="false"
       :title="$trans('Contracts')"
       :search-label="$trans('Search contracts')"
       :refresh="refresh"

@@ -8,7 +8,6 @@
       :count="count"
       :is-loading="isLoading"
       :is-fetching="isFetching"
-      :page-details="false"
       :title="$trans('Members')"
       :search-label="$trans('Search name, companycode or city')"
       :refresh="refresh"

@@ -8,7 +8,6 @@
       :count="count"
       :is-loading="isLoading"
       :is-fetching="isFetching"
-      :page-details="false"
       :title="$trans('Module parts')"
       :search-label="$trans('Search module parts')"
       :refresh="refresh"

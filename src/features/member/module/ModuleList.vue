@@ -8,7 +8,6 @@
       :count="count"
       :is-loading="isLoading"
       :is-fetching="isFetching"
-      :page-details="false"
       :title="$trans('Modules')"
       :search-label="$trans('Search modules')"
       :refresh="refresh"

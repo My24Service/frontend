@@ -47,7 +47,7 @@ const { columns, available, add } = useColumnFilters(props.table)
 </script>
 
 <style scoped>
-:deep(.add-filter-toggle) {
+:deep(button.add-filter-toggle) {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;

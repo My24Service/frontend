@@ -100,10 +100,10 @@ tr:focus-within .edit-icon {
   padding: 0;
   height: 100vh;
   overflow-y: scroll;
-  background-image: linear-gradient(to bottom, $my24 11rem, transparent 11rem);
+  background-image: linear-gradient(to bottom, $my24 15rem, transparent 15rem);
   > header {
     margin: 0 0rem 0;
-    padding: 1rem 2rem;
+    padding: 1rem 1.5rem;
     color: white;
     z-index: 2;
     top: 0;
@@ -154,7 +154,7 @@ tr:focus-within .edit-icon {
 
   > header ~ .panel,
   > header ~ .page-detail {
-    margin: 0 1rem 4rem !important;
+    margin: 0 1.5rem 4rem !important;
   }
 
 }
@@ -172,18 +172,15 @@ tr:focus-within .edit-icon {
 
 /* main app layouts */
 
-.page-details {
+.page-details, .panel {
   box-shadow: 0 1ex 1rem #394b5923;
-
-  &, .panel {
-    @extend .mx-auto;
-    @extend .p-3;
-    background: white;
-    border-radius: .5ex;
-    position: relative;
-    --text-color: #757a7c;
-    color: var(--text-color);
-  }
+  @extend .mx-auto;
+  @extend .p-3;
+  background: white;
+  border-radius: .5ex;
+  position: relative;
+  --text-color: #757a7c;
+  color: var(--text-color);
 
   table {
     thead th {
