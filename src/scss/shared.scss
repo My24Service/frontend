@@ -172,15 +172,18 @@ tr:focus-within .edit-icon {
 
 /* main app layouts */
 
-.app-detail, .panel {
-  @extend .mx-auto;
-  @extend .p-3;
-  background: white;
-  border-radius: .5ex;
+.page-details {
   box-shadow: 0 1ex 1rem #394b5923;
-  position: relative;
-  --text-color: #757a7c;
-  color: var(--text-color);
+
+  &, .panel {
+    @extend .mx-auto;
+    @extend .p-3;
+    background: white;
+    border-radius: .5ex;
+    position: relative;
+    --text-color: #757a7c;
+    color: var(--text-color);
+  }
 
   table {
     thead th {
@@ -192,7 +195,7 @@ tr:focus-within .edit-icon {
       color: var(--text-color);
       vertical-align: middle;
       //background-size: 1.2ex 1.5ex !important;
-      div {font-size: smaller;}
+      // div {font-size: smaller;}
     }
     td {
       vertical-align: middle;

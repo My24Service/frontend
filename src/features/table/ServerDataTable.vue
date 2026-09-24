@@ -18,10 +18,12 @@
           @click="header.column.getToggleSortingHandler()?.($event)"
         >
           <template v-if="!header.isPlaceholder">
-            <FlexRender :header="header" />
-            <span class="sort-indicator">
-              {{ header.column.getIsSorted() === 'asc' ? '▲' : header.column.getIsSorted() === 'desc' ? '▼' : '' }}
-            </span>
+            <div>
+              <FlexRender :header="header" />
+              <span class="sort-indicator">
+                {{ header.column.getIsSorted() === 'asc' ? '▲' : header.column.getIsSorted() === 'desc' ? '▼' : '&nbsp;' }}
+              </span>
+            </div>
           </template>
         </th>
       </tr>
@@ -107,6 +109,10 @@ th.sortable-header {
 
 th.sortable-header:hover {
   background-color: var(--bs-tertiary-bg);
+}
+
+th > div {
+  width: max-content;
 }
 
 .sort-indicator {

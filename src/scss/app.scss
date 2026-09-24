@@ -16,6 +16,15 @@ html, body {
   background: #f6f7fa;
 }
 
+:root.theme-default {
+    .app-page > :not(.page-details, .panel) {
+        .btn-link {
+            color: white;
+            text-shadow: 0 0 3px rgba(0 0 0 / 0.5);
+        }
+    }
+}
+
 details {
   padding: 1ex 2ex;
   transition: all .25s;
@@ -26,7 +35,7 @@ details {
       color: $active-link !important;
     }
   }
-  
+
   &:not(:last-of-type) {
     border-bottom: 1px solid #f8f9fa;
   }
@@ -51,7 +60,7 @@ details {
 
   &[open] {
     background-color: #f8f9fa;
-    
+
     summary {
       > * {
         color: $active-link !important;
