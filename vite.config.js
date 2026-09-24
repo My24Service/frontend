@@ -51,7 +51,13 @@ export default defineConfig(({ mode }) => {
         // serves a dependency's own assets (bootstrap-icons' woff2, pulled in
         // by its css) from the resolved real path, which lies outside the
         // worktree. Allow the real node_modules alongside the project root.
-        allow: ['.', fs.realpathSync(path.resolve('node_modules'))],
+        // Under Yarn PnP there is no node_modules dir, so only add it when present.
+        allow: [
+          '.',
+          ...(fs.existsSync(path.resolve('node_modules'))
+            ? [fs.realpathSync(path.resolve('node_modules'))]
+            : []),
+        ],
       },
       proxy: {
         // in production the Django backend serves /media on the same origin,
