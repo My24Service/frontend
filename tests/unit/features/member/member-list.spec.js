@@ -8,7 +8,7 @@ import { installApiSeam, noContent, settle } from '../../support/api-seam/index.
 import { createTestQueryClient, toasts } from '../../support/form-harness.js'
 import { mountList, rowTexts, serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
-import { offeredFilters } from '../../support/column-filters.js'
+import { addFilter, offeredFilters } from '../../support/column-filters.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate } = await import('../../support/form-harness.js')
@@ -344,5 +344,22 @@ describe('MemberList delete', () => {
     await settle()
 
     expect(api.requests().filter((sent) => sent.method === 'delete')).toEqual([])
+  })
+})
+
+describe('MemberList column filters', () => {
+  test('the member type filter rides the wire as the picked value', async () => {
+    const wrapper = await mountList(MemberList, SUPERUSER)
+    await settle()
+
+    await addFilter(wrapper, 'Type')
+    const option = wrapper.findAll('.column-filter-popover [role="option"]')
+      .find((candidate) => candidate.text() === 'temps')
+    if (!option) throw new Error('no temps option in the member type editor')
+    await option.trigger('click')
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({member_type: 'temps'})
   })
 })

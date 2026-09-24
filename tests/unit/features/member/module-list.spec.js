@@ -4,6 +4,7 @@ import { ModuleList } from '@/features/member'
 import { vPaginatedModuleList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
+import { addFilter, editorInput } from '../../support/column-filters.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { toasts } from '../../support/form-harness.js'
 import { mountList, rowTexts, serverError } from '../../support/list-harness.js'
@@ -202,5 +203,20 @@ describe('ModuleList delete', () => {
     await settle()
 
     expect(api.requests().filter((sent) => sent.method === 'delete')).toEqual([])
+  })
+})
+
+describe('ModuleList column filters', () => {
+  test('the Name filter rides the wire under its bare column name', async () => {
+    const wrapper = await mountList(ModuleList, SUPERUSER)
+    await settle()
+
+    await addFilter(wrapper, 'Name')
+    await editorInput(wrapper, 'name').setValue('Cleanup')
+    // The kit commits the search and the filters on a 300 ms debounce.
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({name: 'Cleanup'})
   })
 })

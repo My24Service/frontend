@@ -4,6 +4,7 @@ import { StatuscodeList } from '@/features/statuscode'
 import { vPaginatedStatuscodeList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
+import { addFilter, editorInput } from '../../support/column-filters.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
@@ -264,5 +265,20 @@ describe('StatuscodeList, load failure', () => {
     await mountStatuscodeList()
 
     expect(toasts().map((toast) => toast.body)).toContain('Error loading statuscodes')
+  })
+})
+
+describe('StatuscodeList column filters', () => {
+  test('the Statuscode filter rides the wire under its bare column name', async () => {
+    const wrapper = await mountStatuscodeList()
+    await settle()
+
+    await addFilter(wrapper, 'Statuscode')
+    await editorInput(wrapper, 'statuscode').setValue('Assigned')
+    // The kit commits the search and the filters on a 300 ms debounce.
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await settle()
+
+    expect(api.requests().at(-1).query).toMatchObject({statuscode: 'Assigned'})
   })
 })
