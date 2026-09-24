@@ -6074,7 +6074,13 @@ paths:
       - in: query
         name: customer
         schema:
-          type: integer
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: name
         schema:
@@ -12070,7 +12076,13 @@ paths:
       - in: query
         name: module
         schema:
-          type: integer
+          oneOf:
+          - type: integer
+          - type: string
+        description: One id, or several comma-separated ids. A single id may ride
+          as a number (?customer=12); more than one, and an id list restored from
+          a shared address, is the comma-joined string, where a comma inside an item
+          is escaped \,.
       - in: query
         name: name
         schema:

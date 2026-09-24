@@ -61,7 +61,10 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 const columnHelper = createAppColumnHelper<ModuleRow>()
 
 const columns = columnHelper.columns([
-  columnHelper.accessor('name', {meta: {width: '70%'}, header: $trans('Name')}),
+  columnHelper.accessor('name', {
+    header: $trans('Name'),
+    meta: {width: '70%', filter: {variant: 'text', label: $trans('Name')}},
+  }),
   columnHelper.accessor('created', {meta: {width: '10%'}, header: $trans('Created')}),
   columnHelper.accessor('modified', {meta: {width: '10%'}, header: $trans('Modified')}),
   createActionColumn(columnHelper, {
@@ -77,6 +80,8 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => memberModuleListOptions({
     query: {
       ...baseListParams(query),
+
+      ...(query.name ? {name: String(query.name)} : {}),
     },
   }),
   urlSync: true,

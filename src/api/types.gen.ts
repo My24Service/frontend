@@ -17487,7 +17487,10 @@ export type CustomerMaintenanceContractListData = {
     body?: never;
     path?: never;
     query?: {
-        customer?: number;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        customer?: number | string;
         name?: string;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
@@ -21632,7 +21635,10 @@ export type MemberModulePartListData = {
     body?: never;
     path?: never;
     query?: {
-        module?: number;
+        /**
+         * One id, or several comma-separated ids. A single id may ride as a number (?customer=12); more than one, and an id list restored from a shared address, is the comma-joined string, where a comma inside an item is escaped \,.
+         */
+        module?: number | string;
         name?: string;
         /**
          * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.

@@ -38,11 +38,12 @@
 <script lang="ts" setup>
 import { RouterLink } from 'vue-router'
 import {
+  customerCustomerAutocompleteListOptions,
   customerMaintenanceContractDestroyMutation,
   customerMaintenanceContractListOptions,
   customerMaintenanceContractListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedMaintenanceContractList } from '@/api/types.gen'
+import type { AddressAutocompleteRow, PaginatedMaintenanceContractList } from '@/api/types.gen'
 import { formatMoney, toDinero } from '@/services/money'
 import {
   ServerTable,
@@ -50,10 +51,18 @@ import {
   createActionColumn,
   createAppColumnHelper,
   useServerTable,
+  type FilterOption,
   type ListRow,
 } from '@/features/table'
 
 type ContractRow = ListRow<PaginatedMaintenanceContractList>
+
+/** An autocomplete row as a filter choice: its id on the wire, its name on the chip. */
+function customerOptions(rows: AddressAutocompleteRow[]): FilterOption[] {
+  return rows.map((row) => ({value: String(row.id), label: row.name ?? row.value}))
+}
+
+const queryClient = useQueryClient()
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated. Typed structurally because
@@ -72,19 +81,35 @@ const columnHelper = createAppColumnHelper<ContractRow>()
 const columns = columnHelper.columns([
   columnHelper.accessor('name', {
     header: $trans('Contract name'),
+    meta: {filter: {variant: 'text', label: $trans('Contract name')}},
     cell: (info) => h(RouterLink, {
       to: {name: 'maintenance-contract-view', params: {pk: info.row.original.id}},
     }, () => info.getValue()),
   }),
+  // The cell shows the customer's name; the endpoint filters on its id.
   columnHelper.accessor((row) => row.customer_view?.name, {
     id: 'customer_view_name',
     header: $trans('Customer'),
+    meta: {filter: {
+      variant: 'select',
+      label: $trans('Customer'),
+      param: 'customer',
+      loadOptions: (term) => queryClient
+        .fetchQuery(customerCustomerAutocompleteListOptions({query: {q: term}}))
+        .then(customerOptions),
+      resolveLabels: (ids) => queryClient
+        .fetchQuery(customerCustomerAutocompleteListOptions({query: {id: ids.join(',')}}))
+        .then(customerOptions),
+    }},
   }),
   columnHelper.accessor('sum_tariffs', {
     header: $trans('Contract value'),
     cell: (info) => h('span', formatMoney(dineroFor(info.row.original))),
   }),
-  columnHelper.accessor('remarks', {header: $trans('Remarks')}),
+  columnHelper.accessor('remarks', {
+    header: $trans('Remarks'),
+    meta: {filter: {variant: 'text', label: $trans('Remarks')}},
+  }),
   columnHelper.accessor('created', {
     header: $trans('Created'),
     cell: (info) => h('small', info.getValue()),
@@ -101,6 +126,10 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => customerMaintenanceContractListOptions({
     query: {
       ...baseListParams(query),
+
+      ...(query.name ? {name: String(query.name)} : {}),
+      ...(query.remarks ? {remarks: String(query.remarks)} : {}),
+      ...(query.customer ? {customer: String(query.customer)} : {}),
     },
   }),
   urlSync: true,

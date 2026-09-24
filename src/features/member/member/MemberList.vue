@@ -50,6 +50,7 @@ import {
   memberMemberListOptions,
   memberMemberListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
+import { vMemberTypeEnum } from '@/api/valibot.gen'
 import type { PaginatedMemberList } from '@/api/types.gen'
 import {
   ServerTable,
@@ -57,6 +58,7 @@ import {
   createActionColumn,
   createAppColumnHelper,
   useServerTable,
+  type FilterOption,
   type ListRow,
 } from '@/features/table'
 
@@ -94,6 +96,14 @@ const variantDefinition = computed(() => VARIANT_DEFINITIONS[props.variant] ?? V
 const variantLabel = computed(() => variantDefinition.value.label())
 
 type MemberRow = ListRow<PaginatedMemberList>
+
+/** The member type the query carries, when it is one the enum names. */
+function memberTypeParam(value: unknown) {
+  return vMemberTypeEnum.options.find((option) => option === value)
+}
+
+/** The member types the endpoint's filter takes, from the generated enum. */
+const memberTypeOptions: FilterOption[] = vMemberTypeEnum.options.map((value) => ({value, label: value}))
 
 const columnHelper = createAppColumnHelper<MemberRow>()
 
@@ -138,8 +148,7 @@ const columns = columnHelper.columns([
   }),
   columnHelper.accessor('member_type', {
     header: $trans('Type'),
-    enableColumnFilter: false,
-    meta: {width: '10%'},
+    meta: {width: '10%', filter: {variant: 'select', label: $trans('Type'), options: memberTypeOptions}},
   }),
   columnHelper.accessor('created', {
     header: $trans('Created'),
@@ -160,6 +169,8 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
     query: {
       ...variantDefinition.value.filters(),
       ...baseListParams(query),
+
+      ...(memberTypeParam(query.member_type) ? {member_type: memberTypeParam(query.member_type)} : {}),
     },
   }),
   urlSync: true,

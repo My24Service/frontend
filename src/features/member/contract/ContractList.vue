@@ -61,7 +61,10 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 const columnHelper = createAppColumnHelper<ContractRow>()
 
 const columns = columnHelper.columns([
-  columnHelper.accessor('name', {meta: {width: '20%'}, header: $trans('Name')}),
+  columnHelper.accessor('name', {
+    header: $trans('Name'),
+    meta: {width: '20%', filter: {variant: 'text', label: $trans('Name')}},
+  }),
   // modules_text is Python-computed (get_modules_text) - no model column
   // behind it, so the backend allow-list cannot sort it.
   columnHelper.accessor('modules_text', {meta: {width: '50%'}, header: $trans('Modules'), enableSorting: false}),
@@ -80,6 +83,8 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => memberContractListOptions({
     query: {
       ...baseListParams(query),
+
+      ...(query.name ? {name: String(query.name)} : {}),
     },
   }),
   urlSync: true,

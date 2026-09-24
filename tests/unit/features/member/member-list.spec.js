@@ -8,6 +8,7 @@ import { installApiSeam, noContent, settle } from '../../support/api-seam/index.
 import { createTestQueryClient, toasts } from '../../support/form-harness.js'
 import { mountList, rowTexts, serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
+import { offeredFilters } from '../../support/column-filters.js'
 
 vi.mock('bootstrap-vue-next', async (importOriginal) => {
   const { toastCreate } = await import('../../support/form-harness.js')
@@ -129,11 +130,14 @@ describe('MemberList, the mirrored columns', () => {
     expect(rowTexts(wrapper)[0]).toContain('Service contract 2026')
   })
 
-  test('the screen renders no column filter bar at all', async () => {
+  test('the member type is the screen\'s one filterable column', async () => {
     const wrapper = await mountList(MemberList, SUPERUSER)
 
-    expect(wrapper.find('.column-filter-menu').exists()).toBe(false)
-    expect(wrapper.find('tr.filter-row').exists()).toBe(false)
+    // The endpoint filters companycode, city, is_deleted and is_requested too,
+    // but no column of this table carries them: the member cell shows several
+    // of those in one display column, which can hold only one filter, and the
+    // two flags have no column at all.
+    expect(await offeredFilters(wrapper)).toEqual(['Type'])
   })
 })
 

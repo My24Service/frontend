@@ -89,7 +89,7 @@ const columns = columnHelper.columns([
   columnHelper.accessor('statuscode', {
     header: $trans('Statuscode'),
     enableSorting: false,
-    meta: {width: '15%'},
+    meta: {width: '15%', filter: {variant: 'text', label: $trans('Statuscode')}},
     cell: (info) => h(RouterLink, {
       to: toRoute(routeNames.value.edit, {pk: info.row.original.id}),
     }, () => info.getValue()),
@@ -117,6 +117,7 @@ const columns = columnHelper.columns([
   columnHelper.accessor('description', {
     header: $trans('Description'),
     enableSorting: false,
+    meta: {filter: {variant: 'text', label: $trans('Description')}},
   }),
   columnHelper.display({
     id: 'actions',
@@ -153,6 +154,9 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => statuscodeStatuscodeListOptions({
     query: {
       ...baseListParams(query),
+
+      ...(query.statuscode ? {statuscode: String(query.statuscode)} : {}),
+      ...(query.description ? {description: String(query.description)} : {}),
       code_type: props.codeType,
     },
   }),

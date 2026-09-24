@@ -19276,7 +19276,7 @@ export const vCustomerExportRetrieveQuery = v.object({
 export const vCustomerExportRetrieveResponse = v.string();
 
 export const vCustomerMaintenanceContractListQuery = v.object({
-    customer: v.optional(v.pipe(v.number(), v.integer())),
+    customer: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     name: v.optional(v.string()),
     ordering: v.optional(v.array(v.picklist([
         '-created',
@@ -20748,7 +20748,7 @@ export const vMemberModuleCreateBody = vModuleRequest;
 export const vMemberModuleCreateResponse = vModule;
 
 export const vMemberModulePartListQuery = v.object({
-    module: v.optional(v.pipe(v.number(), v.integer())),
+    module: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     name: v.optional(v.string()),
     ordering: v.optional(v.array(v.picklist([
         '-created',

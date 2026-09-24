@@ -38,6 +38,7 @@
 <script lang="ts" setup>
 import IBiCheckSquare from '~icons/bi/check-square'
 import {
+  memberModuleListOptions,
   memberModulePartDestroyMutation,
   memberModulePartListOptions,
 } from '@/api/@tanstack/vue-query.gen'
@@ -49,10 +50,21 @@ import {
   createActionColumn,
   createAppColumnHelper,
   useServerTable,
+  type FilterOption,
   type ListRow,
 } from '@/features/table'
 
 type ModulePartRow = ListRow<PaginatedModulePartList>
+
+/** Enough of the module list to name every module in one read. */
+const MODULE_PAGE_SIZE = 200
+
+/** A module list row as a filter choice: its id on the wire, its name on the chip. */
+function moduleOptions(rows: {id: number, name: string}[]): FilterOption[] {
+  return rows.map((row) => ({value: String(row.id), label: row.name}))
+}
+
+const queryClient = useQueryClient()
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated. Typed structurally because
@@ -62,8 +74,26 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 const columnHelper = createAppColumnHelper<ModulePartRow>()
 
 const columns = columnHelper.columns([
-  columnHelper.accessor('name', {meta: {width: '30%'}, header: $trans('Name')}),
-  columnHelper.accessor('module_name', {meta: {width: '20%'}, header: $trans('Module')}),
+  columnHelper.accessor('name', {
+    header: $trans('Name'),
+    meta: {width: '30%', filter: {variant: 'text', label: $trans('Name')}},
+  }),
+  // The cell shows the module's name; the endpoint filters on its id, so the
+  // pick rides `module` and the chip names a restored id through the list.
+  columnHelper.accessor('module_name', {
+    header: $trans('Module'),
+    meta: {width: '20%', filter: {
+      variant: 'select',
+      label: $trans('Module'),
+      param: 'module',
+      loadOptions: (term) => queryClient
+        .fetchQuery(memberModuleListOptions({query: {q: term}}))
+        .then((page) => moduleOptions(page.results ?? [])),
+      resolveLabels: (ids) => queryClient
+        .fetchQuery(memberModuleListOptions({query: {page_size: MODULE_PAGE_SIZE}}))
+        .then((page) => moduleOptions((page.results ?? []).filter((row) => ids.includes(String(row.id))))),
+    }},
+  }),
   columnHelper.accessor('is_always_selected', {
     meta: {width: '20%'},
     header: $trans('Always selected?'),
@@ -87,6 +117,9 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   listOptions: (query) => memberModulePartListOptions({
     query: {
       ...baseListParams(query),
+
+      ...(query.name ? {name: String(query.name)} : {}),
+      ...(query.module ? {module: String(query.module)} : {}),
     },
   }),
   urlSync: true,
