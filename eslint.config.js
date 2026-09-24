@@ -4,6 +4,8 @@ import tseslint from "typescript-eslint";
 import unusedImports from "eslint-plugin-unused-imports";
 import globals from "globals";
 import { defineConfig } from "eslint/config";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
 /** Every `src/features/<slice>/index.ts`; see the barrel rule below. */
 const FEATURE_BARRELS = [
@@ -43,11 +45,54 @@ const MARK_RANGES =
   "\\u2300-\\u23FF\\u2460-\\u24FF\\u25A0-\\u25FF\\u2600-\\u27BF" +
   "\\u2B00-\\u2BFF";
 
+/**
+ * The `.vue` files whose `<script>` is TypeScript.
+ *
+ * The type-checked preset is only meaningful where there are types, and it
+ * *misfires* where there are none: the program behind it applies no Volar
+ * transform, so inside a component written as a bare `export default {}` the
+ * `this` in its methods is the enclosing object literal, and every access
+ * through it is reported as an unsafe `any`. Those reports are the bulk of what
+ * the preset finds here, and none of them is a defect.
+ *
+ * Computed rather than listed: a hand-kept list rots the first time someone
+ * adds a component, and this file is the only place that would need changing.
+ */
+function typescriptSfcs(dir) {
+  const found = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...typescriptSfcs(path));
+    else if (
+      entry.name.endsWith(".vue") &&
+      /<script[^>]*\blang=["']ts["']/.test(readFileSync(path, "utf8"))
+    ) {
+      found.push(path);
+    }
+  }
+  return found;
+}
+
+/** What the type-checked rules may see: TypeScript, and the SFCs that use it. */
+const TYPE_CHECKED_FILES = [
+  "**/*.ts",
+  "**/*.tsx",
+  "**/*.mts",
+  "**/*.cts",
+  ...typescriptSfcs("src"),
+];
+
 export default defineConfig({
   ignores: ["src/api/**"],
   files: ["**/*.{ts,mts,cts,vue}"],
   extends: [
-    tseslint.configs.recommended, //TypeChecked,
+    tseslint.configs.recommended,
+    // The type-checked rules, scoped to the files that can honour them: a
+    // `.vue` whose script is plain JavaScript gets none of them.
+    ...tseslint.configs.recommendedTypeChecked.map((entry) => ({
+      ...entry,
+      files: entry.files ?? TYPE_CHECKED_FILES,
+    })),
     vue.configs["flat/essential"],
     // Untranslated bare text in Vue templates / attributes
     {
