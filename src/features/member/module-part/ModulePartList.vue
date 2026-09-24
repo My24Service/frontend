@@ -55,9 +55,6 @@ import {
 
 type ModulePartRow = ListRow<PaginatedModulePartList>
 
-/** Enough of the module list to name every module in one read. */
-const MODULE_PAGE_SIZE = 200
-
 /** A module list row as a filter choice: its id on the wire, its name on the chip. */
 function moduleOptions(rows: {id: number, name: string}[]): FilterOption[] {
   return rows.map((row) => ({value: String(row.id), label: row.name}))
@@ -89,8 +86,8 @@ const columns = columnHelper.columns([
         .fetchQuery(memberModuleListOptions({query: {q: term}}))
         .then((page) => moduleOptions(page.results ?? [])),
       resolveLabels: (ids) => queryClient
-        .fetchQuery(memberModuleListOptions({query: {page_size: MODULE_PAGE_SIZE}}))
-        .then((page) => moduleOptions((page.results ?? []).filter((row) => ids.includes(String(row.id))))),
+        .fetchQuery(memberModuleListOptions({query: {id: ids.join(',')}}))
+        .then((page) => moduleOptions(page.results ?? [])),
     }},
   }),
   columnHelper.accessor('is_always_selected', {

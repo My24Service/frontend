@@ -20727,6 +20727,7 @@ export const vMemberMemberOverviewStatsRetrieveResponse = vOverviewStats;
 export const vMemberMemberRequestedCountRetrieveResponse = vCountResponse;
 
 export const vMemberModuleListQuery = v.object({
+    id: v.optional(v.union([v.pipe(v.number(), v.integer()), v.string()])),
     name: v.optional(v.string()),
     ordering: v.optional(v.array(v.picklist([
         '-created',
