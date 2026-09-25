@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import { equipmentBuilding } from '@/api/resources.gen'
+import { EquipmentBuilding } from '@/api/resources.gen'
 import { useResourceForm } from '@/features/forms'
 import {
   OwnerPanel,
@@ -107,7 +107,7 @@ const {wireKind, chooses} = useOwnerContext()
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: equipmentBuilding,
+  resource: EquipmentBuilding,
   empty: emptyBuilding,
   fromRecord: buildingFromRecord,
   validate: (values, context) => validateBuilding(values, context, {

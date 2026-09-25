@@ -237,7 +237,7 @@ import VueMultiselect from 'vue-multiselect'
 import { companyLeaveTypeListOptions } from '@/api/@tanstack/vue-query.gen'
 import { companyUserLeaveHoursAdminGetTotalsCreate } from '@/api/sdk.gen'
 import type { UserSelectRow } from '@/api/types.gen'
-import { companyUserLeaveHoursAdmin } from '@/api/resources.gen'
+import { CompanyUserLeaveHoursAdmin } from '@/api/resources.gen'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {
   useQueryErrorToast,
@@ -286,7 +286,7 @@ const {term, options, loading: searching} = useUserSearch()
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: companyUserLeaveHoursAdmin,
+  resource: CompanyUserLeaveHoursAdmin,
   empty: () => emptyLeave(today, now),
   fromRecord: leaveFromRecord,
   validate: validateLeave,

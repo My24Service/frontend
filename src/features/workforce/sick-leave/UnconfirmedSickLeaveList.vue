@@ -36,8 +36,7 @@ import {
   companyUserSickLeaveAdminSetConfirmedCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedUserSickLeaveList } from '@/api/types.gen'
-import { companyUserSickLeaveAdmin } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { CompanyUserSickLeaveAdmin } from '@/api/resources.gen'
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
@@ -120,7 +119,7 @@ const {confirm: showConfirmModal, handleOk: handleConfirmOk} = useConfirmedActio
     ...companyUserSickLeaveAdminSetConfirmedCreateMutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Accepted'), $trans('Leave as been marked as confirmed'))
-      await invalidateReads(companyUserSickLeaveAdmin)(queryClient)
+      await CompanyUserSickLeaveAdmin.invalidate(queryClient)
     },
     onError: () => errorToast(toast, $trans('Error confirming sick leave')),
   }),

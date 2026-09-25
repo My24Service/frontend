@@ -255,7 +255,7 @@ import {
   invoiceInvoiceAutocompleteListOptions,
   quotationQuotationAutocompleteListOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import { companyTemplate } from '@/api/resources.gen'
+import { CompanyTemplate } from '@/api/resources.gen'
 import {
   useQueryErrorToast,
   useResourceForm,
@@ -304,7 +304,7 @@ const templateTypes = [
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: companyTemplate,
+  resource: CompanyTemplate,
   empty: emptyTemplate,
   fromRecord: templateFromRecord,
   validate: templateWrite.validate,

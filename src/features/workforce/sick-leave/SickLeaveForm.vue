@@ -117,7 +117,7 @@
 import moment from 'moment'
 import { nl } from 'date-fns/locale'
 import VueMultiselect from 'vue-multiselect'
-import { companyUserSickLeaveAdmin } from '@/api/resources.gen'
+import { CompanyUserSickLeaveAdmin } from '@/api/resources.gen'
 import type { UserSelectRow } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms'
 import { useUserSearch } from '../use-user-search'
@@ -147,7 +147,7 @@ const {term, options, loading: searching} = useUserSearch()
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: companyUserSickLeaveAdmin,
+  resource: CompanyUserSickLeaveAdmin,
   empty: () => emptySickLeave(today),
   fromRecord: sickLeaveFromRecord,
   validate: sickLeaveWrite.validate,

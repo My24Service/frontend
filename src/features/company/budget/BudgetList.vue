@@ -58,8 +58,8 @@
       :delete-modal="{
         modalId: 'delete-modal',
         confirmText: $trans('Are you sure you want to delete this budget?'),
-        destroyMutation: companyBudget.destroy.mutation,
-        invalidate: invalidateReads(companyBudget),
+        destroyMutation: CompanyBudget.destroy.mutation,
+        invalidate: CompanyBudget.invalidate,
         deletedDetail: $trans('Budget has been deleted'),
         deleteError: $trans('Error deleting budget'),
       }"
@@ -79,8 +79,7 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import { companyBudget } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { CompanyBudget } from '@/api/resources.gen'
 import type { PaginatedBudgetList } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
@@ -144,7 +143,7 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
   // `ordering` - the headers stay non-sortable rather than rendering controls
   // nothing honours.
   enableSorting: false,
-  listOptions: (query) => companyBudget.list.options({
+  listOptions: (query) => CompanyBudget.list.options({
     query: {
       ...baseListParams(query),
     },
@@ -170,15 +169,15 @@ function showAddModal() {
 }
 
 async function showEditModal(id: number) {
-  const record = await queryClient.fetchQuery(companyBudget.retrieve.options({ path: { id } }))
+  const record = await queryClient.fetchQuery(CompanyBudget.retrieve.options({ path: { id } }))
   modal.value = { ...budgetModalFromRecord(record), id, currency: (record).amount_currency }
   modalErrors.value = {}
   submitClicked.value = false
   modelModal.value?.show()
 }
 
-const createMutation = useMutation(companyBudget.create.mutation())
-const updateMutation = useMutation(companyBudget.update.mutation())
+const createMutation = useMutation(CompanyBudget.create.mutation())
+const updateMutation = useMutation(CompanyBudget.update.mutation())
 
 /**
  * The modal write, on the add-state pattern: validation and write failures
@@ -206,7 +205,7 @@ async function submitModal() {
       await createMutation.mutateAsync({ body: budgetWrite.parseCreate(modal.value) })
       infoToast(toast, $trans('Created'), $trans('Budget added'))
     }
-    await invalidateReads(companyBudget)(queryClient)
+    await CompanyBudget.invalidate(queryClient)
     modelModal.value?.hide()
   } catch {
     errorToast(toast, $trans('Error handling budget'))

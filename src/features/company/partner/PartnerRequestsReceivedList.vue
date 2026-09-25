@@ -35,7 +35,7 @@
         modalId: 'delete-received-partner-request-modal',
         confirmText: $trans('Are you sure you want to delete this partner request?'),
         destroyMutation: companyPartnerRequestDestroyMutation,
-        invalidate: invalidateReads(companyPartnerRequestReceived),
+        invalidate: CompanyPartnerRequestReceived.invalidate,
         deletedDetail: $trans('Partner request has been deleted'),
         deleteError: $trans('Error deleting partner request'),
       }"
@@ -64,8 +64,7 @@ import type { PillNavItem } from '@/components/PillsNav.vue'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import type { PaginatedPartnerRequestList } from '@/api/types.gen'
-import { companyPartner, companyPartnerRequestReceived } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { CompanyPartner, CompanyPartnerRequestReceived } from '@/api/resources.gen'
 import { partnerColumns } from './partner-columns'
 
 const partnerPills: PillNavItem[] = [
@@ -154,8 +153,8 @@ const { confirm: showAcceptModal, handleOk: handleAcceptOk } = useConfirmedActio
     ...companyPartnerRequestAcceptPartialUpdateMutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Accepted'), $trans('Partner request has been accepted'))
-      await invalidateReads(companyPartnerRequestReceived)(queryClient)
-      await invalidateReads(companyPartner)(queryClient)
+      await CompanyPartnerRequestReceived.invalidate(queryClient)
+      await CompanyPartner.invalidate(queryClient)
     },
     onError: () => {
       errorToast(toast, $trans('Error accepting partner request'))
@@ -169,7 +168,7 @@ const { confirm: showRejectModal, handleOk: handleRejectOk } = useConfirmedActio
     ...companyPartnerRequestRejectPartialUpdateMutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Rejected'), $trans('Partner request has been rejected'))
-      await invalidateReads(companyPartnerRequestReceived)(queryClient)
+      await CompanyPartnerRequestReceived.invalidate(queryClient)
     },
     onError: () => {
       errorToast(toast, $trans('Error rejecting partner request'))

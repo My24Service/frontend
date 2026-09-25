@@ -116,7 +116,7 @@
 
 <script setup lang="ts">
 import { equipmentBuildingListForSelectListOptions } from '@/api/@tanstack/vue-query.gen'
-import { equipmentLocation } from '@/api/resources.gen'
+import { EquipmentLocation } from '@/api/resources.gen'
 import {
   useQueryErrorToast,
   useResourceForm,
@@ -160,7 +160,7 @@ const {wireKind, chooses} = useOwnerContext()
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: equipmentLocation,
+  resource: EquipmentLocation,
   empty: emptyLocation,
   fromRecord: locationFromRecord,
   validate: (values, context) => validateLocation(values, context, {

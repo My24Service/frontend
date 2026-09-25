@@ -243,7 +243,7 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import { companyStudentuser } from '@/api/resources.gen'
+import { CompanyStudentuser } from '@/api/resources.gen'
 import { vStudentUserWriteRequestWritable } from '@/api/valibot.gen'
 import type { StudentUser } from '@/api/types.gen'
 import {
@@ -307,7 +307,7 @@ const {
   StudentUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: companyStudentuser,
+  resource: CompanyStudentuser,
   empty: emptyStudentUser,
   fromRecord: studentUserFromRecord,
   validate: validateStudentUserForm,

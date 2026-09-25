@@ -17,7 +17,7 @@
         modalId: 'delete-building-modal',
         confirmText: $trans('Are you sure you want to delete this building?'),
         destroyMutation: equipmentBuildingDestroyMutation,
-        invalidate: invalidateReads(equipmentBuilding),
+        invalidate: EquipmentBuilding.invalidate,
         deletedDetail: $trans('building has been deleted'),
         deleteError: $trans('Error deleting building'),
       }"
@@ -39,8 +39,7 @@ import {
   equipmentBuildingListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedBuildingList } from '@/api/types.gen'
-import { equipmentBuilding } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { EquipmentBuilding } from '@/api/resources.gen'
 import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
 import { useBuildingColumns } from './use-building-columns'
 type BuildingRow = ListRow<PaginatedBuildingList>

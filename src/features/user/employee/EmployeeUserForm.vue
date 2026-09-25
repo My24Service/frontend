@@ -82,7 +82,7 @@ import {
   companyBranchListOptions,
   companyBranchMyRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import { companyEmployeeuser } from '@/api/resources.gen'
+import { CompanyEmployeeuser } from '@/api/resources.gen'
 import type { EmployeeUser } from '@/api/types.gen'
 import { vEmployeeUserRequestWritable } from '@/api/valibot.gen'
 import {
@@ -146,7 +146,7 @@ function employeeUserFromRecord(record: EmployeeUser): EmployeeUserFormValues {
 
 const form = useUserForm<EmployeeUserFormValues, EmployeeUser, v.InferOutput<typeof vEmployeeUserRequestWritable>, EmployeeUserFieldErrors>({
   pk: () => props.pk,
-  resource: companyEmployeeuser,
+  resource: CompanyEmployeeuser,
   empty: emptyEmployeeUser,
   fromRecord: employeeUserFromRecord,
   validate: validateEmployeeUserForm,

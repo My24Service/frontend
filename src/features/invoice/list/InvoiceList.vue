@@ -17,7 +17,7 @@
         modalId: 'delete-invoice-modal',
         confirmText: $trans('Are you sure you want to delete this invoice?'),
         destroyMutation: invoiceInvoiceDestroyMutation,
-        invalidate: invalidateReads(invoiceInvoice),
+        invalidate: InvoiceInvoice.invalidate,
         deletedDetail: $trans('Invoice has been deleted'),
         deleteError: $trans('Error deleting invoice'),
       }"
@@ -39,9 +39,8 @@ import {
   statuscodeStatuscodeListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Invoice } from '@/api/types.gen'
-import { invoiceInvoice } from '@/api/resources.gen'
+import { InvoiceInvoice } from '@/api/resources.gen'
 import {
-  invalidateReads,
   useQueryErrorToast,
 } from '@/features/forms'
 import RowAction from '@/components/RowAction.vue'

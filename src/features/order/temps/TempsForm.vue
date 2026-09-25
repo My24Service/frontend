@@ -147,7 +147,7 @@
 </template>
 
 <script lang="ts" setup>
-import { orderOrder } from '@/api/resources.gen'
+import { OrderOrder } from '@/api/resources.gen'
 import type { OrderCreate, OrderUpdate } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms'
 import {
@@ -206,7 +206,7 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: orderOrder,
+  resource: OrderOrder,
   empty: emptyTempsOrder,
   fromRecord: tempsFromRecord,
   validate: (values, context) => validateTempsForm(values, variant.value, context),

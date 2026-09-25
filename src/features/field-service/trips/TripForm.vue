@@ -127,7 +127,7 @@ import VueMultiselect from 'vue-multiselect'
 
 import { orderOrderAutocompleteListOptions } from '@/api/@tanstack/vue-query.gen'
 import type { OrderAutocomplete, Trip } from '@/api/types.gen'
-import { mobileTrip } from '@/api/resources.gen'
+import { MobileTrip } from '@/api/resources.gen'
 import {
   useResourceForm,
   useSearch,
@@ -201,7 +201,7 @@ const form = useResourceForm({
   // The availability detail is a second read model of one trip - its
   // description, date and headcount are what a write changes - and it sits
   // under the trip's path, so the resource's own reads refresh it too.
-  resource: mobileTrip,
+  resource: MobileTrip,
   empty: emptyTrip,
   fromRecord: tripFromRecord,
   validate: (values) => validateTripForm(withStagedOrders(values), conditionsOf(values)),

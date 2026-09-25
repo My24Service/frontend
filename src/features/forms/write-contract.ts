@@ -42,8 +42,8 @@ export interface WriteContractOptions<TField extends string, TValues> {
  * A form's write contract: the generated bodies it writes through, and the
  * `validate`/`parse` pair `useResourceForm` wants.
  *
- *     export const branchWrite = writeContract(companyBranch, {
- *       validateWith: companyBranch.create.body,
+ *     export const branchWrite = writeContract(CompanyBranch, {
+ *       validateWith: CompanyBranch.create.body,
  *       shape: shaped,
  *       labels: FIELD_LABELS,
  *     })

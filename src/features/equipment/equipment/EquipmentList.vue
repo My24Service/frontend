@@ -55,7 +55,7 @@
         modalId: 'delete-equipment-modal',
         confirmText: $trans('Are you sure you want to delete this equipment?'),
         destroyMutation: equipmentEquipmentDestroyMutation,
-        invalidate: invalidateReads(equipmentEquipment),
+        invalidate: EquipmentEquipment.invalidate,
         deletedDetail: $trans('Equipment has been deleted'),
         deleteError: $trans('Error deleting equipment'),
       }"
@@ -88,8 +88,7 @@ import {
   equipmentEquipmentStateCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { EquipmentTypeEnum, PaginatedEquipmentList } from '@/api/types.gen'
-import { equipmentEquipment } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { EquipmentEquipment } from '@/api/resources.gen'
 import { EQUIPMENT_TYPES } from '@/constants'
 import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
 import { useEquipmentColumns } from './use-equipment-columns'

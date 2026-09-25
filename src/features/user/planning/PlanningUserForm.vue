@@ -59,7 +59,7 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import { companyPlanninguser } from '@/api/resources.gen'
+import { CompanyPlanninguser } from '@/api/resources.gen'
 import type { PlanningUser } from '@/api/types.gen'
 import { vPlanningUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
@@ -103,7 +103,7 @@ const {
   PlanningUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: companyPlanninguser,
+  resource: CompanyPlanninguser,
   empty: () => ({...emptyPlanningUser()}),
   fromRecord: planningUserFromRecord,
   validate: validatePlanningUserForm,

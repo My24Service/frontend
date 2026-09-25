@@ -1,4 +1,4 @@
-import { type QueryClient } from '@tanstack/vue-query'
+import { type QueryClient, type UseMutationOptions } from '@tanstack/vue-query'
 import type { ActionResource, CollectionResource, Resource, SingletonResource } from '@/api/resources.gen'
 import { useRoutePk } from './use-route-pk'
 import { useQueryErrorToast } from './use-query-error-toast'
@@ -15,24 +15,6 @@ import { useQueryErrorToast } from './use-query-error-toast'
 export type WriteContext = {isCreate: true; id: null} | {isCreate: false; id: number}
 
 /**
- * Refresh every read a write to `resource` made stale: its list, its detail,
- * and the filtered views and counts under its path - `resource.reads`, which
- * the generator collected from the schema. hey-api keys each query
- * `[{_id, baseURL, ...}]` and tanstack matches a filter partially, so `[{_id}]`
- * reaches every page, filter and id of that read.
- *
- * Returns the `(queryClient) => Promise` shape a delete modal or
- * `useResourceForm` takes, so a screen writes `invalidate:
- * invalidateReads(companyBranch)`. A read that is stale for a reason the
- * schema cannot state - another resource's list - is still a hand-written
- * `invalidation.ts` helper, composed with this one.
- */
-export function invalidateReads(resource: Pick<Resource, 'reads'>) {
-  return (queryClient: QueryClient) =>
-    Promise.all(resource.reads.map((_id) => queryClient.invalidateQueries({queryKey: [{_id}]})))
-}
-
-/**
  * What `useResourceForm` needs of a generated resource (`@/api/resources.gen`):
  * one with a record, read and updated. An `action` has no record and is not
  * a member, so passing one is a type error rather than a form that cannot
@@ -41,10 +23,41 @@ export function invalidateReads(resource: Pick<Resource, 'reads'>) {
  * with no arguments for a singleton.
  */
 type WithRecord<R extends Exclude<Resource, ActionResource>> = R & Required<Pick<R, 'retrieve' | 'update'>>
+
+/**
+ * The conveniences a form calls, re-typed to the shapes a form can actually
+ * meet, with the generated loose ones dropped.
+ *
+ * `ResourceConveniences` declares them `(...args: never[]) => unknown` and
+ * `() => unknown`, which is the only signature that admits every resource's
+ * real one: a singleton's `retrieveOptions` takes no id, a collection's takes
+ * a `number` or a `string`, and no single type covers both. Intersecting the
+ * two does not help - the parameter becomes the *intersection* `never & TId`,
+ * i.e. `never` - so the loose members are omitted and the narrow ones declared
+ * afresh. A form knows which kind it has, because it already narrows on
+ * `kind` and `id`; this is that narrowing, written once.
+ *
+ * `any` in the two mutation slots, as in `ResourceFormWiring`'s hand-named
+ * `update`: `UseMutationOptions` is invariant in its response and error slots,
+ * so no wider type admits every generated pair. Only `mutationFn` is used.
+ */
+interface FormCalls<R extends Exclude<Resource, ActionResource>> {
+  readonly retrieveOptions: R extends SingletonResource
+    ? () => object
+    : (id: R extends CollectionResource<infer TId> ? TId : never) => object
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly updateMutation: () => UseMutationOptions<any, any, any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly createMutation?: () => UseMutationOptions<any, any, any>
+}
+
+type Formable<R extends Exclude<Resource, ActionResource>> =
+  Omit<WithRecord<R>, 'retrieveOptions' | 'updateMutation' | 'createMutation'> & FormCalls<R>
+
 export type FormResource =
-  | WithRecord<CollectionResource<number>>
-  | WithRecord<CollectionResource<string>>
-  | WithRecord<SingletonResource>
+  | Formable<CollectionResource<number>>
+  | Formable<CollectionResource<string>>
+  | Formable<SingletonResource>
 
 /**
  * Where a form's reads and writes come from: the generated resource, or the
@@ -59,7 +72,7 @@ export type ResourceFormWiring =
     create?: never
     update?: never
     /**
-     * Defaults to `invalidateReads(resource)`. Given when a write stales more
+     * Defaults to `resource.invalidate`. Given when a write stales more
      * than the resource's own reads - the branch form's `branch-my` variant
      * also refreshes the branch list.
      */
@@ -187,21 +200,36 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   const { isCreate, id } = useRoutePk(config.pk)
 
   // wiring ----------------------------------------------------------------
-
+  //
+  // Every one of these asks the resource rather than its parts: `retrieveOptions`
+  // already knows whether the id belongs in the path and whether it is an
+  // integer or a name, and `invalidate` already walks the resource's own
+  // `reads`. What is left for this composable to know is the one thing a
+  // resource cannot state - how a *generic* form body becomes this endpoint's
+  // variables, which is `updateVars` below.
   const { resource } = config
+  // One narrowing per line, because a union of function types takes the
+  // *intersection* of its parameters: passing `string | number` to
+  // `(id: string) | (id: number)` is a `never`. `kind` and then `id` are the
+  // two discriminants, and each names one member.
   const retrieve = resource
     ? (id: number) => {
-      if (resource.kind === 'singleton') return resource.retrieve.options()
+      if (resource.kind === 'singleton') return resource.retrieveOptions()
       return resource.id === 'string'
-        ? resource.retrieve.options({path: {id: String(id)}})
-        : resource.retrieve.options({path: {id}})
+        ? resource.retrieveOptions(String(id))
+        : resource.retrieveOptions(id)
     }
     : config.retrieve
-  const createOptions = resource ? (resource.kind === 'collection' ? resource.create?.mutation() : undefined) : config.create
-  const updateOptions = resource ? resource.update.mutation() : config.update
+  const createOptions = resource
+    ? resource.kind === 'collection' ? resource.createMutation?.() : undefined
+    : config.create
+  const updateOptions = resource ? resource.updateMutation() : config.update
   const updateVars = config.updateVars
     ?? (resource?.kind === 'singleton' ? (body: TBody) => ({body}) : undefined)
-  const invalidate = config.resource ? config.invalidate ?? invalidateReads(config.resource) : config.invalidate
+  const invalidate = config.invalidate ?? resource?.invalidate
+  if (!invalidate) {
+    throw new Error('useResourceForm: a form needs a resource or an explicit `invalidate`')
+  }
 
   /**
    * The id a create wrote, once its write landed. A record that exists must not

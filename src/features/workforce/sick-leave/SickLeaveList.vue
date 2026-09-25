@@ -17,7 +17,7 @@
         modalId: 'delete-sick-leave-modal',
         confirmText: $trans('Are you sure you want to delete this sick leave?'),
         destroyMutation: companyUserSickLeaveAdminDestroyMutation,
-        invalidate: invalidateReads(companyUserSickLeaveAdmin),
+        invalidate: CompanyUserSickLeaveAdmin.invalidate,
         deletedDetail: $trans('Sick leave has been deleted'),
         deleteError: $trans('Error deleting sick leave'),
       }"
@@ -40,8 +40,7 @@ import {
   companyUserSickLeaveAdminListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedUserSickLeaveList } from '@/api/types.gen'
-import { companyUserSickLeaveAdmin } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { CompanyUserSickLeaveAdmin } from '@/api/resources.gen'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 

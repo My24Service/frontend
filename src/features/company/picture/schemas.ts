@@ -1,4 +1,4 @@
-import { companyPicture } from '@/api/resources.gen'
+import { CompanyPicture } from '@/api/resources.gen'
 import type { Picture } from '@/api/types.gen'
 import {
   type FieldErrors,
@@ -58,8 +58,8 @@ function shaped(values: PictureFormValues) {
  * The patch body it sends is a superset of what PATCH requires, so nothing is
  * added on top of the generated schema.
  */
-export const pictureWrite = writeContract(companyPicture, {
-  validateWith: companyPicture.create.body,
+export const pictureWrite = writeContract(CompanyPicture, {
+  validateWith: CompanyPicture.create.body,
   shape: shaped,
   labels: FIELD_LABELS,
 })

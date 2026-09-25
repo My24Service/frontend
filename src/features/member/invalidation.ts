@@ -8,6 +8,16 @@ import {
   memberModulePartListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 
+/**
+ * The reads a module write makes stale that are not its own, named one at a
+ * time rather than as resources.
+ *
+ * A resource's `invalidate` refreshes *every* read under its path, which is
+ * the right answer for a write to that resource and too broad here: renaming a
+ * module changes the module list, and the member and contract lists that
+ * embed the module tree, but nothing else about a member. Naming the three
+ * query keys is what says which.
+ */
 export async function invalidateModuleDataReadModels(queryClient: QueryClient): Promise<void> {
   await queryClient.invalidateQueries({queryKey: memberGetModuleDataListQueryKey()})
 }

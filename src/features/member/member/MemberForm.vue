@@ -236,7 +236,7 @@
 <script lang="ts" setup>
 import { vEquipmentQrTypeEnum, vMemberTypeEnum } from '@/api/valibot.gen'
 import { memberContractListOptions } from '@/api/@tanstack/vue-query.gen'
-import { memberMember } from '@/api/resources.gen'
+import { MemberMember } from '@/api/resources.gen'
 import MemberLogoFields from './MemberLogoFields.vue'
 import {
   ValidatedForm,
@@ -317,7 +317,7 @@ const {
   record,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: memberMember,
+  resource: MemberMember,
   empty: emptyMember,
   fromRecord: memberFromRecord,
   validate: async (values) => {

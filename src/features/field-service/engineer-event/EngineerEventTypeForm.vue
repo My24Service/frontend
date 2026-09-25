@@ -71,7 +71,7 @@
 
 <script lang="ts" setup>
 import type { Statuscode } from '@/api/types.gen'
-import { companyEngineerEventType } from '@/api/resources.gen'
+import { CompanyEngineerEventType } from '@/api/resources.gen'
 import {
   useResourceForm,
   ValidatedForm,
@@ -127,7 +127,7 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: companyEngineerEventType,
+  resource: CompanyEngineerEventType,
   empty: emptyEngineerEventType,
   fromRecord: engineerEventTypeFromRecord,
   validate: validateEngineerEventType,

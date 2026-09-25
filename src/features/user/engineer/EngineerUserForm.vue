@@ -252,7 +252,7 @@ import {
   inventoryStockLocationListOptions,
   inventoryStockLocationListQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import { companyEngineer } from '@/api/resources.gen'
+import { CompanyEngineer } from '@/api/resources.gen'
 import type { Engineer } from '@/api/types.gen'
 import { vEngineerRequestWritable } from '@/api/valibot.gen'
 import {
@@ -295,7 +295,7 @@ function engineerUserFromRecord(record: Engineer): EngineerUserFormValues {
 
 const form = useUserForm<EngineerUserFormValues, Engineer, v.InferOutput<typeof vEngineerRequestWritable>, EngineerUserFieldErrors>({
   pk: () => props.pk,
-  resource: companyEngineer,
+  resource: CompanyEngineer,
   empty: emptyEngineerUser,
   fromRecord: engineerUserFromRecord,
   validate: validateEngineerUserForm,

@@ -17,7 +17,7 @@
         modalId: 'delete-partner-modal',
         confirmText: $trans('Are you sure you want to delete this partner relation?'),
         destroyMutation: companyPartnerDestroyMutation,
-        invalidate: invalidateReads(companyPartner),
+        invalidate: CompanyPartner.invalidate,
         deletedDetail: $trans('partner has been deleted'),
         deleteError: $trans('Error deleting partner'),
       }"
@@ -41,8 +41,7 @@ import {
   companyPartnerListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedPartnerDetailList } from '@/api/types.gen'
-import { companyPartner } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { CompanyPartner } from '@/api/resources.gen'
 import type { PillNavItem } from '@/components/PillsNav.vue'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { partnerColumns } from './partner-columns'

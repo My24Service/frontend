@@ -91,9 +91,8 @@ import {
   invoiceEmailCreateMutation, invoiceEmailPartialUpdateMutation, invoiceInvoiceDownloadPdfCreateMutation,
   invoiceEmailGetUnsentEmailRetrieveQueryKey, invoiceInvoiceDetailRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
-import { invoiceInvoice } from '@/api/resources.gen'
+import { InvoiceInvoice } from '@/api/resources.gen'
 import {
-  invalidateReads,
   useQueryErrorToast,
   ValidatedForm,
   ValidatedFormField,
@@ -160,7 +159,7 @@ async function submitForm() {
     const result = email.value.id
       ? await updateMutation.mutateAsync({path: {id: email.value.id}, body})
       : await createMutation.mutateAsync({body})
-    await invalidateReads(invoiceInvoice)(queryClient)
+    await InvoiceInvoice.invalidate(queryClient)
     await queryClient.invalidateQueries({queryKey: invoiceEmailGetUnsentEmailRetrieveQueryKey({query: {invoiceId: id}})})
     if (invoice.value?.uuid) await queryClient.invalidateQueries({queryKey: invoiceInvoiceDetailRetrieveQueryKey({path: {id: invoice.value.uuid}})})
     if (id !== invoiceId.value) return

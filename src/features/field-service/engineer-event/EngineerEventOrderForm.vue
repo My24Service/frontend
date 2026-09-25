@@ -76,8 +76,7 @@ import {
 } from '@/api/@tanstack/vue-query.gen'
 import type { Engineer } from '@/api/types.gen'
 import { vEngineerEventCreateOrderRequestRequest } from '@/api/valibot.gen'
-import { companyEngineerevent } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { CompanyEngineerevent } from '@/api/resources.gen'
 import { addressLabel, useOwnerPicker } from '@/features/order'
 
 import { invalidateDispatchBoard } from '../invalidation'
@@ -258,7 +257,7 @@ async function submitForm() {
     // the board goes stale here exactly as it did while the assign was a
     // request of its own; the events list redraws the row with its order.
     await invalidateDispatchBoard(queryClient)
-    await invalidateReads(companyEngineerevent)(queryClient)
+    await CompanyEngineerevent.invalidate(queryClient)
 
     order.value = emptyOrder()
     isLoading.value = false

@@ -345,7 +345,7 @@
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import { nl } from 'date-fns/locale'
 import { equipmentLocationListForSelectListOptions } from '@/api/@tanstack/vue-query.gen'
-import { equipmentEquipment } from '@/api/resources.gen'
+import { EquipmentEquipment } from '@/api/resources.gen'
 import { EQUIPMENT_TYPES } from '@/constants'
 import {
   useQueryErrorToast,
@@ -399,7 +399,7 @@ const documents = useTemplateRef<{parentCreated: (pk: number) => Promise<unknown
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: equipmentEquipment,
+  resource: EquipmentEquipment,
   empty: () => emptyEquipment(defaultCurrency.value),
   fromRecord: equipmentFromRecord,
   validate: (values, context) => validateEquipment(values, context, {

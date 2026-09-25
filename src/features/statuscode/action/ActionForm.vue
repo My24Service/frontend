@@ -211,7 +211,7 @@ import {
   companyPartnerListOptions,
   statuscodeActionDestroyMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import { statuscodeAction } from '@/api/resources.gen'
+import { StatuscodeAction } from '@/api/resources.gen'
 import {
   useResourceForm,
   requiredMessage,
@@ -268,7 +268,7 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: statuscodeAction,
+  resource: StatuscodeAction,
   invalidate: invalidateStatuscodeLists,
   empty: emptyAction,
   fromRecord: actionFromRecord,

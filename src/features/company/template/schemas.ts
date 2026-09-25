@@ -1,4 +1,4 @@
-import { companyTemplate } from '@/api/resources.gen'
+import { CompanyTemplate } from '@/api/resources.gen'
 import type { Template } from '@/api/types.gen'
 import {
   selectMessage,
@@ -76,7 +76,7 @@ function shaped(values: TemplateFormValues) {
  * - an edit reads the patch body, where the name is optional but not blank,
  *   and the shaped body always carries it, so a blank one is refused anyway.
  */
-export const templateWrite = writeContract(companyTemplate, {
+export const templateWrite = writeContract(CompanyTemplate, {
   shape: shaped,
   labels: FIELD_LABELS,
   messages: FIELD_MESSAGES,

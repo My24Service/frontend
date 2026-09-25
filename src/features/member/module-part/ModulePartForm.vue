@@ -77,7 +77,7 @@
 
 <script lang="ts" setup>
 import { memberModuleListOptions } from '@/api/@tanstack/vue-query.gen'
-import { memberModulePart } from '@/api/resources.gen'
+import { MemberModulePart } from '@/api/resources.gen'
 import type { ModulePart } from '@/api/types.gen'
 import {
   useResourceForm,
@@ -111,7 +111,7 @@ const {
   cancelForm,
 } = useResourceForm<ModulePartFormValues, ModulePart, ReturnType<typeof parseModulePart>, ModulePartFieldErrors>({
   pk: () => props.pk,
-  resource: memberModulePart,
+  resource: MemberModulePart,
   invalidate: invalidateModulePartListQueries,
   empty: emptyModulePart,
   fromRecord: (record) => ({

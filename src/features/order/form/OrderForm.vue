@@ -205,7 +205,7 @@
 </template>
 
 <script lang="ts" setup>
-import { orderOrder } from '@/api/resources.gen'
+import { OrderOrder } from '@/api/resources.gen'
 import type { OrderCreate, OrderUpdate } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms'
 import ContactPanel from './ContactPanel.vue'
@@ -301,7 +301,7 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: orderOrder,
+  resource: OrderOrder,
   empty: emptyOrder,
   fromRecord: orderFromRecord,
   validate: (values, context) => validateOrderForm(values, variant.value, context),

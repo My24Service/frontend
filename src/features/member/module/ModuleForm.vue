@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { memberModule } from '@/api/resources.gen'
+import { MemberModule } from '@/api/resources.gen'
 import type { Module, ModuleRequest } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms'
 import {
@@ -71,7 +71,7 @@ const {
   cancelForm,
 } = useResourceForm<ModuleRequest, Module, ReturnType<typeof parseModule>, ModuleFieldErrors>({
   pk: () => props.pk,
-  resource: memberModule,
+  resource: MemberModule,
   invalidate: invalidateModuleListQueries,
   empty: emptyModule,
   fromRecord: (record) => ({name: record.name}),

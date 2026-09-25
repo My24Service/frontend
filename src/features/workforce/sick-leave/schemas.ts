@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { companyUserSickLeaveAdmin } from '@/api/resources.gen'
+import { CompanyUserSickLeaveAdmin } from '@/api/resources.gen'
 import type { UserSickLeave } from '@/api/types.gen'
 import {
   selectMessage,
@@ -18,7 +18,7 @@ import {
  * form does not carry the field and the parse never sends it.
  */
 export type SickLeaveFormValues =
-  Pick<v.InferInput<typeof companyUserSickLeaveAdmin.create.body>, 'start_date'>
+  Pick<v.InferInput<typeof CompanyUserSickLeaveAdmin.create.body>, 'start_date'>
   & {
     // a picker that is empty rather than absent until chosen
     user: number | null
@@ -57,7 +57,7 @@ export const FIELD_MESSAGES = {
 } satisfies FieldMessages<keyof SickLeaveFieldErrors & string>
 
 /** `user` is already declared required; the date is optional on the wire. */
-const vSickLeaveBody = v.required(companyUserSickLeaveAdmin.create.body, ['start_date'])
+const vSickLeaveBody = v.required(CompanyUserSickLeaveAdmin.create.body, ['start_date'])
 
 /**
  * Validation reads the strengthened copy above - the ledger's rule: `user` is
@@ -68,7 +68,7 @@ const vSickLeaveBody = v.required(companyUserSickLeaveAdmin.create.body, ['start
  * PATCHed the whole loaded record back, `user_full_name`, `created_by` and the
  * status fields included.
  */
-export const sickLeaveWrite = writeContract(companyUserSickLeaveAdmin, {
+export const sickLeaveWrite = writeContract(CompanyUserSickLeaveAdmin, {
   validateWith: vSickLeaveBody,
   labels: FIELD_LABELS,
   messages: FIELD_MESSAGES,

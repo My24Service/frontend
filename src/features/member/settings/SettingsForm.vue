@@ -38,7 +38,7 @@
 
 <script lang="ts" setup>
 import { memberMemberMySettingsRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
-import { memberMemberMySettings } from '@/api/resources.gen'
+import { MemberMemberMySettings } from '@/api/resources.gen'
 import {
   useResourceForm,
   ValidatedForm,
@@ -71,7 +71,7 @@ const {
   // the generated client refuses a path on an endpoint that has none, so only
   // the body crosses.
   pk: () => 'my',
-  resource: memberMemberMySettings,
+  resource: MemberMemberMySettings,
   empty: emptySettings,
   fromRecord: settingsFromRecord,
   validate: validateSettings,

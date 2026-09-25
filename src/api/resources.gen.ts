@@ -10,8 +10,22 @@
 // references. Reads carry `{options, queryKey}`; writes carry `{mutation}`
 // and, where the endpoint takes a body, its valibot schema as `body`;
 // `reads` names every query under the resource's path, for invalidation.
-import type { UseMutationOptions } from '@tanstack/vue-query'
-import type { GenericSchema } from 'valibot'
+//
+// Each resource also declares a namespace of its own types - the record a
+// read answers with, the query parameters a list takes, the body a write
+// takes and parses - so `Api.<resource>.Record` sits beside
+// `Api.<resource>.retrieve` under one name.
+//
+// And a handful of conveniences, so the shapes a screen would otherwise
+// re-derive from `kind` and `id` are derived once: `listOptions` (the base
+// page parameters plus the screen's column filters), `retrieveOptions`,
+// `createMutation`/`updateMutation`, `updateVars` (what an update sends),
+// and `invalidate` (every read under the path, on the app's query client).
+import type { QueryClient, UseMutationOptions } from '@tanstack/vue-query'
+import type { GenericSchema, InferInput, InferOutput } from 'valibot'
+
+import { baseListParams, columnFilters, type ServerPagedListQuery } from '../services/api-client/list-params'
+import { invalidateReads } from '../services/api-client/invalidation'
 
 import {
   accountsChangePasswordCreateMutation,
@@ -802,206 +816,351 @@ import {
   vAccountsVerifyRegistrationCreateBody,
   vChangePasswordCreateBody,
   vCompanyActivityCreateBody,
+  vCompanyActivityListQuery,
   vCompanyActivityPartialUpdateBody,
   vCompanyApiuserCreateBody,
+  vCompanyApiuserListQuery,
   vCompanyApiuserPartialUpdateBody,
+  vCompanyBranchAutocompleteListQuery,
   vCompanyBranchCreateBody,
+  vCompanyBranchListQuery,
   vCompanyBranchMyPartialUpdateBody,
   vCompanyBranchPartialUpdateBody,
   vCompanyBudgetCreateBody,
+  vCompanyBudgetListQuery,
   vCompanyBudgetPartialUpdateBody,
   vCompanyCustomeruserCreateBody,
+  vCompanyCustomeruserListQuery,
   vCompanyCustomeruserPartialUpdateBody,
   vCompanyEmployeeuserCreateBody,
+  vCompanyEmployeeuserListQuery,
   vCompanyEmployeeuserPartialUpdateBody,
   vCompanyEngineerCreateBody,
   vCompanyEngineerEventTypeCreateBody,
+  vCompanyEngineerEventTypeListQuery,
   vCompanyEngineerEventTypePartialUpdateBody,
+  vCompanyEngineerEventTypeStatsListQuery,
+  vCompanyEngineerListQuery,
   vCompanyEngineerPartialUpdateBody,
   vCompanyEngineereventCreateBody,
+  vCompanyEngineereventListQuery,
   vCompanyEngineereventUpdatePartialUpdateBody,
   vCompanyIbanCheckCreateBody,
   vCompanyImportCreateBody,
+  vCompanyImportListQuery,
   vCompanyImportPartialUpdateBody,
   vCompanyLeaveTypeCreateBody,
+  vCompanyLeaveTypeListForSelectListQuery,
+  vCompanyLeaveTypeListQuery,
   vCompanyLeaveTypePartialUpdateBody,
   vCompanyPartnerCreateBody,
+  vCompanyPartnerListQuery,
   vCompanyPartnerPartialUpdateBody,
   vCompanyPartnerRequestCreateBody,
+  vCompanyPartnerRequestListQuery,
   vCompanyPartnerRequestPartialUpdateBody,
+  vCompanyPartnerRequestReceivedListQuery,
   vCompanyPartnerRequestSentCreateBody,
+  vCompanyPartnerRequestSentListQuery,
   vCompanyPictureCreateBody,
+  vCompanyPictureListQuery,
   vCompanyPicturePartialUpdateBody,
   vCompanyPlanninguserCreateBody,
+  vCompanyPlanninguserListQuery,
   vCompanyPlanninguserPartialUpdateBody,
   vCompanyProjectCreateBody,
+  vCompanyProjectListForSelectListQuery,
+  vCompanyProjectListQuery,
   vCompanyProjectPartialUpdateBody,
+  vCompanyPublicPicturesListQuery,
   vCompanySalesuserCreateBody,
+  vCompanySalesuserListQuery,
   vCompanySalesuserPartialUpdateBody,
   vCompanySalesusercustomerCreateBody,
+  vCompanySalesusercustomerListQuery,
   vCompanySalesusercustomerMyCreateBody,
+  vCompanySalesusercustomerMyListQuery,
   vCompanySalesusercustomerMyPartialUpdateBody,
   vCompanySalesusercustomerPartialUpdateBody,
   vCompanyStreamPrivateChannelCreateCreateBody,
   vCompanyStudentuserCreateBody,
+  vCompanyStudentuserListQuery,
   vCompanyStudentuserPartialUpdateBody,
   vCompanyTemplateCreateBody,
+  vCompanyTemplateListQuery,
   vCompanyTemplatePartialUpdateBody,
   vCompanyTemplatePreviewTemplatePdfCreateBody,
   vCompanyTimeRegistrationTimeCorrectionPartialUpdateBody,
   vCompanyUserDeviceTokenCreateBody,
+  vCompanyUserLeaveHoursAdminAllNotAcceptedListQuery,
   vCompanyUserLeaveHoursAdminCreateBody,
   vCompanyUserLeaveHoursAdminGetTotalsCreateBody,
+  vCompanyUserLeaveHoursAdminListQuery,
   vCompanyUserLeaveHoursAdminPartialUpdateBody,
+  vCompanyUserLeaveHoursAllNotAcceptedListQuery,
   vCompanyUserLeaveHoursCreateBody,
   vCompanyUserLeaveHoursGetTotalsCreateBody,
+  vCompanyUserLeaveHoursListQuery,
   vCompanyUserLeaveHoursPartialUpdateBody,
+  vCompanyUserListListQuery,
   vCompanyUserSettingsPartialUpdateBody,
+  vCompanyUserSickLeaveAdminAllSickListQuery,
+  vCompanyUserSickLeaveAdminAllUnconfirmedListQuery,
   vCompanyUserSickLeaveAdminCreateBody,
+  vCompanyUserSickLeaveAdminListQuery,
   vCompanyUserSickLeaveAdminPartialUpdateBody,
   vCompanyUserSickLeaveCreateBody,
   vCompanyUserSickLeaveEndSickCreateBody,
+  vCompanyUserSickLeaveListQuery,
   vCompanyUserSickLeavePartialUpdateBody,
   vCompanyUserWorkhoursCreateBody,
+  vCompanyUserWorkhoursListQuery,
   vCompanyUserWorkhoursPartialUpdateBody,
   vCompanyUsersStudentProfileMePartialUpdateBody,
   vCompanyUsersStudentRegisterFetchUserCreateBody,
   vCompanyUsersVerifyRecaptchaCreateBody,
   vConnectorGrippSettingsPartialUpdateBody,
+  vCustomerCustomerAutocompleteListQuery,
   vCustomerCustomerCreateBody,
+  vCustomerCustomerListQuery,
   vCustomerCustomerMyPartialUpdateBody,
   vCustomerCustomerPartialUpdateBody,
   vCustomerDocumentCreateBody,
+  vCustomerDocumentListQuery,
   vCustomerDocumentPartialUpdateBody,
   vCustomerMaintenanceContractCreateBody,
+  vCustomerMaintenanceContractListQuery,
   vCustomerMaintenanceContractPartialUpdateBody,
   vCustomerMaintenanceContractWithEquipmentCreateBody,
   vCustomerMaintenanceEquipmentCreateBody,
+  vCustomerMaintenanceEquipmentListQuery,
   vCustomerMaintenanceEquipmentPartialUpdateBody,
+  vEquipmentBuildingAutocompleteListQuery,
   vEquipmentBuildingCreateBody,
+  vEquipmentBuildingListForSelectListQuery,
+  vEquipmentBuildingListQuery,
   vEquipmentBuildingPartialUpdateBody,
+  vEquipmentEquipmentAutocompleteListQuery,
   vEquipmentEquipmentCreateBody,
   vEquipmentEquipmentCreateQuickCreateBody,
   vEquipmentEquipmentDocumentCreateBody,
+  vEquipmentEquipmentDocumentListQuery,
   vEquipmentEquipmentDocumentPartialUpdateBody,
+  vEquipmentEquipmentListQuery,
   vEquipmentEquipmentPartialUpdateBody,
   vEquipmentEquipmentStateCreateBody,
+  vEquipmentEquipmentStateListQuery,
+  vEquipmentLocationAutocompleteListQuery,
   vEquipmentLocationCreateBody,
   vEquipmentLocationCreateQuickCreateBody,
   vEquipmentLocationDocumentCreateBody,
+  vEquipmentLocationDocumentListQuery,
   vEquipmentLocationDocumentPartialUpdateBody,
+  vEquipmentLocationListForSelectListQuery,
+  vEquipmentLocationListQuery,
   vEquipmentLocationPartialUpdateBody,
+  vInventoryInventoryLocationsListQuery,
+  vInventoryInventoryMaterialsForLocationListQuery,
+  vInventoryMaterialAutocompleteListQuery,
   vInventoryMaterialCreateBody,
+  vInventoryMaterialListQuery,
   vInventoryMaterialPartialUpdateBody,
   vInventoryPurchaseorderCreateBody,
   vInventoryPurchaseorderEntryBulkCreateBody,
   vInventoryPurchaseorderEntryCreateBody,
+  vInventoryPurchaseorderEntryListQuery,
   vInventoryPurchaseorderEntryPartialUpdateBody,
+  vInventoryPurchaseorderListQuery,
   vInventoryPurchaseorderMaterialCreateBody,
+  vInventoryPurchaseorderMaterialListQuery,
   vInventoryPurchaseorderMaterialPartialUpdateBody,
   vInventoryPurchaseorderPartialUpdateBody,
   vInventoryPurchaseorderStatusCreateBody,
+  vInventoryPurchaseorderStatusListQuery,
   vInventoryPurchaseorderStatusPartialUpdateBody,
   vInventoryPurchaseorderWithMaterialsCreateBody,
   vInventoryStockLocationCreateBody,
+  vInventoryStockLocationListQuery,
   vInventoryStockLocationPartialUpdateBody,
   vInventoryStockmutationsimpleListCreateBody,
+  vInventoryStockmutationsimpleListListQuery,
+  vInventorySupplierAutocompleteListQuery,
   vInventorySupplierCreateBody,
+  vInventorySupplierListQuery,
   vInventorySupplierPartialUpdateBody,
+  vInventorySupplierReservationAutocompleteListQuery,
   vInventorySupplierReservationCreateBody,
+  vInventorySupplierReservationListQuery,
   vInventorySupplierReservationPartialUpdateBody,
   vInventorySupplierReservationWithMaterialsCreateBody,
   vInventorySupplierReservationmaterialCreateBody,
+  vInventorySupplierReservationmaterialListQuery,
   vInventorySupplierReservationmaterialPartialUpdateBody,
   vInvoiceEmailCreateBody,
+  vInvoiceEmailGetDocumentsListQuery,
+  vInvoiceEmailListQuery,
   vInvoiceEmailPartialUpdateBody,
+  vInvoiceInvoiceAutocompleteListQuery,
   vInvoiceInvoiceCreateBody,
   vInvoiceInvoiceLineCreateBody,
+  vInvoiceInvoiceLineListQuery,
   vInvoiceInvoiceLinePartialUpdateBody,
+  vInvoiceInvoiceListQuery,
   vInvoiceInvoicePartialUpdateBody,
+  vInvoiceInvoicePreliminaryListQuery,
+  vInvoiceInvoiceSentListQuery,
   vInvoiceInvoiceStatusCreateBody,
   vInvoicePurchaseCreateBody,
+  vInvoicePurchaseListQuery,
   vInvoicePurchasePartialUpdateBody,
+  vInvoicePurchaseYearListQuery,
   vJwtTokenCreateBody,
   vJwtTokenRefreshCreateBody,
   vLocationToAddressCreateBody,
   vMemberContractCreateBody,
+  vMemberContractListQuery,
   vMemberContractPartialUpdateBody,
+  vMemberListPublicBranchesListQuery,
+  vMemberListPublicListQuery,
   vMemberMemberCreateBody,
+  vMemberMemberGetForPartnerSelectListQuery,
+  vMemberMemberListQuery,
   vMemberMemberMePartialUpdateBody,
   vMemberMemberMySettingsPartialUpdateBody,
   vMemberMemberPartialUpdateBody,
   vMemberModuleCreateBody,
+  vMemberModuleListQuery,
   vMemberModulePartCreateBody,
+  vMemberModulePartListQuery,
   vMemberModulePartPartialUpdateBody,
   vMemberModulePartialUpdateBody,
   vMobileAssignMeCreateBody,
   vMobileAssignUserCreateBody,
   vMobileAssignUserTripCreateBody,
   vMobileAssignedorderCreateBody,
+  vMobileAssignedorderFinishedListListQuery,
+  vMobileAssignedorderListAppListQuery,
+  vMobileAssignedorderListQuery,
   vMobileAssignedorderPartialUpdateBody,
   vMobileAssignedorderSplitCreateBody,
   vMobileAssignedorderWorkorderCreateBody,
+  vMobileAssignedorderWorkorderListQuery,
   vMobileAssignedorderWorkorderPartialUpdateBody,
   vMobileAssignedorderactivityCreateBody,
+  vMobileAssignedorderactivityListQuery,
   vMobileAssignedorderactivityPartialUpdateBody,
   vMobileAssignedorderdocumentCreateBody,
+  vMobileAssignedorderdocumentListQuery,
   vMobileAssignedorderdocumentPartialUpdateBody,
   vMobileAssignedordermaterialCreateBody,
+  vMobileAssignedordermaterialListQuery,
+  vMobileAssignedordermaterialOrderlinesListQuery,
   vMobileAssignedordermaterialPartialUpdateBody,
+  vMobileAssignedordermaterialQuotationListQuery,
   vMobileTripCreateBody,
+  vMobileTripListQuery,
   vMobileTripOrderCreateBody,
+  vMobileTripOrderListQuery,
   vMobileTripOrderPartialUpdateBody,
   vMobileTripPartialUpdateBody,
   vMobileTripStatuscodeActionCreateBody,
+  vMobileTripStatuscodeActionListQuery,
   vMobileTripStatuscodeActionPartialUpdateBody,
+  vMobileTripStatuscodeAutocompleteListQuery,
   vMobileTripStatuscodeCreateBody,
+  vMobileTripStatuscodeListQuery,
   vMobileTripStatuscodePartialUpdateBody,
   vMobileUnassignUserCreateBody,
   vMobileUnassignUserTripCreateBody,
   vMobileUserOrderAvailabilityCreateBody,
+  vMobileUserOrderAvailabilityListQuery,
   vMobileUserOrderAvailabilityPartialUpdateBody,
   vMobileUserTripAvailabilityCreateBody,
+  vMobileUserTripAvailabilityListQuery,
   vMobileUserTripAvailabilityPartialUpdateBody,
   vOrderCostCreateBody,
+  vOrderCostListQuery,
   vOrderCostPartialUpdateBody,
   vOrderDocumentCreateBody,
+  vOrderDocumentListQuery,
   vOrderDocumentPartialUpdateBody,
   vOrderFilterCreateBody,
+  vOrderFilterGetExamplesListQuery,
+  vOrderFilterListQuery,
   vOrderFilterPartialUpdateBody,
+  vOrderFilterSimpleListListQuery,
   vOrderInfolineCreateBody,
+  vOrderInfolineListQuery,
   vOrderInfolinePartialUpdateBody,
+  vOrderOrderAllForCustomerNotAcceptedListQuery,
+  vOrderOrderAllForCustomerV2ListQuery,
+  vOrderOrderAllForEquipmentLocationListQuery,
+  vOrderOrderAssignableListQuery,
+  vOrderOrderAutocompleteListQuery,
   vOrderOrderCreateBody,
+  vOrderOrderDispatchListAllListQuery,
+  vOrderOrderDispatchListFinishedListQuery,
+  vOrderOrderDispatchListInprogressListQuery,
+  vOrderOrderDispatchListUnassignedListQuery,
+  vOrderOrderGetWithinRangeListQuery,
+  vOrderOrderListQuery,
+  vOrderOrderMaintenanceOrdersListQuery,
+  vOrderOrderMonthEventsListQuery,
+  vOrderOrderOrderAvailabilityListQuery,
   vOrderOrderPartialUpdateBody,
+  vOrderOrderPastListQuery,
+  vOrderOrderSalesOrdersListQuery,
   vOrderOrderlineCreateBody,
+  vOrderOrderlineLatestWorkordersListQuery,
+  vOrderOrderlineListQuery,
+  vOrderOrderlineOrderListQuery,
   vOrderOrderlinePartialUpdateBody,
   vOrderStatusCreateBody,
+  vOrderStatusesListQuery,
   vQuotationChapterCreateBody,
+  vQuotationChapterListQuery,
   vQuotationChapterPartialUpdateBody,
   vQuotationCostCreateBody,
+  vQuotationCostListQuery,
   vQuotationCostPartialUpdateBody,
   vQuotationDocumentCreateBody,
+  vQuotationDocumentListQuery,
   vQuotationDocumentPartialUpdateBody,
   vQuotationOfferCreateBody,
+  vQuotationOfferListQuery,
   vQuotationOfferPartialUpdateBody,
+  vQuotationQuotationAutocompleteListQuery,
   vQuotationQuotationCreateBody,
   vQuotationQuotationImageCreateBody,
+  vQuotationQuotationImageListQuery,
   vQuotationQuotationImagePartialUpdateBody,
   vQuotationQuotationLineChapterCreateBody,
   vQuotationQuotationLineCreateBody,
   vQuotationQuotationLineImageCreateBody,
+  vQuotationQuotationLineImageListQuery,
   vQuotationQuotationLineImagePartialUpdateBody,
+  vQuotationQuotationLineListQuery,
   vQuotationQuotationLinePartialUpdateBody,
+  vQuotationQuotationListQuery,
+  vQuotationQuotationNotAcceptedListQuery,
   vQuotationQuotationPartialUpdateBody,
+  vQuotationQuotationPreliminaryListQuery,
+  vQuotationQuotationSentListQuery,
   vQuotationStatusCreateBody,
   vSetLanguageCreateBody,
   vStatuscodeActionCreateBody,
+  vStatuscodeActionListQuery,
   vStatuscodeActionPartialUpdateBody,
+  vStatuscodeStatuscodeAutocompleteListQuery,
   vStatuscodeStatuscodeCreateBody,
+  vStatuscodeStatuscodeListQuery,
   vStatuscodeStatuscodePartialUpdateBody,
   vTeamleaderOauthCreateBody,
+  vTeamleaderProductCategoryListQuery,
+  vTeamleaderTaxRateListQuery,
   vTeamleaderTlProductCreateCreateBody,
   vTeamleaderTlProductCreateLinkCreateBody,
+  vTeamleaderTlProductListListQuery,
   vTeamleaderTravelHoursProductPartialUpdateBody,
   vTeamleaderUpdateDepartmentPartialUpdateBody,
   vTeamleaderUpdateEnabledPartialUpdateBody,
@@ -1009,6 +1168,247 @@ import {
   vTeamleaderUpdateProductCategoryPartialUpdateBody,
   vTeamleaderWorkHoursProductPartialUpdateBody,
 } from './valibot.gen'
+
+import type {
+  CompanyActivityListResponse,
+  CompanyActivityRetrieveResponse,
+  CompanyApiuserListResponse,
+  CompanyApiuserRetrieveResponse,
+  CompanyBranchAutocompleteListResponse,
+  CompanyBranchListResponse,
+  CompanyBranchMyRetrieveResponse,
+  CompanyBranchRetrieveResponse,
+  CompanyBudgetListResponse,
+  CompanyBudgetRetrieveResponse,
+  CompanyCustomeruserListResponse,
+  CompanyCustomeruserRetrieveResponse,
+  CompanyEmployeeuserListResponse,
+  CompanyEmployeeuserRetrieveResponse,
+  CompanyEngineerEventTypeListResponse,
+  CompanyEngineerEventTypeRetrieveResponse,
+  CompanyEngineerEventTypeStatsListResponse,
+  CompanyEngineerGetLocationsListResponse,
+  CompanyEngineerListForSelectListResponse,
+  CompanyEngineerListResponse,
+  CompanyEngineerRetrieveResponse,
+  CompanyEngineereventListResponse,
+  CompanyEngineereventUpdateRetrieveResponse,
+  CompanyImportListResponse,
+  CompanyImportRetrieveResponse,
+  CompanyLeaveTypeListForSelectListResponse,
+  CompanyLeaveTypeListResponse,
+  CompanyLeaveTypeRetrieveResponse,
+  CompanyPartnerListResponse,
+  CompanyPartnerRequestListResponse,
+  CompanyPartnerRequestReceivedListResponse,
+  CompanyPartnerRequestRetrieveResponse,
+  CompanyPartnerRequestSentListResponse,
+  CompanyPartnerRetrieveResponse,
+  CompanyPictureListResponse,
+  CompanyPictureRetrieveResponse,
+  CompanyPlanninguserListResponse,
+  CompanyPlanninguserRetrieveResponse,
+  CompanyProjectListForSelectListResponse,
+  CompanyProjectListResponse,
+  CompanyProjectRetrieveResponse,
+  CompanyPublicPicturesListResponse,
+  CompanySalesuserListResponse,
+  CompanySalesuserRetrieveResponse,
+  CompanySalesusercustomerListResponse,
+  CompanySalesusercustomerMyListResponse,
+  CompanySalesusercustomerMyRetrieveResponse,
+  CompanySalesusercustomerRetrieveResponse,
+  CompanyStudentuserListResponse,
+  CompanyStudentuserRetrieveResponse,
+  CompanyTemplateListResponse,
+  CompanyTemplateRetrieveResponse,
+  CompanyUserLeaveHoursAdminAllNotAcceptedListResponse,
+  CompanyUserLeaveHoursAdminListResponse,
+  CompanyUserLeaveHoursAdminRetrieveResponse,
+  CompanyUserLeaveHoursAllNotAcceptedListResponse,
+  CompanyUserLeaveHoursListResponse,
+  CompanyUserLeaveHoursRetrieveResponse,
+  CompanyUserListListResponse,
+  CompanyUserSettingsRetrieveResponse,
+  CompanyUserSickLeaveAdminAllSickListResponse,
+  CompanyUserSickLeaveAdminAllUnconfirmedListResponse,
+  CompanyUserSickLeaveAdminListResponse,
+  CompanyUserSickLeaveAdminRetrieveResponse,
+  CompanyUserSickLeaveListResponse,
+  CompanyUserSickLeaveRetrieveResponse,
+  CompanyUserWorkhoursListResponse,
+  CompanyUserWorkhoursRetrieveResponse,
+  CompanyUsersStudentProfileMeRetrieveResponse,
+  ConnectorGrippSettingsRetrieveResponse,
+  CustomerCustomerAutocompleteListResponse,
+  CustomerCustomerListResponse,
+  CustomerCustomerMyRetrieveResponse,
+  CustomerCustomerRetrieveResponse,
+  CustomerDocumentListResponse,
+  CustomerDocumentRetrieveResponse,
+  CustomerMaintenanceContractListResponse,
+  CustomerMaintenanceContractRetrieveResponse,
+  CustomerMaintenanceEquipmentListResponse,
+  CustomerMaintenanceEquipmentRetrieveResponse,
+  EquipmentBuildingAutocompleteListResponse,
+  EquipmentBuildingListForSelectListResponse,
+  EquipmentBuildingListResponse,
+  EquipmentBuildingRetrieveResponse,
+  EquipmentEquipmentAutocompleteListResponse,
+  EquipmentEquipmentDocumentListResponse,
+  EquipmentEquipmentDocumentRetrieveResponse,
+  EquipmentEquipmentListResponse,
+  EquipmentEquipmentRetrieveResponse,
+  EquipmentEquipmentStateListResponse,
+  EquipmentLocationAutocompleteListResponse,
+  EquipmentLocationDocumentListResponse,
+  EquipmentLocationDocumentRetrieveResponse,
+  EquipmentLocationListForSelectListResponse,
+  EquipmentLocationListResponse,
+  EquipmentLocationRetrieveResponse,
+  InventoryInventoryLocationsForMaterialListResponse,
+  InventoryInventoryLocationsListResponse,
+  InventoryInventoryMaterialsForLocationListResponse,
+  InventoryInventoryMaterialsListResponse,
+  InventoryMaterialAutocompleteListResponse,
+  InventoryMaterialListResponse,
+  InventoryMaterialRetrieveResponse,
+  InventoryPurchaseorderEntryListResponse,
+  InventoryPurchaseorderEntryRetrieveResponse,
+  InventoryPurchaseorderListResponse,
+  InventoryPurchaseorderMaterialListResponse,
+  InventoryPurchaseorderMaterialRetrieveResponse,
+  InventoryPurchaseorderRetrieveResponse,
+  InventoryPurchaseorderStatusListResponse,
+  InventoryPurchaseorderStatusRetrieveResponse,
+  InventoryStockLocationListResponse,
+  InventoryStockLocationRetrieveResponse,
+  InventoryStockmutationsimpleListListResponse,
+  InventorySupplierAutocompleteListResponse,
+  InventorySupplierListResponse,
+  InventorySupplierReservationAutocompleteListResponse,
+  InventorySupplierReservationListResponse,
+  InventorySupplierReservationRetrieveResponse,
+  InventorySupplierReservationmaterialListResponse,
+  InventorySupplierReservationmaterialRetrieveResponse,
+  InventorySupplierRetrieveResponse,
+  InvoiceEmailGetDocumentsListResponse,
+  InvoiceEmailListResponse,
+  InvoiceEmailRetrieveResponse,
+  InvoiceInvoiceAutocompleteListResponse,
+  InvoiceInvoiceLineListResponse,
+  InvoiceInvoiceLineRetrieveResponse,
+  InvoiceInvoiceListResponse,
+  InvoiceInvoicePreliminaryListResponse,
+  InvoiceInvoiceRetrieveResponse,
+  InvoiceInvoiceSentListResponse,
+  InvoicePurchaseListResponse,
+  InvoicePurchaseRetrieveResponse,
+  InvoicePurchaseYearListResponse,
+  MemberContractListResponse,
+  MemberContractRetrieveResponse,
+  MemberGetModuleDataListResponse,
+  MemberListPublicBranchesListResponse,
+  MemberListPublicListResponse,
+  MemberMemberGetExcludeMeListResponse,
+  MemberMemberGetForPartnerSelectListResponse,
+  MemberMemberListResponse,
+  MemberMemberMeRetrieveResponse,
+  MemberMemberMySettingsRetrieveResponse,
+  MemberMemberRetrieveResponse,
+  MemberModuleListResponse,
+  MemberModulePartListResponse,
+  MemberModulePartRetrieveResponse,
+  MemberModuleRetrieveResponse,
+  MobileAssignedorderFinishedListListResponse,
+  MobileAssignedorderListAppListResponse,
+  MobileAssignedorderListResponse,
+  MobileAssignedorderRetrieveResponse,
+  MobileAssignedorderWorkorderListResponse,
+  MobileAssignedorderWorkorderRetrieveResponse,
+  MobileAssignedorderactivityListResponse,
+  MobileAssignedorderactivityRetrieveResponse,
+  MobileAssignedorderdocumentListResponse,
+  MobileAssignedorderdocumentRetrieveResponse,
+  MobileAssignedordermaterialListResponse,
+  MobileAssignedordermaterialOrderlinesListResponse,
+  MobileAssignedordermaterialQuotationListResponse,
+  MobileAssignedordermaterialRetrieveResponse,
+  MobileTripListResponse,
+  MobileTripOrderListResponse,
+  MobileTripOrderRetrieveResponse,
+  MobileTripRetrieveResponse,
+  MobileTripStatuscodeActionListResponse,
+  MobileTripStatuscodeActionRetrieveResponse,
+  MobileTripStatuscodeAutocompleteListResponse,
+  MobileTripStatuscodeListResponse,
+  MobileTripStatuscodeRetrieveResponse,
+  MobileUserOrderAvailabilityListResponse,
+  MobileUserOrderAvailabilityRetrieveResponse,
+  MobileUserTripAvailabilityListResponse,
+  MobileUserTripAvailabilityRetrieveResponse,
+  OrderCostListResponse,
+  OrderCostRetrieveResponse,
+  OrderDocumentListResponse,
+  OrderDocumentRetrieveResponse,
+  OrderFilterGetExamplesListResponse,
+  OrderFilterListResponse,
+  OrderFilterRetrieveResponse,
+  OrderFilterSimpleListListResponse,
+  OrderInfolineListResponse,
+  OrderInfolineRetrieveResponse,
+  OrderOrderAllForCustomerNotAcceptedListResponse,
+  OrderOrderAllForCustomerV2ListResponse,
+  OrderOrderAllForEquipmentLocationListResponse,
+  OrderOrderAssignableListResponse,
+  OrderOrderAutocompleteListResponse,
+  OrderOrderDispatchListAllListResponse,
+  OrderOrderDispatchListFinishedListResponse,
+  OrderOrderDispatchListInprogressListResponse,
+  OrderOrderDispatchListUnassignedListResponse,
+  OrderOrderGetWithinRangeListResponse,
+  OrderOrderListResponse,
+  OrderOrderMaintenanceOrdersListResponse,
+  OrderOrderMonthEventsListResponse,
+  OrderOrderOrderAvailabilityListResponse,
+  OrderOrderPastListResponse,
+  OrderOrderRetrieveResponse,
+  OrderOrderSalesOrdersListResponse,
+  OrderOrderlineLatestWorkordersListResponse,
+  OrderOrderlineListResponse,
+  OrderOrderlineOrderListResponse,
+  OrderOrderlineRetrieveResponse,
+  OrderStatusesListResponse,
+  QuotationChapterListResponse,
+  QuotationChapterRetrieveResponse,
+  QuotationCostListResponse,
+  QuotationCostRetrieveResponse,
+  QuotationDocumentListResponse,
+  QuotationDocumentRetrieveResponse,
+  QuotationOfferListResponse,
+  QuotationOfferRetrieveResponse,
+  QuotationQuotationAutocompleteListResponse,
+  QuotationQuotationImageListResponse,
+  QuotationQuotationImageRetrieveResponse,
+  QuotationQuotationLineImageListResponse,
+  QuotationQuotationLineImageRetrieveResponse,
+  QuotationQuotationLineListResponse,
+  QuotationQuotationLineRetrieveResponse,
+  QuotationQuotationListResponse,
+  QuotationQuotationNotAcceptedListResponse,
+  QuotationQuotationPreliminaryListResponse,
+  QuotationQuotationRetrieveResponse,
+  QuotationQuotationSentListResponse,
+  StatuscodeActionListResponse,
+  StatuscodeActionRetrieveResponse,
+  StatuscodeStatuscodeAutocompleteListResponse,
+  StatuscodeStatuscodeListResponse,
+  StatuscodeStatuscodeRetrieveResponse,
+  TeamleaderProductCategoryListResponse,
+  TeamleaderTaxRateListResponse,
+  TeamleaderTlProductListListResponse,
+} from './types.gen'
+
 
 /** A list, or a singleton's retrieve: its generated `*Options` and `*QueryKey` factories. */
 export interface ResourceRead {
@@ -1037,6 +1437,41 @@ interface ResourceBase {
    * `path`: the reads a write to this resource makes stale.
    */
   readonly reads: readonly string[]
+  /**
+   * `invalidateReads(this.reads)`: refreshes every one of them. Optional
+   * because `satisfies` only checks what is declared, and this is the one
+   * member present on every resource whatever its kind.
+   */
+  readonly invalidate: (queryClient?: QueryClient) => Promise<unknown[]>
+}
+
+/**
+ * The conveniences a resource carries, declared per kind so the generated
+ * object literal is checked against the shape it claims.
+ *
+ * They are the *call shapes* the bindings above imply, so a consumer never
+ * re-derives them from `kind` and `id`: `retrieveOptions` builds the path a
+ * collection needs and omits it for a singleton, and `updateVars` is the
+ * `{path, body}` a collection sends and the bare `{body}` a singleton does.
+ *
+ * Each is optional, and is present exactly when the resource has the operation
+ * it wraps - so `resource.retrieve && resource.retrieveOptions` is never
+ * needed, but `resource.listOptions` on an action is a type error, which is
+ * the point.
+ */
+export interface ResourceConveniences {
+  /** The generated list options, plus the base page parameters. */
+  readonly listOptions?: (query: ServerPagedListQuery, filters?: readonly never[]) => unknown
+  /** The generated retrieve options; no id for a singleton. */
+  readonly retrieveOptions?: (...args: never[]) => unknown
+  /** The generated create mutation options. */
+  readonly createMutation?: () => unknown
+  /** The generated update mutation options. */
+  readonly updateMutation?: () => unknown
+  /** What an update sends, as the generated mutation's variables. */
+  readonly updateVars?: (...args: never[]) => unknown
+  /** The generated destroy mutation options. */
+  readonly destroyMutation?: () => unknown
 }
 
 /**
@@ -1047,7 +1482,7 @@ interface ResourceBase {
 export type Resource = CollectionResource<number> | CollectionResource<string> | SingletonResource | ActionResource
 
 /** Records addressed by id: the ordinary DRF viewset. */
-export interface CollectionResource<TId extends number | string> extends ResourceBase {
+export interface CollectionResource<TId extends number | string> extends ResourceBase, ResourceConveniences {
   readonly kind: 'collection'
   /**
    * How the retrieve declares its `{id}`. DRF says integer nearly
@@ -1064,102 +1499,372 @@ export interface CollectionResource<TId extends number | string> extends Resourc
 }
 
 /** The caller's own record (`member/me`, `branch-my`): read and updated without a path. */
-export interface SingletonResource extends ResourceBase {
+export interface SingletonResource extends ResourceBase, ResourceConveniences {
   readonly kind: 'singleton'
   readonly retrieve?: ResourceRead
   readonly update?: ResourceWrite
 }
 
 /** A pathless POST with no record behind it - a login, a bulk create. */
-export interface ActionResource extends ResourceBase {
+export interface ActionResource extends ResourceBase, ResourceConveniences {
   readonly kind: 'action'
   readonly create: ResourceWrite
 }
 
 export type ResourceKind = Resource['kind']
 
-/** `api/accounts/change-password` */
-export const accountsChangePassword = {
+/**
+ * The model types a resource of the same name shadows, so the api-client
+ * barrel leaves them out of its types.gen re-export instead of colliding. Each
+ * is reachable under its resource instead, as `<Resource>.Record`.
+ */
+export const shadowedModelTypes: readonly string[] = [
+  'ChangePassword',
+  'CustomerDocument',
+  'InvoiceEmail',
+  'MemberContract',
+  'OrderCost',
+  'OrderDocument',
+  'OrderFilter',
+  'OrderStatus',
+  'QuotationCost',
+  'QuotationDocument',
+  'QuotationStatus',
+]
+
+const accountsChangePasswordReads: readonly string[] = []
+
+const accountsChangePassword = {
   path: 'api/accounts/change-password',
   kind: 'action',
   create: {mutation: accountsChangePasswordCreateMutation, body: vAccountsChangePasswordCreateBody},
-  reads: [],
+  reads: accountsChangePasswordReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(accountsChangePasswordReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => accountsChangePasswordCreateMutation(),
 } as const satisfies Resource
 
-/** `api/accounts/login` */
-export const accountsLogin = {
+/** `api/accounts/change-password` */
+export const AccountsChangePassword = accountsChangePassword
+
+export declare namespace AccountsChangePassword {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsChangePasswordCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsChangePasswordCreateBody>
+}
+
+const accountsLoginReads: readonly string[] = []
+
+const accountsLogin = {
   path: 'api/accounts/login',
   kind: 'action',
   create: {mutation: accountsLoginCreateMutation, body: vAccountsLoginCreateBody},
-  reads: [],
+  reads: accountsLoginReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(accountsLoginReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => accountsLoginCreateMutation(),
 } as const satisfies Resource
 
-/** `api/accounts/logout` */
-export const accountsLogout = {
+/** `api/accounts/login` */
+export const AccountsLogin = accountsLogin
+
+export declare namespace AccountsLogin {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsLoginCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsLoginCreateBody>
+}
+
+const accountsLogoutReads: readonly string[] = []
+
+const accountsLogout = {
   path: 'api/accounts/logout',
   kind: 'action',
   create: {mutation: accountsLogoutCreateMutation, body: vAccountsLogoutCreateBody},
-  reads: [],
+  reads: accountsLogoutReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(accountsLogoutReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => accountsLogoutCreateMutation(),
 } as const satisfies Resource
 
-/** `api/accounts/register` */
-export const accountsRegister = {
+/** `api/accounts/logout` */
+export const AccountsLogout = accountsLogout
+
+export declare namespace AccountsLogout {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsLogoutCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsLogoutCreateBody>
+}
+
+const accountsRegisterReads: readonly string[] = []
+
+const accountsRegister = {
   path: 'api/accounts/register',
   kind: 'action',
   create: {mutation: accountsRegisterCreateMutation, body: vAccountsRegisterCreateBody},
-  reads: [],
+  reads: accountsRegisterReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(accountsRegisterReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => accountsRegisterCreateMutation(),
 } as const satisfies Resource
 
-/** `api/accounts/register-email` */
-export const accountsRegisterEmail = {
+/** `api/accounts/register` */
+export const AccountsRegister = accountsRegister
+
+export declare namespace AccountsRegister {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsRegisterCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsRegisterCreateBody>
+}
+
+const accountsRegisterEmailReads: readonly string[] = []
+
+const accountsRegisterEmail = {
   path: 'api/accounts/register-email',
   kind: 'action',
   create: {mutation: accountsRegisterEmailCreateMutation, body: vAccountsRegisterEmailCreateBody},
-  reads: [],
+  reads: accountsRegisterEmailReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(accountsRegisterEmailReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => accountsRegisterEmailCreateMutation(),
 } as const satisfies Resource
 
-/** `api/accounts/reset-password` */
-export const accountsResetPassword = {
+/** `api/accounts/register-email` */
+export const AccountsRegisterEmail = accountsRegisterEmail
+
+export declare namespace AccountsRegisterEmail {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsRegisterEmailCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsRegisterEmailCreateBody>
+}
+
+const accountsResetPasswordReads: readonly string[] = []
+
+const accountsResetPassword = {
   path: 'api/accounts/reset-password',
   kind: 'action',
   create: {mutation: accountsResetPasswordCreateMutation, body: vAccountsResetPasswordCreateBody},
-  reads: [],
+  reads: accountsResetPasswordReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(accountsResetPasswordReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => accountsResetPasswordCreateMutation(),
 } as const satisfies Resource
 
-/** `api/accounts/send-reset-password-link` */
-export const accountsSendResetPasswordLink = {
+/** `api/accounts/reset-password` */
+export const AccountsResetPassword = accountsResetPassword
+
+export declare namespace AccountsResetPassword {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsResetPasswordCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsResetPasswordCreateBody>
+}
+
+const accountsSendResetPasswordLinkReads: readonly string[] = []
+
+const accountsSendResetPasswordLink = {
   path: 'api/accounts/send-reset-password-link',
   kind: 'action',
   create: {mutation: accountsSendResetPasswordLinkCreateMutation, body: vAccountsSendResetPasswordLinkCreateBody},
-  reads: [],
+  reads: accountsSendResetPasswordLinkReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(accountsSendResetPasswordLinkReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => accountsSendResetPasswordLinkCreateMutation(),
 } as const satisfies Resource
 
-/** `api/accounts/verify-email` */
-export const accountsVerifyEmail = {
+/** `api/accounts/send-reset-password-link` */
+export const AccountsSendResetPasswordLink = accountsSendResetPasswordLink
+
+export declare namespace AccountsSendResetPasswordLink {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsSendResetPasswordLinkCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsSendResetPasswordLinkCreateBody>
+}
+
+const accountsVerifyEmailReads: readonly string[] = []
+
+const accountsVerifyEmail = {
   path: 'api/accounts/verify-email',
   kind: 'action',
   create: {mutation: accountsVerifyEmailCreateMutation, body: vAccountsVerifyEmailCreateBody},
-  reads: [],
+  reads: accountsVerifyEmailReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(accountsVerifyEmailReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => accountsVerifyEmailCreateMutation(),
 } as const satisfies Resource
 
-/** `api/accounts/verify-registration` */
-export const accountsVerifyRegistration = {
+/** `api/accounts/verify-email` */
+export const AccountsVerifyEmail = accountsVerifyEmail
+
+export declare namespace AccountsVerifyEmail {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsVerifyEmailCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsVerifyEmailCreateBody>
+}
+
+const accountsVerifyRegistrationReads: readonly string[] = []
+
+const accountsVerifyRegistration = {
   path: 'api/accounts/verify-registration',
   kind: 'action',
   create: {mutation: accountsVerifyRegistrationCreateMutation, body: vAccountsVerifyRegistrationCreateBody},
-  reads: [],
+  reads: accountsVerifyRegistrationReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(accountsVerifyRegistrationReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => accountsVerifyRegistrationCreateMutation(),
 } as const satisfies Resource
 
-/** `api/change-password` */
-export const changePassword = {
+/** `api/accounts/verify-registration` */
+export const AccountsVerifyRegistration = accountsVerifyRegistration
+
+export declare namespace AccountsVerifyRegistration {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsVerifyRegistrationCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsVerifyRegistrationCreateBody>
+}
+
+const changePasswordReads: readonly string[] = []
+
+const changePassword = {
   path: 'api/change-password',
   kind: 'action',
   create: {mutation: changePasswordCreateMutation, body: vChangePasswordCreateBody},
-  reads: [],
+  reads: changePasswordReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(changePasswordReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => changePasswordCreateMutation(),
 } as const satisfies Resource
 
-/** `api/company/activity` */
-export const companyActivity = {
+/** `api/change-password` */
+export const ChangePassword = changePassword
+
+export declare namespace ChangePassword {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vChangePasswordCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vChangePasswordCreateBody>
+}
+
+const companyActivityReads: readonly string[] = ['companyActivityList', 'companyActivityRetrieve']
+
+const companyActivity = {
   path: 'api/company/activity',
   kind: 'collection',
   id: 'number',
@@ -1168,11 +1873,70 @@ export const companyActivity = {
   create: {mutation: companyActivityCreateMutation, body: vCompanyActivityCreateBody},
   update: {mutation: companyActivityPartialUpdateMutation, body: vCompanyActivityPartialUpdateBody},
   destroy: {mutation: companyActivityDestroyMutation},
-  reads: ['companyActivityList', 'companyActivityRetrieve'],
+  reads: companyActivityReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyActivityListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyActivityReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyActivityRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyActivityCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyActivityPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyActivity.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyActivityDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/apiuser` */
-export const companyApiuser = {
+/** `api/company/activity` */
+export const CompanyActivity = companyActivity
+
+export declare namespace CompanyActivity {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyActivityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyActivityListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyActivityRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyActivityCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyActivityCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyActivityPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyActivityPartialUpdateBody>
+}
+
+const companyApiuserReads: readonly string[] = ['companyApiuserDummyEndpointRetrieve', 'companyApiuserList', 'companyApiuserRetrieve']
+
+const companyApiuser = {
   path: 'api/company/apiuser',
   kind: 'collection',
   id: 'number',
@@ -1181,11 +1945,70 @@ export const companyApiuser = {
   create: {mutation: companyApiuserCreateMutation, body: vCompanyApiuserCreateBody},
   update: {mutation: companyApiuserPartialUpdateMutation, body: vCompanyApiuserPartialUpdateBody},
   destroy: {mutation: companyApiuserDestroyMutation},
-  reads: ['companyApiuserDummyEndpointRetrieve', 'companyApiuserList', 'companyApiuserRetrieve'],
+  reads: companyApiuserReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyApiuserListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyApiuserReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyApiuserRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyApiuserCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyApiuserPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyApiuser.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyApiuserDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/branch` */
-export const companyBranch = {
+/** `api/company/apiuser` */
+export const CompanyApiuser = companyApiuser
+
+export declare namespace CompanyApiuser {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyApiuserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyApiuserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyApiuserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyApiuserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyApiuserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyApiuserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyApiuserPartialUpdateBody>
+}
+
+const companyBranchReads: readonly string[] = ['companyBranchAutocompleteList', 'companyBranchDashboardRetrieve', 'companyBranchFirstRetrieve', 'companyBranchList', 'companyBranchRetrieve']
+
+const companyBranch = {
   path: 'api/company/branch',
   kind: 'collection',
   id: 'number',
@@ -1194,29 +2017,162 @@ export const companyBranch = {
   create: {mutation: companyBranchCreateMutation, body: vCompanyBranchCreateBody},
   update: {mutation: companyBranchPartialUpdateMutation, body: vCompanyBranchPartialUpdateBody},
   destroy: {mutation: companyBranchDestroyMutation},
-  reads: ['companyBranchAutocompleteList', 'companyBranchDashboardRetrieve', 'companyBranchFirstRetrieve', 'companyBranchList', 'companyBranchRetrieve'],
+  reads: companyBranchReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyBranchListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyBranchReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyBranchRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyBranchCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyBranchPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyBranch.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyBranchDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/branch/autocomplete` */
-export const companyBranchAutocomplete = {
+/** `api/company/branch` */
+export const CompanyBranch = companyBranch
+
+export declare namespace CompanyBranch {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyBranchListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyBranchListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyBranchRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyBranchCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyBranchCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyBranchPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyBranchPartialUpdateBody>
+}
+
+const companyBranchAutocompleteFilters: readonly (keyof CompanyBranchAutocomplete.ListQuery)[] = ['id']
+
+const companyBranchAutocompleteReads: readonly string[] = ['companyBranchAutocompleteList']
+
+const companyBranchAutocomplete = {
   path: 'api/company/branch/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: companyBranchAutocompleteListOptions, queryKey: companyBranchAutocompleteListQueryKey},
-  reads: ['companyBranchAutocompleteList'],
+  reads: companyBranchAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanyBranchAutocomplete` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanyBranchAutocomplete.ListQuery)[] = companyBranchAutocompleteFilters) =>
+    companyBranchAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyBranchAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/company/branch-my` */
-export const companyBranchMy = {
+/** `api/company/branch/autocomplete` */
+export const CompanyBranchAutocomplete = companyBranchAutocomplete
+
+export declare namespace CompanyBranchAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyBranchAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyBranchAutocompleteListQuery>
+}
+
+const companyBranchMyReads: readonly string[] = ['companyBranchMyRetrieve']
+
+const companyBranchMy = {
   path: 'api/company/branch-my',
   kind: 'singleton',
   retrieve: {options: companyBranchMyRetrieveOptions, queryKey: companyBranchMyRetrieveQueryKey},
   update: {mutation: companyBranchMyPartialUpdateMutation, body: vCompanyBranchMyPartialUpdateBody},
-  reads: ['companyBranchMyRetrieve'],
+  reads: companyBranchMyReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyBranchMyReads),
+  /** The retrieve options for this record: no path, because it is the caller's own. */
+  retrieveOptions: () => companyBranchMyRetrieveOptions(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyBranchMyPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: CompanyBranchMy.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/company/budget` */
-export const companyBudget = {
+/** `api/company/branch-my` */
+export const CompanyBranchMy = companyBranchMy
+
+export declare namespace CompanyBranchMy {
+  /** What `retrieve` answers with. */
+  export type Record = CompanyBranchMyRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyBranchMyPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyBranchMyPartialUpdateBody>
+}
+
+const companyBudgetReads: readonly string[] = ['companyBudgetCostsRetrieve', 'companyBudgetExpectedCostsRetrieve', 'companyBudgetList', 'companyBudgetRetrieve']
+
+const companyBudget = {
   path: 'api/company/budget',
   kind: 'collection',
   id: 'number',
@@ -1225,11 +2181,70 @@ export const companyBudget = {
   create: {mutation: companyBudgetCreateMutation, body: vCompanyBudgetCreateBody},
   update: {mutation: companyBudgetPartialUpdateMutation, body: vCompanyBudgetPartialUpdateBody},
   destroy: {mutation: companyBudgetDestroyMutation},
-  reads: ['companyBudgetCostsRetrieve', 'companyBudgetExpectedCostsRetrieve', 'companyBudgetList', 'companyBudgetRetrieve'],
+  reads: companyBudgetReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyBudgetListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyBudgetReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyBudgetRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyBudgetCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyBudgetPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyBudget.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyBudgetDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/customeruser` */
-export const companyCustomeruser = {
+/** `api/company/budget` */
+export const CompanyBudget = companyBudget
+
+export declare namespace CompanyBudget {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyBudgetListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyBudgetListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyBudgetRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyBudgetCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyBudgetCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyBudgetPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyBudgetPartialUpdateBody>
+}
+
+const companyCustomeruserReads: readonly string[] = ['companyCustomeruserList', 'companyCustomeruserRetrieve']
+
+const companyCustomeruser = {
   path: 'api/company/customeruser',
   kind: 'collection',
   id: 'number',
@@ -1238,11 +2253,70 @@ export const companyCustomeruser = {
   create: {mutation: companyCustomeruserCreateMutation, body: vCompanyCustomeruserCreateBody},
   update: {mutation: companyCustomeruserPartialUpdateMutation, body: vCompanyCustomeruserPartialUpdateBody},
   destroy: {mutation: companyCustomeruserDestroyMutation},
-  reads: ['companyCustomeruserList', 'companyCustomeruserRetrieve'],
+  reads: companyCustomeruserReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyCustomeruserListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyCustomeruserReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyCustomeruserRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyCustomeruserCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyCustomeruserPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyCustomeruser.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyCustomeruserDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/employeeuser` */
-export const companyEmployeeuser = {
+/** `api/company/customeruser` */
+export const CompanyCustomeruser = companyCustomeruser
+
+export declare namespace CompanyCustomeruser {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyCustomeruserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyCustomeruserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyCustomeruserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyCustomeruserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyCustomeruserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyCustomeruserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyCustomeruserPartialUpdateBody>
+}
+
+const companyEmployeeuserReads: readonly string[] = ['companyEmployeeuserList', 'companyEmployeeuserRetrieve']
+
+const companyEmployeeuser = {
   path: 'api/company/employeeuser',
   kind: 'collection',
   id: 'number',
@@ -1251,11 +2325,70 @@ export const companyEmployeeuser = {
   create: {mutation: companyEmployeeuserCreateMutation, body: vCompanyEmployeeuserCreateBody},
   update: {mutation: companyEmployeeuserPartialUpdateMutation, body: vCompanyEmployeeuserPartialUpdateBody},
   destroy: {mutation: companyEmployeeuserDestroyMutation},
-  reads: ['companyEmployeeuserList', 'companyEmployeeuserRetrieve'],
+  reads: companyEmployeeuserReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyEmployeeuserListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyEmployeeuserReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyEmployeeuserRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyEmployeeuserCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyEmployeeuserPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyEmployeeuser.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyEmployeeuserDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/engineer` */
-export const companyEngineer = {
+/** `api/company/employeeuser` */
+export const CompanyEmployeeuser = companyEmployeeuser
+
+export declare namespace CompanyEmployeeuser {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyEmployeeuserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyEmployeeuserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyEmployeeuserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyEmployeeuserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyEmployeeuserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyEmployeeuserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyEmployeeuserPartialUpdateBody>
+}
+
+const companyEngineerReads: readonly string[] = ['companyEngineerDeviceRetrieve', 'companyEngineerGetLocationsList', 'companyEngineerInfoRetrieve', 'companyEngineerList', 'companyEngineerListForSelectList', 'companyEngineerRetrieve']
+
+const companyEngineer = {
   path: 'api/company/engineer',
   kind: 'collection',
   id: 'number',
@@ -1264,11 +2397,70 @@ export const companyEngineer = {
   create: {mutation: companyEngineerCreateMutation, body: vCompanyEngineerCreateBody},
   update: {mutation: companyEngineerPartialUpdateMutation, body: vCompanyEngineerPartialUpdateBody},
   destroy: {mutation: companyEngineerDestroyMutation},
-  reads: ['companyEngineerDeviceRetrieve', 'companyEngineerGetLocationsList', 'companyEngineerInfoRetrieve', 'companyEngineerList', 'companyEngineerListForSelectList', 'companyEngineerRetrieve'],
+  reads: companyEngineerReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyEngineerListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyEngineerReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyEngineerRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyEngineerCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyEngineerPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyEngineer.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyEngineerDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/engineer-event-type` */
-export const companyEngineerEventType = {
+/** `api/company/engineer` */
+export const CompanyEngineer = companyEngineer
+
+export declare namespace CompanyEngineer {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyEngineerListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyEngineerListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyEngineerRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyEngineerCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyEngineerCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyEngineerPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyEngineerPartialUpdateBody>
+}
+
+const companyEngineerEventTypeReads: readonly string[] = ['companyEngineerEventTypeList', 'companyEngineerEventTypeRetrieve', 'companyEngineerEventTypeStatsList']
+
+const companyEngineerEventType = {
   path: 'api/company/engineer-event-type',
   kind: 'collection',
   id: 'number',
@@ -1277,67 +2469,320 @@ export const companyEngineerEventType = {
   create: {mutation: companyEngineerEventTypeCreateMutation, body: vCompanyEngineerEventTypeCreateBody},
   update: {mutation: companyEngineerEventTypePartialUpdateMutation, body: vCompanyEngineerEventTypePartialUpdateBody},
   destroy: {mutation: companyEngineerEventTypeDestroyMutation},
-  reads: ['companyEngineerEventTypeList', 'companyEngineerEventTypeRetrieve', 'companyEngineerEventTypeStatsList'],
+  reads: companyEngineerEventTypeReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyEngineerEventTypeListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyEngineerEventTypeReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyEngineerEventTypeRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyEngineerEventTypeCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyEngineerEventTypePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyEngineerEventType.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyEngineerEventTypeDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/engineer-event-type/stats` */
-export const companyEngineerEventTypeStats = {
+/** `api/company/engineer-event-type` */
+export const CompanyEngineerEventType = companyEngineerEventType
+
+export declare namespace CompanyEngineerEventType {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyEngineerEventTypeListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyEngineerEventTypeListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyEngineerEventTypeRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyEngineerEventTypeCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyEngineerEventTypeCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyEngineerEventTypePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyEngineerEventTypePartialUpdateBody>
+}
+
+const companyEngineerEventTypeStatsFilters: readonly (keyof CompanyEngineerEventTypeStats.ListQuery)[] = ['engineer', 'year']
+
+const companyEngineerEventTypeStatsReads: readonly string[] = ['companyEngineerEventTypeStatsList']
+
+const companyEngineerEventTypeStats = {
   path: 'api/company/engineer-event-type/stats',
   kind: 'collection',
   id: 'number',
   list: {options: companyEngineerEventTypeStatsListOptions, queryKey: companyEngineerEventTypeStatsListQueryKey},
-  reads: ['companyEngineerEventTypeStatsList'],
+  reads: companyEngineerEventTypeStatsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanyEngineerEventTypeStats` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanyEngineerEventTypeStats.ListQuery)[] = companyEngineerEventTypeStatsFilters) =>
+    companyEngineerEventTypeStatsListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyEngineerEventTypeStatsReads),
 } as const satisfies Resource
 
-/** `api/company/engineer/get_locations` */
-export const companyEngineerGetLocations = {
+/** `api/company/engineer-event-type/stats` */
+export const CompanyEngineerEventTypeStats = companyEngineerEventTypeStats
+
+export declare namespace CompanyEngineerEventTypeStats {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyEngineerEventTypeStatsListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyEngineerEventTypeStatsListQuery>
+}
+
+const companyEngineerGetLocationsReads: readonly string[] = ['companyEngineerGetLocationsList']
+
+const companyEngineerGetLocations = {
   path: 'api/company/engineer/get_locations',
   kind: 'collection',
   id: 'number',
   list: {options: companyEngineerGetLocationsListOptions, queryKey: companyEngineerGetLocationsListQueryKey},
-  reads: ['companyEngineerGetLocationsList'],
+  reads: companyEngineerGetLocationsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyEngineerGetLocationsReads),
 } as const satisfies Resource
 
-/** `api/company/engineer/list-for-select` */
-export const companyEngineerListForSelect = {
+/** `api/company/engineer/get_locations` */
+export const CompanyEngineerGetLocations = companyEngineerGetLocations
+
+export declare namespace CompanyEngineerGetLocations {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyEngineerGetLocationsListResponse
+}
+
+const companyEngineerListForSelectReads: readonly string[] = ['companyEngineerListForSelectList']
+
+const companyEngineerListForSelect = {
   path: 'api/company/engineer/list-for-select',
   kind: 'collection',
   id: 'number',
   list: {options: companyEngineerListForSelectListOptions, queryKey: companyEngineerListForSelectListQueryKey},
-  reads: ['companyEngineerListForSelectList'],
+  reads: companyEngineerListForSelectReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyEngineerListForSelectReads),
 } as const satisfies Resource
 
-/** `api/company/engineerevent` */
-export const companyEngineerevent = {
+/** `api/company/engineer/list-for-select` */
+export const CompanyEngineerListForSelect = companyEngineerListForSelect
+
+export declare namespace CompanyEngineerListForSelect {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyEngineerListForSelectListResponse
+}
+
+const companyEngineereventFilters: readonly (keyof CompanyEngineerevent.ListQuery)[] = ['engineer']
+
+const companyEngineereventReads: readonly string[] = ['companyEngineereventList']
+
+const companyEngineerevent = {
   path: 'api/company/engineerevent',
   kind: 'collection',
   id: 'number',
   list: {options: companyEngineereventListOptions, queryKey: companyEngineereventListQueryKey},
   create: {mutation: companyEngineereventCreateMutation, body: vCompanyEngineereventCreateBody},
   destroy: {mutation: companyEngineereventDestroyMutation},
-  reads: ['companyEngineereventList'],
+  reads: companyEngineereventReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanyEngineerevent` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanyEngineerevent.ListQuery)[] = companyEngineereventFilters) =>
+    companyEngineereventListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyEngineereventReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyEngineereventCreateMutation(),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyEngineereventDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/engineerevent-update` */
-export const companyEngineereventUpdate = {
+/** `api/company/engineerevent` */
+export const CompanyEngineerevent = companyEngineerevent
+
+export declare namespace CompanyEngineerevent {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyEngineereventListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyEngineereventListQuery>
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyEngineereventCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyEngineereventCreateBody>
+}
+
+const companyEngineereventUpdateReads: readonly string[] = ['companyEngineereventUpdateRetrieve']
+
+const companyEngineereventUpdate = {
   path: 'api/company/engineerevent-update',
   kind: 'collection',
   id: 'number',
   retrieve: {options: companyEngineereventUpdateRetrieveOptions, queryKey: companyEngineereventUpdateRetrieveQueryKey},
   update: {mutation: companyEngineereventUpdatePartialUpdateMutation, body: vCompanyEngineereventUpdatePartialUpdateBody},
-  reads: ['companyEngineereventUpdateRetrieve'],
+  reads: companyEngineereventUpdateReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyEngineereventUpdateReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyEngineereventUpdateRetrieveOptions({path: {id}}),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyEngineereventUpdatePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyEngineereventUpdate.UpdateInput) => ({path: {id}, body}),
 } as const satisfies Resource
 
-/** `api/company/iban-check` */
-export const companyIbanCheck = {
+/** `api/company/engineerevent-update` */
+export const CompanyEngineereventUpdate = companyEngineereventUpdate
+
+export declare namespace CompanyEngineereventUpdate {
+  /** What `retrieve` answers with. */
+  export type Record = CompanyEngineereventUpdateRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyEngineereventUpdatePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyEngineereventUpdatePartialUpdateBody>
+}
+
+const companyIbanCheckReads: readonly string[] = []
+
+const companyIbanCheck = {
   path: 'api/company/iban-check',
   kind: 'action',
   create: {mutation: companyIbanCheckCreateMutation, body: vCompanyIbanCheckCreateBody},
-  reads: [],
+  reads: companyIbanCheckReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyIbanCheckReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyIbanCheckCreateMutation(),
 } as const satisfies Resource
 
-/** `api/company/import` */
-export const companyImport = {
+/** `api/company/iban-check` */
+export const CompanyIbanCheck = companyIbanCheck
+
+export declare namespace CompanyIbanCheck {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyIbanCheckCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyIbanCheckCreateBody>
+}
+
+const companyImportReads: readonly string[] = ['companyImportGetAllowedExtensionsRetrieve', 'companyImportGetLookupFieldsRetrieve', 'companyImportList', 'companyImportPreviewRetrieve', 'companyImportRequiredRetrieve', 'companyImportRetrieve']
+
+const companyImport = {
   path: 'api/company/import',
   kind: 'collection',
   id: 'number',
@@ -1346,11 +2791,70 @@ export const companyImport = {
   create: {mutation: companyImportCreateMutation, body: vCompanyImportCreateBody},
   update: {mutation: companyImportPartialUpdateMutation, body: vCompanyImportPartialUpdateBody},
   destroy: {mutation: companyImportDestroyMutation},
-  reads: ['companyImportGetAllowedExtensionsRetrieve', 'companyImportGetLookupFieldsRetrieve', 'companyImportList', 'companyImportPreviewRetrieve', 'companyImportRequiredRetrieve', 'companyImportRetrieve'],
+  reads: companyImportReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyImportListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyImportReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyImportRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyImportCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyImportPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyImport.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyImportDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/leave-type` */
-export const companyLeaveType = {
+/** `api/company/import` */
+export const CompanyImport = companyImport
+
+export declare namespace CompanyImport {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyImportListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyImportListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyImportRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyImportCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyImportCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyImportPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyImportPartialUpdateBody>
+}
+
+const companyLeaveTypeReads: readonly string[] = ['companyLeaveTypeList', 'companyLeaveTypeListForSelectList', 'companyLeaveTypeRetrieve']
+
+const companyLeaveType = {
   path: 'api/company/leave-type',
   kind: 'collection',
   id: 'number',
@@ -1359,20 +2863,112 @@ export const companyLeaveType = {
   create: {mutation: companyLeaveTypeCreateMutation, body: vCompanyLeaveTypeCreateBody},
   update: {mutation: companyLeaveTypePartialUpdateMutation, body: vCompanyLeaveTypePartialUpdateBody},
   destroy: {mutation: companyLeaveTypeDestroyMutation},
-  reads: ['companyLeaveTypeList', 'companyLeaveTypeListForSelectList', 'companyLeaveTypeRetrieve'],
+  reads: companyLeaveTypeReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyLeaveTypeListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyLeaveTypeReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyLeaveTypeRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyLeaveTypeCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyLeaveTypePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyLeaveType.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyLeaveTypeDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/leave-type/list_for_select` */
-export const companyLeaveTypeListForSelect = {
+/** `api/company/leave-type` */
+export const CompanyLeaveType = companyLeaveType
+
+export declare namespace CompanyLeaveType {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyLeaveTypeListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyLeaveTypeListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyLeaveTypeRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyLeaveTypeCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyLeaveTypeCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyLeaveTypePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyLeaveTypePartialUpdateBody>
+}
+
+const companyLeaveTypeListForSelectReads: readonly string[] = ['companyLeaveTypeListForSelectList']
+
+const companyLeaveTypeListForSelect = {
   path: 'api/company/leave-type/list_for_select',
   kind: 'collection',
   id: 'number',
   list: {options: companyLeaveTypeListForSelectListOptions, queryKey: companyLeaveTypeListForSelectListQueryKey},
-  reads: ['companyLeaveTypeListForSelectList'],
+  reads: companyLeaveTypeListForSelectReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyLeaveTypeListForSelectListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyLeaveTypeListForSelectReads),
 } as const satisfies Resource
 
-/** `api/company/partner` */
-export const companyPartner = {
+/** `api/company/leave-type/list_for_select` */
+export const CompanyLeaveTypeListForSelect = companyLeaveTypeListForSelect
+
+export declare namespace CompanyLeaveTypeListForSelect {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyLeaveTypeListForSelectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyLeaveTypeListForSelectListQuery>
+}
+
+const companyPartnerReads: readonly string[] = ['companyPartnerBranchesRetrieve', 'companyPartnerList', 'companyPartnerRetrieve']
+
+const companyPartner = {
   path: 'api/company/partner',
   kind: 'collection',
   id: 'number',
@@ -1381,11 +2977,70 @@ export const companyPartner = {
   create: {mutation: companyPartnerCreateMutation, body: vCompanyPartnerCreateBody},
   update: {mutation: companyPartnerPartialUpdateMutation, body: vCompanyPartnerPartialUpdateBody},
   destroy: {mutation: companyPartnerDestroyMutation},
-  reads: ['companyPartnerBranchesRetrieve', 'companyPartnerList', 'companyPartnerRetrieve'],
+  reads: companyPartnerReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyPartnerListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyPartnerReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyPartnerRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyPartnerCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyPartnerPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyPartner.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyPartnerDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/partner-request` */
-export const companyPartnerRequest = {
+/** `api/company/partner` */
+export const CompanyPartner = companyPartner
+
+export declare namespace CompanyPartner {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyPartnerListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyPartnerListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyPartnerRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyPartnerCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyPartnerCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyPartnerPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyPartnerPartialUpdateBody>
+}
+
+const companyPartnerRequestReads: readonly string[] = ['companyPartnerRequestList', 'companyPartnerRequestReceivedList', 'companyPartnerRequestRetrieve', 'companyPartnerRequestSentList']
+
+const companyPartnerRequest = {
   path: 'api/company/partner-request',
   kind: 'collection',
   id: 'number',
@@ -1394,30 +3049,161 @@ export const companyPartnerRequest = {
   create: {mutation: companyPartnerRequestCreateMutation, body: vCompanyPartnerRequestCreateBody},
   update: {mutation: companyPartnerRequestPartialUpdateMutation, body: vCompanyPartnerRequestPartialUpdateBody},
   destroy: {mutation: companyPartnerRequestDestroyMutation},
-  reads: ['companyPartnerRequestList', 'companyPartnerRequestReceivedList', 'companyPartnerRequestRetrieve', 'companyPartnerRequestSentList'],
+  reads: companyPartnerRequestReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyPartnerRequestListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyPartnerRequestReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyPartnerRequestRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyPartnerRequestCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyPartnerRequestPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyPartnerRequest.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyPartnerRequestDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/partner-request/received` */
-export const companyPartnerRequestReceived = {
+/** `api/company/partner-request` */
+export const CompanyPartnerRequest = companyPartnerRequest
+
+export declare namespace CompanyPartnerRequest {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyPartnerRequestListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyPartnerRequestListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyPartnerRequestRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyPartnerRequestCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyPartnerRequestCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyPartnerRequestPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyPartnerRequestPartialUpdateBody>
+}
+
+const companyPartnerRequestReceivedReads: readonly string[] = ['companyPartnerRequestReceivedList']
+
+const companyPartnerRequestReceived = {
   path: 'api/company/partner-request/received',
   kind: 'collection',
   id: 'number',
   list: {options: companyPartnerRequestReceivedListOptions, queryKey: companyPartnerRequestReceivedListQueryKey},
-  reads: ['companyPartnerRequestReceivedList'],
+  reads: companyPartnerRequestReceivedReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyPartnerRequestReceivedListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyPartnerRequestReceivedReads),
 } as const satisfies Resource
 
-/** `api/company/partner-request/sent` */
-export const companyPartnerRequestSent = {
+/** `api/company/partner-request/received` */
+export const CompanyPartnerRequestReceived = companyPartnerRequestReceived
+
+export declare namespace CompanyPartnerRequestReceived {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyPartnerRequestReceivedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyPartnerRequestReceivedListQuery>
+}
+
+const companyPartnerRequestSentReads: readonly string[] = ['companyPartnerRequestSentList']
+
+const companyPartnerRequestSent = {
   path: 'api/company/partner-request/sent',
   kind: 'collection',
   id: 'number',
   list: {options: companyPartnerRequestSentListOptions, queryKey: companyPartnerRequestSentListQueryKey},
   create: {mutation: companyPartnerRequestSentCreateMutation, body: vCompanyPartnerRequestSentCreateBody},
-  reads: ['companyPartnerRequestSentList'],
+  reads: companyPartnerRequestSentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyPartnerRequestSentListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyPartnerRequestSentReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyPartnerRequestSentCreateMutation(),
 } as const satisfies Resource
 
-/** `api/company/picture` */
-export const companyPicture = {
+/** `api/company/partner-request/sent` */
+export const CompanyPartnerRequestSent = companyPartnerRequestSent
+
+export declare namespace CompanyPartnerRequestSent {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyPartnerRequestSentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyPartnerRequestSentListQuery>
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyPartnerRequestSentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyPartnerRequestSentCreateBody>
+}
+
+const companyPictureReads: readonly string[] = ['companyPictureList', 'companyPictureRetrieve']
+
+const companyPicture = {
   path: 'api/company/picture',
   kind: 'collection',
   id: 'number',
@@ -1426,11 +3212,70 @@ export const companyPicture = {
   create: {mutation: companyPictureCreateMutation, body: vCompanyPictureCreateBody},
   update: {mutation: companyPicturePartialUpdateMutation, body: vCompanyPicturePartialUpdateBody},
   destroy: {mutation: companyPictureDestroyMutation},
-  reads: ['companyPictureList', 'companyPictureRetrieve'],
+  reads: companyPictureReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyPictureListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyPictureReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyPictureRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyPictureCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyPicturePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyPicture.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyPictureDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/planninguser` */
-export const companyPlanninguser = {
+/** `api/company/picture` */
+export const CompanyPicture = companyPicture
+
+export declare namespace CompanyPicture {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyPictureListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyPictureListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyPictureRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyPictureCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyPictureCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyPicturePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyPicturePartialUpdateBody>
+}
+
+const companyPlanninguserReads: readonly string[] = ['companyPlanninguserList', 'companyPlanninguserRetrieve']
+
+const companyPlanninguser = {
   path: 'api/company/planninguser',
   kind: 'collection',
   id: 'number',
@@ -1439,11 +3284,72 @@ export const companyPlanninguser = {
   create: {mutation: companyPlanninguserCreateMutation, body: vCompanyPlanninguserCreateBody},
   update: {mutation: companyPlanninguserPartialUpdateMutation, body: vCompanyPlanninguserPartialUpdateBody},
   destroy: {mutation: companyPlanninguserDestroyMutation},
-  reads: ['companyPlanninguserList', 'companyPlanninguserRetrieve'],
+  reads: companyPlanninguserReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyPlanninguserListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyPlanninguserReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyPlanninguserRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyPlanninguserCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyPlanninguserPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyPlanninguser.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyPlanninguserDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/project` */
-export const companyProject = {
+/** `api/company/planninguser` */
+export const CompanyPlanninguser = companyPlanninguser
+
+export declare namespace CompanyPlanninguser {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyPlanninguserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyPlanninguserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyPlanninguserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyPlanninguserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyPlanninguserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyPlanninguserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyPlanninguserPartialUpdateBody>
+}
+
+const companyProjectFilters: readonly (keyof CompanyProject.ListQuery)[] = ['name']
+
+const companyProjectReads: readonly string[] = ['companyProjectList', 'companyProjectListForSelectList', 'companyProjectRetrieve']
+
+const companyProject = {
   path: 'api/company/project',
   kind: 'collection',
   id: 'number',
@@ -1452,29 +3358,168 @@ export const companyProject = {
   create: {mutation: companyProjectCreateMutation, body: vCompanyProjectCreateBody},
   update: {mutation: companyProjectPartialUpdateMutation, body: vCompanyProjectPartialUpdateBody},
   destroy: {mutation: companyProjectDestroyMutation},
-  reads: ['companyProjectList', 'companyProjectListForSelectList', 'companyProjectRetrieve'],
+  reads: companyProjectReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanyProject` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanyProject.ListQuery)[] = companyProjectFilters) =>
+    companyProjectListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyProjectReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyProjectRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyProjectCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyProjectPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyProject.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyProjectDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/project/list_for_select` */
-export const companyProjectListForSelect = {
+/** `api/company/project` */
+export const CompanyProject = companyProject
+
+export declare namespace CompanyProject {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyProjectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyProjectListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyProjectRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyProjectCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyProjectCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyProjectPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyProjectPartialUpdateBody>
+}
+
+const companyProjectListForSelectFilters: readonly (keyof CompanyProjectListForSelect.ListQuery)[] = ['name']
+
+const companyProjectListForSelectReads: readonly string[] = ['companyProjectListForSelectList']
+
+const companyProjectListForSelect = {
   path: 'api/company/project/list_for_select',
   kind: 'collection',
   id: 'number',
   list: {options: companyProjectListForSelectListOptions, queryKey: companyProjectListForSelectListQueryKey},
-  reads: ['companyProjectListForSelectList'],
+  reads: companyProjectListForSelectReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanyProjectListForSelect` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanyProjectListForSelect.ListQuery)[] = companyProjectListForSelectFilters) =>
+    companyProjectListForSelectListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyProjectListForSelectReads),
 } as const satisfies Resource
 
-/** `api/company/public-pictures` */
-export const companyPublicPictures = {
+/** `api/company/project/list_for_select` */
+export const CompanyProjectListForSelect = companyProjectListForSelect
+
+export declare namespace CompanyProjectListForSelect {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyProjectListForSelectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyProjectListForSelectListQuery>
+}
+
+const companyPublicPicturesReads: readonly string[] = ['companyPublicPicturesList']
+
+const companyPublicPictures = {
   path: 'api/company/public-pictures',
   kind: 'collection',
   id: 'number',
   list: {options: companyPublicPicturesListOptions, queryKey: companyPublicPicturesListQueryKey},
-  reads: ['companyPublicPicturesList'],
+  reads: companyPublicPicturesReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyPublicPicturesListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyPublicPicturesReads),
 } as const satisfies Resource
 
-/** `api/company/salesuser` */
-export const companySalesuser = {
+/** `api/company/public-pictures` */
+export const CompanyPublicPictures = companyPublicPictures
+
+export declare namespace CompanyPublicPictures {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyPublicPicturesListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyPublicPicturesListQuery>
+}
+
+const companySalesuserReads: readonly string[] = ['companySalesuserList', 'companySalesuserRetrieve']
+
+const companySalesuser = {
   path: 'api/company/salesuser',
   kind: 'collection',
   id: 'number',
@@ -1483,11 +3528,72 @@ export const companySalesuser = {
   create: {mutation: companySalesuserCreateMutation, body: vCompanySalesuserCreateBody},
   update: {mutation: companySalesuserPartialUpdateMutation, body: vCompanySalesuserPartialUpdateBody},
   destroy: {mutation: companySalesuserDestroyMutation},
-  reads: ['companySalesuserList', 'companySalesuserRetrieve'],
+  reads: companySalesuserReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companySalesuserListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companySalesuserReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companySalesuserRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companySalesuserCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companySalesuserPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanySalesuser.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companySalesuserDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/salesusercustomer` */
-export const companySalesusercustomer = {
+/** `api/company/salesuser` */
+export const CompanySalesuser = companySalesuser
+
+export declare namespace CompanySalesuser {
+  /** What `list` answers with. */
+  export type ListResponse = CompanySalesuserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanySalesuserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanySalesuserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanySalesuserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanySalesuserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanySalesuserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanySalesuserPartialUpdateBody>
+}
+
+const companySalesusercustomerFilters: readonly (keyof CompanySalesusercustomer.ListQuery)[] = ['user']
+
+const companySalesusercustomerReads: readonly string[] = ['companySalesusercustomerList', 'companySalesusercustomerMyList', 'companySalesusercustomerMyRetrieve', 'companySalesusercustomerRetrieve']
+
+const companySalesusercustomer = {
   path: 'api/company/salesusercustomer',
   kind: 'collection',
   id: 'number',
@@ -1496,11 +3602,76 @@ export const companySalesusercustomer = {
   create: {mutation: companySalesusercustomerCreateMutation, body: vCompanySalesusercustomerCreateBody},
   update: {mutation: companySalesusercustomerPartialUpdateMutation, body: vCompanySalesusercustomerPartialUpdateBody},
   destroy: {mutation: companySalesusercustomerDestroyMutation},
-  reads: ['companySalesusercustomerList', 'companySalesusercustomerMyList', 'companySalesusercustomerMyRetrieve', 'companySalesusercustomerRetrieve'],
+  reads: companySalesusercustomerReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanySalesusercustomer` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanySalesusercustomer.ListQuery)[] = companySalesusercustomerFilters) =>
+    companySalesusercustomerListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companySalesusercustomerReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companySalesusercustomerRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companySalesusercustomerCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companySalesusercustomerPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanySalesusercustomer.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companySalesusercustomerDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/salesusercustomer/my` */
-export const companySalesusercustomerMy = {
+/** `api/company/salesusercustomer` */
+export const CompanySalesusercustomer = companySalesusercustomer
+
+export declare namespace CompanySalesusercustomer {
+  /** What `list` answers with. */
+  export type ListResponse = CompanySalesusercustomerListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanySalesusercustomerListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanySalesusercustomerRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanySalesusercustomerCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanySalesusercustomerCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanySalesusercustomerPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanySalesusercustomerPartialUpdateBody>
+}
+
+const companySalesusercustomerMyReads: readonly string[] = ['companySalesusercustomerMyList', 'companySalesusercustomerMyRetrieve']
+
+const companySalesusercustomerMy = {
   path: 'api/company/salesusercustomer/my',
   kind: 'collection',
   id: 'number',
@@ -1509,19 +3680,103 @@ export const companySalesusercustomerMy = {
   create: {mutation: companySalesusercustomerMyCreateMutation, body: vCompanySalesusercustomerMyCreateBody},
   update: {mutation: companySalesusercustomerMyPartialUpdateMutation, body: vCompanySalesusercustomerMyPartialUpdateBody},
   destroy: {mutation: companySalesusercustomerMyDestroyMutation},
-  reads: ['companySalesusercustomerMyList', 'companySalesusercustomerMyRetrieve'],
+  reads: companySalesusercustomerMyReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companySalesusercustomerMyListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companySalesusercustomerMyReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companySalesusercustomerMyRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companySalesusercustomerMyCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companySalesusercustomerMyPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanySalesusercustomerMy.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companySalesusercustomerMyDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/stream-private-channel-create` */
-export const companyStreamPrivateChannelCreate = {
+/** `api/company/salesusercustomer/my` */
+export const CompanySalesusercustomerMy = companySalesusercustomerMy
+
+export declare namespace CompanySalesusercustomerMy {
+  /** What `list` answers with. */
+  export type ListResponse = CompanySalesusercustomerMyListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanySalesusercustomerMyListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanySalesusercustomerMyRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanySalesusercustomerMyCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanySalesusercustomerMyCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanySalesusercustomerMyPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanySalesusercustomerMyPartialUpdateBody>
+}
+
+const companyStreamPrivateChannelCreateReads: readonly string[] = []
+
+const companyStreamPrivateChannelCreate = {
   path: 'api/company/stream-private-channel-create',
   kind: 'action',
   create: {mutation: companyStreamPrivateChannelCreateCreateMutation, body: vCompanyStreamPrivateChannelCreateCreateBody},
-  reads: [],
+  reads: companyStreamPrivateChannelCreateReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyStreamPrivateChannelCreateReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyStreamPrivateChannelCreateCreateMutation(),
 } as const satisfies Resource
 
-/** `api/company/studentuser` */
-export const companyStudentuser = {
+/** `api/company/stream-private-channel-create` */
+export const CompanyStreamPrivateChannelCreate = companyStreamPrivateChannelCreate
+
+export declare namespace CompanyStreamPrivateChannelCreate {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyStreamPrivateChannelCreateCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyStreamPrivateChannelCreateCreateBody>
+}
+
+const companyStudentuserReads: readonly string[] = ['companyStudentuserList', 'companyStudentuserRetrieve']
+
+const companyStudentuser = {
   path: 'api/company/studentuser',
   kind: 'collection',
   id: 'number',
@@ -1530,11 +3785,72 @@ export const companyStudentuser = {
   create: {mutation: companyStudentuserCreateMutation, body: vCompanyStudentuserCreateBody},
   update: {mutation: companyStudentuserPartialUpdateMutation, body: vCompanyStudentuserPartialUpdateBody},
   destroy: {mutation: companyStudentuserDestroyMutation},
-  reads: ['companyStudentuserList', 'companyStudentuserRetrieve'],
+  reads: companyStudentuserReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyStudentuserListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyStudentuserReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyStudentuserRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyStudentuserCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyStudentuserPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyStudentuser.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyStudentuserDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/template` */
-export const companyTemplate = {
+/** `api/company/studentuser` */
+export const CompanyStudentuser = companyStudentuser
+
+export declare namespace CompanyStudentuser {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyStudentuserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyStudentuserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyStudentuserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyStudentuserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyStudentuserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyStudentuserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyStudentuserPartialUpdateBody>
+}
+
+const companyTemplateFilters: readonly (keyof CompanyTemplate.ListQuery)[] = ['name']
+
+const companyTemplateReads: readonly string[] = ['companyTemplateList', 'companyTemplateRetrieve']
+
+const companyTemplate = {
   path: 'api/company/template',
   kind: 'collection',
   id: 'number',
@@ -1543,36 +3859,180 @@ export const companyTemplate = {
   create: {mutation: companyTemplateCreateMutation, body: vCompanyTemplateCreateBody},
   update: {mutation: companyTemplatePartialUpdateMutation, body: vCompanyTemplatePartialUpdateBody},
   destroy: {mutation: companyTemplateDestroyMutation},
-  reads: ['companyTemplateList', 'companyTemplateRetrieve'],
+  reads: companyTemplateReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanyTemplate` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanyTemplate.ListQuery)[] = companyTemplateFilters) =>
+    companyTemplateListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyTemplateReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyTemplateRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyTemplateCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyTemplatePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyTemplate.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyTemplateDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/template/preview_template_pdf` */
-export const companyTemplatePreviewTemplatePdf = {
+/** `api/company/template` */
+export const CompanyTemplate = companyTemplate
+
+export declare namespace CompanyTemplate {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyTemplateListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyTemplateListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyTemplateRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyTemplateCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyTemplateCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyTemplatePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyTemplatePartialUpdateBody>
+}
+
+const companyTemplatePreviewTemplatePdfReads: readonly string[] = []
+
+const companyTemplatePreviewTemplatePdf = {
   path: 'api/company/template/preview_template_pdf',
   kind: 'action',
   create: {mutation: companyTemplatePreviewTemplatePdfCreateMutation, body: vCompanyTemplatePreviewTemplatePdfCreateBody},
-  reads: [],
+  reads: companyTemplatePreviewTemplatePdfReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyTemplatePreviewTemplatePdfReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyTemplatePreviewTemplatePdfCreateMutation(),
 } as const satisfies Resource
 
-/** `api/company/time-registration/time-correction` */
-export const companyTimeRegistrationTimeCorrection = {
+/** `api/company/template/preview_template_pdf` */
+export const CompanyTemplatePreviewTemplatePdf = companyTemplatePreviewTemplatePdf
+
+export declare namespace CompanyTemplatePreviewTemplatePdf {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyTemplatePreviewTemplatePdfCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyTemplatePreviewTemplatePdfCreateBody>
+}
+
+const companyTimeRegistrationTimeCorrectionReads: readonly string[] = []
+
+const companyTimeRegistrationTimeCorrection = {
   path: 'api/company/time-registration/time-correction',
   kind: 'collection',
   id: 'number',
   update: {mutation: companyTimeRegistrationTimeCorrectionPartialUpdateMutation, body: vCompanyTimeRegistrationTimeCorrectionPartialUpdateBody},
-  reads: [],
+  reads: companyTimeRegistrationTimeCorrectionReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyTimeRegistrationTimeCorrectionReads),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyTimeRegistrationTimeCorrectionPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyTimeRegistrationTimeCorrection.UpdateInput) => ({path: {id}, body}),
 } as const satisfies Resource
 
-/** `api/company/user-device-token` */
-export const companyUserDeviceToken = {
+/** `api/company/time-registration/time-correction` */
+export const CompanyTimeRegistrationTimeCorrection = companyTimeRegistrationTimeCorrection
+
+export declare namespace CompanyTimeRegistrationTimeCorrection {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyTimeRegistrationTimeCorrectionPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyTimeRegistrationTimeCorrectionPartialUpdateBody>
+}
+
+const companyUserDeviceTokenReads: readonly string[] = []
+
+const companyUserDeviceToken = {
   path: 'api/company/user-device-token',
   kind: 'action',
   create: {mutation: companyUserDeviceTokenCreateMutation, body: vCompanyUserDeviceTokenCreateBody},
-  reads: [],
+  reads: companyUserDeviceTokenReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserDeviceTokenReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyUserDeviceTokenCreateMutation(),
 } as const satisfies Resource
 
-/** `api/company/user-leave-hours` */
-export const companyUserLeaveHours = {
+/** `api/company/user-device-token` */
+export const CompanyUserDeviceToken = companyUserDeviceToken
+
+export declare namespace CompanyUserDeviceToken {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUserDeviceTokenCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUserDeviceTokenCreateBody>
+}
+
+const companyUserLeaveHoursReads: readonly string[] = ['companyUserLeaveHoursAdminAllNotAcceptedCountRetrieve', 'companyUserLeaveHoursAdminAllNotAcceptedList', 'companyUserLeaveHoursAdminList', 'companyUserLeaveHoursAdminRetrieve', 'companyUserLeaveHoursAllNotAcceptedCountRetrieve', 'companyUserLeaveHoursAllNotAcceptedList', 'companyUserLeaveHoursList', 'companyUserLeaveHoursRetrieve']
+
+const companyUserLeaveHours = {
   path: 'api/company/user-leave-hours',
   kind: 'collection',
   id: 'number',
@@ -1581,11 +4041,70 @@ export const companyUserLeaveHours = {
   create: {mutation: companyUserLeaveHoursCreateMutation, body: vCompanyUserLeaveHoursCreateBody},
   update: {mutation: companyUserLeaveHoursPartialUpdateMutation, body: vCompanyUserLeaveHoursPartialUpdateBody},
   destroy: {mutation: companyUserLeaveHoursDestroyMutation},
-  reads: ['companyUserLeaveHoursAdminAllNotAcceptedCountRetrieve', 'companyUserLeaveHoursAdminAllNotAcceptedList', 'companyUserLeaveHoursAdminList', 'companyUserLeaveHoursAdminRetrieve', 'companyUserLeaveHoursAllNotAcceptedCountRetrieve', 'companyUserLeaveHoursAllNotAcceptedList', 'companyUserLeaveHoursList', 'companyUserLeaveHoursRetrieve'],
+  reads: companyUserLeaveHoursReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyUserLeaveHoursListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserLeaveHoursReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyUserLeaveHoursRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyUserLeaveHoursCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyUserLeaveHoursPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyUserLeaveHours.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyUserLeaveHoursDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/user-leave-hours/admin` */
-export const companyUserLeaveHoursAdmin = {
+/** `api/company/user-leave-hours` */
+export const CompanyUserLeaveHours = companyUserLeaveHours
+
+export declare namespace CompanyUserLeaveHours {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyUserLeaveHoursListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyUserLeaveHoursListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyUserLeaveHoursRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUserLeaveHoursCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUserLeaveHoursCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyUserLeaveHoursPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyUserLeaveHoursPartialUpdateBody>
+}
+
+const companyUserLeaveHoursAdminReads: readonly string[] = ['companyUserLeaveHoursAdminAllNotAcceptedCountRetrieve', 'companyUserLeaveHoursAdminAllNotAcceptedList', 'companyUserLeaveHoursAdminList', 'companyUserLeaveHoursAdminRetrieve']
+
+const companyUserLeaveHoursAdmin = {
   path: 'api/company/user-leave-hours/admin',
   kind: 'collection',
   id: 'number',
@@ -1594,63 +4113,312 @@ export const companyUserLeaveHoursAdmin = {
   create: {mutation: companyUserLeaveHoursAdminCreateMutation, body: vCompanyUserLeaveHoursAdminCreateBody},
   update: {mutation: companyUserLeaveHoursAdminPartialUpdateMutation, body: vCompanyUserLeaveHoursAdminPartialUpdateBody},
   destroy: {mutation: companyUserLeaveHoursAdminDestroyMutation},
-  reads: ['companyUserLeaveHoursAdminAllNotAcceptedCountRetrieve', 'companyUserLeaveHoursAdminAllNotAcceptedList', 'companyUserLeaveHoursAdminList', 'companyUserLeaveHoursAdminRetrieve'],
+  reads: companyUserLeaveHoursAdminReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyUserLeaveHoursAdminListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserLeaveHoursAdminReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyUserLeaveHoursAdminRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyUserLeaveHoursAdminCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyUserLeaveHoursAdminPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyUserLeaveHoursAdmin.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyUserLeaveHoursAdminDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/user-leave-hours/admin/all_not_accepted` */
-export const companyUserLeaveHoursAdminAllNotAccepted = {
+/** `api/company/user-leave-hours/admin` */
+export const CompanyUserLeaveHoursAdmin = companyUserLeaveHoursAdmin
+
+export declare namespace CompanyUserLeaveHoursAdmin {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyUserLeaveHoursAdminListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyUserLeaveHoursAdminListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyUserLeaveHoursAdminRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUserLeaveHoursAdminCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUserLeaveHoursAdminCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyUserLeaveHoursAdminPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyUserLeaveHoursAdminPartialUpdateBody>
+}
+
+const companyUserLeaveHoursAdminAllNotAcceptedReads: readonly string[] = ['companyUserLeaveHoursAdminAllNotAcceptedList']
+
+const companyUserLeaveHoursAdminAllNotAccepted = {
   path: 'api/company/user-leave-hours/admin/all_not_accepted',
   kind: 'collection',
   id: 'number',
   list: {options: companyUserLeaveHoursAdminAllNotAcceptedListOptions, queryKey: companyUserLeaveHoursAdminAllNotAcceptedListQueryKey},
-  reads: ['companyUserLeaveHoursAdminAllNotAcceptedList'],
+  reads: companyUserLeaveHoursAdminAllNotAcceptedReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyUserLeaveHoursAdminAllNotAcceptedListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserLeaveHoursAdminAllNotAcceptedReads),
 } as const satisfies Resource
 
-/** `api/company/user-leave-hours/admin/get_totals` */
-export const companyUserLeaveHoursAdminGetTotals = {
+/** `api/company/user-leave-hours/admin/all_not_accepted` */
+export const CompanyUserLeaveHoursAdminAllNotAccepted = companyUserLeaveHoursAdminAllNotAccepted
+
+export declare namespace CompanyUserLeaveHoursAdminAllNotAccepted {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyUserLeaveHoursAdminAllNotAcceptedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyUserLeaveHoursAdminAllNotAcceptedListQuery>
+}
+
+const companyUserLeaveHoursAdminGetTotalsReads: readonly string[] = []
+
+const companyUserLeaveHoursAdminGetTotals = {
   path: 'api/company/user-leave-hours/admin/get_totals',
   kind: 'action',
   create: {mutation: companyUserLeaveHoursAdminGetTotalsCreateMutation, body: vCompanyUserLeaveHoursAdminGetTotalsCreateBody},
-  reads: [],
+  reads: companyUserLeaveHoursAdminGetTotalsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserLeaveHoursAdminGetTotalsReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyUserLeaveHoursAdminGetTotalsCreateMutation(),
 } as const satisfies Resource
 
-/** `api/company/user-leave-hours/all_not_accepted` */
-export const companyUserLeaveHoursAllNotAccepted = {
+/** `api/company/user-leave-hours/admin/get_totals` */
+export const CompanyUserLeaveHoursAdminGetTotals = companyUserLeaveHoursAdminGetTotals
+
+export declare namespace CompanyUserLeaveHoursAdminGetTotals {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUserLeaveHoursAdminGetTotalsCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUserLeaveHoursAdminGetTotalsCreateBody>
+}
+
+const companyUserLeaveHoursAllNotAcceptedReads: readonly string[] = ['companyUserLeaveHoursAllNotAcceptedList']
+
+const companyUserLeaveHoursAllNotAccepted = {
   path: 'api/company/user-leave-hours/all_not_accepted',
   kind: 'collection',
   id: 'number',
   list: {options: companyUserLeaveHoursAllNotAcceptedListOptions, queryKey: companyUserLeaveHoursAllNotAcceptedListQueryKey},
-  reads: ['companyUserLeaveHoursAllNotAcceptedList'],
+  reads: companyUserLeaveHoursAllNotAcceptedReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyUserLeaveHoursAllNotAcceptedListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserLeaveHoursAllNotAcceptedReads),
 } as const satisfies Resource
 
-/** `api/company/user-leave-hours/get_totals` */
-export const companyUserLeaveHoursGetTotals = {
+/** `api/company/user-leave-hours/all_not_accepted` */
+export const CompanyUserLeaveHoursAllNotAccepted = companyUserLeaveHoursAllNotAccepted
+
+export declare namespace CompanyUserLeaveHoursAllNotAccepted {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyUserLeaveHoursAllNotAcceptedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyUserLeaveHoursAllNotAcceptedListQuery>
+}
+
+const companyUserLeaveHoursGetTotalsReads: readonly string[] = []
+
+const companyUserLeaveHoursGetTotals = {
   path: 'api/company/user-leave-hours/get_totals',
   kind: 'action',
   create: {mutation: companyUserLeaveHoursGetTotalsCreateMutation, body: vCompanyUserLeaveHoursGetTotalsCreateBody},
-  reads: [],
+  reads: companyUserLeaveHoursGetTotalsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserLeaveHoursGetTotalsReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyUserLeaveHoursGetTotalsCreateMutation(),
 } as const satisfies Resource
 
-/** `api/company/user-list` */
-export const companyUserList = {
+/** `api/company/user-leave-hours/get_totals` */
+export const CompanyUserLeaveHoursGetTotals = companyUserLeaveHoursGetTotals
+
+export declare namespace CompanyUserLeaveHoursGetTotals {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUserLeaveHoursGetTotalsCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUserLeaveHoursGetTotalsCreateBody>
+}
+
+const companyUserListFilters: readonly (keyof CompanyUserList.ListQuery)[] = ['user_type']
+
+const companyUserListReads: readonly string[] = ['companyUserListList']
+
+const companyUserList = {
   path: 'api/company/user-list',
   kind: 'collection',
   id: 'number',
   list: {options: companyUserListListOptions, queryKey: companyUserListListQueryKey},
-  reads: ['companyUserListList'],
+  reads: companyUserListReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanyUserList` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanyUserList.ListQuery)[] = companyUserListFilters) =>
+    companyUserListListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserListReads),
 } as const satisfies Resource
 
-/** `api/company/user-settings` */
-export const companyUserSettings = {
+/** `api/company/user-list` */
+export const CompanyUserList = companyUserList
+
+export declare namespace CompanyUserList {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyUserListListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyUserListListQuery>
+}
+
+const companyUserSettingsReads: readonly string[] = ['companyUserSettingsRetrieve']
+
+const companyUserSettings = {
   path: 'api/company/user-settings',
   kind: 'singleton',
   retrieve: {options: companyUserSettingsRetrieveOptions, queryKey: companyUserSettingsRetrieveQueryKey},
   update: {mutation: companyUserSettingsPartialUpdateMutation, body: vCompanyUserSettingsPartialUpdateBody},
-  reads: ['companyUserSettingsRetrieve'],
+  reads: companyUserSettingsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserSettingsReads),
+  /** The retrieve options for this record: no path, because it is the caller's own. */
+  retrieveOptions: () => companyUserSettingsRetrieveOptions(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyUserSettingsPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: CompanyUserSettings.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/company/user-sick-leave` */
-export const companyUserSickLeave = {
+/** `api/company/user-settings` */
+export const CompanyUserSettings = companyUserSettings
+
+export declare namespace CompanyUserSettings {
+  /** What `retrieve` answers with. */
+  export type Record = CompanyUserSettingsRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyUserSettingsPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyUserSettingsPartialUpdateBody>
+}
+
+const companyUserSickLeaveReads: readonly string[] = ['companyUserSickLeaveAdminAllSickCountRetrieve', 'companyUserSickLeaveAdminAllSickList', 'companyUserSickLeaveAdminAllUnconfirmedCountRetrieve', 'companyUserSickLeaveAdminAllUnconfirmedList', 'companyUserSickLeaveAdminList', 'companyUserSickLeaveAdminRetrieve', 'companyUserSickLeaveList', 'companyUserSickLeaveRetrieve']
+
+const companyUserSickLeave = {
   path: 'api/company/user-sick-leave',
   kind: 'collection',
   id: 'number',
@@ -1659,11 +4427,72 @@ export const companyUserSickLeave = {
   create: {mutation: companyUserSickLeaveCreateMutation, body: vCompanyUserSickLeaveCreateBody},
   update: {mutation: companyUserSickLeavePartialUpdateMutation, body: vCompanyUserSickLeavePartialUpdateBody},
   destroy: {mutation: companyUserSickLeaveDestroyMutation},
-  reads: ['companyUserSickLeaveAdminAllSickCountRetrieve', 'companyUserSickLeaveAdminAllSickList', 'companyUserSickLeaveAdminAllUnconfirmedCountRetrieve', 'companyUserSickLeaveAdminAllUnconfirmedList', 'companyUserSickLeaveAdminList', 'companyUserSickLeaveAdminRetrieve', 'companyUserSickLeaveList', 'companyUserSickLeaveRetrieve'],
+  reads: companyUserSickLeaveReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    companyUserSickLeaveListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserSickLeaveReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyUserSickLeaveRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyUserSickLeaveCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyUserSickLeavePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyUserSickLeave.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyUserSickLeaveDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/user-sick-leave/admin` */
-export const companyUserSickLeaveAdmin = {
+/** `api/company/user-sick-leave` */
+export const CompanyUserSickLeave = companyUserSickLeave
+
+export declare namespace CompanyUserSickLeave {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyUserSickLeaveListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyUserSickLeaveListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyUserSickLeaveRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUserSickLeaveCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUserSickLeaveCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyUserSickLeavePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyUserSickLeavePartialUpdateBody>
+}
+
+const companyUserSickLeaveAdminFilters: readonly (keyof CompanyUserSickLeaveAdmin.ListQuery)[] = ['user']
+
+const companyUserSickLeaveAdminReads: readonly string[] = ['companyUserSickLeaveAdminAllSickCountRetrieve', 'companyUserSickLeaveAdminAllSickList', 'companyUserSickLeaveAdminAllUnconfirmedCountRetrieve', 'companyUserSickLeaveAdminAllUnconfirmedList', 'companyUserSickLeaveAdminList', 'companyUserSickLeaveAdminRetrieve']
+
+const companyUserSickLeaveAdmin = {
   path: 'api/company/user-sick-leave/admin',
   kind: 'collection',
   id: 'number',
@@ -1672,37 +4501,211 @@ export const companyUserSickLeaveAdmin = {
   create: {mutation: companyUserSickLeaveAdminCreateMutation, body: vCompanyUserSickLeaveAdminCreateBody},
   update: {mutation: companyUserSickLeaveAdminPartialUpdateMutation, body: vCompanyUserSickLeaveAdminPartialUpdateBody},
   destroy: {mutation: companyUserSickLeaveAdminDestroyMutation},
-  reads: ['companyUserSickLeaveAdminAllSickCountRetrieve', 'companyUserSickLeaveAdminAllSickList', 'companyUserSickLeaveAdminAllUnconfirmedCountRetrieve', 'companyUserSickLeaveAdminAllUnconfirmedList', 'companyUserSickLeaveAdminList', 'companyUserSickLeaveAdminRetrieve'],
+  reads: companyUserSickLeaveAdminReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanyUserSickLeaveAdmin` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanyUserSickLeaveAdmin.ListQuery)[] = companyUserSickLeaveAdminFilters) =>
+    companyUserSickLeaveAdminListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserSickLeaveAdminReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyUserSickLeaveAdminRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyUserSickLeaveAdminCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyUserSickLeaveAdminPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyUserSickLeaveAdmin.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyUserSickLeaveAdminDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/user-sick-leave/admin/all_sick` */
-export const companyUserSickLeaveAdminAllSick = {
+/** `api/company/user-sick-leave/admin` */
+export const CompanyUserSickLeaveAdmin = companyUserSickLeaveAdmin
+
+export declare namespace CompanyUserSickLeaveAdmin {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyUserSickLeaveAdminListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyUserSickLeaveAdminListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyUserSickLeaveAdminRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUserSickLeaveAdminCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUserSickLeaveAdminCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyUserSickLeaveAdminPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyUserSickLeaveAdminPartialUpdateBody>
+}
+
+const companyUserSickLeaveAdminAllSickFilters: readonly (keyof CompanyUserSickLeaveAdminAllSick.ListQuery)[] = ['user']
+
+const companyUserSickLeaveAdminAllSickReads: readonly string[] = ['companyUserSickLeaveAdminAllSickList']
+
+const companyUserSickLeaveAdminAllSick = {
   path: 'api/company/user-sick-leave/admin/all_sick',
   kind: 'collection',
   id: 'number',
   list: {options: companyUserSickLeaveAdminAllSickListOptions, queryKey: companyUserSickLeaveAdminAllSickListQueryKey},
-  reads: ['companyUserSickLeaveAdminAllSickList'],
+  reads: companyUserSickLeaveAdminAllSickReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanyUserSickLeaveAdminAllSick` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanyUserSickLeaveAdminAllSick.ListQuery)[] = companyUserSickLeaveAdminAllSickFilters) =>
+    companyUserSickLeaveAdminAllSickListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserSickLeaveAdminAllSickReads),
 } as const satisfies Resource
 
-/** `api/company/user-sick-leave/admin/all_unconfirmed` */
-export const companyUserSickLeaveAdminAllUnconfirmed = {
+/** `api/company/user-sick-leave/admin/all_sick` */
+export const CompanyUserSickLeaveAdminAllSick = companyUserSickLeaveAdminAllSick
+
+export declare namespace CompanyUserSickLeaveAdminAllSick {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyUserSickLeaveAdminAllSickListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyUserSickLeaveAdminAllSickListQuery>
+}
+
+const companyUserSickLeaveAdminAllUnconfirmedFilters: readonly (keyof CompanyUserSickLeaveAdminAllUnconfirmed.ListQuery)[] = ['user']
+
+const companyUserSickLeaveAdminAllUnconfirmedReads: readonly string[] = ['companyUserSickLeaveAdminAllUnconfirmedList']
+
+const companyUserSickLeaveAdminAllUnconfirmed = {
   path: 'api/company/user-sick-leave/admin/all_unconfirmed',
   kind: 'collection',
   id: 'number',
   list: {options: companyUserSickLeaveAdminAllUnconfirmedListOptions, queryKey: companyUserSickLeaveAdminAllUnconfirmedListQueryKey},
-  reads: ['companyUserSickLeaveAdminAllUnconfirmedList'],
+  reads: companyUserSickLeaveAdminAllUnconfirmedReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanyUserSickLeaveAdminAllUnconfirmed` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanyUserSickLeaveAdminAllUnconfirmed.ListQuery)[] = companyUserSickLeaveAdminAllUnconfirmedFilters) =>
+    companyUserSickLeaveAdminAllUnconfirmedListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserSickLeaveAdminAllUnconfirmedReads),
 } as const satisfies Resource
 
-/** `api/company/user-sick-leave/end_sick` */
-export const companyUserSickLeaveEndSick = {
+/** `api/company/user-sick-leave/admin/all_unconfirmed` */
+export const CompanyUserSickLeaveAdminAllUnconfirmed = companyUserSickLeaveAdminAllUnconfirmed
+
+export declare namespace CompanyUserSickLeaveAdminAllUnconfirmed {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyUserSickLeaveAdminAllUnconfirmedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyUserSickLeaveAdminAllUnconfirmedListQuery>
+}
+
+const companyUserSickLeaveEndSickReads: readonly string[] = []
+
+const companyUserSickLeaveEndSick = {
   path: 'api/company/user-sick-leave/end_sick',
   kind: 'action',
   create: {mutation: companyUserSickLeaveEndSickCreateMutation, body: vCompanyUserSickLeaveEndSickCreateBody},
-  reads: [],
+  reads: companyUserSickLeaveEndSickReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserSickLeaveEndSickReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyUserSickLeaveEndSickCreateMutation(),
 } as const satisfies Resource
 
-/** `api/company/user-workhours` */
-export const companyUserWorkhours = {
+/** `api/company/user-sick-leave/end_sick` */
+export const CompanyUserSickLeaveEndSick = companyUserSickLeaveEndSick
+
+export declare namespace CompanyUserSickLeaveEndSick {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUserSickLeaveEndSickCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUserSickLeaveEndSickCreateBody>
+}
+
+const companyUserWorkhoursFilters: readonly (keyof CompanyUserWorkhours.ListQuery)[] = ['start_date', 'user']
+
+const companyUserWorkhoursReads: readonly string[] = ['companyUserWorkhoursList', 'companyUserWorkhoursListTotalsRetrieve', 'companyUserWorkhoursRetrieve']
+
+const companyUserWorkhours = {
   path: 'api/company/user-workhours',
   kind: 'collection',
   id: 'number',
@@ -1711,45 +4714,228 @@ export const companyUserWorkhours = {
   create: {mutation: companyUserWorkhoursCreateMutation, body: vCompanyUserWorkhoursCreateBody},
   update: {mutation: companyUserWorkhoursPartialUpdateMutation, body: vCompanyUserWorkhoursPartialUpdateBody},
   destroy: {mutation: companyUserWorkhoursDestroyMutation},
-  reads: ['companyUserWorkhoursList', 'companyUserWorkhoursListTotalsRetrieve', 'companyUserWorkhoursRetrieve'],
+  reads: companyUserWorkhoursReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CompanyUserWorkhours` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CompanyUserWorkhours.ListQuery)[] = companyUserWorkhoursFilters) =>
+    companyUserWorkhoursListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUserWorkhoursReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => companyUserWorkhoursRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyUserWorkhoursCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyUserWorkhoursPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CompanyUserWorkhours.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => companyUserWorkhoursDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/company/users/student/profile/me` */
-export const companyUsersStudentProfileMe = {
+/** `api/company/user-workhours` */
+export const CompanyUserWorkhours = companyUserWorkhours
+
+export declare namespace CompanyUserWorkhours {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyUserWorkhoursListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyUserWorkhoursListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyUserWorkhoursRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUserWorkhoursCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUserWorkhoursCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyUserWorkhoursPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyUserWorkhoursPartialUpdateBody>
+}
+
+const companyUsersStudentProfileMeReads: readonly string[] = ['companyUsersStudentProfileMeRetrieve']
+
+const companyUsersStudentProfileMe = {
   path: 'api/company/users/student/profile/me',
   kind: 'singleton',
   retrieve: {options: companyUsersStudentProfileMeRetrieveOptions, queryKey: companyUsersStudentProfileMeRetrieveQueryKey},
   update: {mutation: companyUsersStudentProfileMePartialUpdateMutation, body: vCompanyUsersStudentProfileMePartialUpdateBody},
-  reads: ['companyUsersStudentProfileMeRetrieve'],
+  reads: companyUsersStudentProfileMeReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUsersStudentProfileMeReads),
+  /** The retrieve options for this record: no path, because it is the caller's own. */
+  retrieveOptions: () => companyUsersStudentProfileMeRetrieveOptions(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => companyUsersStudentProfileMePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: CompanyUsersStudentProfileMe.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/company/users/student/register/fetch-user` */
-export const companyUsersStudentRegisterFetchUser = {
+/** `api/company/users/student/profile/me` */
+export const CompanyUsersStudentProfileMe = companyUsersStudentProfileMe
+
+export declare namespace CompanyUsersStudentProfileMe {
+  /** What `retrieve` answers with. */
+  export type Record = CompanyUsersStudentProfileMeRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyUsersStudentProfileMePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyUsersStudentProfileMePartialUpdateBody>
+}
+
+const companyUsersStudentRegisterFetchUserReads: readonly string[] = []
+
+const companyUsersStudentRegisterFetchUser = {
   path: 'api/company/users/student/register/fetch-user',
   kind: 'action',
   create: {mutation: companyUsersStudentRegisterFetchUserCreateMutation, body: vCompanyUsersStudentRegisterFetchUserCreateBody},
-  reads: [],
+  reads: companyUsersStudentRegisterFetchUserReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUsersStudentRegisterFetchUserReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyUsersStudentRegisterFetchUserCreateMutation(),
 } as const satisfies Resource
 
-/** `api/company/users/verify-recaptcha` */
-export const companyUsersVerifyRecaptcha = {
+/** `api/company/users/student/register/fetch-user` */
+export const CompanyUsersStudentRegisterFetchUser = companyUsersStudentRegisterFetchUser
+
+export declare namespace CompanyUsersStudentRegisterFetchUser {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUsersStudentRegisterFetchUserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUsersStudentRegisterFetchUserCreateBody>
+}
+
+const companyUsersVerifyRecaptchaReads: readonly string[] = []
+
+const companyUsersVerifyRecaptcha = {
   path: 'api/company/users/verify-recaptcha',
   kind: 'action',
   create: {mutation: companyUsersVerifyRecaptchaCreateMutation, body: vCompanyUsersVerifyRecaptchaCreateBody},
-  reads: [],
+  reads: companyUsersVerifyRecaptchaReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(companyUsersVerifyRecaptchaReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => companyUsersVerifyRecaptchaCreateMutation(),
 } as const satisfies Resource
 
-/** `api/connector/gripp-settings` */
-export const connectorGrippSettings = {
+/** `api/company/users/verify-recaptcha` */
+export const CompanyUsersVerifyRecaptcha = companyUsersVerifyRecaptcha
+
+export declare namespace CompanyUsersVerifyRecaptcha {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUsersVerifyRecaptchaCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUsersVerifyRecaptchaCreateBody>
+}
+
+const connectorGrippSettingsReads: readonly string[] = ['connectorGrippSettingsRetrieve']
+
+const connectorGrippSettings = {
   path: 'api/connector/gripp-settings',
   kind: 'singleton',
   retrieve: {options: connectorGrippSettingsRetrieveOptions, queryKey: connectorGrippSettingsRetrieveQueryKey},
   update: {mutation: connectorGrippSettingsPartialUpdateMutation, body: vConnectorGrippSettingsPartialUpdateBody},
-  reads: ['connectorGrippSettingsRetrieve'],
+  reads: connectorGrippSettingsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(connectorGrippSettingsReads),
+  /** The retrieve options for this record: no path, because it is the caller's own. */
+  retrieveOptions: () => connectorGrippSettingsRetrieveOptions(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => connectorGrippSettingsPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: ConnectorGrippSettings.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/customer/customer` */
-export const customerCustomer = {
+/** `api/connector/gripp-settings` */
+export const ConnectorGrippSettings = connectorGrippSettings
+
+export declare namespace ConnectorGrippSettings {
+  /** What `retrieve` answers with. */
+  export type Record = ConnectorGrippSettingsRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vConnectorGrippSettingsPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vConnectorGrippSettingsPartialUpdateBody>
+}
+
+const customerCustomerFilters: readonly (keyof CustomerCustomer.ListQuery)[] = ['city', 'contact', 'name', 'num_orders', 'remarks']
+
+const customerCustomerReads: readonly string[] = ['customerCustomerAutocompleteList', 'customerCustomerCheckCustomerIdHandlingRetrieve', 'customerCustomerCustomDetailRetrieve', 'customerCustomerDashboardRetrieve', 'customerCustomerGetNewCustomerIdFromLatestRetrieve', 'customerCustomerList', 'customerCustomerRetrieve']
+
+const customerCustomer = {
   path: 'api/customer/customer',
   kind: 'collection',
   id: 'number',
@@ -1758,29 +4944,170 @@ export const customerCustomer = {
   create: {mutation: customerCustomerCreateMutation, body: vCustomerCustomerCreateBody},
   update: {mutation: customerCustomerPartialUpdateMutation, body: vCustomerCustomerPartialUpdateBody},
   destroy: {mutation: customerCustomerDestroyMutation},
-  reads: ['customerCustomerAutocompleteList', 'customerCustomerCheckCustomerIdHandlingRetrieve', 'customerCustomerCustomDetailRetrieve', 'customerCustomerDashboardRetrieve', 'customerCustomerGetNewCustomerIdFromLatestRetrieve', 'customerCustomerList', 'customerCustomerRetrieve'],
+  reads: customerCustomerReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CustomerCustomer` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CustomerCustomer.ListQuery)[] = customerCustomerFilters) =>
+    customerCustomerListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(customerCustomerReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => customerCustomerRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => customerCustomerCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => customerCustomerPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CustomerCustomer.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => customerCustomerDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/customer/customer/autocomplete` */
-export const customerCustomerAutocomplete = {
+/** `api/customer/customer` */
+export const CustomerCustomer = customerCustomer
+
+export declare namespace CustomerCustomer {
+  /** What `list` answers with. */
+  export type ListResponse = CustomerCustomerListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCustomerCustomerListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CustomerCustomerRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCustomerCustomerCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCustomerCustomerCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCustomerCustomerPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCustomerCustomerPartialUpdateBody>
+}
+
+const customerCustomerAutocompleteFilters: readonly (keyof CustomerCustomerAutocomplete.ListQuery)[] = ['city', 'contact', 'customer_id', 'id', 'name', 'num_orders', 'remarks']
+
+const customerCustomerAutocompleteReads: readonly string[] = ['customerCustomerAutocompleteList']
+
+const customerCustomerAutocomplete = {
   path: 'api/customer/customer/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: customerCustomerAutocompleteListOptions, queryKey: customerCustomerAutocompleteListQueryKey},
-  reads: ['customerCustomerAutocompleteList'],
+  reads: customerCustomerAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CustomerCustomerAutocomplete` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CustomerCustomerAutocomplete.ListQuery)[] = customerCustomerAutocompleteFilters) =>
+    customerCustomerAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(customerCustomerAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/customer/customer-my` */
-export const customerCustomerMy = {
+/** `api/customer/customer/autocomplete` */
+export const CustomerCustomerAutocomplete = customerCustomerAutocomplete
+
+export declare namespace CustomerCustomerAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = CustomerCustomerAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCustomerCustomerAutocompleteListQuery>
+}
+
+const customerCustomerMyReads: readonly string[] = ['customerCustomerMyRetrieve']
+
+const customerCustomerMy = {
   path: 'api/customer/customer-my',
   kind: 'singleton',
   retrieve: {options: customerCustomerMyRetrieveOptions, queryKey: customerCustomerMyRetrieveQueryKey},
   update: {mutation: customerCustomerMyPartialUpdateMutation, body: vCustomerCustomerMyPartialUpdateBody},
-  reads: ['customerCustomerMyRetrieve'],
+  reads: customerCustomerMyReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(customerCustomerMyReads),
+  /** The retrieve options for this record: no path, because it is the caller's own. */
+  retrieveOptions: () => customerCustomerMyRetrieveOptions(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => customerCustomerMyPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: CustomerCustomerMy.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/customer/document` */
-export const customerDocument = {
+/** `api/customer/customer-my` */
+export const CustomerCustomerMy = customerCustomerMy
+
+export declare namespace CustomerCustomerMy {
+  /** What `retrieve` answers with. */
+  export type Record = CustomerCustomerMyRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCustomerCustomerMyPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCustomerCustomerMyPartialUpdateBody>
+}
+
+const customerDocumentFilters: readonly (keyof CustomerDocument.ListQuery)[] = ['customer']
+
+const customerDocumentReads: readonly string[] = ['customerDocumentList', 'customerDocumentRetrieve']
+
+const customerDocument = {
   path: 'api/customer/document',
   kind: 'collection',
   id: 'number',
@@ -1789,11 +5116,78 @@ export const customerDocument = {
   create: {mutation: customerDocumentCreateMutation, body: vCustomerDocumentCreateBody},
   update: {mutation: customerDocumentPartialUpdateMutation, body: vCustomerDocumentPartialUpdateBody},
   destroy: {mutation: customerDocumentDestroyMutation},
-  reads: ['customerDocumentList', 'customerDocumentRetrieve'],
+  reads: customerDocumentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CustomerDocument` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CustomerDocument.ListQuery)[] = customerDocumentFilters) =>
+    customerDocumentListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(customerDocumentReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => customerDocumentRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => customerDocumentCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => customerDocumentPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CustomerDocument.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => customerDocumentDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/customer/maintenance-contract` */
-export const customerMaintenanceContract = {
+/** `api/customer/document` */
+export const CustomerDocument = customerDocument
+
+export declare namespace CustomerDocument {
+  /** What `list` answers with. */
+  export type ListResponse = CustomerDocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCustomerDocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CustomerDocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCustomerDocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCustomerDocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCustomerDocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCustomerDocumentPartialUpdateBody>
+}
+
+const customerMaintenanceContractFilters: readonly (keyof CustomerMaintenanceContract.ListQuery)[] = ['customer', 'name', 'remarks']
+
+const customerMaintenanceContractReads: readonly string[] = ['customerMaintenanceContractList', 'customerMaintenanceContractRetrieve']
+
+const customerMaintenanceContract = {
   path: 'api/customer/maintenance-contract',
   kind: 'collection',
   id: 'number',
@@ -1802,19 +5196,111 @@ export const customerMaintenanceContract = {
   create: {mutation: customerMaintenanceContractCreateMutation, body: vCustomerMaintenanceContractCreateBody},
   update: {mutation: customerMaintenanceContractPartialUpdateMutation, body: vCustomerMaintenanceContractPartialUpdateBody},
   destroy: {mutation: customerMaintenanceContractDestroyMutation},
-  reads: ['customerMaintenanceContractList', 'customerMaintenanceContractRetrieve'],
+  reads: customerMaintenanceContractReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CustomerMaintenanceContract` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CustomerMaintenanceContract.ListQuery)[] = customerMaintenanceContractFilters) =>
+    customerMaintenanceContractListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(customerMaintenanceContractReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => customerMaintenanceContractRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => customerMaintenanceContractCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => customerMaintenanceContractPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CustomerMaintenanceContract.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => customerMaintenanceContractDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/customer/maintenance-contract/with-equipment` */
-export const customerMaintenanceContractWithEquipment = {
+/** `api/customer/maintenance-contract` */
+export const CustomerMaintenanceContract = customerMaintenanceContract
+
+export declare namespace CustomerMaintenanceContract {
+  /** What `list` answers with. */
+  export type ListResponse = CustomerMaintenanceContractListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCustomerMaintenanceContractListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CustomerMaintenanceContractRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCustomerMaintenanceContractCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCustomerMaintenanceContractCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCustomerMaintenanceContractPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCustomerMaintenanceContractPartialUpdateBody>
+}
+
+const customerMaintenanceContractWithEquipmentReads: readonly string[] = []
+
+const customerMaintenanceContractWithEquipment = {
   path: 'api/customer/maintenance-contract/with-equipment',
   kind: 'action',
   create: {mutation: customerMaintenanceContractWithEquipmentCreateMutation, body: vCustomerMaintenanceContractWithEquipmentCreateBody},
-  reads: [],
+  reads: customerMaintenanceContractWithEquipmentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(customerMaintenanceContractWithEquipmentReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => customerMaintenanceContractWithEquipmentCreateMutation(),
 } as const satisfies Resource
 
-/** `api/customer/maintenance-equipment` */
-export const customerMaintenanceEquipment = {
+/** `api/customer/maintenance-contract/with-equipment` */
+export const CustomerMaintenanceContractWithEquipment = customerMaintenanceContractWithEquipment
+
+export declare namespace CustomerMaintenanceContractWithEquipment {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCustomerMaintenanceContractWithEquipmentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCustomerMaintenanceContractWithEquipmentCreateBody>
+}
+
+const customerMaintenanceEquipmentFilters: readonly (keyof CustomerMaintenanceEquipment.ListQuery)[] = ['contract']
+
+const customerMaintenanceEquipmentReads: readonly string[] = ['customerMaintenanceEquipmentList', 'customerMaintenanceEquipmentRetrieve']
+
+const customerMaintenanceEquipment = {
   path: 'api/customer/maintenance-equipment',
   kind: 'collection',
   id: 'number',
@@ -1823,11 +5309,78 @@ export const customerMaintenanceEquipment = {
   create: {mutation: customerMaintenanceEquipmentCreateMutation, body: vCustomerMaintenanceEquipmentCreateBody},
   update: {mutation: customerMaintenanceEquipmentPartialUpdateMutation, body: vCustomerMaintenanceEquipmentPartialUpdateBody},
   destroy: {mutation: customerMaintenanceEquipmentDestroyMutation},
-  reads: ['customerMaintenanceEquipmentList', 'customerMaintenanceEquipmentRetrieve'],
+  reads: customerMaintenanceEquipmentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `CustomerMaintenanceEquipment` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof CustomerMaintenanceEquipment.ListQuery)[] = customerMaintenanceEquipmentFilters) =>
+    customerMaintenanceEquipmentListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(customerMaintenanceEquipmentReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => customerMaintenanceEquipmentRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => customerMaintenanceEquipmentCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => customerMaintenanceEquipmentPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: CustomerMaintenanceEquipment.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => customerMaintenanceEquipmentDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/equipment/building` */
-export const equipmentBuilding = {
+/** `api/customer/maintenance-equipment` */
+export const CustomerMaintenanceEquipment = customerMaintenanceEquipment
+
+export declare namespace CustomerMaintenanceEquipment {
+  /** What `list` answers with. */
+  export type ListResponse = CustomerMaintenanceEquipmentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCustomerMaintenanceEquipmentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CustomerMaintenanceEquipmentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCustomerMaintenanceEquipmentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCustomerMaintenanceEquipmentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCustomerMaintenanceEquipmentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCustomerMaintenanceEquipmentPartialUpdateBody>
+}
+
+const equipmentBuildingFilters: readonly (keyof EquipmentBuilding.ListQuery)[] = ['branch', 'created', 'customer', 'modified', 'name']
+
+const equipmentBuildingReads: readonly string[] = ['equipmentBuildingAutocompleteList', 'equipmentBuildingDashboardRetrieve', 'equipmentBuildingList', 'equipmentBuildingListForSelectList', 'equipmentBuildingRetrieve']
+
+const equipmentBuilding = {
   path: 'api/equipment/building',
   kind: 'collection',
   id: 'number',
@@ -1836,29 +5389,178 @@ export const equipmentBuilding = {
   create: {mutation: equipmentBuildingCreateMutation, body: vEquipmentBuildingCreateBody},
   update: {mutation: equipmentBuildingPartialUpdateMutation, body: vEquipmentBuildingPartialUpdateBody},
   destroy: {mutation: equipmentBuildingDestroyMutation},
-  reads: ['equipmentBuildingAutocompleteList', 'equipmentBuildingDashboardRetrieve', 'equipmentBuildingList', 'equipmentBuildingListForSelectList', 'equipmentBuildingRetrieve'],
+  reads: equipmentBuildingReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `EquipmentBuilding` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof EquipmentBuilding.ListQuery)[] = equipmentBuildingFilters) =>
+    equipmentBuildingListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentBuildingReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => equipmentBuildingRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => equipmentBuildingCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => equipmentBuildingPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: EquipmentBuilding.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => equipmentBuildingDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/equipment/building/autocomplete` */
-export const equipmentBuildingAutocomplete = {
+/** `api/equipment/building` */
+export const EquipmentBuilding = equipmentBuilding
+
+export declare namespace EquipmentBuilding {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentBuildingListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentBuildingListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = EquipmentBuildingRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentBuildingCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentBuildingCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vEquipmentBuildingPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vEquipmentBuildingPartialUpdateBody>
+}
+
+const equipmentBuildingAutocompleteFilters: readonly (keyof EquipmentBuildingAutocomplete.ListQuery)[] = ['branch', 'created', 'customer', 'modified', 'name']
+
+const equipmentBuildingAutocompleteReads: readonly string[] = ['equipmentBuildingAutocompleteList']
+
+const equipmentBuildingAutocomplete = {
   path: 'api/equipment/building/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentBuildingAutocompleteListOptions, queryKey: equipmentBuildingAutocompleteListQueryKey},
-  reads: ['equipmentBuildingAutocompleteList'],
+  reads: equipmentBuildingAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `EquipmentBuildingAutocomplete` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof EquipmentBuildingAutocomplete.ListQuery)[] = equipmentBuildingAutocompleteFilters) =>
+    equipmentBuildingAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentBuildingAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/equipment/building/list_for_select` */
-export const equipmentBuildingListForSelect = {
+/** `api/equipment/building/autocomplete` */
+export const EquipmentBuildingAutocomplete = equipmentBuildingAutocomplete
+
+export declare namespace EquipmentBuildingAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentBuildingAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentBuildingAutocompleteListQuery>
+}
+
+const equipmentBuildingListForSelectFilters: readonly (keyof EquipmentBuildingListForSelect.ListQuery)[] = ['branch', 'created', 'customer', 'modified', 'name']
+
+const equipmentBuildingListForSelectReads: readonly string[] = ['equipmentBuildingListForSelectList']
+
+const equipmentBuildingListForSelect = {
   path: 'api/equipment/building/list_for_select',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentBuildingListForSelectListOptions, queryKey: equipmentBuildingListForSelectListQueryKey},
-  reads: ['equipmentBuildingListForSelectList'],
+  reads: equipmentBuildingListForSelectReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `EquipmentBuildingListForSelect` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof EquipmentBuildingListForSelect.ListQuery)[] = equipmentBuildingListForSelectFilters) =>
+    equipmentBuildingListForSelectListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentBuildingListForSelectReads),
 } as const satisfies Resource
 
-/** `api/equipment/equipment` */
-export const equipmentEquipment = {
+/** `api/equipment/building/list_for_select` */
+export const EquipmentBuildingListForSelect = equipmentBuildingListForSelect
+
+export declare namespace EquipmentBuildingListForSelect {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentBuildingListForSelectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentBuildingListForSelectListQuery>
+}
+
+const equipmentEquipmentFilters: readonly (keyof EquipmentEquipment.ListQuery)[] = ['branch', 'brand', 'customer', 'description', 'identifier', 'location', 'name', 'num_orders', 'serialnumber', 'type']
+
+const equipmentEquipmentReads: readonly string[] = ['equipmentEquipmentAutocompleteList', 'equipmentEquipmentDashboardRetrieve', 'equipmentEquipmentList', 'equipmentEquipmentRetrieve', 'equipmentEquipmentUuidRetrieve']
+
+const equipmentEquipment = {
   path: 'api/equipment/equipment',
   kind: 'collection',
   id: 'number',
@@ -1867,28 +5569,161 @@ export const equipmentEquipment = {
   create: {mutation: equipmentEquipmentCreateMutation, body: vEquipmentEquipmentCreateBody},
   update: {mutation: equipmentEquipmentPartialUpdateMutation, body: vEquipmentEquipmentPartialUpdateBody},
   destroy: {mutation: equipmentEquipmentDestroyMutation},
-  reads: ['equipmentEquipmentAutocompleteList', 'equipmentEquipmentDashboardRetrieve', 'equipmentEquipmentList', 'equipmentEquipmentRetrieve', 'equipmentEquipmentUuidRetrieve'],
+  reads: equipmentEquipmentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `EquipmentEquipment` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof EquipmentEquipment.ListQuery)[] = equipmentEquipmentFilters) =>
+    equipmentEquipmentListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentEquipmentReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => equipmentEquipmentRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => equipmentEquipmentCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => equipmentEquipmentPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: EquipmentEquipment.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => equipmentEquipmentDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/equipment/equipment/autocomplete` */
-export const equipmentEquipmentAutocomplete = {
+/** `api/equipment/equipment` */
+export const EquipmentEquipment = equipmentEquipment
+
+export declare namespace EquipmentEquipment {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentEquipmentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentEquipmentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = EquipmentEquipmentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentEquipmentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentEquipmentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vEquipmentEquipmentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vEquipmentEquipmentPartialUpdateBody>
+}
+
+const equipmentEquipmentAutocompleteFilters: readonly (keyof EquipmentEquipmentAutocomplete.ListQuery)[] = ['branch', 'brand', 'customer', 'description', 'identifier', 'location', 'name', 'num_orders', 'serialnumber', 'type']
+
+const equipmentEquipmentAutocompleteReads: readonly string[] = ['equipmentEquipmentAutocompleteList']
+
+const equipmentEquipmentAutocomplete = {
   path: 'api/equipment/equipment/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentEquipmentAutocompleteListOptions, queryKey: equipmentEquipmentAutocompleteListQueryKey},
-  reads: ['equipmentEquipmentAutocompleteList'],
+  reads: equipmentEquipmentAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `EquipmentEquipmentAutocomplete` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof EquipmentEquipmentAutocomplete.ListQuery)[] = equipmentEquipmentAutocompleteFilters) =>
+    equipmentEquipmentAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentEquipmentAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/equipment/equipment/create_quick` */
-export const equipmentEquipmentCreateQuick = {
+/** `api/equipment/equipment/autocomplete` */
+export const EquipmentEquipmentAutocomplete = equipmentEquipmentAutocomplete
+
+export declare namespace EquipmentEquipmentAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentEquipmentAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentEquipmentAutocompleteListQuery>
+}
+
+const equipmentEquipmentCreateQuickReads: readonly string[] = []
+
+const equipmentEquipmentCreateQuick = {
   path: 'api/equipment/equipment/create_quick',
   kind: 'action',
   create: {mutation: equipmentEquipmentCreateQuickCreateMutation, body: vEquipmentEquipmentCreateQuickCreateBody},
-  reads: [],
+  reads: equipmentEquipmentCreateQuickReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentEquipmentCreateQuickReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => equipmentEquipmentCreateQuickCreateMutation(),
 } as const satisfies Resource
 
-/** `api/equipment/equipment-document` */
-export const equipmentEquipmentDocument = {
+/** `api/equipment/equipment/create_quick` */
+export const EquipmentEquipmentCreateQuick = equipmentEquipmentCreateQuick
+
+export declare namespace EquipmentEquipmentCreateQuick {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentEquipmentCreateQuickCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentEquipmentCreateQuickCreateBody>
+}
+
+const equipmentEquipmentDocumentFilters: readonly (keyof EquipmentEquipmentDocument.ListQuery)[] = ['equipment']
+
+const equipmentEquipmentDocumentReads: readonly string[] = ['equipmentEquipmentDocumentList', 'equipmentEquipmentDocumentRetrieve']
+
+const equipmentEquipmentDocument = {
   path: 'api/equipment/equipment-document',
   kind: 'collection',
   id: 'number',
@@ -1897,21 +5732,127 @@ export const equipmentEquipmentDocument = {
   create: {mutation: equipmentEquipmentDocumentCreateMutation, body: vEquipmentEquipmentDocumentCreateBody},
   update: {mutation: equipmentEquipmentDocumentPartialUpdateMutation, body: vEquipmentEquipmentDocumentPartialUpdateBody},
   destroy: {mutation: equipmentEquipmentDocumentDestroyMutation},
-  reads: ['equipmentEquipmentDocumentList', 'equipmentEquipmentDocumentRetrieve'],
+  reads: equipmentEquipmentDocumentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `EquipmentEquipmentDocument` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof EquipmentEquipmentDocument.ListQuery)[] = equipmentEquipmentDocumentFilters) =>
+    equipmentEquipmentDocumentListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentEquipmentDocumentReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => equipmentEquipmentDocumentRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => equipmentEquipmentDocumentCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => equipmentEquipmentDocumentPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: EquipmentEquipmentDocument.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => equipmentEquipmentDocumentDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/equipment/equipment-state` */
-export const equipmentEquipmentState = {
+/** `api/equipment/equipment-document` */
+export const EquipmentEquipmentDocument = equipmentEquipmentDocument
+
+export declare namespace EquipmentEquipmentDocument {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentEquipmentDocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentEquipmentDocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = EquipmentEquipmentDocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentEquipmentDocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentEquipmentDocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vEquipmentEquipmentDocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vEquipmentEquipmentDocumentPartialUpdateBody>
+}
+
+const equipmentEquipmentStateReads: readonly string[] = ['equipmentEquipmentStateList']
+
+const equipmentEquipmentState = {
   path: 'api/equipment/equipment-state',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentEquipmentStateListOptions, queryKey: equipmentEquipmentStateListQueryKey},
   create: {mutation: equipmentEquipmentStateCreateMutation, body: vEquipmentEquipmentStateCreateBody},
-  reads: ['equipmentEquipmentStateList'],
+  reads: equipmentEquipmentStateReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    equipmentEquipmentStateListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentEquipmentStateReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => equipmentEquipmentStateCreateMutation(),
 } as const satisfies Resource
 
-/** `api/equipment/location` */
-export const equipmentLocation = {
+/** `api/equipment/equipment-state` */
+export const EquipmentEquipmentState = equipmentEquipmentState
+
+export declare namespace EquipmentEquipmentState {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentEquipmentStateListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentEquipmentStateListQuery>
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentEquipmentStateCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentEquipmentStateCreateBody>
+}
+
+const equipmentLocationFilters: readonly (keyof EquipmentLocation.ListQuery)[] = ['branch', 'created', 'customer', 'modified', 'name']
+
+const equipmentLocationReads: readonly string[] = ['equipmentLocationAutocompleteList', 'equipmentLocationDashboardRetrieve', 'equipmentLocationList', 'equipmentLocationListForSelectList', 'equipmentLocationRetrieve', 'equipmentLocationUuidRetrieve']
+
+const equipmentLocation = {
   path: 'api/equipment/location',
   kind: 'collection',
   id: 'number',
@@ -1920,28 +5861,161 @@ export const equipmentLocation = {
   create: {mutation: equipmentLocationCreateMutation, body: vEquipmentLocationCreateBody},
   update: {mutation: equipmentLocationPartialUpdateMutation, body: vEquipmentLocationPartialUpdateBody},
   destroy: {mutation: equipmentLocationDestroyMutation},
-  reads: ['equipmentLocationAutocompleteList', 'equipmentLocationDashboardRetrieve', 'equipmentLocationList', 'equipmentLocationListForSelectList', 'equipmentLocationRetrieve', 'equipmentLocationUuidRetrieve'],
+  reads: equipmentLocationReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `EquipmentLocation` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof EquipmentLocation.ListQuery)[] = equipmentLocationFilters) =>
+    equipmentLocationListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentLocationReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => equipmentLocationRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => equipmentLocationCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => equipmentLocationPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: EquipmentLocation.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => equipmentLocationDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/equipment/location/autocomplete` */
-export const equipmentLocationAutocomplete = {
+/** `api/equipment/location` */
+export const EquipmentLocation = equipmentLocation
+
+export declare namespace EquipmentLocation {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentLocationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentLocationListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = EquipmentLocationRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentLocationCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentLocationCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vEquipmentLocationPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vEquipmentLocationPartialUpdateBody>
+}
+
+const equipmentLocationAutocompleteFilters: readonly (keyof EquipmentLocationAutocomplete.ListQuery)[] = ['branch', 'created', 'customer', 'modified', 'name']
+
+const equipmentLocationAutocompleteReads: readonly string[] = ['equipmentLocationAutocompleteList']
+
+const equipmentLocationAutocomplete = {
   path: 'api/equipment/location/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentLocationAutocompleteListOptions, queryKey: equipmentLocationAutocompleteListQueryKey},
-  reads: ['equipmentLocationAutocompleteList'],
+  reads: equipmentLocationAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `EquipmentLocationAutocomplete` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof EquipmentLocationAutocomplete.ListQuery)[] = equipmentLocationAutocompleteFilters) =>
+    equipmentLocationAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentLocationAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/equipment/location/create_quick` */
-export const equipmentLocationCreateQuick = {
+/** `api/equipment/location/autocomplete` */
+export const EquipmentLocationAutocomplete = equipmentLocationAutocomplete
+
+export declare namespace EquipmentLocationAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentLocationAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentLocationAutocompleteListQuery>
+}
+
+const equipmentLocationCreateQuickReads: readonly string[] = []
+
+const equipmentLocationCreateQuick = {
   path: 'api/equipment/location/create_quick',
   kind: 'action',
   create: {mutation: equipmentLocationCreateQuickCreateMutation, body: vEquipmentLocationCreateQuickCreateBody},
-  reads: [],
+  reads: equipmentLocationCreateQuickReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentLocationCreateQuickReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => equipmentLocationCreateQuickCreateMutation(),
 } as const satisfies Resource
 
-/** `api/equipment/location-document` */
-export const equipmentLocationDocument = {
+/** `api/equipment/location/create_quick` */
+export const EquipmentLocationCreateQuick = equipmentLocationCreateQuick
+
+export declare namespace EquipmentLocationCreateQuick {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentLocationCreateQuickCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentLocationCreateQuickCreateBody>
+}
+
+const equipmentLocationDocumentFilters: readonly (keyof EquipmentLocationDocument.ListQuery)[] = ['location']
+
+const equipmentLocationDocumentReads: readonly string[] = ['equipmentLocationDocumentList', 'equipmentLocationDocumentRetrieve']
+
+const equipmentLocationDocument = {
   path: 'api/equipment/location-document',
   kind: 'collection',
   id: 'number',
@@ -1950,56 +6024,280 @@ export const equipmentLocationDocument = {
   create: {mutation: equipmentLocationDocumentCreateMutation, body: vEquipmentLocationDocumentCreateBody},
   update: {mutation: equipmentLocationDocumentPartialUpdateMutation, body: vEquipmentLocationDocumentPartialUpdateBody},
   destroy: {mutation: equipmentLocationDocumentDestroyMutation},
-  reads: ['equipmentLocationDocumentList', 'equipmentLocationDocumentRetrieve'],
+  reads: equipmentLocationDocumentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `EquipmentLocationDocument` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof EquipmentLocationDocument.ListQuery)[] = equipmentLocationDocumentFilters) =>
+    equipmentLocationDocumentListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentLocationDocumentReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => equipmentLocationDocumentRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => equipmentLocationDocumentCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => equipmentLocationDocumentPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: EquipmentLocationDocument.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => equipmentLocationDocumentDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/equipment/location/list_for_select` */
-export const equipmentLocationListForSelect = {
+/** `api/equipment/location-document` */
+export const EquipmentLocationDocument = equipmentLocationDocument
+
+export declare namespace EquipmentLocationDocument {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentLocationDocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentLocationDocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = EquipmentLocationDocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentLocationDocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentLocationDocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vEquipmentLocationDocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vEquipmentLocationDocumentPartialUpdateBody>
+}
+
+const equipmentLocationListForSelectFilters: readonly (keyof EquipmentLocationListForSelect.ListQuery)[] = ['branch', 'created', 'customer', 'modified', 'name']
+
+const equipmentLocationListForSelectReads: readonly string[] = ['equipmentLocationListForSelectList']
+
+const equipmentLocationListForSelect = {
   path: 'api/equipment/location/list_for_select',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentLocationListForSelectListOptions, queryKey: equipmentLocationListForSelectListQueryKey},
-  reads: ['equipmentLocationListForSelectList'],
+  reads: equipmentLocationListForSelectReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `EquipmentLocationListForSelect` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof EquipmentLocationListForSelect.ListQuery)[] = equipmentLocationListForSelectFilters) =>
+    equipmentLocationListForSelectListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(equipmentLocationListForSelectReads),
 } as const satisfies Resource
 
-/** `api/inventory/inventory-locations` */
-export const inventoryInventoryLocations = {
+/** `api/equipment/location/list_for_select` */
+export const EquipmentLocationListForSelect = equipmentLocationListForSelect
+
+export declare namespace EquipmentLocationListForSelect {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentLocationListForSelectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentLocationListForSelectListQuery>
+}
+
+const inventoryInventoryLocationsReads: readonly string[] = ['inventoryInventoryLocationsList']
+
+const inventoryInventoryLocations = {
   path: 'api/inventory/inventory-locations',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryInventoryLocationsListOptions, queryKey: inventoryInventoryLocationsListQueryKey},
-  reads: ['inventoryInventoryLocationsList'],
+  reads: inventoryInventoryLocationsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    inventoryInventoryLocationsListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryInventoryLocationsReads),
 } as const satisfies Resource
 
-/** `api/inventory/inventory-locations-for-material` */
-export const inventoryInventoryLocationsForMaterial = {
+/** `api/inventory/inventory-locations` */
+export const InventoryInventoryLocations = inventoryInventoryLocations
+
+export declare namespace InventoryInventoryLocations {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryInventoryLocationsListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryInventoryLocationsListQuery>
+}
+
+const inventoryInventoryLocationsForMaterialReads: readonly string[] = ['inventoryInventoryLocationsForMaterialList']
+
+const inventoryInventoryLocationsForMaterial = {
   path: 'api/inventory/inventory-locations-for-material',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryInventoryLocationsForMaterialListOptions, queryKey: inventoryInventoryLocationsForMaterialListQueryKey},
-  reads: ['inventoryInventoryLocationsForMaterialList'],
+  reads: inventoryInventoryLocationsForMaterialReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryInventoryLocationsForMaterialReads),
 } as const satisfies Resource
 
-/** `api/inventory/inventory-materials` */
-export const inventoryInventoryMaterials = {
+/** `api/inventory/inventory-locations-for-material` */
+export const InventoryInventoryLocationsForMaterial = inventoryInventoryLocationsForMaterial
+
+export declare namespace InventoryInventoryLocationsForMaterial {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryInventoryLocationsForMaterialListResponse
+}
+
+const inventoryInventoryMaterialsReads: readonly string[] = ['inventoryInventoryMaterialsList']
+
+const inventoryInventoryMaterials = {
   path: 'api/inventory/inventory-materials',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryInventoryMaterialsListOptions, queryKey: inventoryInventoryMaterialsListQueryKey},
-  reads: ['inventoryInventoryMaterialsList'],
+  reads: inventoryInventoryMaterialsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryInventoryMaterialsReads),
 } as const satisfies Resource
 
-/** `api/inventory/inventory-materials-for-location` */
-export const inventoryInventoryMaterialsForLocation = {
+/** `api/inventory/inventory-materials` */
+export const InventoryInventoryMaterials = inventoryInventoryMaterials
+
+export declare namespace InventoryInventoryMaterials {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryInventoryMaterialsListResponse
+}
+
+const inventoryInventoryMaterialsForLocationFilters: readonly (keyof InventoryInventoryMaterialsForLocation.ListQuery)[] = ['location']
+
+const inventoryInventoryMaterialsForLocationReads: readonly string[] = ['inventoryInventoryMaterialsForLocationList']
+
+const inventoryInventoryMaterialsForLocation = {
   path: 'api/inventory/inventory-materials-for-location',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryInventoryMaterialsForLocationListOptions, queryKey: inventoryInventoryMaterialsForLocationListQueryKey},
-  reads: ['inventoryInventoryMaterialsForLocationList'],
+  reads: inventoryInventoryMaterialsForLocationReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InventoryInventoryMaterialsForLocation` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InventoryInventoryMaterialsForLocation.ListQuery)[] = inventoryInventoryMaterialsForLocationFilters) =>
+    inventoryInventoryMaterialsForLocationListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryInventoryMaterialsForLocationReads),
 } as const satisfies Resource
 
-/** `api/inventory/material` */
-export const inventoryMaterial = {
+/** `api/inventory/inventory-materials-for-location` */
+export const InventoryInventoryMaterialsForLocation = inventoryInventoryMaterialsForLocation
+
+export declare namespace InventoryInventoryMaterialsForLocation {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryInventoryMaterialsForLocationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryInventoryMaterialsForLocationListQuery>
+}
+
+const inventoryMaterialFilters: readonly (keyof InventoryMaterial.ListQuery)[] = ['supplier_relation']
+
+const inventoryMaterialReads: readonly string[] = ['inventoryMaterialAutocompleteList', 'inventoryMaterialList', 'inventoryMaterialRetrieve', 'inventoryMaterialStatsTableRetrieve', 'inventoryMaterialTotalSalesPerCustomerRetrieve', 'inventoryMaterialTotalSalesPerMaterialCustomerRetrieve', 'inventoryMaterialTotalSalesPerSupplierPerMaterialRetrieve', 'inventoryMaterialTotalSalesPerSupplierRetrieve', 'inventoryMaterialTotalSalesRetrieve']
+
+const inventoryMaterial = {
   path: 'api/inventory/material',
   kind: 'collection',
   id: 'number',
@@ -2008,20 +6306,126 @@ export const inventoryMaterial = {
   create: {mutation: inventoryMaterialCreateMutation, body: vInventoryMaterialCreateBody},
   update: {mutation: inventoryMaterialPartialUpdateMutation, body: vInventoryMaterialPartialUpdateBody},
   destroy: {mutation: inventoryMaterialDestroyMutation},
-  reads: ['inventoryMaterialAutocompleteList', 'inventoryMaterialList', 'inventoryMaterialRetrieve', 'inventoryMaterialStatsTableRetrieve', 'inventoryMaterialTotalSalesPerCustomerRetrieve', 'inventoryMaterialTotalSalesPerMaterialCustomerRetrieve', 'inventoryMaterialTotalSalesPerSupplierPerMaterialRetrieve', 'inventoryMaterialTotalSalesPerSupplierRetrieve', 'inventoryMaterialTotalSalesRetrieve'],
+  reads: inventoryMaterialReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InventoryMaterial` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InventoryMaterial.ListQuery)[] = inventoryMaterialFilters) =>
+    inventoryMaterialListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryMaterialReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => inventoryMaterialRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventoryMaterialCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => inventoryMaterialPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InventoryMaterial.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => inventoryMaterialDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/material/autocomplete` */
-export const inventoryMaterialAutocomplete = {
+/** `api/inventory/material` */
+export const InventoryMaterial = inventoryMaterial
+
+export declare namespace InventoryMaterial {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryMaterialListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryMaterialListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryMaterialRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryMaterialCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryMaterialCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryMaterialPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryMaterialPartialUpdateBody>
+}
+
+const inventoryMaterialAutocompleteFilters: readonly (keyof InventoryMaterialAutocomplete.ListQuery)[] = ['supplier', 'supplier_relation', 'use_latest_year', 'year']
+
+const inventoryMaterialAutocompleteReads: readonly string[] = ['inventoryMaterialAutocompleteList']
+
+const inventoryMaterialAutocomplete = {
   path: 'api/inventory/material/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryMaterialAutocompleteListOptions, queryKey: inventoryMaterialAutocompleteListQueryKey},
-  reads: ['inventoryMaterialAutocompleteList'],
+  reads: inventoryMaterialAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InventoryMaterialAutocomplete` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InventoryMaterialAutocomplete.ListQuery)[] = inventoryMaterialAutocompleteFilters) =>
+    inventoryMaterialAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryMaterialAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/inventory/purchaseorder` */
-export const inventoryPurchaseorder = {
+/** `api/inventory/material/autocomplete` */
+export const InventoryMaterialAutocomplete = inventoryMaterialAutocomplete
+
+export declare namespace InventoryMaterialAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryMaterialAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryMaterialAutocompleteListQuery>
+}
+
+const inventoryPurchaseorderReads: readonly string[] = ['inventoryPurchaseorderList', 'inventoryPurchaseorderRetrieve']
+
+const inventoryPurchaseorder = {
   path: 'api/inventory/purchaseorder',
   kind: 'collection',
   id: 'number',
@@ -2030,11 +6434,72 @@ export const inventoryPurchaseorder = {
   create: {mutation: inventoryPurchaseorderCreateMutation, body: vInventoryPurchaseorderCreateBody},
   update: {mutation: inventoryPurchaseorderPartialUpdateMutation, body: vInventoryPurchaseorderPartialUpdateBody},
   destroy: {mutation: inventoryPurchaseorderDestroyMutation},
-  reads: ['inventoryPurchaseorderList', 'inventoryPurchaseorderRetrieve'],
+  reads: inventoryPurchaseorderReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    inventoryPurchaseorderListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryPurchaseorderReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => inventoryPurchaseorderRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventoryPurchaseorderCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => inventoryPurchaseorderPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InventoryPurchaseorder.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => inventoryPurchaseorderDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/purchaseorder-entry` */
-export const inventoryPurchaseorderEntry = {
+/** `api/inventory/purchaseorder` */
+export const InventoryPurchaseorder = inventoryPurchaseorder
+
+export declare namespace InventoryPurchaseorder {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryPurchaseorderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryPurchaseorderListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryPurchaseorderRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryPurchaseorderPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryPurchaseorderPartialUpdateBody>
+}
+
+const inventoryPurchaseorderEntryFilters: readonly (keyof InventoryPurchaseorderEntry.ListQuery)[] = ['purchase_order_material']
+
+const inventoryPurchaseorderEntryReads: readonly string[] = ['inventoryPurchaseorderEntryList', 'inventoryPurchaseorderEntryRetrieve']
+
+const inventoryPurchaseorderEntry = {
   path: 'api/inventory/purchaseorder-entry',
   kind: 'collection',
   id: 'number',
@@ -2043,19 +6508,111 @@ export const inventoryPurchaseorderEntry = {
   create: {mutation: inventoryPurchaseorderEntryCreateMutation, body: vInventoryPurchaseorderEntryCreateBody},
   update: {mutation: inventoryPurchaseorderEntryPartialUpdateMutation, body: vInventoryPurchaseorderEntryPartialUpdateBody},
   destroy: {mutation: inventoryPurchaseorderEntryDestroyMutation},
-  reads: ['inventoryPurchaseorderEntryList', 'inventoryPurchaseorderEntryRetrieve'],
+  reads: inventoryPurchaseorderEntryReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InventoryPurchaseorderEntry` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InventoryPurchaseorderEntry.ListQuery)[] = inventoryPurchaseorderEntryFilters) =>
+    inventoryPurchaseorderEntryListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryPurchaseorderEntryReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => inventoryPurchaseorderEntryRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventoryPurchaseorderEntryCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => inventoryPurchaseorderEntryPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InventoryPurchaseorderEntry.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => inventoryPurchaseorderEntryDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/purchaseorder-entry/bulk` */
-export const inventoryPurchaseorderEntryBulk = {
+/** `api/inventory/purchaseorder-entry` */
+export const InventoryPurchaseorderEntry = inventoryPurchaseorderEntry
+
+export declare namespace InventoryPurchaseorderEntry {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryPurchaseorderEntryListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryPurchaseorderEntryListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryPurchaseorderEntryRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderEntryCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderEntryCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryPurchaseorderEntryPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryPurchaseorderEntryPartialUpdateBody>
+}
+
+const inventoryPurchaseorderEntryBulkReads: readonly string[] = []
+
+const inventoryPurchaseorderEntryBulk = {
   path: 'api/inventory/purchaseorder-entry/bulk',
   kind: 'action',
   create: {mutation: inventoryPurchaseorderEntryBulkCreateMutation, body: vInventoryPurchaseorderEntryBulkCreateBody},
-  reads: [],
+  reads: inventoryPurchaseorderEntryBulkReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryPurchaseorderEntryBulkReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventoryPurchaseorderEntryBulkCreateMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/purchaseorder-material` */
-export const inventoryPurchaseorderMaterial = {
+/** `api/inventory/purchaseorder-entry/bulk` */
+export const InventoryPurchaseorderEntryBulk = inventoryPurchaseorderEntryBulk
+
+export declare namespace InventoryPurchaseorderEntryBulk {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderEntryBulkCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderEntryBulkCreateBody>
+}
+
+const inventoryPurchaseorderMaterialFilters: readonly (keyof InventoryPurchaseorderMaterial.ListQuery)[] = ['purchase_order']
+
+const inventoryPurchaseorderMaterialReads: readonly string[] = ['inventoryPurchaseorderMaterialList', 'inventoryPurchaseorderMaterialRetrieve']
+
+const inventoryPurchaseorderMaterial = {
   path: 'api/inventory/purchaseorder-material',
   kind: 'collection',
   id: 'number',
@@ -2064,11 +6621,78 @@ export const inventoryPurchaseorderMaterial = {
   create: {mutation: inventoryPurchaseorderMaterialCreateMutation, body: vInventoryPurchaseorderMaterialCreateBody},
   update: {mutation: inventoryPurchaseorderMaterialPartialUpdateMutation, body: vInventoryPurchaseorderMaterialPartialUpdateBody},
   destroy: {mutation: inventoryPurchaseorderMaterialDestroyMutation},
-  reads: ['inventoryPurchaseorderMaterialList', 'inventoryPurchaseorderMaterialRetrieve'],
+  reads: inventoryPurchaseorderMaterialReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InventoryPurchaseorderMaterial` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InventoryPurchaseorderMaterial.ListQuery)[] = inventoryPurchaseorderMaterialFilters) =>
+    inventoryPurchaseorderMaterialListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryPurchaseorderMaterialReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => inventoryPurchaseorderMaterialRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventoryPurchaseorderMaterialCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => inventoryPurchaseorderMaterialPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InventoryPurchaseorderMaterial.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => inventoryPurchaseorderMaterialDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/purchaseorder-status` */
-export const inventoryPurchaseorderStatus = {
+/** `api/inventory/purchaseorder-material` */
+export const InventoryPurchaseorderMaterial = inventoryPurchaseorderMaterial
+
+export declare namespace InventoryPurchaseorderMaterial {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryPurchaseorderMaterialListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryPurchaseorderMaterialListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryPurchaseorderMaterialRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderMaterialCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderMaterialCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryPurchaseorderMaterialPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryPurchaseorderMaterialPartialUpdateBody>
+}
+
+const inventoryPurchaseorderStatusFilters: readonly (keyof InventoryPurchaseorderStatus.ListQuery)[] = ['purchase_order']
+
+const inventoryPurchaseorderStatusReads: readonly string[] = ['inventoryPurchaseorderStatusList', 'inventoryPurchaseorderStatusRetrieve']
+
+const inventoryPurchaseorderStatus = {
   path: 'api/inventory/purchaseorder-status',
   kind: 'collection',
   id: 'number',
@@ -2077,19 +6701,109 @@ export const inventoryPurchaseorderStatus = {
   create: {mutation: inventoryPurchaseorderStatusCreateMutation, body: vInventoryPurchaseorderStatusCreateBody},
   update: {mutation: inventoryPurchaseorderStatusPartialUpdateMutation, body: vInventoryPurchaseorderStatusPartialUpdateBody},
   destroy: {mutation: inventoryPurchaseorderStatusDestroyMutation},
-  reads: ['inventoryPurchaseorderStatusList', 'inventoryPurchaseorderStatusRetrieve'],
+  reads: inventoryPurchaseorderStatusReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InventoryPurchaseorderStatus` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InventoryPurchaseorderStatus.ListQuery)[] = inventoryPurchaseorderStatusFilters) =>
+    inventoryPurchaseorderStatusListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryPurchaseorderStatusReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => inventoryPurchaseorderStatusRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventoryPurchaseorderStatusCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => inventoryPurchaseorderStatusPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InventoryPurchaseorderStatus.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => inventoryPurchaseorderStatusDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/purchaseorder/with-materials` */
-export const inventoryPurchaseorderWithMaterials = {
+/** `api/inventory/purchaseorder-status` */
+export const InventoryPurchaseorderStatus = inventoryPurchaseorderStatus
+
+export declare namespace InventoryPurchaseorderStatus {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryPurchaseorderStatusListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryPurchaseorderStatusListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryPurchaseorderStatusRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderStatusCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderStatusCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryPurchaseorderStatusPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryPurchaseorderStatusPartialUpdateBody>
+}
+
+const inventoryPurchaseorderWithMaterialsReads: readonly string[] = []
+
+const inventoryPurchaseorderWithMaterials = {
   path: 'api/inventory/purchaseorder/with-materials',
   kind: 'action',
   create: {mutation: inventoryPurchaseorderWithMaterialsCreateMutation, body: vInventoryPurchaseorderWithMaterialsCreateBody},
-  reads: [],
+  reads: inventoryPurchaseorderWithMaterialsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryPurchaseorderWithMaterialsReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventoryPurchaseorderWithMaterialsCreateMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/stock-location` */
-export const inventoryStockLocation = {
+/** `api/inventory/purchaseorder/with-materials` */
+export const InventoryPurchaseorderWithMaterials = inventoryPurchaseorderWithMaterials
+
+export declare namespace InventoryPurchaseorderWithMaterials {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderWithMaterialsCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderWithMaterialsCreateBody>
+}
+
+const inventoryStockLocationReads: readonly string[] = ['inventoryStockLocationList', 'inventoryStockLocationRetrieve']
+
+const inventoryStockLocation = {
   path: 'api/inventory/stock-location',
   kind: 'collection',
   id: 'number',
@@ -2098,21 +6812,119 @@ export const inventoryStockLocation = {
   create: {mutation: inventoryStockLocationCreateMutation, body: vInventoryStockLocationCreateBody},
   update: {mutation: inventoryStockLocationPartialUpdateMutation, body: vInventoryStockLocationPartialUpdateBody},
   destroy: {mutation: inventoryStockLocationDestroyMutation},
-  reads: ['inventoryStockLocationList', 'inventoryStockLocationRetrieve'],
+  reads: inventoryStockLocationReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    inventoryStockLocationListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryStockLocationReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => inventoryStockLocationRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventoryStockLocationCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => inventoryStockLocationPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InventoryStockLocation.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => inventoryStockLocationDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/stockmutationsimple-list` */
-export const inventoryStockmutationsimpleList = {
+/** `api/inventory/stock-location` */
+export const InventoryStockLocation = inventoryStockLocation
+
+export declare namespace InventoryStockLocation {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryStockLocationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryStockLocationListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryStockLocationRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryStockLocationCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryStockLocationCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryStockLocationPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryStockLocationPartialUpdateBody>
+}
+
+const inventoryStockmutationsimpleListReads: readonly string[] = ['inventoryStockmutationsimpleListList']
+
+const inventoryStockmutationsimpleList = {
   path: 'api/inventory/stockmutationsimple-list',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryStockmutationsimpleListListOptions, queryKey: inventoryStockmutationsimpleListListQueryKey},
   create: {mutation: inventoryStockmutationsimpleListCreateMutation, body: vInventoryStockmutationsimpleListCreateBody},
-  reads: ['inventoryStockmutationsimpleListList'],
+  reads: inventoryStockmutationsimpleListReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    inventoryStockmutationsimpleListListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventoryStockmutationsimpleListReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventoryStockmutationsimpleListCreateMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/supplier` */
-export const inventorySupplier = {
+/** `api/inventory/stockmutationsimple-list` */
+export const InventoryStockmutationsimpleList = inventoryStockmutationsimpleList
+
+export declare namespace InventoryStockmutationsimpleList {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryStockmutationsimpleListListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryStockmutationsimpleListListQuery>
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryStockmutationsimpleListCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryStockmutationsimpleListCreateBody>
+}
+
+const inventorySupplierReads: readonly string[] = ['inventorySupplierAutocompleteList', 'inventorySupplierList', 'inventorySupplierRetrieve']
+
+const inventorySupplier = {
   path: 'api/inventory/supplier',
   kind: 'collection',
   id: 'number',
@@ -2121,20 +6933,114 @@ export const inventorySupplier = {
   create: {mutation: inventorySupplierCreateMutation, body: vInventorySupplierCreateBody},
   update: {mutation: inventorySupplierPartialUpdateMutation, body: vInventorySupplierPartialUpdateBody},
   destroy: {mutation: inventorySupplierDestroyMutation},
-  reads: ['inventorySupplierAutocompleteList', 'inventorySupplierList', 'inventorySupplierRetrieve'],
+  reads: inventorySupplierReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    inventorySupplierListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventorySupplierReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => inventorySupplierRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventorySupplierCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => inventorySupplierPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InventorySupplier.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => inventorySupplierDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/supplier/autocomplete` */
-export const inventorySupplierAutocomplete = {
+/** `api/inventory/supplier` */
+export const InventorySupplier = inventorySupplier
+
+export declare namespace InventorySupplier {
+  /** What `list` answers with. */
+  export type ListResponse = InventorySupplierListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventorySupplierListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventorySupplierRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventorySupplierCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventorySupplierCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventorySupplierPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventorySupplierPartialUpdateBody>
+}
+
+const inventorySupplierAutocompleteReads: readonly string[] = ['inventorySupplierAutocompleteList']
+
+const inventorySupplierAutocomplete = {
   path: 'api/inventory/supplier/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: inventorySupplierAutocompleteListOptions, queryKey: inventorySupplierAutocompleteListQueryKey},
-  reads: ['inventorySupplierAutocompleteList'],
+  reads: inventorySupplierAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    inventorySupplierAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventorySupplierAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/inventory/supplier-reservation` */
-export const inventorySupplierReservation = {
+/** `api/inventory/supplier/autocomplete` */
+export const InventorySupplierAutocomplete = inventorySupplierAutocomplete
+
+export declare namespace InventorySupplierAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = InventorySupplierAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventorySupplierAutocompleteListQuery>
+}
+
+const inventorySupplierReservationFilters: readonly (keyof InventorySupplierReservation.ListQuery)[] = ['supplier']
+
+const inventorySupplierReservationReads: readonly string[] = ['inventorySupplierReservationAutocompleteList', 'inventorySupplierReservationList', 'inventorySupplierReservationRetrieve']
+
+const inventorySupplierReservation = {
   path: 'api/inventory/supplier-reservation',
   kind: 'collection',
   id: 'number',
@@ -2143,28 +7049,161 @@ export const inventorySupplierReservation = {
   create: {mutation: inventorySupplierReservationCreateMutation, body: vInventorySupplierReservationCreateBody},
   update: {mutation: inventorySupplierReservationPartialUpdateMutation, body: vInventorySupplierReservationPartialUpdateBody},
   destroy: {mutation: inventorySupplierReservationDestroyMutation},
-  reads: ['inventorySupplierReservationAutocompleteList', 'inventorySupplierReservationList', 'inventorySupplierReservationRetrieve'],
+  reads: inventorySupplierReservationReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InventorySupplierReservation` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InventorySupplierReservation.ListQuery)[] = inventorySupplierReservationFilters) =>
+    inventorySupplierReservationListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventorySupplierReservationReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => inventorySupplierReservationRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventorySupplierReservationCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => inventorySupplierReservationPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InventorySupplierReservation.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => inventorySupplierReservationDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/supplier-reservation/autocomplete` */
-export const inventorySupplierReservationAutocomplete = {
+/** `api/inventory/supplier-reservation` */
+export const InventorySupplierReservation = inventorySupplierReservation
+
+export declare namespace InventorySupplierReservation {
+  /** What `list` answers with. */
+  export type ListResponse = InventorySupplierReservationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventorySupplierReservationListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventorySupplierReservationRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventorySupplierReservationCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventorySupplierReservationCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventorySupplierReservationPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventorySupplierReservationPartialUpdateBody>
+}
+
+const inventorySupplierReservationAutocompleteFilters: readonly (keyof InventorySupplierReservationAutocomplete.ListQuery)[] = ['supplier']
+
+const inventorySupplierReservationAutocompleteReads: readonly string[] = ['inventorySupplierReservationAutocompleteList']
+
+const inventorySupplierReservationAutocomplete = {
   path: 'api/inventory/supplier-reservation/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: inventorySupplierReservationAutocompleteListOptions, queryKey: inventorySupplierReservationAutocompleteListQueryKey},
-  reads: ['inventorySupplierReservationAutocompleteList'],
+  reads: inventorySupplierReservationAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InventorySupplierReservationAutocomplete` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InventorySupplierReservationAutocomplete.ListQuery)[] = inventorySupplierReservationAutocompleteFilters) =>
+    inventorySupplierReservationAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventorySupplierReservationAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/inventory/supplier-reservation/with-materials` */
-export const inventorySupplierReservationWithMaterials = {
+/** `api/inventory/supplier-reservation/autocomplete` */
+export const InventorySupplierReservationAutocomplete = inventorySupplierReservationAutocomplete
+
+export declare namespace InventorySupplierReservationAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = InventorySupplierReservationAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventorySupplierReservationAutocompleteListQuery>
+}
+
+const inventorySupplierReservationWithMaterialsReads: readonly string[] = []
+
+const inventorySupplierReservationWithMaterials = {
   path: 'api/inventory/supplier-reservation/with-materials',
   kind: 'action',
   create: {mutation: inventorySupplierReservationWithMaterialsCreateMutation, body: vInventorySupplierReservationWithMaterialsCreateBody},
-  reads: [],
+  reads: inventorySupplierReservationWithMaterialsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventorySupplierReservationWithMaterialsReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventorySupplierReservationWithMaterialsCreateMutation(),
 } as const satisfies Resource
 
-/** `api/inventory/supplier-reservationmaterial` */
-export const inventorySupplierReservationmaterial = {
+/** `api/inventory/supplier-reservation/with-materials` */
+export const InventorySupplierReservationWithMaterials = inventorySupplierReservationWithMaterials
+
+export declare namespace InventorySupplierReservationWithMaterials {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventorySupplierReservationWithMaterialsCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventorySupplierReservationWithMaterialsCreateBody>
+}
+
+const inventorySupplierReservationmaterialFilters: readonly (keyof InventorySupplierReservationmaterial.ListQuery)[] = ['material', 'reservation']
+
+const inventorySupplierReservationmaterialReads: readonly string[] = ['inventorySupplierReservationmaterialList', 'inventorySupplierReservationmaterialRetrieve']
+
+const inventorySupplierReservationmaterial = {
   path: 'api/inventory/supplier-reservationmaterial',
   kind: 'collection',
   id: 'number',
@@ -2173,11 +7212,76 @@ export const inventorySupplierReservationmaterial = {
   create: {mutation: inventorySupplierReservationmaterialCreateMutation, body: vInventorySupplierReservationmaterialCreateBody},
   update: {mutation: inventorySupplierReservationmaterialPartialUpdateMutation, body: vInventorySupplierReservationmaterialPartialUpdateBody},
   destroy: {mutation: inventorySupplierReservationmaterialDestroyMutation},
-  reads: ['inventorySupplierReservationmaterialList', 'inventorySupplierReservationmaterialRetrieve'],
+  reads: inventorySupplierReservationmaterialReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InventorySupplierReservationmaterial` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InventorySupplierReservationmaterial.ListQuery)[] = inventorySupplierReservationmaterialFilters) =>
+    inventorySupplierReservationmaterialListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(inventorySupplierReservationmaterialReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => inventorySupplierReservationmaterialRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => inventorySupplierReservationmaterialCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => inventorySupplierReservationmaterialPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InventorySupplierReservationmaterial.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => inventorySupplierReservationmaterialDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/invoice/email` */
-export const invoiceEmail = {
+/** `api/inventory/supplier-reservationmaterial` */
+export const InventorySupplierReservationmaterial = inventorySupplierReservationmaterial
+
+export declare namespace InventorySupplierReservationmaterial {
+  /** What `list` answers with. */
+  export type ListResponse = InventorySupplierReservationmaterialListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventorySupplierReservationmaterialListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventorySupplierReservationmaterialRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventorySupplierReservationmaterialCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventorySupplierReservationmaterialCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventorySupplierReservationmaterialPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventorySupplierReservationmaterialPartialUpdateBody>
+}
+
+const invoiceEmailReads: readonly string[] = ['invoiceEmailGetDocumentsList', 'invoiceEmailGetUnsentEmailRetrieve', 'invoiceEmailList', 'invoiceEmailRetrieve']
+
+const invoiceEmail = {
   path: 'api/invoice/email',
   kind: 'collection',
   id: 'number',
@@ -2186,20 +7290,104 @@ export const invoiceEmail = {
   create: {mutation: invoiceEmailCreateMutation, body: vInvoiceEmailCreateBody},
   update: {mutation: invoiceEmailPartialUpdateMutation, body: vInvoiceEmailPartialUpdateBody},
   destroy: {mutation: invoiceEmailDestroyMutation},
-  reads: ['invoiceEmailGetDocumentsList', 'invoiceEmailGetUnsentEmailRetrieve', 'invoiceEmailList', 'invoiceEmailRetrieve'],
+  reads: invoiceEmailReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    invoiceEmailListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(invoiceEmailReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => invoiceEmailRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => invoiceEmailCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => invoiceEmailPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InvoiceEmail.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => invoiceEmailDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/invoice/email/get_documents` */
-export const invoiceEmailGetDocuments = {
+/** `api/invoice/email` */
+export const InvoiceEmail = invoiceEmail
+
+export declare namespace InvoiceEmail {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceEmailListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceEmailListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InvoiceEmailRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoiceEmailCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoiceEmailCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInvoiceEmailPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInvoiceEmailPartialUpdateBody>
+}
+
+const invoiceEmailGetDocumentsReads: readonly string[] = ['invoiceEmailGetDocumentsList']
+
+const invoiceEmailGetDocuments = {
   path: 'api/invoice/email/get_documents',
   kind: 'collection',
   id: 'number',
   list: {options: invoiceEmailGetDocumentsListOptions, queryKey: invoiceEmailGetDocumentsListQueryKey},
-  reads: ['invoiceEmailGetDocumentsList'],
+  reads: invoiceEmailGetDocumentsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(invoiceEmailGetDocumentsReads),
 } as const satisfies Resource
 
-/** `api/invoice/invoice` */
-export const invoiceInvoice = {
+/** `api/invoice/email/get_documents` */
+export const InvoiceEmailGetDocuments = invoiceEmailGetDocuments
+
+export declare namespace InvoiceEmailGetDocuments {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceEmailGetDocumentsListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceEmailGetDocumentsListQuery>
+}
+
+const invoiceInvoiceFilters: readonly (keyof InvoiceInvoice.ListQuery)[] = ['order']
+
+const invoiceInvoiceReads: readonly string[] = ['invoiceInvoiceAutocompleteList', 'invoiceInvoiceDataRetrieve', 'invoiceInvoiceList', 'invoiceInvoicePreliminaryList', 'invoiceInvoiceRetrieve', 'invoiceInvoiceSentList']
+
+const invoiceInvoice = {
   path: 'api/invoice/invoice',
   kind: 'collection',
   id: 'number',
@@ -2208,20 +7396,128 @@ export const invoiceInvoice = {
   create: {mutation: invoiceInvoiceCreateMutation, body: vInvoiceInvoiceCreateBody},
   update: {mutation: invoiceInvoicePartialUpdateMutation, body: vInvoiceInvoicePartialUpdateBody},
   destroy: {mutation: invoiceInvoiceDestroyMutation},
-  reads: ['invoiceInvoiceAutocompleteList', 'invoiceInvoiceDataRetrieve', 'invoiceInvoiceList', 'invoiceInvoicePreliminaryList', 'invoiceInvoiceRetrieve', 'invoiceInvoiceSentList'],
+  reads: invoiceInvoiceReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InvoiceInvoice` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InvoiceInvoice.ListQuery)[] = invoiceInvoiceFilters) =>
+    invoiceInvoiceListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(invoiceInvoiceReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => invoiceInvoiceRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => invoiceInvoiceCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => invoiceInvoicePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InvoiceInvoice.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => invoiceInvoiceDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/invoice/invoice/autocomplete` */
-export const invoiceInvoiceAutocomplete = {
+/** `api/invoice/invoice` */
+export const InvoiceInvoice = invoiceInvoice
+
+export declare namespace InvoiceInvoice {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceInvoiceListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceInvoiceListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InvoiceInvoiceRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoiceInvoiceCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoiceInvoiceCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInvoiceInvoicePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInvoiceInvoicePartialUpdateBody>
+}
+
+const invoiceInvoiceAutocompleteFilters: readonly (keyof InvoiceInvoiceAutocomplete.ListQuery)[] = ['order']
+
+const invoiceInvoiceAutocompleteReads: readonly string[] = ['invoiceInvoiceAutocompleteList']
+
+const invoiceInvoiceAutocomplete = {
   path: 'api/invoice/invoice/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: invoiceInvoiceAutocompleteListOptions, queryKey: invoiceInvoiceAutocompleteListQueryKey},
-  reads: ['invoiceInvoiceAutocompleteList'],
+  reads: invoiceInvoiceAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InvoiceInvoiceAutocomplete` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InvoiceInvoiceAutocomplete.ListQuery)[] = invoiceInvoiceAutocompleteFilters) =>
+    invoiceInvoiceAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(invoiceInvoiceAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/invoice/invoice-line` */
-export const invoiceInvoiceLine = {
+/** `api/invoice/invoice/autocomplete` */
+export const InvoiceInvoiceAutocomplete = invoiceInvoiceAutocomplete
+
+export declare namespace InvoiceInvoiceAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceInvoiceAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceInvoiceAutocompleteListQuery>
+}
+
+const invoiceInvoiceLineFilters: readonly (keyof InvoiceInvoiceLine.ListQuery)[] = ['invoice']
+
+const invoiceInvoiceLineReads: readonly string[] = ['invoiceInvoiceLineList', 'invoiceInvoiceLineRetrieve']
+
+const invoiceInvoiceLine = {
   path: 'api/invoice/invoice-line',
   kind: 'collection',
   id: 'number',
@@ -2230,37 +7526,211 @@ export const invoiceInvoiceLine = {
   create: {mutation: invoiceInvoiceLineCreateMutation, body: vInvoiceInvoiceLineCreateBody},
   update: {mutation: invoiceInvoiceLinePartialUpdateMutation, body: vInvoiceInvoiceLinePartialUpdateBody},
   destroy: {mutation: invoiceInvoiceLineDestroyMutation},
-  reads: ['invoiceInvoiceLineList', 'invoiceInvoiceLineRetrieve'],
+  reads: invoiceInvoiceLineReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InvoiceInvoiceLine` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InvoiceInvoiceLine.ListQuery)[] = invoiceInvoiceLineFilters) =>
+    invoiceInvoiceLineListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(invoiceInvoiceLineReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => invoiceInvoiceLineRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => invoiceInvoiceLineCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => invoiceInvoiceLinePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InvoiceInvoiceLine.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => invoiceInvoiceLineDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/invoice/invoice/preliminary` */
-export const invoiceInvoicePreliminary = {
+/** `api/invoice/invoice-line` */
+export const InvoiceInvoiceLine = invoiceInvoiceLine
+
+export declare namespace InvoiceInvoiceLine {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceInvoiceLineListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceInvoiceLineListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InvoiceInvoiceLineRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoiceInvoiceLineCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoiceInvoiceLineCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInvoiceInvoiceLinePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInvoiceInvoiceLinePartialUpdateBody>
+}
+
+const invoiceInvoicePreliminaryFilters: readonly (keyof InvoiceInvoicePreliminary.ListQuery)[] = ['order']
+
+const invoiceInvoicePreliminaryReads: readonly string[] = ['invoiceInvoicePreliminaryList']
+
+const invoiceInvoicePreliminary = {
   path: 'api/invoice/invoice/preliminary',
   kind: 'collection',
   id: 'number',
   list: {options: invoiceInvoicePreliminaryListOptions, queryKey: invoiceInvoicePreliminaryListQueryKey},
-  reads: ['invoiceInvoicePreliminaryList'],
+  reads: invoiceInvoicePreliminaryReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InvoiceInvoicePreliminary` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InvoiceInvoicePreliminary.ListQuery)[] = invoiceInvoicePreliminaryFilters) =>
+    invoiceInvoicePreliminaryListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(invoiceInvoicePreliminaryReads),
 } as const satisfies Resource
 
-/** `api/invoice/invoice/sent` */
-export const invoiceInvoiceSent = {
+/** `api/invoice/invoice/preliminary` */
+export const InvoiceInvoicePreliminary = invoiceInvoicePreliminary
+
+export declare namespace InvoiceInvoicePreliminary {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceInvoicePreliminaryListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceInvoicePreliminaryListQuery>
+}
+
+const invoiceInvoiceSentFilters: readonly (keyof InvoiceInvoiceSent.ListQuery)[] = ['order']
+
+const invoiceInvoiceSentReads: readonly string[] = ['invoiceInvoiceSentList']
+
+const invoiceInvoiceSent = {
   path: 'api/invoice/invoice/sent',
   kind: 'collection',
   id: 'number',
   list: {options: invoiceInvoiceSentListOptions, queryKey: invoiceInvoiceSentListQueryKey},
-  reads: ['invoiceInvoiceSentList'],
+  reads: invoiceInvoiceSentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InvoiceInvoiceSent` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InvoiceInvoiceSent.ListQuery)[] = invoiceInvoiceSentFilters) =>
+    invoiceInvoiceSentListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(invoiceInvoiceSentReads),
 } as const satisfies Resource
 
-/** `api/invoice/invoice-status` */
-export const invoiceInvoiceStatus = {
+/** `api/invoice/invoice/sent` */
+export const InvoiceInvoiceSent = invoiceInvoiceSent
+
+export declare namespace InvoiceInvoiceSent {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceInvoiceSentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceInvoiceSentListQuery>
+}
+
+const invoiceInvoiceStatusReads: readonly string[] = []
+
+const invoiceInvoiceStatus = {
   path: 'api/invoice/invoice-status',
   kind: 'action',
   create: {mutation: invoiceInvoiceStatusCreateMutation, body: vInvoiceInvoiceStatusCreateBody},
-  reads: [],
+  reads: invoiceInvoiceStatusReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(invoiceInvoiceStatusReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => invoiceInvoiceStatusCreateMutation(),
 } as const satisfies Resource
 
-/** `api/invoice/purchase` */
-export const invoicePurchase = {
+/** `api/invoice/invoice-status` */
+export const InvoiceInvoiceStatus = invoiceInvoiceStatus
+
+export declare namespace InvoiceInvoiceStatus {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoiceInvoiceStatusCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoiceInvoiceStatusCreateBody>
+}
+
+const invoicePurchaseFilters: readonly (keyof InvoicePurchase.ListQuery)[] = ['order']
+
+const invoicePurchaseReads: readonly string[] = ['invoicePurchaseList', 'invoicePurchaseRetrieve', 'invoicePurchaseYearList']
+
+const invoicePurchase = {
   path: 'api/invoice/purchase',
   kind: 'collection',
   id: 'number',
@@ -2269,44 +7739,227 @@ export const invoicePurchase = {
   create: {mutation: invoicePurchaseCreateMutation, body: vInvoicePurchaseCreateBody},
   update: {mutation: invoicePurchasePartialUpdateMutation, body: vInvoicePurchasePartialUpdateBody},
   destroy: {mutation: invoicePurchaseDestroyMutation},
-  reads: ['invoicePurchaseList', 'invoicePurchaseRetrieve', 'invoicePurchaseYearList'],
+  reads: invoicePurchaseReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InvoicePurchase` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InvoicePurchase.ListQuery)[] = invoicePurchaseFilters) =>
+    invoicePurchaseListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(invoicePurchaseReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => invoicePurchaseRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => invoicePurchaseCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => invoicePurchasePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: InvoicePurchase.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => invoicePurchaseDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/invoice/purchase/year` */
-export const invoicePurchaseYear = {
+/** `api/invoice/purchase` */
+export const InvoicePurchase = invoicePurchase
+
+export declare namespace InvoicePurchase {
+  /** What `list` answers with. */
+  export type ListResponse = InvoicePurchaseListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoicePurchaseListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InvoicePurchaseRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoicePurchaseCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoicePurchaseCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInvoicePurchasePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInvoicePurchasePartialUpdateBody>
+}
+
+const invoicePurchaseYearFilters: readonly (keyof InvoicePurchaseYear.ListQuery)[] = ['order']
+
+const invoicePurchaseYearReads: readonly string[] = ['invoicePurchaseYearList']
+
+const invoicePurchaseYear = {
   path: 'api/invoice/purchase/year',
   kind: 'collection',
   id: 'number',
   list: {options: invoicePurchaseYearListOptions, queryKey: invoicePurchaseYearListQueryKey},
-  reads: ['invoicePurchaseYearList'],
+  reads: invoicePurchaseYearReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `InvoicePurchaseYear` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof InvoicePurchaseYear.ListQuery)[] = invoicePurchaseYearFilters) =>
+    invoicePurchaseYearListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(invoicePurchaseYearReads),
 } as const satisfies Resource
 
-/** `api/jwt-token` */
-export const jwtToken = {
+/** `api/invoice/purchase/year` */
+export const InvoicePurchaseYear = invoicePurchaseYear
+
+export declare namespace InvoicePurchaseYear {
+  /** What `list` answers with. */
+  export type ListResponse = InvoicePurchaseYearListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoicePurchaseYearListQuery>
+}
+
+const jwtTokenReads: readonly string[] = []
+
+const jwtToken = {
   path: 'api/jwt-token',
   kind: 'action',
   create: {mutation: jwtTokenCreateMutation, body: vJwtTokenCreateBody},
-  reads: [],
+  reads: jwtTokenReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(jwtTokenReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => jwtTokenCreateMutation(),
 } as const satisfies Resource
 
-/** `api/jwt-token/refresh` */
-export const jwtTokenRefresh = {
+/** `api/jwt-token` */
+export const JwtToken = jwtToken
+
+export declare namespace JwtToken {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vJwtTokenCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vJwtTokenCreateBody>
+}
+
+const jwtTokenRefreshReads: readonly string[] = []
+
+const jwtTokenRefresh = {
   path: 'api/jwt-token/refresh',
   kind: 'action',
   create: {mutation: jwtTokenRefreshCreateMutation, body: vJwtTokenRefreshCreateBody},
-  reads: [],
+  reads: jwtTokenRefreshReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(jwtTokenRefreshReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => jwtTokenRefreshCreateMutation(),
 } as const satisfies Resource
 
-/** `api/location-to-address` */
-export const locationToAddress = {
+/** `api/jwt-token/refresh` */
+export const JwtTokenRefresh = jwtTokenRefresh
+
+export declare namespace JwtTokenRefresh {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vJwtTokenRefreshCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vJwtTokenRefreshCreateBody>
+}
+
+const locationToAddressReads: readonly string[] = []
+
+const locationToAddress = {
   path: 'api/location-to-address',
   kind: 'action',
   create: {mutation: locationToAddressCreateMutation, body: vLocationToAddressCreateBody},
-  reads: [],
+  reads: locationToAddressReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(locationToAddressReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => locationToAddressCreateMutation(),
 } as const satisfies Resource
 
-/** `api/member/contract` */
-export const memberContract = {
+/** `api/location-to-address` */
+export const LocationToAddress = locationToAddress
+
+export declare namespace LocationToAddress {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vLocationToAddressCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vLocationToAddressCreateBody>
+}
+
+const memberContractFilters: readonly (keyof MemberContract.ListQuery)[] = ['name']
+
+const memberContractReads: readonly string[] = ['memberContractList', 'memberContractRetrieve']
+
+const memberContract = {
   path: 'api/member/contract',
   kind: 'collection',
   id: 'number',
@@ -2315,38 +7968,192 @@ export const memberContract = {
   create: {mutation: memberContractCreateMutation, body: vMemberContractCreateBody},
   update: {mutation: memberContractPartialUpdateMutation, body: vMemberContractPartialUpdateBody},
   destroy: {mutation: memberContractDestroyMutation},
-  reads: ['memberContractList', 'memberContractRetrieve'],
+  reads: memberContractReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `MemberContract` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof MemberContract.ListQuery)[] = memberContractFilters) =>
+    memberContractListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(memberContractReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => memberContractRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => memberContractCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => memberContractPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MemberContract.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => memberContractDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/member/get-module-data` */
-export const memberGetModuleData = {
+/** `api/member/contract` */
+export const MemberContract = memberContract
+
+export declare namespace MemberContract {
+  /** What `list` answers with. */
+  export type ListResponse = MemberContractListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberContractListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MemberContractRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMemberContractCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMemberContractCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberContractPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberContractPartialUpdateBody>
+}
+
+const memberGetModuleDataReads: readonly string[] = ['memberGetModuleDataList']
+
+const memberGetModuleData = {
   path: 'api/member/get-module-data',
   kind: 'collection',
   id: 'number',
   list: {options: memberGetModuleDataListOptions, queryKey: memberGetModuleDataListQueryKey},
-  reads: ['memberGetModuleDataList'],
+  reads: memberGetModuleDataReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(memberGetModuleDataReads),
 } as const satisfies Resource
 
-/** `api/member/list-public` */
-export const memberListPublic = {
+/** `api/member/get-module-data` */
+export const MemberGetModuleData = memberGetModuleData
+
+export declare namespace MemberGetModuleData {
+  /** What `list` answers with. */
+  export type ListResponse = MemberGetModuleDataListResponse
+}
+
+const memberListPublicReads: readonly string[] = ['memberListPublicList']
+
+const memberListPublic = {
   path: 'api/member/list-public',
   kind: 'collection',
   id: 'number',
   list: {options: memberListPublicListOptions, queryKey: memberListPublicListQueryKey},
-  reads: ['memberListPublicList'],
+  reads: memberListPublicReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    memberListPublicListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(memberListPublicReads),
 } as const satisfies Resource
 
-/** `api/member/list-public-branches` */
-export const memberListPublicBranches = {
+/** `api/member/list-public` */
+export const MemberListPublic = memberListPublic
+
+export declare namespace MemberListPublic {
+  /** What `list` answers with. */
+  export type ListResponse = MemberListPublicListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberListPublicListQuery>
+}
+
+const memberListPublicBranchesReads: readonly string[] = ['memberListPublicBranchesList']
+
+const memberListPublicBranches = {
   path: 'api/member/list-public-branches',
   kind: 'collection',
   id: 'number',
   list: {options: memberListPublicBranchesListOptions, queryKey: memberListPublicBranchesListQueryKey},
-  reads: ['memberListPublicBranchesList'],
+  reads: memberListPublicBranchesReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    memberListPublicBranchesListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(memberListPublicBranchesReads),
 } as const satisfies Resource
 
-/** `api/member/member` */
-export const memberMember = {
+/** `api/member/list-public-branches` */
+export const MemberListPublicBranches = memberListPublicBranches
+
+export declare namespace MemberListPublicBranches {
+  /** What `list` answers with. */
+  export type ListResponse = MemberListPublicBranchesListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberListPublicBranchesListQuery>
+}
+
+const memberMemberFilters: readonly (keyof MemberMember.ListQuery)[] = ['city', 'companycode', 'is_deleted', 'is_requested', 'member_type']
+
+const memberMemberReads: readonly string[] = ['memberMemberGetDashboardRetrieve', 'memberMemberGetExcludeMeList', 'memberMemberGetForPartnerSelectList', 'memberMemberGetMySettingsRetrieve', 'memberMemberGetOciUrlRetrieve', 'memberMemberList', 'memberMemberMeRetrieve', 'memberMemberMySettingsRetrieve', 'memberMemberOverviewStatsRetrieve', 'memberMemberRequestedCountRetrieve', 'memberMemberRetrieve']
+
+const memberMember = {
   path: 'api/member/member',
   kind: 'collection',
   id: 'number',
@@ -2355,47 +8162,234 @@ export const memberMember = {
   create: {mutation: memberMemberCreateMutation, body: vMemberMemberCreateBody},
   update: {mutation: memberMemberPartialUpdateMutation, body: vMemberMemberPartialUpdateBody},
   destroy: {mutation: memberMemberDestroyMutation},
-  reads: ['memberMemberGetDashboardRetrieve', 'memberMemberGetExcludeMeList', 'memberMemberGetForPartnerSelectList', 'memberMemberGetMySettingsRetrieve', 'memberMemberGetOciUrlRetrieve', 'memberMemberList', 'memberMemberMeRetrieve', 'memberMemberMySettingsRetrieve', 'memberMemberOverviewStatsRetrieve', 'memberMemberRequestedCountRetrieve', 'memberMemberRetrieve'],
+  reads: memberMemberReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `MemberMember` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof MemberMember.ListQuery)[] = memberMemberFilters) =>
+    memberMemberListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(memberMemberReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => memberMemberRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => memberMemberCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => memberMemberPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MemberMember.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => memberMemberDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/member/member/get_exclude_me` */
-export const memberMemberGetExcludeMe = {
+/** `api/member/member` */
+export const MemberMember = memberMember
+
+export declare namespace MemberMember {
+  /** What `list` answers with. */
+  export type ListResponse = MemberMemberListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberMemberListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MemberMemberRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMemberMemberCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMemberMemberCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberMemberPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberMemberPartialUpdateBody>
+}
+
+const memberMemberGetExcludeMeReads: readonly string[] = ['memberMemberGetExcludeMeList']
+
+const memberMemberGetExcludeMe = {
   path: 'api/member/member/get_exclude_me',
   kind: 'collection',
   id: 'number',
   list: {options: memberMemberGetExcludeMeListOptions, queryKey: memberMemberGetExcludeMeListQueryKey},
-  reads: ['memberMemberGetExcludeMeList'],
+  reads: memberMemberGetExcludeMeReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(memberMemberGetExcludeMeReads),
 } as const satisfies Resource
 
-/** `api/member/member/get_for_partner_select` */
-export const memberMemberGetForPartnerSelect = {
+/** `api/member/member/get_exclude_me` */
+export const MemberMemberGetExcludeMe = memberMemberGetExcludeMe
+
+export declare namespace MemberMemberGetExcludeMe {
+  /** What `list` answers with. */
+  export type ListResponse = MemberMemberGetExcludeMeListResponse
+}
+
+const memberMemberGetForPartnerSelectReads: readonly string[] = ['memberMemberGetForPartnerSelectList']
+
+const memberMemberGetForPartnerSelect = {
   path: 'api/member/member/get_for_partner_select',
   kind: 'collection',
   id: 'number',
   list: {options: memberMemberGetForPartnerSelectListOptions, queryKey: memberMemberGetForPartnerSelectListQueryKey},
-  reads: ['memberMemberGetForPartnerSelectList'],
+  reads: memberMemberGetForPartnerSelectReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    memberMemberGetForPartnerSelectListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(memberMemberGetForPartnerSelectReads),
 } as const satisfies Resource
 
-/** `api/member/member/me` */
-export const memberMemberMe = {
+/** `api/member/member/get_for_partner_select` */
+export const MemberMemberGetForPartnerSelect = memberMemberGetForPartnerSelect
+
+export declare namespace MemberMemberGetForPartnerSelect {
+  /** What `list` answers with. */
+  export type ListResponse = MemberMemberGetForPartnerSelectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberMemberGetForPartnerSelectListQuery>
+}
+
+const memberMemberMeReads: readonly string[] = ['memberMemberMeRetrieve']
+
+const memberMemberMe = {
   path: 'api/member/member/me',
   kind: 'singleton',
   retrieve: {options: memberMemberMeRetrieveOptions, queryKey: memberMemberMeRetrieveQueryKey},
   update: {mutation: memberMemberMePartialUpdateMutation, body: vMemberMemberMePartialUpdateBody},
-  reads: ['memberMemberMeRetrieve'],
+  reads: memberMemberMeReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(memberMemberMeReads),
+  /** The retrieve options for this record: no path, because it is the caller's own. */
+  retrieveOptions: () => memberMemberMeRetrieveOptions(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => memberMemberMePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: MemberMemberMe.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/member/member/my_settings` */
-export const memberMemberMySettings = {
+/** `api/member/member/me` */
+export const MemberMemberMe = memberMemberMe
+
+export declare namespace MemberMemberMe {
+  /** What `retrieve` answers with. */
+  export type Record = MemberMemberMeRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberMemberMePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberMemberMePartialUpdateBody>
+}
+
+const memberMemberMySettingsReads: readonly string[] = ['memberMemberMySettingsRetrieve']
+
+const memberMemberMySettings = {
   path: 'api/member/member/my_settings',
   kind: 'singleton',
   retrieve: {options: memberMemberMySettingsRetrieveOptions, queryKey: memberMemberMySettingsRetrieveQueryKey},
   update: {mutation: memberMemberMySettingsPartialUpdateMutation, body: vMemberMemberMySettingsPartialUpdateBody},
-  reads: ['memberMemberMySettingsRetrieve'],
+  reads: memberMemberMySettingsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(memberMemberMySettingsReads),
+  /** The retrieve options for this record: no path, because it is the caller's own. */
+  retrieveOptions: () => memberMemberMySettingsRetrieveOptions(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => memberMemberMySettingsPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: MemberMemberMySettings.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/member/module` */
-export const memberModule = {
+/** `api/member/member/my_settings` */
+export const MemberMemberMySettings = memberMemberMySettings
+
+export declare namespace MemberMemberMySettings {
+  /** What `retrieve` answers with. */
+  export type Record = MemberMemberMySettingsRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberMemberMySettingsPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberMemberMySettingsPartialUpdateBody>
+}
+
+const memberModuleFilters: readonly (keyof MemberModule.ListQuery)[] = ['id', 'name']
+
+const memberModuleReads: readonly string[] = ['memberModuleList', 'memberModuleRetrieve']
+
+const memberModule = {
   path: 'api/member/module',
   kind: 'collection',
   id: 'number',
@@ -2404,11 +8398,78 @@ export const memberModule = {
   create: {mutation: memberModuleCreateMutation, body: vMemberModuleCreateBody},
   update: {mutation: memberModulePartialUpdateMutation, body: vMemberModulePartialUpdateBody},
   destroy: {mutation: memberModuleDestroyMutation},
-  reads: ['memberModuleList', 'memberModuleRetrieve'],
+  reads: memberModuleReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `MemberModule` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof MemberModule.ListQuery)[] = memberModuleFilters) =>
+    memberModuleListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(memberModuleReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => memberModuleRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => memberModuleCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => memberModulePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MemberModule.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => memberModuleDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/member/module-part` */
-export const memberModulePart = {
+/** `api/member/module` */
+export const MemberModule = memberModule
+
+export declare namespace MemberModule {
+  /** What `list` answers with. */
+  export type ListResponse = MemberModuleListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberModuleListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MemberModuleRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMemberModuleCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMemberModuleCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberModulePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberModulePartialUpdateBody>
+}
+
+const memberModulePartFilters: readonly (keyof MemberModulePart.ListQuery)[] = ['module', 'name']
+
+const memberModulePartReads: readonly string[] = ['memberModulePartList', 'memberModulePartRetrieve']
+
+const memberModulePart = {
   path: 'api/member/module-part',
   kind: 'collection',
   id: 'number',
@@ -2417,37 +8478,179 @@ export const memberModulePart = {
   create: {mutation: memberModulePartCreateMutation, body: vMemberModulePartCreateBody},
   update: {mutation: memberModulePartPartialUpdateMutation, body: vMemberModulePartPartialUpdateBody},
   destroy: {mutation: memberModulePartDestroyMutation},
-  reads: ['memberModulePartList', 'memberModulePartRetrieve'],
+  reads: memberModulePartReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `MemberModulePart` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof MemberModulePart.ListQuery)[] = memberModulePartFilters) =>
+    memberModulePartListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(memberModulePartReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => memberModulePartRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => memberModulePartCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => memberModulePartPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MemberModulePart.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => memberModulePartDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/assign-me` */
-export const mobileAssignMe = {
+/** `api/member/module-part` */
+export const MemberModulePart = memberModulePart
+
+export declare namespace MemberModulePart {
+  /** What `list` answers with. */
+  export type ListResponse = MemberModulePartListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberModulePartListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MemberModulePartRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMemberModulePartCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMemberModulePartCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberModulePartPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberModulePartPartialUpdateBody>
+}
+
+const mobileAssignMeReads: readonly string[] = []
+
+const mobileAssignMe = {
   path: 'api/mobile/assign-me',
   kind: 'action',
   create: {mutation: mobileAssignMeCreateMutation, body: vMobileAssignMeCreateBody},
-  reads: [],
+  reads: mobileAssignMeReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignMeReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileAssignMeCreateMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/assign-user` */
-export const mobileAssignUser = {
+/** `api/mobile/assign-me` */
+export const MobileAssignMe = mobileAssignMe
+
+export declare namespace MobileAssignMe {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignMeCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignMeCreateBody>
+}
+
+const mobileAssignUserReads: readonly string[] = []
+
+const mobileAssignUser = {
   path: 'api/mobile/assign-user',
   kind: 'collection',
   id: 'number',
   create: {mutation: mobileAssignUserCreateMutation, body: vMobileAssignUserCreateBody},
-  reads: [],
+  reads: mobileAssignUserReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignUserReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileAssignUserCreateMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/assign-user-trip` */
-export const mobileAssignUserTrip = {
+/** `api/mobile/assign-user` */
+export const MobileAssignUser = mobileAssignUser
+
+export declare namespace MobileAssignUser {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignUserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignUserCreateBody>
+}
+
+const mobileAssignUserTripReads: readonly string[] = []
+
+const mobileAssignUserTrip = {
   path: 'api/mobile/assign-user-trip',
   kind: 'collection',
   id: 'number',
   create: {mutation: mobileAssignUserTripCreateMutation, body: vMobileAssignUserTripCreateBody},
-  reads: [],
+  reads: mobileAssignUserTripReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignUserTripReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileAssignUserTripCreateMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/assignedorder` */
-export const mobileAssignedorder = {
+/** `api/mobile/assign-user-trip` */
+export const MobileAssignUserTrip = mobileAssignUserTrip
+
+export declare namespace MobileAssignUserTrip {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignUserTripCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignUserTripCreateBody>
+}
+
+const mobileAssignedorderFilters: readonly (keyof MobileAssignedorder.ListQuery)[] = ['engineer', 'order', 'student_user']
+
+const mobileAssignedorderReads: readonly string[] = ['mobileAssignedorderDetailDeviceRetrieve', 'mobileAssignedorderFinishedListList', 'mobileAssignedorderGetWorkorderSignDetailsRetrieve', 'mobileAssignedorderList', 'mobileAssignedorderListAppList', 'mobileAssignedorderListDeviceAppRetrieve', 'mobileAssignedorderListDeviceRetrieve', 'mobileAssignedorderListTimesheetTotalsRetrieve', 'mobileAssignedorderRetrieve']
+
+const mobileAssignedorder = {
   path: 'api/mobile/assignedorder',
   kind: 'collection',
   id: 'number',
@@ -2456,37 +8659,209 @@ export const mobileAssignedorder = {
   create: {mutation: mobileAssignedorderCreateMutation, body: vMobileAssignedorderCreateBody},
   update: {mutation: mobileAssignedorderPartialUpdateMutation, body: vMobileAssignedorderPartialUpdateBody},
   destroy: {mutation: mobileAssignedorderDestroyMutation},
-  reads: ['mobileAssignedorderDetailDeviceRetrieve', 'mobileAssignedorderFinishedListList', 'mobileAssignedorderGetWorkorderSignDetailsRetrieve', 'mobileAssignedorderList', 'mobileAssignedorderListAppList', 'mobileAssignedorderListDeviceAppRetrieve', 'mobileAssignedorderListDeviceRetrieve', 'mobileAssignedorderListTimesheetTotalsRetrieve', 'mobileAssignedorderRetrieve'],
+  reads: mobileAssignedorderReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `MobileAssignedorder` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof MobileAssignedorder.ListQuery)[] = mobileAssignedorderFilters) =>
+    mobileAssignedorderListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignedorderReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => mobileAssignedorderRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileAssignedorderCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => mobileAssignedorderPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MobileAssignedorder.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => mobileAssignedorderDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/assignedorder/finished_list` */
-export const mobileAssignedorderFinishedList = {
+/** `api/mobile/assignedorder` */
+export const MobileAssignedorder = mobileAssignedorder
+
+export declare namespace MobileAssignedorder {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileAssignedorderRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedorderCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedorderCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileAssignedorderPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileAssignedorderPartialUpdateBody>
+}
+
+const mobileAssignedorderFinishedListFilters: readonly (keyof MobileAssignedorderFinishedList.ListQuery)[] = ['engineer', 'month', 'order', 'student_user', 'submodel_id', 'year']
+
+const mobileAssignedorderFinishedListReads: readonly string[] = ['mobileAssignedorderFinishedListList']
+
+const mobileAssignedorderFinishedList = {
   path: 'api/mobile/assignedorder/finished_list',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedorderFinishedListListOptions, queryKey: mobileAssignedorderFinishedListListQueryKey},
-  reads: ['mobileAssignedorderFinishedListList'],
+  reads: mobileAssignedorderFinishedListReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `MobileAssignedorderFinishedList` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof MobileAssignedorderFinishedList.ListQuery)[] = mobileAssignedorderFinishedListFilters) =>
+    mobileAssignedorderFinishedListListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignedorderFinishedListReads),
 } as const satisfies Resource
 
-/** `api/mobile/assignedorder/list_app` */
-export const mobileAssignedorderListApp = {
+/** `api/mobile/assignedorder/finished_list` */
+export const MobileAssignedorderFinishedList = mobileAssignedorderFinishedList
+
+export declare namespace MobileAssignedorderFinishedList {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderFinishedListListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderFinishedListListQuery>
+}
+
+const mobileAssignedorderListAppFilters: readonly (keyof MobileAssignedorderListApp.ListQuery)[] = ['engineer', 'order', 'student_user']
+
+const mobileAssignedorderListAppReads: readonly string[] = ['mobileAssignedorderListAppList']
+
+const mobileAssignedorderListApp = {
   path: 'api/mobile/assignedorder/list_app',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedorderListAppListOptions, queryKey: mobileAssignedorderListAppListQueryKey},
-  reads: ['mobileAssignedorderListAppList'],
+  reads: mobileAssignedorderListAppReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `MobileAssignedorderListApp` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof MobileAssignedorderListApp.ListQuery)[] = mobileAssignedorderListAppFilters) =>
+    mobileAssignedorderListAppListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignedorderListAppReads),
 } as const satisfies Resource
 
-/** `api/mobile/assignedorder/split` */
-export const mobileAssignedorderSplit = {
+/** `api/mobile/assignedorder/list_app` */
+export const MobileAssignedorderListApp = mobileAssignedorderListApp
+
+export declare namespace MobileAssignedorderListApp {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderListAppListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderListAppListQuery>
+}
+
+const mobileAssignedorderSplitReads: readonly string[] = []
+
+const mobileAssignedorderSplit = {
   path: 'api/mobile/assignedorder/split',
   kind: 'action',
   create: {mutation: mobileAssignedorderSplitCreateMutation, body: vMobileAssignedorderSplitCreateBody},
-  reads: [],
+  reads: mobileAssignedorderSplitReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignedorderSplitReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileAssignedorderSplitCreateMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/assignedorder-workorder` */
-export const mobileAssignedorderWorkorder = {
+/** `api/mobile/assignedorder/split` */
+export const MobileAssignedorderSplit = mobileAssignedorderSplit
+
+export declare namespace MobileAssignedorderSplit {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedorderSplitCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedorderSplitCreateBody>
+}
+
+const mobileAssignedorderWorkorderReads: readonly string[] = ['mobileAssignedorderWorkorderList', 'mobileAssignedorderWorkorderRetrieve']
+
+const mobileAssignedorderWorkorder = {
   path: 'api/mobile/assignedorder-workorder',
   kind: 'collection',
   id: 'number',
@@ -2495,11 +8870,72 @@ export const mobileAssignedorderWorkorder = {
   create: {mutation: mobileAssignedorderWorkorderCreateMutation, body: vMobileAssignedorderWorkorderCreateBody},
   update: {mutation: mobileAssignedorderWorkorderPartialUpdateMutation, body: vMobileAssignedorderWorkorderPartialUpdateBody},
   destroy: {mutation: mobileAssignedorderWorkorderDestroyMutation},
-  reads: ['mobileAssignedorderWorkorderList', 'mobileAssignedorderWorkorderRetrieve'],
+  reads: mobileAssignedorderWorkorderReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    mobileAssignedorderWorkorderListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignedorderWorkorderReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => mobileAssignedorderWorkorderRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileAssignedorderWorkorderCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => mobileAssignedorderWorkorderPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MobileAssignedorderWorkorder.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => mobileAssignedorderWorkorderDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/assignedorderactivity` */
-export const mobileAssignedorderactivity = {
+/** `api/mobile/assignedorder-workorder` */
+export const MobileAssignedorderWorkorder = mobileAssignedorderWorkorder
+
+export declare namespace MobileAssignedorderWorkorder {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderWorkorderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderWorkorderListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileAssignedorderWorkorderRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedorderWorkorderCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedorderWorkorderCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileAssignedorderWorkorderPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileAssignedorderWorkorderPartialUpdateBody>
+}
+
+const mobileAssignedorderactivityFilters: readonly (keyof MobileAssignedorderactivity.ListQuery)[] = ['assigned_order']
+
+const mobileAssignedorderactivityReads: readonly string[] = ['mobileAssignedorderactivityList', 'mobileAssignedorderactivityRetrieve']
+
+const mobileAssignedorderactivity = {
   path: 'api/mobile/assignedorderactivity',
   kind: 'collection',
   id: 'number',
@@ -2508,11 +8944,78 @@ export const mobileAssignedorderactivity = {
   create: {mutation: mobileAssignedorderactivityCreateMutation, body: vMobileAssignedorderactivityCreateBody},
   update: {mutation: mobileAssignedorderactivityPartialUpdateMutation, body: vMobileAssignedorderactivityPartialUpdateBody},
   destroy: {mutation: mobileAssignedorderactivityDestroyMutation},
-  reads: ['mobileAssignedorderactivityList', 'mobileAssignedorderactivityRetrieve'],
+  reads: mobileAssignedorderactivityReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `MobileAssignedorderactivity` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof MobileAssignedorderactivity.ListQuery)[] = mobileAssignedorderactivityFilters) =>
+    mobileAssignedorderactivityListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignedorderactivityReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => mobileAssignedorderactivityRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileAssignedorderactivityCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => mobileAssignedorderactivityPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MobileAssignedorderactivity.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => mobileAssignedorderactivityDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/assignedorderdocument` */
-export const mobileAssignedorderdocument = {
+/** `api/mobile/assignedorderactivity` */
+export const MobileAssignedorderactivity = mobileAssignedorderactivity
+
+export declare namespace MobileAssignedorderactivity {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderactivityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderactivityListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileAssignedorderactivityRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedorderactivityCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedorderactivityCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileAssignedorderactivityPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileAssignedorderactivityPartialUpdateBody>
+}
+
+const mobileAssignedorderdocumentFilters: readonly (keyof MobileAssignedorderdocument.ListQuery)[] = ['assigned_order']
+
+const mobileAssignedorderdocumentReads: readonly string[] = ['mobileAssignedorderdocumentList', 'mobileAssignedorderdocumentRetrieve']
+
+const mobileAssignedorderdocument = {
   path: 'api/mobile/assignedorderdocument',
   kind: 'collection',
   id: 'number',
@@ -2521,11 +9024,78 @@ export const mobileAssignedorderdocument = {
   create: {mutation: mobileAssignedorderdocumentCreateMutation, body: vMobileAssignedorderdocumentCreateBody},
   update: {mutation: mobileAssignedorderdocumentPartialUpdateMutation, body: vMobileAssignedorderdocumentPartialUpdateBody},
   destroy: {mutation: mobileAssignedorderdocumentDestroyMutation},
-  reads: ['mobileAssignedorderdocumentList', 'mobileAssignedorderdocumentRetrieve'],
+  reads: mobileAssignedorderdocumentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `MobileAssignedorderdocument` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof MobileAssignedorderdocument.ListQuery)[] = mobileAssignedorderdocumentFilters) =>
+    mobileAssignedorderdocumentListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignedorderdocumentReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => mobileAssignedorderdocumentRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileAssignedorderdocumentCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => mobileAssignedorderdocumentPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MobileAssignedorderdocument.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => mobileAssignedorderdocumentDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/assignedordermaterial` */
-export const mobileAssignedordermaterial = {
+/** `api/mobile/assignedorderdocument` */
+export const MobileAssignedorderdocument = mobileAssignedorderdocument
+
+export declare namespace MobileAssignedorderdocument {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderdocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderdocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileAssignedorderdocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedorderdocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedorderdocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileAssignedorderdocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileAssignedorderdocumentPartialUpdateBody>
+}
+
+const mobileAssignedordermaterialFilters: readonly (keyof MobileAssignedordermaterial.ListQuery)[] = ['assigned_order']
+
+const mobileAssignedordermaterialReads: readonly string[] = ['mobileAssignedordermaterialList', 'mobileAssignedordermaterialOrderlinesList', 'mobileAssignedordermaterialQuotationList', 'mobileAssignedordermaterialRetrieve']
+
+const mobileAssignedordermaterial = {
   path: 'api/mobile/assignedordermaterial',
   kind: 'collection',
   id: 'number',
@@ -2534,29 +9104,160 @@ export const mobileAssignedordermaterial = {
   create: {mutation: mobileAssignedordermaterialCreateMutation, body: vMobileAssignedordermaterialCreateBody},
   update: {mutation: mobileAssignedordermaterialPartialUpdateMutation, body: vMobileAssignedordermaterialPartialUpdateBody},
   destroy: {mutation: mobileAssignedordermaterialDestroyMutation},
-  reads: ['mobileAssignedordermaterialList', 'mobileAssignedordermaterialOrderlinesList', 'mobileAssignedordermaterialQuotationList', 'mobileAssignedordermaterialRetrieve'],
+  reads: mobileAssignedordermaterialReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `MobileAssignedordermaterial` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof MobileAssignedordermaterial.ListQuery)[] = mobileAssignedordermaterialFilters) =>
+    mobileAssignedordermaterialListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignedordermaterialReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => mobileAssignedordermaterialRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileAssignedordermaterialCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => mobileAssignedordermaterialPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MobileAssignedordermaterial.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => mobileAssignedordermaterialDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/assignedordermaterial/orderlines` */
-export const mobileAssignedordermaterialOrderlines = {
+/** `api/mobile/assignedordermaterial` */
+export const MobileAssignedordermaterial = mobileAssignedordermaterial
+
+export declare namespace MobileAssignedordermaterial {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedordermaterialListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedordermaterialListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileAssignedordermaterialRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedordermaterialCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedordermaterialCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileAssignedordermaterialPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileAssignedordermaterialPartialUpdateBody>
+}
+
+const mobileAssignedordermaterialOrderlinesReads: readonly string[] = ['mobileAssignedordermaterialOrderlinesList']
+
+const mobileAssignedordermaterialOrderlines = {
   path: 'api/mobile/assignedordermaterial/orderlines',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedordermaterialOrderlinesListOptions, queryKey: mobileAssignedordermaterialOrderlinesListQueryKey},
-  reads: ['mobileAssignedordermaterialOrderlinesList'],
+  reads: mobileAssignedordermaterialOrderlinesReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    mobileAssignedordermaterialOrderlinesListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignedordermaterialOrderlinesReads),
 } as const satisfies Resource
 
-/** `api/mobile/assignedordermaterial/quotation` */
-export const mobileAssignedordermaterialQuotation = {
+/** `api/mobile/assignedordermaterial/orderlines` */
+export const MobileAssignedordermaterialOrderlines = mobileAssignedordermaterialOrderlines
+
+export declare namespace MobileAssignedordermaterialOrderlines {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedordermaterialOrderlinesListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedordermaterialOrderlinesListQuery>
+}
+
+const mobileAssignedordermaterialQuotationReads: readonly string[] = ['mobileAssignedordermaterialQuotationList']
+
+const mobileAssignedordermaterialQuotation = {
   path: 'api/mobile/assignedordermaterial/quotation',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedordermaterialQuotationListOptions, queryKey: mobileAssignedordermaterialQuotationListQueryKey},
-  reads: ['mobileAssignedordermaterialQuotationList'],
+  reads: mobileAssignedordermaterialQuotationReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    mobileAssignedordermaterialQuotationListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileAssignedordermaterialQuotationReads),
 } as const satisfies Resource
 
-/** `api/mobile/trip` */
-export const mobileTrip = {
+/** `api/mobile/assignedordermaterial/quotation` */
+export const MobileAssignedordermaterialQuotation = mobileAssignedordermaterialQuotation
+
+export declare namespace MobileAssignedordermaterialQuotation {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedordermaterialQuotationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedordermaterialQuotationListQuery>
+}
+
+const mobileTripReads: readonly string[] = ['mobileTripList', 'mobileTripRetrieve', 'mobileTripTripAvailabilityDetailRetrieve', 'mobileTripTripAvailabilityRetrieve']
+
+const mobileTrip = {
   path: 'api/mobile/trip',
   kind: 'collection',
   id: 'number',
@@ -2565,11 +9266,70 @@ export const mobileTrip = {
   create: {mutation: mobileTripCreateMutation, body: vMobileTripCreateBody},
   update: {mutation: mobileTripPartialUpdateMutation, body: vMobileTripPartialUpdateBody},
   destroy: {mutation: mobileTripDestroyMutation},
-  reads: ['mobileTripList', 'mobileTripRetrieve', 'mobileTripTripAvailabilityDetailRetrieve', 'mobileTripTripAvailabilityRetrieve'],
+  reads: mobileTripReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    mobileTripListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileTripReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => mobileTripRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileTripCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => mobileTripPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MobileTrip.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => mobileTripDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/trip-order` */
-export const mobileTripOrder = {
+/** `api/mobile/trip` */
+export const MobileTrip = mobileTrip
+
+export declare namespace MobileTrip {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileTripRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileTripCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileTripCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileTripPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileTripPartialUpdateBody>
+}
+
+const mobileTripOrderReads: readonly string[] = ['mobileTripOrderList', 'mobileTripOrderRetrieve']
+
+const mobileTripOrder = {
   path: 'api/mobile/trip-order',
   kind: 'collection',
   id: 'number',
@@ -2578,11 +9338,70 @@ export const mobileTripOrder = {
   create: {mutation: mobileTripOrderCreateMutation, body: vMobileTripOrderCreateBody},
   update: {mutation: mobileTripOrderPartialUpdateMutation, body: vMobileTripOrderPartialUpdateBody},
   destroy: {mutation: mobileTripOrderDestroyMutation},
-  reads: ['mobileTripOrderList', 'mobileTripOrderRetrieve'],
+  reads: mobileTripOrderReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    mobileTripOrderListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileTripOrderReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => mobileTripOrderRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileTripOrderCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => mobileTripOrderPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MobileTripOrder.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => mobileTripOrderDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/trip-statuscode` */
-export const mobileTripStatuscode = {
+/** `api/mobile/trip-order` */
+export const MobileTripOrder = mobileTripOrder
+
+export declare namespace MobileTripOrder {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripOrderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripOrderListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileTripOrderRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileTripOrderCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileTripOrderCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileTripOrderPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileTripOrderPartialUpdateBody>
+}
+
+const mobileTripStatuscodeReads: readonly string[] = ['mobileTripStatuscodeAutocompleteList', 'mobileTripStatuscodeList', 'mobileTripStatuscodeRetrieve']
+
+const mobileTripStatuscode = {
   path: 'api/mobile/trip-statuscode',
   kind: 'collection',
   id: 'number',
@@ -2591,11 +9410,70 @@ export const mobileTripStatuscode = {
   create: {mutation: mobileTripStatuscodeCreateMutation, body: vMobileTripStatuscodeCreateBody},
   update: {mutation: mobileTripStatuscodePartialUpdateMutation, body: vMobileTripStatuscodePartialUpdateBody},
   destroy: {mutation: mobileTripStatuscodeDestroyMutation},
-  reads: ['mobileTripStatuscodeAutocompleteList', 'mobileTripStatuscodeList', 'mobileTripStatuscodeRetrieve'],
+  reads: mobileTripStatuscodeReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    mobileTripStatuscodeListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileTripStatuscodeReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => mobileTripStatuscodeRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileTripStatuscodeCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => mobileTripStatuscodePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MobileTripStatuscode.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => mobileTripStatuscodeDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/trip-statuscode-action` */
-export const mobileTripStatuscodeAction = {
+/** `api/mobile/trip-statuscode` */
+export const MobileTripStatuscode = mobileTripStatuscode
+
+export declare namespace MobileTripStatuscode {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripStatuscodeListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripStatuscodeListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileTripStatuscodeRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileTripStatuscodeCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileTripStatuscodeCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileTripStatuscodePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileTripStatuscodePartialUpdateBody>
+}
+
+const mobileTripStatuscodeActionReads: readonly string[] = ['mobileTripStatuscodeActionList', 'mobileTripStatuscodeActionOperatorsRetrieve', 'mobileTripStatuscodeActionRetrieve', 'mobileTripStatuscodeActionStatusoptionsRetrieve']
+
+const mobileTripStatuscodeAction = {
   path: 'api/mobile/trip-statuscode-action',
   kind: 'collection',
   id: 'number',
@@ -2604,38 +9482,180 @@ export const mobileTripStatuscodeAction = {
   create: {mutation: mobileTripStatuscodeActionCreateMutation, body: vMobileTripStatuscodeActionCreateBody},
   update: {mutation: mobileTripStatuscodeActionPartialUpdateMutation, body: vMobileTripStatuscodeActionPartialUpdateBody},
   destroy: {mutation: mobileTripStatuscodeActionDestroyMutation},
-  reads: ['mobileTripStatuscodeActionList', 'mobileTripStatuscodeActionOperatorsRetrieve', 'mobileTripStatuscodeActionRetrieve', 'mobileTripStatuscodeActionStatusoptionsRetrieve'],
+  reads: mobileTripStatuscodeActionReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    mobileTripStatuscodeActionListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileTripStatuscodeActionReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => mobileTripStatuscodeActionRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileTripStatuscodeActionCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => mobileTripStatuscodeActionPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MobileTripStatuscodeAction.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => mobileTripStatuscodeActionDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/trip-statuscode/autocomplete` */
-export const mobileTripStatuscodeAutocomplete = {
+/** `api/mobile/trip-statuscode-action` */
+export const MobileTripStatuscodeAction = mobileTripStatuscodeAction
+
+export declare namespace MobileTripStatuscodeAction {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripStatuscodeActionListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripStatuscodeActionListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileTripStatuscodeActionRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileTripStatuscodeActionCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileTripStatuscodeActionCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileTripStatuscodeActionPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileTripStatuscodeActionPartialUpdateBody>
+}
+
+const mobileTripStatuscodeAutocompleteReads: readonly string[] = ['mobileTripStatuscodeAutocompleteList']
+
+const mobileTripStatuscodeAutocomplete = {
   path: 'api/mobile/trip-statuscode/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: mobileTripStatuscodeAutocompleteListOptions, queryKey: mobileTripStatuscodeAutocompleteListQueryKey},
-  reads: ['mobileTripStatuscodeAutocompleteList'],
+  reads: mobileTripStatuscodeAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    mobileTripStatuscodeAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileTripStatuscodeAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/mobile/unassign-user` */
-export const mobileUnassignUser = {
+/** `api/mobile/trip-statuscode/autocomplete` */
+export const MobileTripStatuscodeAutocomplete = mobileTripStatuscodeAutocomplete
+
+export declare namespace MobileTripStatuscodeAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripStatuscodeAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripStatuscodeAutocompleteListQuery>
+}
+
+const mobileUnassignUserReads: readonly string[] = []
+
+const mobileUnassignUser = {
   path: 'api/mobile/unassign-user',
   kind: 'collection',
   id: 'number',
   create: {mutation: mobileUnassignUserCreateMutation, body: vMobileUnassignUserCreateBody},
-  reads: [],
+  reads: mobileUnassignUserReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileUnassignUserReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileUnassignUserCreateMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/unassign-user-trip` */
-export const mobileUnassignUserTrip = {
+/** `api/mobile/unassign-user` */
+export const MobileUnassignUser = mobileUnassignUser
+
+export declare namespace MobileUnassignUser {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileUnassignUserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileUnassignUserCreateBody>
+}
+
+const mobileUnassignUserTripReads: readonly string[] = []
+
+const mobileUnassignUserTrip = {
   path: 'api/mobile/unassign-user-trip',
   kind: 'collection',
   id: 'number',
   create: {mutation: mobileUnassignUserTripCreateMutation, body: vMobileUnassignUserTripCreateBody},
-  reads: [],
+  reads: mobileUnassignUserTripReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileUnassignUserTripReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileUnassignUserTripCreateMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/user-order-availability` */
-export const mobileUserOrderAvailability = {
+/** `api/mobile/unassign-user-trip` */
+export const MobileUnassignUserTrip = mobileUnassignUserTrip
+
+export declare namespace MobileUnassignUserTrip {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileUnassignUserTripCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileUnassignUserTripCreateBody>
+}
+
+const mobileUserOrderAvailabilityReads: readonly string[] = ['mobileUserOrderAvailabilityList', 'mobileUserOrderAvailabilityRetrieve']
+
+const mobileUserOrderAvailability = {
   path: 'api/mobile/user-order-availability',
   kind: 'collection',
   id: 'number',
@@ -2644,11 +9664,70 @@ export const mobileUserOrderAvailability = {
   create: {mutation: mobileUserOrderAvailabilityCreateMutation, body: vMobileUserOrderAvailabilityCreateBody},
   update: {mutation: mobileUserOrderAvailabilityPartialUpdateMutation, body: vMobileUserOrderAvailabilityPartialUpdateBody},
   destroy: {mutation: mobileUserOrderAvailabilityDestroyMutation},
-  reads: ['mobileUserOrderAvailabilityList', 'mobileUserOrderAvailabilityRetrieve'],
+  reads: mobileUserOrderAvailabilityReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    mobileUserOrderAvailabilityListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileUserOrderAvailabilityReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => mobileUserOrderAvailabilityRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileUserOrderAvailabilityCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => mobileUserOrderAvailabilityPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MobileUserOrderAvailability.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => mobileUserOrderAvailabilityDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/mobile/user-trip-availability` */
-export const mobileUserTripAvailability = {
+/** `api/mobile/user-order-availability` */
+export const MobileUserOrderAvailability = mobileUserOrderAvailability
+
+export declare namespace MobileUserOrderAvailability {
+  /** What `list` answers with. */
+  export type ListResponse = MobileUserOrderAvailabilityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileUserOrderAvailabilityListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileUserOrderAvailabilityRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileUserOrderAvailabilityCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileUserOrderAvailabilityCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileUserOrderAvailabilityPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileUserOrderAvailabilityPartialUpdateBody>
+}
+
+const mobileUserTripAvailabilityReads: readonly string[] = ['mobileUserTripAvailabilityList', 'mobileUserTripAvailabilityRetrieve']
+
+const mobileUserTripAvailability = {
   path: 'api/mobile/user-trip-availability',
   kind: 'collection',
   id: 'number',
@@ -2657,11 +9736,72 @@ export const mobileUserTripAvailability = {
   create: {mutation: mobileUserTripAvailabilityCreateMutation, body: vMobileUserTripAvailabilityCreateBody},
   update: {mutation: mobileUserTripAvailabilityPartialUpdateMutation, body: vMobileUserTripAvailabilityPartialUpdateBody},
   destroy: {mutation: mobileUserTripAvailabilityDestroyMutation},
-  reads: ['mobileUserTripAvailabilityList', 'mobileUserTripAvailabilityRetrieve'],
+  reads: mobileUserTripAvailabilityReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    mobileUserTripAvailabilityListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(mobileUserTripAvailabilityReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => mobileUserTripAvailabilityRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => mobileUserTripAvailabilityCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => mobileUserTripAvailabilityPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: MobileUserTripAvailability.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => mobileUserTripAvailabilityDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/order/cost` */
-export const orderCost = {
+/** `api/mobile/user-trip-availability` */
+export const MobileUserTripAvailability = mobileUserTripAvailability
+
+export declare namespace MobileUserTripAvailability {
+  /** What `list` answers with. */
+  export type ListResponse = MobileUserTripAvailabilityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileUserTripAvailabilityListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileUserTripAvailabilityRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileUserTripAvailabilityCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileUserTripAvailabilityCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileUserTripAvailabilityPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileUserTripAvailabilityPartialUpdateBody>
+}
+
+const orderCostFilters: readonly (keyof OrderCost.ListQuery)[] = ['cost_type', 'order']
+
+const orderCostReads: readonly string[] = ['orderCostList', 'orderCostRetrieve']
+
+const orderCost = {
   path: 'api/order/cost',
   kind: 'collection',
   id: 'number',
@@ -2670,11 +9810,78 @@ export const orderCost = {
   create: {mutation: orderCostCreateMutation, body: vOrderCostCreateBody},
   update: {mutation: orderCostPartialUpdateMutation, body: vOrderCostPartialUpdateBody},
   destroy: {mutation: orderCostDestroyMutation},
-  reads: ['orderCostList', 'orderCostRetrieve'],
+  reads: orderCostReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderCost` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderCost.ListQuery)[] = orderCostFilters) =>
+    orderCostListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderCostReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => orderCostRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => orderCostCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => orderCostPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: OrderCost.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => orderCostDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/order/document` */
-export const orderDocument = {
+/** `api/order/cost` */
+export const OrderCost = orderCost
+
+export declare namespace OrderCost {
+  /** What `list` answers with. */
+  export type ListResponse = OrderCostListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderCostListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderCostRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderCostCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderCostCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderCostPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderCostPartialUpdateBody>
+}
+
+const orderDocumentFilters: readonly (keyof OrderDocument.ListQuery)[] = ['order']
+
+const orderDocumentReads: readonly string[] = ['orderDocumentList', 'orderDocumentRetrieve']
+
+const orderDocument = {
   path: 'api/order/document',
   kind: 'collection',
   id: 'number',
@@ -2683,11 +9890,76 @@ export const orderDocument = {
   create: {mutation: orderDocumentCreateMutation, body: vOrderDocumentCreateBody},
   update: {mutation: orderDocumentPartialUpdateMutation, body: vOrderDocumentPartialUpdateBody},
   destroy: {mutation: orderDocumentDestroyMutation},
-  reads: ['orderDocumentList', 'orderDocumentRetrieve'],
+  reads: orderDocumentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderDocument` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderDocument.ListQuery)[] = orderDocumentFilters) =>
+    orderDocumentListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderDocumentReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => orderDocumentRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => orderDocumentCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => orderDocumentPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: OrderDocument.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => orderDocumentDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/order/filter` */
-export const orderFilter = {
+/** `api/order/document` */
+export const OrderDocument = orderDocument
+
+export declare namespace OrderDocument {
+  /** What `list` answers with. */
+  export type ListResponse = OrderDocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderDocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderDocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderDocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderDocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderDocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderDocumentPartialUpdateBody>
+}
+
+const orderFilterReads: readonly string[] = ['orderFilterGetBaseFilterOptionsRetrieve', 'orderFilterGetExamplesList', 'orderFilterGetFieldsRetrieve', 'orderFilterGetNonTextFieldTypesRetrieve', 'orderFilterGetOperatorsRetrieve', 'orderFilterGetStatusFieldsRetrieve', 'orderFilterGetStatusesRetrieve', 'orderFilterList', 'orderFilterRetrieve', 'orderFilterSimpleListList']
+
+const orderFilter = {
   path: 'api/order/filter',
   kind: 'collection',
   id: 'number',
@@ -2696,29 +9968,156 @@ export const orderFilter = {
   create: {mutation: orderFilterCreateMutation, body: vOrderFilterCreateBody},
   update: {mutation: orderFilterPartialUpdateMutation, body: vOrderFilterPartialUpdateBody},
   destroy: {mutation: orderFilterDestroyMutation},
-  reads: ['orderFilterGetBaseFilterOptionsRetrieve', 'orderFilterGetExamplesList', 'orderFilterGetFieldsRetrieve', 'orderFilterGetNonTextFieldTypesRetrieve', 'orderFilterGetOperatorsRetrieve', 'orderFilterGetStatusFieldsRetrieve', 'orderFilterGetStatusesRetrieve', 'orderFilterList', 'orderFilterRetrieve', 'orderFilterSimpleListList'],
+  reads: orderFilterReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    orderFilterListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderFilterReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => orderFilterRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => orderFilterCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => orderFilterPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: OrderFilter.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => orderFilterDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/order/filter/get_examples` */
-export const orderFilterGetExamples = {
+/** `api/order/filter` */
+export const OrderFilter = orderFilter
+
+export declare namespace OrderFilter {
+  /** What `list` answers with. */
+  export type ListResponse = OrderFilterListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderFilterListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderFilterRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderFilterCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderFilterCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderFilterPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderFilterPartialUpdateBody>
+}
+
+const orderFilterGetExamplesReads: readonly string[] = ['orderFilterGetExamplesList']
+
+const orderFilterGetExamples = {
   path: 'api/order/filter/get_examples',
   kind: 'collection',
   id: 'number',
   list: {options: orderFilterGetExamplesListOptions, queryKey: orderFilterGetExamplesListQueryKey},
-  reads: ['orderFilterGetExamplesList'],
+  reads: orderFilterGetExamplesReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    orderFilterGetExamplesListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderFilterGetExamplesReads),
 } as const satisfies Resource
 
-/** `api/order/filter/simple_list` */
-export const orderFilterSimpleList = {
+/** `api/order/filter/get_examples` */
+export const OrderFilterGetExamples = orderFilterGetExamples
+
+export declare namespace OrderFilterGetExamples {
+  /** What `list` answers with. */
+  export type ListResponse = OrderFilterGetExamplesListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderFilterGetExamplesListQuery>
+}
+
+const orderFilterSimpleListReads: readonly string[] = ['orderFilterSimpleListList']
+
+const orderFilterSimpleList = {
   path: 'api/order/filter/simple_list',
   kind: 'collection',
   id: 'number',
   list: {options: orderFilterSimpleListListOptions, queryKey: orderFilterSimpleListListQueryKey},
-  reads: ['orderFilterSimpleListList'],
+  reads: orderFilterSimpleListReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    orderFilterSimpleListListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderFilterSimpleListReads),
 } as const satisfies Resource
 
-/** `api/order/infoline` */
-export const orderInfoline = {
+/** `api/order/filter/simple_list` */
+export const OrderFilterSimpleList = orderFilterSimpleList
+
+export declare namespace OrderFilterSimpleList {
+  /** What `list` answers with. */
+  export type ListResponse = OrderFilterSimpleListListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderFilterSimpleListListQuery>
+}
+
+const orderInfolineFilters: readonly (keyof OrderInfoline.ListQuery)[] = ['order']
+
+const orderInfolineReads: readonly string[] = ['orderInfolineList', 'orderInfolineRetrieve']
+
+const orderInfoline = {
   path: 'api/order/infoline',
   kind: 'collection',
   id: 'number',
@@ -2727,11 +10126,78 @@ export const orderInfoline = {
   create: {mutation: orderInfolineCreateMutation, body: vOrderInfolineCreateBody},
   update: {mutation: orderInfolinePartialUpdateMutation, body: vOrderInfolinePartialUpdateBody},
   destroy: {mutation: orderInfolineDestroyMutation},
-  reads: ['orderInfolineList', 'orderInfolineRetrieve'],
+  reads: orderInfolineReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderInfoline` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderInfoline.ListQuery)[] = orderInfolineFilters) =>
+    orderInfolineListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderInfolineReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => orderInfolineRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => orderInfolineCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => orderInfolinePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: OrderInfoline.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => orderInfolineDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/order/order` */
-export const orderOrder = {
+/** `api/order/infoline` */
+export const OrderInfoline = orderInfoline
+
+export declare namespace OrderInfoline {
+  /** What `list` answers with. */
+  export type ListResponse = OrderInfolineListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderInfolineListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderInfolineRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderInfolineCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderInfolineCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderInfolinePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderInfolinePartialUpdateBody>
+}
+
+const orderOrderFilters: readonly (keyof OrderOrder.ListQuery)[] = ['assigned_count', 'branch', 'building', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'equipment', 'external_identifier', 'last_status', 'limit', 'location', 'mode', 'offset', 'order_address', 'order_by', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'orders', 'since', 'start_date', 'start_date__from', 'start_date__until', 'user_filter']
+
+const orderOrderReads: readonly string[] = ['orderOrderAllForCustomerNotAcceptedCountRetrieve', 'orderOrderAllForCustomerNotAcceptedList', 'orderOrderAllForCustomerV2List', 'orderOrderAllForEquipmentLocationList', 'orderOrderAssignableList', 'orderOrderAutocompleteList', 'orderOrderCountsYearOrderTypeStatsRetrieve', 'orderOrderDispatchListAllList', 'orderOrderDispatchListFinishedList', 'orderOrderDispatchListInprogressList', 'orderOrderDispatchListUnassignedList', 'orderOrderGetTopXCustomersRetrieve', 'orderOrderGetWithinRangeList', 'orderOrderList', 'orderOrderMaintenanceOrdersEventsRetrieve', 'orderOrderMaintenanceOrdersList', 'orderOrderMonthEventsList', 'orderOrderMonthListRetrieve', 'orderOrderNewRetrieve', 'orderOrderOrderAvailabilityDetailRetrieve', 'orderOrderOrderAvailabilityList', 'orderOrderOrderCountsStatsRetrieve', 'orderOrderOrderTypesMonthStatsRetrieve', 'orderOrderOrderTypesRetrieve', 'orderOrderOrderTypesStatsRetrieve', 'orderOrderPastList', 'orderOrderRetrieve', 'orderOrderSalesOrdersList', 'orderOrderUserFilterCountRetrieve', 'orderOrderYearListRetrieve']
+
+const orderOrder = {
   path: 'api/order/order',
   kind: 'collection',
   id: 'string',
@@ -2740,146 +10206,810 @@ export const orderOrder = {
   create: {mutation: orderOrderCreateMutation, body: vOrderOrderCreateBody},
   update: {mutation: orderOrderPartialUpdateMutation, body: vOrderOrderPartialUpdateBody},
   destroy: {mutation: orderOrderDestroyMutation},
-  reads: ['orderOrderAllForCustomerNotAcceptedCountRetrieve', 'orderOrderAllForCustomerNotAcceptedList', 'orderOrderAllForCustomerV2List', 'orderOrderAllForEquipmentLocationList', 'orderOrderAssignableList', 'orderOrderAutocompleteList', 'orderOrderCountsYearOrderTypeStatsRetrieve', 'orderOrderDispatchListAllList', 'orderOrderDispatchListFinishedList', 'orderOrderDispatchListInprogressList', 'orderOrderDispatchListUnassignedList', 'orderOrderGetTopXCustomersRetrieve', 'orderOrderGetWithinRangeList', 'orderOrderList', 'orderOrderMaintenanceOrdersEventsRetrieve', 'orderOrderMaintenanceOrdersList', 'orderOrderMonthEventsList', 'orderOrderMonthListRetrieve', 'orderOrderNewRetrieve', 'orderOrderOrderAvailabilityDetailRetrieve', 'orderOrderOrderAvailabilityList', 'orderOrderOrderCountsStatsRetrieve', 'orderOrderOrderTypesMonthStatsRetrieve', 'orderOrderOrderTypesRetrieve', 'orderOrderOrderTypesStatsRetrieve', 'orderOrderPastList', 'orderOrderRetrieve', 'orderOrderSalesOrdersList', 'orderOrderUserFilterCountRetrieve', 'orderOrderYearListRetrieve'],
+  reads: orderOrderReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrder` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrder.ListQuery)[] = orderOrderFilters) =>
+    orderOrderListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is stringified: DRF declares this resource by name, and the generated options type its path as a string.
+   */
+  retrieveOptions: (id: string) => orderOrderRetrieveOptions({path: {id: String(id)}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => orderOrderCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => orderOrderPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: string, body: OrderOrder.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => orderOrderDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/order/order/all_for_customer_not_accepted` */
-export const orderOrderAllForCustomerNotAccepted = {
+/** `api/order/order` */
+export const OrderOrder = orderOrder
+
+export declare namespace OrderOrder {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderOrderRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderOrderCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderOrderCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderOrderPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderOrderPartialUpdateBody>
+}
+
+const orderOrderAllForCustomerNotAcceptedFilters: readonly (keyof OrderOrderAllForCustomerNotAccepted.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderAllForCustomerNotAcceptedReads: readonly string[] = ['orderOrderAllForCustomerNotAcceptedList']
+
+const orderOrderAllForCustomerNotAccepted = {
   path: 'api/order/order/all_for_customer_not_accepted',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderAllForCustomerNotAcceptedListOptions, queryKey: orderOrderAllForCustomerNotAcceptedListQueryKey},
-  reads: ['orderOrderAllForCustomerNotAcceptedList'],
+  reads: orderOrderAllForCustomerNotAcceptedReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderAllForCustomerNotAccepted` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderAllForCustomerNotAccepted.ListQuery)[] = orderOrderAllForCustomerNotAcceptedFilters) =>
+    orderOrderAllForCustomerNotAcceptedListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderAllForCustomerNotAcceptedReads),
 } as const satisfies Resource
 
-/** `api/order/order/all_for_customer_v2` */
-export const orderOrderAllForCustomerV2 = {
+/** `api/order/order/all_for_customer_not_accepted` */
+export const OrderOrderAllForCustomerNotAccepted = orderOrderAllForCustomerNotAccepted
+
+export declare namespace OrderOrderAllForCustomerNotAccepted {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderAllForCustomerNotAcceptedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderAllForCustomerNotAcceptedListQuery>
+}
+
+const orderOrderAllForCustomerV2Filters: readonly (keyof OrderOrderAllForCustomerV2.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderAllForCustomerV2Reads: readonly string[] = ['orderOrderAllForCustomerV2List']
+
+const orderOrderAllForCustomerV2 = {
   path: 'api/order/order/all_for_customer_v2',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderAllForCustomerV2ListOptions, queryKey: orderOrderAllForCustomerV2ListQueryKey},
-  reads: ['orderOrderAllForCustomerV2List'],
+  reads: orderOrderAllForCustomerV2Reads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderAllForCustomerV2` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderAllForCustomerV2.ListQuery)[] = orderOrderAllForCustomerV2Filters) =>
+    orderOrderAllForCustomerV2ListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderAllForCustomerV2Reads),
 } as const satisfies Resource
 
-/** `api/order/order/all_for_equipment_location` */
-export const orderOrderAllForEquipmentLocation = {
+/** `api/order/order/all_for_customer_v2` */
+export const OrderOrderAllForCustomerV2 = orderOrderAllForCustomerV2
+
+export declare namespace OrderOrderAllForCustomerV2 {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderAllForCustomerV2ListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderAllForCustomerV2ListQuery>
+}
+
+const orderOrderAllForEquipmentLocationFilters: readonly (keyof OrderOrderAllForEquipmentLocation.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'equipment', 'external_identifier', 'last_status', 'limit', 'location', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderAllForEquipmentLocationReads: readonly string[] = ['orderOrderAllForEquipmentLocationList']
+
+const orderOrderAllForEquipmentLocation = {
   path: 'api/order/order/all_for_equipment_location',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderAllForEquipmentLocationListOptions, queryKey: orderOrderAllForEquipmentLocationListQueryKey},
-  reads: ['orderOrderAllForEquipmentLocationList'],
+  reads: orderOrderAllForEquipmentLocationReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderAllForEquipmentLocation` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderAllForEquipmentLocation.ListQuery)[] = orderOrderAllForEquipmentLocationFilters) =>
+    orderOrderAllForEquipmentLocationListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderAllForEquipmentLocationReads),
 } as const satisfies Resource
 
-/** `api/order/order/assignable` */
-export const orderOrderAssignable = {
+/** `api/order/order/all_for_equipment_location` */
+export const OrderOrderAllForEquipmentLocation = orderOrderAllForEquipmentLocation
+
+export declare namespace OrderOrderAllForEquipmentLocation {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderAllForEquipmentLocationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderAllForEquipmentLocationListQuery>
+}
+
+const orderOrderAssignableFilters: readonly (keyof OrderOrderAssignable.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderAssignableReads: readonly string[] = ['orderOrderAssignableList']
+
+const orderOrderAssignable = {
   path: 'api/order/order/assignable',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderAssignableListOptions, queryKey: orderOrderAssignableListQueryKey},
-  reads: ['orderOrderAssignableList'],
+  reads: orderOrderAssignableReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderAssignable` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderAssignable.ListQuery)[] = orderOrderAssignableFilters) =>
+    orderOrderAssignableListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderAssignableReads),
 } as const satisfies Resource
 
-/** `api/order/order/autocomplete` */
-export const orderOrderAutocomplete = {
+/** `api/order/order/assignable` */
+export const OrderOrderAssignable = orderOrderAssignable
+
+export declare namespace OrderOrderAssignable {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderAssignableListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderAssignableListQuery>
+}
+
+const orderOrderAutocompleteFilters: readonly (keyof OrderOrderAutocomplete.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderAutocompleteReads: readonly string[] = ['orderOrderAutocompleteList']
+
+const orderOrderAutocomplete = {
   path: 'api/order/order/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderAutocompleteListOptions, queryKey: orderOrderAutocompleteListQueryKey},
-  reads: ['orderOrderAutocompleteList'],
+  reads: orderOrderAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderAutocomplete` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderAutocomplete.ListQuery)[] = orderOrderAutocompleteFilters) =>
+    orderOrderAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/order/order/dispatch_list_all` */
-export const orderOrderDispatchListAll = {
+/** `api/order/order/autocomplete` */
+export const OrderOrderAutocomplete = orderOrderAutocomplete
+
+export declare namespace OrderOrderAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderAutocompleteListQuery>
+}
+
+const orderOrderDispatchListAllFilters: readonly (keyof OrderOrderDispatchListAll.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderDispatchListAllReads: readonly string[] = ['orderOrderDispatchListAllList']
+
+const orderOrderDispatchListAll = {
   path: 'api/order/order/dispatch_list_all',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderDispatchListAllListOptions, queryKey: orderOrderDispatchListAllListQueryKey},
-  reads: ['orderOrderDispatchListAllList'],
+  reads: orderOrderDispatchListAllReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderDispatchListAll` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderDispatchListAll.ListQuery)[] = orderOrderDispatchListAllFilters) =>
+    orderOrderDispatchListAllListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderDispatchListAllReads),
 } as const satisfies Resource
 
-/** `api/order/order/dispatch_list_finished` */
-export const orderOrderDispatchListFinished = {
+/** `api/order/order/dispatch_list_all` */
+export const OrderOrderDispatchListAll = orderOrderDispatchListAll
+
+export declare namespace OrderOrderDispatchListAll {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderDispatchListAllListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderDispatchListAllListQuery>
+}
+
+const orderOrderDispatchListFinishedFilters: readonly (keyof OrderOrderDispatchListFinished.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderDispatchListFinishedReads: readonly string[] = ['orderOrderDispatchListFinishedList']
+
+const orderOrderDispatchListFinished = {
   path: 'api/order/order/dispatch_list_finished',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderDispatchListFinishedListOptions, queryKey: orderOrderDispatchListFinishedListQueryKey},
-  reads: ['orderOrderDispatchListFinishedList'],
+  reads: orderOrderDispatchListFinishedReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderDispatchListFinished` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderDispatchListFinished.ListQuery)[] = orderOrderDispatchListFinishedFilters) =>
+    orderOrderDispatchListFinishedListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderDispatchListFinishedReads),
 } as const satisfies Resource
 
-/** `api/order/order/dispatch_list_inprogress` */
-export const orderOrderDispatchListInprogress = {
+/** `api/order/order/dispatch_list_finished` */
+export const OrderOrderDispatchListFinished = orderOrderDispatchListFinished
+
+export declare namespace OrderOrderDispatchListFinished {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderDispatchListFinishedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderDispatchListFinishedListQuery>
+}
+
+const orderOrderDispatchListInprogressFilters: readonly (keyof OrderOrderDispatchListInprogress.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderDispatchListInprogressReads: readonly string[] = ['orderOrderDispatchListInprogressList']
+
+const orderOrderDispatchListInprogress = {
   path: 'api/order/order/dispatch_list_inprogress',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderDispatchListInprogressListOptions, queryKey: orderOrderDispatchListInprogressListQueryKey},
-  reads: ['orderOrderDispatchListInprogressList'],
+  reads: orderOrderDispatchListInprogressReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderDispatchListInprogress` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderDispatchListInprogress.ListQuery)[] = orderOrderDispatchListInprogressFilters) =>
+    orderOrderDispatchListInprogressListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderDispatchListInprogressReads),
 } as const satisfies Resource
 
-/** `api/order/order/dispatch_list_unassigned` */
-export const orderOrderDispatchListUnassigned = {
+/** `api/order/order/dispatch_list_inprogress` */
+export const OrderOrderDispatchListInprogress = orderOrderDispatchListInprogress
+
+export declare namespace OrderOrderDispatchListInprogress {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderDispatchListInprogressListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderDispatchListInprogressListQuery>
+}
+
+const orderOrderDispatchListUnassignedFilters: readonly (keyof OrderOrderDispatchListUnassigned.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderDispatchListUnassignedReads: readonly string[] = ['orderOrderDispatchListUnassignedList']
+
+const orderOrderDispatchListUnassigned = {
   path: 'api/order/order/dispatch_list_unassigned',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderDispatchListUnassignedListOptions, queryKey: orderOrderDispatchListUnassignedListQueryKey},
-  reads: ['orderOrderDispatchListUnassignedList'],
+  reads: orderOrderDispatchListUnassignedReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderDispatchListUnassigned` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderDispatchListUnassigned.ListQuery)[] = orderOrderDispatchListUnassignedFilters) =>
+    orderOrderDispatchListUnassignedListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderDispatchListUnassignedReads),
 } as const satisfies Resource
 
-/** `api/order/order/get_within_range` */
-export const orderOrderGetWithinRange = {
+/** `api/order/order/dispatch_list_unassigned` */
+export const OrderOrderDispatchListUnassigned = orderOrderDispatchListUnassigned
+
+export declare namespace OrderOrderDispatchListUnassigned {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderDispatchListUnassignedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderDispatchListUnassignedListQuery>
+}
+
+const orderOrderGetWithinRangeFilters: readonly (keyof OrderOrderGetWithinRange.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderGetWithinRangeReads: readonly string[] = ['orderOrderGetWithinRangeList']
+
+const orderOrderGetWithinRange = {
   path: 'api/order/order/get_within_range',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderGetWithinRangeListOptions, queryKey: orderOrderGetWithinRangeListQueryKey},
-  reads: ['orderOrderGetWithinRangeList'],
+  reads: orderOrderGetWithinRangeReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderGetWithinRange` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderGetWithinRange.ListQuery)[] = orderOrderGetWithinRangeFilters) =>
+    orderOrderGetWithinRangeListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderGetWithinRangeReads),
 } as const satisfies Resource
 
-/** `api/order/order/maintenance_orders` */
-export const orderOrderMaintenanceOrders = {
+/** `api/order/order/get_within_range` */
+export const OrderOrderGetWithinRange = orderOrderGetWithinRange
+
+export declare namespace OrderOrderGetWithinRange {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderGetWithinRangeListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderGetWithinRangeListQuery>
+}
+
+const orderOrderMaintenanceOrdersFilters: readonly (keyof OrderOrderMaintenanceOrders.ListQuery)[] = ['assigned_count', 'branch', 'contract', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderMaintenanceOrdersReads: readonly string[] = ['orderOrderMaintenanceOrdersList']
+
+const orderOrderMaintenanceOrders = {
   path: 'api/order/order/maintenance_orders',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderMaintenanceOrdersListOptions, queryKey: orderOrderMaintenanceOrdersListQueryKey},
-  reads: ['orderOrderMaintenanceOrdersList'],
+  reads: orderOrderMaintenanceOrdersReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderMaintenanceOrders` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderMaintenanceOrders.ListQuery)[] = orderOrderMaintenanceOrdersFilters) =>
+    orderOrderMaintenanceOrdersListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderMaintenanceOrdersReads),
 } as const satisfies Resource
 
-/** `api/order/order/month_events` */
-export const orderOrderMonthEvents = {
+/** `api/order/order/maintenance_orders` */
+export const OrderOrderMaintenanceOrders = orderOrderMaintenanceOrders
+
+export declare namespace OrderOrderMaintenanceOrders {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderMaintenanceOrdersListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderMaintenanceOrdersListQuery>
+}
+
+const orderOrderMonthEventsReads: readonly string[] = ['orderOrderMonthEventsList']
+
+const orderOrderMonthEvents = {
   path: 'api/order/order/month_events',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderMonthEventsListOptions, queryKey: orderOrderMonthEventsListQueryKey},
-  reads: ['orderOrderMonthEventsList'],
+  reads: orderOrderMonthEventsReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderMonthEventsReads),
 } as const satisfies Resource
 
-/** `api/order/order/order_availability` */
-export const orderOrderOrderAvailability = {
+/** `api/order/order/month_events` */
+export const OrderOrderMonthEvents = orderOrderMonthEvents
+
+export declare namespace OrderOrderMonthEvents {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderMonthEventsListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderMonthEventsListQuery>
+}
+
+const orderOrderOrderAvailabilityFilters: readonly (keyof OrderOrderOrderAvailability.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderOrderAvailabilityReads: readonly string[] = ['orderOrderOrderAvailabilityList']
+
+const orderOrderOrderAvailability = {
   path: 'api/order/order/order_availability',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderOrderAvailabilityListOptions, queryKey: orderOrderOrderAvailabilityListQueryKey},
-  reads: ['orderOrderOrderAvailabilityList'],
+  reads: orderOrderOrderAvailabilityReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderOrderAvailability` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderOrderAvailability.ListQuery)[] = orderOrderOrderAvailabilityFilters) =>
+    orderOrderOrderAvailabilityListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderOrderAvailabilityReads),
 } as const satisfies Resource
 
-/** `api/order/order/past` */
-export const orderOrderPast = {
+/** `api/order/order/order_availability` */
+export const OrderOrderOrderAvailability = orderOrderOrderAvailability
+
+export declare namespace OrderOrderOrderAvailability {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderOrderAvailabilityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderOrderAvailabilityListQuery>
+}
+
+const orderOrderPastFilters: readonly (keyof OrderOrderPast.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until']
+
+const orderOrderPastReads: readonly string[] = ['orderOrderPastList']
+
+const orderOrderPast = {
   path: 'api/order/order/past',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderPastListOptions, queryKey: orderOrderPastListQueryKey},
-  reads: ['orderOrderPastList'],
+  reads: orderOrderPastReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderPast` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderPast.ListQuery)[] = orderOrderPastFilters) =>
+    orderOrderPastListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderPastReads),
 } as const satisfies Resource
 
-/** `api/order/order/sales_orders` */
-export const orderOrderSalesOrders = {
+/** `api/order/order/past` */
+export const OrderOrderPast = orderOrderPast
+
+export declare namespace OrderOrderPast {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderPastListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderPastListQuery>
+}
+
+const orderOrderSalesOrdersFilters: readonly (keyof OrderOrderSalesOrders.ListQuery)[] = ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until', 'year']
+
+const orderOrderSalesOrdersReads: readonly string[] = ['orderOrderSalesOrdersList']
+
+const orderOrderSalesOrders = {
   path: 'api/order/order/sales_orders',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderSalesOrdersListOptions, queryKey: orderOrderSalesOrdersListQueryKey},
-  reads: ['orderOrderSalesOrdersList'],
+  reads: orderOrderSalesOrdersReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderSalesOrders` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderSalesOrders.ListQuery)[] = orderOrderSalesOrdersFilters) =>
+    orderOrderSalesOrdersListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderSalesOrdersReads),
 } as const satisfies Resource
 
-/** `api/order/orderline` */
-export const orderOrderline = {
+/** `api/order/order/sales_orders` */
+export const OrderOrderSalesOrders = orderOrderSalesOrders
+
+export declare namespace OrderOrderSalesOrders {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderSalesOrdersListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderSalesOrdersListQuery>
+}
+
+const orderOrderlineFilters: readonly (keyof OrderOrderline.ListQuery)[] = ['order']
+
+const orderOrderlineReads: readonly string[] = ['orderOrderlineAssignedOrderRetrieve', 'orderOrderlineLatestWorkordersList', 'orderOrderlineList', 'orderOrderlineOrderList', 'orderOrderlineRetrieve']
+
+const orderOrderline = {
   path: 'api/order/orderline',
   kind: 'collection',
   id: 'number',
@@ -2888,46 +11018,235 @@ export const orderOrderline = {
   create: {mutation: orderOrderlineCreateMutation, body: vOrderOrderlineCreateBody},
   update: {mutation: orderOrderlinePartialUpdateMutation, body: vOrderOrderlinePartialUpdateBody},
   destroy: {mutation: orderOrderlineDestroyMutation},
-  reads: ['orderOrderlineAssignedOrderRetrieve', 'orderOrderlineLatestWorkordersList', 'orderOrderlineList', 'orderOrderlineOrderList', 'orderOrderlineRetrieve'],
+  reads: orderOrderlineReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderline` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderline.ListQuery)[] = orderOrderlineFilters) =>
+    orderOrderlineListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderlineReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => orderOrderlineRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => orderOrderlineCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => orderOrderlinePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: OrderOrderline.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => orderOrderlineDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/order/orderline/latest_workorders` */
-export const orderOrderlineLatestWorkorders = {
+/** `api/order/orderline` */
+export const OrderOrderline = orderOrderline
+
+export declare namespace OrderOrderline {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderlineListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderlineListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderOrderlineRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderOrderlineCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderOrderlineCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderOrderlinePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderOrderlinePartialUpdateBody>
+}
+
+const orderOrderlineLatestWorkordersFilters: readonly (keyof OrderOrderlineLatestWorkorders.ListQuery)[] = ['building', 'equipment', 'location', 'order']
+
+const orderOrderlineLatestWorkordersReads: readonly string[] = ['orderOrderlineLatestWorkordersList']
+
+const orderOrderlineLatestWorkorders = {
   path: 'api/order/orderline/latest_workorders',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderlineLatestWorkordersListOptions, queryKey: orderOrderlineLatestWorkordersListQueryKey},
-  reads: ['orderOrderlineLatestWorkordersList'],
+  reads: orderOrderlineLatestWorkordersReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `OrderOrderlineLatestWorkorders` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof OrderOrderlineLatestWorkorders.ListQuery)[] = orderOrderlineLatestWorkordersFilters) =>
+    orderOrderlineLatestWorkordersListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderlineLatestWorkordersReads),
 } as const satisfies Resource
 
-/** `api/order/orderline/order` */
-export const orderOrderlineOrder = {
+/** `api/order/orderline/latest_workorders` */
+export const OrderOrderlineLatestWorkorders = orderOrderlineLatestWorkorders
+
+export declare namespace OrderOrderlineLatestWorkorders {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderlineLatestWorkordersListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderlineLatestWorkordersListQuery>
+}
+
+const orderOrderlineOrderReads: readonly string[] = ['orderOrderlineOrderList']
+
+const orderOrderlineOrder = {
   path: 'api/order/orderline/order',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderlineOrderListOptions, queryKey: orderOrderlineOrderListQueryKey},
-  reads: ['orderOrderlineOrderList'],
+  reads: orderOrderlineOrderReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderOrderlineOrderReads),
 } as const satisfies Resource
 
-/** `api/order/status` */
-export const orderStatus = {
+/** `api/order/orderline/order` */
+export const OrderOrderlineOrder = orderOrderlineOrder
+
+export declare namespace OrderOrderlineOrder {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderlineOrderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderlineOrderListQuery>
+}
+
+const orderStatusReads: readonly string[] = []
+
+const orderStatus = {
   path: 'api/order/status',
   kind: 'action',
   create: {mutation: orderStatusCreateMutation, body: vOrderStatusCreateBody},
-  reads: [],
+  reads: orderStatusReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderStatusReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => orderStatusCreateMutation(),
 } as const satisfies Resource
 
-/** `api/order/statuses` */
-export const orderStatuses = {
+/** `api/order/status` */
+export const OrderStatus = orderStatus
+
+export declare namespace OrderStatus {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderStatusCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderStatusCreateBody>
+}
+
+const orderStatusesReads: readonly string[] = ['orderStatusesList']
+
+const orderStatuses = {
   path: 'api/order/statuses',
   kind: 'collection',
   id: 'number',
   list: {options: orderStatusesListOptions, queryKey: orderStatusesListQueryKey},
-  reads: ['orderStatusesList'],
+  reads: orderStatusesReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    orderStatusesListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(orderStatusesReads),
 } as const satisfies Resource
 
-/** `api/quotation/chapter` */
-export const quotationChapter = {
+/** `api/order/statuses` */
+export const OrderStatuses = orderStatuses
+
+export declare namespace OrderStatuses {
+  /** What `list` answers with. */
+  export type ListResponse = OrderStatusesListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderStatusesListQuery>
+}
+
+const quotationChapterFilters: readonly (keyof QuotationChapter.ListQuery)[] = ['quotation']
+
+const quotationChapterReads: readonly string[] = ['quotationChapterList', 'quotationChapterRetrieve']
+
+const quotationChapter = {
   path: 'api/quotation/chapter',
   kind: 'collection',
   id: 'number',
@@ -2936,11 +11255,78 @@ export const quotationChapter = {
   create: {mutation: quotationChapterCreateMutation, body: vQuotationChapterCreateBody},
   update: {mutation: quotationChapterPartialUpdateMutation, body: vQuotationChapterPartialUpdateBody},
   destroy: {mutation: quotationChapterDestroyMutation},
-  reads: ['quotationChapterList', 'quotationChapterRetrieve'],
+  reads: quotationChapterReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `QuotationChapter` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof QuotationChapter.ListQuery)[] = quotationChapterFilters) =>
+    quotationChapterListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationChapterReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => quotationChapterRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => quotationChapterCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => quotationChapterPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: QuotationChapter.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => quotationChapterDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/quotation/cost` */
-export const quotationCost = {
+/** `api/quotation/chapter` */
+export const QuotationChapter = quotationChapter
+
+export declare namespace QuotationChapter {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationChapterListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationChapterListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationChapterRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationChapterCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationChapterCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationChapterPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationChapterPartialUpdateBody>
+}
+
+const quotationCostFilters: readonly (keyof QuotationCost.ListQuery)[] = ['chapter', 'cost_type', 'quotation']
+
+const quotationCostReads: readonly string[] = ['quotationCostList', 'quotationCostRetrieve']
+
+const quotationCost = {
   path: 'api/quotation/cost',
   kind: 'collection',
   id: 'number',
@@ -2949,11 +11335,78 @@ export const quotationCost = {
   create: {mutation: quotationCostCreateMutation, body: vQuotationCostCreateBody},
   update: {mutation: quotationCostPartialUpdateMutation, body: vQuotationCostPartialUpdateBody},
   destroy: {mutation: quotationCostDestroyMutation},
-  reads: ['quotationCostList', 'quotationCostRetrieve'],
+  reads: quotationCostReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `QuotationCost` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof QuotationCost.ListQuery)[] = quotationCostFilters) =>
+    quotationCostListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationCostReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => quotationCostRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => quotationCostCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => quotationCostPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: QuotationCost.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => quotationCostDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/quotation/document` */
-export const quotationDocument = {
+/** `api/quotation/cost` */
+export const QuotationCost = quotationCost
+
+export declare namespace QuotationCost {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationCostListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationCostListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationCostRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationCostCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationCostCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationCostPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationCostPartialUpdateBody>
+}
+
+const quotationDocumentFilters: readonly (keyof QuotationDocument.ListQuery)[] = ['quotation']
+
+const quotationDocumentReads: readonly string[] = ['quotationDocumentList', 'quotationDocumentRetrieve']
+
+const quotationDocument = {
   path: 'api/quotation/document',
   kind: 'collection',
   id: 'number',
@@ -2962,11 +11415,76 @@ export const quotationDocument = {
   create: {mutation: quotationDocumentCreateMutation, body: vQuotationDocumentCreateBody},
   update: {mutation: quotationDocumentPartialUpdateMutation, body: vQuotationDocumentPartialUpdateBody},
   destroy: {mutation: quotationDocumentDestroyMutation},
-  reads: ['quotationDocumentList', 'quotationDocumentRetrieve'],
+  reads: quotationDocumentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `QuotationDocument` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof QuotationDocument.ListQuery)[] = quotationDocumentFilters) =>
+    quotationDocumentListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationDocumentReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => quotationDocumentRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => quotationDocumentCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => quotationDocumentPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: QuotationDocument.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => quotationDocumentDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/quotation/offer` */
-export const quotationOffer = {
+/** `api/quotation/document` */
+export const QuotationDocument = quotationDocument
+
+export declare namespace QuotationDocument {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationDocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationDocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationDocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationDocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationDocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationDocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationDocumentPartialUpdateBody>
+}
+
+const quotationOfferReads: readonly string[] = ['quotationOfferGetUnsentOfferRetrieve', 'quotationOfferList', 'quotationOfferRetrieve']
+
+const quotationOffer = {
   path: 'api/quotation/offer',
   kind: 'collection',
   id: 'number',
@@ -2975,11 +11493,72 @@ export const quotationOffer = {
   create: {mutation: quotationOfferCreateMutation, body: vQuotationOfferCreateBody},
   update: {mutation: quotationOfferPartialUpdateMutation, body: vQuotationOfferPartialUpdateBody},
   destroy: {mutation: quotationOfferDestroyMutation},
-  reads: ['quotationOfferGetUnsentOfferRetrieve', 'quotationOfferList', 'quotationOfferRetrieve'],
+  reads: quotationOfferReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    quotationOfferListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationOfferReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => quotationOfferRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => quotationOfferCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => quotationOfferPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: QuotationOffer.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => quotationOfferDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/quotation/quotation` */
-export const quotationQuotation = {
+/** `api/quotation/offer` */
+export const QuotationOffer = quotationOffer
+
+export declare namespace QuotationOffer {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationOfferListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationOfferListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationOfferRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationOfferCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationOfferCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationOfferPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationOfferPartialUpdateBody>
+}
+
+const quotationQuotationFilters: readonly (keyof QuotationQuotation.ListQuery)[] = ['customer_relation']
+
+const quotationQuotationReads: readonly string[] = ['quotationQuotationAutocompleteList', 'quotationQuotationGetMaterialsForAppList', 'quotationQuotationList', 'quotationQuotationNotAcceptedList', 'quotationQuotationPreliminaryList', 'quotationQuotationRetrieve', 'quotationQuotationSentList']
+
+const quotationQuotation = {
   path: 'api/quotation/quotation',
   kind: 'collection',
   id: 'number',
@@ -2988,20 +11567,128 @@ export const quotationQuotation = {
   create: {mutation: quotationQuotationCreateMutation, body: vQuotationQuotationCreateBody},
   update: {mutation: quotationQuotationPartialUpdateMutation, body: vQuotationQuotationPartialUpdateBody},
   destroy: {mutation: quotationQuotationDestroyMutation},
-  reads: ['quotationQuotationAutocompleteList', 'quotationQuotationGetMaterialsForAppList', 'quotationQuotationList', 'quotationQuotationNotAcceptedList', 'quotationQuotationPreliminaryList', 'quotationQuotationRetrieve', 'quotationQuotationSentList'],
+  reads: quotationQuotationReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `QuotationQuotation` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof QuotationQuotation.ListQuery)[] = quotationQuotationFilters) =>
+    quotationQuotationListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationQuotationReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => quotationQuotationRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => quotationQuotationCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => quotationQuotationPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: QuotationQuotation.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => quotationQuotationDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/quotation/quotation/autocomplete` */
-export const quotationQuotationAutocomplete = {
+/** `api/quotation/quotation` */
+export const QuotationQuotation = quotationQuotation
+
+export declare namespace QuotationQuotation {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationQuotationRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationQuotationCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationQuotationCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationQuotationPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationQuotationPartialUpdateBody>
+}
+
+const quotationQuotationAutocompleteFilters: readonly (keyof QuotationQuotationAutocomplete.ListQuery)[] = ['customer_relation']
+
+const quotationQuotationAutocompleteReads: readonly string[] = ['quotationQuotationAutocompleteList']
+
+const quotationQuotationAutocomplete = {
   path: 'api/quotation/quotation/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationAutocompleteListOptions, queryKey: quotationQuotationAutocompleteListQueryKey},
-  reads: ['quotationQuotationAutocompleteList'],
+  reads: quotationQuotationAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `QuotationQuotationAutocomplete` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof QuotationQuotationAutocomplete.ListQuery)[] = quotationQuotationAutocompleteFilters) =>
+    quotationQuotationAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationQuotationAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/quotation/quotation-image` */
-export const quotationQuotationImage = {
+/** `api/quotation/quotation/autocomplete` */
+export const QuotationQuotationAutocomplete = quotationQuotationAutocomplete
+
+export declare namespace QuotationQuotationAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationAutocompleteListQuery>
+}
+
+const quotationQuotationImageFilters: readonly (keyof QuotationQuotationImage.ListQuery)[] = ['quotation']
+
+const quotationQuotationImageReads: readonly string[] = ['quotationQuotationImageList', 'quotationQuotationImageRetrieve']
+
+const quotationQuotationImage = {
   path: 'api/quotation/quotation-image',
   kind: 'collection',
   id: 'number',
@@ -3010,11 +11697,78 @@ export const quotationQuotationImage = {
   create: {mutation: quotationQuotationImageCreateMutation, body: vQuotationQuotationImageCreateBody},
   update: {mutation: quotationQuotationImagePartialUpdateMutation, body: vQuotationQuotationImagePartialUpdateBody},
   destroy: {mutation: quotationQuotationImageDestroyMutation},
-  reads: ['quotationQuotationImageList', 'quotationQuotationImageRetrieve'],
+  reads: quotationQuotationImageReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `QuotationQuotationImage` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof QuotationQuotationImage.ListQuery)[] = quotationQuotationImageFilters) =>
+    quotationQuotationImageListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationQuotationImageReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => quotationQuotationImageRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => quotationQuotationImageCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => quotationQuotationImagePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: QuotationQuotationImage.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => quotationQuotationImageDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/quotation/quotation-line` */
-export const quotationQuotationLine = {
+/** `api/quotation/quotation-image` */
+export const QuotationQuotationImage = quotationQuotationImage
+
+export declare namespace QuotationQuotationImage {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationImageListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationImageListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationQuotationImageRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationQuotationImageCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationQuotationImageCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationQuotationImagePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationQuotationImagePartialUpdateBody>
+}
+
+const quotationQuotationLineFilters: readonly (keyof QuotationQuotationLine.ListQuery)[] = ['chapter', 'quotation']
+
+const quotationQuotationLineReads: readonly string[] = ['quotationQuotationLineList', 'quotationQuotationLineRetrieve']
+
+const quotationQuotationLine = {
   path: 'api/quotation/quotation-line',
   kind: 'collection',
   id: 'number',
@@ -3023,20 +11777,112 @@ export const quotationQuotationLine = {
   create: {mutation: quotationQuotationLineCreateMutation, body: vQuotationQuotationLineCreateBody},
   update: {mutation: quotationQuotationLinePartialUpdateMutation, body: vQuotationQuotationLinePartialUpdateBody},
   destroy: {mutation: quotationQuotationLineDestroyMutation},
-  reads: ['quotationQuotationLineList', 'quotationQuotationLineRetrieve'],
+  reads: quotationQuotationLineReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `QuotationQuotationLine` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof QuotationQuotationLine.ListQuery)[] = quotationQuotationLineFilters) =>
+    quotationQuotationLineListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationQuotationLineReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => quotationQuotationLineRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => quotationQuotationLineCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => quotationQuotationLinePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: QuotationQuotationLine.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => quotationQuotationLineDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/quotation/quotation-line/chapter` */
-export const quotationQuotationLineChapter = {
+/** `api/quotation/quotation-line` */
+export const QuotationQuotationLine = quotationQuotationLine
+
+export declare namespace QuotationQuotationLine {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationLineListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationLineListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationQuotationLineRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationQuotationLineCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationQuotationLineCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationQuotationLinePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationQuotationLinePartialUpdateBody>
+}
+
+const quotationQuotationLineChapterReads: readonly string[] = []
+
+const quotationQuotationLineChapter = {
   path: 'api/quotation/quotation-line/chapter',
   kind: 'collection',
   id: 'number',
   create: {mutation: quotationQuotationLineChapterCreateMutation, body: vQuotationQuotationLineChapterCreateBody},
-  reads: [],
+  reads: quotationQuotationLineChapterReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationQuotationLineChapterReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => quotationQuotationLineChapterCreateMutation(),
 } as const satisfies Resource
 
-/** `api/quotation/quotation-line-image` */
-export const quotationQuotationLineImage = {
+/** `api/quotation/quotation-line/chapter` */
+export const QuotationQuotationLineChapter = quotationQuotationLineChapter
+
+export declare namespace QuotationQuotationLineChapter {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationQuotationLineChapterCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationQuotationLineChapterCreateBody>
+}
+
+const quotationQuotationLineImageFilters: readonly (keyof QuotationQuotationLineImage.ListQuery)[] = ['quotation_line']
+
+const quotationQuotationLineImageReads: readonly string[] = ['quotationQuotationLineImageList', 'quotationQuotationLineImageRetrieve']
+
+const quotationQuotationLineImage = {
   path: 'api/quotation/quotation-line-image',
   kind: 'collection',
   id: 'number',
@@ -3045,54 +11891,294 @@ export const quotationQuotationLineImage = {
   create: {mutation: quotationQuotationLineImageCreateMutation, body: vQuotationQuotationLineImageCreateBody},
   update: {mutation: quotationQuotationLineImagePartialUpdateMutation, body: vQuotationQuotationLineImagePartialUpdateBody},
   destroy: {mutation: quotationQuotationLineImageDestroyMutation},
-  reads: ['quotationQuotationLineImageList', 'quotationQuotationLineImageRetrieve'],
+  reads: quotationQuotationLineImageReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `QuotationQuotationLineImage` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof QuotationQuotationLineImage.ListQuery)[] = quotationQuotationLineImageFilters) =>
+    quotationQuotationLineImageListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationQuotationLineImageReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => quotationQuotationLineImageRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => quotationQuotationLineImageCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => quotationQuotationLineImagePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: QuotationQuotationLineImage.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => quotationQuotationLineImageDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/quotation/quotation/not_accepted` */
-export const quotationQuotationNotAccepted = {
+/** `api/quotation/quotation-line-image` */
+export const QuotationQuotationLineImage = quotationQuotationLineImage
+
+export declare namespace QuotationQuotationLineImage {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationLineImageListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationLineImageListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationQuotationLineImageRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationQuotationLineImageCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationQuotationLineImageCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationQuotationLineImagePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationQuotationLineImagePartialUpdateBody>
+}
+
+const quotationQuotationNotAcceptedFilters: readonly (keyof QuotationQuotationNotAccepted.ListQuery)[] = ['customer_relation']
+
+const quotationQuotationNotAcceptedReads: readonly string[] = ['quotationQuotationNotAcceptedList']
+
+const quotationQuotationNotAccepted = {
   path: 'api/quotation/quotation/not_accepted',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationNotAcceptedListOptions, queryKey: quotationQuotationNotAcceptedListQueryKey},
-  reads: ['quotationQuotationNotAcceptedList'],
+  reads: quotationQuotationNotAcceptedReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `QuotationQuotationNotAccepted` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof QuotationQuotationNotAccepted.ListQuery)[] = quotationQuotationNotAcceptedFilters) =>
+    quotationQuotationNotAcceptedListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationQuotationNotAcceptedReads),
 } as const satisfies Resource
 
-/** `api/quotation/quotation/preliminary` */
-export const quotationQuotationPreliminary = {
+/** `api/quotation/quotation/not_accepted` */
+export const QuotationQuotationNotAccepted = quotationQuotationNotAccepted
+
+export declare namespace QuotationQuotationNotAccepted {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationNotAcceptedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationNotAcceptedListQuery>
+}
+
+const quotationQuotationPreliminaryFilters: readonly (keyof QuotationQuotationPreliminary.ListQuery)[] = ['customer_relation']
+
+const quotationQuotationPreliminaryReads: readonly string[] = ['quotationQuotationPreliminaryList']
+
+const quotationQuotationPreliminary = {
   path: 'api/quotation/quotation/preliminary',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationPreliminaryListOptions, queryKey: quotationQuotationPreliminaryListQueryKey},
-  reads: ['quotationQuotationPreliminaryList'],
+  reads: quotationQuotationPreliminaryReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `QuotationQuotationPreliminary` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof QuotationQuotationPreliminary.ListQuery)[] = quotationQuotationPreliminaryFilters) =>
+    quotationQuotationPreliminaryListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationQuotationPreliminaryReads),
 } as const satisfies Resource
 
-/** `api/quotation/quotation/sent` */
-export const quotationQuotationSent = {
+/** `api/quotation/quotation/preliminary` */
+export const QuotationQuotationPreliminary = quotationQuotationPreliminary
+
+export declare namespace QuotationQuotationPreliminary {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationPreliminaryListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationPreliminaryListQuery>
+}
+
+const quotationQuotationSentFilters: readonly (keyof QuotationQuotationSent.ListQuery)[] = ['customer_relation']
+
+const quotationQuotationSentReads: readonly string[] = ['quotationQuotationSentList']
+
+const quotationQuotationSent = {
   path: 'api/quotation/quotation/sent',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationSentListOptions, queryKey: quotationQuotationSentListQueryKey},
-  reads: ['quotationQuotationSentList'],
+  reads: quotationQuotationSentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `QuotationQuotationSent` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof QuotationQuotationSent.ListQuery)[] = quotationQuotationSentFilters) =>
+    quotationQuotationSentListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationQuotationSentReads),
 } as const satisfies Resource
 
-/** `api/quotation/status` */
-export const quotationStatus = {
+/** `api/quotation/quotation/sent` */
+export const QuotationQuotationSent = quotationQuotationSent
+
+export declare namespace QuotationQuotationSent {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationSentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationSentListQuery>
+}
+
+const quotationStatusReads: readonly string[] = []
+
+const quotationStatus = {
   path: 'api/quotation/status',
   kind: 'action',
   create: {mutation: quotationStatusCreateMutation, body: vQuotationStatusCreateBody},
-  reads: [],
+  reads: quotationStatusReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(quotationStatusReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => quotationStatusCreateMutation(),
 } as const satisfies Resource
 
-/** `api/set-language` */
-export const setLanguage = {
+/** `api/quotation/status` */
+export const QuotationStatus = quotationStatus
+
+export declare namespace QuotationStatus {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationStatusCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationStatusCreateBody>
+}
+
+const setLanguageReads: readonly string[] = []
+
+const setLanguage = {
   path: 'api/set-language',
   kind: 'action',
   create: {mutation: setLanguageCreateMutation, body: vSetLanguageCreateBody},
-  reads: [],
+  reads: setLanguageReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(setLanguageReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => setLanguageCreateMutation(),
 } as const satisfies Resource
 
-/** `api/statuscode/action` */
-export const statuscodeAction = {
+/** `api/set-language` */
+export const SetLanguage = setLanguage
+
+export declare namespace SetLanguage {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vSetLanguageCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vSetLanguageCreateBody>
+}
+
+const statuscodeActionFilters: readonly (keyof StatuscodeAction.ListQuery)[] = ['statuscode']
+
+const statuscodeActionReads: readonly string[] = ['statuscodeActionList', 'statuscodeActionOperatorsRetrieve', 'statuscodeActionRetrieve', 'statuscodeActionStatusoptionsRetrieve']
+
+const statuscodeAction = {
   path: 'api/statuscode/action',
   kind: 'collection',
   id: 'number',
@@ -3101,11 +12187,78 @@ export const statuscodeAction = {
   create: {mutation: statuscodeActionCreateMutation, body: vStatuscodeActionCreateBody},
   update: {mutation: statuscodeActionPartialUpdateMutation, body: vStatuscodeActionPartialUpdateBody},
   destroy: {mutation: statuscodeActionDestroyMutation},
-  reads: ['statuscodeActionList', 'statuscodeActionOperatorsRetrieve', 'statuscodeActionRetrieve', 'statuscodeActionStatusoptionsRetrieve'],
+  reads: statuscodeActionReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `StatuscodeAction` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof StatuscodeAction.ListQuery)[] = statuscodeActionFilters) =>
+    statuscodeActionListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(statuscodeActionReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => statuscodeActionRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => statuscodeActionCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => statuscodeActionPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: StatuscodeAction.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => statuscodeActionDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/statuscode/statuscode` */
-export const statuscodeStatuscode = {
+/** `api/statuscode/action` */
+export const StatuscodeAction = statuscodeAction
+
+export declare namespace StatuscodeAction {
+  /** What `list` answers with. */
+  export type ListResponse = StatuscodeActionListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vStatuscodeActionListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = StatuscodeActionRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vStatuscodeActionCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vStatuscodeActionCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vStatuscodeActionPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vStatuscodeActionPartialUpdateBody>
+}
+
+const statuscodeStatuscodeFilters: readonly (keyof StatuscodeStatuscode.ListQuery)[] = ['code_type', 'description', 'statuscode']
+
+const statuscodeStatuscodeReads: readonly string[] = ['statuscodeStatuscodeAutocompleteList', 'statuscodeStatuscodeList', 'statuscodeStatuscodeRetrieve', 'statuscodeStatuscodeRolesRetrieve']
+
+const statuscodeStatuscode = {
   path: 'api/statuscode/statuscode',
   kind: 'collection',
   id: 'number',
@@ -3114,153 +12267,704 @@ export const statuscodeStatuscode = {
   create: {mutation: statuscodeStatuscodeCreateMutation, body: vStatuscodeStatuscodeCreateBody},
   update: {mutation: statuscodeStatuscodePartialUpdateMutation, body: vStatuscodeStatuscodePartialUpdateBody},
   destroy: {mutation: statuscodeStatuscodeDestroyMutation},
-  reads: ['statuscodeStatuscodeAutocompleteList', 'statuscodeStatuscodeList', 'statuscodeStatuscodeRetrieve', 'statuscodeStatuscodeRolesRetrieve'],
+  reads: statuscodeStatuscodeReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `StatuscodeStatuscode` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof StatuscodeStatuscode.ListQuery)[] = statuscodeStatuscodeFilters) =>
+    statuscodeStatuscodeListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(statuscodeStatuscodeReads),
+  /**
+   * The retrieve options for one record, with its id in the path.
+   *
+   * The id is passed as declared - this endpoint declares an integer id.
+   */
+  retrieveOptions: (id: number) => statuscodeStatuscodeRetrieveOptions({path: {id}}),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => statuscodeStatuscodeCreateMutation(),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => statuscodeStatuscodePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, plus the record's id in the path.
+   */
+  updateVars: (id: number, body: StatuscodeStatuscode.UpdateInput) => ({path: {id}, body}),
+  /** The destroy mutation options, for `useMutation`. */
+  destroyMutation: () => statuscodeStatuscodeDestroyMutation(),
 } as const satisfies Resource
 
-/** `api/statuscode/statuscode/autocomplete` */
-export const statuscodeStatuscodeAutocomplete = {
+/** `api/statuscode/statuscode` */
+export const StatuscodeStatuscode = statuscodeStatuscode
+
+export declare namespace StatuscodeStatuscode {
+  /** What `list` answers with. */
+  export type ListResponse = StatuscodeStatuscodeListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vStatuscodeStatuscodeListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = StatuscodeStatuscodeRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vStatuscodeStatuscodeCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vStatuscodeStatuscodeCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vStatuscodeStatuscodePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vStatuscodeStatuscodePartialUpdateBody>
+}
+
+const statuscodeStatuscodeAutocompleteFilters: readonly (keyof StatuscodeStatuscodeAutocomplete.ListQuery)[] = ['code_type', 'description', 'statuscode']
+
+const statuscodeStatuscodeAutocompleteReads: readonly string[] = ['statuscodeStatuscodeAutocompleteList']
+
+const statuscodeStatuscodeAutocomplete = {
   path: 'api/statuscode/statuscode/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: statuscodeStatuscodeAutocompleteListOptions, queryKey: statuscodeStatuscodeAutocompleteListQueryKey},
-  reads: ['statuscodeStatuscodeAutocompleteList'],
+  reads: statuscodeStatuscodeAutocompleteReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `StatuscodeStatuscodeAutocomplete` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof StatuscodeStatuscodeAutocomplete.ListQuery)[] = statuscodeStatuscodeAutocompleteFilters) =>
+    statuscodeStatuscodeAutocompleteListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(statuscodeStatuscodeAutocompleteReads),
 } as const satisfies Resource
 
-/** `api/teamleader/authorize` */
-export const teamleaderAuthorize = {
+/** `api/statuscode/statuscode/autocomplete` */
+export const StatuscodeStatuscodeAutocomplete = statuscodeStatuscodeAutocomplete
+
+export declare namespace StatuscodeStatuscodeAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = StatuscodeStatuscodeAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vStatuscodeStatuscodeAutocompleteListQuery>
+}
+
+const teamleaderAuthorizeReads: readonly string[] = []
+
+const teamleaderAuthorize = {
   path: 'api/teamleader/authorize',
   kind: 'action',
   create: {mutation: teamleaderAuthorizeCreateMutation},
-  reads: [],
+  reads: teamleaderAuthorizeReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderAuthorizeReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => teamleaderAuthorizeCreateMutation(),
 } as const satisfies Resource
 
-/** `api/teamleader/check-tokens` */
-export const teamleaderCheckTokens = {
+/** `api/teamleader/authorize` */
+export const TeamleaderAuthorize = teamleaderAuthorize
+
+const teamleaderCheckTokensReads: readonly string[] = []
+
+const teamleaderCheckTokens = {
   path: 'api/teamleader/check-tokens',
   kind: 'action',
   create: {mutation: teamleaderCheckTokensCreateMutation},
-  reads: [],
+  reads: teamleaderCheckTokensReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderCheckTokensReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => teamleaderCheckTokensCreateMutation(),
 } as const satisfies Resource
 
-/** `api/teamleader/empty-tokens` */
-export const teamleaderEmptyTokens = {
+/** `api/teamleader/check-tokens` */
+export const TeamleaderCheckTokens = teamleaderCheckTokens
+
+const teamleaderEmptyTokensReads: readonly string[] = []
+
+const teamleaderEmptyTokens = {
   path: 'api/teamleader/empty-tokens',
   kind: 'action',
   create: {mutation: teamleaderEmptyTokensCreateMutation},
-  reads: [],
+  reads: teamleaderEmptyTokensReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderEmptyTokensReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => teamleaderEmptyTokensCreateMutation(),
 } as const satisfies Resource
 
-/** `api/teamleader/oauth` */
-export const teamleaderOauth = {
+/** `api/teamleader/empty-tokens` */
+export const TeamleaderEmptyTokens = teamleaderEmptyTokens
+
+const teamleaderOauthReads: readonly string[] = []
+
+const teamleaderOauth = {
   path: 'api/teamleader/oauth',
   kind: 'action',
   create: {mutation: teamleaderOauthCreateMutation, body: vTeamleaderOauthCreateBody},
-  reads: [],
+  reads: teamleaderOauthReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderOauthReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => teamleaderOauthCreateMutation(),
 } as const satisfies Resource
 
-/** `api/teamleader/product-category` */
-export const teamleaderProductCategory = {
+/** `api/teamleader/oauth` */
+export const TeamleaderOauth = teamleaderOauth
+
+export declare namespace TeamleaderOauth {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vTeamleaderOauthCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vTeamleaderOauthCreateBody>
+}
+
+const teamleaderProductCategoryReads: readonly string[] = ['teamleaderProductCategoryList']
+
+const teamleaderProductCategory = {
   path: 'api/teamleader/product-category',
   kind: 'collection',
   id: 'number',
   list: {options: teamleaderProductCategoryListOptions, queryKey: teamleaderProductCategoryListQueryKey},
-  reads: ['teamleaderProductCategoryList'],
+  reads: teamleaderProductCategoryReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    teamleaderProductCategoryListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderProductCategoryReads),
 } as const satisfies Resource
 
-/** `api/teamleader/product-category-reset` */
-export const teamleaderProductCategoryReset = {
+/** `api/teamleader/product-category` */
+export const TeamleaderProductCategory = teamleaderProductCategory
+
+export declare namespace TeamleaderProductCategory {
+  /** What `list` answers with. */
+  export type ListResponse = TeamleaderProductCategoryListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vTeamleaderProductCategoryListQuery>
+}
+
+const teamleaderProductCategoryResetReads: readonly string[] = []
+
+const teamleaderProductCategoryReset = {
   path: 'api/teamleader/product-category-reset',
   kind: 'action',
   create: {mutation: teamleaderProductCategoryResetCreateMutation},
-  reads: [],
+  reads: teamleaderProductCategoryResetReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderProductCategoryResetReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => teamleaderProductCategoryResetCreateMutation(),
 } as const satisfies Resource
 
-/** `api/teamleader/tax-rate` */
-export const teamleaderTaxRate = {
+/** `api/teamleader/product-category-reset` */
+export const TeamleaderProductCategoryReset = teamleaderProductCategoryReset
+
+const teamleaderTaxRateReads: readonly string[] = ['teamleaderTaxRateList']
+
+const teamleaderTaxRate = {
   path: 'api/teamleader/tax-rate',
   kind: 'collection',
   id: 'number',
   list: {options: teamleaderTaxRateListOptions, queryKey: teamleaderTaxRateListQueryKey},
-  reads: ['teamleaderTaxRateList'],
+  reads: teamleaderTaxRateReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters.
+   */
+  listOptions: (query: ServerPagedListQuery) =>
+    teamleaderTaxRateListOptions({
+      query: {
+        ...baseListParams(query),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderTaxRateReads),
 } as const satisfies Resource
 
-/** `api/teamleader/tax-rate-reset` */
-export const teamleaderTaxRateReset = {
+/** `api/teamleader/tax-rate` */
+export const TeamleaderTaxRate = teamleaderTaxRate
+
+export declare namespace TeamleaderTaxRate {
+  /** What `list` answers with. */
+  export type ListResponse = TeamleaderTaxRateListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vTeamleaderTaxRateListQuery>
+}
+
+const teamleaderTaxRateResetReads: readonly string[] = []
+
+const teamleaderTaxRateReset = {
   path: 'api/teamleader/tax-rate-reset',
   kind: 'action',
   create: {mutation: teamleaderTaxRateResetCreateMutation},
-  reads: [],
+  reads: teamleaderTaxRateResetReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderTaxRateResetReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => teamleaderTaxRateResetCreateMutation(),
 } as const satisfies Resource
 
-/** `api/teamleader/tl-product-create` */
-export const teamleaderTlProductCreate = {
+/** `api/teamleader/tax-rate-reset` */
+export const TeamleaderTaxRateReset = teamleaderTaxRateReset
+
+const teamleaderTlProductCreateReads: readonly string[] = []
+
+const teamleaderTlProductCreate = {
   path: 'api/teamleader/tl-product-create',
   kind: 'action',
   create: {mutation: teamleaderTlProductCreateCreateMutation, body: vTeamleaderTlProductCreateCreateBody},
-  reads: [],
+  reads: teamleaderTlProductCreateReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderTlProductCreateReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => teamleaderTlProductCreateCreateMutation(),
 } as const satisfies Resource
 
-/** `api/teamleader/tl-product-create-link` */
-export const teamleaderTlProductCreateLink = {
+/** `api/teamleader/tl-product-create` */
+export const TeamleaderTlProductCreate = teamleaderTlProductCreate
+
+export declare namespace TeamleaderTlProductCreate {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vTeamleaderTlProductCreateCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vTeamleaderTlProductCreateCreateBody>
+}
+
+const teamleaderTlProductCreateLinkReads: readonly string[] = []
+
+const teamleaderTlProductCreateLink = {
   path: 'api/teamleader/tl-product-create-link',
   kind: 'action',
   create: {mutation: teamleaderTlProductCreateLinkCreateMutation, body: vTeamleaderTlProductCreateLinkCreateBody},
-  reads: [],
+  reads: teamleaderTlProductCreateLinkReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderTlProductCreateLinkReads),
+  /** The create mutation options, for `useMutation`. */
+  createMutation: () => teamleaderTlProductCreateLinkCreateMutation(),
 } as const satisfies Resource
 
-/** `api/teamleader/tl-product-list` */
-export const teamleaderTlProductList = {
+/** `api/teamleader/tl-product-create-link` */
+export const TeamleaderTlProductCreateLink = teamleaderTlProductCreateLink
+
+export declare namespace TeamleaderTlProductCreateLink {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vTeamleaderTlProductCreateLinkCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vTeamleaderTlProductCreateLinkCreateBody>
+}
+
+const teamleaderTlProductListFilters: readonly (keyof TeamleaderTlProductList.ListQuery)[] = ['ids']
+
+const teamleaderTlProductListReads: readonly string[] = ['teamleaderTlProductListList']
+
+const teamleaderTlProductList = {
   path: 'api/teamleader/tl-product-list',
   kind: 'collection',
   id: 'number',
   list: {options: teamleaderTlProductListListOptions, queryKey: teamleaderTlProductListListQueryKey},
-  reads: ['teamleaderTlProductListList'],
+  reads: teamleaderTlProductListReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * The generated list options for a server-paged table: the four base page
+   * parameters, plus this resource's column filters.
+   *
+   * `filters` defaults to every filter `TeamleaderTlProductList` declares, so a screen whose
+   * columns are the endpoint's own filters passes nothing and cannot drift from
+   * them. Name it only to send a subset. A name the endpoint does not declare
+   * does not typecheck.
+   */
+  listOptions: (query: ServerPagedListQuery, filters: readonly (keyof TeamleaderTlProductList.ListQuery)[] = teamleaderTlProductListFilters) =>
+    teamleaderTlProductListListOptions({
+      query: {
+        ...baseListParams(query),
+        ...columnFilters(query, filters),
+      },
+    }),
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderTlProductListReads),
 } as const satisfies Resource
 
-/** `api/teamleader/travel-hours-product` */
-export const teamleaderTravelHoursProduct = {
+/** `api/teamleader/tl-product-list` */
+export const TeamleaderTlProductList = teamleaderTlProductList
+
+export declare namespace TeamleaderTlProductList {
+  /** What `list` answers with. */
+  export type ListResponse = TeamleaderTlProductListListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vTeamleaderTlProductListListQuery>
+}
+
+const teamleaderTravelHoursProductReads: readonly string[] = []
+
+const teamleaderTravelHoursProduct = {
   path: 'api/teamleader/travel-hours-product',
   kind: 'singleton',
   update: {mutation: teamleaderTravelHoursProductPartialUpdateMutation, body: vTeamleaderTravelHoursProductPartialUpdateBody},
-  reads: [],
+  reads: teamleaderTravelHoursProductReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderTravelHoursProductReads),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => teamleaderTravelHoursProductPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: TeamleaderTravelHoursProduct.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/teamleader/update-department` */
-export const teamleaderUpdateDepartment = {
+/** `api/teamleader/travel-hours-product` */
+export const TeamleaderTravelHoursProduct = teamleaderTravelHoursProduct
+
+export declare namespace TeamleaderTravelHoursProduct {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderTravelHoursProductPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderTravelHoursProductPartialUpdateBody>
+}
+
+const teamleaderUpdateDepartmentReads: readonly string[] = []
+
+const teamleaderUpdateDepartment = {
   path: 'api/teamleader/update-department',
   kind: 'singleton',
   update: {mutation: teamleaderUpdateDepartmentPartialUpdateMutation, body: vTeamleaderUpdateDepartmentPartialUpdateBody},
-  reads: [],
+  reads: teamleaderUpdateDepartmentReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderUpdateDepartmentReads),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => teamleaderUpdateDepartmentPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: TeamleaderUpdateDepartment.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/teamleader/update-enabled` */
-export const teamleaderUpdateEnabled = {
+/** `api/teamleader/update-department` */
+export const TeamleaderUpdateDepartment = teamleaderUpdateDepartment
+
+export declare namespace TeamleaderUpdateDepartment {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderUpdateDepartmentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderUpdateDepartmentPartialUpdateBody>
+}
+
+const teamleaderUpdateEnabledReads: readonly string[] = []
+
+const teamleaderUpdateEnabled = {
   path: 'api/teamleader/update-enabled',
   kind: 'singleton',
   update: {mutation: teamleaderUpdateEnabledPartialUpdateMutation, body: vTeamleaderUpdateEnabledPartialUpdateBody},
-  reads: [],
+  reads: teamleaderUpdateEnabledReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderUpdateEnabledReads),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => teamleaderUpdateEnabledPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: TeamleaderUpdateEnabled.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/teamleader/update-invoice-document-template` */
-export const teamleaderUpdateInvoiceDocumentTemplate = {
+/** `api/teamleader/update-enabled` */
+export const TeamleaderUpdateEnabled = teamleaderUpdateEnabled
+
+export declare namespace TeamleaderUpdateEnabled {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderUpdateEnabledPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderUpdateEnabledPartialUpdateBody>
+}
+
+const teamleaderUpdateInvoiceDocumentTemplateReads: readonly string[] = []
+
+const teamleaderUpdateInvoiceDocumentTemplate = {
   path: 'api/teamleader/update-invoice-document-template',
   kind: 'singleton',
   update: {mutation: teamleaderUpdateInvoiceDocumentTemplatePartialUpdateMutation, body: vTeamleaderUpdateInvoiceDocumentTemplatePartialUpdateBody},
-  reads: [],
+  reads: teamleaderUpdateInvoiceDocumentTemplateReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderUpdateInvoiceDocumentTemplateReads),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => teamleaderUpdateInvoiceDocumentTemplatePartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: TeamleaderUpdateInvoiceDocumentTemplate.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/teamleader/update-product-category` */
-export const teamleaderUpdateProductCategory = {
+/** `api/teamleader/update-invoice-document-template` */
+export const TeamleaderUpdateInvoiceDocumentTemplate = teamleaderUpdateInvoiceDocumentTemplate
+
+export declare namespace TeamleaderUpdateInvoiceDocumentTemplate {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderUpdateInvoiceDocumentTemplatePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderUpdateInvoiceDocumentTemplatePartialUpdateBody>
+}
+
+const teamleaderUpdateProductCategoryReads: readonly string[] = []
+
+const teamleaderUpdateProductCategory = {
   path: 'api/teamleader/update-product-category',
   kind: 'singleton',
   update: {mutation: teamleaderUpdateProductCategoryPartialUpdateMutation, body: vTeamleaderUpdateProductCategoryPartialUpdateBody},
-  reads: [],
+  reads: teamleaderUpdateProductCategoryReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderUpdateProductCategoryReads),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => teamleaderUpdateProductCategoryPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: TeamleaderUpdateProductCategory.UpdateInput) => ({body}),
 } as const satisfies Resource
 
-/** `api/teamleader/work-hours-product` */
-export const teamleaderWorkHoursProduct = {
+/** `api/teamleader/update-product-category` */
+export const TeamleaderUpdateProductCategory = teamleaderUpdateProductCategory
+
+export declare namespace TeamleaderUpdateProductCategory {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderUpdateProductCategoryPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderUpdateProductCategoryPartialUpdateBody>
+}
+
+const teamleaderWorkHoursProductReads: readonly string[] = []
+
+const teamleaderWorkHoursProduct = {
   path: 'api/teamleader/work-hours-product',
   kind: 'singleton',
   update: {mutation: teamleaderWorkHoursProductPartialUpdateMutation, body: vTeamleaderWorkHoursProductPartialUpdateBody},
-  reads: [],
+  reads: teamleaderWorkHoursProductReads,
+
+  // The conveniences. Generated from the bindings above rather than written
+  // per resource, so they cannot drift from what the schema declares.
+  /**
+   * Refresh every read under this resource's path - its own list and detail,
+   * and the filtered views and counts beside them - in one call.
+   *
+   * `(queryClient?)`: the application singleton by default, so a delete modal
+   * can call this straight from a click handler; a caller inside `setup`
+   * passes the client it already holds.
+   */
+  invalidate: invalidateReads(teamleaderWorkHoursProductReads),
+  /** The update mutation options, for `useMutation`. */
+  updateMutation: () => teamleaderWorkHoursProductPartialUpdateMutation(),
+  /**
+   * What an update sends: the body, and nothing else - a singleton has no path.
+   */
+  updateVars: (body: TeamleaderWorkHoursProduct.UpdateInput) => ({body}),
 } as const satisfies Resource
+
+/** `api/teamleader/work-hours-product` */
+export const TeamleaderWorkHoursProduct = teamleaderWorkHoursProduct
+
+export declare namespace TeamleaderWorkHoursProduct {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderWorkHoursProductPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderWorkHoursProductPartialUpdateBody>
+}

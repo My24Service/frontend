@@ -61,7 +61,7 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import { companySalesuser } from '@/api/resources.gen'
+import { CompanySalesuser } from '@/api/resources.gen'
 import type { SalesUser } from '@/api/types.gen'
 import { vSalesUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
@@ -105,7 +105,7 @@ const {
   SalesUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: companySalesuser,
+  resource: CompanySalesuser,
   empty: () => ({...emptySalesUser()}),
   fromRecord: salesUserFromRecord,
   validate: validateSalesUserForm,

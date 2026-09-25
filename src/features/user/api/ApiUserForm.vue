@@ -92,7 +92,7 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import { companyApiuser } from '@/api/resources.gen'
+import { CompanyApiuser } from '@/api/resources.gen'
 import type { ApiUser } from '@/api/types.gen'
 import { vApiUserRequestWritable } from '@/api/valibot.gen'
 import {
@@ -145,7 +145,7 @@ const {
   ApiUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: companyApiuser,
+  resource: CompanyApiuser,
   empty: emptyApiUser,
   fromRecord: apiUserFromRecord,
   validate: validateApiUserForm,

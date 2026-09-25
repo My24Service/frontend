@@ -2,8 +2,7 @@ import {
   mobileAssignUserTripCreateMutation,
   mobileUnassignUserTripCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
-import { mobileTrip } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { MobileTrip } from '@/api/resources.gen'
 
 /**
  * Putting a user on a trip and taking them off again.
@@ -27,7 +26,7 @@ export function useTripAssignment() {
       body: {trip_ids: String(tripId), set_unavailable: true},
     })
 
-    await invalidateReads(mobileTrip)(queryClient)
+    await MobileTrip.invalidate(queryClient)
   }
 
   async function unassignTrip(userId: number, tripId: number) {
@@ -36,7 +35,7 @@ export function useTripAssignment() {
       body: {trip_pk: tripId, set_available: true},
     })
 
-    await invalidateReads(mobileTrip)(queryClient)
+    await MobileTrip.invalidate(queryClient)
   }
 
   const isPending = computed(() => assignMutation.isPending.value || unassignMutation.isPending.value)

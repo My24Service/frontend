@@ -1,4 +1,4 @@
-import { companyBudget } from '@/api/resources.gen'
+import { CompanyBudget } from '@/api/resources.gen'
 import type { Budget } from '@/api/types.gen'
 import {
   type FieldErrors,
@@ -50,8 +50,8 @@ function shaped(values: BudgetModalValues) {
  * whatever DRF coerced. Both writes validate the generated body instead - the
  * create body, since the form fills in a whole budget either way.
  */
-export const budgetWrite = writeContract(companyBudget, {
-  validateWith: companyBudget.create.body,
+export const budgetWrite = writeContract(CompanyBudget, {
+  validateWith: CompanyBudget.create.body,
   shape: shaped,
   labels: FIELD_LABELS,
 })

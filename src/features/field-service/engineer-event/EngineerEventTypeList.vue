@@ -17,7 +17,7 @@
         modalId: 'delete-event-type-modal',
         confirmText: $trans('Are you sure you want to delete this event type?'),
         destroyMutation: companyEngineerEventTypeDestroyMutation,
-        invalidate: invalidateReads(companyEngineerEventType),
+        invalidate: CompanyEngineerEventType.invalidate,
         deletedDetail: $trans('Event type has been deleted'),
         deleteError: $trans('Error deleting event type'),
       }"
@@ -39,8 +39,7 @@ import {
   companyEngineerEventTypeListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedEngineerEventTypeList } from '@/api/types.gen'
-import { companyEngineerEventType } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { CompanyEngineerEventType } from '@/api/resources.gen'
 import {
   ServerTable,
   baseListParams,

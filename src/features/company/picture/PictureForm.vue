@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { companyPicture } from '@/api/resources.gen'
+import { CompanyPicture } from '@/api/resources.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import {
   ImageUploadField,
@@ -98,7 +98,7 @@ const props = withDefaults(defineProps<{
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: companyPicture,
+  resource: CompanyPicture,
   empty: emptyPicture,
   fromRecord: pictureFromRecord,
   validate: pictureWrite.validate,

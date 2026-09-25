@@ -89,12 +89,6 @@ export default defineConfig(({ mode }) => {
         vueDirectives: true,
         viteOptimizeDeps: true,
         dumpUnimportItems: './auto-imports.json',
-        dirs: [
-          {
-            glob: 'src/composables/**',
-            types: true,
-          }
-        ],
       }),
       Components({
         resolvers: [

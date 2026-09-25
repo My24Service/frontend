@@ -27,7 +27,6 @@ export {
   type QueryOptionsLike,
 } from './use-query-of'
 export {
-  invalidateReads,
   useResourceForm,
   type WriteContext,
   type FormResource,

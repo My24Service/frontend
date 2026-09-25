@@ -1732,6 +1732,11 @@
     "as": "my24"
   },
   {
+    "from": "@/services/api-client",
+    "name": "*",
+    "as": "Api"
+  },
+  {
     "from": "@/router/types",
     "type": true,
     "name": "RouteName",
@@ -1742,12 +1747,6 @@
     "type": true,
     "name": "RouteTo",
     "as": "RouteTo"
-  },
-  {
-    "from": "@/api/types.gen",
-    "type": true,
-    "name": "*",
-    "as": "Api"
   },
   {
     "from": "vue",
@@ -1826,5 +1825,11 @@
     "type": true,
     "name": "*",
     "as": "TF"
+  },
+  {
+    "from": "@/services/api-client",
+    "type": true,
+    "name": "*",
+    "as": "Api"
   }
 ]

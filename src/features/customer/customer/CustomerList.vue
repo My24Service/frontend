@@ -17,8 +17,8 @@
       :delete-modal="{
         modalId: 'delete-customer-modal',
         confirmText: $trans('Are you sure you want to delete this customer?'),
-        destroyMutation: () => customerCustomerDestroyMutation(),
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: customerCustomerListQueryKey()}),
+        destroyMutation: Api.CustomerCustomer.destroyMutation,
+        invalidate: Api.CustomerCustomer.invalidate,
         deletedDetail: $trans('Customer has been deleted'),
         deleteError: $trans('Error deleting customer'),
       }"
@@ -50,20 +50,15 @@ import { customerExportRetrieve } from '@/api/sdk.gen'
 import { useFileDownload, XLSX_MIME } from '@/features/shared'
 
 import {
-  customerCustomerDestroyMutation,
-  customerCustomerListOptions,
-  customerCustomerListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedCustomerList } from '@/api/types.gen'
-import {
   ServerTable,
-  baseListParams,
   createActionColumn,
   createAppColumnHelper,
   useServerTable,
   type ListRow,
 } from '@/features/table'
-type CustomerRow = ListRow<PaginatedCustomerList>
+/** The paginated envelope the list answers with - the same generated
+ * `ListResponse` the resource binds, so the row and its query agree. */
+type CustomerRow = ListRow<Api.CustomerCustomer.ListResponse>
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated. Typed structurally because
@@ -186,17 +181,10 @@ function rowClass(row: CustomerRow) {
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh, globalFilter} = useServerTable<CustomerRow>({
   key: 'customer-table',
   columns,
-  listOptions: (query) => customerCustomerListOptions({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-      ...(query.city ? {city: String(query.city)} : {}),
-      ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
-      ...(query.remarks ? {remarks: String(query.remarks)} : {}),
-      ...(query.contact ? {contact: String(query.contact)} : {}),
-    },
-  }),
+  // No filter list: the endpoint's own query parameters are what this screen
+  // filters on, so `listOptions` derives them. Passing the five by hand would
+  // be a second statement of the same fact, free to drift.
+  listOptions: (query) => Api.CustomerCustomer.listOptions(query),
   urlSync: true,
   loadError: $trans('Error loading customers'),
 })

@@ -60,8 +60,7 @@ import {
   invoiceInvoiceRetrieveQueryKey,
 } from '@/api/@tanstack/vue-query.gen'
 import type { Invoice } from '@/api/types.gen'
-import { invoiceInvoice } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { InvoiceInvoice } from '@/api/resources.gen'
 import { decodePdfError, downloadBlob, type PdfBlobError } from '@/features/shared'
 
 // The editor's and viewer's records come from two retrieve endpoints; the
@@ -170,7 +169,7 @@ async function doMakeDefinitive() {
   isLoading.value = true
   try {
     await definitiveMutation.mutateAsync({path: {id: props.invoice.id}})
-    await Promise.all([invalidateAfterPdfChange(), invalidateReads(invoiceInvoice)(queryClient)])
+    await Promise.all([invalidateAfterPdfChange(), InvoiceInvoice.invalidate(queryClient)])
     isLoading.value = false
     infoToast(create, $trans('Success'), $trans('Invoice is now definitive'))
     // make_definitive's response carries no uuid and the prop still holds the

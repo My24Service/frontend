@@ -46,8 +46,7 @@ import {
   companyUserLeaveHoursAdminSetRejectedCreateMutation,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedUserLeaveHoursList } from '@/api/types.gen'
-import { companyUserLeaveHoursAdmin } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { CompanyUserLeaveHoursAdmin } from '@/api/resources.gen'
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
@@ -137,7 +136,7 @@ const {confirm: showAcceptModal, handleOk: handleAcceptOk} = useConfirmedAction(
     ...companyUserLeaveHoursAdminSetAcceptedCreateMutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Accepted'), $trans('Leave as been accepted'))
-      await invalidateReads(companyUserLeaveHoursAdmin)(queryClient)
+      await CompanyUserLeaveHoursAdmin.invalidate(queryClient)
     },
     onError: () => errorToast(toast, $trans('Error accepting leave')),
   }),
@@ -149,7 +148,7 @@ const {confirm: showRejectModal, handleOk: handleRejectOk} = useConfirmedAction(
     ...companyUserLeaveHoursAdminSetRejectedCreateMutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Rejected'), $trans('Leave as been rejected'))
-      await invalidateReads(companyUserLeaveHoursAdmin)(queryClient)
+      await CompanyUserLeaveHoursAdmin.invalidate(queryClient)
     },
     onError: () => errorToast(toast, $trans('Error rejecting leave')),
   }),

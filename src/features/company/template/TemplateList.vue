@@ -17,7 +17,7 @@
         modalId: 'delete-template-modal',
         confirmText: $trans('Are you sure you want to delete this template?'),
         destroyMutation: companyTemplateDestroyMutation,
-        invalidate: invalidateReads(companyTemplate),
+        invalidate: CompanyTemplate.invalidate,
         deletedDetail: $trans('Template has been deleted'),
         deleteError: $trans('Error deleting template'),
       }"
@@ -41,8 +41,7 @@ import {
   companyTemplateListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedTemplateList } from '@/api/types.gen'
-import { companyTemplate } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { CompanyTemplate } from '@/api/resources.gen'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 /**
  * The template list. The route names are the legacy `customer-template-*`

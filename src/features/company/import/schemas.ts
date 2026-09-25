@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { companyImport } from '@/api/resources.gen'
+import { CompanyImport } from '@/api/resources.gen'
 import { vImportedRow } from '@/api/valibot.gen'
 import type { Import } from '@/api/types.gen'
 import {
@@ -68,7 +68,7 @@ function shaped(values: ImportFormValues) {
  * the name is optional but not blank, and this form always sends it, so a
  * blank one is refused either way.
  */
-export const importWrite = writeContract(companyImport, {
+export const importWrite = writeContract(CompanyImport, {
   shape: shaped,
   labels: FIELD_LABELS,
   messages: FIELD_MESSAGES,

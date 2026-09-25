@@ -98,9 +98,8 @@ import {
   companyImportGetLookupFieldsRetrieveOptions,
   companyImportPreviewRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import { companyImport } from '@/api/resources.gen'
+import { CompanyImport } from '@/api/resources.gen'
 import {
-  invalidateReads,
   useQueryErrorToast,
 } from '@/features/forms'
 import type { PreviewRow } from './schemas'
@@ -251,7 +250,7 @@ async function importAll() {
   try {
     await doMutation.mutateAsync({ path: { id: id.value } })
     infoToast(toast, $trans('Imported'), $trans('Data has been imported'))
-    await invalidateReads(companyImport)(queryClient)
+    await CompanyImport.invalidate(queryClient)
     importModal.value?.hide()
     await router.push(toRoute(`${props.route_prefix}-list` as RouteName))
   } catch {

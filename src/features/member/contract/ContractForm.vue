@@ -82,7 +82,7 @@
 
 <script lang="ts" setup>
 import { memberGetModuleDataListOptions } from '@/api/@tanstack/vue-query.gen'
-import { memberContract } from '@/api/resources.gen'
+import { MemberContract } from '@/api/resources.gen'
 import type { Contract, ContractCreateRequest } from '@/api/types.gen'
 import {
   useResourceForm,
@@ -124,7 +124,7 @@ const {
   record,
 } = useResourceForm<ContractCreateRequest, Contract, ReturnType<typeof parseContract>, ContractFieldErrors>({
   pk: () => props.pk,
-  resource: memberContract,
+  resource: MemberContract,
   empty: emptyContract,
   fromRecord: (entry) => ({name: entry.name ?? '', module_paths: entry.module_paths ?? []}),
   validate: (values) => {

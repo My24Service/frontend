@@ -96,9 +96,8 @@ import {
   memberMemberGetForPartnerSelectListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PartnerSelect } from '@/api/types.gen'
-import { companyPartnerRequestSent } from '@/api/resources.gen'
+import { CompanyPartnerRequestSent } from '@/api/resources.gen'
 import {
-  invalidateReads,
   useQueryErrorToast,
 } from '@/features/forms'
 import {
@@ -165,7 +164,7 @@ async function submitForm() {
       return
     }
     infoToast(toast, $trans('Created'), $trans('Partner request has been sent'))
-    await invalidateReads(companyPartnerRequestSent)(queryClient)
+    await CompanyPartnerRequestSent.invalidate(queryClient)
     router.go(-1)
   } finally {
     saving.value = false

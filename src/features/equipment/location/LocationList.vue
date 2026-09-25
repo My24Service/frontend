@@ -17,7 +17,7 @@
         modalId: 'delete-location-modal',
         confirmText: $trans('Are you sure you want to delete this location?'),
         destroyMutation: equipmentLocationDestroyMutation,
-        invalidate: invalidateReads(equipmentLocation),
+        invalidate: EquipmentLocation.invalidate,
         deletedDetail: $trans('Location has been deleted'),
         deleteError: $trans('Error deleting location'),
       }"
@@ -48,8 +48,7 @@ import {
   equipmentLocationListOptions,
 } from '@/api/@tanstack/vue-query.gen'
 import type { PaginatedLocationList } from '@/api/types.gen'
-import { equipmentLocation } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { EquipmentLocation } from '@/api/resources.gen'
 import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
 import { useLocationColumns } from './use-location-columns'
 const props = withDefaults(defineProps<{

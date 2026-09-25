@@ -72,12 +72,6 @@ export default defineConfig({
       imports: autoImportEntries,
       // Templates call auto-imported helpers too (`:to="toRoute(...)"`).
       vueTemplate: true,
-      dirs: [
-        {
-          glob: 'src/composables/**',
-          types: true,
-        }
-      ],
       // The app build owns auto-imports.d.ts; tests must not rewrite it.
       dts: false,
     }),
