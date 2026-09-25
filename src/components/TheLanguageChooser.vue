@@ -28,7 +28,9 @@ export default {
   methods: {
     async setLanguage() {
       try {
-        await setLanguageCreate({body: {language: this.selected}, throwOnError: true})
+        // withCredentials: in dev the API is on another port, and the browser
+        // drops a cross-origin Set-Cookie unless the request sends credentials.
+        await setLanguageCreate({body: {language: this.selected}, withCredentials: true, throwOnError: true})
         this.mainStore.setLanguage(this.selected)
         window.location.reload()
       } catch (error) {
