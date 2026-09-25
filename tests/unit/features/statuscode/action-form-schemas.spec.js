@@ -124,6 +124,22 @@ describe('actionFromRecord', () => {
   test('gives a record with null conditions an empty list to add to', () => {
     expect(actionFromRecord({ id: 7, ...valid, statuscode: 3, json_conditions: null, destination: null, conditions: '' }).json_conditions).toEqual([])
   })
+
+  test('detaches the conditions from the cached record, which is readonly', () => {
+    const record = {
+      id: 7, ...valid, statuscode: 3, destination: null, conditions: '',
+      json_conditions: [{ field: 'order_type', operator: '=', value: 'storing' }],
+    }
+    Object.freeze(record.json_conditions)
+    Object.freeze(record.json_conditions[0])
+
+    const values = actionFromRecord(record)
+    values.json_conditions.push({ field: 'city', operator: 'CONTAINS', value: 'dam' })
+    values.json_conditions[0].value = 'changed'
+
+    expect(record.json_conditions).toEqual([{ field: 'order_type', operator: '=', value: 'storing' }])
+    expect(values.json_conditions).toHaveLength(2)
+  })
 })
 
 describe('actionTypesFor', () => {

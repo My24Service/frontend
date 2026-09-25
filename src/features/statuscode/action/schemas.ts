@@ -67,7 +67,9 @@ export function actionFromRecord(record: Action): ActionFormValues {
   return {
     ...emptyAction(),
     ...fields,
-    json_conditions: record.json_conditions ?? [],
+    // Clone the conditions off the cached record: the query data is readonly,
+    // so pushing/splicing the record's own array warns and does nothing.
+    json_conditions: (record.json_conditions ?? []).map((condition) => ({...condition})),
   }
 }
 

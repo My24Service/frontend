@@ -290,13 +290,34 @@ describe('ActionForm, conditions', () => {
     })
   })
 
-  test('an incomplete condition is not added — the API refuses a blank part', async () => {
+  test('pressing Add with an incomplete draft flags the missing parts instead of silence', async () => {
     const wrapper = await mountActionForm({ statuscodePk: '3' })
+    const shown = () => wrapper.findAll('.invalid-feedback').filter((node) => node.classes('d-block')).map((node) => node.text())
 
-    await type(wrapper, '#action-condition-field', 'city')
+    expect(wrapper.get('button.add-condition').attributes('disabled')).toBeUndefined()
+
     await wrapper.get('button.add-condition').trigger('click')
 
     expect(wrapper.findAll('table.conditions tbody tr').length).toBe(0)
+    expect(shown()).toContain('Please enter a field')
+    expect(shown()).toContain('Please enter a value')
+
+    await type(wrapper, '#action-condition-field', 'city')
+    await type(wrapper, '#action-condition-value', 'dam')
+    await wrapper.get('button.add-condition').trigger('click')
+
+    expect(wrapper.findAll('table.conditions tbody tr').length).toBe(1)
+    expect(shown()).toEqual([])
+  })
+
+  test('pressing enter in the value field adds the condition', async () => {
+    const wrapper = await mountActionForm({ statuscodePk: '3' })
+
+    await type(wrapper, '#action-condition-field', 'city')
+    await type(wrapper, '#action-condition-value', 'dam')
+    await wrapper.get('#action-condition-value').trigger('keyup.enter')
+
+    expect(wrapper.findAll('table.conditions tbody tr').length).toBe(1)
   })
 })
 

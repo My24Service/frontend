@@ -81,17 +81,26 @@
             <b-row>
               <b-col cols="4" role="group">
                 <BFormGroup label-size="sm" :label="$trans('field')" label-for="action-condition-field">
-                  <BFormInput id="action-condition-field" size="sm" v-model="draftCondition.field" />
+                  <BFormInput id="action-condition-field" size="sm" v-model="draftCondition.field" :state="conditionState(draftCondition.field)" />
+                  <b-form-invalid-feedback :state="conditionState(draftCondition.field)">
+                    {{ requiredMessage($trans('field')) }}
+                  </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
                 <BFormGroup label-size="sm" :label="$trans('operator')" label-for="action-condition-operator">
-                  <BFormSelect id="action-condition-operator" size="sm" v-model="draftCondition.operator" :options="CONDITION_OPERATORS" />
+                  <BFormSelect id="action-condition-operator" size="sm" v-model="draftCondition.operator" :options="CONDITION_OPERATORS" :state="conditionState(draftCondition.operator)" />
+                  <b-form-invalid-feedback :state="conditionState(draftCondition.operator)">
+                    {{ selectMessage($trans('operator')) }}
+                  </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
               <b-col cols="4" role="group">
                 <BFormGroup label-size="sm" :label="$trans('value')" label-for="action-condition-value">
-                  <BFormInput id="action-condition-value" size="sm" v-model="draftCondition.value" />
+                  <BFormInput id="action-condition-value" size="sm" v-model="draftCondition.value" :state="conditionState(draftCondition.value)" @keyup.enter="addCondition" />
+                  <b-form-invalid-feedback :state="conditionState(draftCondition.value)">
+                    {{ requiredMessage($trans('value')) }}
+                  </b-form-invalid-feedback>
                 </BFormGroup>
               </b-col>
               <b-col cols="12">
@@ -205,6 +214,8 @@ import {
 import { statuscodeAction } from '@/api/resources.gen'
 import {
   useResourceForm,
+  requiredMessage,
+  selectMessage,
   ValidatedForm,
   ValidatedFormField,
 } from '@/features/forms'
@@ -310,13 +321,37 @@ const QUERYMODES = [
 
 const draftCondition = reactive<ActionCondition>({field: '', operator: '=', value: ''})
 
+/** The Add button stays enabled so an incomplete draft can answer with feedback instead of silence. */
+const canAddCondition = computed(() =>
+  [draftCondition.field, draftCondition.operator, draftCondition.value].every(
+    (part) => String(part ?? '').trim() !== '',
+  ),
+)
+
+/**
+ * Whether Add has been pressed with an incomplete draft. The draft's empty
+ * parts then read invalid — the same submit-clicked pattern the main form
+ * uses — until typed in.
+ */
+const conditionAddAttempted = ref(false)
+
+function conditionState(part: string | null | undefined): boolean | null {
+  if (!conditionAddAttempted.value) return null
+  return (part ?? '').trim() !== ''
+}
+
 /**
  * Stage the typed condition. Every part is required on the wire
  * (`vActionConditionRequest`), so an incomplete one is not added — the legacy
- * form staged it and the save then failed.
+ * form staged it and the save then failed. The empty parts are flagged
+ * instead, and the guard stays as the safety net for the same rule.
  */
 function addCondition() {
-  if (!draftCondition.field || !draftCondition.operator || !draftCondition.value) return
+  if (!canAddCondition.value) {
+    conditionAddAttempted.value = true
+    return
+  }
+  conditionAddAttempted.value = false
   action.value.json_conditions.push({...draftCondition})
   draftCondition.field = ''
   draftCondition.value = ''
