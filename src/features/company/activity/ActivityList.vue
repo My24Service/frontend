@@ -19,7 +19,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 /**
  * The activity log: a read-only, server-paged list. No form, no row actions -

@@ -95,7 +95,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { useQueryErrorToast } from '@/features/forms'
 import { DocumentsComponent } from '@/features/equipment/documents'
 import {

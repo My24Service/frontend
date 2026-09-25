@@ -86,7 +86,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import { useQueryErrorToast } from '@/features/forms'
 const props = defineProps<{
   pk: string | number

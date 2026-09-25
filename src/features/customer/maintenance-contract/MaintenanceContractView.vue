@@ -169,7 +169,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import CustomerCard from '../CustomerCard.vue'
 import { formatMoney, toDinero } from '@/services/money'
 import { useQueryErrorToast } from '@/features/forms'

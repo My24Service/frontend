@@ -67,7 +67,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { NO_IMAGE_URL } from '@/constants'
 import {
   ImageUploadField,

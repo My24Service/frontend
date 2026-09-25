@@ -205,7 +205,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import { useResourceForm } from '@/features/forms'
 import ContactPanel from './ContactPanel.vue'
 import DateTimeFields from './DateTimeFields.vue'

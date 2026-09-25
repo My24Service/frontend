@@ -26,7 +26,6 @@
 </template>
 
 <script setup lang="ts">
-
 /**
  * The coloured status select the invoice and order lists share: the dot in
  * the row's colour and a select of the statuscodes, under the same element

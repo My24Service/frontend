@@ -115,7 +115,6 @@
 </template>
 
 <script setup lang="ts">
-
 import {
   useQueryErrorToast,
   useResourceForm,

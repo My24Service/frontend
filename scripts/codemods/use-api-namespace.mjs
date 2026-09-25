@@ -15,12 +15,13 @@
  *   read straight out of the generated file: `companyBranchListOptions` becomes
  *   `Api.CompanyBranch.list.options`. A name the generator does not bind is
  *   reported and left alone rather than guessed at.
- * - `types.gen` - `Api.<Type>`, except the model types a resource of the same
- *   name shadows; those are reported, because the resource is what `Api.<Name>`
- *   means now and the model is not reachable under it.
- * - `valibot.gen` - `schemas.<name>`, the alias the auto-import contract
- *   already declares for this module. These are runtime schemas (schema
- *   composition, `.options` on an enum), so a type cannot stand in for them.
+ * - `types.gen` - `Api.<Type>`. A model type a resource of the same name
+ *   shadows is that resource's record, so it becomes `Api.<Name>.Record`
+ *   where the resource declares one, and is reported where it does not.
+ * - `valibot.gen` - a body schema bound to a resource goes through it
+ *   (`Api.CompanyBranch.create.body`); any other schema - a nested serializer,
+ *   an enum's `.options` - through `schemas.<name>`, the alias the auto-import
+ *   contract declares. Both are runtime values, so no type stands in for them.
  * - `sdk.gen` - reported and left alone. These are the loose endpoints and
  *   binary downloads that belong to no resource.
  *
@@ -28,8 +29,11 @@
  * an inner scope is not the import and must not be touched, which a regex
  * cannot tell apart.
  *
- * Idempotent - a second run finds no `@/api` import to rewrite and changes
- * nothing.
+ * After the imports, every script is normalised (see `normalise`): uses of the
+ * auto-imported `schemas` that a resource names, and `v.InferInput<typeof ...body>`
+ * that its namespace names, move onto the resource.
+ *
+ * Idempotent - a second run finds nothing to rewrite and changes nothing.
  *
  * Usage:
  *   node scripts/codemods/use-api-namespace.mjs [--dry] [dir ...]
@@ -97,6 +101,11 @@ if (bound.size === 0) throw new Error(`no resource({...}) bindings found in ${GE
 const shadowedList = generatedFile.getVariableDeclarationOrThrow('shadowedModelTypes').getInitializerIfKindOrThrow(SyntaxKind.ArrayLiteralExpression)
 for (const element of shadowedList.getElements()) shadowed.add(element.getLiteralText())
 
+/** Resource name -> the types its namespace declares (`Record`, `CreateInput`, ...). */
+const namespaceTypes = new Map(
+  generatedFile.getModules().map((ns) => [ns.getName(), new Set(ns.getTypeAliases().map((alias) => alias.getName()))]),
+)
+
 // --- what one import specifier becomes ------------------------------------
 
 /** The specifier names with no home. Per file, not global: an unmapped name in
@@ -128,6 +137,58 @@ const escapeRe = (name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 const inMemory = () => new Project({useInMemoryFileSystem: true, skipFileDependencyResolution: true})
 
+/** Apply non-overlapping `{start, end, text}` edits, back-to-front so earlier offsets stay valid. */
+function applyEdits(text, edits) {
+  let out = text
+  for (const edit of [...edits].sort((a, b) => b.start - a.start)) {
+    out = out.slice(0, edit.start) + edit.text + out.slice(edit.end)
+  }
+  return out
+}
+
+/**
+ * What a script says through `schemas` or a bare inference that its resource
+ * already names. Runs on every file, imports or not, because these are uses of
+ * the auto-imported `schemas`, which no import declaration points at:
+ *
+ * - `schemas.vCompanyBranchCreateBody` -> `Api.CompanyBranch.create.body`, for
+ *   a schema bound to a resource (a value or a `typeof` alike);
+ * - `v.InferInput<typeof Api.CompanyBranch.create.body>` ->
+ *   `Api.CompanyBranch.CreateInput` (and `Output`, `update`, `replace`), where
+ *   the resource's namespace declares that type.
+ */
+function normalise(text) {
+  const schemaEdits = []
+  const sf = inMemory().createSourceFile('block.ts', text)
+  for (const node of [
+    ...sf.getDescendantsOfKind(SyntaxKind.PropertyAccessExpression),
+    ...sf.getDescendantsOfKind(SyntaxKind.QualifiedName),
+  ]) {
+    const [left, right] = node.getKind() === SyntaxKind.QualifiedName
+      ? [node.getLeft(), node.getRight()]
+      : [node.getExpression(), node.getNameNode()]
+    if (left.getText() !== 'schemas') continue
+    const to = bound.get(right.getText())
+    if (to) schemaEdits.push({start: node.getStart(), end: node.getEnd(), text: to})
+  }
+  const afterSchemas = applyEdits(text, schemaEdits)
+
+  const inferEdits = []
+  const sf2 = inMemory().createSourceFile('block.ts', afterSchemas)
+  for (const ref of sf2.getDescendantsOfKind(SyntaxKind.TypeReference)) {
+    const io = /^(?:v\.)?Infer(Input|Output)$/.exec(ref.getTypeName().getText())
+    const [argument] = ref.getTypeArguments()
+    if (!io || argument?.getKind() !== SyntaxKind.TypeQuery) continue
+    const body = /^Api\.(\w+)\.(create|update|replace)\.body$/.exec(argument.getExprName().getText())
+    if (!body) continue
+    const alias = `${body[2].charAt(0).toUpperCase()}${body[2].slice(1)}${io[1]}`
+    if (namespaceTypes.get(body[1])?.has(alias)) {
+      inferEdits.push({start: ref.getStart(), end: ref.getEnd(), text: `Api.${body[1]}.${alias}`})
+    }
+  }
+  return applyEdits(afterSchemas, inferEdits)
+}
+
 function rewriteFile(file) {
   const absolute = resolve(ROOT, file)
   const whole = readFileSync(absolute, 'utf8')
@@ -137,6 +198,10 @@ function rewriteFile(file) {
   const renames = new Map()
   let changed = false
   unmappedHere = new Map()
+  /** Each script block's text after the import pass. */
+  const rewritten = []
+  /** The blocks that changed, as edits to the whole file. */
+  const spliced = []
 
   for (const block of scriptBlocks(file, whole)) {
     const sf = inMemory().createSourceFile('block.ts', block.text)
@@ -193,7 +258,6 @@ function rewriteFile(file) {
     }
 
     if (!pending) continue
-    changed = true
 
     let out = block.text
     for (const edit of edits.sort((a, b) => b.start - a.start)) {
@@ -223,18 +287,32 @@ function rewriteFile(file) {
       const text = kept.length === 0
         ? ''
         : `import ${typeOnly}{ ${kept.map((n) => n.getText()).join(', ')} } from ${quote}${module}${quote}`
-      edits2.push({start: d.getStart(), end: d.getEnd(), text})
+      // An emptied declaration takes its line break with it, so no blank line
+      // is left where it stood.
+      // One that stood alone between two blank lines takes one of them too.
+      let end = kept.length === 0 && out[d.getEnd()] === '\n' ? d.getEnd() + 1 : d.getEnd()
+      const startsOwnLine = d.getStart() === 0 || out.slice(d.getStart() - 2, d.getStart()) === '\n\n' || d.getStart() === 1
+      if (kept.length === 0 && startsOwnLine && out[end] === '\n') end += 1
+      edits2.push({start: d.getStart(), end, text})
     }
     for (const e of edits2.sort((a, b) => b.start - a.start)) {
       out = out.slice(0, e.start) + e.text + out.slice(e.end)
     }
-    // An emptied declaration leaves a blank line behind.
-    out = out.replace(/\n{3,}/g, '\n\n')
+    rewritten.push({block, text: out})
+  }
 
-    if (!dry) {
-      writeFileSync(absolute, whole.slice(0, block.start) + out + whole.slice(block.start + block.text.length))
+  // Every block is spliced into the text it was read from, back-to-front, and
+  // written once: writing per block would let the second block's write, made
+  // from the original text, undo the first's.
+  for (const block of scriptBlocks(file, whole)) {
+    const done = rewritten.find((r) => r.block.start === block.start)
+    const text = normalise(done?.text ?? block.text)
+    if (text !== block.text) {
+      changed = true
+      spliced.push({start: block.start, end: block.start + block.text.length, text})
     }
   }
+  if (spliced.length > 0 && !dry) writeFileSync(absolute, applyEdits(whole, spliced))
 
   // The template pass. A `<template>` sees the script's bindings through setup
   // scope, so `:destroyMutation="mobileTripDestroyMutation"` has to move too,
@@ -329,7 +407,14 @@ if (unmapped.length === 0) {
 function replacement(module, name) {
   if (module.endsWith('resources.gen')) return `Api.${name}`
   if (module.endsWith('vue-query.gen')) return bound.get(name) ?? null
-  if (module.endsWith('types.gen')) return shadowed.has(name) ? null : `Api.${name}`
-  if (module.endsWith('valibot.gen')) return `schemas.${name}`
+  // A model a resource shadows is the record that resource answers with, so it
+  // is reachable as `<Resource>.Record` - where the resource has one.
+  if (module.endsWith('types.gen')) {
+    if (!shadowed.has(name)) return `Api.${name}`
+    return namespaceTypes.get(name)?.has('Record') ? `Api.${name}.Record` : null
+  }
+  // A body schema bound to a resource is reached through it; any other schema
+  // (a nested serializer, an enum) through the `schemas` alias.
+  if (module.endsWith('valibot.gen')) return bound.get(name) ?? `schemas.${name}`
   return null // sdk.gen: no resource owns it
 }

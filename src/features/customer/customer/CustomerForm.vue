@@ -246,7 +246,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import {
   customerCustomerCheckCustomerIdHandlingRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'

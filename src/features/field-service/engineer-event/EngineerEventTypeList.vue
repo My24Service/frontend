@@ -33,7 +33,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 
 import EngineerPills from './EngineerPills.vue'

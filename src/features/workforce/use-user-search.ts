@@ -1,4 +1,3 @@
-
 import { useQueryErrorToast } from '@/features/forms'
 /**
  * The "type to search a user" picker the leave and sick-leave forms both carry.

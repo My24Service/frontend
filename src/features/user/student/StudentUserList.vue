@@ -35,7 +35,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 import IBiCheckSquare from '~icons/bi/check-square'

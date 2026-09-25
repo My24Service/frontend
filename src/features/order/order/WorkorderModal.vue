@@ -56,7 +56,6 @@
 </template>
 
 <script lang="ts" setup>
-
 /**
  * The workorder as the customer sees it, in an iframe on the public
  * `workorder-view` route, with the PDF download and — for planning — the

@@ -39,7 +39,7 @@ export function memberFromRecord(record: Api.Member): Api.MemberRequest {
   // The upload fields show the current logos straight off the record.
   return {
     ...emptyMember(),
-    ...objectOmit(fieldsFromRecord(schemas.vMemberMemberCreateBody, record), ['companylogo', 'companylogo_workorder']),
+    ...objectOmit(fieldsFromRecord(Api.MemberMember.create.body, record), ['companylogo', 'companylogo_workorder']),
   }
 }
 
@@ -75,7 +75,7 @@ export function validateMemberForm(
   values: Api.MemberRequest,
   { requireLogo = false }: { requireLogo?: boolean } = {},
 ): MemberFieldErrors {
-  const errors: MemberFieldErrors = fieldErrors(schemas.vMemberMemberCreateBody, values, {}, FIELD_LABELS)
+  const errors: MemberFieldErrors = fieldErrors(Api.MemberMember.create.body, values, {}, FIELD_LABELS)
 
   if (requireLogo && !values.companylogo) {
     errors.companylogo = MEMBER_LOGO_REQUIRED_MESSAGE()
@@ -85,5 +85,5 @@ export function validateMemberForm(
 }
 
 export function parseMemberForm(values: Api.MemberRequest): Api.MemberRequest {
-  return v.parse(schemas.vMemberMemberCreateBody, values)
+  return v.parse(Api.MemberMember.create.body, values)
 }

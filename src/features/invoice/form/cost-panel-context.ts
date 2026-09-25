@@ -1,4 +1,3 @@
-
 import type { InvoiceLineDraft, InvoiceLineType } from './calculations'
 
 /**

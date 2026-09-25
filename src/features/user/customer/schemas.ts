@@ -1,4 +1,3 @@
-
 import {
   emptyUserIdentity,
   IDENTITY_FIELD_MESSAGES,

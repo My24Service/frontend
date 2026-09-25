@@ -73,7 +73,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { useResourceForm } from '@/features/forms'
 import {
   OwnerPanel,

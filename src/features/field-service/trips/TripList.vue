@@ -32,7 +32,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 type TripRow = ListRow<Api.PaginatedTripList>
 

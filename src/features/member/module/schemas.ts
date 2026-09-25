@@ -13,7 +13,7 @@ import { formDefaults } from '@/models/schema'
  * and one it drops fails the typecheck.
  */
 export function emptyModule(): Api.ModuleRequest {
-  return formDefaults(schemas.vMemberModuleCreateBody)
+  return formDefaults(Api.MemberModule.create.body)
 }
 
 export type ModuleFieldErrors = FieldErrors<keyof Api.ModuleRequest & string>
@@ -26,9 +26,9 @@ export const FIELD_LABELS = {
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)
 
 export function validateModule(values: Api.ModuleRequest): ModuleFieldErrors {
-  return fieldErrors(schemas.vMemberModuleCreateBody, values, {}, FIELD_LABELS)
+  return fieldErrors(Api.MemberModule.create.body, values, {}, FIELD_LABELS)
 }
 
 export function parseModule(values: Api.ModuleRequest): Api.ModuleRequest {
-  return v.parse(schemas.vMemberModuleCreateBody, values)
+  return v.parse(Api.MemberModule.create.body, values)
 }

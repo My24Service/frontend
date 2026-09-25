@@ -84,7 +84,6 @@
 </template>
 
 <script setup lang="ts">
-
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
 import CostCollectionShell from './CostCollectionShell.vue'

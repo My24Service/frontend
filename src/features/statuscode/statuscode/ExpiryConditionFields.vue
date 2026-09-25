@@ -55,7 +55,6 @@
 </template>
 
 <script lang="ts" setup>
-
 /**
  * A quotation statuscode's expiry condition: "`num_days` from
  * `num_days_model_field`, compared with `num_days_operator`", with the field

@@ -20,7 +20,6 @@
 </template>
 
 <script setup lang="ts">
-
 /**
  * The read-only contact block both order details render: the temps view
  * and the maintenance summary panel wrote it out identically.

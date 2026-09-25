@@ -34,7 +34,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 
 type ContractRow = ListRow<Api.PaginatedContractList>

@@ -1,5 +1,3 @@
-
-
 import type { ColumnFilterSpec, FilterOption } from '@/features/table'
 
 /** An autocomplete row as a filter choice: its id on the wire, its name on the chip. */

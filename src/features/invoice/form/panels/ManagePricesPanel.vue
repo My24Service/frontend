@@ -36,7 +36,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { formatMoneyPlain, type Money } from '@/services/money'
 import { useMaterialPriceUpdates } from '../use-material-prices'
 

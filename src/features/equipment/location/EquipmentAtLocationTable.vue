@@ -27,7 +27,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { useQueryErrorToast } from '@/features/forms'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 /**

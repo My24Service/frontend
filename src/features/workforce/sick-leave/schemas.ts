@@ -16,7 +16,7 @@ import {
  * form does not carry the field and the parse never sends it.
  */
 export type SickLeaveFormValues =
-  Pick<v.InferInput<typeof Api.CompanyUserSickLeaveAdmin.create.body>, 'start_date'>
+  Pick<Api.CompanyUserSickLeaveAdmin.CreateInput, 'start_date'>
   & {
     // a picker that is empty rather than absent until chosen
     user: number | null

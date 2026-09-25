@@ -27,7 +27,6 @@
 </template>
 
 <script setup lang="ts">
-
 /**
  * Where the engineers are, on a HERE map.
  *

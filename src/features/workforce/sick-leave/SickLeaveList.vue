@@ -34,7 +34,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 

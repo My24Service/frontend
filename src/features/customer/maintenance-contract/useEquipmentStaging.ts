@@ -1,5 +1,3 @@
-
-
 import { toDinero } from '@/services/money'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {

@@ -61,7 +61,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import { NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES } from '@/constants'
 import { ServerTable, useServerTable } from '@/features/table'
 import { useMemberNewData } from '../use-member-new-data'

@@ -1,4 +1,3 @@
-
 /**
  * What the dispatch screen needs of a picked order: its ids, and who is
  * already on it (listed there as already assigned).

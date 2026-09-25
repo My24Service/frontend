@@ -77,7 +77,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import type { CustomerFormValues } from './schemas'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 

@@ -28,7 +28,6 @@
 </template>
 
 <script lang="ts" setup>
-
 /**
  * One of the "Workorder documents" blocks on the order detail: a heading
  * and a list of PDF links, or the heading dimmed when there is nothing.

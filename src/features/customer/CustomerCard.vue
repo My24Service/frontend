@@ -29,7 +29,6 @@
 </template>
 
 <script lang="ts" setup>
-
 type CustomerCardRecord = Partial<Pick<Api.Customer,
   | 'name' | 'address' | 'city' | 'country_code' | 'postal' | 'contact'
   | 'email' | 'tel' | 'mobile' | 'customer_id' | 'external_identifier' | 'remarks'

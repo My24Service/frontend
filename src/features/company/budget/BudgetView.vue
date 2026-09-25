@@ -91,7 +91,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { PieChart } from '@/features/shared'
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoneyEuropean as formatDinero, toDinero } from '@/services/money'

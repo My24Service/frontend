@@ -1,4 +1,3 @@
-import type { OrderCost } from '@/api/types.gen'
 import { enumOf } from '@/enums'
 import { formatMoney, formatMoneyPlain, toDinero, type Money } from '@/services/money'
 
@@ -101,7 +100,7 @@ export function calculateInvoiceLine(line: PriceInput & { amount: number | strin
   return priceFields(price, total, vatFor(total, line.vat_type))
 }
 
-export function hydrateInvoicePrices(record: Pick<OrderCost | Api.InvoiceLine,
+export function hydrateInvoicePrices(record: Pick<Api.OrderCost.Record | Api.InvoiceLine,
   'price' | 'price_currency' | 'total' | 'total_currency' | 'vat' | 'vat_currency'
 > & { default_currency?: string }): CalculatedPrices {
   return priceFields(

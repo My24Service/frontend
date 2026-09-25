@@ -54,7 +54,6 @@
 </template>
 
 <script setup lang="ts">
-
 import {displayDurationFromSeconds, translateHoursField} from './hours-fields'
 import {buildDayHeaderColumns, useHoursWeekNav, type TableField} from './use-hours-week-nav'
 import {useUserHoursPivot} from './useUserHoursPivot'

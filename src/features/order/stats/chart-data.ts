@@ -1,5 +1,3 @@
-
-
 /** The golden-angle step both colour helpers walk. */
 const GOLDEN_ANGLE = 137.508
 

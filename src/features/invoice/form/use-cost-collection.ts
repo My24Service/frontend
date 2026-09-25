@@ -1,7 +1,5 @@
 import * as v from 'valibot'
 
-import type { OrderCost } from '@/api/types.gen'
-
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoneyPlain, toDinero } from '@/services/money'
 import {
@@ -15,7 +13,7 @@ import {
 } from './calculations'
 import type { CostPanelContext } from './cost-panel-context'
 
-export type CostRow = Omit<Partial<OrderCost>, keyof CalculatedPrices | 'id' | 'amount_decimal' | 'amount_duration' | 'amount_duration_read' | 'amount_int' | 'vat_type' | 'price_currency'> & CalculatedPrices & {
+export type CostRow = Omit<Partial<Api.OrderCost.Record>, keyof CalculatedPrices | 'id' | 'amount_decimal' | 'amount_duration' | 'amount_duration_read' | 'amount_int' | 'vat_type' | 'price_currency'> & CalculatedPrices & {
   id?: number
   cost_type: Api.CostTypeEnum
   amount_int: number
@@ -139,9 +137,9 @@ export function useCostCollection(options: CollectionOptions) {
   }
   const parentHasInvoiceLines = computed(() => checkParentHasInvoiceLines(context.invoiceLines.value))
 
-  function reconcile(records: readonly OrderCost[]) {
+  function reconcile(records: readonly Api.OrderCost.Record[]) {
     if (records.length > 0) {
-      collection.value = records.map((row: OrderCost) => makeCostRow({ ...row, ...hydrateInvoicePrices(row), amount_int: row.amount_int ?? 0, amount_decimal: row.amount_decimal ?? 0, amount_duration_read: row.amount_duration_read ?? '' }, { price: row.price, currency: row.price_currency }, row.vat_type ?? '0'))
+      collection.value = records.map((row: Api.OrderCost.Record) => makeCostRow({ ...row, ...hydrateInvoicePrices(row), amount_int: row.amount_int ?? 0, amount_decimal: row.amount_decimal ?? 0, amount_duration_read: row.amount_duration_read ?? '' }, { price: row.price, currency: row.price_currency }, row.vat_type ?? '0'))
     } else {
       collection.value = options.buildRows()
     }

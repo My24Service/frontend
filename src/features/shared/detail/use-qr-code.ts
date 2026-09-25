@@ -1,4 +1,3 @@
-
 import { useFileDownload } from '../use-file-download'
 /**
  * The sliver of a detail record the QR block reads: the display name, the

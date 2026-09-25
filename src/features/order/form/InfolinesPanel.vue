@@ -58,7 +58,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import { infolineFromRecord, type InfolineRow } from './schemas'
 import { useStagedRows } from './use-staged-rows'
 

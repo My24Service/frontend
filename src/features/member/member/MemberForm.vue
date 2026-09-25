@@ -234,7 +234,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import MemberLogoFields from './MemberLogoFields.vue'
 import {
   ValidatedForm,

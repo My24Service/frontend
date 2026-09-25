@@ -1,5 +1,3 @@
-
-
 /** A user as the board, the picker and the search modal identify one. */
 export interface AssignedUser {
   user_id: number

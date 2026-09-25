@@ -1,5 +1,3 @@
-
-
 /** The checkbox tree's state: per module id, the ticked part ids. */
 export type ModuleSelection = Record<string, string[]>
 

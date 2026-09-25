@@ -18,7 +18,6 @@
 </template>
 
 <script lang="ts" setup>
-
 /** The order an event click opens: who, where, when. */
 defineProps<{
   order: Api.OrderDetail | null

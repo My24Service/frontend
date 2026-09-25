@@ -1,4 +1,3 @@
-
 import type { DocumentResource } from '@/features/documents'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 

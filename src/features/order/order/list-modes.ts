@@ -1,5 +1,3 @@
-
-
 import { baseListParams, type ServerPagedListQuery } from '@/features/table'
 
 /**

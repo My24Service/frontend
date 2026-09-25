@@ -260,7 +260,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import { formatMoney, toDinero } from '@/services/money'
 import CustomerCard from '../CustomerCard.vue'
 import { useQueryErrorToast } from '@/features/forms'

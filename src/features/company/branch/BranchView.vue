@@ -199,7 +199,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { EQUIPMENT_TYPES } from '@/constants'
 import {
   useDetailOrders,

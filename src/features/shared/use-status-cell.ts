@@ -1,5 +1,3 @@
-
-
 /** The row fields a status cell reads. Both the invoice and the order rows carry these. */
 export interface StatusRow {
   id: number

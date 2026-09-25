@@ -35,7 +35,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import { invalidateModuleListQueries } from '../invalidation'
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 

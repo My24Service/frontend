@@ -14,6 +14,7 @@
     "allowJs": true,
     "checkJs": false,
     "isolatedModules": true,
+    "moduleDetection": "force",
     "esModuleInterop": true,
 
     /* Strictness – start relaxed, tighten over time */

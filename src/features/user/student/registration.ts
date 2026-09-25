@@ -90,9 +90,9 @@ function toWire(values: Api.StudentUserRegisterRequest): Api.StudentUserRegister
 export function validateStudentRegistration(
   values: Api.StudentUserRegisterRequest,
 ): StudentRegistrationErrors {
-  return fieldErrors(schemas.vAccountsRegisterCreateBody, toWire(values), REGISTRATION_FIELD_MESSAGES, FIELD_LABELS)
+  return fieldErrors(Api.AccountsRegister.create.body, toWire(values), REGISTRATION_FIELD_MESSAGES, FIELD_LABELS)
 }
 
 export function parseStudentRegistration(values: Api.StudentUserRegisterRequest): Api.StudentUserRegisterRequest {
-  return v.parse(schemas.vAccountsRegisterCreateBody, toWire(values))
+  return v.parse(Api.AccountsRegister.create.body, toWire(values))
 }

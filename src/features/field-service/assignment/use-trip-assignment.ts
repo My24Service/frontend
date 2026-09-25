@@ -1,5 +1,3 @@
-
-
 /**
  * Putting a user on a trip and taking them off again.
  *

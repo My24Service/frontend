@@ -10,7 +10,7 @@ import {
 } from '@/features/forms'
 import type { AccountLinkParams } from './link-params'
 
-export const sendResetLinkSchema = v.required(schemas.vAccountsSendResetPasswordLinkCreateBody, ['email'])
+export const sendResetLinkSchema = v.required(Api.AccountsSendResetPasswordLink.create.body, ['email'])
 
 export interface SendResetLinkValues {
   email: string
@@ -56,5 +56,5 @@ export function validateSetPassword(values: SetPasswordValues): SetPasswordError
 }
 
 export function parseSetPassword(link: AccountLinkParams, password: string) {
-  return v.parse(schemas.vAccountsResetPasswordCreateBody, { ...link, password })
+  return v.parse(Api.AccountsResetPassword.create.body, { ...link, password })
 }

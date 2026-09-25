@@ -117,7 +117,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoney, formatMoneyPlain, toDinero } from '@/services/money'
 import { calculateInvoiceLine, hydrateInvoicePrices, type InvoiceLineDraft } from '../calculations'

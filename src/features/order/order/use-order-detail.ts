@@ -1,5 +1,3 @@
-
-
 /**
  * One order detail, addressed by primary key (the app's own `order-view`
  * route) or by uuid (`order-detail`, the address an e-mail carries). Both

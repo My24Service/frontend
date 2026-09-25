@@ -80,7 +80,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { useQueryErrorToast } from '@/features/forms'
 import {
   useDetailChrome,

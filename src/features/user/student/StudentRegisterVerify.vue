@@ -25,7 +25,6 @@
 </template>
 
 <script lang="ts" setup>
-
 import { readLinkParams } from '@/features/account'
 /**
  * The activation link a registrant follows from their email: verify the

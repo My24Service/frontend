@@ -131,8 +131,6 @@
 <script lang="ts" setup>
 import * as v from 'valibot'
 
-import type { OrderDocument } from '@/api/types.gen'
-
 import RowAction from '@/components/RowAction.vue'
 import { fileListOf, readAsDataUrl } from '@/features/shared'
 import { useStagedRows } from './use-staged-rows'
@@ -155,7 +153,7 @@ type DocumentRow = {
 }
 
 const props = defineProps<{
-  documents: OrderDocument[]
+  documents: Api.OrderDocument.Record[]
 }>()
 
 const {create} = useToast()
@@ -178,7 +176,7 @@ const {
 const dirty = ref(false)
 const hasChanges = computed(() => dirty.value)
 
-function seedRows(documents: OrderDocument[]) {
+function seedRows(documents: Api.OrderDocument.Record[]) {
   seed(documents.map((record) => ({
     id: record.id,
     name: record.name ?? record.filename,

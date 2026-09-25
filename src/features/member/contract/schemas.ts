@@ -13,7 +13,7 @@ import { formDefaults } from '@/models/schema'
  * is `0`, and a create has no opinion about it rather than an opinion of zero.
  */
 export function emptyContract(): Api.ContractCreateRequest {
-  return formDefaults(schemas.vMemberContractCreateBody, {max_users: undefined})
+  return formDefaults(Api.MemberContract.create.body, {max_users: undefined})
 }
 
 export type ContractFieldErrors = FieldErrors<keyof Api.ContractCreateRequest & string>
@@ -27,9 +27,9 @@ export const FIELD_LABELS = {
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)
 
 export function validateContract(values: Api.ContractCreateRequest): ContractFieldErrors {
-  return fieldErrors(schemas.vMemberContractCreateBody, values, {}, FIELD_LABELS)
+  return fieldErrors(Api.MemberContract.create.body, values, {}, FIELD_LABELS)
 }
 
 export function parseContract(values: Api.ContractCreateRequest): Api.ContractCreateRequest {
-  return v.parse(schemas.vMemberContractCreateBody, values)
+  return v.parse(Api.MemberContract.create.body, values)
 }

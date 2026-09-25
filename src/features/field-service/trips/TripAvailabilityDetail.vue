@@ -86,7 +86,6 @@
 </template>
 
 <script setup lang="ts">
-
 import { useQueryErrorToast } from '@/features/forms'
 import { useTripAssignment } from '@/features/field-service/assignment'
 

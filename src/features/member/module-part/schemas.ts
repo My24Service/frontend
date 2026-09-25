@@ -8,7 +8,7 @@ import {
 } from '@/features/forms'
 import { formDefaults } from '@/models/schema'
 export type ModulePartFormValues =
-  Omit<v.InferInput<typeof schemas.vMemberModulePartCreateBody>, 'module'> & {module: number | null}
+  Omit<Api.MemberModulePart.CreateInput, 'module'> & {module: number | null}
 
 /**
  * The blank form, derived from the request component. `module` is the one
@@ -16,7 +16,7 @@ export type ModulePartFormValues =
  * its inferred blank is `0`, while an unchosen picker is `null`.
  */
 export function emptyModulePart(): ModulePartFormValues {
-  return formDefaults(schemas.vMemberModulePartCreateBody, {module: null})
+  return formDefaults(Api.MemberModulePart.create.body, {module: null})
 }
 
 export type ModulePartFieldErrors = FieldErrors<keyof ModulePartFormValues & string>
@@ -30,9 +30,9 @@ export const FIELD_LABELS = {
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)
 
 export function validateModulePart(values: ModulePartFormValues): ModulePartFieldErrors {
-  return fieldErrors(schemas.vMemberModulePartCreateBody, values, {}, FIELD_LABELS)
+  return fieldErrors(Api.MemberModulePart.create.body, values, {}, FIELD_LABELS)
 }
 
-export function parseModulePart(values: ModulePartFormValues): v.InferOutput<typeof schemas.vMemberModulePartCreateBody> {
-  return v.parse(schemas.vMemberModulePartCreateBody, values)
+export function parseModulePart(values: ModulePartFormValues): Api.MemberModulePart.CreateOutput {
+  return v.parse(Api.MemberModulePart.create.body, values)
 }

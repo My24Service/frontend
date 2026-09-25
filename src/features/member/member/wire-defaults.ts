@@ -1,4 +1,3 @@
-
 import { formDefaults } from '@/models/schema'
 
 export function memberFieldDefaults(): Record<string, unknown> {
