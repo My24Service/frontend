@@ -5,12 +5,3 @@ allowBuilds:
   vue-demi: true
   fsevents: true
   vite-plugin-theme-preprocessor@git+https://codeberg.org/My24Service/vite-plugin-theme-preprocessor.git: true
-
-packageExtensions:
-  local-pkg:
-    dependencies:
-      '@vueuse/core': '*'
-      "@vue/compiler-sfc": "*"
-  vue-router@*:
-    dependencies:
-      "@vue/compiler-sfc": "*"
