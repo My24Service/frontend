@@ -7,14 +7,14 @@ WORKDIR /app
 # write version to assets
 COPY . .
 RUN ./save_version.sh
-RUN npm install
-RUN npm update vite-plugin-theme-preprocessor
+RUN curl -fsSL https://get.pnpm.io/install.sh | sh -
+RUN pnpm ci && pnpm update vite-plugin-theme-preprocessor
 
 # ---- Build ----
 FROM base AS build
 WORKDIR /app
 
-RUN npm run build
+RUN pnpm run build
 
 # ---- Release ----
 FROM nginx:1.21-alpine

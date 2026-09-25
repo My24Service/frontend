@@ -97,5 +97,6 @@
     "vue-tsc": "^3.3.9",
     "yaml": "^2.9.0",
     "yaml-eslint-parser": "^2.1.0"
-  }
+  },
+  "packageManager": "pnpm@12.6.0"
 }

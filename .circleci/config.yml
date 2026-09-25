@@ -5,28 +5,41 @@ jobs:
     working_directory: ~/circleci-frontend
     docker:
       - image: cimg/node:22.16
+    environment:
+      PNPM_HOME: /home/circleci/.local/share/pnpm
+      # CircleCI runs steps under bash but does not export $SHELL, which
+      # pnpm's install script needs for `pnpm setup`. The profile it writes
+      # is never reloaded in CI; PATH is handled via $BASH_ENV below.
+      SHELL: /bin/bash
     steps:
       - checkout
       - restore_cache:
+          name: Restore pnpm Package Cache
           keys:
-            - v1-npm-{{ checksum "package-lock.json" }}
-            - v1-npm-
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
       - run:
-          name: Install dependencies
-          command: npm ci
+          name: Install pnpm package manager
+          command: |
+            curl -fsSL https://get.pnpm.io/install.sh | sh -
+            echo 'export PATH="$PNPM_HOME/bin:$PATH"' >> "$BASH_ENV"
+            "$PNPM_HOME/bin/pnpm" config set store-dir .pnpm-store
+      - run:
+          name: Install Dependencies
+          command: pnpm install
       - save_cache:
-          key: v1-npm-{{ checksum "package-lock.json" }}
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
-            - ~/.npm
+            - .pnpm-store
       - run:
           name: Run test suite
-          command: npm test
+          command: pnpm test
       - run:
           # Contract usage gate (block A). Warns only for now: it exits 0 and
           # lists operations no client calls. Switches to a failure in block A
-          # step 7 (`npm run usage-gate -- --strict`).
+          # step 7 (`pnpm run usage-gate -- --strict`).
           name: Contract usage gate (warning only)
-          command: npm run usage-gate
+          command: pnpm run usage-gate
   build-push-main:
     working_directory: ~/circleci-frontend
     docker:
