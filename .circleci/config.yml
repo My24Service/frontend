@@ -1,12 +1,5 @@
 version: "2.1"
 
-# Set `manual-build: true` when triggering a pipeline by hand to run the
-# temporary `build` workflow below without the `test` job.
-parameters:
-  manual-build:
-    type: boolean
-    default: false
-
 jobs:
   test:
     working_directory: ~/circleci-frontend
@@ -84,21 +77,6 @@ jobs:
 
 workflows:
   version: 2
-  # Temporary: run the image builds without `test`. Gated on the
-  # `manual-build` pipeline parameter, so no automatic trigger (push, PR,
-  # schedule) can start it. Trigger by hand via Trigger Pipeline with
-  # `manual-build: true`.
-  build:
-    when: << pipeline.parameters.manual-build >>
-    jobs:
-      - build-push-main:
-          filters:
-            branches:
-              only: main
-      - build-push-develop:
-          filters:
-            branches:
-              only: develop
   test-and-build:
     jobs:
       # Deliberately unfiltered. Combined with the project-level
