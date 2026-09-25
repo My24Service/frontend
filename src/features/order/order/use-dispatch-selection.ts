@@ -1,5 +1,9 @@
 import type { Order } from '@/api/types.gen'
-export type SelectedOrder = Pick<Order, 'id' | 'order_id'>
+/**
+ * What the dispatch screen needs of a picked order: its ids, and who is
+ * already on it (listed there as already assigned).
+ */
+export type SelectedOrder = Pick<Order, 'id' | 'order_id' | 'assigned_user_info'>
 
 /**
  * The orders picked on the mobile dispatch lists, to hand to the dispatch
@@ -17,7 +21,11 @@ export function useDispatchSelection() {
 
   function select(order: SelectedOrder) {
     if (selected.value.some((entry) => entry.id === order.id)) return
-    mainStore.setAssignOrders([...selected.value, {id: order.id, order_id: order.order_id}])
+    mainStore.setAssignOrders([...selected.value, {
+      id: order.id,
+      order_id: order.order_id,
+      assigned_user_info: order.assigned_user_info,
+    }])
   }
 
   function remove(index: number) {

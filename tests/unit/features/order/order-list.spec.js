@@ -527,7 +527,13 @@ describe('OrderList dispatch selection', () => {
     await settle()
 
     expect(wrapper.text()).toContain('Selected orders (1)')
-    expect(store.setAssignOrders).toHaveBeenLastCalledWith([{ id: 5, order_id: '2026-0005' }])
+    // Dispatch lists who is already on the picked orders, so the pick
+    // carries the assignees along with the ids.
+    expect(store.setAssignOrders).toHaveBeenLastCalledWith([{
+      id: 5,
+      order_id: '2026-0005',
+      assigned_user_info: [{ user_id: 9, full_name: 'Piet Post', license_plate: 'AB-12-CD' }],
+    }])
   })
 
   test('the selection is restored from the store', async () => {
