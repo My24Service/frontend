@@ -19,12 +19,12 @@ export function emptyModulePart(): ModulePartFormValues {
   return formDefaults(Api.MemberModulePart.create.body, {module: null})
 }
 
-export type ModulePartFieldErrors = FieldErrors<keyof ModulePartFormValues & string>
+export type ModulePartFieldErrors = FieldErrors<keyof ModulePartFormValues>
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   module: () => $trans('Module'),
-} satisfies FieldLabels<keyof ModulePartFormValues & string>
+} satisfies FieldLabels<keyof ModulePartFormValues>
 
 /** The line under an untouched field: the same required line the validation shows. */
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)

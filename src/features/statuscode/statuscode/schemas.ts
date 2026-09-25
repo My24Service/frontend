@@ -75,17 +75,17 @@ export function statuscodeFromRecord(record: Api.Statuscode): StatuscodeFormValu
 /** The form's validator: the generated request schema with the code type left to the screen. */
 const statuscodeFormSchema = v.omit(schemas.vStatuscodeRequest, ['code_type'])
 
-export type StatuscodeFieldErrors = FieldErrors<keyof StatuscodeFormValues & string>
+export type StatuscodeFieldErrors = FieldErrors<keyof StatuscodeFormValues>
 
 /** The colour is picked from a palette, so its empty line asks to select. */
 export const FIELD_MESSAGES = {
   color: () => selectMessage($trans('Label color')),
-} satisfies FieldMessages<keyof StatuscodeFormValues & string>
+} satisfies FieldMessages<keyof StatuscodeFormValues>
 
 export const FIELD_LABELS = {
   statuscode: () => $trans('Statuscode'),
   num_days: () => $trans('Number of days'),
-} satisfies FieldLabels<keyof StatuscodeFormValues & string>
+} satisfies FieldLabels<keyof StatuscodeFormValues>
 
 /** A blank text field goes out as null, so an edit can clear it. */
 function blankToNull(value: string | null | undefined): string | null {

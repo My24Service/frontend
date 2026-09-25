@@ -44,7 +44,7 @@ export type LeaveFormValues = Omit<
   total_time: string
 }
 
-export type LeaveFieldErrors = FieldErrors<keyof LeaveFormValues & string>
+export type LeaveFieldErrors = FieldErrors<keyof LeaveFormValues>
 
 /** The blank leave the create form starts on, seeded with today's date. */
 export function emptyLeave(today: string, now: string): LeaveFormValues {
@@ -101,7 +101,7 @@ export const FIELD_LABELS = {
   end_date: () => $trans('End date'),
   start_time: () => $trans('Start time'),
   end_time: () => $trans('End time'),
-} satisfies FieldLabels<keyof LeaveFormValues & string>
+} satisfies FieldLabels<keyof LeaveFormValues>
 
 /**
  * The two lines a rule cannot read off the issue: a time that must read HH:mm
@@ -113,7 +113,7 @@ export const FIELD_MESSAGES = {
   leave_type: () => selectMessage(FIELD_LABELS.leave_type()),
   start_time: () => $trans('Please enter a valid start time HH:mm'),
   end_time: () => $trans('Please enter a valid end time HH:mm'),
-} satisfies FieldMessages<keyof LeaveFieldErrors & string>
+} satisfies FieldMessages<keyof LeaveFieldErrors>
 
 /**
  * The create body, with the four fields the endpoint cannot do without made
@@ -262,7 +262,7 @@ export const LEAVE_TYPE_MESSAGES = {
     () => $trans('Please enter a leave type name'),
     () => $trans('Please use at most 150 characters'),
   ),
-} satisfies FieldMessages<keyof LeaveTypeFieldErrors & string>
+} satisfies FieldMessages<keyof LeaveTypeFieldErrors>
 
 /** `name` already carries `minLength(1)` in the generated component. */
 export function validateLeaveType(values: Api.LeaveTypeRequest): LeaveTypeFieldErrors {

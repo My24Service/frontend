@@ -13,7 +13,7 @@ export interface BudgetModalValues {
   amount: string
 }
 
-export type BudgetModalErrors = FieldErrors<keyof BudgetModalValues & string>
+export type BudgetModalErrors = FieldErrors<keyof BudgetModalValues>
 
 /** A budget as the modal is opened for a create: this year, zero amount. */
 export function emptyBudget(): BudgetModalValues {
@@ -28,7 +28,7 @@ export function budgetModalFromRecord(record: Api.Budget): BudgetModalValues {
 export const FIELD_LABELS = {
   year: () => $trans('Year'),
   amount: () => $trans('Amount'),
-} satisfies FieldLabels<keyof BudgetModalValues & string>
+} satisfies FieldLabels<keyof BudgetModalValues>
 
 /**
  * The wire-shaped body: the year as a number, the amount only when filled.

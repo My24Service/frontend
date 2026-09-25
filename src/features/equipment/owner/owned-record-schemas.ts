@@ -43,7 +43,7 @@ export function ownedRecordSchemas<TValues extends OwnedValues>(schemas: {
   customer: v.GenericSchema
   /** The generated `vPatched*Request`, which declares both owner keys. */
   patch: v.GenericSchema
-  labels: FieldLabels<keyof TValues & string>
+  labels: FieldLabels<keyof TValues>
 }) {
   type Field = keyof TValues & string
 

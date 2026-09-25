@@ -14,7 +14,7 @@ export interface PartnerRequestFormValues {
   to_member: number | null
 }
 
-export type PartnerRequestFormErrors = FieldErrors<keyof PartnerRequestFormValues & string>
+export type PartnerRequestFormErrors = FieldErrors<keyof PartnerRequestFormValues>
 
 export function emptyPartnerRequest(): PartnerRequestFormValues {
   return { to_member: null }
@@ -22,7 +22,7 @@ export function emptyPartnerRequest(): PartnerRequestFormValues {
 
 export const FIELD_LABELS = {
   to_member: () => $trans('Member'),
-} satisfies FieldLabels<keyof PartnerRequestFormValues & string>
+} satisfies FieldLabels<keyof PartnerRequestFormValues>
 
 /**
  * The wire-shaped body. `from_member` rides as null: the generated entry is

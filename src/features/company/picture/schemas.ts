@@ -15,7 +15,7 @@ export interface PictureFormValues {
   picture: string | null
 }
 
-export type PictureFieldErrors = FieldErrors<keyof PictureFormValues & string>
+export type PictureFieldErrors = FieldErrors<keyof PictureFormValues>
 
 /** A picture as the form is filled in from scratch. */
 export function emptyPicture(): PictureFormValues {
@@ -34,7 +34,7 @@ export function pictureFromRecord(record: Api.Picture): PictureFormValues {
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof PictureFormValues & string>
+} satisfies FieldLabels<keyof PictureFormValues>
 
 /**
  * The wire-shaped body: the staged upload rides only when a file was picked.

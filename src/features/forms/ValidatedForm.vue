@@ -39,9 +39,9 @@ const props = defineProps<{
    */
   errors?: Partial<Record<string, string | undefined>>
   /** The form's FIELD_MESSAGES: the copy shown under each field. */
-  messages?: FieldMessages<keyof TValues & string>
+  messages?: FieldMessages<keyof TValues>
   /** The form's FIELD_LABELS: what each field is called. */
-  labels?: FieldLabels<keyof TValues & string>
+  labels?: FieldLabels<keyof TValues>
   /** True once the form has been submitted at least once. */
   submitted?: boolean
 }>()

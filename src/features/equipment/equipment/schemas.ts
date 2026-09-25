@@ -29,7 +29,7 @@ export type EquipmentFormValues =
     price_currency: string
   }
 
-export type EquipmentFieldErrors = FieldErrors<keyof EquipmentFormValues & string>
+export type EquipmentFieldErrors = FieldErrors<keyof EquipmentFormValues>
 
 /** An equipment as the form is filled in from scratch. */
 export function emptyEquipment(currency: string): EquipmentFormValues {
@@ -96,7 +96,7 @@ export function wireDate(value: Date | null | undefined): string | null {
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof EquipmentFormValues & string>
+} satisfies FieldLabels<keyof EquipmentFormValues>
 
 /**
  * Validation and the wire body, shared with the other owned records: the

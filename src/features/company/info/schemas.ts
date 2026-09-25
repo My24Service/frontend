@@ -31,7 +31,7 @@ export interface InfoFormValues {
   companylogo_workorder: string | null
 }
 
-export type InfoFormErrors = FieldErrors<keyof InfoFormValues & string>
+export type InfoFormErrors = FieldErrors<keyof InfoFormValues>
 
 /** The blank form state the kit starts from, before the record arrives. */
 export function emptyInfo(): InfoFormValues {
@@ -86,7 +86,7 @@ export const FIELD_LABELS = {
   contacts: () => $trans('Contacts'),
   info: () => $trans('Info'),
   activities: () => $trans('Activities'),
-} satisfies FieldLabels<keyof InfoFormValues & string>
+} satisfies FieldLabels<keyof InfoFormValues>
 
 /**
  * The wire-shaped body: the staged logos ride only when files were picked -

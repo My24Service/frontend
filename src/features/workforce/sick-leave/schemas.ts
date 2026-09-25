@@ -22,7 +22,7 @@ export type SickLeaveFormValues =
     user: number | null
   }
 
-export type SickLeaveFieldErrors = FieldErrors<keyof SickLeaveFormValues & string>
+export type SickLeaveFieldErrors = FieldErrors<keyof SickLeaveFormValues>
 
 export function emptySickLeave(today: string): SickLeaveFormValues {
   return {user: null, start_date: today}
@@ -47,12 +47,12 @@ export function sickLeaveFromRecord(record: Api.UserSickLeave): SickLeaveFormVal
 export const FIELD_LABELS = {
   user: () => $trans('User'),
   start_date: () => $trans('Start date'),
-} satisfies FieldLabels<keyof SickLeaveFormValues & string>
+} satisfies FieldLabels<keyof SickLeaveFormValues>
 
 /** `start_date` is the only field the rule cannot read off the issue. */
 export const FIELD_MESSAGES = {
   user: () => selectMessage(FIELD_LABELS.user()),
-} satisfies FieldMessages<keyof SickLeaveFieldErrors & string>
+} satisfies FieldMessages<keyof SickLeaveFieldErrors>
 
 /** `user` is already declared required; the date is optional on the wire. */
 const vSickLeaveBody = v.required(Api.CompanyUserSickLeaveAdmin.create.body, ['start_date'])

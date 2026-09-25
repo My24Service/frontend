@@ -20,7 +20,7 @@ export interface ImportFormValues {
   file: string | null
 }
 
-export type ImportFormErrors = FieldErrors<keyof ImportFormValues & string>
+export type ImportFormErrors = FieldErrors<keyof ImportFormValues>
 
 /** An import as the form is filled in from scratch. */
 export function emptyImport(): ImportFormValues {
@@ -34,12 +34,12 @@ export function importFromRecord(record: Api.Import): ImportFormValues {
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof ImportFormValues & string>
+} satisfies FieldLabels<keyof ImportFormValues>
 
 /** The file is chosen, not typed, and the values drop it when none was picked. */
 export const FIELD_MESSAGES = {
   file: () => selectMessage($trans('File')),
-} satisfies FieldMessages<keyof ImportFormValues & string>
+} satisfies FieldMessages<keyof ImportFormValues>
 
 /**
  * A preview row: the declared core (id, name, whether the run would insert

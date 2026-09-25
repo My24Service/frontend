@@ -19,7 +19,7 @@ export interface BuildingFormValues {
   branch: number | null
 }
 
-export type BuildingFieldErrors = FieldErrors<keyof BuildingFormValues & string>
+export type BuildingFieldErrors = FieldErrors<keyof BuildingFormValues>
 
 /** A building as the form is filled in from scratch. */
 export function emptyBuilding(): BuildingFormValues {
@@ -37,7 +37,7 @@ export function buildingFromRecord(record: Api.Building): BuildingFormValues {
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof BuildingFormValues & string>
+} satisfies FieldLabels<keyof BuildingFormValues>
 
 /**
  * Validation and the wire body, shared with the other owned records: the

@@ -55,7 +55,7 @@ export function customerFromRecord(record: Api.Customer): CustomerFormValues {
   }
 }
 
-export type CustomerFieldErrors = FieldErrors<keyof CustomerFormValues & string>
+export type CustomerFieldErrors = FieldErrors<keyof CustomerFormValues>
 
 export const FIELD_LABELS = {
   customer_id: () => $trans('Customer ID'),
@@ -64,13 +64,13 @@ export const FIELD_LABELS = {
   postal: () => $trans('Postal'),
   city: () => $trans('City'),
   country_code: () => $trans('Country'),
-} satisfies FieldLabels<keyof CustomerFormValues & string>
+} satisfies FieldLabels<keyof CustomerFormValues>
 
 /** The two phone fields: a format the rule's generic line would not explain. */
 export const FIELD_MESSAGES = {
   tel: () => $trans('Please provide a valid phone number'),
   mobile: () => $trans('Please provide a valid phone number'),
-} satisfies FieldMessages<keyof CustomerFormValues & string>
+} satisfies FieldMessages<keyof CustomerFormValues>
 
 /** The line under an untouched field: the required line, or the field's own copy. */
 export const PLACEHOLDERS = { ...requiredMessages(FIELD_LABELS), ...FIELD_MESSAGES }

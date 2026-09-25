@@ -20,7 +20,7 @@ export interface TemplateFormValues {
   is_active: boolean
 }
 
-export type TemplateFormErrors = FieldErrors<keyof TemplateFormValues & string>
+export type TemplateFormErrors = FieldErrors<keyof TemplateFormValues>
 
 /** A template as the form is filled in from scratch. */
 export function emptyTemplate(): TemplateFormValues {
@@ -41,12 +41,12 @@ export function templateFromRecord(record: Api.Template): TemplateFormValues {
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   template_type: () => $trans('Type'),
-} satisfies FieldLabels<keyof TemplateFormValues & string>
+} satisfies FieldLabels<keyof TemplateFormValues>
 
 /** The file is chosen, not typed, and the values drop it when none was picked. */
 export const FIELD_MESSAGES = {
   file: () => selectMessage($trans('File')),
-} satisfies FieldMessages<keyof TemplateFormValues & string>
+} satisfies FieldMessages<keyof TemplateFormValues>
 
 /**
  * The wire-shaped body: blank text rides as absent keys, not nulls or empty

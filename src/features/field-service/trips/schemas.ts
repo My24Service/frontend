@@ -76,7 +76,7 @@ export type TripFormValues = Omit<
   trip_orders: TripOrderFormRow[]
 }
 
-export type TripFieldErrors = FieldErrors<keyof TripFormValues & string>
+export type TripFieldErrors = FieldErrors<keyof TripFormValues>
 
 /**
  * Which of the four conditional blocks the form is asking for.
@@ -179,7 +179,7 @@ export const FIELD_LABELS = {
   end_city: () => $trans('City'),
   end_country_code: () => $trans('Country'),
   required_users: () => $trans('Required users'),
-} satisfies FieldLabels<keyof TripFormValues & string>
+} satisfies FieldLabels<keyof TripFormValues>
 
 /**
  * The copy a rule alone cannot say.
@@ -197,7 +197,7 @@ export const FIELD_MESSAGES = {
     : requiredMessage(FIELD_LABELS.required_users())),
   start_date: () => requiredMessage(FIELD_LABELS.start_date()),
   end_date: () => requiredMessage(FIELD_LABELS.end_date()),
-} satisfies FieldMessages<keyof TripFormValues & string>
+} satisfies FieldMessages<keyof TripFormValues>
 
 /**
  * `vTripRequest`'s entry as it is, or with a value demanded.

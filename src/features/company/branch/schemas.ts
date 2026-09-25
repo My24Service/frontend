@@ -25,7 +25,7 @@ export interface BranchFormValues {
   image: string | null
 }
 
-export type BranchFieldErrors = FieldErrors<keyof BranchFormValues & string>
+export type BranchFieldErrors = FieldErrors<keyof BranchFormValues>
 
 /**
  * A branch as the form is filled in from scratch: every field of the request
@@ -66,7 +66,7 @@ export const FIELD_LABELS = {
   address: () => $trans('Address'),
   postal: () => $trans('Postal'),
   city: () => $trans('City'),
-} satisfies FieldLabels<keyof BranchFormValues & string>
+} satisfies FieldLabels<keyof BranchFormValues>
 
 /**
  * The wire-shaped body: blank optionals ride as absent keys, not nulls or

@@ -21,7 +21,7 @@ export type EngineerEventTypeFormValues =
     statuscode: number | null
   }
 
-export type EngineerEventTypeFieldErrors = FieldErrors<keyof EngineerEventTypeFormValues & string>
+export type EngineerEventTypeFieldErrors = FieldErrors<keyof EngineerEventTypeFormValues>
 
 export function emptyEngineerEventType(): EngineerEventTypeFormValues {
   return {event_type: '', measure_last_event_type: '', statuscode: null}
@@ -43,7 +43,7 @@ export function engineerEventTypeFromRecord(record: Api.EngineerEventType): Engi
 
 export const FIELD_LABELS = {
   event_type: () => $trans('Event type'),
-} satisfies FieldLabels<keyof EngineerEventTypeFormValues & string>
+} satisfies FieldLabels<keyof EngineerEventTypeFormValues>
 
 /**
  * The legacy screen's own line for the one required field. The derived
@@ -52,7 +52,7 @@ export const FIELD_LABELS = {
  */
 export const FIELD_MESSAGES = {
   event_type: () => $trans('Please enter a type'),
-} satisfies FieldMessages<keyof EngineerEventTypeFormValues & string>
+} satisfies FieldMessages<keyof EngineerEventTypeFormValues>
 
 /**
  * The wire body.
