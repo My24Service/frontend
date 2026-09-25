@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-picture-modal',
         confirmText: $trans('Are you sure you want to delete this picture?'),
-        destroyMutation: Api.CompanyPicture.destroy.mutation,
-        invalidate: Api.CompanyPicture.invalidate,
+        resource: Api.CompanyPicture,
         deletedDetail: $trans('Picture has been deleted'),
         deleteError: $trans('Error deleting picture'),
       }"
@@ -37,7 +36,7 @@
 import { RouterLink } from 'vue-router'
 
 import { NO_IMAGE_URL } from '@/constants'
-import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 type PictureRow = ListRow<Api.PaginatedPictureList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
@@ -78,11 +77,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<PictureRow>({
   key: 'picture-table',
   columns,
-  listOptions: (query) => Api.CompanyPicture.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyPicture,
   urlSync: true,
   loadError: $trans('Error loading pictures'),
 })

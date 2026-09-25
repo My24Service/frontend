@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-student-user-modal',
         confirmText: $trans('Are you sure you want to delete this student user?'),
-        destroyMutation: Api.CompanyStudentuser.destroy.mutation,
-        invalidate: (qc) => qc.invalidateQueries({queryKey: Api.CompanyStudentuser.list.queryKey()}),
+        resource: Api.CompanyStudentuser,
         deletedDetail: $trans('Student user has been deleted'),
         deleteError: $trans('Error deleting student user'),
       }"
@@ -37,14 +36,7 @@
 
 <script lang="ts" setup>
 
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 import IBiCheckSquare from '~icons/bi/check-square'
 import IBiCheckSquareFill from '~icons/bi/check-square-fill'
@@ -131,11 +123,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<StudentUserRow>({
   key: 'student-user-table',
   columns,
-  listOptions: (query) => Api.CompanyStudentuser.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyStudentuser,
   urlSync: true,
   loadError: $trans('Error loading student users'),
 })

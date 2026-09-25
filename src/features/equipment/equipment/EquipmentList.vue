@@ -54,8 +54,7 @@
       :delete-modal="{
         modalId: 'delete-equipment-modal',
         confirmText: $trans('Are you sure you want to delete this equipment?'),
-        destroyMutation: Api.EquipmentEquipment.destroy.mutation,
-        invalidate: Api.EquipmentEquipment.invalidate,
+        resource: Api.EquipmentEquipment,
         deletedDetail: $trans('Equipment has been deleted'),
         deleteError: $trans('Error deleting equipment'),
       }"
@@ -84,7 +83,7 @@ import { equipmentEquipmentExportQrRetrieve } from '@/api/sdk.gen'
 import { useFileDownload, XLSX_MIME } from '@/features/shared'
 
 import { EQUIPMENT_TYPES } from '@/constants'
-import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, useServerTable, type ListRow } from '@/features/table'
 import { useEquipmentColumns } from './use-equipment-columns'
 const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions and the add link. */
@@ -128,20 +127,9 @@ const columns = useEquipmentColumns({
 const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetching, refresh} = useServerTable<EquipmentRow>({
   key: 'equipment-table',
   columns,
-  listOptions: (query) => Api.EquipmentEquipment.list.options({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-      ...(query.brand ? {brand: String(query.brand)} : {}),
-      ...(query.customer ? {customer: String(query.customer)} : {}),
-      ...(query.branch ? {branch: String(query.branch)} : {}),
-      ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
-      // Always sent: the endpoint scopes the list by type, and the legacy
-      // screen sent its default (`technical`) the same way.
-      type: props.type,
-    },
-  }),
+  // `type` always rides along: the endpoint scopes the list by type, and the
+  // legacy screen sent its default (`technical`) the same way.
+  listOptions: (query) => Api.EquipmentEquipment.listOptions({...query, type: props.type}),
   urlSync: true,
   loadError: $trans('Error loading equipment'),
 })

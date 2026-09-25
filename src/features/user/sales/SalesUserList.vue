@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-sales-user-modal',
         confirmText: $trans('Are you sure you want to delete this sales user?'),
-        destroyMutation: Api.CompanySalesuser.destroy.mutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: Api.CompanySalesuser.list.queryKey()}),
+        resource: Api.CompanySalesuser,
         deletedDetail: $trans('Sales user has been deleted'),
         deleteError: $trans('Error deleting sales user'),
       }"
@@ -38,14 +37,7 @@
 
 <script lang="ts" setup>
 
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 
 const authStore = useAuthStore()
@@ -78,11 +70,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<SalesUserRow>({
   key: 'sales-user-table',
   columns,
-  listOptions: (query) => Api.CompanySalesuser.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanySalesuser,
   urlSync: true,
   loadError: $trans('Error loading sales users'),
 })

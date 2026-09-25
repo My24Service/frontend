@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-leave-modal',
         confirmText: $trans('Are you sure you want to delete this leave?'),
-        destroyMutation: Api.CompanyUserLeaveHoursAdmin.destroy.mutation,
-        invalidate: Api.CompanyUserLeaveHoursAdmin.invalidate,
+        resource: Api.CompanyUserLeaveHoursAdmin,
         deletedDetail: $trans('Leave has been deleted'),
         deleteError: $trans('Error deleting leave'),
       }"
@@ -37,7 +36,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 
-import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
 /**
@@ -95,11 +94,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'leave-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => Api.CompanyUserLeaveHoursAdmin.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyUserLeaveHoursAdmin,
   urlSync: true,
   loadError: $trans('Error loading leave requests'),
 })

@@ -25,8 +25,7 @@
       :delete-modal="{
         modalId: 'delete-api-user-modal',
         confirmText: $trans('Are you sure you want to delete this API user?'),
-        destroyMutation: Api.CompanyApiuser.destroy.mutation,
-        invalidate: (qc) => qc.invalidateQueries({queryKey: Api.CompanyApiuser.list.queryKey()}),
+        resource: Api.CompanyApiuser,
         deletedDetail: $trans('API user has been deleted'),
         deleteError: $trans('Error deleting API user'),
       }"
@@ -49,15 +48,7 @@
 import { RouterLink } from 'vue-router'
 import { addDays, format } from 'date-fns'
 
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useConfirmedAction,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 
 const authStore = useAuthStore()
 const queryClient = useQueryClient()
@@ -156,11 +147,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ApiUserRow>({
   key: 'api-user-table',
   columns,
-  listOptions: (query) => Api.CompanyApiuser.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyApiuser,
   urlSync: true,
   loadError: $trans('Error loading API users'),
 })

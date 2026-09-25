@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-leave-modal',
         confirmText: $trans('Are you sure you want to delete this leave type?'),
-        destroyMutation: Api.CompanyLeaveType.destroy.mutation,
-        invalidate: Api.CompanyLeaveType.invalidate,
+        resource: Api.CompanyLeaveType,
         deletedDetail: $trans('Leave type has been deleted'),
         deleteError: $trans('Error deleting leave type'),
       }"
@@ -80,7 +79,7 @@
 import IBiPencil from '~icons/bi/pencil'
 
 import RowAction from '@/components/RowAction.vue'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 import {
   emptyLeaveType,
@@ -139,11 +138,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'leave-type-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => Api.CompanyLeaveType.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyLeaveType,
   urlSync: true,
   loadError: $trans('Error loading leave types'),
 })

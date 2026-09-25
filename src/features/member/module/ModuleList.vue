@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-module-modal',
         confirmText: $trans('Are you sure you want to delete this module?'),
-        destroyMutation: Api.MemberModule.destroy.mutation,
+        resource: Api.MemberModule,
         invalidate: (queryClient) => invalidateModuleListQueries(queryClient),
         deletedDetail: $trans('Module has been deleted'),
         deleteError: $trans('Error deleting module'),
@@ -37,14 +37,7 @@
 <script lang="ts" setup>
 
 import { invalidateModuleListQueries } from '../invalidation'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 
 type ModuleRow = ListRow<Api.PaginatedModuleList>
 
@@ -72,13 +65,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ModuleRow>({
   key: 'module-table',
   columns,
-  listOptions: (query) => Api.MemberModule.list.options({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-    },
-  }),
+  resource: Api.MemberModule,
   urlSync: true,
   loadError: $trans('Error loading modules'),
 })

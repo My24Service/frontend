@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-statuscode-modal',
         confirmText: $trans('Are you sure you want to delete this statuscode?'),
-        destroyMutation: Api.StatuscodeStatuscode.destroy.mutation,
+        resource: Api.StatuscodeStatuscode,
         invalidate: invalidateStatuscodeLists,
         deletedDetail: $trans('Statuscode has been deleted'),
         deleteError: $trans('Error deleting statuscode'),
@@ -39,13 +39,7 @@
 import { RouterLink } from 'vue-router'
 
 import RowAction from '@/components/RowAction.vue'
-import {
-  ServerTable,
-  baseListParams,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 
 import { routeNamesFor, type CodeType } from './code-types'
 import { invalidateStatuscodeLists } from './invalidation'
@@ -146,15 +140,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<StatuscodeRow>({
   key: 'statuscode-table',
   columns,
-  listOptions: (query) => Api.StatuscodeStatuscode.list.options({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.statuscode ? {statuscode: String(query.statuscode)} : {}),
-      ...(query.description ? {description: String(query.description)} : {}),
-      code_type: props.codeType,
-    },
-  }),
+  listOptions: (query) => Api.StatuscodeStatuscode.listOptions({...query, code_type: props.codeType}),
   urlSync: true,
   loadError: $trans('Error loading statuscodes'),
 })

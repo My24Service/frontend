@@ -32,7 +32,7 @@
 import { hLink } from '@/components/render'
 import IBiCheckLg from '~icons/bi/check-lg'
 
-import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
 /**
@@ -93,11 +93,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'unconfirmed-sick-leave-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => Api.CompanyUserSickLeaveAdminAllUnconfirmed.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyUserSickLeaveAdminAllUnconfirmed,
   urlSync: true,
   loadError: $trans('Error loading unconfirmed sick leave request'),
 })

@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-contract-modal',
         confirmText: $trans('Are you sure you want to delete this contract?'),
-        destroyMutation: Api.MemberContract.destroy.mutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: Api.MemberContract.list.queryKey()}),
+        resource: Api.MemberContract,
         deletedDetail: $trans('Contract has been deleted'),
         deleteError: $trans('Error deleting contract'),
       }"
@@ -36,14 +35,7 @@
 
 <script lang="ts" setup>
 
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 
 type ContractRow = ListRow<Api.PaginatedContractList>
 
@@ -74,13 +66,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ContractRow>({
   key: 'contract-table',
   columns,
-  listOptions: (query) => Api.MemberContract.list.options({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-    },
-  }),
+  resource: Api.MemberContract,
   urlSync: true,
   loadError: $trans('Error loading contracts'),
 })

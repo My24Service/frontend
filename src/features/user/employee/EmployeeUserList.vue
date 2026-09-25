@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-employee-user-modal',
         confirmText: $trans('Are you sure you want to delete this employee?'),
-        destroyMutation: Api.CompanyEmployeeuser.destroy.mutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: Api.CompanyEmployeeuser.list.queryKey()}),
+        resource: Api.CompanyEmployeeuser,
         deletedDetail: $trans('Employee has been deleted'),
         deleteError: $trans('Error deleting employee'),
       }"
@@ -37,14 +36,7 @@
 
 <script lang="ts" setup>
 
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 
 const props = withDefaults(defineProps<{
@@ -90,11 +82,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<EmployeeUserRow>({
   key: 'employee-user-table',
   columns,
-  listOptions: (query) => Api.CompanyEmployeeuser.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyEmployeeuser,
   urlSync: true,
   loadError: $trans('Error loading employees'),
 })

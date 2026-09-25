@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 /**
  * The activity log: a read-only, server-paged list. No form, no row actions -
  * the legacy screen's icons column was empty - so no delete modal and no
@@ -43,11 +43,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<ActivityRow>({
   key: 'activity-table',
   columns,
-  listOptions: (query) => Api.CompanyActivity.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyActivity,
   urlSync: true,
   loadError: $trans('Error loading activity'),
 })

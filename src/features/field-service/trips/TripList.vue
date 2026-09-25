@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-trip-modal',
         confirmText: $trans('Are you sure you want to delete this trip?'),
-        destroyMutation: Api.MobileTrip.destroy.mutation,
-        invalidate: Api.MobileTrip.invalidate,
+        resource: Api.MobileTrip,
         deletedDetail: $trans('Trip has been deleted'),
         deleteError: $trans('Error deleting trip'),
       }"
@@ -34,14 +33,7 @@
 
 <script setup lang="ts">
 
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 type TripRow = ListRow<Api.PaginatedTripList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
@@ -67,11 +59,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   // sortable headers sorted the rows it already held. The kit's sort state is
   // therefore never forwarded, and the headers offer no sort.
   enableSorting: false,
-  listOptions: (query) => Api.MobileTrip.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.MobileTrip,
   urlSync: true,
   loadError: $trans('Error loading trips'),
 })

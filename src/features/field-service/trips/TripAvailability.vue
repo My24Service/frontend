@@ -20,13 +20,7 @@
 import { Fragment } from 'vue'
 import { RouterLink } from 'vue-router'
 
-import {
-  ServerTable,
-  baseListParams,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 /**
  * Who can be put on a trip, read as the trip collection.
  *
@@ -69,11 +63,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   // the rows it held; the endpoint declares no `ordering`, so no sort is
   // forwarded and the headers offer none.
   enableSorting: false,
-  listOptions: (query) => Api.MobileTrip.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.MobileTrip,
   urlSync: true,
   loadError: $trans('Error loading trips'),
 })

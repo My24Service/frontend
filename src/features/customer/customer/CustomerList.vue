@@ -17,8 +17,7 @@
       :delete-modal="{
         modalId: 'delete-customer-modal',
         confirmText: $trans('Are you sure you want to delete this customer?'),
-        destroyMutation: Api.CustomerCustomer.destroyMutation,
-        invalidate: Api.CustomerCustomer.invalidate,
+        resource: Api.CustomerCustomer,
         deletedDetail: $trans('Customer has been deleted'),
         deleteError: $trans('Error deleting customer'),
       }"
@@ -184,7 +183,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh, gl
   // No filter list: the endpoint's own query parameters are what this screen
   // filters on, so `listOptions` derives them. Passing the five by hand would
   // be a second statement of the same fact, free to drift.
-  listOptions: (query) => Api.CustomerCustomer.listOptions(query),
+  resource: Api.CustomerCustomer,
   urlSync: true,
   loadError: $trans('Error loading customers'),
 })

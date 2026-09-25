@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-engineer-user-modal',
         confirmText: $trans('Are you sure you want to delete this engineer?'),
-        destroyMutation: Api.CompanyEngineer.destroy.mutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: Api.CompanyEngineer.list.queryKey()}),
+        resource: Api.CompanyEngineer,
         deletedDetail: $trans('Engineer has been deleted'),
         deleteError: $trans('Error deleting engineer'),
       }"
@@ -38,14 +37,7 @@
 
 <script lang="ts" setup>
 
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 
 const authStore = useAuthStore()
@@ -89,11 +81,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<EngineerUserRow>({
   key: 'engineer-user-table',
   columns,
-  listOptions: (query) => Api.CompanyEngineer.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyEngineer,
   urlSync: true,
   loadError: $trans('Error loading engineers'),
 })

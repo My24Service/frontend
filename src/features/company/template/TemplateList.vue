@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-template-modal',
         confirmText: $trans('Are you sure you want to delete this template?'),
-        destroyMutation: Api.CompanyTemplate.destroy.mutation,
-        invalidate: Api.CompanyTemplate.invalidate,
+        resource: Api.CompanyTemplate,
         deletedDetail: $trans('Template has been deleted'),
         deleteError: $trans('Error deleting template'),
       }"
@@ -37,7 +36,7 @@
 import { RouterLink } from 'vue-router'
 import IBiCheck from '~icons/bi/check'
 
-import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 /**
  * The template list. The route names are the legacy `customer-template-*`
  * family: URLs stay stable across the migration, so they keep their names.
@@ -85,11 +84,7 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
   // `ordering` - the headers stay non-sortable rather than rendering controls
   // nothing honours.
   enableSorting: false,
-  listOptions: (query) => Api.CompanyTemplate.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyTemplate,
   urlSync: true,
   loadError: $trans('Error loading templates'),
 })

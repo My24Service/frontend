@@ -41,7 +41,7 @@ import { hLink } from '@/components/render'
 import IBiCheckLg from '~icons/bi/check-lg'
 import IBiXLg from '~icons/bi/x-lg'
 
-import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
 /**
@@ -109,11 +109,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'leave-request-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => Api.CompanyUserLeaveHoursAdminAllNotAccepted.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyUserLeaveHoursAdminAllNotAccepted,
   urlSync: true,
   loadError: $trans('Error loading leave requests'),
 })

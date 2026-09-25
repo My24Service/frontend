@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-partner-modal',
         confirmText: $trans('Are you sure you want to delete this partner relation?'),
-        destroyMutation: Api.CompanyPartner.destroy.mutation,
-        invalidate: Api.CompanyPartner.invalidate,
+        resource: Api.CompanyPartner,
         deletedDetail: $trans('partner has been deleted'),
         deleteError: $trans('Error deleting partner'),
       }"
@@ -38,7 +37,7 @@
 import IBiCheckSquareFill from '~icons/bi/check-square-fill'
 
 import type { PillNavItem } from '@/components/PillsNav.vue'
-import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { partnerColumns } from './partner-columns'
 
 /**
@@ -86,11 +85,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<PartnerRow>({
   key: 'partner-table',
   columns,
-  listOptions: (query) => Api.CompanyPartner.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyPartner,
   urlSync: true,
   loadError: $trans('Error loading partners'),
 })

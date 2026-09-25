@@ -7,6 +7,7 @@ export {
 } from './table'
 export {
   useServerTable,
+  type PageableResource,
   type ServerTableOptions,
 } from './use-server-table'
 export {
@@ -39,4 +40,5 @@ export {
 } from './filters'
 export { default as ServerDataTable } from './ServerDataTable.vue'
 export { default as ListDeleteModal } from './ListDeleteModal.vue'
+export type { DeletableResource } from './use-list-delete'
 export { default as ListPageHeader } from './ListPageHeader.vue'

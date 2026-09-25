@@ -58,8 +58,7 @@
       :delete-modal="{
         modalId: 'delete-modal',
         confirmText: $trans('Are you sure you want to delete this budget?'),
-        destroyMutation: Api.CompanyBudget.destroy.mutation,
-        invalidate: Api.CompanyBudget.invalidate,
+        resource: Api.CompanyBudget,
         deletedDetail: $trans('Budget has been deleted'),
         deleteError: $trans('Error deleting budget'),
       }"
@@ -81,7 +80,7 @@
 import { RouterLink } from 'vue-router'
 
 import RowAction from '@/components/RowAction.vue'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { formatMoney, formatMoneyPlain, toDinero } from '@/services/money'
 import {
   budgetModalFromRecord,
@@ -142,11 +141,7 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
   // `ordering` - the headers stay non-sortable rather than rendering controls
   // nothing honours.
   enableSorting: false,
-  listOptions: (query) => Api.CompanyBudget.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyBudget,
   urlSync: true,
   loadError: $trans('Error loading budgets'),
 })

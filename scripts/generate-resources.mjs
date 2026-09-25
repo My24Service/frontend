@@ -44,8 +44,8 @@
  * and retrieve whose path sits under the resource's - its own list and detail,
  * and the filtered views beside them (`user-sick-leave/admin/all_sick/`,
  * `invoice/invoice/sent/`). Those are the reads of the same rows, so they are
- * what a write to the resource makes stale, and `invalidateReads` in the forms
- * kit refreshes them all. The ids are strings rather than the key factories
+ * what a write to the resource makes stale, and its `invalidate` refreshes
+ * them all. The ids are strings rather than the key factories
  * because a factory for a detail read demands the id it has no use for here:
  * hey-api keys every query `[{_id, baseURL, path?, query?}]`, and tanstack's
  * partial matching means `[{_id}]` alone reaches every variant of that read.
@@ -55,8 +55,25 @@
  *
  * Every binding is checked against what hey-api actually declared, so a
  * renamed export fails the run rather than producing a file that fails to
- * typecheck later. Runs after `openapi-ts` in `npm run codegen`; it writes only
- * its own file.
+ * typecheck later. Runs after `openapi-ts` in `npm run codegen`.
+ *
+ * How a resource is built
+ * -----------------------
+ * Each is one `resource({...})` call: the bindings are its own, enumerable
+ * data, and the methods that derive something from them - `listOptions`,
+ * `retrieveOptions`, `invalidate` - live once, on a prototype shared by every
+ * resource with the same set (./templates/resource-runtime.ts). Their types
+ * are computed from each resource's own bindings, so `Api.OrderOrder.retrieveOptions`
+ * takes a string id and `Api.CompanyBranchMy.retrieveOptions` takes none,
+ * exactly as when every resource spelled its methods out.
+ *
+ * A method that only renamed a binding (`createMutation` for `create.mutation`)
+ * is not generated: it adds a second name for one thing and nothing else.
+ *
+ * Output stays inside `src/api/`: the runtime is copied from the template to
+ * `resource-runtime.gen.ts` beside the resources, so generated code never
+ * imports application code. Writes `resources.gen.ts`, `resource-runtime.gen.ts`
+ * and `model-types.gen.ts`.
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { toCase } from '@hey-api/openapi-ts'
@@ -471,14 +488,10 @@ for (const prefix of [...groups.keys()].sort()) {
     })
   }
 
-  // Whether `listOptions` can be generated at all (see `isPageable`), and
-  // whether it can take named filters: a pageable list that declares no query
-  // parameters has no `ListQuery` type in its namespace either, so there is
-  // nothing to check a filter name against.
+  // Whether the resource gets `listOptions` at all (see `isPageable`).
   const pageable = Boolean(operations.list && pageableLists.get(operations.list.id))
-  const hasListQuery = Boolean(pageable && hasQueryParams.get(operations.list.id))
 
-  resources.push({ name, path, kind, idType, entries, reads: readIds, types, hasListQuery, pageable, listId: operations.list?.id, extras: [] })
+  resources.push({ name, path, kind, idType, entries, reads: readIds, types, pageable, listId: operations.list?.id, extras: [] })
 }
 
 // The record-level verbs, each hung on the resource whose path its own path
@@ -559,132 +572,31 @@ const typeBlock = (name, types) =>
     .map(({alias, expr, doc}) => `  /** ${doc} */\n  export type ${alias} = ${expr}`)
     .join('\n')}\n}`
 
-/**
- * The convenience methods every resource carries, so a screen names the
- * resource and never repeats what the schema already says.
- *
- * Each is generated from the bindings above rather than written per resource:
- * `listOptions` is `list.options` plus the base page parameters, `invalidate`
- * is the resource's own `reads`, and the rest are the singletons' call shapes
- * that every consumer used to re-derive from `kind` and `id`.
- *
- * They are plain literal properties, not a shared prototype. There are a few
- * hundred resources, built once at module load - the `Object.create` pattern
- * that TanStack Table uses for its rows is worth ~60 bytes per instance, which
- * is a rounding error against a few hundred objects and the parsed source.
- * (The same post's numbers are for 100k-10M rows.) A prototype would also lose
- * the literal types that make `Api.<name>.Record` exact, which is the point of
- * the namespace.
- */
-const convenienceBlock = ({name, kind, entries, filterKeys, pageable, idType}) => {
-  const out = []
-
-  if (entries.list && pageable) {
-    // The screen names a filter set only when it wants a *subset* of the one
-    // the endpoint declares. The default is the derived set, so the common case
-    // - a screen whose columns are the endpoint's own filters - passes nothing.
-    // A list that declares no filters at all has nothing to narrow, so it takes
-    // no second parameter.
-    const filters = filterKeys.length === 0
-      ? ''
-      : `filters: readonly (keyof ${name}.ListQuery)[] = ${lowerFirst(name)}Filters`
-    const filterBody = filterKeys.length === 0
-      ? `        ...baseListParams(query),`
-      : `        ...baseListParams(query),
-        ...columnFilters(query, filters),`
-    const filterDocs = filterKeys.length === 0
-      ? ''
-      : `
-   *
-   * \`filters\` defaults to every filter \`${name}\` declares, so a screen whose
-   * columns are the endpoint's own filters passes nothing and cannot drift from
-   * them. Name it only to send a subset. A name the endpoint does not declare
-   * does not typecheck.`
-    out.push(
-      `  /**
-   * The generated list options for a server-paged table: the four base page
-   * parameters${filterKeys.length === 0 ? '' : ', plus this resource\'s column filters'}.${filterDocs}
-   */
-  listOptions: (query: ServerPagedListQuery${filters ? `, ${filters}` : ''}) =>
-    ${entries.list.options}({
-      query: {
-${filterBody}
-      },
-    }),`,
-    )
-  }
-
-  // `invalidate` is the one convenience that names no generated export: it is a
-  // walk over the resource's own `reads`, which is why it is spelled
-  // `invalidateReads(thisResource.reads)` and can be. Every other convenience
-  // below binds a named export, so the generator can write it.
-  out.push(
-    `  /**
-   * Refresh every read under this resource's path - its own list and detail,
-   * and the filtered views and counts beside them - in one call.
-   *
-   * \`(queryClient?)\`: the application singleton by default, so a delete modal
-   * can call this straight from a click handler; a caller inside \`setup\`
-   * passes the client it already holds.
-   */
-  invalidate: invalidateReads(${lowerFirst(name)}Reads),`,
-  )
-
-  if (entries.retrieve) {
-    out.push(
-      kind === 'singleton'
-        ? `  /** The retrieve options for this record: no path, because it is the caller's own. */
-  retrieveOptions: () => ${entries.retrieve.options}(),`
-        : `  /**
-   * The retrieve options for one record, with its id in the path.
-   *
-   * ${idType === 'string' ? 'The id is stringified: DRF declares this resource by name, and the generated options type its path as a string.' : 'The id is passed as declared - this endpoint declares an integer id.'}
-   */
-  retrieveOptions: (id: ${idType}) => ${entries.retrieve.options}({path: {id${idType === 'string' ? ': String(id)' : ''}}}),`,
-    )
-  }
-
-  if (entries.create) {
-    out.push(`  /** The create mutation options, for \`useMutation\`. */\n  createMutation: () => ${entries.create.mutation}(),`)
-  }
-  if (entries.update) {
-    // The body is typed as the resource's own `UpdateInput`, so a form's
-    // `parse` is checked against the schema hey-api generated for this exact
-    // endpoint rather than against `unknown`.
-    const body = entries.update.body ? `${name}.UpdateInput` : 'unknown'
-    out.push(
-      `  /** The update mutation options, for \`useMutation\`. */
-  updateMutation: () => ${entries.update.mutation}(),
-  /**
-   * What an update sends: the body, ${kind === 'singleton' ? 'and nothing else - a singleton has no path.' : 'plus the record\'s id in the path.'}
-   */
-  updateVars: (${kind === 'singleton' ? 'body' : `id: ${idType}, body`}: ${body}) => ({${kind === 'singleton' ? '' : 'path: {id}, '}body}),`,
-    )
-  }
-  if (entries.destroy) {
-    out.push(`  /** The destroy mutation options, for \`useMutation\`. */\n  destroyMutation: () => ${entries.destroy.mutation}(),`)
-  }
-
-  return out.join('\n')
-}
-
 const resourceBlocks = resources.map((resource) => {
-  const {name, path, kind, idType, entries, reads, types, hasListQuery, pageable, listId, extras: resourceExtras} = resource
-  // The filter set this list derives, emitted once beside the resource so
-  // `listOptions`'s default is a name rather than an inline literal.
-  const filterKeys = pageable ? derivedFilters(listId) : []
-  const lines = Object.entries(entries).map(
-    ([key, entry]) =>
-      `  ${key}: {${Object.entries(entry)
-        .map(([field, value]) => `${field}: ${value}`)
-        .join(', ')}},`,
-  )
-  // The record-level verbs, one line each under `extras`. A screen that needs
-  // `/branch/{id}/dashboard/` names `Api.CompanyBranch` and reaches for
-  // `extras.dashboardRetrieve`, not for a second generated export.
+  const {name, path, kind, idType, entries, reads, types, pageable, listId, extras: resourceExtras} = resource
+  const fields = [`  path: '${path}',`, `  kind: '${kind}',`]
+  if (kind === 'collection') fields.push(`  id: '${idType}',`)
+  for (const [key, entry] of Object.entries(entries)) {
+    fields.push(`  ${key}: {${Object.entries(entry).map(([field, value]) => `${field}: ${value}`).join(', ')}},`)
+    // `filters` sits beside `list` and is present exactly when a table can page
+    // it - that presence is what gives the resource `listOptions`. It holds
+    // every filter the endpoint declares (see `derivedFilters`), checked against
+    // the resource's own `ListQuery`: if the schema drops one, the run's output
+    // no longer typechecks rather than sending a parameter the endpoint ignores.
+    if (key === 'list' && pageable) {
+      const filterKeys = derivedFilters(listId)
+      fields.push(
+        filterKeys.length === 0
+          ? `  filters: [],`
+          : `  filters: [${filterKeys.map((key) => `'${key}'`).join(', ')}] satisfies (keyof ${name}.ListQuery)[],`,
+      )
+    }
+  }
+  // The record-level verbs: a screen that needs `/branch/{id}/dashboard/` names
+  // `Api.CompanyBranch` and reaches for `extras.dashboardRetrieve`, not for a
+  // second generated export.
   if (resourceExtras.length > 0) {
-    lines.push(
-      `  // The verbs on one record, which the server serves under this resource's path.`,
+    fields.push(
       `  extras: {${resourceExtras
         .map(
           ({name: extraName, path: extraPath, entry}) =>
@@ -695,31 +607,25 @@ const resourceBlocks = resources.map((resource) => {
         .join('')}\n  },`,
     )
   }
-  const conveniences = convenienceBlock({name, kind, entries, filterKeys, pageable, idType})
+  fields.push(`  reads: [${reads.map((id) => `'${id}'`).join(', ')}],`)
   const namespace = types.length > 0 ? `\n\n${typeBlock(name, types)}` : ''
-  // The derived filter set, one local per resource, annotated with the
-  // resource's own `ListQuery` keys. The annotation is the check that matters:
-  // if the schema drops a filter, this array no longer typechecks and the run
-  // fails rather than sending a parameter the endpoint no longer accepts.
-  const filters = filterKeys.length === 0
-    ? ''
-    : `const ${lowerFirst(name)}Filters: readonly (keyof ${name}.ListQuery)[] = [${filterKeys.map((key) => `'${key}'`).join(', ')}]\n\n`
-  return `${filters}const ${lowerFirst(name)}Reads: readonly string[] = [${reads.map((id) => `'${id}'`).join(', ')}]
-
-const ${lowerFirst(name)} = {
-  path: '${path}',
-  kind: '${kind}',${kind === 'collection' ? `\n  id: '${idType}',` : ''}
-${lines.join('\n')}
-  reads: ${lowerFirst(name)}Reads,
-
-  // The conveniences. Generated from the bindings above rather than written
-  // per resource, so they cannot drift from what the schema declares.
-${conveniences}
-} as const satisfies Resource
-
-/** \`${path}\` */
-export const ${name} = ${lowerFirst(name)}${namespace}`
+  return `/** \`${path}\` */
+export const ${name} = /*#__PURE__*/ resource({
+${fields.join('\n')}
+})${namespace}`
 })
+
+const RUNTIME_TEMPLATE = new URL('./templates/resource-runtime.ts', import.meta.url)
+const RUNTIME_TARGET = new URL('../src/api/resource-runtime.gen.ts', import.meta.url)
+
+writeFileSync(
+  RUNTIME_TARGET,
+  `// This file is copied from scripts/templates/resource-runtime.ts by
+// scripts/generate-resources.mjs. Do not edit; edit the template and run
+// \`npm run codegen\` instead.
+//
+${readFileSync(RUNTIME_TEMPLATE, 'utf8')}`,
+)
 
 writeFileSync(
   TARGET,
@@ -741,132 +647,26 @@ writeFileSync(
 // takes and parses - so \`Api.<resource>.Record\` sits beside
 // \`Api.<resource>.retrieve\` under one name.
 //
-// And a handful of conveniences, so the shapes a screen would otherwise
-// re-derive from \`kind\` and \`id\` are derived once: \`listOptions\` (the base
-// page parameters plus the screen's column filters), \`retrieveOptions\`,
-// \`createMutation\`/\`updateMutation\`, \`updateVars\` (what an update sends),
-// and \`invalidate\` (every read under the path, on the app's query client).
-import type { QueryClient, UseMutationOptions } from '@tanstack/vue-query'
-import type { GenericSchema, InferInput, InferOutput } from 'valibot'
+// Each is built by \`resource()\` (./resource-runtime.gen.ts), which puts the
+// bindings on the object and the few methods that derive something from them
+// - \`listOptions\`, \`retrieveOptions\`, \`invalidate\` - on a shared prototype.
+import type { InferInput, InferOutput } from 'valibot'
 
-import { baseListParams, columnFilters, type ServerPagedListQuery } from '../services/api-client/list-params'
-import { invalidateReads } from '../services/api-client/invalidation'
+import { resource } from './resource-runtime.gen'
 
 ${importBlock(tanstackImports, './@tanstack/vue-query.gen')}
 ${importBlock(valibotImports, './valibot.gen')}
 ${typeImports.size > 0 ? `\nimport type {\n${[...typeImports].sort().map((name) => `  ${name},`).join('\n')}\n} from './types.gen'\n` : ''}
-
-/** A list, or a singleton's retrieve: its generated \`*Options\` and \`*QueryKey\` factories. */
-export interface ResourceRead {
-  readonly options: (...args: never[]) => object
-  readonly queryKey: (...args: never[]) => readonly unknown[]
-}
-
-/** A collection's retrieve: the options take the record's id in the path. */
-export interface ResourceRecordRead<TId extends number | string> extends ResourceRead {
-  readonly options: (options: {path: {id: TId}}) => object
-}
-
-/** A create, update, replace or destroy: its generated \`*Mutation\` factory and the body it takes. */
-export interface ResourceWrite {
-  // \`any\`, as in \`useResourceForm\`: UseMutationOptions is invariant in its
-  // response and error slots, so no single wider type admits every mutation.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readonly mutation: (...args: never[]) => UseMutationOptions<any, any, any>
-  readonly body?: GenericSchema
-}
-
-interface ResourceBase {
-  readonly path: string
-  /**
-   * The hey-api query-key id (\`[{_id}]\`) of every list and retrieve under
-   * \`path\`: the reads a write to this resource makes stale.
-   */
-  readonly reads: readonly string[]
-  /**
-   * \`invalidateReads(this.reads)\`: refreshes every one of them. Optional
-   * because \`satisfies\` only checks what is declared, and this is the one
-   * member present on every resource whatever its kind.
-   */
-  readonly invalidate: (queryClient?: QueryClient) => Promise<unknown[]>
-}
-
-/**
- * The conveniences a resource carries, declared per kind so the generated
- * object literal is checked against the shape it claims.
- *
- * They are the *call shapes* the bindings above imply, so a consumer never
- * re-derives them from \`kind\` and \`id\`: \`retrieveOptions\` builds the path a
- * collection needs and omits it for a singleton, and \`updateVars\` is the
- * \`{path, body}\` a collection sends and the bare \`{body}\` a singleton does.
- *
- * Each is optional, and is present exactly when the resource has the operation
- * it wraps - so \`resource.retrieve && resource.retrieveOptions\` is never
- * needed, but \`resource.listOptions\` on an action is a type error, which is
- * the point.
- */
-export interface ResourceConveniences {
-  /** The generated list options, plus the base page parameters. */
-  readonly listOptions?: (query: ServerPagedListQuery, filters?: readonly never[]) => unknown
-  /** The generated retrieve options; no id for a singleton. */
-  readonly retrieveOptions?: (...args: never[]) => unknown
-  /** The generated create mutation options. */
-  readonly createMutation?: () => unknown
-  /** The generated update mutation options. */
-  readonly updateMutation?: () => unknown
-  /** What an update sends, as the generated mutation's variables. */
-  readonly updateVars?: (...args: never[]) => unknown
-  /** The generated destroy mutation options. */
-  readonly destroyMutation?: () => unknown
-}
-
-/**
- * The shape every resource below satisfies, by how its record is addressed.
- * Which of the operations a resource has is its own type; the union says
- * which it *can* have, so the generator's classification is checked here.
- */
-export type Resource = CollectionResource<number> | CollectionResource<string> | SingletonResource | ActionResource
-
-/** Records addressed by id: the ordinary DRF viewset. */
-export interface CollectionResource<TId extends number | string> extends ResourceBase, ResourceConveniences {
-  readonly kind: 'collection'
-  /**
-   * How the retrieve declares its \`{id}\`. DRF says integer nearly
-   * everywhere, string for a few (\`order/order\`), and hey-api types the
-   * options to match - so a caller narrows on this before building the path.
-   */
-  readonly id: TId extends number ? 'number' : 'string'
-  readonly list?: ResourceRead
-  readonly retrieve?: ResourceRecordRead<TId>
-  readonly create?: ResourceWrite
-  readonly update?: ResourceWrite
-  readonly replace?: ResourceWrite
-  readonly destroy?: ResourceWrite
-  /**
-   * The verbs the server serves on one of this resource's records, under this
-   * resource's path: \`/branch/{id}/dashboard/\`, \`/apiuser/{id}/revoke/\`. A
-   * screen that needs one names this resource and reads
-   * \`Api.CompanyBranch.extras.dashboardRetrieve\`, so a record-level verb never
-   * becomes a second bare generated import. Read-only ones carry
-   * \`{options, queryKey}\` like \`list\`; the rest carry \`{mutation, body?}\`.
-   */
-  readonly extras?: Record<string, ResourceRead | ResourceWrite>
-}
-
-/** The caller's own record (\`member/me\`, \`branch-my\`): read and updated without a path. */
-export interface SingletonResource extends ResourceBase, ResourceConveniences {
-  readonly kind: 'singleton'
-  readonly retrieve?: ResourceRead
-  readonly update?: ResourceWrite
-}
-
-/** A pathless POST with no record behind it - a login, a bulk create. */
-export interface ActionResource extends ResourceBase, ResourceConveniences {
-  readonly kind: 'action'
-  readonly create: ResourceWrite
-}
-
-export type ResourceKind = Resource['kind']
+export type {
+  ActionResource,
+  CollectionResource,
+  Resource,
+  ResourceDefinition,
+  ResourceKind,
+  ResourceRead,
+  ResourceWrite,
+  SingletonResource,
+} from './resource-runtime.gen'
 
 /**
  * The model types a resource of the same name shadows, so the api-client

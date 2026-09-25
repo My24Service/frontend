@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-branch-modal',
         confirmText: $trans('Are you sure you want to delete this branch?'),
-        destroyMutation: Api.CompanyBranch.destroyMutation,
-        invalidate: Api.CompanyBranch.invalidate,
+        resource: Api.CompanyBranch,
         deletedDetail: $trans('Branch has been deleted'),
         deleteError: $trans('Error deleting branch'),
       }"
@@ -113,7 +112,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<BranchRow>({
   key: 'branch-table',
   columns,
-  listOptions: (query) => Api.CompanyBranch.listOptions(query),
+  resource: Api.CompanyBranch,
   urlSync: true,
   loadError: $trans('Error loading branches'),
 })

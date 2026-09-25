@@ -95,8 +95,10 @@ const TableHost = defineComponent({
       :delete-modal="{
         modalId: 'delete-thing-modal',
         confirmText: 'Delete this thing?',
-        destroyMutation: () => ({ mutationFn: async () => ({}) }),
-        invalidate: () => {},
+        resource: {
+          destroy: { mutation: () => ({ mutationFn: async () => ({}) }) },
+          invalidate: async () => {},
+        },
         deletedDetail: 'Thing has been deleted',
         deleteError: 'Error deleting thing',
       }"

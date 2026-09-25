@@ -18,8 +18,7 @@
       :delete-modal="{
         modalId: 'delete-event-modal',
         confirmText: $trans('Are you sure you want to delete this event?'),
-        destroyMutation: Api.CompanyEngineerevent.destroy.mutation,
-        invalidate: Api.CompanyEngineerevent.invalidate,
+        resource: Api.CompanyEngineerevent,
         deletedDetail: $trans('Event has been deleted'),
         deleteError: $trans('Error deleting event'),
       }"

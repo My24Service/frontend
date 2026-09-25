@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-event-type-modal',
         confirmText: $trans('Are you sure you want to delete this event type?'),
-        destroyMutation: Api.CompanyEngineerEventType.destroy.mutation,
-        invalidate: Api.CompanyEngineerEventType.invalidate,
+        resource: Api.CompanyEngineerEventType,
         deletedDetail: $trans('Event type has been deleted'),
         deleteError: $trans('Error deleting event type'),
       }"
@@ -35,14 +34,7 @@
 
 <script lang="ts" setup>
 
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 
 import EngineerPills from './EngineerPills.vue'
 
@@ -94,11 +86,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'engineer-event-type-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => Api.CompanyEngineerEventType.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyEngineerEventType,
   urlSync: true,
   loadError: $trans('Error loading event types'),
 })

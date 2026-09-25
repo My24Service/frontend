@@ -25,34 +25,24 @@ export type WriteContext = {isCreate: true; id: null} | {isCreate: false; id: nu
 type WithRecord<R extends Exclude<Api.Resource, Api.ActionResource>> = R & Required<Pick<R, 'retrieve' | 'update'>>
 
 /**
- * The conveniences a form calls, re-typed to the shapes a form can actually
- * meet, with the generated loose ones dropped.
+ * `retrieveOptions` re-typed to the shape a form can actually meet.
  *
- * `ResourceConveniences` declares them `(...args: never[]) => unknown` and
- * `() => unknown`, which is the only signature that admits every resource's
- * real one: a singleton's `retrieveOptions` takes no id, a collection's takes
- * a `number` or a `string`, and no single type covers both. Intersecting the
- * two does not help - the parameter becomes the *intersection* `never & TId`,
- * i.e. `never` - so the loose members are omitted and the narrow ones declared
- * afresh. A form knows which kind it has, because it already narrows on
- * `kind` and `id`; this is that narrowing, written once.
- *
- * `any` in the two mutation slots, as in `ResourceFormWiring`'s hand-named
- * `update`: `UseMutationOptions` is invariant in its response and error slots,
- * so no wider type admits every generated pair. Only `mutationFn` is used.
+ * The generic `Resource` declares it `(...args: never[]) => object`, the only
+ * signature that admits every resource's real one: a singleton's takes no id,
+ * a collection's a `number` or a `string`. Intersecting a narrow signature with
+ * that one does not work - the parameter becomes the *intersection* `never &
+ * TId`, i.e. `never` - so the loose member is omitted and the narrow one
+ * declared afresh. A form knows which kind it has, because it already narrows
+ * on `kind` and `id`; this is that narrowing, written once.
  */
 interface FormCalls<R extends Exclude<Api.Resource, Api.ActionResource>> {
-  readonly retrieveOptions: R extends Api.SingletonResource
-    ? () => object
-    : (id: R extends Api.CollectionResource<infer TId> ? TId : never) => object
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readonly updateMutation: () => UseMutationOptions<any, any, any>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readonly createMutation?: () => UseMutationOptions<any, any, any>
+  retrieveOptions(...args: R extends Api.SingletonResource
+    ? []
+    : [id: R extends Api.CollectionResource<infer TId> ? TId : never]): object
 }
 
 type Formable<R extends Exclude<Api.Resource, Api.ActionResource>> =
-  Omit<WithRecord<R>, 'retrieveOptions' | 'updateMutation' | 'createMutation'> & FormCalls<R>
+  Omit<WithRecord<R>, 'retrieveOptions'> & FormCalls<R>
 
 export type FormResource =
   | Formable<Api.CollectionResource<number>>
@@ -221,12 +211,13 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
     }
     : config.retrieve
   const createOptions = resource
-    ? resource.kind === 'collection' ? resource.createMutation?.() : undefined
+    ? resource.kind === 'collection' ? resource.create?.mutation() : undefined
     : config.create
-  const updateOptions = resource ? resource.updateMutation() : config.update
+  const updateOptions = resource ? resource.update.mutation() : config.update
   const updateVars = config.updateVars
     ?? (resource?.kind === 'singleton' ? (body: TBody) => ({body}) : undefined)
-  const invalidate = config.invalidate ?? resource?.invalidate
+  const invalidate = config.invalidate
+    ?? (resource ? (client: QueryClient) => resource.invalidate(client) : undefined)
   if (!invalidate) {
     throw new Error('useResourceForm: a form needs a resource or an explicit `invalidate`')
   }

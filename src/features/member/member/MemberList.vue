@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-member-modal',
         confirmText: $trans('Are you sure you want to delete this member?'),
-        destroyMutation: Api.MemberMember.destroy.mutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: Api.MemberMember.list.queryKey()}),
+        resource: Api.MemberMember,
         deletedDetail: $trans('Member has been deleted'),
         deleteError: $trans('Error deleting member'),
       }"

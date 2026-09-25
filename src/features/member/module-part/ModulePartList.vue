@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-module-part-modal',
         confirmText: $trans('Are you sure you want to delete this module part?'),
-        destroyMutation: Api.MemberModulePart.destroy.mutation,
+        resource: Api.MemberModulePart,
         invalidate: (queryClient) => invalidateModulePartListQueries(queryClient),
         deletedDetail: $trans('Module part has been deleted'),
         deleteError: $trans('Error deleting module part'),
@@ -38,15 +38,7 @@
 import IBiCheckSquare from '~icons/bi/check-square'
 
 import { invalidateModulePartListQueries } from '../invalidation'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type FilterOption,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type FilterOption, type ListRow } from '@/features/table'
 
 type ModulePartRow = ListRow<Api.PaginatedModulePartList>
 
@@ -105,14 +97,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ModulePartRow>({
   key: 'module-part-table',
   columns,
-  listOptions: (query) => Api.MemberModulePart.list.options({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-      ...(query.module ? {module: String(query.module)} : {}),
-    },
-  }),
+  resource: Api.MemberModulePart,
   urlSync: true,
   loadError: $trans('Error loading module parts'),
 })

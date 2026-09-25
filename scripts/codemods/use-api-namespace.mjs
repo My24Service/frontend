@@ -50,37 +50,52 @@ const targets = argv.filter((a) => !a.startsWith('--'))
 if (targets.length === 0) targets.push('src/features')
 
 // --- the name map, read out of the generated file -------------------------
-
-const generated = readFileSync(GENERATED, 'utf8')
+//
+// Parsed, not pattern-matched: every `export const X = resource({...})` call's
+// object literal is walked as an AST, so a change to how the generator lays
+// the file out cannot silently empty the map.
 
 /** `companyBranchListOptions` -> `Api.CompanyBranch.list.options` */
 const bound = new Map()
 /** Model types a resource of the same name shadows, which `Api.<Name>` is not. */
 const shadowed = new Set()
 
-for (const m of generated.matchAll(/^const (\w+) = \{([\s\S]*?)^\} as const satisfies Resource$/gm)) {
-  const local = m[1]
-  // `export const CompanyBranch = companyBranch` - the name a caller writes.
-  const pascal = new RegExp(`^export const (\\w+) = ${local}$`, 'm').exec(generated)?.[1]
-  if (!pascal) throw new Error(`generate-resources.mjs: no export for ${local}`)
-  const body = m[2]
-  // The CRUD slots, one line each: `  list: {options: X, queryKey: Y},`
-  for (const e of body.matchAll(/^ {2}(list|retrieve|create|update|replace|destroy): \{([^}]*)\},$/gm)) {
-    for (const f of e[2].matchAll(/(\w+): (\w+)/g)) bound.set(f[2], `Api.${pascal}.${e[1]}.${f[1]}`)
-  }
-  // The record-level verbs, indented one level deeper: `    name: {options: X},`
-  const extras = /extras: \{([\s\S]*?)\n {2}\},/.exec(body)
-  if (extras) {
-    for (const e of extras[1].matchAll(/^ {4}(\w+): \{([^}]*)\},$/gm)) {
-      for (const f of e[2].matchAll(/(\w+): (\w+)/g)) bound.set(f[2], `Api.${pascal}.extras.${e[1]}.${f[1]}`)
+const generatedFile = new Project({skipAddingFilesFromTsConfig: true}).addSourceFileAtPath(GENERATED)
+
+/** `{options: X, queryKey: Y}` -> [['options', 'X'], ['queryKey', 'Y']] */
+const slotsOf = (literal) =>
+  literal
+    .getProperties()
+    .filter((p) => p.getKind() === SyntaxKind.PropertyAssignment)
+    .map((p) => [p.getName(), p.getInitializer().getText()])
+
+for (const statement of generatedFile.getVariableStatements()) {
+  if (!statement.isExported()) continue
+  for (const declaration of statement.getDeclarations()) {
+    const call = declaration.getInitializerIfKind(SyntaxKind.CallExpression)
+    if (call?.getExpression().getText() !== 'resource') continue
+    const name = declaration.getName()
+    const definition = call.getArguments()[0].asKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+    for (const property of definition.getProperties()) {
+      if (property.getKind() !== SyntaxKind.PropertyAssignment) continue
+      const key = property.getName()
+      const value = property.getInitializer()
+      if (['list', 'retrieve', 'create', 'update', 'replace', 'destroy'].includes(key)) {
+        for (const [field, target] of slotsOf(value)) bound.set(target, `Api.${name}.${key}.${field}`)
+      } else if (key === 'extras') {
+        for (const extra of value.getProperties()) {
+          for (const [field, target] of slotsOf(extra.getInitializer())) {
+            bound.set(target, `Api.${name}.extras.${extra.getName()}.${field}`)
+          }
+        }
+      }
     }
   }
 }
+if (bound.size === 0) throw new Error(`no resource({...}) bindings found in ${GENERATED}; has the generator's output changed?`)
 
-const shadowedBlock = /shadowedModelTypes: readonly string\[\] = \[([\s\S]*?)\]/.exec(generated)
-if (shadowedBlock) {
-  for (const n of shadowedBlock[1].matchAll(/'([^']+)'/g)) shadowed.add(n[1])
-}
+const shadowedList = generatedFile.getVariableDeclarationOrThrow('shadowedModelTypes').getInitializerIfKindOrThrow(SyntaxKind.ArrayLiteralExpression)
+for (const element of shadowedList.getElements()) shadowed.add(element.getLiteralText())
 
 // --- what one import specifier becomes ------------------------------------
 

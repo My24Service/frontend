@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-maintenance-contract-modal',
         confirmText: $trans('Are you sure you want to delete this maintenance contract?'),
-        destroyMutation: Api.CustomerMaintenanceContract.destroy.mutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: Api.CustomerMaintenanceContract.list.queryKey()}),
+        resource: Api.CustomerMaintenanceContract,
         deletedDetail: $trans('Maintenance contract has been deleted'),
         deleteError: $trans('Error deleting maintenance contract'),
       }"
@@ -39,15 +38,7 @@
 import { RouterLink } from 'vue-router'
 
 import { formatMoney, toDinero } from '@/services/money'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type FilterOption,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type FilterOption, type ListRow } from '@/features/table'
 
 type ContractRow = ListRow<Api.PaginatedMaintenanceContractList>
 
@@ -117,15 +108,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ContractRow>({
   key: 'maintenance-contract-table',
   columns,
-  listOptions: (query) => Api.CustomerMaintenanceContract.list.options({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-      ...(query.remarks ? {remarks: String(query.remarks)} : {}),
-      ...(query.customer ? {customer: String(query.customer)} : {}),
-    },
-  }),
+  resource: Api.CustomerMaintenanceContract,
   urlSync: true,
   loadError: $trans('Error loading maintenance contracts'),
 })

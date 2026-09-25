@@ -8,8 +8,9 @@ import { modal } from '../../support/modal.js'
 /**
  * The shared delete-confirm modal (src/features/table/ListDeleteModal.vue).
  *
- * The destroy mutation is a fake behind the same seam the composable calls:
- * `useListDelete` spreads `destroyMutation()` into `useMutation` and fires
+ * The resource is a fake with the two members the composable reads:
+ * `useListDelete` spreads `resource.destroy.mutation()` into `useMutation`,
+ * fires
  * `mutateAsync({path: {id}})`, so a `{mutationKey, mutationFn}` object is
  * everything it needs. What the specs pin is the modal's half of the pinned
  * guards — nothing fires before the OK, a double OK fires once (the
@@ -32,16 +33,21 @@ beforeEach(() => {
   invalidate = vi.fn(async () => {})
 })
 
-async function mountDeleteModal() {
+async function mountDeleteModal(extraProps = {}) {
   const wrapper = await mountListView(ListDeleteModal, {
     deep: true,
     props: {
       modalId: MODAL_ID,
       confirmText: 'Are you sure you want to delete this thing?',
-      destroyMutation: () => ({ mutationKey: ['shell-delete'], mutationFn }),
-      invalidate,
+      // A method, as on a generated resource: the composable must call it on
+      // the resource, not detach it.
+      resource: {
+        destroy: { mutation: () => ({ mutationKey: ['shell-delete'], mutationFn }) },
+        invalidate(queryClient) { return invalidate(this, queryClient) },
+      },
       deletedDetail: 'Thing has been deleted',
       deleteError: 'Error deleting thing',
+      ...extraProps,
     },
   })
   await settle()
@@ -73,7 +79,23 @@ describe('ListDeleteModal', () => {
     expect(mutationFn.mock.calls[0][0]).toEqual({ path: { id: 7 } })
     expect(toasts().map((toast) => toast.body)).toContain('Thing has been deleted')
     expect(invalidate).toHaveBeenCalledTimes(1)
+    expect(invalidate.mock.calls[0][0]).toHaveProperty('destroy')
+    expect(invalidate.mock.calls[0][1]).toHaveProperty('invalidateQueries')
     expect(modal(MODAL_ID).isOpen()).toBe(false)
+  })
+
+  test('an explicit invalidate replaces the resource\'s own', async () => {
+    const override = vi.fn(async () => {})
+    const wrapper = await mountDeleteModal({ invalidate: override })
+
+    wrapper.vm.showDeleteModal(7)
+    await settle()
+    modal(MODAL_ID).ok()
+    await settle()
+    await settle()
+
+    expect(override).toHaveBeenCalledTimes(1)
+    expect(invalidate).not.toHaveBeenCalled()
   })
 
   test('cancelling deletes nothing and tells no one', async () => {

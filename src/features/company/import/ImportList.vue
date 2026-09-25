@@ -25,8 +25,7 @@
       :delete-modal="{
         modalId: 'delete-company-import-modal',
         confirmText: $trans('Are you sure you want to delete this import?'),
-        destroyMutation: Api.CompanyImport.destroy.mutation,
-        invalidate: Api.CompanyImport.invalidate,
+        resource: Api.CompanyImport,
         deletedDetail: $trans('Import has been deleted'),
         deleteError: $trans('Error deleting import'),
       }"
@@ -50,7 +49,7 @@ import IBiArrowCounterclockwise from '~icons/bi/arrow-counterclockwise'
 
 import RowAction from '@/components/RowAction.vue'
 import { fileNameOf } from '@/features/shared'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 /**
  * The import list, mounted by the company router and the settings layout.
  * The mount answers one route stem (`company-import`, `settings-company-import`),
@@ -144,11 +143,7 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
   // `ordering` - the headers stay non-sortable rather than rendering controls
   // nothing honours.
   enableSorting: false,
-  listOptions: (query) => Api.CompanyImport.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyImport,
   urlSync: true,
   loadError: $trans('Error loading imports'),
 })

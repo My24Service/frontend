@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-order-modal',
         confirmText: $trans('Are you sure you want to delete this order?'),
-        destroyMutation: () => Api.OrderOrder.destroy.mutation(),
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: Api.OrderOrder.list.queryKey()}),
+        resource: Api.OrderOrder,
         deletedDetail: $trans('Order has been deleted'),
         deleteError: $trans('Error deleting order'),
       }"

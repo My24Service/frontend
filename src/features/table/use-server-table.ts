@@ -12,11 +12,25 @@ import { hook } from './table'
 import type { PagedEnvelope, ServerPagedListQuery } from './server-paged-list'
 import { useUrlQuerySync } from './url-query-sync'
 
+/** What a table needs of a generated resource: a list it can page. Any `Api.<Resource>` whose list is pageable is one. */
+export interface PageableResource {
+  listOptions(query: ServerPagedListQuery): object
+}
+
+/**
+ * Where the rows come from: the resource, whose `listOptions` sends the page
+ * parameters and every column filter the table holds a value for - or, for a
+ * list that sends something else (a mode, a month, another endpoint per
+ * route), the options built by hand. One or the other.
+ */
+type ListSource =
+  | {resource: PageableResource; listOptions?: never}
+  | {resource?: never; listOptions: (query: ServerPagedListQuery) => unknown}
+
 export type ServerTableOptions<TData extends RowData> = Omit<
   Parameters<typeof hook.useAppTable<TData>>[0],
   'data' | 'rowCount' | 'state' | 'onSortingChange' | 'onColumnFiltersChange' | 'onPaginationChange'
-> & {
-  listOptions: (query: ServerPagedListQuery) => unknown
+> & ListSource & {
 
   urlSync?: boolean
 
@@ -51,7 +65,8 @@ function sameFilterValues(a: ColumnFiltersState, b: ColumnFiltersState): boolean
 export function useServerTable<TData extends RowData>(config: ServerTableOptions<TData>) {
   const debounceMs = 300
 
-  const {listOptions, urlSync, loadError, pageSize = 20, getRowId, ...tableOptions} = config
+  const {resource, listOptions: explicitOptions, urlSync, loadError, pageSize = 20, getRowId, ...tableOptions} = config
+  const listOptions = resource ? (query: ServerPagedListQuery) => resource.listOptions(query) : explicitOptions
 
   const sorting = ref<SortingState>([])
   const columnFilters = ref<ColumnFiltersState>([])

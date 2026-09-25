@@ -34,8 +34,8 @@
       :delete-modal="{
         modalId: 'delete-received-partner-request-modal',
         confirmText: $trans('Are you sure you want to delete this partner request?'),
-        destroyMutation: Api.CompanyPartnerRequest.destroy.mutation,
-        invalidate: Api.CompanyPartnerRequestReceived.invalidate,
+        resource: Api.CompanyPartnerRequest,
+        invalidate: (queryClient) => Api.CompanyPartnerRequestReceived.invalidate(queryClient),
         deletedDetail: $trans('Partner request has been deleted'),
         deleteError: $trans('Error deleting partner request'),
       }"
@@ -57,7 +57,7 @@ import { hButton } from '@/components/render'
 
 import type { PillNavItem } from '@/components/PillsNav.vue'
 import RowAction from '@/components/RowAction.vue'
-import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 
 import { partnerColumns } from './partner-columns'
 
@@ -132,11 +132,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<RequestRow>({
   key: 'partner-requests-received-table',
   columns,
-  listOptions: (query) => Api.CompanyPartnerRequestReceived.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyPartnerRequestReceived,
   urlSync: true,
   loadError: $trans('Error loading partner requests received'),
 })

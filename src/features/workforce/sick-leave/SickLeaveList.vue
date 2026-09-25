@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-sick-leave-modal',
         confirmText: $trans('Are you sure you want to delete this sick leave?'),
-        destroyMutation: Api.CompanyUserSickLeaveAdmin.destroy.mutation,
-        invalidate: Api.CompanyUserSickLeaveAdmin.invalidate,
+        resource: Api.CompanyUserSickLeaveAdmin,
         deletedDetail: $trans('Sick leave has been deleted'),
         deleteError: $trans('Error deleting sick leave'),
       }"
@@ -36,7 +35,7 @@
 
 <script setup lang="ts">
 
-import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
 /**
@@ -91,11 +90,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'sick-leave-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => Api.CompanyUserSickLeaveAdmin.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyUserSickLeaveAdmin,
   urlSync: true,
   loadError: $trans('Error loading sick leave request'),
 })

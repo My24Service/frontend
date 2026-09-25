@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-building-modal',
         confirmText: $trans('Are you sure you want to delete this building?'),
-        destroyMutation: Api.EquipmentBuilding.destroy.mutation,
-        invalidate: Api.EquipmentBuilding.invalidate,
+        resource: Api.EquipmentBuilding,
         deletedDetail: $trans('building has been deleted'),
         deleteError: $trans('Error deleting building'),
       }"
@@ -35,7 +34,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 
-import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, useServerTable, type ListRow } from '@/features/table'
 import { useBuildingColumns } from './use-building-columns'
 type BuildingRow = ListRow<Api.PaginatedBuildingList>
 
@@ -64,17 +63,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   columns,
   // The endpoint declares search, paging, `ordering` and the column filters
   // (apps/equipment/views.py), so the kit forwards all three.
-  listOptions: (query) => Api.EquipmentBuilding.list.options({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-      ...(query.customer ? {customer: String(query.customer)} : {}),
-      ...(query.branch ? {branch: String(query.branch)} : {}),
-      ...(query.created ? {created: String(query.created)} : {}),
-      ...(query.modified ? {modified: String(query.modified)} : {}),
-    },
-  }),
+  resource: Api.EquipmentBuilding,
   urlSync: true,
   loadError: $trans('Error loading buildings'),
 })

@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-invoice-modal',
         confirmText: $trans('Are you sure you want to delete this invoice?'),
-        destroyMutation: Api.InvoiceInvoice.destroy.mutation,
-        invalidate: Api.InvoiceInvoice.invalidate,
+        resource: Api.InvoiceInvoice,
         deletedDetail: $trans('Invoice has been deleted'),
         deleteError: $trans('Error deleting invoice'),
       }"

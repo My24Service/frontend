@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-partner-request-modal',
         confirmText: $trans('Are you sure you want to delete this partner request?'),
-        destroyMutation: Api.CompanyPartnerRequest.destroy.mutation,
-        invalidate: Api.CompanyPartnerRequestSent.invalidate,
+        resource: Api.CompanyPartnerRequest,
+        invalidate: (queryClient) => Api.CompanyPartnerRequestSent.invalidate(queryClient),
         deletedDetail: $trans('Partner request has been deleted'),
         deleteError: $trans('Error deleting partner request'),
       }"
@@ -37,7 +37,7 @@
 <script setup lang="ts">
 
 import type { PillNavItem } from '@/components/PillsNav.vue'
-import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { partnerColumns } from './partner-columns'
 
 const partnerPills: PillNavItem[] = [
@@ -77,11 +77,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<RequestRow>({
   key: 'partner-requests-sent-table',
   columns,
-  listOptions: (query) => Api.CompanyPartnerRequestSent.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyPartnerRequestSent,
   urlSync: true,
   loadError: $trans('Error loading partner requests sent'),
 })

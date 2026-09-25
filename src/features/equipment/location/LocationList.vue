@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-location-modal',
         confirmText: $trans('Are you sure you want to delete this location?'),
-        destroyMutation: Api.EquipmentLocation.destroy.mutation,
-        invalidate: Api.EquipmentLocation.invalidate,
+        resource: Api.EquipmentLocation,
         deletedDetail: $trans('Location has been deleted'),
         deleteError: $trans('Error deleting location'),
       }"
@@ -44,7 +43,7 @@ import { RouterLink } from 'vue-router'
 import { equipmentLocationExportQrRetrieve } from '@/api/sdk.gen'
 import { useFileDownload, XLSX_MIME } from '@/features/shared'
 
-import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, useServerTable, type ListRow } from '@/features/table'
 import { useLocationColumns } from './use-location-columns'
 const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions. */
@@ -79,17 +78,7 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
   // The endpoint declares search, paging, `ordering` and the column filters
   // (apps/equipment/views.py), so the kit forwards all three: the sort state
   // and the filters both travel in the query and in the address bar.
-  listOptions: (query) => Api.EquipmentLocation.list.options({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-      ...(query.customer ? {customer: String(query.customer)} : {}),
-      ...(query.branch ? {branch: String(query.branch)} : {}),
-      ...(query.created ? {created: String(query.created)} : {}),
-      ...(query.modified ? {modified: String(query.modified)} : {}),
-    },
-  }),
+  resource: Api.EquipmentLocation,
   urlSync: true,
   loadError: $trans('Error loading locations'),
 })

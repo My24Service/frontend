@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-planning-user-modal',
         confirmText: $trans('Are you sure you want to delete this planning user?'),
-        destroyMutation: Api.CompanyPlanninguser.destroy.mutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: Api.CompanyPlanninguser.list.queryKey()}),
+        resource: Api.CompanyPlanninguser,
         deletedDetail: $trans('planning user has been deleted'),
         deleteError: $trans('Error deleting planning user'),
       }"
@@ -37,14 +36,7 @@
 
 <script lang="ts" setup>
 
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 
 const props = withDefaults(defineProps<{
@@ -88,11 +80,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<PlanningUserRow>({
   key: 'planning-user-table',
   columns,
-  listOptions: (query) => Api.CompanyPlanninguser.list.options({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyPlanninguser,
   urlSync: true,
   loadError: $trans('Error loading planning users'),
 })
