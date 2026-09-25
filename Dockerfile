@@ -1,5 +1,6 @@
 # ---- Base ----
-FROM node:24-slim AS base
+FROM ghcr.io/pnpm/pnpm:12 AS base
+RUN pnpm runtime set node 24 -g
 
 RUN apt-get update && apt-get install -y git
 
@@ -7,13 +8,11 @@ WORKDIR /app
 # write version to assets
 COPY . .
 RUN ./save_version.sh
-RUN curl -fsSL https://get.pnpm.io/install.sh | sh -
-RUN pnpm ci && pnpm update vite-plugin-theme-preprocessor
 
 # ---- Build ----
 FROM base AS build
 WORKDIR /app
-
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm run build
 
 # ---- Release ----

@@ -1,4 +1,11 @@
-version: '2.1'
+version: "2.1"
+
+# Set `manual-build: true` when triggering a pipeline by hand to run the
+# temporary `build` workflow below without the `test` job.
+parameters:
+  manual-build:
+    type: boolean
+    default: false
 
 jobs:
   test:
@@ -76,24 +83,39 @@ jobs:
           command: docker push registry.chapter3-it.io/my24service/frontend-develop:latest
 
 workflows:
-   version: 2
-   test-and-build:
-     jobs:
-       # Deliberately unfiltered. Combined with the project-level
-       # "Only build pull requests" setting, this runs the suite on every PR
-       # and on the default branch, and nowhere else. CircleCI branch filters
-       # cannot see a PR's target branch, so this is the only way to cover
-       # PRs into develop/main.
-       - test
-       - build-push-main:
-           requires:
-             - test
-           filters:
-             branches:
-               only: main
-       - build-push-develop:
-           requires:
-             - test
-           filters:
-             branches:
-               only: develop
+  version: 2
+  # Temporary: run the image builds without `test`. Gated on the
+  # `manual-build` pipeline parameter, so no automatic trigger (push, PR,
+  # schedule) can start it. Trigger by hand via Trigger Pipeline with
+  # `manual-build: true`.
+  build:
+    when: << pipeline.parameters.manual-build >>
+    jobs:
+      - build-push-main:
+          filters:
+            branches:
+              only: main
+      - build-push-develop:
+          filters:
+            branches:
+              only: develop
+  test-and-build:
+    jobs:
+      # Deliberately unfiltered. Combined with the project-level
+      # "Only build pull requests" setting, this runs the suite on every PR
+      # and on the default branch, and nowhere else. CircleCI branch filters
+      # cannot see a PR's target branch, so this is the only way to cover
+      # PRs into develop/main.
+      - test
+      - build-push-main:
+          requires:
+            - test
+          filters:
+            branches:
+              only: main
+      - build-push-develop:
+          requires:
+            - test
+          filters:
+            branches:
+              only: develop
