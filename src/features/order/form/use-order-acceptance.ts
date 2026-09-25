@@ -1,7 +1,4 @@
-import {
-  orderOrderSetOrderAcceptedCreateMutation,
-  orderOrderSetOrderRejectedCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
+
 /**
  * The acceptance both order forms post: accepting after a save, and
  * rejecting straight from the header (which leaves the form). The two
@@ -11,8 +8,8 @@ import {
  */
 export function useOrderAcceptance(id: Ref<number>, cancelled: () => void) {
   const {create} = useToast()
-  const acceptMutation = useMutation({...orderOrderSetOrderAcceptedCreateMutation()})
-  const rejectMutation = useMutation({...orderOrderSetOrderRejectedCreateMutation()})
+  const acceptMutation = useMutation({...Api.OrderOrder.extras.setOrderAcceptedCreate.mutation()})
+  const rejectMutation = useMutation({...Api.OrderOrder.extras.setOrderRejectedCreate.mutation()})
 
   async function accept(orderId: number) {
     await acceptMutation.mutateAsync({path: {id: orderId}})

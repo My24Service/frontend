@@ -1,8 +1,5 @@
-import {
-  mobileAssignUserCreateMutation,
-  mobileUnassignUserCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { AssignOrdersResponse } from '@/api/types.gen'
+
+
 import { invalidateDispatchBoard } from '../invalidation'
 
 /**
@@ -21,8 +18,8 @@ import { invalidateDispatchBoard } from '../invalidation'
 export function useOrderAssignment() {
   const queryClient = useQueryClient()
 
-  const assignMutation = useMutation({...mobileAssignUserCreateMutation()})
-  const unassignMutation = useMutation({...mobileUnassignUserCreateMutation()})
+  const assignMutation = useMutation({...Api.MobileAssignUser.create.mutation()})
+  const unassignMutation = useMutation({...Api.MobileUnassignUser.create.mutation()})
 
   /**
    * Assign one order set to each of `userIds`, sequentially: a failure on the
@@ -34,7 +31,7 @@ export function useOrderAssignment() {
    * engineer-event modal attaches to the event. The board ignores them.
    */
   async function assignOrders(userIds: readonly number[], orderIds: readonly string[], notifyUser: boolean) {
-    const responses: AssignOrdersResponse[] = []
+    const responses: Api.AssignOrdersResponse[] = []
     for (const userId of userIds) {
       responses.push(await assignMutation.mutateAsync({
         path: {id: userId},

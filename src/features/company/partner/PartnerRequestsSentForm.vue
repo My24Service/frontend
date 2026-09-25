@@ -91,12 +91,7 @@
 
 <script setup lang="ts">
 import VueMultiselect from 'vue-multiselect'
-import {
-  companyPartnerRequestCreateMutation,
-  memberMemberGetForPartnerSelectListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PartnerSelect } from '@/api/types.gen'
-import { CompanyPartnerRequestSent } from '@/api/resources.gen'
+
 import {
   useQueryErrorToast,
 } from '@/features/forms'
@@ -127,21 +122,21 @@ const memberInfo = ref('')
 const searchTerm = ref('')
 
 const pickerQuery = useQuery(() => ({
-  ...memberMemberGetForPartnerSelectListOptions({ query: { q: searchTerm.value } }),
+  ...Api.MemberMemberGetForPartnerSelect.list.options({ query: { q: searchTerm.value } }),
 }))
 useQueryErrorToast(pickerQuery.error, $trans('Error fetching members'))
 
 const members = computed(() => pickerQuery.data.value ?? [])
 const isSearching = computed(() => pickerQuery.isFetching.value)
 
-const createMutation = useMutation(companyPartnerRequestCreateMutation())
+const createMutation = useMutation(Api.CompanyPartnerRequest.create.mutation())
 const buttonDisabled = computed(() => saving.value || createMutation.isPending.value)
 
-function memberLabel(member: PartnerSelect): string {
+function memberLabel(member: Api.PartnerSelect): string {
   return `${member.name} - ${member.city ?? ''}`
 }
 
-function selectMember(option: PartnerSelect) {
+function selectMember(option: Api.PartnerSelect) {
   values.value.to_member = option.id
   memberInfo.value = `${option.name}, ${option.city ?? ''}`
 }
@@ -164,7 +159,7 @@ async function submitForm() {
       return
     }
     infoToast(toast, $trans('Created'), $trans('Partner request has been sent'))
-    await CompanyPartnerRequestSent.invalidate(queryClient)
+    await Api.CompanyPartnerRequestSent.invalidate(queryClient)
     router.go(-1)
   } finally {
     saving.value = false

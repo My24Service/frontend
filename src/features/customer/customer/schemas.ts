@@ -1,8 +1,6 @@
 import * as v from 'valibot'
 import { objectPick } from '@vueuse/core'
 
-import type { Customer } from '@/api/types.gen'
-import { vCustomerCreateRequest, vPatchedCustomerRequest } from '@/api/valibot.gen'
 import {
   normalizePhone,
   fieldsFromRecord,
@@ -18,22 +16,22 @@ const requiredCustomerId = <E extends {customer_id: v.NullishSchema<v.GenericSch
 
 export const customerFormSchema = v.required(
   v.object({
-    ...vPatchedCustomerRequest.entries,
-    customer_id: requiredCustomerId(vPatchedCustomerRequest.entries),
+    ...schemas.vPatchedCustomerRequest.entries,
+    customer_id: requiredCustomerId(schemas.vPatchedCustomerRequest.entries),
   }),
   ['name', 'address', 'postal', 'city', 'country_code'],
 )
 
 export const customerCreateSchema = v.object({
-  ...vCustomerCreateRequest.entries,
-  customer_id: requiredCustomerId(vCustomerCreateRequest.entries),
+  ...schemas.vCustomerCreateRequest.entries,
+  customer_id: requiredCustomerId(schemas.vCustomerCreateRequest.entries),
 })
 
 /** The read-only companions the panels display next to the form. */
 const DISPLAY_FIELDS = ['id', 'num_orders'] as const
 
-export type CustomerFormValues = v.InferInput<typeof vPatchedCustomerRequest> &
-  Partial<Pick<Customer, (typeof DISPLAY_FIELDS)[number]>>
+export type CustomerFormValues = v.InferInput<typeof schemas.vPatchedCustomerRequest> &
+  Partial<Pick<Api.Customer, (typeof DISPLAY_FIELDS)[number]>>
 
 export function emptyCustomer(): CustomerFormValues {
   return {
@@ -45,10 +43,10 @@ export function emptyCustomer(): CustomerFormValues {
   }
 }
 
-export function customerFromRecord(record: Customer): CustomerFormValues {
+export function customerFromRecord(record: Api.Customer): CustomerFormValues {
   return {
     ...emptyCustomer(),
-    ...fieldsFromRecord(vPatchedCustomerRequest, record),
+    ...fieldsFromRecord(schemas.vPatchedCustomerRequest, record),
     // The branch pickers treat null as a state of their own ("none"), not as
     // an absent value, so a record's null reaches them as null.
     branch_partner: record.branch_partner ?? null,

@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ActivityUserTotal } from '@/api/types.gen'
+
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
 import CostCollectionShell from './CostCollectionShell.vue'
@@ -96,7 +96,7 @@ import {
 import type { TeamleaderHourlyRate } from '../use-teamleader-products'
 
 // The editor also accepts the older per-user duration aliases and partner metadata.
-type UserTotal = { -readonly [K in keyof ActivityUserTotal]: ActivityUserTotal[K] } & {
+type UserTotal = { -readonly [K in keyof Api.ActivityUserTotal]: Api.ActivityUserTotal[K] } & {
   is_partner?: boolean
   extra_work?: string | null
   extra_work_secs?: number | null

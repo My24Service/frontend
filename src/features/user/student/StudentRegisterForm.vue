@@ -111,7 +111,7 @@
 </template>
 
 <script lang="ts" setup>
-import { accountsRegisterCreateMutation } from '@/api/@tanstack/vue-query.gen'
+
 import {
   ValidatedForm,
   ValidatedFormField,
@@ -133,7 +133,7 @@ const errors = ref<StudentRegistrationErrors>({})
 const submitClicked = ref(false)
 const registered = ref(false)
 
-const registerMutation = useMutation(accountsRegisterCreateMutation())
+const registerMutation = useMutation(Api.AccountsRegister.create.mutation())
 
 const isPending = computed(() => registerMutation.isPending.value)
 

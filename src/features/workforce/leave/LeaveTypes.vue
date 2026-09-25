@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-leave-modal',
         confirmText: $trans('Are you sure you want to delete this leave type?'),
-        destroyMutation: companyLeaveTypeDestroyMutation,
-        invalidate: CompanyLeaveType.invalidate,
+        destroyMutation: Api.CompanyLeaveType.destroy.mutation,
+        invalidate: Api.CompanyLeaveType.invalidate,
         deletedDetail: $trans('Leave type has been deleted'),
         deleteError: $trans('Error deleting leave type'),
       }"
@@ -78,14 +78,7 @@
 
 <script setup lang="ts">
 import IBiPencil from '~icons/bi/pencil'
-import {
-  companyLeaveTypeCreateMutation,
-  companyLeaveTypeDestroyMutation,
-  companyLeaveTypeListOptions,
-  companyLeaveTypePartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { LeaveType, LeaveTypeRequest, PaginatedLeaveTypeList } from '@/api/types.gen'
-import { CompanyLeaveType } from '@/api/resources.gen'
+
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
@@ -110,7 +103,7 @@ import {
  * invalidates the list query, so a save closes the modal and refetches behind
  * it.
  */
-type LeaveTypeRow = ListRow<PaginatedLeaveTypeList>
+type LeaveTypeRow = ListRow<Api.PaginatedLeaveTypeList>
 
 const queryClient = useQueryClient()
 const {create: toast} = useToast()
@@ -146,7 +139,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'leave-type-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => companyLeaveTypeListOptions({
+  listOptions: (query) => Api.CompanyLeaveType.list.options({
     query: {
       ...baseListParams(query),
     },
@@ -155,15 +148,15 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   loadError: $trans('Error loading leave types'),
 })
 
-const values = ref<LeaveTypeRequest>(emptyLeaveType())
+const values = ref<Api.LeaveTypeRequest>(emptyLeaveType())
 const errors = ref<LeaveTypeFieldErrors>({})
 const submitClicked = ref(false)
 const submitting = ref(false)
 /** null while the modal is creating; the row's id while it is editing. */
 const editingId = ref<number | null>(null)
 
-const createMutation = useMutation(companyLeaveTypeCreateMutation())
-const updateMutation = useMutation(companyLeaveTypePartialUpdateMutation())
+const createMutation = useMutation(Api.CompanyLeaveType.create.mutation())
+const updateMutation = useMutation(Api.CompanyLeaveType.update.mutation())
 
 function openCreate() {
   editingId.value = null
@@ -172,7 +165,7 @@ function openCreate() {
   formModal.value?.show()
 }
 
-function openEdit(record: LeaveType) {
+function openEdit(record: Api.LeaveType) {
   editingId.value = record.id
   values.value = leaveTypeFromRecord(record)
   submitClicked.value = false
@@ -208,7 +201,7 @@ async function submit(event: {preventDefault: () => void}) {
       })
       infoToast(toast, $trans('Updated'), $trans('Leave type has been updated'))
     }
-    await CompanyLeaveType.invalidate(queryClient)
+    await Api.CompanyLeaveType.invalidate(queryClient)
     formModal.value?.hide()
   } catch {
     errorToast(toast, id === null ? $trans('Error creating leave types') : $trans('Error updating leave type'))

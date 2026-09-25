@@ -1,5 +1,5 @@
-import { CompanyPicture } from '@/api/resources.gen'
-import type { Picture } from '@/api/types.gen'
+
+
 import {
   type FieldErrors,
   type FieldLabels,
@@ -30,7 +30,7 @@ export function emptyPicture(): PictureFormValues {
  * so it never enters the values - the screen reads it off the query's record
  * to show the current image.
  */
-export function pictureFromRecord(record: Picture): PictureFormValues {
+export function pictureFromRecord(record: Api.Picture): PictureFormValues {
   return { name: record.name, picture: null }
 }
 
@@ -58,8 +58,8 @@ function shaped(values: PictureFormValues) {
  * The patch body it sends is a superset of what PATCH requires, so nothing is
  * added on top of the generated schema.
  */
-export const pictureWrite = writeContract(CompanyPicture, {
-  validateWith: CompanyPicture.create.body,
+export const pictureWrite = writeContract(Api.CompanyPicture, {
+  validateWith: Api.CompanyPicture.create.body,
   shape: shaped,
   labels: FIELD_LABELS,
 })

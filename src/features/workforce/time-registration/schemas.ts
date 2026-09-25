@@ -1,7 +1,5 @@
 import * as v from 'valibot'
 
-import { vPatchedTimeCorrectionRequest } from '@/api/valibot.gen'
-import type { TimeRegistrationWorkhourRow } from '@/api/types.gen'
 /**
  * The work-hours correction: what the planner types, and what rides.
  *
@@ -69,7 +67,7 @@ export function normaliseCorrection(stored: string | undefined | null): string {
  * request declares it optional, and a null would be rejected.
  */
 export function correctionBody(
-  entry: TimeRegistrationWorkhourRow,
+  entry: Api.TimeRegistrationWorkhourRow,
   correction: Correction,
   userId: string | number | null | undefined,
 ) {
@@ -81,5 +79,5 @@ export function correctionBody(
   if (userId !== null && userId !== undefined && userId !== '') {
     body.work_correction_by_user = Number(userId)
   }
-  return v.parse(vPatchedTimeCorrectionRequest, body)
+  return v.parse(schemas.vPatchedTimeCorrectionRequest, body)
 }

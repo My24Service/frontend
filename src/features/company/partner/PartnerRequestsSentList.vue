@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-partner-request-modal',
         confirmText: $trans('Are you sure you want to delete this partner request?'),
-        destroyMutation: companyPartnerRequestDestroyMutation,
-        invalidate: CompanyPartnerRequestSent.invalidate,
+        destroyMutation: Api.CompanyPartnerRequest.destroy.mutation,
+        invalidate: Api.CompanyPartnerRequestSent.invalidate,
         deletedDetail: $trans('Partner request has been deleted'),
         deleteError: $trans('Error deleting partner request'),
       }"
@@ -35,12 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  companyPartnerRequestDestroyMutation,
-  companyPartnerRequestSentListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedPartnerRequestList } from '@/api/types.gen'
-import { CompanyPartnerRequestSent } from '@/api/resources.gen'
+
 import type { PillNavItem } from '@/components/PillsNav.vue'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { partnerColumns } from './partner-columns'
@@ -55,7 +50,7 @@ const partnerPills: PillNavItem[] = [
  * The partner requests this tenant sent. Delete-only rows: a sent request is
  * withdrawn, never edited, and acceptance happens on the other side.
  */
-type RequestRow = ListRow<PaginatedPartnerRequestList>
+type RequestRow = ListRow<Api.PaginatedPartnerRequestList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
@@ -82,7 +77,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<RequestRow>({
   key: 'partner-requests-sent-table',
   columns,
-  listOptions: (query) => companyPartnerRequestSentListOptions({
+  listOptions: (query) => Api.CompanyPartnerRequestSent.list.options({
     query: {
       ...baseListParams(query),
     },

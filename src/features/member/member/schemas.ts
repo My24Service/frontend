@@ -1,8 +1,6 @@
 import * as v from 'valibot'
 import { objectOmit } from '@vueuse/core'
 
-import type { Member, MemberRequest } from '@/api/types.gen'
-import { vMemberMemberCreateBody } from '@/api/valibot.gen'
 import {
   fieldsFromRecord,
   type FieldLabels,
@@ -10,7 +8,7 @@ import {
   selectMessage,
   type FieldErrors,
 } from '@/features/forms'
-export function emptyMember(): MemberRequest {
+export function emptyMember(): Api.MemberRequest {
   return {
     companycode: '',
     name: '',
@@ -35,17 +33,17 @@ export function emptyMember(): MemberRequest {
   }
 }
 
-export function memberFromRecord(record: Member): MemberRequest {
+export function memberFromRecord(record: Api.Member): Api.MemberRequest {
   // The record carries the logos as URLs; on the form they are the files a
   // user picks, and an untouched edit must not send the URLs back as files.
   // The upload fields show the current logos straight off the record.
   return {
     ...emptyMember(),
-    ...objectOmit(fieldsFromRecord(vMemberMemberCreateBody, record), ['companylogo', 'companylogo_workorder']),
+    ...objectOmit(fieldsFromRecord(schemas.vMemberMemberCreateBody, record), ['companylogo', 'companylogo_workorder']),
   }
 }
 
-export type MemberFieldErrors = FieldErrors<keyof MemberRequest & string>
+export type MemberFieldErrors = FieldErrors<keyof Api.MemberRequest & string>
 
 /** The one rule the schema cannot say: the API answered that the code is taken. */
 export const COMPANYCODE_TAKEN_MESSAGE = () => $trans('Company code is already in use')
@@ -69,15 +67,15 @@ export const FIELD_LABELS = {
   contacts: () => $trans('Contacts'),
   activities: () => $trans('Activities'),
   info: () => $trans('Info'),
-} satisfies FieldLabels<keyof MemberRequest & string>
+} satisfies FieldLabels<keyof Api.MemberRequest & string>
 
 export const COMPANYCODE_DEBOUNCE_MS = 500
 
 export function validateMemberForm(
-  values: MemberRequest,
+  values: Api.MemberRequest,
   { requireLogo = false }: { requireLogo?: boolean } = {},
 ): MemberFieldErrors {
-  const errors: MemberFieldErrors = fieldErrors(vMemberMemberCreateBody, values, {}, FIELD_LABELS)
+  const errors: MemberFieldErrors = fieldErrors(schemas.vMemberMemberCreateBody, values, {}, FIELD_LABELS)
 
   if (requireLogo && !values.companylogo) {
     errors.companylogo = MEMBER_LOGO_REQUIRED_MESSAGE()
@@ -86,6 +84,6 @@ export function validateMemberForm(
   return errors
 }
 
-export function parseMemberForm(values: MemberRequest): MemberRequest {
-  return v.parse(vMemberMemberCreateBody, values)
+export function parseMemberForm(values: Api.MemberRequest): Api.MemberRequest {
+  return v.parse(schemas.vMemberMemberCreateBody, values)
 }

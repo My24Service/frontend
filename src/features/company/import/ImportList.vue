@@ -25,8 +25,8 @@
       :delete-modal="{
         modalId: 'delete-company-import-modal',
         confirmText: $trans('Are you sure you want to delete this import?'),
-        destroyMutation: companyImportDestroyMutation,
-        invalidate: CompanyImport.invalidate,
+        destroyMutation: Api.CompanyImport.destroy.mutation,
+        invalidate: Api.CompanyImport.invalidate,
         deletedDetail: $trans('Import has been deleted'),
         deleteError: $trans('Error deleting import'),
       }"
@@ -47,13 +47,7 @@ import { hLink } from '@/components/render'
 import { Fragment } from 'vue'
 import { RouterLink } from 'vue-router'
 import IBiArrowCounterclockwise from '~icons/bi/arrow-counterclockwise'
-import {
-  companyImportDestroyMutation,
-  companyImportListOptions,
-  companyImportRevertCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedImportList } from '@/api/types.gen'
-import { CompanyImport } from '@/api/resources.gen'
+
 import RowAction from '@/components/RowAction.vue'
 import { fileNameOf } from '@/features/shared'
 import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
@@ -66,7 +60,7 @@ import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, typ
  * nothing, edit and delete) or executed (counts: revert). The conditions are
  * the legacy screen's, including its quirk: an empty result reads as pending.
  */
-type ImportRow = ListRow<PaginatedImportList>
+type ImportRow = ListRow<Api.PaginatedImportList>
 
 const props = defineProps<{
   /** The route name stem this mount answers to. Supplied by the routers. */
@@ -150,7 +144,7 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
   // `ordering` - the headers stay non-sortable rather than rendering controls
   // nothing honours.
   enableSorting: false,
-  listOptions: (query) => companyImportListOptions({
+  listOptions: (query) => Api.CompanyImport.list.options({
     query: {
       ...baseListParams(query),
     },
@@ -159,7 +153,7 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
   loadError: $trans('Error loading imports'),
 })
 
-const revertMutation = useMutation(companyImportRevertCreateMutation())
+const revertMutation = useMutation(Api.CompanyImport.extras.revertCreate.mutation())
 
 function showRevertModal(id: number) {
   revertPk.value = id
@@ -175,7 +169,7 @@ async function revertImport() {
   try {
     await revertMutation.mutateAsync({ path: { id: revertPk.value } })
     infoToast(toast, $trans('Reverted'), $trans('Import has been reverted'))
-    await CompanyImport.invalidate(queryClient)
+    await Api.CompanyImport.invalidate(queryClient)
     revertModal.value?.hide()
   } catch {
     errorToast(toast, $trans('Error reverting import'))

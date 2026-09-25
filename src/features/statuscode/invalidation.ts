@@ -1,10 +1,5 @@
 import type { QueryClient } from '@tanstack/vue-query'
 
-import {
-  statuscodeActionListQueryKey,
-  statuscodeStatuscodeListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-
 /**
  * A statuscode carries its actions inline (`Statuscode.actions`), so a write
  * to either resource makes the statuscode list stale; the action list is
@@ -17,7 +12,7 @@ import {
  */
 export async function invalidateStatuscodeLists(queryClient: QueryClient): Promise<void> {
   await Promise.all([
-    queryClient.invalidateQueries({queryKey: statuscodeStatuscodeListQueryKey()}),
-    queryClient.invalidateQueries({queryKey: statuscodeActionListQueryKey()}),
+    queryClient.invalidateQueries({queryKey: Api.StatuscodeStatuscode.list.queryKey()}),
+    queryClient.invalidateQueries({queryKey: Api.StatuscodeAction.list.queryKey()}),
   ])
 }

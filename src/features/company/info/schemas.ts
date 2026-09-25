@@ -1,7 +1,5 @@
 import * as v from 'valibot'
 
-import { vPatchedMemberRequest } from '@/api/valibot.gen'
-import type { Member } from '@/api/types.gen'
 import {
   fieldErrors,
   type FieldErrors,
@@ -57,7 +55,7 @@ export function emptyInfo(): InfoFormValues {
 }
 
 /** The fetched record as form values: the fields this screen owns. */
-export function infoFromRecord(record: Member): InfoFormValues {
+export function infoFromRecord(record: Api.Member): InfoFormValues {
   return {
     name: record.name,
     chamber_of_commerce: record.chamber_of_commerce ?? null,
@@ -122,7 +120,7 @@ function shaped(values: InfoFormValues) {
  * own.
  */
 export function validateInfo(values: InfoFormValues): InfoFormErrors {
-  return fieldErrors(vPatchedMemberRequest, shaped(values), {}, FIELD_LABELS)
+  return fieldErrors(schemas.vPatchedMemberRequest, shaped(values), {}, FIELD_LABELS)
 }
 
 /**
@@ -132,5 +130,5 @@ export function validateInfo(values: InfoFormValues): InfoFormErrors {
  * ignored them either way.
  */
 export function parseInfo(values: InfoFormValues) {
-  return v.parse(vPatchedMemberRequest, shaped(values))
+  return v.parse(schemas.vPatchedMemberRequest, shaped(values))
 }

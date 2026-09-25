@@ -5,11 +5,6 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import locale from '@fullcalendar/core/locales/nl'
 
-import {
-  orderOrderMonthEventsListOptions,
-  orderOrderRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { OrderDetail, OrderEvent } from '@/api/types.gen'
 import { toApiDate } from '@/features/forms'
 
 /**
@@ -60,7 +55,7 @@ export function useSchedule() {
   const events: CalendarOptions['events'] = async (info, success, failure) => {
     const loader = loading.show()
     try {
-      const rows = await queryClient.fetchQuery(orderOrderMonthEventsListOptions({
+      const rows = await queryClient.fetchQuery(Api.OrderOrderMonthEvents.list.options({
         query: {start: toApiDate(info.start), end: toApiDate(info.end)},
       }))
       loadedEventTypes.value = rows.map((event) => event.groupId)
@@ -72,7 +67,7 @@ export function useSchedule() {
     }
   }
 
-  function toCalendarEvent(event: OrderEvent): EventInput {
+  function toCalendarEvent(event: Api.OrderEvent): EventInput {
     const start = new Date(event.start)
     const end = event.end ? new Date(event.end) : start
     // the row's status colour is not the event's colour: FullCalendar would
@@ -91,13 +86,13 @@ export function useSchedule() {
 
   // The order modal --------------------------------------------------------
 
-  const selectedOrder = ref<OrderDetail | null>(null)
+  const selectedOrder = ref<Api.OrderDetail | null>(null)
   const orderModal = ref<{show: () => void} | null>(null)
 
   const eventClick: CalendarOptions['eventClick'] = async (info) => {
     const loader = loading.show()
     try {
-      selectedOrder.value = await queryClient.fetchQuery(orderOrderRetrieveOptions({path: {id: info.event.id}}))
+      selectedOrder.value = await queryClient.fetchQuery(Api.OrderOrder.retrieve.options({path: {id: info.event.id}}))
       // the modal renders once there is an order; give it the tick
       await Promise.resolve()
       orderModal.value?.show()

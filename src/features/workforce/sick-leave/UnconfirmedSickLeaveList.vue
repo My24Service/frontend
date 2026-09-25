@@ -31,12 +31,7 @@
 <script setup lang="ts">
 import { hLink } from '@/components/render'
 import IBiCheckLg from '~icons/bi/check-lg'
-import {
-  companyUserSickLeaveAdminAllUnconfirmedListOptions,
-  companyUserSickLeaveAdminSetConfirmedCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedUserSickLeaveList } from '@/api/types.gen'
-import { CompanyUserSickLeaveAdmin } from '@/api/resources.gen'
+
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
@@ -50,7 +45,7 @@ import SubNav from '../SubNav.vue'
  * plain text, as the legacy screen's actually rendered: its `cell(full_name)`
  * template was dead because the column's field is `user_full_name`.
  */
-type SickLeaveRow = ListRow<PaginatedUserSickLeaveList>
+type SickLeaveRow = ListRow<Api.PaginatedUserSickLeaveList>
 
 const queryClient = useQueryClient()
 const {create: toast} = useToast()
@@ -98,7 +93,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'unconfirmed-sick-leave-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => companyUserSickLeaveAdminAllUnconfirmedListOptions({
+  listOptions: (query) => Api.CompanyUserSickLeaveAdminAllUnconfirmed.list.options({
     query: {
       ...baseListParams(query),
     },
@@ -116,10 +111,10 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
 const {confirm: showConfirmModal, handleOk: handleConfirmOk} = useConfirmedAction({
   modalRefName: 'confirm-leave-modal',
   mutationOptions: () => ({
-    ...companyUserSickLeaveAdminSetConfirmedCreateMutation(),
+    ...Api.CompanyUserSickLeaveAdmin.extras.setConfirmedCreate.mutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Accepted'), $trans('Leave as been marked as confirmed'))
-      await CompanyUserSickLeaveAdmin.invalidate(queryClient)
+      await Api.CompanyUserSickLeaveAdmin.invalidate(queryClient)
     },
     onError: () => errorToast(toast, $trans('Error confirming sick leave')),
   }),

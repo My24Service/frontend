@@ -20,12 +20,12 @@
 </template>
 
 <script setup lang="ts">
-import type { OrderDetail } from '@/api/types.gen'
+
 /**
  * The read-only contact block both order details render: the temps view
  * and the maintenance summary panel wrote it out identically.
  */
-export type OrderContact = Pick<OrderDetail,
+export type OrderContact = Pick<Api.OrderDetail,
   | 'order_contact'
   | 'order_email'
   | 'order_tel'

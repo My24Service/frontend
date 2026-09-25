@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-picture-modal',
         confirmText: $trans('Are you sure you want to delete this picture?'),
-        destroyMutation: companyPictureDestroyMutation,
-        invalidate: CompanyPicture.invalidate,
+        destroyMutation: Api.CompanyPicture.destroy.mutation,
+        invalidate: Api.CompanyPicture.invalidate,
         deletedDetail: $trans('Picture has been deleted'),
         deleteError: $trans('Error deleting picture'),
       }"
@@ -35,15 +35,10 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import {
-  companyPictureDestroyMutation,
-  companyPictureListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedPictureList } from '@/api/types.gen'
-import { CompanyPicture } from '@/api/resources.gen'
+
 import { NO_IMAGE_URL } from '@/constants'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
-type PictureRow = ListRow<PaginatedPictureList>
+type PictureRow = ListRow<Api.PaginatedPictureList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
@@ -83,7 +78,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<PictureRow>({
   key: 'picture-table',
   columns,
-  listOptions: (query) => companyPictureListOptions({
+  listOptions: (query) => Api.CompanyPicture.list.options({
     query: {
       ...baseListParams(query),
     },

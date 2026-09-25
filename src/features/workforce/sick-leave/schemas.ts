@@ -1,7 +1,5 @@
 import * as v from 'valibot'
 
-import { CompanyUserSickLeaveAdmin } from '@/api/resources.gen'
-import type { UserSickLeave } from '@/api/types.gen'
 import {
   selectMessage,
   type FieldErrors,
@@ -18,7 +16,7 @@ import {
  * form does not carry the field and the parse never sends it.
  */
 export type SickLeaveFormValues =
-  Pick<v.InferInput<typeof CompanyUserSickLeaveAdmin.create.body>, 'start_date'>
+  Pick<v.InferInput<typeof Api.CompanyUserSickLeaveAdmin.create.body>, 'start_date'>
   & {
     // a picker that is empty rather than absent until chosen
     user: number | null
@@ -39,7 +37,7 @@ export function emptySickLeave(today: string): SickLeaveFormValues {
  * format the tenant configured - the same reading the leave form does, and the
  * ledger records the change.
  */
-export function sickLeaveFromRecord(record: UserSickLeave): SickLeaveFormValues {
+export function sickLeaveFromRecord(record: Api.UserSickLeave): SickLeaveFormValues {
   return {
     user: record.user,
     start_date: record.start_date_iso,
@@ -57,7 +55,7 @@ export const FIELD_MESSAGES = {
 } satisfies FieldMessages<keyof SickLeaveFieldErrors & string>
 
 /** `user` is already declared required; the date is optional on the wire. */
-const vSickLeaveBody = v.required(CompanyUserSickLeaveAdmin.create.body, ['start_date'])
+const vSickLeaveBody = v.required(Api.CompanyUserSickLeaveAdmin.create.body, ['start_date'])
 
 /**
  * Validation reads the strengthened copy above - the ledger's rule: `user` is
@@ -68,7 +66,7 @@ const vSickLeaveBody = v.required(CompanyUserSickLeaveAdmin.create.body, ['start
  * PATCHed the whole loaded record back, `user_full_name`, `created_by` and the
  * status fields included.
  */
-export const sickLeaveWrite = writeContract(CompanyUserSickLeaveAdmin, {
+export const sickLeaveWrite = writeContract(Api.CompanyUserSickLeaveAdmin, {
   validateWith: vSickLeaveBody,
   labels: FIELD_LABELS,
   messages: FIELD_MESSAGES,

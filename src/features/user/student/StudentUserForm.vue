@@ -243,9 +243,6 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import { CompanyStudentuser } from '@/api/resources.gen'
-import { vStudentUserWriteRequestWritable } from '@/api/valibot.gen'
-import type { StudentUser } from '@/api/types.gen'
 import {
   emptyStudentUser,
   FIELD_MESSAGES,
@@ -266,7 +263,7 @@ const props = withDefaults(defineProps<{
 
 // The record nests its profile the way the write body does, so the form's
 // fields fill straight from it; the passwords start blank.
-function studentUserFromRecord(record: StudentUser): StudentUserFormValues {
+function studentUserFromRecord(record: Api.StudentUser): StudentUserFormValues {
   return {
     ...filledFrom(emptyUserIdentity(), record),
     student_user: filledFrom(emptyStudentUser().student_user, record.student_user),
@@ -302,12 +299,12 @@ const {
   probe,
 } = useUserForm<
   StudentUserFormValues,
-  StudentUser,
-  v.InferOutput<typeof vStudentUserWriteRequestWritable>,
+  Api.StudentUser,
+  v.InferOutput<typeof schemas.vStudentUserWriteRequestWritable>,
   StudentUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: CompanyStudentuser,
+  resource: Api.CompanyStudentuser,
   empty: emptyStudentUser,
   fromRecord: studentUserFromRecord,
   validate: validateStudentUserForm,

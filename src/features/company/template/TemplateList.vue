@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-template-modal',
         confirmText: $trans('Are you sure you want to delete this template?'),
-        destroyMutation: companyTemplateDestroyMutation,
-        invalidate: CompanyTemplate.invalidate,
+        destroyMutation: Api.CompanyTemplate.destroy.mutation,
+        invalidate: Api.CompanyTemplate.invalidate,
         deletedDetail: $trans('Template has been deleted'),
         deleteError: $trans('Error deleting template'),
       }"
@@ -36,18 +36,13 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import IBiCheck from '~icons/bi/check'
-import {
-  companyTemplateDestroyMutation,
-  companyTemplateListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedTemplateList } from '@/api/types.gen'
-import { CompanyTemplate } from '@/api/resources.gen'
+
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 /**
  * The template list. The route names are the legacy `customer-template-*`
  * family: URLs stay stable across the migration, so they keep their names.
  */
-type TemplateRow = ListRow<PaginatedTemplateList>
+type TemplateRow = ListRow<Api.PaginatedTemplateList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
@@ -90,7 +85,7 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
   // `ordering` - the headers stay non-sortable rather than rendering controls
   // nothing honours.
   enableSorting: false,
-  listOptions: (query) => companyTemplateListOptions({
+  listOptions: (query) => Api.CompanyTemplate.list.options({
     query: {
       ...baseListParams(query),
     },

@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-partner-modal',
         confirmText: $trans('Are you sure you want to delete this partner relation?'),
-        destroyMutation: companyPartnerDestroyMutation,
-        invalidate: CompanyPartner.invalidate,
+        destroyMutation: Api.CompanyPartner.destroy.mutation,
+        invalidate: Api.CompanyPartner.invalidate,
         deletedDetail: $trans('partner has been deleted'),
         deleteError: $trans('Error deleting partner'),
       }"
@@ -36,12 +36,7 @@
 
 <script setup lang="ts">
 import IBiCheckSquareFill from '~icons/bi/check-square-fill'
-import {
-  companyPartnerDestroyMutation,
-  companyPartnerListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedPartnerDetailList } from '@/api/types.gen'
-import { CompanyPartner } from '@/api/resources.gen'
+
 import type { PillNavItem } from '@/components/PillsNav.vue'
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { partnerColumns } from './partner-columns'
@@ -61,7 +56,7 @@ const partnerPills: PillNavItem[] = [
  * request is accepted, never typed in - so the add button opens the request
  * form. The pills switch between the three partner screens.
  */
-type PartnerRow = ListRow<PaginatedPartnerDetailList>
+type PartnerRow = ListRow<Api.PaginatedPartnerDetailList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
@@ -91,7 +86,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<PartnerRow>({
   key: 'partner-table',
   columns,
-  listOptions: (query) => companyPartnerListOptions({
+  listOptions: (query) => Api.CompanyPartner.list.options({
     query: {
       ...baseListParams(query),
     },

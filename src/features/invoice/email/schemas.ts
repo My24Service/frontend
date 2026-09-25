@@ -1,5 +1,5 @@
 import * as v from 'valibot'
-import { vInvoiceEmailRequest } from '@/api/valibot.gen'
+
 import {
   fieldErrors,
   requiredMessage,
@@ -10,13 +10,13 @@ import {
 export const tagValidator = (tag: string) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(tag)
 
 export const emailFormSchema = v.object({
-  ...vInvoiceEmailRequest.entries,
+  ...schemas.vInvoiceEmailRequest.entries,
   // Case 2: a draft may be blank, but sending requires valid recipients and a subject.
   recipients: v.pipe(
-    v.unwrap(vInvoiceEmailRequest.entries.recipients),
+    v.unwrap(schemas.vInvoiceEmailRequest.entries.recipients),
     v.check(value => value.length > 0 && value.split(',').every(tagValidator)),
   ),
-  subject: v.pipe(v.unwrap(vInvoiceEmailRequest.entries.subject), v.check(value => value.trim().length > 0)),
+  subject: v.pipe(v.unwrap(schemas.vInvoiceEmailRequest.entries.subject), v.check(value => value.trim().length > 0)),
 })
 
 export type EmailFormValues = v.InferInput<typeof emailFormSchema>

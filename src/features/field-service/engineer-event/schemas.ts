@@ -1,7 +1,5 @@
 import * as v from 'valibot'
 
-import type { EngineerEventType, EngineerEventTypeRequest } from '@/api/types.gen'
-import { vEngineerEventTypeRequest } from '@/api/valibot.gen'
 import {
   type FieldLabels,
   fieldErrors,
@@ -17,7 +15,7 @@ import {
  * serializer is one this form does not offer yet.
  */
 export type EngineerEventTypeFormValues =
-  Omit<v.InferInput<typeof vEngineerEventTypeRequest>, 'measure_last_event_type' | 'statuscode'>
+  Omit<v.InferInput<typeof schemas.vEngineerEventTypeRequest>, 'measure_last_event_type' | 'statuscode'>
   & {
     measure_last_event_type: string
     statuscode: number | null
@@ -35,7 +33,7 @@ export function emptyEngineerEventType(): EngineerEventTypeFormValues {
  * three counts, which the legacy screen carried back onto the wire and the
  * parse now drops.
  */
-export function engineerEventTypeFromRecord(record: EngineerEventType): EngineerEventTypeFormValues {
+export function engineerEventTypeFromRecord(record: Api.EngineerEventType): EngineerEventTypeFormValues {
   return {
     event_type: record.event_type,
     measure_last_event_type: record.measure_last_event_type ?? '',
@@ -73,7 +71,7 @@ function shaped(values: EngineerEventTypeFormValues): Record<string, unknown> {
 }
 
 export function validateEngineerEventType(values: EngineerEventTypeFormValues): EngineerEventTypeFieldErrors {
-  return fieldErrors(vEngineerEventTypeRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
+  return fieldErrors(schemas.vEngineerEventTypeRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
 }
 
 /**
@@ -85,6 +83,6 @@ export function validateEngineerEventType(values: EngineerEventTypeFormValues): 
  * same three keys, and the create is the stricter of the pair about the one
  * the form cannot save without.
  */
-export function parseEngineerEventType(values: EngineerEventTypeFormValues): EngineerEventTypeRequest {
-  return v.parse(vEngineerEventTypeRequest, shaped(values))
+export function parseEngineerEventType(values: EngineerEventTypeFormValues): Api.EngineerEventTypeRequest {
+  return v.parse(schemas.vEngineerEventTypeRequest, shaped(values))
 }

@@ -1,4 +1,4 @@
-import type { CodeTypeEnum } from '@/api/types.gen'
+
 /**
  * The code types this Slice edits, in the order the pills show them.
  *
@@ -13,7 +13,7 @@ export const CODE_TYPES = [
   'quotation',
   'invoice',
   'work_hours',
-] as const satisfies readonly CodeTypeEnum[]
+] as const satisfies readonly Api.CodeTypeEnum[]
 
 export type CodeType = (typeof CODE_TYPES)[number]
 

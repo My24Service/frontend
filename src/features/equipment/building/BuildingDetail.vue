@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { equipmentBuildingRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+
 import { useQueryErrorToast } from '@/features/forms'
 import {
   useDetailChrome,
@@ -103,7 +103,7 @@ const props = withDefaults(defineProps<{
 
 const id = Number(props.pk)
 
-const detailQuery = useQuery(equipmentBuildingRetrieveOptions({path: {id}}))
+const detailQuery = useQuery(Api.EquipmentBuilding.retrieve.options({path: {id}}))
 useQueryErrorToast(detailQuery.error, $trans('Error fetching building detail'))
 const building = computed(() => detailQuery.data.value)
 

@@ -86,7 +86,7 @@
 </template>
 
 <script lang="ts" setup>
-import { companyStudentuserRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+
 import { useQueryErrorToast } from '@/features/forms'
 const props = defineProps<{
   pk: string | number
@@ -94,7 +94,7 @@ const props = defineProps<{
 
 const router = useRouter()
 
-const detailQuery = useQuery(() => companyStudentuserRetrieveOptions({path: {id: Number(props.pk)}}))
+const detailQuery = useQuery(() => Api.CompanyStudentuser.retrieve.options({path: {id: Number(props.pk)}}))
 
 useQueryErrorToast(detailQuery.error, $trans('Error loading studentuser'))
 

@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { WorkorderDocument } from '@/api/types.gen'
+
 /**
  * One of the "Workorder documents" blocks on the order detail: a heading
  * and a list of PDF links, or the heading dimmed when there is nothing.
@@ -36,6 +36,6 @@ import type { WorkorderDocument } from '@/api/types.gen'
 defineProps<{
   title: string
   orderId: string | null
-  documents: WorkorderDocument[]
+  documents: Api.WorkorderDocument[]
 }>()
 </script>

@@ -1,4 +1,4 @@
-import { vEngineerRequestWritable } from '@/api/valibot.gen'
+
 import {
   normalizePhone,
   type FieldLabels,
@@ -11,7 +11,7 @@ import {
   type UserFieldErrors,
   type UserFormValues,
 } from '../user-form'
-type EngineerWireValues = UserFormValues<typeof vEngineerRequestWritable>
+type EngineerWireValues = UserFormValues<typeof schemas.vEngineerRequestWritable>
 
 /** The wire shape, except that the location picker is empty until one is chosen. */
 export type EngineerUserFormValues = Omit<EngineerWireValues, 'engineer'> & {
@@ -73,9 +73,9 @@ function payloadOf(values: EngineerUserFormValues) {
 }
 
 export const { validate: validateEngineerUserForm, parse: parseEngineerUserForm } = userFormContract<
-  typeof vEngineerRequestWritable, EngineerUserFormValues, 'engineer.mobile' | 'engineer.preferred_location'
+  typeof schemas.vEngineerRequestWritable, EngineerUserFormValues, 'engineer.mobile' | 'engineer.preferred_location'
 >({
-  schema: vEngineerRequestWritable,
+  schema: schemas.vEngineerRequestWritable,
   messages: FIELD_MESSAGES,
   labels: FIELD_LABELS,
   payloadOf,

@@ -1,8 +1,5 @@
 import * as v from 'valibot'
 
-import { CompanyImport } from '@/api/resources.gen'
-import { vImportedRow } from '@/api/valibot.gen'
-import type { Import } from '@/api/types.gen'
 import {
   selectMessage,
   type FieldErrors,
@@ -31,7 +28,7 @@ export function emptyImport(): ImportFormValues {
 }
 
 /** The fetched record as form values: the name this form owns. */
-export function importFromRecord(record: Import): ImportFormValues {
+export function importFromRecord(record: Api.Import): ImportFormValues {
   return { name: record.name ?? '', file: null }
 }
 
@@ -51,7 +48,7 @@ export const FIELD_MESSAGES = {
  * open record rather than a redeclared entry.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PreviewRow = v.InferOutput<typeof vImportedRow> & Record<string, any>
+export type PreviewRow = v.InferOutput<typeof schemas.vImportedRow> & Record<string, any>
 
 /**
  * The wire-shaped body: the name trimmed as the API trims it before its
@@ -68,7 +65,7 @@ function shaped(values: ImportFormValues) {
  * the name is optional but not blank, and this form always sends it, so a
  * blank one is refused either way.
  */
-export const importWrite = writeContract(CompanyImport, {
+export const importWrite = writeContract(Api.CompanyImport, {
   shape: shaped,
   labels: FIELD_LABELS,
   messages: FIELD_MESSAGES,

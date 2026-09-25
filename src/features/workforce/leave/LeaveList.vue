@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-leave-modal',
         confirmText: $trans('Are you sure you want to delete this leave?'),
-        destroyMutation: companyUserLeaveHoursAdminDestroyMutation,
-        invalidate: CompanyUserLeaveHoursAdmin.invalidate,
+        destroyMutation: Api.CompanyUserLeaveHoursAdmin.destroy.mutation,
+        invalidate: Api.CompanyUserLeaveHoursAdmin.invalidate,
         deletedDetail: $trans('Leave has been deleted'),
         deleteError: $trans('Error deleting leave'),
       }"
@@ -36,12 +36,7 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import {
-  companyUserLeaveHoursAdminDestroyMutation,
-  companyUserLeaveHoursAdminListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedUserLeaveHoursList } from '@/api/types.gen'
-import { CompanyUserLeaveHoursAdmin } from '@/api/resources.gen'
+
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
@@ -54,7 +49,7 @@ import SubNav from '../SubNav.vue'
  * `ordering`, so no column is sortable rather than rendering a control nothing
  * honours.
  */
-type LeaveRow = ListRow<PaginatedUserLeaveHoursList>
+type LeaveRow = ListRow<Api.PaginatedUserLeaveHoursList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const helper = createAppColumnHelper<LeaveRow>()
@@ -100,7 +95,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'leave-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => companyUserLeaveHoursAdminListOptions({
+  listOptions: (query) => Api.CompanyUserLeaveHoursAdmin.list.options({
     query: {
       ...baseListParams(query),
     },

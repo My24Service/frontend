@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-engineer-user-modal',
         confirmText: $trans('Are you sure you want to delete this engineer?'),
-        destroyMutation: companyEngineerDestroyMutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyEngineerListQueryKey()}),
+        destroyMutation: Api.CompanyEngineer.destroy.mutation,
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: Api.CompanyEngineer.list.queryKey()}),
         deletedDetail: $trans('Engineer has been deleted'),
         deleteError: $trans('Error deleting engineer'),
       }"
@@ -37,12 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  companyEngineerDestroyMutation,
-  companyEngineerListOptions,
-  companyEngineerListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedEngineerList } from '@/api/types.gen'
+
 import {
   ServerTable,
   baseListParams,
@@ -55,7 +50,7 @@ import { createUserColumns } from '../user-list-columns'
 
 const authStore = useAuthStore()
 
-type EngineerUserRow = ListRow<PaginatedEngineerList>
+type EngineerUserRow = ListRow<Api.PaginatedEngineerList>
 
 const columnHelper = createAppColumnHelper<EngineerUserRow>()
 
@@ -94,7 +89,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<EngineerUserRow>({
   key: 'engineer-user-table',
   columns,
-  listOptions: (query) => companyEngineerListOptions({
+  listOptions: (query) => Api.CompanyEngineer.list.options({
     query: {
       ...baseListParams(query),
     },

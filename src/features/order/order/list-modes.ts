@@ -1,5 +1,5 @@
-import { orderOrderListOptions } from '@/api/@tanstack/vue-query.gen'
-import type { OrderOrderListData } from '@/api/types.gen'
+
+
 import { baseListParams, type ServerPagedListQuery } from '@/features/table'
 
 /**
@@ -21,9 +21,9 @@ export function isListMode(value: unknown): value is ListMode {
  * column filter that is set. Only the plain list additionally takes
  * `user_filter` (typed apart below).
  */
-export type OrderListQuery = NonNullable<OrderOrderListData['query']>
+export type OrderListQuery = NonNullable<Api.OrderOrderListData['query']>
 
-type PlainListOnly = Pick<NonNullable<OrderOrderListData['query']>, 'user_filter'>
+type PlainListOnly = Pick<NonNullable<Api.OrderOrderListData['query']>, 'user_filter'>
 
 /**
  * The column filters the list forwards, each under its bare name. The
@@ -57,6 +57,6 @@ export function userFilterFrom(query: ServerPagedListQuery): PlainListOnly {
 export function listOptionsFor(mode: ListMode, query: OrderListQuery, plainListOnly: PlainListOnly = {}) {
   // One query for every mode: the mode rides `?mode=` on the order list,
   // and only the plain list additionally names a saved filter.
-  if (mode === 'all') return orderOrderListOptions({query: {...query, ...plainListOnly}})
-  return orderOrderListOptions({query: {...query, mode}})
+  if (mode === 'all') return Api.OrderOrder.list.options({query: {...query, ...plainListOnly}})
+  return Api.OrderOrder.list.options({query: {...query, mode}})
 }

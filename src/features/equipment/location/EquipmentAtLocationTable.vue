@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { equipmentEquipmentListOptions } from '@/api/@tanstack/vue-query.gen'
+
 import { useQueryErrorToast } from '@/features/forms'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 /**
@@ -59,7 +59,7 @@ const fields = computed(() => [
   {key: 'num_orders', label: $trans('Orders')},
 ])
 
-const listQuery = useQuery(equipmentEquipmentListOptions({
+const listQuery = useQuery(Api.EquipmentEquipment.list.options({
   query: {location: props.locationId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
 }))
 useQueryErrorToast(listQuery.error, $trans('Error loading equipment'))

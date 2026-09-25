@@ -344,8 +344,7 @@
 <script setup lang="ts">
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import { nl } from 'date-fns/locale'
-import { equipmentLocationListForSelectListOptions } from '@/api/@tanstack/vue-query.gen'
-import { EquipmentEquipment } from '@/api/resources.gen'
+
 import { EQUIPMENT_TYPES } from '@/constants'
 import {
   useQueryErrorToast,
@@ -399,7 +398,7 @@ const documents = useTemplateRef<{parentCreated: (pk: number) => Promise<unknown
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: EquipmentEquipment,
+  resource: Api.EquipmentEquipment,
   empty: () => emptyEquipment(defaultCurrency.value),
   fromRecord: equipmentFromRecord,
   validate: (values, context) => validateEquipment(values, context, {
@@ -459,7 +458,7 @@ const locationOwnerId = computed<number | null>(() => (chooses.value ? ownerId.v
 const locationsQuery = useQuery(() => {
   const ownerId = locationOwnerId.value
   return {
-    ...equipmentLocationListForSelectListOptions(ownerId == null
+    ...Api.EquipmentLocationListForSelect.list.options(ownerId == null
       ? {}
       : {query: wireKind.value === 'branch' ? {branch: ownerId} : {customer: ownerId}}),
     enabled: !chooses.value || ownerId != null,

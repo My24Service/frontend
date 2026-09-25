@@ -56,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import { orderOrderRecreatePdfCreateMutation } from '@/api/@tanstack/vue-query.gen'
+
 /**
  * The workorder as the customer sees it, in an iframe on the public
  * `workorder-view` route, with the PDF download and — for planning — the
@@ -95,7 +95,7 @@ function openInNewTab() {
 
 const {create} = useToast()
 const recreate = useMutation({
-  ...orderOrderRecreatePdfCreateMutation(),
+  ...Api.OrderOrder.extras.recreatePdfCreate.mutation(),
   onSuccess: () => {
     infoToast(create, $trans('Success'), $trans('Workorder recreated'))
     emit('recreated')

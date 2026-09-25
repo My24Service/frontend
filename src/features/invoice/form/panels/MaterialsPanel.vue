@@ -76,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AssignedOrderMaterialTotals, Material, ProductList } from '@/api/types.gen'
+
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
 import CostCollectionShell from './CostCollectionShell.vue'
@@ -89,7 +89,7 @@ import { useCostPanelContext } from '../cost-panel-context'
 import { PIXEL_URL } from '@/constants'
 import { COST_TYPE } from '../calculations'
 
-type UsedMaterial = AssignedOrderMaterialTotals & {
+type UsedMaterial = Api.AssignedOrderMaterialTotals & {
   user_id?: number | string
   is_partner?: boolean
   full_name?: string
@@ -104,10 +104,10 @@ type UsedMaterial = AssignedOrderMaterialTotals & {
  * `useCostPanelContext`.
  */
 const props = withDefaults(defineProps<{
-  material_models?: Material[] | null
+  material_models?: Api.Material[] | null
   used_materials?: UsedMaterial[] | null
   /** The linked Teamleader products, or null off a Teamleader tenant. */
-  teamleaderProducts?: ProductList[] | null
+  teamleaderProducts?: Api.ProductList[] | null
 }>(), { material_models: null, used_materials: null, teamleaderProducts: null })
 const context = useCostPanelContext()
 const mainStore = useMainStore()

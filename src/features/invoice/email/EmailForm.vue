@@ -85,13 +85,8 @@
 </template>
 <script setup lang="ts">
 import { parse } from 'valibot'
-import {
-  invoiceEmailGetUnsentEmailRetrieveOptions, invoiceEmailGetDocumentsListOptions,
-  invoiceInvoiceRetrieveOptions, orderOrderRetrieveOptions, customerCustomerRetrieveOptions,
-  invoiceEmailCreateMutation, invoiceEmailPartialUpdateMutation, invoiceInvoiceDownloadPdfCreateMutation,
-  invoiceEmailGetUnsentEmailRetrieveQueryKey, invoiceInvoiceDetailRetrieveQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import { InvoiceInvoice } from '@/api/resources.gen'
+import { invoiceEmailGetUnsentEmailRetrieveOptions, invoiceEmailGetUnsentEmailRetrieveQueryKey, invoiceInvoiceDetailRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
+
 import {
   useQueryErrorToast,
   ValidatedForm,
@@ -107,12 +102,12 @@ const { create } = useToast()
 const invoiceId = computed(() => Number(route.query.invoiceId))
 const validId = computed(() => Number.isSafeInteger(invoiceId.value) && invoiceId.value > 0)
 const draftQuery = useQuery(() => ({ ...invoiceEmailGetUnsentEmailRetrieveOptions({query: {invoiceId: invoiceId.value}}), enabled: validId.value }))
-const docsQuery = useQuery(() => ({ ...invoiceEmailGetDocumentsListOptions({query: {invoiceId: invoiceId.value}}), enabled: validId.value }))
-const invoiceQuery = useQuery(() => ({ ...invoiceInvoiceRetrieveOptions({path: {id: invoiceId.value}}), enabled: validId.value }))
+const docsQuery = useQuery(() => ({ ...Api.InvoiceEmailGetDocuments.list.options({query: {invoiceId: invoiceId.value}}), enabled: validId.value }))
+const invoiceQuery = useQuery(() => ({ ...Api.InvoiceInvoice.retrieve.options({path: {id: invoiceId.value}}), enabled: validId.value }))
 const invoice = invoiceQuery.data
-const orderQuery = useQuery(() => ({ ...orderOrderRetrieveOptions({path: {id: String(invoice.value?.order)}}), enabled: !!invoice.value?.order }))
+const orderQuery = useQuery(() => ({ ...Api.OrderOrder.retrieve.options({path: {id: String(invoice.value?.order)}}), enabled: !!invoice.value?.order }))
 const customerId = computed(() => orderQuery.data.value?.customer_relation)
-const customerQuery = useQuery(() => ({ ...customerCustomerRetrieveOptions({path: {id: Number(customerId.value)}}), enabled: !!customerId.value }))
+const customerQuery = useQuery(() => ({ ...Api.CustomerCustomer.retrieve.options({path: {id: Number(customerId.value)}}), enabled: !!customerId.value }))
 useQueryErrorToast(draftQuery.error, $trans('Error fetching unsent email'))
 useQueryErrorToast(docsQuery.error, $trans('Error fetching documents'))
 useQueryErrorToast(invoiceQuery.error, $trans('Error fetching invoice'))
@@ -141,9 +136,9 @@ watch([invoiceId, ready], ([, value]) => {
   recipients.value = [...new Set([...(draft?.recipients ?? '').split(','), ...(invoice.value?.invoice_email ?? '').split(','), ...(customerQuery.data.value?.email ?? '').split(',')].map(item => item.trim()).filter(tagValidator))]
   hydrated = true
 }, {immediate: true})
-const createMutation = useMutation(invoiceEmailCreateMutation())
-const updateMutation = useMutation(invoiceEmailPartialUpdateMutation())
-const pdfMutation = useMutation(invoiceInvoiceDownloadPdfCreateMutation())
+const createMutation = useMutation(Api.InvoiceEmail.create.mutation())
+const updateMutation = useMutation(Api.InvoiceEmail.update.mutation())
+const pdfMutation = useMutation(Api.InvoiceInvoice.extras.downloadPdfCreate.mutation())
 const loadingPdf = pdfMutation.isPending
 const isLoading = computed(() => draftQuery.isFetching.value || invoiceQuery.isFetching.value || orderQuery.isFetching.value || customerQuery.isFetching.value || createMutation.isPending.value || updateMutation.isPending.value)
 function cancelForm() { router.go(-1) }
@@ -159,7 +154,7 @@ async function submitForm() {
     const result = email.value.id
       ? await updateMutation.mutateAsync({path: {id: email.value.id}, body})
       : await createMutation.mutateAsync({body})
-    await InvoiceInvoice.invalidate(queryClient)
+    await Api.InvoiceInvoice.invalidate(queryClient)
     await queryClient.invalidateQueries({queryKey: invoiceEmailGetUnsentEmailRetrieveQueryKey({query: {invoiceId: id}})})
     if (invoice.value?.uuid) await queryClient.invalidateQueries({queryKey: invoiceInvoiceDetailRetrieveQueryKey({path: {id: invoice.value.uuid}})})
     if (id !== invoiceId.value) return

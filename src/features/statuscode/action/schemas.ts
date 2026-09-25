@@ -1,7 +1,5 @@
 import * as v from 'valibot'
 
-import type { Action, ActionRequest, ActionTypeEnum } from '@/api/types.gen'
-import { vActionRequest } from '@/api/valibot.gen'
 import {
   fieldsFromRecord,
   type FieldLabels,
@@ -10,7 +8,7 @@ import {
 } from '@/features/forms'
 import type { CodeType } from '../code-types'
 
-type WireValues = v.InferInput<typeof vActionRequest>
+type WireValues = v.InferInput<typeof schemas.vActionRequest>
 
 export type ActionCondition = NonNullable<WireValues['json_conditions']>[number]
 
@@ -62,8 +60,8 @@ export function emptyAction(): ActionFormValues {
   }
 }
 
-export function actionFromRecord(record: Action): ActionFormValues {
-  const fields = fieldsFromRecord(vActionRequest, record)
+export function actionFromRecord(record: Api.Action): ActionFormValues {
+  const fields = fieldsFromRecord(schemas.vActionRequest, record)
   return {
     ...emptyAction(),
     ...fields,
@@ -73,7 +71,7 @@ export function actionFromRecord(record: Action): ActionFormValues {
   }
 }
 
-const actionFormSchema = v.omit(vActionRequest, ['statuscode'])
+const actionFormSchema = v.omit(schemas.vActionRequest, ['statuscode'])
 
 export type ActionFieldErrors = FieldErrors<keyof ActionFormValues & string>
 
@@ -122,13 +120,13 @@ export interface ActionWrite {
   statuscodePk: string | number | null
 }
 
-export function parseAction(values: ActionFormValues, write: ActionWrite): ActionRequest {
+export function parseAction(values: ActionFormValues, write: ActionWrite): Api.ActionRequest {
   const statuscode = write.isCreate ? Number(write.statuscodePk) : values.statuscode
-  return v.parse(vActionRequest, {...toWire(values), statuscode})
+  return v.parse(schemas.vActionRequest, {...toWire(values), statuscode})
 }
 
 export interface ActionTypeOption {
-  value: ActionTypeEnum
+  value: Api.ActionTypeEnum
   text: string
 }
 

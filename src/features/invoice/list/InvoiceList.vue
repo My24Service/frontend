@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-invoice-modal',
         confirmText: $trans('Are you sure you want to delete this invoice?'),
-        destroyMutation: invoiceInvoiceDestroyMutation,
-        invalidate: InvoiceInvoice.invalidate,
+        destroyMutation: Api.InvoiceInvoice.destroy.mutation,
+        invalidate: Api.InvoiceInvoice.invalidate,
         deletedDetail: $trans('Invoice has been deleted'),
         deleteError: $trans('Error deleting invoice'),
       }"
@@ -31,15 +31,7 @@
 import { RouterLink } from 'vue-router'
 import IBiMailbox from '~icons/bi/mailbox'
 import IBiArrowUpRightCircle from '~icons/bi/arrow-up-right-circle'
-import {
-  invoiceInvoiceDestroyMutation,
-  invoiceInvoiceListOptions,
-  invoiceInvoicePreliminaryListOptions,
-  invoiceInvoiceSentListOptions,
-  statuscodeStatuscodeListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Invoice } from '@/api/types.gen'
-import { InvoiceInvoice } from '@/api/resources.gen'
+
 import {
   useQueryErrorToast,
 } from '@/features/forms'
@@ -60,11 +52,11 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 
 // A picker needs the collection, not just the table's first page. This is
 // My24Pagination's maximum page size, shared with the other feature pickers.
-const codesQuery = useQuery(statuscodeStatuscodeListOptions({query: {code_type: 'invoice', page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}))
+const codesQuery = useQuery(Api.StatuscodeStatuscode.list.options({query: {code_type: 'invoice', page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}))
 const statuscodes = computed(() => codesQuery.data.value?.results ?? [])
 useQueryErrorToast(codesQuery.error, $trans('Error loading statuscodes'))
 
-const helper = createAppColumnHelper<Invoice>()
+const helper = createAppColumnHelper<Api.Invoice>()
 const columns = helper.columns([
   helper.accessor('invoice_id', {
     header: $trans('ID'),
@@ -102,7 +94,7 @@ const columns = helper.columns([
   }),
 ])
 
-const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetching, refresh} = useServerTable<Invoice>({
+const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetching, refresh} = useServerTable<Api.Invoice>({
   key: 'invoice-table',
   columns,
   // The API offers search and pagination, but no ordering or column filters.
@@ -110,9 +102,9 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
   enableColumnFilters: false,
   listOptions: ({page, page_size, q}) => {
     const options = {query: {page, page_size, ...(q ? {q} : {})}}
-    if (route.name === 'preliminary-invoices') return invoiceInvoicePreliminaryListOptions(options)
-    if (route.name === 'invoices-sent') return invoiceInvoiceSentListOptions(options)
-    return invoiceInvoiceListOptions(options)
+    if (route.name === 'preliminary-invoices') return Api.InvoiceInvoicePreliminary.list.options(options)
+    if (route.name === 'invoices-sent') return Api.InvoiceInvoiceSent.list.options(options)
+    return Api.InvoiceInvoice.list.options(options)
   },
   urlSync: true,
   loadError: $trans('Error loading invoices'),

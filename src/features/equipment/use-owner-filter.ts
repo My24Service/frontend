@@ -1,12 +1,9 @@
-import {
-  companyBranchAutocompleteListOptions,
-  customerCustomerAutocompleteListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { AddressAutocompleteRow } from '@/api/types.gen'
+
+
 import type { ColumnFilterSpec, FilterOption } from '@/features/table'
 
 /** An autocomplete row as a filter choice: its id on the wire, its name on the chip. */
-function ownerOptions(rows: AddressAutocompleteRow[]): FilterOption[] {
+function ownerOptions(rows: Api.AddressAutocompleteRow[]): FilterOption[] {
   return rows.map((row) => ({value: String(row.id), label: row.name ?? row.value}))
 }
 
@@ -29,22 +26,22 @@ export function useOwnerFilter() {
   function loadOptions(term: string): Promise<FilterOption[]> {
     if (hasBranches.value) {
       return queryClient
-        .fetchQuery(companyBranchAutocompleteListOptions({query: {q: term}}))
+        .fetchQuery(Api.CompanyBranchAutocomplete.list.options({query: {q: term}}))
         .then(ownerOptions)
     }
     return queryClient
-      .fetchQuery(customerCustomerAutocompleteListOptions({query: {q: term}}))
+      .fetchQuery(Api.CustomerCustomerAutocomplete.list.options({query: {q: term}}))
       .then(ownerOptions)
   }
 
   function resolveLabels(ids: string[]): Promise<FilterOption[]> {
     if (hasBranches.value) {
       return queryClient
-        .fetchQuery(companyBranchAutocompleteListOptions({query: {id: ids.join(',')}}))
+        .fetchQuery(Api.CompanyBranchAutocomplete.list.options({query: {id: ids.join(',')}}))
         .then(ownerOptions)
     }
     return queryClient
-      .fetchQuery(customerCustomerAutocompleteListOptions({query: {id: ids.join(',')}}))
+      .fetchQuery(Api.CustomerCustomerAutocomplete.list.options({query: {id: ids.join(',')}}))
       .then(ownerOptions)
   }
 

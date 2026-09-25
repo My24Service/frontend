@@ -61,9 +61,6 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import { CompanySalesuser } from '@/api/resources.gen'
-import type { SalesUser } from '@/api/types.gen'
-import { vSalesUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
 import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
@@ -81,7 +78,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-function salesUserFromRecord(record: SalesUser): SalesUserFormValues {
+function salesUserFromRecord(record: Api.SalesUser): SalesUserFormValues {
   return {
     ...filledFrom(emptyUserIdentity(), record),
     sales_user: filledFrom(emptySalesUser().sales_user, record.sales_user),
@@ -100,12 +97,12 @@ const {
   cancelForm,
 } = useUserForm<
   SalesUserFormValues,
-  SalesUser,
-  v.InferOutput<typeof vSalesUserRequestWritable>,
+  Api.SalesUser,
+  v.InferOutput<typeof schemas.vSalesUserRequestWritable>,
   SalesUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: CompanySalesuser,
+  resource: Api.CompanySalesuser,
   empty: () => ({...emptySalesUser()}),
   fromRecord: salesUserFromRecord,
   validate: validateSalesUserForm,

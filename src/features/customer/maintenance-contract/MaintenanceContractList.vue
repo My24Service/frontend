@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-maintenance-contract-modal',
         confirmText: $trans('Are you sure you want to delete this maintenance contract?'),
-        destroyMutation: customerMaintenanceContractDestroyMutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()}),
+        destroyMutation: Api.CustomerMaintenanceContract.destroy.mutation,
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: Api.CustomerMaintenanceContract.list.queryKey()}),
         deletedDetail: $trans('Maintenance contract has been deleted'),
         deleteError: $trans('Error deleting maintenance contract'),
       }"
@@ -37,13 +37,7 @@
 
 <script lang="ts" setup>
 import { RouterLink } from 'vue-router'
-import {
-  customerCustomerAutocompleteListOptions,
-  customerMaintenanceContractDestroyMutation,
-  customerMaintenanceContractListOptions,
-  customerMaintenanceContractListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { AddressAutocompleteRow, PaginatedMaintenanceContractList } from '@/api/types.gen'
+
 import { formatMoney, toDinero } from '@/services/money'
 import {
   ServerTable,
@@ -55,10 +49,10 @@ import {
   type ListRow,
 } from '@/features/table'
 
-type ContractRow = ListRow<PaginatedMaintenanceContractList>
+type ContractRow = ListRow<Api.PaginatedMaintenanceContractList>
 
 /** An autocomplete row as a filter choice: its id on the wire, its name on the chip. */
-function customerOptions(rows: AddressAutocompleteRow[]): FilterOption[] {
+function customerOptions(rows: Api.AddressAutocompleteRow[]): FilterOption[] {
   return rows.map((row) => ({value: String(row.id), label: row.name ?? row.value}))
 }
 
@@ -95,10 +89,10 @@ const columns = columnHelper.columns([
       label: $trans('Customer'),
       param: 'customer',
       loadOptions: (term) => queryClient
-        .fetchQuery(customerCustomerAutocompleteListOptions({query: {q: term}}))
+        .fetchQuery(Api.CustomerCustomerAutocomplete.list.options({query: {q: term}}))
         .then(customerOptions),
       resolveLabels: (ids) => queryClient
-        .fetchQuery(customerCustomerAutocompleteListOptions({query: {id: ids.join(',')}}))
+        .fetchQuery(Api.CustomerCustomerAutocomplete.list.options({query: {id: ids.join(',')}}))
         .then(customerOptions),
     }},
   }),
@@ -123,7 +117,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ContractRow>({
   key: 'maintenance-contract-table',
   columns,
-  listOptions: (query) => customerMaintenanceContractListOptions({
+  listOptions: (query) => Api.CustomerMaintenanceContract.list.options({
     query: {
       ...baseListParams(query),
 

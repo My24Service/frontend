@@ -1,4 +1,4 @@
-import { vSalesUserRequestWritable } from '@/api/valibot.gen'
+
 import {
   emptyUserIdentity,
   IDENTITY_FIELD_MESSAGES,
@@ -7,7 +7,7 @@ import {
   type UserFormValues,
 } from '../user-form'
 
-export type SalesUserFormValues = UserFormValues<typeof vSalesUserRequestWritable>
+export type SalesUserFormValues = UserFormValues<typeof schemas.vSalesUserRequestWritable>
 export type SalesUserFieldErrors = UserFieldErrors
 
 export function emptySalesUser(): SalesUserFormValues {
@@ -23,6 +23,6 @@ export function emptySalesUser(): SalesUserFormValues {
 export const FIELD_MESSAGES = IDENTITY_FIELD_MESSAGES
 
 export const { validate: validateSalesUserForm, parse: parseSalesUserForm } = userFormContract({
-  schema: vSalesUserRequestWritable,
+  schema: schemas.vSalesUserRequestWritable,
   messages: FIELD_MESSAGES,
 })

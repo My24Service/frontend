@@ -1,16 +1,16 @@
-import type { CostTypeEnum, InvoiceLine, OrderCost } from '@/api/types.gen'
+import type { OrderCost } from '@/api/types.gen'
 import { enumOf } from '@/enums'
 import { formatMoney, formatMoneyPlain, toDinero, type Money } from '@/services/money'
 
 type Decimal = number | string | null | undefined
 
-export type CostType = CostTypeEnum
+export type CostType = Api.CostTypeEnum
 export type HoursCostType = Exclude<CostType, 'used_materials' | 'distance' | 'call_out_costs'>
 export type InvoiceLineType = 'work' | 'travel' | 'extra-work' | 'actual-work'
   | 'used-materials' | 'distance' | 'call-out-costs' | 'manual'
 export type InvoiceLineOption = 'user_totals' | 'total' | 'none'
 
-export const COST_TYPE = enumOf<CostTypeEnum>()({
+export const COST_TYPE = enumOf<Api.CostTypeEnum>()({
   USED_MATERIALS: 'used_materials',
   WORK_HOURS: 'work_hours',
   TRAVEL_HOURS: 'travel_hours',
@@ -48,12 +48,12 @@ export interface PriceInput {
   vat_type: number | string
 }
 
-export interface InvoiceTotals extends Required<Pick<InvoiceLine, 'total' | 'total_currency' | 'vat' | 'vat_currency'>> {
+export interface InvoiceTotals extends Required<Pick<Api.InvoiceLine, 'total' | 'total_currency' | 'vat' | 'vat_currency'>> {
   total_dinero: Money
   vat_dinero: Money
 }
 
-export interface CalculatedPrices extends InvoiceTotals, Required<Pick<InvoiceLine, 'price' | 'price_currency'>> {
+export interface CalculatedPrices extends InvoiceTotals, Required<Pick<Api.InvoiceLine, 'price' | 'price_currency'>> {
   price_dinero: Money
 }
 
@@ -101,7 +101,7 @@ export function calculateInvoiceLine(line: PriceInput & { amount: number | strin
   return priceFields(price, total, vatFor(total, line.vat_type))
 }
 
-export function hydrateInvoicePrices(record: Pick<OrderCost | InvoiceLine,
+export function hydrateInvoicePrices(record: Pick<OrderCost | Api.InvoiceLine,
   'price' | 'price_currency' | 'total' | 'total_currency' | 'vat' | 'vat_currency'
 > & { default_currency?: string }): CalculatedPrices {
   return priceFields(

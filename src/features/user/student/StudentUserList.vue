@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-student-user-modal',
         confirmText: $trans('Are you sure you want to delete this student user?'),
-        destroyMutation: companyStudentuserDestroyMutation,
-        invalidate: (qc) => qc.invalidateQueries({queryKey: companyStudentuserListQueryKey()}),
+        destroyMutation: Api.CompanyStudentuser.destroy.mutation,
+        invalidate: (qc) => qc.invalidateQueries({queryKey: Api.CompanyStudentuser.list.queryKey()}),
         deletedDetail: $trans('Student user has been deleted'),
         deleteError: $trans('Error deleting student user'),
       }"
@@ -36,13 +36,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  companyStudentuserDestroyMutation,
-  companyStudentuserListOptions,
-  companyStudentuserPartialUpdateMutation,
-  companyStudentuserListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedStudentUserList } from '@/api/types.gen'
+
 import {
   ServerTable,
   baseListParams,
@@ -55,7 +49,7 @@ import { createUserColumns } from '../user-list-columns'
 import IBiCheckSquare from '~icons/bi/check-square'
 import IBiCheckSquareFill from '~icons/bi/check-square-fill'
 
-type StudentUserRow = ListRow<PaginatedStudentUserList>
+type StudentUserRow = ListRow<Api.PaginatedStudentUserList>
 
 const queryClient = useQueryClient()
 const {create} = useToast()
@@ -65,9 +59,9 @@ const {create} = useToast()
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 const activeMutation = useMutation({
-  ...companyStudentuserPartialUpdateMutation(),
+  ...Api.CompanyStudentuser.update.mutation(),
   onSuccess: async () => {
-    await queryClient.invalidateQueries({queryKey: companyStudentuserListQueryKey()})
+    await queryClient.invalidateQueries({queryKey: Api.CompanyStudentuser.list.queryKey()})
   },
   onError: (_error, variables) => {
     errorToast(create, variables.body?.is_active
@@ -137,7 +131,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<StudentUserRow>({
   key: 'student-user-table',
   columns,
-  listOptions: (query) => companyStudentuserListOptions({
+  listOptions: (query) => Api.CompanyStudentuser.list.options({
     query: {
       ...baseListParams(query),
     },

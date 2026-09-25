@@ -1,10 +1,6 @@
 import * as v from 'valibot'
 
 import {
-  vAccountsResetPasswordCreateBody,
-  vAccountsSendResetPasswordLinkCreateBody,
-} from '@/api/valibot.gen'
-import {
   PASSWORD_MESSAGES,
   passwordErrors,
   fieldErrors,
@@ -14,7 +10,7 @@ import {
 } from '@/features/forms'
 import type { AccountLinkParams } from './link-params'
 
-export const sendResetLinkSchema = v.required(vAccountsSendResetPasswordLinkCreateBody, ['email'])
+export const sendResetLinkSchema = v.required(schemas.vAccountsSendResetPasswordLinkCreateBody, ['email'])
 
 export interface SendResetLinkValues {
   email: string
@@ -60,5 +56,5 @@ export function validateSetPassword(values: SetPasswordValues): SetPasswordError
 }
 
 export function parseSetPassword(link: AccountLinkParams, password: string) {
-  return v.parse(vAccountsResetPasswordCreateBody, { ...link, password })
+  return v.parse(schemas.vAccountsResetPasswordCreateBody, { ...link, password })
 }

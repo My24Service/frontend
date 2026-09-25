@@ -125,9 +125,6 @@
 import moment from 'moment'
 import VueMultiselect from 'vue-multiselect'
 
-import { orderOrderAutocompleteListOptions } from '@/api/@tanstack/vue-query.gen'
-import type { OrderAutocomplete, Trip } from '@/api/types.gen'
-import { MobileTrip } from '@/api/resources.gen'
 import {
   useResourceForm,
   useSearch,
@@ -201,13 +198,13 @@ const form = useResourceForm({
   // The availability detail is a second read model of one trip - its
   // description, date and headcount are what a write changes - and it sits
   // under the trip's path, so the resource's own reads refresh it too.
-  resource: MobileTrip,
+  resource: Api.MobileTrip,
   empty: emptyTrip,
   fromRecord: tripFromRecord,
   validate: (values) => validateTripForm(withStagedOrders(values), conditionsOf(values)),
   parse: (values) => parseTripBody(withStagedOrders(values), conditionsOf(values)),
   onSaved: async (result) => {
-    createdTripId.value = (result as Trip | undefined)?.id ?? null
+    createdTripId.value = (result as Api.Trip | undefined)?.id ?? null
   },
   copy: {
     fetchError: $trans('Error fetching trip'),
@@ -262,7 +259,7 @@ function addOrder() {
 }
 
 /** Pick an order into the staging slot; one already staged stays as it is. */
-function selectOrder(option: OrderAutocomplete) {
+function selectOrder(option: Api.OrderAutocomplete) {
   if (stagedOrders.rows.value.some((staged) => staged.order === option.id)) return
   stagedOrders.rowEdit.value = {
     name: option.orderName,
@@ -273,7 +270,7 @@ function selectOrder(option: OrderAutocomplete) {
   }
 }
 
-function orderLabel({order_id, orderDate, orderName, orderCity}: OrderAutocomplete) {
+function orderLabel({order_id, orderDate, orderName, orderCity}: Api.OrderAutocomplete) {
   return order_id + ', ' + orderDate + ' ' + orderName + ' - ' + orderCity
 }
 
@@ -291,7 +288,7 @@ function orderLabel({order_id, orderDate, orderName, orderCity}: OrderAutocomple
  * (`OrderViewset.autocomplete`), so there is no envelope to unwrap.
  */
 const orderSearch = useSearch(
-  (q) => orderOrderAutocompleteListOptions({query: {q}}),
+  (q) => Api.OrderOrderAutocomplete.list.options({query: {q}}),
   () => true,
   $trans('Error fetching orders'),
   (rows) => rows,

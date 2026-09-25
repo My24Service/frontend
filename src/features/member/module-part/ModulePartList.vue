@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-module-part-modal',
         confirmText: $trans('Are you sure you want to delete this module part?'),
-        destroyMutation: memberModulePartDestroyMutation,
+        destroyMutation: Api.MemberModulePart.destroy.mutation,
         invalidate: (queryClient) => invalidateModulePartListQueries(queryClient),
         deletedDetail: $trans('Module part has been deleted'),
         deleteError: $trans('Error deleting module part'),
@@ -36,12 +36,7 @@
 
 <script lang="ts" setup>
 import IBiCheckSquare from '~icons/bi/check-square'
-import {
-  memberModuleListOptions,
-  memberModulePartDestroyMutation,
-  memberModulePartListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedModulePartList } from '@/api/types.gen'
+
 import { invalidateModulePartListQueries } from '../invalidation'
 import {
   ServerTable,
@@ -53,7 +48,7 @@ import {
   type ListRow,
 } from '@/features/table'
 
-type ModulePartRow = ListRow<PaginatedModulePartList>
+type ModulePartRow = ListRow<Api.PaginatedModulePartList>
 
 /** A module list row as a filter choice: its id on the wire, its name on the chip. */
 function moduleOptions(rows: {id: number, name: string}[]): FilterOption[] {
@@ -83,10 +78,10 @@ const columns = columnHelper.columns([
       label: $trans('Module'),
       param: 'module',
       loadOptions: (term) => queryClient
-        .fetchQuery(memberModuleListOptions({query: {q: term}}))
+        .fetchQuery(Api.MemberModule.list.options({query: {q: term}}))
         .then((page) => moduleOptions(page.results ?? [])),
       resolveLabels: (ids) => queryClient
-        .fetchQuery(memberModuleListOptions({query: {id: ids.join(',')}}))
+        .fetchQuery(Api.MemberModule.list.options({query: {id: ids.join(',')}}))
         .then((page) => moduleOptions(page.results ?? [])),
     }},
   }),
@@ -110,7 +105,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ModulePartRow>({
   key: 'module-part-table',
   columns,
-  listOptions: (query) => memberModulePartListOptions({
+  listOptions: (query) => Api.MemberModulePart.list.options({
     query: {
       ...baseListParams(query),
 

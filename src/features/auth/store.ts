@@ -2,15 +2,12 @@ import * as v from 'valibot'
 import { defineStore } from 'pinia'
 
 import { jwtTokenCreate, jwtTokenRefreshCreate } from '@/api/sdk.gen'
-import { vJwtTokenCreateResponse, vJwtTokenRefreshCreateResponse } from '@/api/valibot.gen'
-
-import type { UserInfoResponse } from '@/api/types.gen'
 
 import { forgetSocketRooms } from '@/services/websocket/BaseSocket.js'
 
 import { useAuthToken } from './token'
 
-export type SessionUserInfo = UserInfoResponse
+export type SessionUserInfo = Api.UserInfoResponse
 
 interface AuthState {
   userInfo: SessionUserInfo | null
@@ -85,7 +82,7 @@ export const useAuthStore = defineStore('auth', {
     async login(username: string, password: string): Promise<void> {
       const { data } = await jwtTokenCreate({
         body: { username, password, app: 'web' },
-        responseValidator: async (response) => v.parse(vJwtTokenCreateResponse, response),
+        responseValidator: async (response) => v.parse(schemas.vJwtTokenCreateResponse, response),
         throwOnError: true,
       })
 
@@ -104,7 +101,7 @@ export const useAuthStore = defineStore('auth', {
       }
       const { data } = await jwtTokenRefreshCreate({
         body: { token },
-        responseValidator: async (response) => v.parse(vJwtTokenRefreshCreateResponse, response),
+        responseValidator: async (response) => v.parse(schemas.vJwtTokenRefreshCreateResponse, response),
         throwOnError: true,
       })
       // A logout (or another refresh) during the round-trip wins over this

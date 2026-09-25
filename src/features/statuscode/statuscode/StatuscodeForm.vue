@@ -101,7 +101,7 @@
 </template>
 
 <script lang="ts" setup>
-import { StatuscodeStatuscode } from '@/api/resources.gen'
+
 import {
   useResourceForm,
   ValidatedForm,
@@ -145,7 +145,7 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: StatuscodeStatuscode,
+  resource: Api.StatuscodeStatuscode,
   invalidate: invalidateStatuscodeLists,
   empty: emptyStatuscode,
   fromRecord: statuscodeFromRecord,

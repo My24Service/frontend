@@ -215,7 +215,7 @@
 </template>
 
 <script setup lang="ts">
-import { CompanyBranch, CompanyBranchMy } from '@/api/resources.gen'
+
 import { NO_IMAGE_URL } from '@/constants'
 import {
   ImageUploadField,
@@ -284,12 +284,12 @@ const form = useResourceForm(isMyBranch.value
     // the kit's edit path. Neither the retrieve nor the update reads the id
     // it produces, and there is no create.
     pk: () => 'my',
-    resource: CompanyBranchMy,
+    resource: Api.CompanyBranchMy,
     // The record is also a row of the branch list, which lives under another
     // path than `branch-my` - so its reads are named on top of the default.
     invalidate: async (queryClient) => {
-      await CompanyBranchMy.invalidate(queryClient)
-      await CompanyBranch.invalidate(queryClient)
+      await Api.CompanyBranchMy.invalidate(queryClient)
+      await Api.CompanyBranch.invalidate(queryClient)
     },
     // A save stays on the form, where the legacy screen reloaded it: the
     // invalidation above refetches the record behind the values.
@@ -298,7 +298,7 @@ const form = useResourceForm(isMyBranch.value
   : {
     ...branchConfig,
     pk: () => props.pk,
-    resource: CompanyBranch,
+    resource: Api.CompanyBranch,
   })
 
 const { values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record } = form

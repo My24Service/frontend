@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Statuscode } from '@/api/types.gen'
+
 /**
  * The coloured status select the invoice and order lists share: the dot in
  * the row's colour and a select of the statuscodes, under the same element
@@ -40,17 +40,17 @@ defineProps<{
   /** The row's full status text, as the select's tooltip. */
   title?: string | null
   color: string
-  statuscodes: Statuscode[]
+  statuscodes: Api.Statuscode[]
   /** What the select shows: the row's status, or the attempted one in flight. */
   selected: string
   isPending: boolean
   /** The row's status, for the unresolved fallback option. */
   current: string
-  currentCode: Statuscode | null
+  currentCode: Api.Statuscode | null
   /** Offer the row's raw status as a disabled option when no code resolved. */
   showUnresolvedOption?: boolean
   /** Codes the picker offers but refuses. */
-  isDisabledOption?: (code: Statuscode) => boolean
+  isDisabledOption?: (code: Api.Statuscode) => boolean
   /** What a list with no statuscodes at all shows instead of a select. */
   emptyText?: string
 }>()

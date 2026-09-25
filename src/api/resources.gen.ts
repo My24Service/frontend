@@ -50,11 +50,15 @@ import {
   companyApiuserListOptions,
   companyApiuserListQueryKey,
   companyApiuserPartialUpdateMutation,
+  companyApiuserRenewTokenCreateMutation,
   companyApiuserRetrieveOptions,
   companyApiuserRetrieveQueryKey,
+  companyApiuserRevokeCreateMutation,
   companyBranchAutocompleteListOptions,
   companyBranchAutocompleteListQueryKey,
   companyBranchCreateMutation,
+  companyBranchDashboardRetrieveOptions,
+  companyBranchDashboardRetrieveQueryKey,
   companyBranchDestroyMutation,
   companyBranchListOptions,
   companyBranchListQueryKey,
@@ -64,8 +68,12 @@ import {
   companyBranchPartialUpdateMutation,
   companyBranchRetrieveOptions,
   companyBranchRetrieveQueryKey,
+  companyBudgetCostsRetrieveOptions,
+  companyBudgetCostsRetrieveQueryKey,
   companyBudgetCreateMutation,
   companyBudgetDestroyMutation,
+  companyBudgetExpectedCostsRetrieveOptions,
+  companyBudgetExpectedCostsRetrieveQueryKey,
   companyBudgetListOptions,
   companyBudgetListQueryKey,
   companyBudgetPartialUpdateMutation,
@@ -98,6 +106,8 @@ import {
   companyEngineerEventTypeStatsListQueryKey,
   companyEngineerGetLocationsListOptions,
   companyEngineerGetLocationsListQueryKey,
+  companyEngineerInfoRetrieveOptions,
+  companyEngineerInfoRetrieveQueryKey,
   companyEngineerListForSelectListOptions,
   companyEngineerListForSelectListQueryKey,
   companyEngineerListOptions,
@@ -105,7 +115,9 @@ import {
   companyEngineerPartialUpdateMutation,
   companyEngineerRetrieveOptions,
   companyEngineerRetrieveQueryKey,
+  companyEngineerStoreLonLatCreateMutation,
   companyEngineereventCreateMutation,
+  companyEngineereventCreateOrderCreateMutation,
   companyEngineereventDestroyMutation,
   companyEngineereventListOptions,
   companyEngineereventListQueryKey,
@@ -115,11 +127,15 @@ import {
   companyIbanCheckCreateMutation,
   companyImportCreateMutation,
   companyImportDestroyMutation,
+  companyImportDoCreateMutation,
   companyImportListOptions,
   companyImportListQueryKey,
   companyImportPartialUpdateMutation,
+  companyImportPreviewRetrieveOptions,
+  companyImportPreviewRetrieveQueryKey,
   companyImportRetrieveOptions,
   companyImportRetrieveQueryKey,
+  companyImportRevertCreateMutation,
   companyLeaveTypeCreateMutation,
   companyLeaveTypeDestroyMutation,
   companyLeaveTypeListForSelectListOptions,
@@ -129,11 +145,16 @@ import {
   companyLeaveTypePartialUpdateMutation,
   companyLeaveTypeRetrieveOptions,
   companyLeaveTypeRetrieveQueryKey,
+  companyPartnerBranchCreateFromCustomerCreateMutation,
+  companyPartnerBranchesRetrieveOptions,
+  companyPartnerBranchesRetrieveQueryKey,
+  companyPartnerCopyCustomerOrdersCreateMutation,
   companyPartnerCreateMutation,
   companyPartnerDestroyMutation,
   companyPartnerListOptions,
   companyPartnerListQueryKey,
   companyPartnerPartialUpdateMutation,
+  companyPartnerRequestAcceptPartialUpdateMutation,
   companyPartnerRequestCreateMutation,
   companyPartnerRequestDestroyMutation,
   companyPartnerRequestListOptions,
@@ -141,6 +162,7 @@ import {
   companyPartnerRequestPartialUpdateMutation,
   companyPartnerRequestReceivedListOptions,
   companyPartnerRequestReceivedListQueryKey,
+  companyPartnerRequestRejectPartialUpdateMutation,
   companyPartnerRequestRetrieveOptions,
   companyPartnerRequestRetrieveQueryKey,
   companyPartnerRequestSentCreateMutation,
@@ -222,6 +244,8 @@ import {
   companyUserLeaveHoursAdminPartialUpdateMutation,
   companyUserLeaveHoursAdminRetrieveOptions,
   companyUserLeaveHoursAdminRetrieveQueryKey,
+  companyUserLeaveHoursAdminSetAcceptedCreateMutation,
+  companyUserLeaveHoursAdminSetRejectedCreateMutation,
   companyUserLeaveHoursAllNotAcceptedListOptions,
   companyUserLeaveHoursAllNotAcceptedListQueryKey,
   companyUserLeaveHoursCreateMutation,
@@ -243,11 +267,13 @@ import {
   companyUserSickLeaveAdminAllUnconfirmedListQueryKey,
   companyUserSickLeaveAdminCreateMutation,
   companyUserSickLeaveAdminDestroyMutation,
+  companyUserSickLeaveAdminEndSickCreateMutation,
   companyUserSickLeaveAdminListOptions,
   companyUserSickLeaveAdminListQueryKey,
   companyUserSickLeaveAdminPartialUpdateMutation,
   companyUserSickLeaveAdminRetrieveOptions,
   companyUserSickLeaveAdminRetrieveQueryKey,
+  companyUserSickLeaveAdminSetConfirmedCreateMutation,
   companyUserSickLeaveCreateMutation,
   companyUserSickLeaveDestroyMutation,
   companyUserSickLeaveEndSickCreateMutation,
@@ -274,6 +300,10 @@ import {
   customerCustomerAutocompleteListOptions,
   customerCustomerAutocompleteListQueryKey,
   customerCustomerCreateMutation,
+  customerCustomerCustomDetailRetrieveOptions,
+  customerCustomerCustomDetailRetrieveQueryKey,
+  customerCustomerDashboardRetrieveOptions,
+  customerCustomerDashboardRetrieveQueryKey,
   customerCustomerDestroyMutation,
   customerCustomerListOptions,
   customerCustomerListQueryKey,
@@ -298,6 +328,7 @@ import {
   customerMaintenanceContractRetrieveOptions,
   customerMaintenanceContractRetrieveQueryKey,
   customerMaintenanceContractWithEquipmentCreateMutation,
+  customerMaintenanceContractWithEquipmentUpdateMutation,
   customerMaintenanceEquipmentCreateMutation,
   customerMaintenanceEquipmentDestroyMutation,
   customerMaintenanceEquipmentListOptions,
@@ -308,6 +339,8 @@ import {
   equipmentBuildingAutocompleteListOptions,
   equipmentBuildingAutocompleteListQueryKey,
   equipmentBuildingCreateMutation,
+  equipmentBuildingDashboardRetrieveOptions,
+  equipmentBuildingDashboardRetrieveQueryKey,
   equipmentBuildingDestroyMutation,
   equipmentBuildingListForSelectListOptions,
   equipmentBuildingListForSelectListQueryKey,
@@ -319,7 +352,10 @@ import {
   equipmentEquipmentAutocompleteListOptions,
   equipmentEquipmentAutocompleteListQueryKey,
   equipmentEquipmentCreateMutation,
+  equipmentEquipmentCreateQrCreateMutation,
   equipmentEquipmentCreateQuickCreateMutation,
+  equipmentEquipmentDashboardRetrieveOptions,
+  equipmentEquipmentDashboardRetrieveQueryKey,
   equipmentEquipmentDestroyMutation,
   equipmentEquipmentDocumentCreateMutation,
   equipmentEquipmentDocumentDestroyMutation,
@@ -336,10 +372,15 @@ import {
   equipmentEquipmentStateCreateMutation,
   equipmentEquipmentStateListOptions,
   equipmentEquipmentStateListQueryKey,
+  equipmentEquipmentUuidRetrieveOptions,
+  equipmentEquipmentUuidRetrieveQueryKey,
   equipmentLocationAutocompleteListOptions,
   equipmentLocationAutocompleteListQueryKey,
   equipmentLocationCreateMutation,
+  equipmentLocationCreateQrCreateMutation,
   equipmentLocationCreateQuickCreateMutation,
+  equipmentLocationDashboardRetrieveOptions,
+  equipmentLocationDashboardRetrieveQueryKey,
   equipmentLocationDestroyMutation,
   equipmentLocationDocumentCreateMutation,
   equipmentLocationDocumentDestroyMutation,
@@ -355,6 +396,8 @@ import {
   equipmentLocationPartialUpdateMutation,
   equipmentLocationRetrieveOptions,
   equipmentLocationRetrieveQueryKey,
+  equipmentLocationUuidRetrieveOptions,
+  equipmentLocationUuidRetrieveQueryKey,
   inventoryInventoryLocationsForMaterialListOptions,
   inventoryInventoryLocationsForMaterialListQueryKey,
   inventoryInventoryLocationsListOptions,
@@ -369,6 +412,7 @@ import {
   inventoryMaterialDestroyMutation,
   inventoryMaterialListOptions,
   inventoryMaterialListQueryKey,
+  inventoryMaterialMoveCreateMutation,
   inventoryMaterialPartialUpdateMutation,
   inventoryMaterialRetrieveOptions,
   inventoryMaterialRetrieveQueryKey,
@@ -402,6 +446,7 @@ import {
   inventoryPurchaseorderStatusRetrieveOptions,
   inventoryPurchaseorderStatusRetrieveQueryKey,
   inventoryPurchaseorderWithMaterialsCreateMutation,
+  inventoryPurchaseorderWithMaterialsPartialUpdateMutation,
   inventoryStockLocationCreateMutation,
   inventoryStockLocationDestroyMutation,
   inventoryStockLocationListOptions,
@@ -429,6 +474,7 @@ import {
   inventorySupplierReservationRetrieveOptions,
   inventorySupplierReservationRetrieveQueryKey,
   inventorySupplierReservationWithMaterialsCreateMutation,
+  inventorySupplierReservationWithMaterialsPartialUpdateMutation,
   inventorySupplierReservationmaterialCreateMutation,
   inventorySupplierReservationmaterialDestroyMutation,
   inventorySupplierReservationmaterialListOptions,
@@ -451,6 +497,8 @@ import {
   invoiceInvoiceAutocompleteListQueryKey,
   invoiceInvoiceCreateMutation,
   invoiceInvoiceDestroyMutation,
+  invoiceInvoiceDownloadPdfCreateMutation,
+  invoiceInvoiceGeneratePreviewPdfCreateMutation,
   invoiceInvoiceLineCreateMutation,
   invoiceInvoiceLineDestroyMutation,
   invoiceInvoiceLineListOptions,
@@ -460,9 +508,11 @@ import {
   invoiceInvoiceLineRetrieveQueryKey,
   invoiceInvoiceListOptions,
   invoiceInvoiceListQueryKey,
+  invoiceInvoiceMakeDefinitiveCreateMutation,
   invoiceInvoicePartialUpdateMutation,
   invoiceInvoicePreliminaryListOptions,
   invoiceInvoicePreliminaryListQueryKey,
+  invoiceInvoiceRecreatePdfCreateMutation,
   invoiceInvoiceRetrieveOptions,
   invoiceInvoiceRetrieveQueryKey,
   invoiceInvoiceSentListOptions,
@@ -527,15 +577,24 @@ import {
   mobileAssignMeCreateMutation,
   mobileAssignUserCreateMutation,
   mobileAssignUserTripCreateMutation,
+  mobileAssignedorderCreateExtraOrderCreateMutation,
   mobileAssignedorderCreateMutation,
   mobileAssignedorderDestroyMutation,
+  mobileAssignedorderDetailChangeDatePartialUpdateMutation,
+  mobileAssignedorderDetailDeviceRetrieveOptions,
+  mobileAssignedorderDetailDeviceRetrieveQueryKey,
   mobileAssignedorderFinishedListListOptions,
   mobileAssignedorderFinishedListListQueryKey,
+  mobileAssignedorderGetWorkorderSignDetailsRetrieveOptions,
+  mobileAssignedorderGetWorkorderSignDetailsRetrieveQueryKey,
   mobileAssignedorderListAppListOptions,
   mobileAssignedorderListAppListQueryKey,
   mobileAssignedorderListOptions,
   mobileAssignedorderListQueryKey,
+  mobileAssignedorderNoWorkorderFinishedCreateMutation,
   mobileAssignedorderPartialUpdateMutation,
+  mobileAssignedorderReportStatuscodeCreateMutation,
+  mobileAssignedorderReportWorkordersSignedCreateMutation,
   mobileAssignedorderRetrieveOptions,
   mobileAssignedorderRetrieveQueryKey,
   mobileAssignedorderSplitCreateMutation,
@@ -601,6 +660,8 @@ import {
   mobileTripStatuscodePartialUpdateMutation,
   mobileTripStatuscodeRetrieveOptions,
   mobileTripStatuscodeRetrieveQueryKey,
+  mobileTripTripAvailabilityDetailRetrieveOptions,
+  mobileTripTripAvailabilityDetailRetrieveQueryKey,
   mobileUnassignUserCreateMutation,
   mobileUnassignUserTripCreateMutation,
   mobileUserOrderAvailabilityCreateMutation,
@@ -621,6 +682,7 @@ import {
   orderCostDestroyMutation,
   orderCostListOptions,
   orderCostListQueryKey,
+  orderCostOrderCreateMutation,
   orderCostPartialUpdateMutation,
   orderCostRetrieveOptions,
   orderCostRetrieveQueryKey,
@@ -655,11 +717,13 @@ import {
   orderOrderAllForCustomerV2ListQueryKey,
   orderOrderAllForEquipmentLocationListOptions,
   orderOrderAllForEquipmentLocationListQueryKey,
+  orderOrderAssignMeCreateMutation,
   orderOrderAssignableListOptions,
   orderOrderAssignableListQueryKey,
   orderOrderAutocompleteListOptions,
   orderOrderAutocompleteListQueryKey,
   orderOrderCreateMutation,
+  orderOrderCreatePdfBackgroundCreateMutation,
   orderOrderDestroyMutation,
   orderOrderDispatchListAllListOptions,
   orderOrderDispatchListAllListQueryKey,
@@ -677,15 +741,21 @@ import {
   orderOrderMaintenanceOrdersListQueryKey,
   orderOrderMonthEventsListOptions,
   orderOrderMonthEventsListQueryKey,
+  orderOrderOrderAvailabilityDetailRetrieveOptions,
+  orderOrderOrderAvailabilityDetailRetrieveQueryKey,
   orderOrderOrderAvailabilityListOptions,
   orderOrderOrderAvailabilityListQueryKey,
   orderOrderPartialUpdateMutation,
   orderOrderPastListOptions,
   orderOrderPastListQueryKey,
+  orderOrderRecreatePdfBackgroundCreateMutation,
+  orderOrderRecreatePdfCreateMutation,
   orderOrderRetrieveOptions,
   orderOrderRetrieveQueryKey,
   orderOrderSalesOrdersListOptions,
   orderOrderSalesOrdersListQueryKey,
+  orderOrderSetOrderAcceptedCreateMutation,
+  orderOrderSetOrderRejectedCreateMutation,
   orderOrderlineCreateMutation,
   orderOrderlineDestroyMutation,
   orderOrderlineLatestWorkordersListOptions,
@@ -712,6 +782,7 @@ import {
   quotationCostListOptions,
   quotationCostListQueryKey,
   quotationCostPartialUpdateMutation,
+  quotationCostQuotationCreateMutation,
   quotationCostRetrieveOptions,
   quotationCostRetrieveQueryKey,
   quotationDocumentCreateMutation,
@@ -732,6 +803,11 @@ import {
   quotationQuotationAutocompleteListQueryKey,
   quotationQuotationCreateMutation,
   quotationQuotationDestroyMutation,
+  quotationQuotationDownloadDefinitivePdfCreateMutation,
+  quotationQuotationGenerateDefinitivePdfCreateMutation,
+  quotationQuotationGeneratePreviewPdfCreateMutation,
+  quotationQuotationGetMaterialsForAppListOptions,
+  quotationQuotationGetMaterialsForAppListQueryKey,
   quotationQuotationImageCreateMutation,
   quotationQuotationImageDestroyMutation,
   quotationQuotationImageListOptions,
@@ -756,6 +832,7 @@ import {
   quotationQuotationLineRetrieveQueryKey,
   quotationQuotationListOptions,
   quotationQuotationListQueryKey,
+  quotationQuotationMakeDefinitiveCreateMutation,
   quotationQuotationNotAcceptedListOptions,
   quotationQuotationNotAcceptedListQueryKey,
   quotationQuotationPartialUpdateMutation,
@@ -821,6 +898,7 @@ import {
   vCompanyApiuserCreateBody,
   vCompanyApiuserListQuery,
   vCompanyApiuserPartialUpdateBody,
+  vCompanyApiuserRenewTokenCreateBody,
   vCompanyBranchAutocompleteListQuery,
   vCompanyBranchCreateBody,
   vCompanyBranchListQuery,
@@ -842,7 +920,9 @@ import {
   vCompanyEngineerEventTypeStatsListQuery,
   vCompanyEngineerListQuery,
   vCompanyEngineerPartialUpdateBody,
+  vCompanyEngineerStoreLonLatCreateBody,
   vCompanyEngineereventCreateBody,
+  vCompanyEngineereventCreateOrderCreateBody,
   vCompanyEngineereventListQuery,
   vCompanyEngineereventUpdatePartialUpdateBody,
   vCompanyIbanCheckCreateBody,
@@ -853,6 +933,8 @@ import {
   vCompanyLeaveTypeListForSelectListQuery,
   vCompanyLeaveTypeListQuery,
   vCompanyLeaveTypePartialUpdateBody,
+  vCompanyPartnerBranchCreateFromCustomerCreateBody,
+  vCompanyPartnerCopyCustomerOrdersCreateBody,
   vCompanyPartnerCreateBody,
   vCompanyPartnerListQuery,
   vCompanyPartnerPartialUpdateBody,
@@ -932,6 +1014,7 @@ import {
   vCustomerMaintenanceContractListQuery,
   vCustomerMaintenanceContractPartialUpdateBody,
   vCustomerMaintenanceContractWithEquipmentCreateBody,
+  vCustomerMaintenanceContractWithEquipmentUpdateBody,
   vCustomerMaintenanceEquipmentCreateBody,
   vCustomerMaintenanceEquipmentListQuery,
   vCustomerMaintenanceEquipmentPartialUpdateBody,
@@ -964,6 +1047,7 @@ import {
   vInventoryMaterialAutocompleteListQuery,
   vInventoryMaterialCreateBody,
   vInventoryMaterialListQuery,
+  vInventoryMaterialMoveCreateBody,
   vInventoryMaterialPartialUpdateBody,
   vInventoryPurchaseorderCreateBody,
   vInventoryPurchaseorderEntryBulkCreateBody,
@@ -979,6 +1063,7 @@ import {
   vInventoryPurchaseorderStatusListQuery,
   vInventoryPurchaseorderStatusPartialUpdateBody,
   vInventoryPurchaseorderWithMaterialsCreateBody,
+  vInventoryPurchaseorderWithMaterialsPartialUpdateBody,
   vInventoryStockLocationCreateBody,
   vInventoryStockLocationListQuery,
   vInventoryStockLocationPartialUpdateBody,
@@ -993,6 +1078,7 @@ import {
   vInventorySupplierReservationListQuery,
   vInventorySupplierReservationPartialUpdateBody,
   vInventorySupplierReservationWithMaterialsCreateBody,
+  vInventorySupplierReservationWithMaterialsPartialUpdateBody,
   vInventorySupplierReservationmaterialCreateBody,
   vInventorySupplierReservationmaterialListQuery,
   vInventorySupplierReservationmaterialPartialUpdateBody,
@@ -1038,10 +1124,15 @@ import {
   vMobileAssignUserCreateBody,
   vMobileAssignUserTripCreateBody,
   vMobileAssignedorderCreateBody,
+  vMobileAssignedorderCreateExtraOrderCreateBody,
+  vMobileAssignedorderDetailChangeDatePartialUpdateBody,
   vMobileAssignedorderFinishedListListQuery,
   vMobileAssignedorderListAppListQuery,
   vMobileAssignedorderListQuery,
+  vMobileAssignedorderNoWorkorderFinishedCreateBody,
   vMobileAssignedorderPartialUpdateBody,
+  vMobileAssignedorderReportStatuscodeCreateBody,
+  vMobileAssignedorderReportWorkordersSignedCreateBody,
   vMobileAssignedorderSplitCreateBody,
   vMobileAssignedorderWorkorderCreateBody,
   vMobileAssignedorderWorkorderListQuery,
@@ -1080,6 +1171,7 @@ import {
   vMobileUserTripAvailabilityPartialUpdateBody,
   vOrderCostCreateBody,
   vOrderCostListQuery,
+  vOrderCostOrderCreateBody,
   vOrderCostPartialUpdateBody,
   vOrderDocumentCreateBody,
   vOrderDocumentListQuery,
@@ -1095,9 +1187,11 @@ import {
   vOrderOrderAllForCustomerNotAcceptedListQuery,
   vOrderOrderAllForCustomerV2ListQuery,
   vOrderOrderAllForEquipmentLocationListQuery,
+  vOrderOrderAssignMeCreateBody,
   vOrderOrderAssignableListQuery,
   vOrderOrderAutocompleteListQuery,
   vOrderOrderCreateBody,
+  vOrderOrderCreatePdfBackgroundCreateBody,
   vOrderOrderDispatchListAllListQuery,
   vOrderOrderDispatchListFinishedListQuery,
   vOrderOrderDispatchListInprogressListQuery,
@@ -1109,6 +1203,7 @@ import {
   vOrderOrderOrderAvailabilityListQuery,
   vOrderOrderPartialUpdateBody,
   vOrderOrderPastListQuery,
+  vOrderOrderRecreatePdfBackgroundCreateBody,
   vOrderOrderSalesOrdersListQuery,
   vOrderOrderlineCreateBody,
   vOrderOrderlineLatestWorkordersListQuery,
@@ -1123,6 +1218,7 @@ import {
   vQuotationCostCreateBody,
   vQuotationCostListQuery,
   vQuotationCostPartialUpdateBody,
+  vQuotationCostQuotationCreateBody,
   vQuotationDocumentCreateBody,
   vQuotationDocumentListQuery,
   vQuotationDocumentPartialUpdateBody,
@@ -1131,6 +1227,8 @@ import {
   vQuotationOfferPartialUpdateBody,
   vQuotationQuotationAutocompleteListQuery,
   vQuotationQuotationCreateBody,
+  vQuotationQuotationDownloadDefinitivePdfCreateBody,
+  vQuotationQuotationGeneratePreviewPdfCreateBody,
   vQuotationQuotationImageCreateBody,
   vQuotationQuotationImageListQuery,
   vQuotationQuotationImagePartialUpdateBody,
@@ -1142,6 +1240,7 @@ import {
   vQuotationQuotationLineListQuery,
   vQuotationQuotationLinePartialUpdateBody,
   vQuotationQuotationListQuery,
+  vQuotationQuotationMakeDefinitiveCreateBody,
   vQuotationQuotationNotAcceptedListQuery,
   vQuotationQuotationPartialUpdateBody,
   vQuotationQuotationPreliminaryListQuery,
@@ -1496,6 +1595,15 @@ export interface CollectionResource<TId extends number | string> extends Resourc
   readonly update?: ResourceWrite
   readonly replace?: ResourceWrite
   readonly destroy?: ResourceWrite
+  /**
+   * The verbs the server serves on one of this resource's records, under this
+   * resource's path: `/branch/{id}/dashboard/`, `/apiuser/{id}/revoke/`. A
+   * screen that needs one names this resource and reads
+   * `Api.CompanyBranch.extras.dashboardRetrieve`, so a record-level verb never
+   * becomes a second bare generated import. Read-only ones carry
+   * `{options, queryKey}` like `list`; the rest carry `{mutation, body?}`.
+   */
+  readonly extras?: Record<string, ResourceRead | ResourceWrite>
 }
 
 /** The caller's own record (`member/me`, `branch-my`): read and updated without a path. */
@@ -1945,6 +2053,13 @@ const companyApiuser = {
   create: {mutation: companyApiuserCreateMutation, body: vCompanyApiuserCreateBody},
   update: {mutation: companyApiuserPartialUpdateMutation, body: vCompanyApiuserPartialUpdateBody},
   destroy: {mutation: companyApiuserDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/company/apiuser/{id}/renew_token/` */
+    renewTokenCreate: {mutation: companyApiuserRenewTokenCreateMutation, body: vCompanyApiuserRenewTokenCreateBody},
+    /** `/api/company/apiuser/{id}/revoke/` */
+    revokeCreate: {mutation: companyApiuserRevokeCreateMutation},
+  },
   reads: companyApiuserReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -2017,6 +2132,11 @@ const companyBranch = {
   create: {mutation: companyBranchCreateMutation, body: vCompanyBranchCreateBody},
   update: {mutation: companyBranchPartialUpdateMutation, body: vCompanyBranchPartialUpdateBody},
   destroy: {mutation: companyBranchDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/company/branch/{id}/dashboard/` */
+    dashboardRetrieve: {options: companyBranchDashboardRetrieveOptions, queryKey: companyBranchDashboardRetrieveQueryKey},
+  },
   reads: companyBranchReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -2181,6 +2301,13 @@ const companyBudget = {
   create: {mutation: companyBudgetCreateMutation, body: vCompanyBudgetCreateBody},
   update: {mutation: companyBudgetPartialUpdateMutation, body: vCompanyBudgetPartialUpdateBody},
   destroy: {mutation: companyBudgetDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/company/budget/{id}/costs/` */
+    costsRetrieve: {options: companyBudgetCostsRetrieveOptions, queryKey: companyBudgetCostsRetrieveQueryKey},
+    /** `/api/company/budget/{id}/expected_costs/` */
+    expectedCostsRetrieve: {options: companyBudgetExpectedCostsRetrieveOptions, queryKey: companyBudgetExpectedCostsRetrieveQueryKey},
+  },
   reads: companyBudgetReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -2397,6 +2524,13 @@ const companyEngineer = {
   create: {mutation: companyEngineerCreateMutation, body: vCompanyEngineerCreateBody},
   update: {mutation: companyEngineerPartialUpdateMutation, body: vCompanyEngineerPartialUpdateBody},
   destroy: {mutation: companyEngineerDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/company/engineer/{id}/info/` */
+    infoRetrieve: {options: companyEngineerInfoRetrieveOptions, queryKey: companyEngineerInfoRetrieveQueryKey},
+    /** `/api/company/engineer/{id}/store_lon_lat/` */
+    storeLonLatCreate: {mutation: companyEngineerStoreLonLatCreateMutation, body: vCompanyEngineerStoreLonLatCreateBody},
+  },
   reads: companyEngineerReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -2651,6 +2785,11 @@ const companyEngineerevent = {
   list: {options: companyEngineereventListOptions, queryKey: companyEngineereventListQueryKey},
   create: {mutation: companyEngineereventCreateMutation, body: vCompanyEngineereventCreateBody},
   destroy: {mutation: companyEngineereventDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/company/engineerevent/{id}/create-order/` */
+    createOrderCreate: {mutation: companyEngineereventCreateOrderCreateMutation, body: vCompanyEngineereventCreateOrderCreateBody},
+  },
   reads: companyEngineereventReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -2791,6 +2930,15 @@ const companyImport = {
   create: {mutation: companyImportCreateMutation, body: vCompanyImportCreateBody},
   update: {mutation: companyImportPartialUpdateMutation, body: vCompanyImportPartialUpdateBody},
   destroy: {mutation: companyImportDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/company/import/{id}/do/` */
+    doCreate: {mutation: companyImportDoCreateMutation},
+    /** `/api/company/import/{id}/preview/` */
+    previewRetrieve: {options: companyImportPreviewRetrieveOptions, queryKey: companyImportPreviewRetrieveQueryKey},
+    /** `/api/company/import/{id}/revert/` */
+    revertCreate: {mutation: companyImportRevertCreateMutation},
+  },
   reads: companyImportReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -2977,6 +3125,15 @@ const companyPartner = {
   create: {mutation: companyPartnerCreateMutation, body: vCompanyPartnerCreateBody},
   update: {mutation: companyPartnerPartialUpdateMutation, body: vCompanyPartnerPartialUpdateBody},
   destroy: {mutation: companyPartnerDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/company/partner/{id}/branch_create_from_customer/` */
+    branchCreateFromCustomerCreate: {mutation: companyPartnerBranchCreateFromCustomerCreateMutation, body: vCompanyPartnerBranchCreateFromCustomerCreateBody},
+    /** `/api/company/partner/{id}/branches/` */
+    branchesRetrieve: {options: companyPartnerBranchesRetrieveOptions, queryKey: companyPartnerBranchesRetrieveQueryKey},
+    /** `/api/company/partner/{id}/copy_customer_orders/` */
+    copyCustomerOrdersCreate: {mutation: companyPartnerCopyCustomerOrdersCreateMutation, body: vCompanyPartnerCopyCustomerOrdersCreateBody},
+  },
   reads: companyPartnerReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -3049,6 +3206,13 @@ const companyPartnerRequest = {
   create: {mutation: companyPartnerRequestCreateMutation, body: vCompanyPartnerRequestCreateBody},
   update: {mutation: companyPartnerRequestPartialUpdateMutation, body: vCompanyPartnerRequestPartialUpdateBody},
   destroy: {mutation: companyPartnerRequestDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/company/partner-request/{id}/accept/` */
+    acceptPartialUpdate: {mutation: companyPartnerRequestAcceptPartialUpdateMutation},
+    /** `/api/company/partner-request/{id}/reject/` */
+    rejectPartialUpdate: {mutation: companyPartnerRequestRejectPartialUpdateMutation},
+  },
   reads: companyPartnerRequestReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -4113,6 +4277,13 @@ const companyUserLeaveHoursAdmin = {
   create: {mutation: companyUserLeaveHoursAdminCreateMutation, body: vCompanyUserLeaveHoursAdminCreateBody},
   update: {mutation: companyUserLeaveHoursAdminPartialUpdateMutation, body: vCompanyUserLeaveHoursAdminPartialUpdateBody},
   destroy: {mutation: companyUserLeaveHoursAdminDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/company/user-leave-hours/admin/{id}/set_accepted/` */
+    setAcceptedCreate: {mutation: companyUserLeaveHoursAdminSetAcceptedCreateMutation},
+    /** `/api/company/user-leave-hours/admin/{id}/set_rejected/` */
+    setRejectedCreate: {mutation: companyUserLeaveHoursAdminSetRejectedCreateMutation},
+  },
   reads: companyUserLeaveHoursAdminReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -4501,6 +4672,13 @@ const companyUserSickLeaveAdmin = {
   create: {mutation: companyUserSickLeaveAdminCreateMutation, body: vCompanyUserSickLeaveAdminCreateBody},
   update: {mutation: companyUserSickLeaveAdminPartialUpdateMutation, body: vCompanyUserSickLeaveAdminPartialUpdateBody},
   destroy: {mutation: companyUserSickLeaveAdminDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/company/user-sick-leave/admin/{id}/end_sick/` */
+    endSickCreate: {mutation: companyUserSickLeaveAdminEndSickCreateMutation},
+    /** `/api/company/user-sick-leave/admin/{id}/set_confirmed/` */
+    setConfirmedCreate: {mutation: companyUserSickLeaveAdminSetConfirmedCreateMutation},
+  },
   reads: companyUserSickLeaveAdminReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -4944,6 +5122,13 @@ const customerCustomer = {
   create: {mutation: customerCustomerCreateMutation, body: vCustomerCustomerCreateBody},
   update: {mutation: customerCustomerPartialUpdateMutation, body: vCustomerCustomerPartialUpdateBody},
   destroy: {mutation: customerCustomerDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/customer/customer/{id}/custom_detail/` */
+    customDetailRetrieve: {options: customerCustomerCustomDetailRetrieveOptions, queryKey: customerCustomerCustomDetailRetrieveQueryKey},
+    /** `/api/customer/customer/{id}/dashboard/` */
+    dashboardRetrieve: {options: customerCustomerDashboardRetrieveOptions, queryKey: customerCustomerDashboardRetrieveQueryKey},
+  },
   reads: customerCustomerReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -5196,6 +5381,11 @@ const customerMaintenanceContract = {
   create: {mutation: customerMaintenanceContractCreateMutation, body: vCustomerMaintenanceContractCreateBody},
   update: {mutation: customerMaintenanceContractPartialUpdateMutation, body: vCustomerMaintenanceContractPartialUpdateBody},
   destroy: {mutation: customerMaintenanceContractDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/customer/maintenance-contract/{id}/with-equipment/` */
+    withEquipmentUpdate: {mutation: customerMaintenanceContractWithEquipmentUpdateMutation, body: vCustomerMaintenanceContractWithEquipmentUpdateBody},
+  },
   reads: customerMaintenanceContractReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -5389,6 +5579,11 @@ const equipmentBuilding = {
   create: {mutation: equipmentBuildingCreateMutation, body: vEquipmentBuildingCreateBody},
   update: {mutation: equipmentBuildingPartialUpdateMutation, body: vEquipmentBuildingPartialUpdateBody},
   destroy: {mutation: equipmentBuildingDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/equipment/building/{id}/dashboard/` */
+    dashboardRetrieve: {options: equipmentBuildingDashboardRetrieveOptions, queryKey: equipmentBuildingDashboardRetrieveQueryKey},
+  },
   reads: equipmentBuildingReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -5569,6 +5764,15 @@ const equipmentEquipment = {
   create: {mutation: equipmentEquipmentCreateMutation, body: vEquipmentEquipmentCreateBody},
   update: {mutation: equipmentEquipmentPartialUpdateMutation, body: vEquipmentEquipmentPartialUpdateBody},
   destroy: {mutation: equipmentEquipmentDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/equipment/equipment/{id}/create_qr/` */
+    createQrCreate: {mutation: equipmentEquipmentCreateQrCreateMutation},
+    /** `/api/equipment/equipment/{id}/dashboard/` */
+    dashboardRetrieve: {options: equipmentEquipmentDashboardRetrieveOptions, queryKey: equipmentEquipmentDashboardRetrieveQueryKey},
+    /** `/api/equipment/equipment/{uuid}/uuid/` */
+    uuidRetrieve: {options: equipmentEquipmentUuidRetrieveOptions, queryKey: equipmentEquipmentUuidRetrieveQueryKey},
+  },
   reads: equipmentEquipmentReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -5861,6 +6065,15 @@ const equipmentLocation = {
   create: {mutation: equipmentLocationCreateMutation, body: vEquipmentLocationCreateBody},
   update: {mutation: equipmentLocationPartialUpdateMutation, body: vEquipmentLocationPartialUpdateBody},
   destroy: {mutation: equipmentLocationDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/equipment/location/{id}/create_qr/` */
+    createQrCreate: {mutation: equipmentLocationCreateQrCreateMutation},
+    /** `/api/equipment/location/{id}/dashboard/` */
+    dashboardRetrieve: {options: equipmentLocationDashboardRetrieveOptions, queryKey: equipmentLocationDashboardRetrieveQueryKey},
+    /** `/api/equipment/location/{uuid}/uuid/` */
+    uuidRetrieve: {options: equipmentLocationUuidRetrieveOptions, queryKey: equipmentLocationUuidRetrieveQueryKey},
+  },
   reads: equipmentLocationReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -6306,6 +6519,11 @@ const inventoryMaterial = {
   create: {mutation: inventoryMaterialCreateMutation, body: vInventoryMaterialCreateBody},
   update: {mutation: inventoryMaterialPartialUpdateMutation, body: vInventoryMaterialPartialUpdateBody},
   destroy: {mutation: inventoryMaterialDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/inventory/material/{id}/move/` */
+    moveCreate: {mutation: inventoryMaterialMoveCreateMutation, body: vInventoryMaterialMoveCreateBody},
+  },
   reads: inventoryMaterialReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -6434,6 +6652,11 @@ const inventoryPurchaseorder = {
   create: {mutation: inventoryPurchaseorderCreateMutation, body: vInventoryPurchaseorderCreateBody},
   update: {mutation: inventoryPurchaseorderPartialUpdateMutation, body: vInventoryPurchaseorderPartialUpdateBody},
   destroy: {mutation: inventoryPurchaseorderDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/inventory/purchaseorder/{id}/with-materials/` */
+    withMaterialsPartialUpdate: {mutation: inventoryPurchaseorderWithMaterialsPartialUpdateMutation, body: vInventoryPurchaseorderWithMaterialsPartialUpdateBody},
+  },
   reads: inventoryPurchaseorderReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -7049,6 +7272,11 @@ const inventorySupplierReservation = {
   create: {mutation: inventorySupplierReservationCreateMutation, body: vInventorySupplierReservationCreateBody},
   update: {mutation: inventorySupplierReservationPartialUpdateMutation, body: vInventorySupplierReservationPartialUpdateBody},
   destroy: {mutation: inventorySupplierReservationDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/inventory/supplier-reservation/{id}/with-materials/` */
+    withMaterialsPartialUpdate: {mutation: inventorySupplierReservationWithMaterialsPartialUpdateMutation, body: vInventorySupplierReservationWithMaterialsPartialUpdateBody},
+  },
   reads: inventorySupplierReservationReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -7396,6 +7624,17 @@ const invoiceInvoice = {
   create: {mutation: invoiceInvoiceCreateMutation, body: vInvoiceInvoiceCreateBody},
   update: {mutation: invoiceInvoicePartialUpdateMutation, body: vInvoiceInvoicePartialUpdateBody},
   destroy: {mutation: invoiceInvoiceDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/invoice/invoice/{id}/download_pdf/` */
+    downloadPdfCreate: {mutation: invoiceInvoiceDownloadPdfCreateMutation},
+    /** `/api/invoice/invoice/{id}/generate_preview_pdf/` */
+    generatePreviewPdfCreate: {mutation: invoiceInvoiceGeneratePreviewPdfCreateMutation},
+    /** `/api/invoice/invoice/{id}/make_definitive/` */
+    makeDefinitiveCreate: {mutation: invoiceInvoiceMakeDefinitiveCreateMutation},
+    /** `/api/invoice/invoice/{id}/recreate_pdf/` */
+    recreatePdfCreate: {mutation: invoiceInvoiceRecreatePdfCreateMutation},
+  },
   reads: invoiceInvoiceReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -8659,6 +8898,23 @@ const mobileAssignedorder = {
   create: {mutation: mobileAssignedorderCreateMutation, body: vMobileAssignedorderCreateBody},
   update: {mutation: mobileAssignedorderPartialUpdateMutation, body: vMobileAssignedorderPartialUpdateBody},
   destroy: {mutation: mobileAssignedorderDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/mobile/assignedorder/{id}/create_extra_order/` */
+    createExtraOrderCreate: {mutation: mobileAssignedorderCreateExtraOrderCreateMutation, body: vMobileAssignedorderCreateExtraOrderCreateBody},
+    /** `/api/mobile/assignedorder/{id}/detail_change_date/` */
+    detailChangeDatePartialUpdate: {mutation: mobileAssignedorderDetailChangeDatePartialUpdateMutation, body: vMobileAssignedorderDetailChangeDatePartialUpdateBody},
+    /** `/api/mobile/assignedorder/{id}/detail_device/` */
+    detailDeviceRetrieve: {options: mobileAssignedorderDetailDeviceRetrieveOptions, queryKey: mobileAssignedorderDetailDeviceRetrieveQueryKey},
+    /** `/api/mobile/assignedorder/{id}/get_workorder_sign_details/` */
+    getWorkorderSignDetailsRetrieve: {options: mobileAssignedorderGetWorkorderSignDetailsRetrieveOptions, queryKey: mobileAssignedorderGetWorkorderSignDetailsRetrieveQueryKey},
+    /** `/api/mobile/assignedorder/{id}/no_workorder_finished/` */
+    noWorkorderFinishedCreate: {mutation: mobileAssignedorderNoWorkorderFinishedCreateMutation, body: vMobileAssignedorderNoWorkorderFinishedCreateBody},
+    /** `/api/mobile/assignedorder/{id}/report_statuscode/` */
+    reportStatuscodeCreate: {mutation: mobileAssignedorderReportStatuscodeCreateMutation, body: vMobileAssignedorderReportStatuscodeCreateBody},
+    /** `/api/mobile/assignedorder/{id}/report_workorders_signed/` */
+    reportWorkordersSignedCreate: {mutation: mobileAssignedorderReportWorkordersSignedCreateMutation, body: vMobileAssignedorderReportWorkordersSignedCreateBody},
+  },
   reads: mobileAssignedorderReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -9266,6 +9522,11 @@ const mobileTrip = {
   create: {mutation: mobileTripCreateMutation, body: vMobileTripCreateBody},
   update: {mutation: mobileTripPartialUpdateMutation, body: vMobileTripPartialUpdateBody},
   destroy: {mutation: mobileTripDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/mobile/trip/{id}/trip_availability_detail/` */
+    tripAvailabilityDetailRetrieve: {options: mobileTripTripAvailabilityDetailRetrieveOptions, queryKey: mobileTripTripAvailabilityDetailRetrieveQueryKey},
+  },
   reads: mobileTripReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -9810,6 +10071,11 @@ const orderCost = {
   create: {mutation: orderCostCreateMutation, body: vOrderCostCreateBody},
   update: {mutation: orderCostPartialUpdateMutation, body: vOrderCostPartialUpdateBody},
   destroy: {mutation: orderCostDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/order/cost/order/{order_id}/{cost_type}/` */
+    orderCreate: {mutation: orderCostOrderCreateMutation, body: vOrderCostOrderCreateBody},
+  },
   reads: orderCostReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -10206,6 +10472,23 @@ const orderOrder = {
   create: {mutation: orderOrderCreateMutation, body: vOrderOrderCreateBody},
   update: {mutation: orderOrderPartialUpdateMutation, body: vOrderOrderPartialUpdateBody},
   destroy: {mutation: orderOrderDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/order/order/{id}/assign_me/` */
+    assignMeCreate: {mutation: orderOrderAssignMeCreateMutation, body: vOrderOrderAssignMeCreateBody},
+    /** `/api/order/order/{id}/create_pdf_background/` */
+    createPdfBackgroundCreate: {mutation: orderOrderCreatePdfBackgroundCreateMutation, body: vOrderOrderCreatePdfBackgroundCreateBody},
+    /** `/api/order/order/{id}/order_availability_detail/` */
+    orderAvailabilityDetailRetrieve: {options: orderOrderOrderAvailabilityDetailRetrieveOptions, queryKey: orderOrderOrderAvailabilityDetailRetrieveQueryKey},
+    /** `/api/order/order/{id}/recreate_pdf/` */
+    recreatePdfCreate: {mutation: orderOrderRecreatePdfCreateMutation},
+    /** `/api/order/order/{id}/recreate_pdf_background/` */
+    recreatePdfBackgroundCreate: {mutation: orderOrderRecreatePdfBackgroundCreateMutation, body: vOrderOrderRecreatePdfBackgroundCreateBody},
+    /** `/api/order/order/{id}/set_order_accepted/` */
+    setOrderAcceptedCreate: {mutation: orderOrderSetOrderAcceptedCreateMutation},
+    /** `/api/order/order/{id}/set_order_rejected/` */
+    setOrderRejectedCreate: {mutation: orderOrderSetOrderRejectedCreateMutation},
+  },
   reads: orderOrderReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -11335,6 +11618,11 @@ const quotationCost = {
   create: {mutation: quotationCostCreateMutation, body: vQuotationCostCreateBody},
   update: {mutation: quotationCostPartialUpdateMutation, body: vQuotationCostPartialUpdateBody},
   destroy: {mutation: quotationCostDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/quotation/cost/quotation/{quotation_id}/{cost_type}/` */
+    quotationCreate: {mutation: quotationCostQuotationCreateMutation, body: vQuotationCostQuotationCreateBody},
+  },
   reads: quotationCostReads,
 
   // The conveniences. Generated from the bindings above rather than written
@@ -11567,6 +11855,19 @@ const quotationQuotation = {
   create: {mutation: quotationQuotationCreateMutation, body: vQuotationQuotationCreateBody},
   update: {mutation: quotationQuotationPartialUpdateMutation, body: vQuotationQuotationPartialUpdateBody},
   destroy: {mutation: quotationQuotationDestroyMutation},
+  // The verbs on one record, which the server serves under this resource's path.
+  extras: {
+    /** `/api/quotation/quotation/{id}/download_definitive_pdf/` */
+    downloadDefinitivePdfCreate: {mutation: quotationQuotationDownloadDefinitivePdfCreateMutation, body: vQuotationQuotationDownloadDefinitivePdfCreateBody},
+    /** `/api/quotation/quotation/{id}/generate_definitive_pdf/` */
+    generateDefinitivePdfCreate: {mutation: quotationQuotationGenerateDefinitivePdfCreateMutation},
+    /** `/api/quotation/quotation/{id}/generate_preview_pdf/` */
+    generatePreviewPdfCreate: {mutation: quotationQuotationGeneratePreviewPdfCreateMutation, body: vQuotationQuotationGeneratePreviewPdfCreateBody},
+    /** `/api/quotation/quotation/{id}/get_materials_for_app/` */
+    getMaterialsForAppList: {options: quotationQuotationGetMaterialsForAppListOptions, queryKey: quotationQuotationGetMaterialsForAppListQueryKey},
+    /** `/api/quotation/quotation/{id}/make_definitive/` */
+    makeDefinitiveCreate: {mutation: quotationQuotationMakeDefinitiveCreateMutation, body: vQuotationQuotationMakeDefinitiveCreateBody},
+  },
   reads: quotationQuotationReads,
 
   // The conveniences. Generated from the bindings above rather than written

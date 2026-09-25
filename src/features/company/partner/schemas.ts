@@ -1,6 +1,5 @@
 import * as v from 'valibot'
 
-import { vPartnerRequestRequest } from '@/api/valibot.gen'
 import {
   fieldErrors,
   type FieldErrors,
@@ -35,12 +34,12 @@ function shaped(values: PartnerRequestFormValues) {
 }
 
 export function validatePartnerRequest(values: PartnerRequestFormValues): PartnerRequestFormErrors {
-  return fieldErrors(vPartnerRequestRequest, shaped(values), {}, FIELD_LABELS)
+  return fieldErrors(schemas.vPartnerRequestRequest, shaped(values), {}, FIELD_LABELS)
 }
 
 /**
  * The body to send, as the generated create component resolves it.
  */
 export function parsePartnerRequest(values: PartnerRequestFormValues) {
-  return v.parse(vPartnerRequestRequest, shaped(values))
+  return v.parse(schemas.vPartnerRequestRequest, shaped(values))
 }

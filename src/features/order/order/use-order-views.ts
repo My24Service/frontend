@@ -1,6 +1,6 @@
 import type { ColumnFiltersState } from '@tanstack/vue-table'
 import type { LocationQueryRaw } from 'vue-router'
-import { orderFilterSimpleListListOptions } from '@/api/@tanstack/vue-query.gen'
+
 import type { ListMode } from './list-modes'
 
 const USER_FILTER = 'user_filter'
@@ -74,7 +74,7 @@ export function useOrderViews(options: {
 }) {
   const router = useRouter()
   const route = useRoute()
-  const query = useQuery(orderFilterSimpleListListOptions())
+  const query = useQuery(Api.OrderFilterSimpleList.list.options())
   const filters = computed<SavedFilter[]>(() => query.data.value ?? [])
 
   const activeFilterId = computed<number | null>(() => {

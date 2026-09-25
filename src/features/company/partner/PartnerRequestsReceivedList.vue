@@ -34,8 +34,8 @@
       :delete-modal="{
         modalId: 'delete-received-partner-request-modal',
         confirmText: $trans('Are you sure you want to delete this partner request?'),
-        destroyMutation: companyPartnerRequestDestroyMutation,
-        invalidate: CompanyPartnerRequestReceived.invalidate,
+        destroyMutation: Api.CompanyPartnerRequest.destroy.mutation,
+        invalidate: Api.CompanyPartnerRequestReceived.invalidate,
         deletedDetail: $trans('Partner request has been deleted'),
         deleteError: $trans('Error deleting partner request'),
       }"
@@ -54,17 +54,11 @@
 
 <script setup lang="ts">
 import { hButton } from '@/components/render'
-import {
-  companyPartnerRequestAcceptPartialUpdateMutation,
-  companyPartnerRequestDestroyMutation,
-  companyPartnerRequestReceivedListOptions,
-  companyPartnerRequestRejectPartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
+
 import type { PillNavItem } from '@/components/PillsNav.vue'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
-import type { PaginatedPartnerRequestList } from '@/api/types.gen'
-import { CompanyPartner, CompanyPartnerRequestReceived } from '@/api/resources.gen'
+
 import { partnerColumns } from './partner-columns'
 
 const partnerPills: PillNavItem[] = [
@@ -81,7 +75,7 @@ const partnerPills: PillNavItem[] = [
  * Two legacy copy slips are fixed rather than preserved: the reject dialog
  * was titled "Accept?", and a failed load reported the *sent* list.
  */
-type RequestRow = ListRow<PaginatedPartnerRequestList>
+type RequestRow = ListRow<Api.PaginatedPartnerRequestList>
 
 const queryClient = useQueryClient()
 const { create: toast } = useToast()
@@ -138,7 +132,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<RequestRow>({
   key: 'partner-requests-received-table',
   columns,
-  listOptions: (query) => companyPartnerRequestReceivedListOptions({
+  listOptions: (query) => Api.CompanyPartnerRequestReceived.list.options({
     query: {
       ...baseListParams(query),
     },
@@ -150,11 +144,11 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
 const { confirm: showAcceptModal, handleOk: handleAcceptOk } = useConfirmedAction({
   modalRefName: 'acceptModal',
   mutationOptions: () => ({
-    ...companyPartnerRequestAcceptPartialUpdateMutation(),
+    ...Api.CompanyPartnerRequest.extras.acceptPartialUpdate.mutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Accepted'), $trans('Partner request has been accepted'))
-      await CompanyPartnerRequestReceived.invalidate(queryClient)
-      await CompanyPartner.invalidate(queryClient)
+      await Api.CompanyPartnerRequestReceived.invalidate(queryClient)
+      await Api.CompanyPartner.invalidate(queryClient)
     },
     onError: () => {
       errorToast(toast, $trans('Error accepting partner request'))
@@ -165,10 +159,10 @@ const { confirm: showAcceptModal, handleOk: handleAcceptOk } = useConfirmedActio
 const { confirm: showRejectModal, handleOk: handleRejectOk } = useConfirmedAction({
   modalRefName: 'rejectModal',
   mutationOptions: () => ({
-    ...companyPartnerRequestRejectPartialUpdateMutation(),
+    ...Api.CompanyPartnerRequest.extras.rejectPartialUpdate.mutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Rejected'), $trans('Partner request has been rejected'))
-      await CompanyPartnerRequestReceived.invalidate(queryClient)
+      await Api.CompanyPartnerRequestReceived.invalidate(queryClient)
     },
     onError: () => {
       errorToast(toast, $trans('Error rejecting partner request'))

@@ -1,4 +1,4 @@
-import type { MonthListResponse, Statuscode, YearListResponse } from '@/api/types.gen'
+
 
 /** The golden-angle step both colour helpers walk. */
 const GOLDEN_ANGLE = 137.508
@@ -47,7 +47,7 @@ function pair(labels: string[], counts: number[], percentages: Array<number | st
  * up by exact name, never fuzzy-matched. Grey when the tally outlived its
  * code or the code has no colour.
  */
-function bucketColor(statuscodes: Statuscode[], code: string): string {
+function bucketColor(statuscodes: Api.Statuscode[], code: string): string {
   const color = statuscodes.find((item) => item.statuscode === code)?.color
   if (!color) return '#ccc'
   return color.startsWith('#') ? color : `#${color}`
@@ -56,7 +56,7 @@ function bucketColor(statuscodes: Statuscode[], code: string): string {
 /** One pair per bucket of statuses, coloured by the tenant's statuscodes. */
 function statusPairs(
   statusesData: Record<string, {items: Buckets; total: number}>,
-  statuscodes: Statuscode[],
+  statuscodes: Api.Statuscode[],
   labelFor: (bucket: string, total: number) => string,
 ): Record<string, ChartPair> {
   const pairs: Record<string, ChartPair> = {}
@@ -73,7 +73,7 @@ function statusPairs(
   return pairs
 }
 
-export function yearCharts(response: YearListResponse, orderType: string, monthLabels: string[], statuscodes: Statuscode[]) {
+export function yearCharts(response: Api.YearListResponse, orderType: string, monthLabels: string[], statuscodes: Api.Statuscode[]) {
   const counts: number[] = []
   const percentages: Array<number | string> = []
   for (let month = 1; month <= 12; month++) {
@@ -95,7 +95,7 @@ export function yearCharts(response: YearListResponse, orderType: string, monthL
   }
 }
 
-export function monthCharts(response: MonthListResponse, orderType: string, weekLabel: (week: string) => string, statuscodes: Statuscode[]) {
+export function monthCharts(response: Api.MonthListResponse, orderType: string, weekLabel: (week: string) => string, statuscodes: Api.Statuscode[]) {
   const weeks = Object.keys(response.month_data.items)
   const assigned: Record<string, ChartPair> = {}
   for (const [week, data] of Object.entries(response.assigned_orders_data)) {

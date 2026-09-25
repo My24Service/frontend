@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-order-modal',
         confirmText: $trans('Are you sure you want to delete this order?'),
-        destroyMutation: () => orderOrderDestroyMutation(),
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: orderOrderListQueryKey()}),
+        destroyMutation: () => Api.OrderOrder.destroy.mutation(),
+        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: Api.OrderOrder.list.queryKey()}),
         deletedDetail: $trans('Order has been deleted'),
         deleteError: $trans('Error deleting order'),
       }"
@@ -62,7 +62,7 @@
 </template>
 
 <script lang="ts" setup>
-import { orderOrderDestroyMutation, orderOrderListQueryKey } from '@/api/@tanstack/vue-query.gen'
+
 import { NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES } from '@/constants'
 import { ServerTable, useServerTable } from '@/features/table'
 import { useMemberNewData } from '../use-member-new-data'

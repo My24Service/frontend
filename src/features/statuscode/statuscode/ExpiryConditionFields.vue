@@ -55,8 +55,6 @@
 </template>
 
 <script lang="ts" setup>
-import type { NumDaysOperatorEnum } from '@/api/types.gen'
-import { vNumDaysOperatorEnum } from '@/api/valibot.gen'
 
 /**
  * A quotation statuscode's expiry condition: "`num_days` from
@@ -67,7 +65,7 @@ import { vNumDaysOperatorEnum } from '@/api/valibot.gen'
  */
 defineProps<{
   numDays: number | string | null | undefined
-  operator: NumDaysOperatorEnum | undefined
+  operator: Api.NumDaysOperatorEnum | undefined
   modelField: string | null | undefined
   error?: string
   submitted?: boolean
@@ -76,7 +74,7 @@ defineProps<{
 const emit = defineEmits<{
   /** What the number input typed: the integer the wire wants, or as typed so the schema can refuse it. */
   (event: 'update:numDays', value: number | string | null): void
-  (event: 'update:operator', value: NumDaysOperatorEnum | undefined): void
+  (event: 'update:operator', value: Api.NumDaysOperatorEnum | undefined): void
   (event: 'update:modelField', value: string | null | undefined): void
 }>()
 
@@ -88,7 +86,7 @@ function onModelFieldInput(value: string | number | null): void {
   emit('update:modelField', typeof value === 'number' ? String(value) : value)
 }
 
-const OPERATORS = vNumDaysOperatorEnum.options
+const OPERATORS = schemas.vNumDaysOperatorEnum.options
 </script>
 
 <style scoped>

@@ -109,10 +109,7 @@
 
 <script setup lang="ts">
 import moment from 'moment/min/moment-with-locales'
-import {
-  equipmentEquipmentRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { EquipmentTypeEnum } from '@/api/types.gen'
+
 import { EQUIPMENT_TYPES } from '@/constants'
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoney, toDinero } from '@/services/money'
@@ -146,7 +143,7 @@ const props = withDefaults(defineProps<{
   route_prefix: string
   /** Set by the settings layout, which also shows the edit link on shltr. */
   from_settings?: boolean
-  type?: EquipmentTypeEnum
+  type?: Api.EquipmentTypeEnum
 }>(), {
   pk: '',
   from_settings: false,
@@ -156,7 +153,7 @@ const props = withDefaults(defineProps<{
 const id = Number(props.pk)
 const mainStore = useMainStore()
 
-const detailQuery = useQuery(equipmentEquipmentRetrieveOptions({path: {id}}))
+const detailQuery = useQuery(Api.EquipmentEquipment.retrieve.options({path: {id}}))
 useQueryErrorToast(detailQuery.error, $trans('Error fetching equipment detail'))
 const equipment = computed(() => detailQuery.data.value)
 

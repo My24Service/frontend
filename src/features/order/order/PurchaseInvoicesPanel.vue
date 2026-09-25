@@ -131,13 +131,6 @@
 <script lang="ts" setup>
 import type Dinero from 'dinero.js'
 
-import {
-  invoicePurchaseCreateMutation,
-  invoicePurchaseDestroyMutation,
-  invoicePurchaseListOptions,
-  invoicePurchaseListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PurchaseRequest } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
 import {
   useConfirmedAction,
@@ -165,7 +158,7 @@ const currency = computed(() => mainStore.getDefaultCurrency)
 const queryClient = useQueryClient()
 const {create} = useToast()
 
-const listQuery = useQuery(() => invoicePurchaseListOptions({
+const listQuery = useQuery(() => Api.InvoicePurchase.list.options({
   query: {order: props.orderId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
 }))
 const rows = computed(() => listQuery.data.value?.results ?? [])
@@ -173,7 +166,7 @@ const isLoading = computed(() => listQuery.isLoading.value)
 useQueryErrorToast(listQuery.error, $trans('Error loading purchase invoices'))
 
 function invalidate() {
-  return queryClient.invalidateQueries({queryKey: invoicePurchaseListQueryKey({query: {order: props.orderId}})})
+  return queryClient.invalidateQueries({queryKey: Api.InvoicePurchase.list.queryKey({query: {order: props.orderId}})})
 }
 
 function money(amount: string | undefined, rowCurrency: string): string {
@@ -183,18 +176,18 @@ function money(amount: string | undefined, rowCurrency: string): string {
 
 const {confirm: confirmDelete, handleOk: handleDeleteOk} = useConfirmedAction({
   mutationOptions: () => ({
-    ...invoicePurchaseDestroyMutation(),
+    ...Api.InvoicePurchase.destroy.mutation(),
     onSuccess: invalidate,
     onError: () => errorToast(create, $trans('Error deleting purchase invoice')),
   }),
   modalRefName: 'delete-purchase-invoice-modal',
 })
 
-function blankDraft(): PurchaseRequest {
+function blankDraft(): Api.PurchaseRequest {
   return {order: props.orderId, vat: '0.00', total: '0.00', reference: '', description: ''}
 }
 
-const draft = reactive<PurchaseRequest>(blankDraft())
+const draft = reactive<Api.PurchaseRequest>(blankDraft())
 const addModal = useTemplateRef<{show: () => void; hide: () => void}>('add-purchase-invoice-modal')
 
 function openAdd() {
@@ -203,7 +196,7 @@ function openAdd() {
 }
 
 const createMutation = useMutation({
-  ...invoicePurchaseCreateMutation(),
+  ...Api.InvoicePurchase.create.mutation(),
   onSuccess: invalidate,
   onError: () => errorToast(create, $trans('Error creating purchase invoice')),
 })

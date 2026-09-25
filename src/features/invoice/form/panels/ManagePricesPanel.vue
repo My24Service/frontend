@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Material, ProductList } from '@/api/types.gen'
+
 import { formatMoneyPlain, type Money } from '@/services/money'
 import { useMaterialPriceUpdates } from '../use-material-prices'
 
@@ -56,10 +56,10 @@ import { useMaterialPriceUpdates } from '../use-material-prices'
  * was clicked.
  */
 const props = withDefaults(defineProps<{
-  materials: Material[]
+  materials: Api.Material[]
   currency: string
   /** The linked Teamleader products, or null off a Teamleader tenant. */
-  teamleaderProducts?: ProductList[] | null
+  teamleaderProducts?: Api.ProductList[] | null
   /** True while the form is linking a product; disables the link buttons. */
   linkingProduct?: boolean
 }>(), {
@@ -68,12 +68,12 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  linkMaterial: [material: Material]
+  linkMaterial: [material: Api.Material]
 }>()
 
 const hasTeamleader = computed(() => props.teamleaderProducts !== null)
 
-function linkedProduct(materialId: number): ProductList | undefined {
+function linkedProduct(materialId: number): Api.ProductList | undefined {
   return props.teamleaderProducts?.find(product => product.material.id === materialId)
 }
 

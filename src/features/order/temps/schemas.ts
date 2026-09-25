@@ -1,6 +1,5 @@
 import * as v from 'valibot'
 
-import type { OrderDetail } from '@/api/types.gen'
 import {
   emptyOrder,
   orderFromRecord,
@@ -33,7 +32,7 @@ export function emptyTempsOrder(): TempsFormValues {
   return {...emptyOrder(), required_users: '1'}
 }
 
-export function tempsFromRecord(record: OrderDetail): TempsFormValues {
+export function tempsFromRecord(record: Api.OrderDetail): TempsFormValues {
   return {...orderFromRecord(record), required_users: String(record.required_users ?? 1)}
 }
 

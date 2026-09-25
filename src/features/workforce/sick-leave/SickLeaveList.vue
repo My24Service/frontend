@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-sick-leave-modal',
         confirmText: $trans('Are you sure you want to delete this sick leave?'),
-        destroyMutation: companyUserSickLeaveAdminDestroyMutation,
-        invalidate: CompanyUserSickLeaveAdmin.invalidate,
+        destroyMutation: Api.CompanyUserSickLeaveAdmin.destroy.mutation,
+        invalidate: Api.CompanyUserSickLeaveAdmin.invalidate,
         deletedDetail: $trans('Sick leave has been deleted'),
         deleteError: $trans('Error deleting sick leave'),
       }"
@@ -35,12 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  companyUserSickLeaveAdminDestroyMutation,
-  companyUserSickLeaveAdminListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedUserSickLeaveList } from '@/api/types.gen'
-import { CompanyUserSickLeaveAdmin } from '@/api/resources.gen'
+
 import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
@@ -56,7 +51,7 @@ import SubNav from '../SubNav.vue'
  * name was never the link to `leave-edit` it appeared to be. The row's edit
  * action is the sick-leave editor, which is what the screen means.
  */
-type SickLeaveRow = ListRow<PaginatedUserSickLeaveList>
+type SickLeaveRow = ListRow<Api.PaginatedUserSickLeaveList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const helper = createAppColumnHelper<SickLeaveRow>()
@@ -96,7 +91,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'sick-leave-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => companyUserSickLeaveAdminListOptions({
+  listOptions: (query) => Api.CompanyUserSickLeaveAdmin.list.options({
     query: {
       ...baseListParams(query),
     },

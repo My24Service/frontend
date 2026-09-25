@@ -45,7 +45,6 @@
 <script lang="ts" setup>
 import PasswordMeter from 'vue-simple-password-meter'
 
-import { accountsResetPasswordCreateMutation } from '@/api/@tanstack/vue-query.gen'
 import {
   ValidatedForm,
   ValidatedFormField,
@@ -69,7 +68,7 @@ const errors = ref<SetPasswordErrors>({})
 const submitClicked = ref(false)
 
 const resetMutation = useMutation({
-  ...accountsResetPasswordCreateMutation(),
+  ...Api.AccountsResetPassword.create.mutation(),
 })
 
 const buttonDisabled = computed(() => resetMutation.isPending.value)

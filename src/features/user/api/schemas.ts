@@ -1,6 +1,5 @@
 import { format } from 'date-fns'
 
-import { vApiUserRequestWritable } from '@/api/valibot.gen'
 import {
   requiredMessages,
   type FieldErrors,
@@ -73,9 +72,9 @@ function payloadOf(values: ApiUserFormValues) {
 // values shape; the request nests the token's fields, so their errors key by
 // that path — `api_user.name`.
 export const { validate: validateApiUserForm, parse: parseApiUserForm } = userFormContract<
-  typeof vApiUserRequestWritable, ApiUserFormValues, 'api_user.name' | 'api_user.expire_start_dt' | 'api_user.expire_in_days'
+  typeof schemas.vApiUserRequestWritable, ApiUserFormValues, 'api_user.name' | 'api_user.expire_start_dt' | 'api_user.expire_in_days'
 >({
-  schema: vApiUserRequestWritable,
+  schema: schemas.vApiUserRequestWritable,
   messages: FIELD_MESSAGES,
   labels: FIELD_LABELS,
   payloadOf,

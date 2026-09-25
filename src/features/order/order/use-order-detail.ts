@@ -1,14 +1,11 @@
-import {
-  orderOrderRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { OrderDetail, OrderLine } from '@/api/types.gen'
+
 
 /**
  * One order detail, addressed by primary key (the app's own `order-view`
  * route) or by uuid (`order-detail`, the address an e-mail carries). Both
  * ride the one retrieve endpoint, which answers the full detail either way.
  */
-export type OrderDetailRecord = OrderDetail
+export type OrderDetailRecord = Api.OrderDetail
 
 export interface OrderAddress {
   pk?: string | number | null
@@ -21,7 +18,7 @@ export function orderDetailAddress(address: OrderAddress): string {
 
 export function useOrderDetail(address: MaybeRefOrGetter<OrderAddress>) {
   const query = useQuery(() => ({
-    ...orderOrderRetrieveOptions({path: {id: orderDetailAddress(toValue(address))}}),
+    ...Api.OrderOrder.retrieve.options({path: {id: orderDetailAddress(toValue(address))}}),
     enabled: toValue(address).pk != null || toValue(address).uuid != null,
   }))
 
@@ -40,7 +37,7 @@ export function useOrderDetail(address: MaybeRefOrGetter<OrderAddress>) {
  * its location) shows those names rather than the free-text product and
  * location the line was typed with.
  */
-export function displayOrderlines(orderlines: OrderLine[], usesEquipment: boolean): OrderLine[] {
+export function displayOrderlines(orderlines: Api.OrderLine[], usesEquipment: boolean): Api.OrderLine[] {
   if (!usesEquipment) return orderlines
   return orderlines.map((line) => ({
     ...line,

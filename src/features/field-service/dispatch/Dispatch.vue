@@ -282,14 +282,8 @@ import { nl } from 'date-fns/locale'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import VueMultiselect from 'vue-multiselect'
 
-import {
-  companyDispatchAssignedordersUserListV4RetrieveQueryKey,
-  companyUserListListOptions,
-  mobileAssignedorderDetailChangeDatePartialUpdateMutation,
-  mobileAssignedorderSplitCreateMutation,
-  orderOrderRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Order, OrderDetail, UserSelectRow } from '@/api/types.gen'
+import { companyDispatchAssignedordersUserListV4RetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
+
 import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 import { NEW_DATA_EVENTS } from '@/constants'
 import { completeTime } from '@/features/forms'
@@ -357,12 +351,12 @@ const buttonDisabled = ref(false)
 const showOverlay = ref(false)
 
 const assignMode = ref(false)
-const selectedOrders = ref<Order[]>([])
+const selectedOrders = ref<Api.Order[]>([])
 const selectedOrderIds = ref<string[]>([])
 const selectedUsers = ref<AssignedUser[]>([])
 const alreadyAssignedUsers = ref<AssignedUser[]>([])
 
-const selectedOrder = ref<OrderDetail | null>(null)
+const selectedOrder = ref<Api.OrderDetail | null>(null)
 const selectedAssignedOrder = ref<DispatchBoardAssignedOrder | null>(null)
 const selectedOrderUserId = ref<number | null>(null)
 const selectedOrderIsPartner = ref(false)
@@ -381,8 +375,8 @@ const assignedOrder = ref<AssignedOrderDates>({
 
 const getEngineersDebounced = AwesomeDebouncePromise(getEngineers, 500)
 
-const engineers = ref<UserSelectRow[]>([])
-const selectedEngineers = ref<UserSelectRow[]>([])
+const engineers = ref<Api.UserSelectRow[]>([])
+const selectedEngineers = ref<Api.UserSelectRow[]>([])
 const searchingEngineers = ref(false)
 
 const searchAssignModal = useTemplateRef<InstanceType<typeof SearchAndAssign>>('search-modal-wide')
@@ -392,8 +386,8 @@ const actionsModal = useTemplateRef<{show: () => void; hide: () => Promise<unkno
 
 const startWeek = computed(() => Number(moment(startDate.value).format('w')))
 
-const changeDateMutation = useMutation({...mobileAssignedorderDetailChangeDatePartialUpdateMutation()})
-const splitAssignedOrderMutation = useMutation({...mobileAssignedorderSplitCreateMutation()})
+const changeDateMutation = useMutation({...Api.MobileAssignedorder.extras.detailChangeDatePartialUpdate.mutation()})
+const splitAssignedOrderMutation = useMutation({...Api.MobileAssignedorderSplit.create.mutation()})
 
 watch(mode, (value) => localStorage.setItem('displayMode', JSON.stringify(value)))
 watch(showUsersMode, (value) => localStorage.setItem('showUsersMode', JSON.stringify(value)))
@@ -484,7 +478,7 @@ async function openActionsModal(userId: number, order_pk: number, assignedorder:
     // The retrieve path is declared as a string — it accepts an order pk or a
     // uuid — so the number the grid carries is stringified for the request.
     selectedOrder.value = await queryClient.fetchQuery(
-      orderOrderRetrieveOptions({path: {id: String(order_pk)}}))
+      Api.OrderOrder.retrieve.options({path: {id: String(order_pk)}}))
     showOverlay.value = false
     await actionsModal.value?.show()
   } catch (error) {
@@ -638,7 +632,7 @@ async function getEngineers(query: string) {
 
   try {
     engineers.value = await queryClient.fetchQuery(
-      companyUserListListOptions({query: {q: query, user_type: 'engineer'}}))
+      Api.CompanyUserList.list.options({query: {q: query, user_type: 'engineer'}}))
     searchingEngineers.value = false
   } catch (error) {
     console.log('Error fetching engineers', error)

@@ -1,17 +1,6 @@
 import type { Simplify } from 'type-fest'
 
 import {
-  companyBranchAutocompleteListOptions,
-  companyEngineerListForSelectListOptions,
-  companySalesuserListOptions,
-  customerCustomerAutocompleteListOptions,
-  equipmentEquipmentAutocompleteListOptions,
-  equipmentEquipmentCreateQuickCreateMutation,
-  equipmentLocationAutocompleteListOptions,
-  equipmentLocationCreateQuickCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { BranchAutocomplete, CustomerAutocomplete } from '@/api/types.gen'
-import {
   useSearch,
   useQueryErrorToast,
 } from '@/features/forms'
@@ -21,8 +10,8 @@ import type { OrderContactBlock, OrderFormValues } from './schemas'
 const asIs = <T>(rows: T[]) => rows
 
 type Like<T extends { id: unknown }> = Simplify<Partial<Omit<T, 'value'>> & Pick<T, 'id'>>
-export type CustomerLike = Like<CustomerAutocomplete>
-export type BranchLike = Like<BranchAutocomplete>
+export type CustomerLike = Like<Api.CustomerAutocomplete>
+export type BranchLike = Like<Api.BranchAutocomplete>
 
 /**
  * The owner picker: a tenant with branches orders for a branch, one without
@@ -35,7 +24,7 @@ export type BranchLike = Like<BranchAutocomplete>
 export function useOwnerPicker<TValues extends OrderContactBlock>(values: Ref<TValues>, hasBranches: boolean) {
   if (hasBranches) {
     const {term, options} = useSearch(
-      (q) => companyBranchAutocompleteListOptions({query: {q}}),
+      (q) => Api.CompanyBranchAutocomplete.list.options({query: {q}}),
       () => true,
       $trans('Error fetching branches'),
       asIs,
@@ -47,7 +36,7 @@ export function useOwnerPicker<TValues extends OrderContactBlock>(values: Ref<TV
     return {term, options, select: (branch: typeof options['value'][number]) => fillBranch(values.value as TValues & {branch: number | null}, branch)}
   }
   const {term, options} = useSearch(
-    (q) => customerCustomerAutocompleteListOptions({query: {q}}),
+    (q) => Api.CustomerCustomerAutocomplete.list.options({query: {q}}),
     () => true,
     $trans('Error fetching customers'),
     asIs,
@@ -124,13 +113,13 @@ export function useEquipmentPickers(
   )
 
   const equipment = useSearch(
-    (q) => equipmentEquipmentAutocompleteListOptions({query: {q, ...owner.value}}),
+    (q) => Api.EquipmentEquipmentAutocomplete.list.options({query: {q, ...owner.value}}),
     () => ownerChosen.value,
     $trans('Error searching equipment'),
     asIs,
   )
   const locations = useSearch(
-    (q) => equipmentLocationAutocompleteListOptions({query: {q, ...owner.value}}),
+    (q) => Api.EquipmentLocationAutocomplete.list.options({query: {q, ...owner.value}}),
     () => ownerChosen.value,
     $trans('Error searching location'),
     asIs,
@@ -143,8 +132,8 @@ export function useEquipmentPickers(
     return {customer: isPlanningUser.value ? (values.value.customer_relation ?? 0) : 0}
   }
 
-  const quickCreateEquipment = useMutation({...equipmentEquipmentCreateQuickCreateMutation()})
-  const quickCreateLocation = useMutation({...equipmentLocationCreateQuickCreateMutation()})
+  const quickCreateEquipment = useMutation({...Api.EquipmentEquipmentCreateQuick.create.mutation()})
+  const quickCreateLocation = useMutation({...Api.EquipmentLocationCreateQuick.create.mutation()})
 
   async function createEquipment(name: string): Promise<{id: number; name: string} | null> {
     try {
@@ -192,7 +181,7 @@ export function useEquipmentPickers(
  */
 export function useEngineerOptions(enabled: () => boolean) {
   const query = useQuery(() => ({
-    ...companyEngineerListForSelectListOptions(),
+    ...Api.CompanyEngineerListForSelect.list.options(),
     enabled: enabled(),
   }))
   const engineers = computed(() => query.data.value ?? [])
@@ -203,7 +192,7 @@ export function useEngineerOptions(enabled: () => boolean) {
 /** The sales users whose e-mail goes on the order's extra recipients. */
 export function useSalesUserOptions(enabled: () => boolean) {
   const salesUsers = useSearch(
-    (q) => companySalesuserListOptions({query: {q}}),
+    (q) => Api.CompanySalesuser.list.options({query: {q}}),
     enabled,
     $trans('Error fetching sales users'),
     (page) => page.results ?? [],

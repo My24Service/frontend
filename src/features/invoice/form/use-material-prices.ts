@@ -1,4 +1,4 @@
-import { inventoryMaterialPartialUpdateMutation } from '@/api/@tanstack/vue-query.gen'
+
 /**
  * The material price write the Manage-prices panel performs: the record being
  * edited plus the patch body captured from the PriceInput events, reported
@@ -6,7 +6,7 @@ import { inventoryMaterialPartialUpdateMutation } from '@/api/@tanstack/vue-quer
  */
 export function useMaterialPriceUpdates() {
   const { create } = useToast()
-  const materialPatch = useMutation(inventoryMaterialPartialUpdateMutation())
+  const materialPatch = useMutation(Api.InventoryMaterial.update.mutation())
 
   async function updateMaterialPrices(
     materialId: number,

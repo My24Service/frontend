@@ -257,6 +257,8 @@ const resourcePath = (path) =>
 const groups = new Map()
 /** Every list and retrieve, by path, for the `reads` of the resource above it. */
 const reads = []
+/** The verbs on a single record, attached to their resource's `extras` below. */
+const extras = []
 
 for (const [path, item] of Object.entries(doc.paths ?? {})) {
   for (const [method, operation] of Object.entries(item)) {
@@ -281,7 +283,14 @@ for (const [path, item] of Object.entries(doc.paths ?? {})) {
       (operation.parameters ?? []).filter((param) => param.in === 'query').map((param) => param.name),
     )
     bodySchemas.set(id, Boolean(operation.requestBody) ? `v${toCase(id, 'PascalCase')}Body` : null)
-    if (isAction(path)) continue
+    // A verb on one record (`branch/{id}/dashboard/`, `apiuser/{id}/revoke/`)
+    // belongs to the resource that record is an instance of, under that
+    // resource's `extras` - the screen still names the resource. Collected
+    // here, attached below, once every resource's path is known.
+    if (isAction(path)) {
+      extras.push({ id, path, key, hasBody: Boolean(operation.requestBody) })
+      continue
+    }
 
     const prefix = id.slice(0, -(verb.length + 1))
     if (!groups.has(prefix)) groups.set(prefix, { paths: new Set(), operations: {} })
@@ -469,7 +478,60 @@ for (const prefix of [...groups.keys()].sort()) {
   const pageable = Boolean(operations.list && pageableLists.get(operations.list.id))
   const hasListQuery = Boolean(pageable && hasQueryParams.get(operations.list.id))
 
-  resources.push({ name, path, kind, idType, entries, reads: readIds, types, hasListQuery, pageable, listId: operations.list?.id })
+  resources.push({ name, path, kind, idType, entries, reads: readIds, types, hasListQuery, pageable, listId: operations.list?.id, extras: [] })
+}
+
+// The record-level verbs, each hung on the resource whose path its own path
+// sits under - the longest such path, so `/api/company/salesusercustomer/my/`
+// joins `salesusercustomer` and not `company`. Ownership by path, not by name:
+// the operationId prefix would put `companyPartnerRequestAccept` on
+// `partnerRequest` by luck of spelling, and the path is what the server
+// actually answers.
+//
+// Both sides are compared in `resourcePath` form, because a resource's `path`
+// has no leading slash (`api/company/branch`) while the operation's does
+// (`/api/company/branch/{id}/dashboard/`).
+const resourceByPath = resources.map((resource) => ({ resource, prefix: `${resourcePath(resource.path)}/` }))
+const orphans = []
+
+for (const extra of extras) {
+  const own = resourceByPath
+    .filter(({ prefix }) => resourcePath(extra.path).startsWith(prefix))
+    .sort((a, b) => b.prefix.length - a.prefix.length)[0]
+  if (!own) {
+    orphans.push(`${extra.id} (${extra.path})`)
+    continue
+  }
+  const { resource } = own
+  const camel = toCase(extra.id, 'camelCase')
+  // The name is the operationId with the owner's own id prefix removed, so
+  // `companyApiuserRevokeCreate` on `Api.CompanyApiuser` is
+  // `extras.revokeCreate` and not a name that could collide with a sibling
+  // resource's. The comparison is in camelCase because a raw operationId is
+  // snake_case (`company_apiuser_revoke_create`) and would never match the
+  // resource's camelCase name.
+  const owner = lowerFirst(resource.name)
+  const name = camel.startsWith(owner) ? toCase(camel.slice(owner.length), 'camelCase') : camel
+  if (resource.extras.some((e) => e.name === name)) {
+    throw new Error(`${resource.name} has two extras named ${name}: ${extra.id}`)
+  }
+  const entry = {}
+  if (READS.has(extra.key)) {
+    entry.options = bind(tanstackExports, `${camel}Options`, 'vue-query.gen', extra.id)
+    entry.queryKey = bind(tanstackExports, `${camel}QueryKey`, 'vue-query.gen', extra.id)
+  } else {
+    entry.mutation = bind(tanstackExports, `${camel}Mutation`, 'vue-query.gen', extra.id)
+    if (extra.hasBody) entry.body = bind(valibotExports, `v${toCase(extra.id, 'PascalCase')}Body`, 'valibot.gen', extra.id)
+  }
+  resource.extras.push({ name, path: extra.path, entry })
+}
+
+for (const { extras: resourceExtras } of resources) {
+  for (const { entry } of resourceExtras) {
+    for (const [field, name] of Object.entries(entry)) {
+      ;(field === 'body' ? valibotImports : tanstackImports).add(name)
+    }
+  }
 }
 
 for (const { entries } of resources) {
@@ -607,7 +669,7 @@ ${filterBody}
 }
 
 const resourceBlocks = resources.map((resource) => {
-  const {name, path, kind, idType, entries, reads, types, hasListQuery, pageable, listId} = resource
+  const {name, path, kind, idType, entries, reads, types, hasListQuery, pageable, listId, extras: resourceExtras} = resource
   // The filter set this list derives, emitted once beside the resource so
   // `listOptions`'s default is a name rather than an inline literal.
   const filterKeys = pageable ? derivedFilters(listId) : []
@@ -617,6 +679,22 @@ const resourceBlocks = resources.map((resource) => {
         .map(([field, value]) => `${field}: ${value}`)
         .join(', ')}},`,
   )
+  // The record-level verbs, one line each under `extras`. A screen that needs
+  // `/branch/{id}/dashboard/` names `Api.CompanyBranch` and reaches for
+  // `extras.dashboardRetrieve`, not for a second generated export.
+  if (resourceExtras.length > 0) {
+    lines.push(
+      `  // The verbs on one record, which the server serves under this resource's path.`,
+      `  extras: {${resourceExtras
+        .map(
+          ({name: extraName, path: extraPath, entry}) =>
+            `\n    /** \`${extraPath}\` */\n    ${extraName}: {${Object.entries(entry)
+              .map(([field, value]) => `${field}: ${value}`)
+              .join(', ')}},`,
+        )
+        .join('')}\n  },`,
+    )
+  }
   const conveniences = convenienceBlock({name, kind, entries, filterKeys, pageable, idType})
   const namespace = types.length > 0 ? `\n\n${typeBlock(name, types)}` : ''
   // The derived filter set, one local per resource, annotated with the
@@ -764,6 +842,15 @@ export interface CollectionResource<TId extends number | string> extends Resourc
   readonly update?: ResourceWrite
   readonly replace?: ResourceWrite
   readonly destroy?: ResourceWrite
+  /**
+   * The verbs the server serves on one of this resource's records, under this
+   * resource's path: \`/branch/{id}/dashboard/\`, \`/apiuser/{id}/revoke/\`. A
+   * screen that needs one names this resource and reads
+   * \`Api.CompanyBranch.extras.dashboardRetrieve\`, so a record-level verb never
+   * becomes a second bare generated import. Read-only ones carry
+   * \`{options, queryKey}\` like \`list\`; the rest carry \`{mutation, body?}\`.
+   */
+  readonly extras?: Record<string, ResourceRead | ResourceWrite>
 }
 
 /** The caller's own record (\`member/me\`, \`branch-my\`): read and updated without a path. */

@@ -1,6 +1,5 @@
 import * as v from 'valibot'
 
-import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
 import {
   fieldErrors,
   requiredMessages,
@@ -9,7 +8,7 @@ import {
 } from '@/features/forms'
 import { formDefaults } from '@/models/schema'
 export type ModulePartFormValues =
-  Omit<v.InferInput<typeof vMemberModulePartCreateBody>, 'module'> & {module: number | null}
+  Omit<v.InferInput<typeof schemas.vMemberModulePartCreateBody>, 'module'> & {module: number | null}
 
 /**
  * The blank form, derived from the request component. `module` is the one
@@ -17,7 +16,7 @@ export type ModulePartFormValues =
  * its inferred blank is `0`, while an unchosen picker is `null`.
  */
 export function emptyModulePart(): ModulePartFormValues {
-  return formDefaults(vMemberModulePartCreateBody, {module: null})
+  return formDefaults(schemas.vMemberModulePartCreateBody, {module: null})
 }
 
 export type ModulePartFieldErrors = FieldErrors<keyof ModulePartFormValues & string>
@@ -31,9 +30,9 @@ export const FIELD_LABELS = {
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)
 
 export function validateModulePart(values: ModulePartFormValues): ModulePartFieldErrors {
-  return fieldErrors(vMemberModulePartCreateBody, values, {}, FIELD_LABELS)
+  return fieldErrors(schemas.vMemberModulePartCreateBody, values, {}, FIELD_LABELS)
 }
 
-export function parseModulePart(values: ModulePartFormValues): v.InferOutput<typeof vMemberModulePartCreateBody> {
-  return v.parse(vMemberModulePartCreateBody, values)
+export function parseModulePart(values: ModulePartFormValues): v.InferOutput<typeof schemas.vMemberModulePartCreateBody> {
+  return v.parse(schemas.vMemberModulePartCreateBody, values)
 }

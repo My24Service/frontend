@@ -199,13 +199,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  companyBranchMyRetrieveOptions,
-  companyBranchRetrieveOptions,
-  equipmentEquipmentListOptions,
-  equipmentLocationListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Branch } from '@/api/types.gen'
+
 import { EQUIPMENT_TYPES } from '@/constants'
 import {
   useDetailOrders,
@@ -258,9 +252,9 @@ const editLocation = computed(() => toRoute(editRoute.value, { pk: subjectId.val
 // through `useQueryOf`: a ternary between the two is a union `useQuery`
 // rejects, so the role gate lives in the selector. Planning reads the branch
 // by id; an employee reads their own through the pathless `branch-my`.
-const branchQuery = useQueryOf<Branch>(() => (isEmployee.value
-  ? {...companyBranchMyRetrieveOptions(), enabled: true}
-  : {...companyBranchRetrieveOptions({path: {id: subjectId.value ?? 0}}), enabled: hasSubject.value}))
+const branchQuery = useQueryOf<Api.Branch>(() => (isEmployee.value
+  ? {...Api.CompanyBranchMy.retrieve.options(), enabled: true}
+  : {...Api.CompanyBranch.retrieve.options({path: {id: subjectId.value ?? 0}}), enabled: hasSubject.value}))
 useQueryErrorToast(branchQuery.error, $trans('Error fetching branch detail'))
 
 const record = computed(() => branchQuery.data.value)
@@ -294,11 +288,11 @@ const {
 // `locationsQuery` does it: it is the arguments that differ by role, not the
 // options object, which is the shape generated `*Options` calls support.
 const equipmentQuery = useQuery(() => ({
-  ...equipmentEquipmentListOptions({query: isEmployee.value ? {page: 1} : {branch: subjectId.value ?? 0, page: 1}}),
+  ...Api.EquipmentEquipment.list.options({query: isEmployee.value ? {page: 1} : {branch: subjectId.value ?? 0, page: 1}}),
   enabled: isEmployee.value || hasSubject.value,
 }))
 const locationsQuery = useQuery(() => ({
-  ...equipmentLocationListOptions({query: isEmployee.value ? {page: 1} : {branch: subjectId.value ?? 0, page: 1}}),
+  ...Api.EquipmentLocation.list.options({query: isEmployee.value ? {page: 1} : {branch: subjectId.value ?? 0, page: 1}}),
   enabled: isEmployee.value || hasSubject.value,
 }))
 useQueryErrorToast(equipmentQuery.error, $trans('Error fetching equipment'))

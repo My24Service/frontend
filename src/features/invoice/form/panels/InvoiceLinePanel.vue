@@ -117,20 +117,14 @@
 </template>
 
 <script setup lang="ts">
-import {
-  invoiceInvoiceLineCreateMutation,
-  invoiceInvoiceLineDestroyMutation,
-  invoiceInvoiceLinePartialUpdateMutation,
-  invoiceInvoiceLineListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { InvoiceLine, InvoiceLineRequest } from '@/api/types.gen'
+
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoney, formatMoneyPlain, toDinero } from '@/services/money'
 import { calculateInvoiceLine, hydrateInvoicePrices, type InvoiceLineDraft } from '../calculations'
 import VAT from './VAT.vue'
 
 type Money = ReturnType<typeof toDinero>
-type LineRow = Omit<InvoiceLine, 'id' | 'invoice'> & {
+type LineRow = Omit<Api.InvoiceLine, 'id' | 'invoice'> & {
   id?: number
   invoice?: number
   localKey: number
@@ -158,11 +152,11 @@ const saving = ref(false)
 const editorVersion = ref(0)
 let nextKey = 0
 const savedBodies = new Map<number, string>()
-const createLine = useMutation(invoiceInvoiceLineCreateMutation())
-const updateLine = useMutation(invoiceInvoiceLinePartialUpdateMutation())
-const deleteLine = useMutation(invoiceInvoiceLineDestroyMutation())
+const createLine = useMutation(Api.InvoiceInvoiceLine.create.mutation())
+const updateLine = useMutation(Api.InvoiceInvoiceLine.update.mutation())
+const deleteLine = useMutation(Api.InvoiceInvoiceLine.destroy.mutation())
 const linesQuery = useQuery(() => ({
-  ...invoiceInvoiceLineListOptions({ query: { invoice: Number(props.invoicePk) } }),
+  ...Api.InvoiceInvoiceLine.list.options({ query: { invoice: Number(props.invoicePk) } }),
   enabled: Boolean(props.invoicePk),
   refetchOnWindowFocus: false,
 }))
@@ -175,7 +169,7 @@ const editTotals = computed(() => editPrices.value.total_dinero)
 const editVat = computed(() => editPrices.value.vat_dinero)
 const hasTotalsLine = computed(() => lines.value.some(line => line.price_text === '*'))
 
-function bodyFor(line: LineRow, invoice: number): InvoiceLineRequest {
+function bodyFor(line: LineRow, invoice: number): Api.InvoiceLineRequest {
   return {
     invoice,
     description: line.description,
@@ -279,7 +273,7 @@ async function saveCollection(invoiceId = Number(props.invoicePk)) {
       }
       savedBodies.set(row.id, serialized)
     }
-    await queryClient.invalidateQueries({ queryKey: invoiceInvoiceLineListOptions({ query: { invoice: invoiceId } }).queryKey, refetchType: 'none' })
+    await queryClient.invalidateQueries({ queryKey: Api.InvoiceInvoiceLine.list.options({ query: { invoice: invoiceId } }).queryKey, refetchType: 'none' })
     publishTotals()
   } finally {
     saving.value = false

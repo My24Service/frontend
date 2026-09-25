@@ -86,8 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import { mobileTripTripAvailabilityDetailRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import type { AvailabilityUserRow } from '@/api/types.gen'
+
 import { useQueryErrorToast } from '@/features/forms'
 import { useTripAssignment } from '@/features/field-service/assignment'
 
@@ -119,7 +118,7 @@ const {assignTrip, unassignTrip, isPending} = useTripAssignment()
 const tripId = computed(() => Number(props.pk))
 
 const query = useQuery(() => ({
-  ...mobileTripTripAvailabilityDetailRetrieveOptions({path: {id: tripId.value}}),
+  ...Api.MobileTrip.extras.tripAvailabilityDetailRetrieve.options({path: {id: tripId.value}}),
   enabled: Number.isFinite(tripId.value),
 }))
 
@@ -135,14 +134,14 @@ const isLoading = computed(() => query.isLoading.value || isPending.value)
 const buttonDisabled = isPending
 
 const mode = ref<Proposal>(null)
-const selectedUser = ref<AvailabilityUserRow | null>(null)
+const selectedUser = ref<Api.AvailabilityUserRow | null>(null)
 
 /**
  * The row's name, spelled per variant: `AvailabilityUserRow` is a union of the
  * flattened student row (which carries `full_name`) and the engineer row, whose
  * account nests under `user` and so has only the name parts.
  */
-function rowName(row: AvailabilityUserRow): string {
+function rowName(row: Api.AvailabilityUserRow): string {
   if ('full_name' in row) return row.full_name
 
   const name = [row.user.first_name, row.user.last_name].filter(Boolean).join(' ')
@@ -156,12 +155,12 @@ const fields = [
   {key: 'icons', label: ''},
 ]
 
-function askToAssign(user: AvailabilityUserRow) {
+function askToAssign(user: Api.AvailabilityUserRow) {
   mode.value = 'assign'
   selectedUser.value = user
 }
 
-function askToUnassign(user: AvailabilityUserRow) {
+function askToUnassign(user: Api.AvailabilityUserRow) {
   mode.value = 'unassign'
   selectedUser.value = user
 }

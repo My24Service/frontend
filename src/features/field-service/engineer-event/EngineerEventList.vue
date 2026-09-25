@@ -18,8 +18,8 @@
       :delete-modal="{
         modalId: 'delete-event-modal',
         confirmText: $trans('Are you sure you want to delete this event?'),
-        destroyMutation: companyEngineereventDestroyMutation,
-        invalidate: CompanyEngineerevent.invalidate,
+        destroyMutation: Api.CompanyEngineerevent.destroy.mutation,
+        invalidate: Api.CompanyEngineerevent.invalidate,
         deletedDetail: $trans('Event has been deleted'),
         deleteError: $trans('Error deleting event'),
       }"
@@ -46,12 +46,6 @@
 <script lang="ts" setup>
 import moment from 'moment'
 
-import {
-  companyEngineereventDestroyMutation,
-  companyEngineereventListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedEngineerEventList } from '@/api/types.gen'
-import { CompanyEngineerevent } from '@/api/resources.gen'
 import { NEW_DATA_EVENTS } from '@/constants'
 import {
   ServerTable,
@@ -92,7 +86,7 @@ import EngineerEventOrderForm from './EngineerEventOrderForm.vue'
  *    either; `/api/company/engineerevent/{id}/` (DELETE) exists now, and the
  *    shell's `deleteModal` owns the modal, the confirmation and the refresh.
  */
-type EventRow = ListRow<PaginatedEngineerEventList>
+type EventRow = ListRow<Api.PaginatedEngineerEventList>
 
 /** The page size the endpoint pages by: DRF's `PAGE_SIZE`, and not a parameter. */
 const PAGE_SIZE = 50
@@ -164,7 +158,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   columns,
   enableSorting: false,
   pageSize: PAGE_SIZE,
-  listOptions: (query) => companyEngineereventListOptions({query: {page: query.page}}),
+  listOptions: (query) => Api.CompanyEngineerevent.list.options({query: {page: query.page}}),
   urlSync: true,
   loadError: $trans('Error loading events'),
 })

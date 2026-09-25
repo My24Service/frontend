@@ -40,13 +40,7 @@
 import { hLink } from '@/components/render'
 import IBiCheckLg from '~icons/bi/check-lg'
 import IBiXLg from '~icons/bi/x-lg'
-import {
-  companyUserLeaveHoursAdminAllNotAcceptedListOptions,
-  companyUserLeaveHoursAdminSetAcceptedCreateMutation,
-  companyUserLeaveHoursAdminSetRejectedCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedUserLeaveHoursList } from '@/api/types.gen'
-import { CompanyUserLeaveHoursAdmin } from '@/api/resources.gen'
+
 import { ServerTable, baseListParams, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
@@ -64,7 +58,7 @@ import SubNav from '../SubNav.vue'
  * Each decision is a PATCH-free POST the endpoint declares no body for, so only
  * the path rides - a write that invalidates both lists this sub-folder shows.
  */
-type LeaveRequestRow = ListRow<PaginatedUserLeaveHoursList>
+type LeaveRequestRow = ListRow<Api.PaginatedUserLeaveHoursList>
 
 const queryClient = useQueryClient()
 const {create: toast} = useToast()
@@ -115,7 +109,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'leave-request-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => companyUserLeaveHoursAdminAllNotAcceptedListOptions({
+  listOptions: (query) => Api.CompanyUserLeaveHoursAdminAllNotAccepted.list.options({
     query: {
       ...baseListParams(query),
     },
@@ -133,10 +127,10 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
 const {confirm: showAcceptModal, handleOk: handleAcceptOk} = useConfirmedAction({
   modalRefName: 'accept-leave-modal',
   mutationOptions: () => ({
-    ...companyUserLeaveHoursAdminSetAcceptedCreateMutation(),
+    ...Api.CompanyUserLeaveHoursAdmin.extras.setAcceptedCreate.mutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Accepted'), $trans('Leave as been accepted'))
-      await CompanyUserLeaveHoursAdmin.invalidate(queryClient)
+      await Api.CompanyUserLeaveHoursAdmin.invalidate(queryClient)
     },
     onError: () => errorToast(toast, $trans('Error accepting leave')),
   }),
@@ -145,10 +139,10 @@ const {confirm: showAcceptModal, handleOk: handleAcceptOk} = useConfirmedAction(
 const {confirm: showRejectModal, handleOk: handleRejectOk} = useConfirmedAction({
   modalRefName: 'reject-leave-modal',
   mutationOptions: () => ({
-    ...companyUserLeaveHoursAdminSetRejectedCreateMutation(),
+    ...Api.CompanyUserLeaveHoursAdmin.extras.setRejectedCreate.mutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Rejected'), $trans('Leave as been rejected'))
-      await CompanyUserLeaveHoursAdmin.invalidate(queryClient)
+      await Api.CompanyUserLeaveHoursAdmin.invalidate(queryClient)
     },
     onError: () => errorToast(toast, $trans('Error rejecting leave')),
   }),

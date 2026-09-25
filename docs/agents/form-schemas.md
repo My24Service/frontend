@@ -340,6 +340,39 @@ drift:
 | `createMutation()` / `updateMutation()` / `destroyMutation()` | that operation's mutation options, for `useMutation` |
 | `updateVars(id, body)` / `updateVars(body)` | what an update sends: `{path, body}` for a collection, `{body}` for a singleton |
 | `invalidate(queryClient?)` | every read under this resource's path, refreshed |
+| `extras.<verb>` | a verb the server serves on *one* of this resource's records, under its path |
+
+`extras` holds what the generator used to drop: the record-level verbs, matched
+by `isAction` - `/branch/{id}/dashboard/`, `/apiuser/{id}/revoke/`,
+`/order/{id}/set_order_accepted/`. A screen that needs one names the resource
+and reaches for `Api.CompanyBranch.extras.dashboardRetrieve`, so a verb on a
+record never becomes a second bare generated import. Ownership is by **path**
+(longest resource path that prefixes it), not by operationId prefix: the name
+would attach `companyPartnerRequestAccept` to `partnerRequest` by luck of
+spelling, and the path is what the server actually answers. Read-only verbs
+carry `{options, queryKey}` like `list`; the rest carry `{mutation, body?}`.
+25 resources have them today.
+
+## The codemod
+
+`npm run use-api-namespace` rewrites the `@/api/**` imports to `Api`. It takes
+a directory (`npm run use-api-namespace -- src/features`) and a `--dry` flag,
+renames through the ts-morph *symbol* so a shadowing local is untouched, and is
+idempotent - a second run rewrites nothing. Anything it cannot place is printed
+by name and left imported, which is how the remaining 34 were found.
+
+Two things it is careful about, both of which were bugs first:
+
+- The **script** pass renames identifiers that resolve to the import, skipping
+  the specifier's own name, and then rebuilds each declaration from the
+  specifiers that still have no other home. Rebuilding rather than deleting is
+  what makes a *partly* placed declaration correct.
+- The **template** pass is not textual. It walks `descriptor.template.ast` and
+  rewrites identifiers inside directive bindings and interpolations, so a
+  string literal is never a candidate - a whole-word substitution turned
+  `$trans('Invoice has been deleted')` into `'Api.Invoice has been deleted'`.
+  The expression offsets are relative to the whole file, not the template
+  block; getting that wrong lands them inside string literals.
 
 `listOptions` is what a server-paged table takes, and a screen names nothing:
 

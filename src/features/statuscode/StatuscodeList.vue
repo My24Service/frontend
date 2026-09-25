@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-statuscode-modal',
         confirmText: $trans('Are you sure you want to delete this statuscode?'),
-        destroyMutation: statuscodeStatuscodeDestroyMutation,
+        destroyMutation: Api.StatuscodeStatuscode.destroy.mutation,
         invalidate: invalidateStatuscodeLists,
         deletedDetail: $trans('Statuscode has been deleted'),
         deleteError: $trans('Error deleting statuscode'),
@@ -38,11 +38,6 @@
 <script lang="ts" setup>
 import { RouterLink } from 'vue-router'
 
-import {
-  statuscodeStatuscodeDestroyMutation,
-  statuscodeStatuscodeListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedStatuscodeList } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
 import {
   ServerTable,
@@ -67,7 +62,7 @@ const props = withDefaults(defineProps<{
 
 const routeNames = computed(() => routeNamesFor(props.codeType, props.fromSettings))
 
-type StatuscodeRow = ListRow<PaginatedStatuscodeList>
+type StatuscodeRow = ListRow<Api.PaginatedStatuscodeList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
@@ -151,7 +146,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<StatuscodeRow>({
   key: 'statuscode-table',
   columns,
-  listOptions: (query) => statuscodeStatuscodeListOptions({
+  listOptions: (query) => Api.StatuscodeStatuscode.list.options({
     query: {
       ...baseListParams(query),
 

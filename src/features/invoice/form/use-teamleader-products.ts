@@ -1,13 +1,6 @@
 import { parse } from 'valibot'
-import {
-  teamleaderConfigRetrieveOptions,
-  teamleaderProductDetailRetrieveOptions,
-  teamleaderTaxRateListOptions,
-  teamleaderTlProductCreateCreateMutation,
-  teamleaderTlProductListListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Material, ProductList, ProductRequest, TaxRate } from '@/api/types.gen'
-import { vProductRequest } from '@/api/valibot.gen'
+import { teamleaderConfigRetrieveOptions, teamleaderProductDetailRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+
 import { useQueryErrorToast } from '@/features/forms'
 import { hasAccessToModule } from '@/utils'
 
@@ -23,7 +16,7 @@ export interface ProductChooserHandle {
 }
 
 /** A selling price the Teamleader config fixes for a kind of hours. */
-export type TeamleaderHourlyRate = Pick<ProductList, 'selling_price'>
+export type TeamleaderHourlyRate = Pick<Api.ProductList, 'selling_price'>
 
 /**
  * A configured hours rate, or null when the setting is absent, blank or not a
@@ -63,14 +56,14 @@ export function productLinkBody(input: {
   materialId: number
   productId: string
   detail: Record<string, unknown>
-  taxRates: readonly TaxRate[]
+  taxRates: readonly Api.TaxRate[]
   currency: string
-}): ProductRequest {
+}): Api.ProductRequest {
   const tax = input.detail.tax
   if (!tax || typeof tax !== 'object' || !('id' in tax)) throw new Error('Missing product tax')
   const taxRate = input.taxRates.find(rate => rate.uuid === tax.id)
   if (!taxRate) throw new Error('Unknown product tax')
-  return parse(vProductRequest, {
+  return parse(schemas.vProductRequest, {
     material: input.materialId,
     uuid: input.productId,
     purchase_price: productMoney(input.detail, 'purchase_price', input.currency),
@@ -93,7 +86,7 @@ export function productLinkBody(input: {
  * mode, show, hide after a link lands).
  */
 export function useTeamleaderProducts(options: {
-  materials: () => readonly Material[]
+  materials: () => readonly Api.Material[]
   currency: string
   chooser: () => ProductChooserHandle | null | undefined
 }) {
@@ -108,7 +101,7 @@ export function useTeamleaderProducts(options: {
     refetchOnWindowFocus: false,
   }))
   const productsQuery = useQuery(() => ({
-    ...teamleaderTlProductListListOptions({
+    ...Api.TeamleaderTlProductList.list.options({
       query: { ids: options.materials().map(material => material.id).join(',') },
     }),
     enabled: hasTeamleader.value && options.materials().length > 0,
@@ -120,7 +113,7 @@ export function useTeamleaderProducts(options: {
   const isLoading = computed(() => configQuery.isLoading.value || productsQuery.isLoading.value)
 
   /** The linked products, or null off a Teamleader tenant. */
-  const tlProducts = computed<ProductList[] | null>(() => {
+  const tlProducts = computed<Api.ProductList[] | null>(() => {
     if (!hasTeamleader.value) return null
     return productsQuery.data.value ?? []
   })
@@ -134,16 +127,16 @@ export function useTeamleaderProducts(options: {
     }
   })
 
-  function linkedProduct(materialId: number): ProductList | undefined {
+  function linkedProduct(materialId: number): Api.ProductList | undefined {
     return tlProducts.value?.find(product => product.material.id === materialId)
   }
 
   /** The material the chooser is open for; the chooser is keyed on it. */
-  const chosenMaterial = ref<Material | null>(null)
+  const chosenMaterial = ref<Api.Material | null>(null)
   const linkingProduct = ref(false)
-  const linkMutation = useMutation(teamleaderTlProductCreateCreateMutation())
+  const linkMutation = useMutation(Api.TeamleaderTlProductCreate.create.mutation())
 
-  async function openProductChooser(material: Material) {
+  async function openProductChooser(material: Api.Material) {
     chosenMaterial.value = material
     // The chooser mounts on the next tick, keyed on the material just set.
     await nextTick()
@@ -165,7 +158,7 @@ export function useTeamleaderProducts(options: {
     try {
       const [detail, taxes] = await Promise.all([
         queryClient.fetchQuery(teamleaderProductDetailRetrieveOptions({ query: { id: product.id } })),
-        queryClient.fetchQuery(teamleaderTaxRateListOptions()),
+        queryClient.fetchQuery(Api.TeamleaderTaxRate.list.options()),
       ])
       const body = productLinkBody({
         materialId: material.id,

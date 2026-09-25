@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-building-modal',
         confirmText: $trans('Are you sure you want to delete this building?'),
-        destroyMutation: equipmentBuildingDestroyMutation,
-        invalidate: EquipmentBuilding.invalidate,
+        destroyMutation: Api.EquipmentBuilding.destroy.mutation,
+        invalidate: Api.EquipmentBuilding.invalidate,
         deletedDetail: $trans('building has been deleted'),
         deleteError: $trans('Error deleting building'),
       }"
@@ -34,15 +34,10 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import {
-  equipmentBuildingDestroyMutation,
-  equipmentBuildingListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedBuildingList } from '@/api/types.gen'
-import { EquipmentBuilding } from '@/api/resources.gen'
+
 import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
 import { useBuildingColumns } from './use-building-columns'
-type BuildingRow = ListRow<PaginatedBuildingList>
+type BuildingRow = ListRow<Api.PaginatedBuildingList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
@@ -69,7 +64,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   columns,
   // The endpoint declares search, paging, `ordering` and the column filters
   // (apps/equipment/views.py), so the kit forwards all three.
-  listOptions: (query) => equipmentBuildingListOptions({
+  listOptions: (query) => Api.EquipmentBuilding.list.options({
     query: {
       ...baseListParams(query),
 

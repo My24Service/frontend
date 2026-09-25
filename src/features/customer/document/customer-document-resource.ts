@@ -1,10 +1,4 @@
-import {
-  customerDocumentCreateMutation,
-  customerDocumentDestroyMutation,
-  customerDocumentListOptions,
-  customerDocumentListQueryKey,
-  customerDocumentPartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
+
 import type { DocumentResource } from '@/features/documents'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
@@ -14,10 +8,10 @@ export const customerDocumentResource: DocumentResource = {
   // then never write them. `WHOLE_COLLECTION_PAGE_SIZE` is the API's own ceiling
   // (`My24Pagination.max_page_size`, my24service `source/apps/core/rest.py:236`),
   // which DRF clamps a larger value down to rather than rejecting it.
-  list: (parentId) => customerDocumentListOptions({query: {customer: parentId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
-  create: customerDocumentCreateMutation,
-  update: customerDocumentPartialUpdateMutation,
-  destroy: customerDocumentDestroyMutation,
-  queryKey: customerDocumentListQueryKey,
+  list: (parentId) => Api.CustomerDocument.list.options({query: {customer: parentId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
+  create: Api.CustomerDocument.create.mutation,
+  update: Api.CustomerDocument.update.mutation,
+  destroy: Api.CustomerDocument.destroy.mutation,
+  queryKey: Api.CustomerDocument.list.queryKey,
   parentField: 'customer',
 }

@@ -1,5 +1,5 @@
 import { type QueryClient, type UseMutationOptions } from '@tanstack/vue-query'
-import type { ActionResource, CollectionResource, Resource, SingletonResource } from '@/api/resources.gen'
+
 import { useRoutePk } from './use-route-pk'
 import { useQueryErrorToast } from './use-query-error-toast'
 
@@ -22,7 +22,7 @@ export type WriteContext = {isCreate: true; id: null} | {isCreate: false; id: nu
  * builds both. Each member keeps its own `retrieve` - by id in the path, or
  * with no arguments for a singleton.
  */
-type WithRecord<R extends Exclude<Resource, ActionResource>> = R & Required<Pick<R, 'retrieve' | 'update'>>
+type WithRecord<R extends Exclude<Api.Resource, Api.ActionResource>> = R & Required<Pick<R, 'retrieve' | 'update'>>
 
 /**
  * The conveniences a form calls, re-typed to the shapes a form can actually
@@ -41,23 +41,23 @@ type WithRecord<R extends Exclude<Resource, ActionResource>> = R & Required<Pick
  * `update`: `UseMutationOptions` is invariant in its response and error slots,
  * so no wider type admits every generated pair. Only `mutationFn` is used.
  */
-interface FormCalls<R extends Exclude<Resource, ActionResource>> {
-  readonly retrieveOptions: R extends SingletonResource
+interface FormCalls<R extends Exclude<Api.Resource, Api.ActionResource>> {
+  readonly retrieveOptions: R extends Api.SingletonResource
     ? () => object
-    : (id: R extends CollectionResource<infer TId> ? TId : never) => object
+    : (id: R extends Api.CollectionResource<infer TId> ? TId : never) => object
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly updateMutation: () => UseMutationOptions<any, any, any>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   readonly createMutation?: () => UseMutationOptions<any, any, any>
 }
 
-type Formable<R extends Exclude<Resource, ActionResource>> =
+type Formable<R extends Exclude<Api.Resource, Api.ActionResource>> =
   Omit<WithRecord<R>, 'retrieveOptions' | 'updateMutation' | 'createMutation'> & FormCalls<R>
 
 export type FormResource =
-  | Formable<CollectionResource<number>>
-  | Formable<CollectionResource<string>>
-  | Formable<SingletonResource>
+  | Formable<Api.CollectionResource<number>>
+  | Formable<Api.CollectionResource<string>>
+  | Formable<Api.SingletonResource>
 
 /**
  * Where a form's reads and writes come from: the generated resource, or the

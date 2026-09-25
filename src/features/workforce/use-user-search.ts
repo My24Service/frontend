@@ -1,4 +1,4 @@
-import { companyUserListListOptions } from '@/api/@tanstack/vue-query.gen'
+
 import { useQueryErrorToast } from '@/features/forms'
 /**
  * The "type to search a user" picker the leave and sick-leave forms both carry.
@@ -19,7 +19,7 @@ export function useUserSearch() {
   const queryTerm = refDebounced(term, 500)
 
   const search = useQuery(() => ({
-    ...companyUserListListOptions({query: {q: queryTerm.value}}),
+    ...Api.CompanyUserList.list.options({query: {q: queryTerm.value}}),
     enabled: queryTerm.value.length > 0,
   }))
 

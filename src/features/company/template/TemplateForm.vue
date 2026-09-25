@@ -250,12 +250,7 @@
 
 <script setup lang="ts">
 import VueMultiselect from 'vue-multiselect'
-import {
-  companyTemplatePreviewTemplatePdfCreateMutation,
-  invoiceInvoiceAutocompleteListOptions,
-  quotationQuotationAutocompleteListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import { CompanyTemplate } from '@/api/resources.gen'
+
 import {
   useQueryErrorToast,
   useResourceForm,
@@ -304,7 +299,7 @@ const templateTypes = [
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: CompanyTemplate,
+  resource: Api.CompanyTemplate,
   empty: emptyTemplate,
   fromRecord: templateFromRecord,
   validate: templateWrite.validate,
@@ -364,11 +359,11 @@ function cancelForm() {
 const previewType = computed(() => record.value?.template_type)
 
 const invoicePreviewQuery = useQuery(() => ({
-  ...invoiceInvoiceAutocompleteListOptions({ query: { q: previewDebounced.value } }),
+  ...Api.InvoiceInvoiceAutocomplete.list.options({ query: { q: previewDebounced.value } }),
   enabled: previewType.value === 'invoice' && previewDebounced.value.length > 0,
 }))
 const quotationPreviewQuery = useQuery(() => ({
-  ...quotationQuotationAutocompleteListOptions({ query: { q: previewDebounced.value } }),
+  ...Api.QuotationQuotationAutocomplete.list.options({ query: { q: previewDebounced.value } }),
   enabled: previewType.value === 'quotation' && previewDebounced.value.length > 0,
 }))
 useQueryErrorToast(invoicePreviewQuery.error, $trans('Error fetching results'))
@@ -389,7 +384,7 @@ function previewLabel(option: { label: string }): string {
   return option.label
 }
 
-const previewMutation = useMutation(companyTemplatePreviewTemplatePdfCreateMutation())
+const previewMutation = useMutation(Api.CompanyTemplatePreviewTemplatePdf.create.mutation())
 
 async function previewPdf() {
   if (previewResult.value == null || props.pk == null || loadingPdf.value) return

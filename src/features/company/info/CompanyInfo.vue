@@ -352,7 +352,7 @@
 </template>
 
 <script setup lang="ts">
-import { MemberMemberMe } from '@/api/resources.gen'
+
 import { NO_IMAGE_URL } from '@/constants'
 import {
   useResourceForm,
@@ -385,7 +385,7 @@ const form = useResourceForm({
   // No `:pk` on this route and no create: a truthy pseudo-pk holds the kit's
   // edit path, which the retrieve and update below never read.
   pk: () => 'me',
-  resource: MemberMemberMe,
+  resource: Api.MemberMemberMe,
   // The pathless endpoint declares no path, so only the body crosses.
   updateVars: (body) => ({body}),
   empty: emptyInfo,

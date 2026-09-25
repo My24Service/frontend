@@ -1,12 +1,5 @@
-import {
-  companyBranchAutocompleteListOptions,
-  companyBranchMyRetrieveOptions,
-  companyBranchRetrieveOptions,
-  customerCustomerAutocompleteListOptions,
-  customerCustomerMyRetrieveOptions,
-  customerCustomerRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { BranchAutocomplete, CustomerAutocomplete } from '@/api/types.gen'
+
+
 import {
   useQueryErrorToast,
   useQueryOf,
@@ -14,7 +7,7 @@ import {
 import type { OwnedRecord, OwnedValues, OwnerKind } from './owner-kind'
 
 /** An autocomplete row from either owner endpoint: they share id/name/city. */
-export type OwnerOption = CustomerAutocomplete | BranchAutocomplete
+export type OwnerOption = Api.CustomerAutocomplete | Api.BranchAutocomplete
 
 /** What the picked owner's read-only block shows. */
 export interface OwnerRecord {
@@ -81,15 +74,15 @@ export function useFormOwner(options: {
   // "type to search", so it stays empty until there is something to search for.
   const searchQuery = useQueryOf<OwnerOption[]>(() => ({
     ...(isBranchOwner.value
-      ? companyBranchAutocompleteListOptions({query: {q: debouncedTerm.value}})
-      : customerCustomerAutocompleteListOptions({query: {q: debouncedTerm.value}})),
+      ? Api.CompanyBranchAutocomplete.list.options({query: {q: debouncedTerm.value}})
+      : Api.CustomerCustomerAutocomplete.list.options({query: {q: debouncedTerm.value}})),
     enabled: chooses.value && debouncedTerm.value.length > 0,
   }))
 
   // The pinned roles' own owner, on a create: a chooser picks one instead, and
   // an edit reads the one the record already names.
   const myQuery = useQueryOf<OwnerRecord & {id: number}>(() => ({
-    ...(isBranchOwner.value ? companyBranchMyRetrieveOptions() : customerCustomerMyRetrieveOptions()),
+    ...(isBranchOwner.value ? Api.CompanyBranchMy.retrieve.options() : Api.CustomerCustomerMy.retrieve.options()),
     enabled: isCreate.value && !chooses.value,
   }))
 
@@ -98,8 +91,8 @@ export function useFormOwner(options: {
   const namedOwnerId = computed(() => record.value?.[wireKind.value] ?? null)
   const namedOwnerQuery = useQueryOf<OwnerRecord>(() => ({
     ...(isBranchOwner.value
-      ? companyBranchRetrieveOptions({path: {id: namedOwnerId.value ?? 0}})
-      : customerCustomerRetrieveOptions({path: {id: namedOwnerId.value ?? 0}})),
+      ? Api.CompanyBranch.retrieve.options({path: {id: namedOwnerId.value ?? 0}})
+      : Api.CustomerCustomer.retrieve.options({path: {id: namedOwnerId.value ?? 0}})),
     enabled: namedOwnerId.value != null,
   }))
 

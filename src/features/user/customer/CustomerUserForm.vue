@@ -107,10 +107,6 @@ import UserFormShell from '../UserFormShell.vue'
 import VueMultiselect from 'vue-multiselect'
 import * as v from 'valibot'
 
-import { customerCustomerAutocompleteListOptions } from '@/api/@tanstack/vue-query.gen'
-import { CompanyCustomeruser } from '@/api/resources.gen'
-import type { CustomerAutocomplete, CustomerUser } from '@/api/types.gen'
-import { vCustomerUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
 import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
@@ -130,7 +126,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-function customerUserFromRecord(record: CustomerUser): CustomerUserFormValues {
+function customerUserFromRecord(record: Api.CustomerUser): CustomerUserFormValues {
   return {
     ...filledFrom(emptyUserIdentity(), record),
     customer_user: filledFrom(emptyCustomerUser().customer_user, record.customer_user),
@@ -139,7 +135,7 @@ function customerUserFromRecord(record: CustomerUser): CustomerUserFormValues {
 
 // The picker's display line is read-only on the wire: it comes with the
 // record (`customer_details`), not the form.
-function customerInfoOf(record: CustomerUser): string {
+function customerInfoOf(record: Api.CustomerUser): string {
   const details = record.customer_details
   return details && record.customer_user?.customer !== null
     ? `${details.name}, ${details.address}, ${details.city}`
@@ -159,12 +155,12 @@ const {
   cancelForm,
 } = useUserForm<
   CustomerUserFormValues,
-  CustomerUser,
-  v.InferOutput<typeof vCustomerUserRequestWritable>,
+  Api.CustomerUser,
+  v.InferOutput<typeof schemas.vCustomerUserRequestWritable>,
   CustomerUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: CompanyCustomeruser,
+  resource: Api.CompanyCustomeruser,
   empty: emptyCustomerUser,
   fromRecord: customerUserFromRecord,
   validate: validateCustomerUserForm,
@@ -200,7 +196,7 @@ const customerSearchTerm = ref('')
 const customerQueryTerm = refDebounced(customerSearchTerm, 500)
 
 const customerSearchQuery = useQuery(() => ({
-  ...customerCustomerAutocompleteListOptions({query: {q: customerQueryTerm.value}}),
+  ...Api.CustomerCustomerAutocomplete.list.options({query: {q: customerQueryTerm.value}}),
   enabled: customerQueryTerm.value.length > 0,
 }))
 
@@ -213,7 +209,7 @@ function customerLabel({ name, city }: { name?: string; city?: string }) {
   return `${name} - ${city}`
 }
 
-function selectCustomer(option: CustomerAutocomplete) {
+function selectCustomer(option: Api.CustomerAutocomplete) {
   customerUser.value.customer_user.customer = option.id
   customerInfo.value = `${option.name}, ${option.address}, ${option.city}`
 }

@@ -2,12 +2,7 @@ import type {
   FieldErrors,
   FieldLabels,
 } from '@/features/forms'
-import {
-  vLocationBranchCreateRequest,
-  vLocationCustomerCreateRequest,
-  vPatchedLocationRequest,
-} from '@/api/valibot.gen'
-import type { Location } from '@/api/types.gen'
+
 import { ownedRecordSchemas } from '@/features/equipment/owner'
 
 /**
@@ -40,7 +35,7 @@ export function emptyLocation(): LocationFormValues {
 }
 
 /** The fetched record as form values: the four fields this form owns. */
-export function locationFromRecord(record: Location): LocationFormValues {
+export function locationFromRecord(record: Api.Location): LocationFormValues {
   return {
     name: record.name,
     customer: record.customer ?? null,
@@ -60,8 +55,8 @@ export const FIELD_LABELS = {
  * `ownedRecordSchemas`.
  */
 export const {validate: validateLocation, parse: parseLocation} = ownedRecordSchemas<LocationFormValues>({
-  branch: vLocationBranchCreateRequest,
-  customer: vLocationCustomerCreateRequest,
-  patch: vPatchedLocationRequest,
+  branch: schemas.vLocationBranchCreateRequest,
+  customer: schemas.vLocationCustomerCreateRequest,
+  patch: schemas.vPatchedLocationRequest,
   labels: FIELD_LABELS,
 })

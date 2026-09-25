@@ -147,8 +147,7 @@
 </template>
 
 <script lang="ts" setup>
-import { OrderOrder } from '@/api/resources.gen'
-import type { OrderCreate, OrderUpdate } from '@/api/types.gen'
+
 import { useResourceForm } from '@/features/forms'
 import {
   ContactPanel,
@@ -206,13 +205,13 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: OrderOrder,
+  resource: Api.OrderOrder,
   empty: emptyTempsOrder,
   fromRecord: tempsFromRecord,
   validate: (values, context) => validateTempsForm(values, variant.value, context),
   parse: (values, context) => parseTempsBody(values, variant.value, context, {orderlines: orderlines.value?.rows}),
   onSaved: async (result, context) => {
-    const saved = result as OrderCreate | OrderUpdate
+    const saved = result as Api.OrderCreate | Api.OrderUpdate
     if (saved.orderlines) orderlines.value?.adopt(saved.orderlines)
 
     if (acceptOnSave.value && !context.isCreate) {

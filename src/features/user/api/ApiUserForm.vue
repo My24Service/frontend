@@ -92,9 +92,6 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import { CompanyApiuser } from '@/api/resources.gen'
-import type { ApiUser } from '@/api/types.gen'
-import { vApiUserRequestWritable } from '@/api/valibot.gen'
 import {
   emptyApiUser,
   FIELD_MESSAGES,
@@ -113,7 +110,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-function apiUserFromRecord(record: ApiUser): ApiUserFormValues {
+function apiUserFromRecord(record: Api.ApiUser): ApiUserFormValues {
   return {
     username: record.username,
     password1: '',
@@ -140,12 +137,12 @@ const {
   probe,
 } = useUserForm<
   ApiUserFormValues,
-  ApiUser,
-  v.InferOutput<typeof vApiUserRequestWritable>,
+  Api.ApiUser,
+  v.InferOutput<typeof schemas.vApiUserRequestWritable>,
   ApiUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: CompanyApiuser,
+  resource: Api.CompanyApiuser,
   empty: emptyApiUser,
   fromRecord: apiUserFromRecord,
   validate: validateApiUserForm,

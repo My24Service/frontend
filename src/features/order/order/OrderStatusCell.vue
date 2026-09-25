@@ -13,8 +13,7 @@
 </template>
 
 <script lang="ts" setup>
-import { orderStatusCreateMutation } from '@/api/@tanstack/vue-query.gen'
-import type { Order, Statuscode } from '@/api/types.gen'
+
 import {
   StatusCell,
   useStatusCell,
@@ -30,14 +29,14 @@ import {
  * code with that id and the dot is the row's colour — no string matching.
  */
 const props = defineProps<{
-  order: Pick<Order, 'id' | 'last_status' | 'last_status_full' | 'statuscode_id' | 'color'>
-  statuscodes: Statuscode[]
+  order: Pick<Api.Order, 'id' | 'last_status' | 'last_status_full' | 'statuscode_id' | 'color'>
+  statuscodes: Api.Statuscode[]
 }>()
 
 const emit = defineEmits<{changed: [status: string]}>()
 
 const {create} = useToast()
-const {mutateAsync} = useMutation({...orderStatusCreateMutation()})
+const {mutateAsync} = useMutation({...Api.OrderStatus.create.mutation()})
 
 // The select keeps showing the attempted status once its write lands, until
 // the list reload answers for the row; a failed write rolls it back to the

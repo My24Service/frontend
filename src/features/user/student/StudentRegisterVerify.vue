@@ -25,10 +25,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  accountsSendResetPasswordLinkCreateMutation,
-  accountsVerifyRegistrationCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
+
 import { readLinkParams } from '@/features/account'
 /**
  * The activation link a registrant follows from their email: verify the
@@ -47,8 +44,8 @@ const phase = ref<Phase>('verifying')
 // set-password form.
 const link = readLinkParams(route.query)
 
-const verifyMutation = useMutation(accountsVerifyRegistrationCreateMutation())
-const sendLinkMutation = useMutation(accountsSendResetPasswordLinkCreateMutation())
+const verifyMutation = useMutation(Api.AccountsVerifyRegistration.create.mutation())
+const sendLinkMutation = useMutation(Api.AccountsSendResetPasswordLink.create.mutation())
 
 const isSending = computed(() => sendLinkMutation.isPending.value)
 

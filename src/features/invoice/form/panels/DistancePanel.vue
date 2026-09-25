@@ -84,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ActivityUserTotal } from '@/api/types.gen'
+
 import HeaderCell from './Header.vue'
 import VAT from './VAT.vue'
 import CostCollectionShell from './CostCollectionShell.vue'
@@ -96,7 +96,7 @@ import {
 import { useCostPanelContext } from '../cost-panel-context'
 import { COST_TYPE } from '../calculations'
 
-type UserTotal = ActivityUserTotal & { is_partner?: boolean }
+type UserTotal = Api.ActivityUserTotal & { is_partner?: boolean }
 /**
  * The distance driven per engineer as a cost collection, each draft seeded
  * with the tenant's price per km. The order, engineers and the invoice-lines

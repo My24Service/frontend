@@ -1,7 +1,5 @@
 import * as v from 'valibot'
 
-import type { StudentUserRegisterRequest } from '@/api/types.gen'
-import { vAccountsRegisterCreateBody } from '@/api/valibot.gen'
 import {
   normalizePhone,
   type FieldLabels,
@@ -17,7 +15,7 @@ import {
  * mobile and introduction required — so the generated schema is the whole
  * contract and the form binds its input shape directly.
  */
-export function emptyStudentRegistration(): StudentUserRegisterRequest {
+export function emptyStudentRegistration(): Api.StudentUserRegisterRequest {
   return {
     email: '',
     first_name: '',
@@ -82,7 +80,7 @@ export const FIELD_LABELS = {
  * The values as the wire takes them: the mobile goes out normalized (the
  * schema wants E.164) while the input keeps what was typed.
  */
-function toWire(values: StudentUserRegisterRequest): StudentUserRegisterRequest {
+function toWire(values: Api.StudentUserRegisterRequest): Api.StudentUserRegisterRequest {
   return {
     ...values,
     student_user: { ...values.student_user, mobile: normalizePhone(values.student_user.mobile, '+31') },
@@ -90,11 +88,11 @@ function toWire(values: StudentUserRegisterRequest): StudentUserRegisterRequest 
 }
 
 export function validateStudentRegistration(
-  values: StudentUserRegisterRequest,
+  values: Api.StudentUserRegisterRequest,
 ): StudentRegistrationErrors {
-  return fieldErrors(vAccountsRegisterCreateBody, toWire(values), REGISTRATION_FIELD_MESSAGES, FIELD_LABELS)
+  return fieldErrors(schemas.vAccountsRegisterCreateBody, toWire(values), REGISTRATION_FIELD_MESSAGES, FIELD_LABELS)
 }
 
-export function parseStudentRegistration(values: StudentUserRegisterRequest): StudentUserRegisterRequest {
-  return v.parse(vAccountsRegisterCreateBody, toWire(values))
+export function parseStudentRegistration(values: Api.StudentUserRegisterRequest): Api.StudentUserRegisterRequest {
+  return v.parse(schemas.vAccountsRegisterCreateBody, toWire(values))
 }

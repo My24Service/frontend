@@ -1,11 +1,5 @@
 import { keepPreviousData } from '@tanstack/vue-query'
-import {
-  companyBranchDashboardRetrieveOptions,
-  equipmentBuildingDashboardRetrieveOptions,
-  equipmentEquipmentDashboardRetrieveOptions,
-  equipmentLocationDashboardRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Order } from '@/api/types.gen'
+
 import { useQueryErrorToast } from '@/features/forms'
 /** What owns the detail page: the three equipment screens' subject, or a branch. */
 export type DetailOwnerKind = 'equipment' | 'location' | 'building' | 'branch'
@@ -46,26 +40,26 @@ export function useDetailOrders({kind, pk, enabled = true}: {
   }))
 
   const equipmentBundle = useQuery(() => ({
-    ...equipmentEquipmentDashboardRetrieveOptions({path: {id: pk}, query: ordersQuery.value}),
+    ...Api.EquipmentEquipment.extras.dashboardRetrieve.options({path: {id: pk}, query: ordersQuery.value}),
     enabled: kind === 'equipment' && enabled,
     // Paging keeps the page being left on screen rather than blanking it.
     placeholderData: keepPreviousData,
   }))
 
   const locationBundle = useQuery(() => ({
-    ...equipmentLocationDashboardRetrieveOptions({path: {id: pk}, query: ordersQuery.value}),
+    ...Api.EquipmentLocation.extras.dashboardRetrieve.options({path: {id: pk}, query: ordersQuery.value}),
     enabled: kind === 'location' && enabled,
     placeholderData: keepPreviousData,
   }))
 
   const buildingBundle = useQuery(() => ({
-    ...equipmentBuildingDashboardRetrieveOptions({path: {id: pk}, query: ordersQuery.value}),
+    ...Api.EquipmentBuilding.extras.dashboardRetrieve.options({path: {id: pk}, query: ordersQuery.value}),
     enabled: kind === 'building' && enabled,
     placeholderData: keepPreviousData,
   }))
 
   const branchBundle = useQuery(() => ({
-    ...companyBranchDashboardRetrieveOptions({path: {id: pk}, query: ordersQuery.value}),
+    ...Api.CompanyBranch.extras.dashboardRetrieve.options({path: {id: pk}, query: ordersQuery.value}),
     enabled: kind === 'branch' && enabled,
     placeholderData: keepPreviousData,
   }))
@@ -78,7 +72,7 @@ export function useDetailOrders({kind, pk, enabled = true}: {
 
   // The four dashboards answer the same envelope with the same inner shapes,
   // so the page is named once here rather than at each read.
-  const ordersPage = computed(() => bundle.data.value?.orders as {results?: Order[], count?: number} | undefined)
+  const ordersPage = computed(() => bundle.data.value?.orders as {results?: Api.Order[], count?: number} | undefined)
   const orders = computed(() => ordersPage.value?.results ?? [])
   const count = computed(() => ordersPage.value?.count ?? 0)
   const isLoading = computed(() => bundle.isLoading.value)

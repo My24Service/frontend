@@ -1,5 +1,5 @@
-import { CompanyTemplate } from '@/api/resources.gen'
-import type { Template } from '@/api/types.gen'
+
+
 import {
   selectMessage,
   type FieldErrors,
@@ -30,7 +30,7 @@ export function emptyTemplate(): TemplateFormValues {
 }
 
 /** The fetched record as form values: the five fields this form owns. */
-export function templateFromRecord(record: Template): TemplateFormValues {
+export function templateFromRecord(record: Api.Template): TemplateFormValues {
   return {
     name: record.name,
     description: record.description ?? null,
@@ -76,7 +76,7 @@ function shaped(values: TemplateFormValues) {
  * - an edit reads the patch body, where the name is optional but not blank,
  *   and the shaped body always carries it, so a blank one is refused anyway.
  */
-export const templateWrite = writeContract(CompanyTemplate, {
+export const templateWrite = writeContract(Api.CompanyTemplate, {
   shape: shaped,
   labels: FIELD_LABELS,
   messages: FIELD_MESSAGES,

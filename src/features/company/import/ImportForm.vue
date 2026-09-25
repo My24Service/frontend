@@ -94,7 +94,7 @@
 
 <script setup lang="ts">
 import { companyImportGetAllowedExtensionsRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import { CompanyImport } from '@/api/resources.gen'
+
 import {
   useQueryErrorToast,
   useResourceForm,
@@ -131,7 +131,7 @@ const isCreateRoute = props.pk == null
 
 const form = useResourceForm({
   pk: () => props.pk ?? null,
-  resource: CompanyImport,
+  resource: Api.CompanyImport,
   empty: emptyImport,
   fromRecord: importFromRecord,
   validate: importWrite.validate,

@@ -1,13 +1,12 @@
 import type { RowData } from '@tanstack/vue-table'
 
-import type { MinimalMember } from '@/api/types.gen'
 import type { createAppColumnHelper } from '@/features/table'
 type AnyColumnHelper<TData extends RowData> = ReturnType<typeof createAppColumnHelper<TData>>
 
 /** The member views a partner row can nest. */
 type PartnerMemberViewKey = 'partner_view' | 'to_member_view' | 'from_member_view'
 
-type RowWithMemberView<K extends PartnerMemberViewKey> = { [P in K]: MinimalMember }
+type RowWithMemberView<K extends PartnerMemberViewKey> = { [P in K]: Api.MinimalMember }
 
 /**
  * The member columns every partner list shows: the name and the three

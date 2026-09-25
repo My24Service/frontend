@@ -1,6 +1,5 @@
 import type { QueryClient } from '@tanstack/vue-query'
 import { companyDispatchAssignedordersUserListV4RetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
-import { MobileAssignedorder } from '@/api/resources.gen'
 
 /**
  * The one read this Slice refreshes that the schema cannot derive: the
@@ -13,6 +12,6 @@ import { MobileAssignedorder } from '@/api/resources.gen'
 export function invalidateDispatchBoard(queryClient: QueryClient) {
   return Promise.all([
     queryClient.invalidateQueries({queryKey: companyDispatchAssignedordersUserListV4RetrieveQueryKey()}),
-    MobileAssignedorder.invalidate(queryClient),
+    Api.MobileAssignedorder.invalidate(queryClient),
   ])
 }

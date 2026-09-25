@@ -1,13 +1,6 @@
 import * as v from 'valibot'
 
 import {
-  vLeaveTypeRequest,
-  vPatchedUserLeaveHoursPlanningRequest,
-  vUserLeaveHoursNoPlanningRequest,
-  vUserLeaveHoursPlanningRequest,
-} from '@/api/valibot.gen'
-import type { LeaveType, LeaveTypeRequest, UserLeaveHours } from '@/api/types.gen'
-import {
   fieldErrors,
   requiredOrMaxLength,
   selectMessage,
@@ -32,7 +25,7 @@ import {
  * added to the serializer is a field this type already has.
  */
 export type LeaveFormValues = Omit<
-  v.InferInput<typeof vUserLeaveHoursPlanningRequest>,
+  v.InferInput<typeof schemas.vUserLeaveHoursPlanningRequest>,
   'user' | 'leave_type' | 'description' | 'start_date' | 'end_date'
   | 'start_date_hours' | 'start_date_minutes' | 'start_date_is_whole_day'
   | 'end_date_hours' | 'end_date_minutes' | 'end_date_is_whole_day'
@@ -78,7 +71,7 @@ export function emptyLeave(today: string, now: string): LeaveFormValues {
  * "DD/MM/YYYY" - which is only right for the tenants that happen to use that
  * format. The ledger records the change.
  */
-export function leaveFromRecord(record: UserLeaveHours): LeaveFormValues {
+export function leaveFromRecord(record: Api.UserLeaveHours): LeaveFormValues {
   return {
     user: record.user ?? null,
     leave_type: record.leave_type ?? null,
@@ -128,13 +121,13 @@ export const FIELD_MESSAGES = {
  * the generated component; a leave without them is not a leave.
  */
 const vLeaveBody = v.required(
-  vUserLeaveHoursPlanningRequest,
+  schemas.vUserLeaveHoursPlanningRequest,
   ['user', 'leave_type', 'start_date', 'end_date'],
 )
 
 /** The same for the probe, whose endpoint validates with the no-planning body. */
 const vLeaveProbeBody = v.required(
-  vUserLeaveHoursNoPlanningRequest,
+  schemas.vUserLeaveHoursNoPlanningRequest,
   ['start_date', 'end_date'],
 )
 
@@ -218,8 +211,8 @@ export function validateLeave(values: LeaveFormValues): LeaveFieldErrors {
  */
 export function parseLeave(values: LeaveFormValues, context: WriteContext) {
   const body = shaped(values)
-  if (!context.isCreate) return v.parse(vPatchedUserLeaveHoursPlanningRequest, body)
-  return v.parse(vUserLeaveHoursPlanningRequest, body)
+  if (!context.isCreate) return v.parse(schemas.vPatchedUserLeaveHoursPlanningRequest, body)
+  return v.parse(schemas.vUserLeaveHoursPlanningRequest, body)
 }
 
 /**
@@ -243,20 +236,20 @@ export function leaveProbeBody(values: LeaveFormValues) {
 // ---------------------------------------------------------------------------
 // Leave types
 
-export type LeaveTypeFieldErrors = FieldErrors<keyof LeaveTypeRequest & string>
+export type LeaveTypeFieldErrors = FieldErrors<keyof Api.LeaveTypeRequest & string>
 
-export function emptyLeaveType(): LeaveTypeRequest {
+export function emptyLeaveType(): Api.LeaveTypeRequest {
   return {name: '', counts_as_leave: true}
 }
 
-export function leaveTypeFromRecord(record: LeaveType): LeaveTypeRequest {
+export function leaveTypeFromRecord(record: Api.LeaveType): Api.LeaveTypeRequest {
   return {name: record.name, counts_as_leave: record.counts_as_leave ?? false}
 }
 
 export const LEAVE_TYPE_LABELS = {
   name: () => $trans('Name'),
   counts_as_leave: () => $trans('Counts as leave'),
-} satisfies FieldLabels<keyof LeaveTypeRequest & string>
+} satisfies FieldLabels<keyof Api.LeaveTypeRequest & string>
 
 /**
  * The modal's `Name` sits beside a "Counts as leave" switch, where the derived
@@ -272,8 +265,8 @@ export const LEAVE_TYPE_MESSAGES = {
 } satisfies FieldMessages<keyof LeaveTypeFieldErrors & string>
 
 /** `name` already carries `minLength(1)` in the generated component. */
-export function validateLeaveType(values: LeaveTypeRequest): LeaveTypeFieldErrors {
-  return fieldErrors(vLeaveTypeRequest, values, LEAVE_TYPE_MESSAGES, LEAVE_TYPE_LABELS)
+export function validateLeaveType(values: Api.LeaveTypeRequest): LeaveTypeFieldErrors {
+  return fieldErrors(schemas.vLeaveTypeRequest, values, LEAVE_TYPE_MESSAGES, LEAVE_TYPE_LABELS)
 }
 
 /**
@@ -286,8 +279,8 @@ export function validateLeaveType(values: LeaveTypeRequest): LeaveTypeFieldError
  * carried `id`, `created` and `modified` - the parse drops what the endpoint
  * does not declare.
  */
-export function parseLeaveType(values: LeaveTypeRequest): LeaveTypeRequest {
-  return v.parse(vLeaveTypeRequest, values)
+export function parseLeaveType(values: Api.LeaveTypeRequest): Api.LeaveTypeRequest {
+  return v.parse(schemas.vLeaveTypeRequest, values)
 }
 
 /** The totals probe's answer, as the screen prints it. */

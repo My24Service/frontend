@@ -70,13 +70,6 @@ import * as v from 'valibot'
 import moment from 'moment'
 import VueMultiselect from 'vue-multiselect'
 
-import {
-  companyEngineereventCreateOrderCreateMutation,
-  companyEngineerRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Engineer } from '@/api/types.gen'
-import { vEngineerEventCreateOrderRequestRequest } from '@/api/valibot.gen'
-import { CompanyEngineerevent } from '@/api/resources.gen'
 import { addressLabel, useOwnerPicker } from '@/features/order'
 
 import { invalidateDispatchBoard } from '../invalidation'
@@ -146,7 +139,7 @@ function emptyOrder(): OrderValues {
 }
 
 const eventId = ref<number | null>(null)
-const engineer = ref<Engineer | null>(null)
+const engineer = ref<Api.Engineer | null>(null)
 const order = ref<OrderValues>(emptyOrder())
 const isLoading = ref(false)
 
@@ -168,7 +161,7 @@ const {term, options: customers, select: selectCustomer} = useOwnerPicker(
 
 // The one write -------------------------------------------------------------
 
-const createOrder = useMutation({...companyEngineereventCreateOrderCreateMutation()})
+const createOrder = useMutation({...Api.CompanyEngineerevent.extras.createOrderCreate.mutation()})
 
 /**
  * The body of the order this modal means: what it filled, today's dates, and
@@ -182,7 +175,7 @@ const createOrder = useMutation({...companyEngineereventCreateOrderCreateMutatio
  */
 function orderBody(values: OrderValues) {
   const today = moment().format('YYYY-MM-DD')
-  return v.parse(vEngineerEventCreateOrderRequestRequest, {
+  return v.parse(schemas.vEngineerEventCreateOrderRequestRequest, {
     customer_relation: values.customer_relation,
     customer_id: values.customer_id,
     order_name: values.order_name,
@@ -217,7 +210,7 @@ function orderBody(values: OrderValues) {
 async function show(eventId_: number, engineerUserId: number) {
   eventId.value = eventId_
   engineer.value = await queryClient.fetchQuery(
-    companyEngineerRetrieveOptions({path: {id: engineerUserId}}),
+    Api.CompanyEngineer.retrieve.options({path: {id: engineerUserId}}),
   )
   modalRef.value?.show()
 }
@@ -257,7 +250,7 @@ async function submitForm() {
     // the board goes stale here exactly as it did while the assign was a
     // request of its own; the events list redraws the row with its order.
     await invalidateDispatchBoard(queryClient)
-    await CompanyEngineerevent.invalidate(queryClient)
+    await Api.CompanyEngineerevent.invalidate(queryClient)
 
     order.value = emptyOrder()
     isLoading.value = false

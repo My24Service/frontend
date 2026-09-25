@@ -81,9 +81,7 @@
 </template>
 
 <script lang="ts" setup>
-import { memberGetModuleDataListOptions } from '@/api/@tanstack/vue-query.gen'
-import { MemberContract } from '@/api/resources.gen'
-import type { Contract, ContractCreateRequest } from '@/api/types.gen'
+
 import {
   useResourceForm,
   useQueryErrorToast,
@@ -102,7 +100,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const moduleDataQuery = useQuery(memberGetModuleDataListOptions())
+const moduleDataQuery = useQuery(Api.MemberGetModuleData.list.options())
 
 useQueryErrorToast(moduleDataQuery.error, $trans('Error loading modules'))
 
@@ -122,9 +120,9 @@ const {
   submitForm,
   cancelForm,
   record,
-} = useResourceForm<ContractCreateRequest, Contract, ReturnType<typeof parseContract>, ContractFieldErrors>({
+} = useResourceForm<Api.ContractCreateRequest, Api.Contract, ReturnType<typeof parseContract>, ContractFieldErrors>({
   pk: () => props.pk,
-  resource: MemberContract,
+  resource: Api.MemberContract,
   empty: emptyContract,
   fromRecord: (entry) => ({name: entry.name ?? '', module_paths: entry.module_paths ?? []}),
   validate: (values) => {

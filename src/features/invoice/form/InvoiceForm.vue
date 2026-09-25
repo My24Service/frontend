@@ -159,15 +159,8 @@
 
 <script setup lang="ts">
 import { parse } from 'valibot'
-import {
-  customerCustomerRetrieveOptions,
-  invoiceInvoiceCreateMutation,
-  invoiceInvoiceDataRetrieveOptions,
-  invoiceInvoicePartialUpdateMutation,
-  invoiceInvoiceRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Customer, Invoice, InvoiceDataResponse, InvoiceRequest } from '@/api/types.gen'
-import { vInvoiceRequest } from '@/api/valibot.gen'
+import { invoiceInvoiceDataRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+
 import { CustomerCard } from '@/features/customer'
 import { useQueryErrorToast } from '@/features/forms'
 import { InvoicePDFViewer } from '@/features/invoice/pdf'
@@ -229,14 +222,14 @@ const chooser = useTemplateRef<ProductChooserHandle>('product-chooser')
 
 const saving = ref(false)
 /** The saved invoice: loaded on an edit, or the POST result once a create has one. */
-const invoice = ref<Invoice | null>(null)
+const invoice = ref<Api.Invoice | null>(null)
 /** The lines the line panel currently holds; the cost panels use it to hide "create lines" for a type already added. */
 const invoiceLines = ref<{ type?: string }[]>([])
 // Own copies of the bootstrap rows: the Manage-prices panel edits the materials in place.
-const materials = ref<InvoiceDataResponse['material_models']>([])
-const engineers = ref<InvoiceDataResponse['engineer_models']>([])
-const usedMaterials = ref<InvoiceDataResponse['used_materials']>([])
-const customer = ref<Customer | null>(null)
+const materials = ref<Api.InvoiceDataResponse['material_models']>([])
+const engineers = ref<Api.InvoiceDataResponse['engineer_models']>([])
+const usedMaterials = ref<Api.InvoiceDataResponse['used_materials']>([])
+const customer = ref<Api.Customer | null>(null)
 const totalDinero = ref(toDinero(0, currency))
 const vatDinero = ref(toDinero(0, currency))
 
@@ -248,7 +241,7 @@ const draft = ref({
 })
 
 const invoiceQuery = useQuery(() => ({
-  ...invoiceInvoiceRetrieveOptions({ path: { id: Number(props.pk) } }),
+  ...Api.InvoiceInvoice.retrieve.options({ path: { id: Number(props.pk) } }),
   enabled: isEdit.value,
   refetchOnWindowFocus: false,
 }))
@@ -261,7 +254,7 @@ const bootstrapQuery = useQuery(() => ({
 }))
 const bootstrap = computed(() => bootstrapQuery.data.value)
 const customerQuery = useQuery(() => ({
-  ...customerCustomerRetrieveOptions({ path: { id: bootstrap.value?.customer_pk ?? 0 } }),
+  ...Api.CustomerCustomer.retrieve.options({ path: { id: bootstrap.value?.customer_pk ?? 0 } }),
   enabled: Boolean(bootstrap.value?.customer_pk),
   refetchOnWindowFocus: false,
 }))
@@ -315,8 +308,8 @@ watch(customerQuery.data, data => {
 
 const totals = computed(() => bootstrap.value?.activity_totals)
 
-const createInvoice = useMutation(invoiceInvoiceCreateMutation())
-const patchInvoice = useMutation(invoiceInvoicePartialUpdateMutation())
+const createInvoice = useMutation(Api.InvoiceInvoice.create.mutation())
+const patchInvoice = useMutation(Api.InvoiceInvoice.update.mutation())
 
 function showViewer() {
   viewer.value?.show()
@@ -351,8 +344,8 @@ provideCostPanelContext({
   emptyCollectionClicked,
 })
 
-function invoiceRequestBody(): InvoiceRequest {
-  return parse(vInvoiceRequest, {
+function invoiceRequestBody(): Api.InvoiceRequest {
+  return parse(schemas.vInvoiceRequest, {
     order: bootstrap.value?.order_pk,
     ...draft.value,
     term_of_payment_days: Number(draft.value.term_of_payment_days),

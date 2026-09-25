@@ -1,5 +1,5 @@
-import { CompanyBranch } from '@/api/resources.gen'
-import type { Branch } from '@/api/types.gen'
+
+
 import {
   type FieldErrors,
   type FieldLabels,
@@ -41,11 +41,11 @@ export type BranchFieldErrors = FieldErrors<keyof BranchFormValues & string>
  * assertion.
  */
 export function emptyBranch(): BranchFormValues {
-  return formDefaults(CompanyBranch.create.body, {country_code: 'NL', image: null})
+  return formDefaults(Api.CompanyBranch.create.body, {country_code: 'NL', image: null})
 }
 
 /** The fetched record as form values: the ten fields this form owns. */
-export function branchFromRecord(record: Branch): BranchFormValues {
+export function branchFromRecord(record: Api.Branch): BranchFormValues {
   return {
     name: record.name,
     address: record.address,
@@ -95,8 +95,8 @@ function shaped(values: BranchFormValues) {
  * patch body it sends is a superset of what PATCH requires, so nothing is
  * added on top of the generated schema.
  */
-export const branchWrite = writeContract(CompanyBranch, {
-  validateWith: CompanyBranch.create.body,
+export const branchWrite = writeContract(Api.CompanyBranch, {
+  validateWith: Api.CompanyBranch.create.body,
   shape: shaped,
   labels: FIELD_LABELS,
 })

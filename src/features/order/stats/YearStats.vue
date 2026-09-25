@@ -30,7 +30,7 @@
 
 <script lang="ts" setup>
 import { orderOrderYearListRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import type { YearListResponse } from '@/api/types.gen'
+
 import ChartPairRow from './ChartPairRow.vue'
 import StatsPage from './StatsPage.vue'
 import { yearCharts } from './chart-data'
@@ -40,7 +40,7 @@ import { useOrderStatsQuery } from './use-order-stats-query'
 const mainStore = useMainStore()
 
 const year = ref(new Date().getFullYear())
-const {orderType, query, statuscodes} = useOrderStatsQuery<YearListResponse>(
+const {orderType, query, statuscodes} = useOrderStatsQuery<Api.YearListResponse>(
   (orderType) => orderOrderYearListRetrieveOptions({
     query: {order_type: orderType, year: year.value},
   }),

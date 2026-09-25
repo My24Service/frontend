@@ -1,9 +1,9 @@
 import { RouterLink } from 'vue-router'
-import type { PaginatedLocationList } from '@/api/types.gen'
+
 import { createActionColumn, createAppColumnHelper, type ListRow } from '@/features/table'
 import { useOwnerFilter } from '../use-owner-filter'
 
-export type LocationRow = ListRow<PaginatedLocationList>
+export type LocationRow = ListRow<Api.PaginatedLocationList>
 
 export interface LocationColumnOptions {
   /** The route name stem this mount answers to (`equipment-location`, `settings-location`, ...). */

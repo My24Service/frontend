@@ -117,8 +117,7 @@
 import moment from 'moment'
 import { nl } from 'date-fns/locale'
 import VueMultiselect from 'vue-multiselect'
-import { CompanyUserSickLeaveAdmin } from '@/api/resources.gen'
-import type { UserSelectRow } from '@/api/types.gen'
+
 import { useResourceForm } from '@/features/forms'
 import { useUserSearch } from '../use-user-search'
 import {
@@ -147,7 +146,7 @@ const {term, options, loading: searching} = useUserSearch()
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: CompanyUserSickLeaveAdmin,
+  resource: Api.CompanyUserSickLeaveAdmin,
   empty: () => emptySickLeave(today),
   fromRecord: sickLeaveFromRecord,
   validate: sickLeaveWrite.validate,
@@ -172,7 +171,7 @@ watch(record, (data) => {
   if (data) userName.value = data.full_name ?? ''
 }, {immediate: true})
 
-function userLabel(option: UserSelectRow): string {
+function userLabel(option: Api.UserSelectRow): string {
   return option.name
 }
 
@@ -180,7 +179,7 @@ function onSearch(value: string) {
   term.value = value
 }
 
-function selectUser(option: UserSelectRow) {
+function selectUser(option: Api.UserSelectRow) {
   values.value.user = option.id
   userName.value = option.name
 }

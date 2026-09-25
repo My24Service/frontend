@@ -1,8 +1,6 @@
 import * as v from 'valibot'
 import moment from 'moment'
 
-import { vTripRequest } from '@/api/valibot.gen'
-import type { Trip } from '@/api/types.gen'
 import {
   toApiDate,
   completeTime,
@@ -35,7 +33,7 @@ export function emptyTripOrderRow(): TripOrderFormRow {
 }
 
 /** The record's rows as staged rows: the `order` the body keeps plus the display fields. */
-export function tripOrderRowsFromRecord(record: Trip): TripOrderFormRow[] {
+export function tripOrderRowsFromRecord(record: Api.Trip): TripOrderFormRow[] {
   return record.trip_orders.map((row) => ({
     order: row.order,
     name: row.name,
@@ -56,7 +54,7 @@ export function tripOrderRowsFromRecord(record: Trip): TripOrderFormRow[] {
  * fields the table shows beside the `order` the body keeps.
  */
 export type TripFormValues = Omit<
-  v.InferInput<typeof vTripRequest>,
+  v.InferInput<typeof schemas.vTripRequest>,
   | 'start_date'
   | 'end_date'
   | 'required_users'
@@ -138,7 +136,7 @@ function dateOf(iso: string | null | undefined): Date | null {
   return iso ? moment(iso, 'YYYY-MM-DD').toDate() : null
 }
 
-export function tripFromRecord(record: Trip): TripFormValues {
+export function tripFromRecord(record: Api.Trip): TripFormValues {
   return {
     ...emptyTrip(),
     description: record.description ?? '',
@@ -220,7 +218,7 @@ function asked<E extends v.NullishSchema<v.GenericSchema<string>, undefined>>(en
  * reports the previous day for an evening pick east of UTC, the trap the
  * equipment form's ledger records.
  */
-function pickerDate(entry: typeof vTripRequest.entries.start_date, required: boolean) {
+function pickerDate(entry: typeof schemas.vTripRequest.entries.start_date, required: boolean) {
   // The two cases spell their own transform: a demanded date reaches the rule
   // as `''` so that it fails there, an optional one as `undefined` so that the
   // key is absent from the body - which is what the legacy's delete did.
@@ -241,7 +239,7 @@ function pickerDate(entry: typeof vTripRequest.entries.start_date, required: boo
  * A time as the field takes it: `HH:mm`, or `HH:mm:ss` when it is already
  * complete. Blank is absent from the body, as the legacy deleted the key.
  */
-function inputTime(entry: typeof vTripRequest.entries.start_time, required: boolean) {
+function inputTime(entry: typeof schemas.vTripRequest.entries.start_time, required: boolean) {
   const complete = (value: string | null | undefined) => {
     if (value == null || value === '') return ''
     return completeTime(value)
@@ -293,22 +291,22 @@ export function tripSchema({
   endDatetimeFromLastOrder,
 }: TripConditions) {
   return v.object({
-    ...vTripRequest.entries,
+    ...schemas.vTripRequest.entries,
     required_users: requiredUsers,
-    start_date: pickerDate(vTripRequest.entries.start_date, !startDatetimeFromFirstOrder),
-    start_time: inputTime(vTripRequest.entries.start_time, !startDatetimeFromFirstOrder),
-    start_name: asked(vTripRequest.entries.start_name, !startLocationFromFirstOrder),
-    start_address: asked(vTripRequest.entries.start_address, !startLocationFromFirstOrder),
-    start_postal: asked(vTripRequest.entries.start_postal, !startLocationFromFirstOrder),
-    start_city: asked(vTripRequest.entries.start_city, !startLocationFromFirstOrder),
-    start_country_code: asked(vTripRequest.entries.start_country_code, !startLocationFromFirstOrder),
-    end_date: pickerDate(vTripRequest.entries.end_date, !endDatetimeFromLastOrder),
-    end_time: inputTime(vTripRequest.entries.end_time, !endDatetimeFromLastOrder),
-    end_name: asked(vTripRequest.entries.end_name, !endLocationFromLastOrder),
-    end_address: asked(vTripRequest.entries.end_address, !endLocationFromLastOrder),
-    end_postal: asked(vTripRequest.entries.end_postal, !endLocationFromLastOrder),
-    end_city: asked(vTripRequest.entries.end_city, !endLocationFromLastOrder),
-    end_country_code: asked(vTripRequest.entries.end_country_code, !endLocationFromLastOrder),
+    start_date: pickerDate(schemas.vTripRequest.entries.start_date, !startDatetimeFromFirstOrder),
+    start_time: inputTime(schemas.vTripRequest.entries.start_time, !startDatetimeFromFirstOrder),
+    start_name: asked(schemas.vTripRequest.entries.start_name, !startLocationFromFirstOrder),
+    start_address: asked(schemas.vTripRequest.entries.start_address, !startLocationFromFirstOrder),
+    start_postal: asked(schemas.vTripRequest.entries.start_postal, !startLocationFromFirstOrder),
+    start_city: asked(schemas.vTripRequest.entries.start_city, !startLocationFromFirstOrder),
+    start_country_code: asked(schemas.vTripRequest.entries.start_country_code, !startLocationFromFirstOrder),
+    end_date: pickerDate(schemas.vTripRequest.entries.end_date, !endDatetimeFromLastOrder),
+    end_time: inputTime(schemas.vTripRequest.entries.end_time, !endDatetimeFromLastOrder),
+    end_name: asked(schemas.vTripRequest.entries.end_name, !endLocationFromLastOrder),
+    end_address: asked(schemas.vTripRequest.entries.end_address, !endLocationFromLastOrder),
+    end_postal: asked(schemas.vTripRequest.entries.end_postal, !endLocationFromLastOrder),
+    end_city: asked(schemas.vTripRequest.entries.end_city, !endLocationFromLastOrder),
+    end_country_code: asked(schemas.vTripRequest.entries.end_country_code, !endLocationFromLastOrder),
   })
 }
 

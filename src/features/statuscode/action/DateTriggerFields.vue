@@ -49,8 +49,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { NumDaysOperatorEnum } from '@/api/types.gen'
-import { vNumDaysOperatorEnum } from '@/api/valibot.gen'
+
 import type { CodeType } from '../code-types'
 import { dateTriggerFieldsFor } from './schemas'
 
@@ -62,7 +61,7 @@ import { dateTriggerFieldsFor } from './schemas'
 const props = defineProps<{
   codeType: CodeType
   numDays: number | string | null | undefined
-  operator: NumDaysOperatorEnum | undefined
+  operator: Api.NumDaysOperatorEnum | undefined
   modelField: string | null | undefined
   error?: string
   submitted?: boolean
@@ -70,11 +69,11 @@ const props = defineProps<{
 
 defineEmits<{
   (event: 'update:numDays', value: number | string | null): void
-  (event: 'update:operator', value: NumDaysOperatorEnum | undefined): void
+  (event: 'update:operator', value: Api.NumDaysOperatorEnum | undefined): void
   (event: 'update:modelField', value: string | null): void
 }>()
 
-const OPERATORS = vNumDaysOperatorEnum.options
+const OPERATORS = schemas.vNumDaysOperatorEnum.options
 
 const FIELD_TEXTS: Record<string, () => string> = {
   start_date: () => $trans('Start date'),

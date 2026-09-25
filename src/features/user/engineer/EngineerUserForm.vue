@@ -248,14 +248,6 @@ import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
 import {
-  inventoryStockLocationCreateMutation,
-  inventoryStockLocationListOptions,
-  inventoryStockLocationListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import { CompanyEngineer } from '@/api/resources.gen'
-import type { Engineer } from '@/api/types.gen'
-import { vEngineerRequestWritable } from '@/api/valibot.gen'
-import {
   selectMessage,
   useQueryErrorToast,
 } from '@/features/forms'
@@ -285,7 +277,7 @@ const {create} = useToast()
 // fields fill straight from it; the passwords start blank. The two decimals
 // a record can hold as null open blank rather than at the new-engineer
 // prefill, so an untouched save keeps them null.
-function engineerUserFromRecord(record: Engineer): EngineerUserFormValues {
+function engineerUserFromRecord(record: Api.Engineer): EngineerUserFormValues {
   const { engineer: defaults } = emptyEngineerUser()
   return {
     ...filledFrom(emptyUserIdentity(), record),
@@ -293,9 +285,9 @@ function engineerUserFromRecord(record: Engineer): EngineerUserFormValues {
   }
 }
 
-const form = useUserForm<EngineerUserFormValues, Engineer, v.InferOutput<typeof vEngineerRequestWritable>, EngineerUserFieldErrors>({
+const form = useUserForm<EngineerUserFormValues, Api.Engineer, v.InferOutput<typeof schemas.vEngineerRequestWritable>, EngineerUserFieldErrors>({
   pk: () => props.pk,
-  resource: CompanyEngineer,
+  resource: Api.CompanyEngineer,
   empty: emptyEngineerUser,
   fromRecord: engineerUserFromRecord,
   validate: validateEngineerUserForm,
@@ -323,7 +315,7 @@ const countries = computed(() => mainStore.getCountries)
 // stock-location list query. Creating a location posts through the generated
 // mutation, then pins the new id — the legacy `createLocation` flow.
 const locationsQuery = useQuery(() => ({
-  ...inventoryStockLocationListOptions(),
+  ...Api.InventoryStockLocation.list.options(),
 }))
 
 useQueryErrorToast(locationsQuery.error, $trans('Error fetching locations'))
@@ -336,9 +328,9 @@ const buttonCreateLocationDisabled = computed(
 )
 
 const createLocationMutation = useMutation({
-  ...inventoryStockLocationCreateMutation(),
+  ...Api.InventoryStockLocation.create.mutation(),
   onSuccess: async (data) => {
-    await queryClient.invalidateQueries({queryKey: inventoryStockLocationListQueryKey()})
+    await queryClient.invalidateQueries({queryKey: Api.InventoryStockLocation.list.queryKey()})
     engineer.value.engineer.preferred_location = data.id
     newLocationName.value = ''
   },

@@ -1,11 +1,7 @@
 import * as v from 'valibot'
 
-import type { CostTypeEnum, OrderCost, OrderCostRowRequest } from '@/api/types.gen'
-import { vOrderCostRowRequest } from '@/api/valibot.gen'
-import {
-  orderCostListOptions,
-  orderCostOrderCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
+import type { OrderCost } from '@/api/types.gen'
+
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoneyPlain, toDinero } from '@/services/money'
 import {
@@ -21,7 +17,7 @@ import type { CostPanelContext } from './cost-panel-context'
 
 export type CostRow = Omit<Partial<OrderCost>, keyof CalculatedPrices | 'id' | 'amount_decimal' | 'amount_duration' | 'amount_duration_read' | 'amount_int' | 'vat_type' | 'price_currency'> & CalculatedPrices & {
   id?: number
-  cost_type: CostTypeEnum
+  cost_type: Api.CostTypeEnum
   amount_int: number
   amount_decimal: number | string
   amount_duration: string | number | null
@@ -51,7 +47,7 @@ export type CostRow = Omit<Partial<OrderCost>, keyof CalculatedPrices | 'id' | '
  * cost, which the row's PriceInput then edits in place.
  */
 export function makeCostRow(
-  input: Partial<CostRow> & { cost_type: CostTypeEnum },
+  input: Partial<CostRow> & { cost_type: Api.CostTypeEnum },
   price: { price: string | number | null | undefined; currency: string },
   vat: string | number,
 ): CostRow {
@@ -83,7 +79,7 @@ function amountFields(row: CostRow): CostAmount {
 interface CollectionOptions {
   /** The form's shared reads and callbacks; see `CostPanelContext`. */
   context: Pick<CostPanelContext, 'orderPk' | 'engineers' | 'invoiceLines' | 'invoiceLinesCreated' | 'emptyCollectionClicked'>
-  costType: () => CostTypeEnum
+  costType: () => Api.CostTypeEnum
   /** The tenant default currency from the server bootstrap, for empty sums. */
   currency: () => string
   buildRows: () => CostRow[]
@@ -111,13 +107,13 @@ export function useCostCollection(options: CollectionOptions) {
   const { create } = useToast()
 
   const listQuery = useQuery(() => ({
-    ...orderCostListOptions({
+    ...Api.OrderCost.list.options({
       query: { order: context.orderPk.value ?? 0, cost_type: options.costType() },
     }),
     enabled: context.orderPk.value != null,
     refetchOnWindowFocus: false,
   }))
-  const replaceMutation = useMutation(orderCostOrderCreateMutation())
+  const replaceMutation = useMutation(Api.OrderCost.extras.orderCreate.mutation())
   useQueryErrorToast(listQuery.error, $trans('Error loading costs'))
 
   const collection = ref<CostRow[]>([])
@@ -157,7 +153,7 @@ export function useCostCollection(options: CollectionOptions) {
     reconcile(data?.results ?? [])
   }, { immediate: true })
 
-  function rowBody(row: CostRow): OrderCostRowRequest {
+  function rowBody(row: CostRow): Api.OrderCostRowRequest {
     // The order and cost type travel in the URL; totals are priced by the
     // server and never sent.
     //
@@ -166,7 +162,7 @@ export function useCostCollection(options: CollectionOptions) {
     // dineros the panel calculates with) while the endpoint takes one of three,
     // so the generated component is what narrows it - and it is the same schema
     // the specs' seam validates a stub against.
-    return v.parse(vOrderCostRowRequest, {
+    return v.parse(schemas.vOrderCostRowRequest, {
       ...(row.id == null ? {} : { id: row.id }),
       user: row.user ?? null,
       user_full_name: row.user_full_name ?? null,

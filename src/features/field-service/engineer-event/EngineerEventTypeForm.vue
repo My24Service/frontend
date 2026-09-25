@@ -70,8 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Statuscode } from '@/api/types.gen'
-import { CompanyEngineerEventType } from '@/api/resources.gen'
+
 import {
   useResourceForm,
   ValidatedForm,
@@ -110,7 +109,7 @@ const store = useMainStore()
  */
 const statuscodeOptions = computed<{id: number | null; statuscode: string}[]>(() => [
   {id: null, statuscode: ''},
-  ...((store.getStatuscodes ?? []) as Statuscode[]).map((statuscode) => ({
+  ...((store.getStatuscodes ?? []) as Api.Statuscode[]).map((statuscode) => ({
     id: statuscode.id,
     statuscode: statuscode.statuscode,
   })),
@@ -127,7 +126,7 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: CompanyEngineerEventType,
+  resource: Api.CompanyEngineerEventType,
   empty: emptyEngineerEventType,
   fromRecord: engineerEventTypeFromRecord,
   validate: validateEngineerEventType,

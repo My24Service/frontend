@@ -34,7 +34,7 @@
 </template>
 
 <script lang="ts" setup>
-import { accountsSendResetPasswordLinkCreateMutation } from '@/api/@tanstack/vue-query.gen'
+
 import {
   ValidatedForm,
   ValidatedFormField,
@@ -55,7 +55,7 @@ const errors = ref<SendResetLinkErrors>({})
 const submitClicked = ref(false)
 
 const sendLinkMutation = useMutation({
-  ...accountsSendResetPasswordLinkCreateMutation(),
+  ...Api.AccountsSendResetPasswordLink.create.mutation(),
 })
 
 const isLoading = computed(() => sendLinkMutation.isPending.value)

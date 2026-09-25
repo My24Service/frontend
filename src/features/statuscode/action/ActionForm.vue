@@ -207,11 +207,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  companyPartnerListOptions,
-  statuscodeActionDestroyMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import { StatuscodeAction } from '@/api/resources.gen'
+
 import {
   useResourceForm,
   requiredMessage,
@@ -268,7 +264,7 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: StatuscodeAction,
+  resource: Api.StatuscodeAction,
   invalidate: invalidateStatuscodeLists,
   empty: emptyAction,
   fromRecord: actionFromRecord,
@@ -301,7 +297,7 @@ const actionTypes = computed(() => actionTypesFor(props.codeType, {hasGripp: has
 // partners, for the order type's copy action --------------------------------
 
 const partnersQuery = useQuery(() => ({
-  ...companyPartnerListOptions({query: {page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
+  ...Api.CompanyPartner.list.options({query: {page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
   enabled: props.codeType === 'order',
 }))
 
@@ -366,7 +362,7 @@ function removeCondition(index: number) {
 const {confirm: showDeleteModal, handleOk: handleDeleteOk} = useConfirmedAction({
   modalRefName: 'deleteModal',
   mutationOptions: () => ({
-    ...statuscodeActionDestroyMutation(),
+    ...Api.StatuscodeAction.destroy.mutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Deleted'), $trans('Action has been deleted'))
       await invalidateStatuscodeLists(queryClient)

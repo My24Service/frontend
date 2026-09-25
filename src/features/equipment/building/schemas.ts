@@ -2,12 +2,7 @@ import type {
   FieldErrors,
   FieldLabels,
 } from '@/features/forms'
-import {
-  vBuildingBranchCreateRequest,
-  vBuildingCustomerCreateRequest,
-  vPatchedBuildingRequest,
-} from '@/api/valibot.gen'
-import type { Building } from '@/api/types.gen'
+
 import { ownedRecordSchemas } from '@/features/equipment/owner'
 
 /**
@@ -32,7 +27,7 @@ export function emptyBuilding(): BuildingFormValues {
 }
 
 /** The fetched record as form values: the three fields this form owns. */
-export function buildingFromRecord(record: Building): BuildingFormValues {
+export function buildingFromRecord(record: Api.Building): BuildingFormValues {
   return {
     name: record.name,
     customer: record.customer ?? null,
@@ -51,8 +46,8 @@ export const FIELD_LABELS = {
  * `ownedRecordSchemas`.
  */
 export const {validate: validateBuilding, parse: parseBuilding} = ownedRecordSchemas<BuildingFormValues>({
-  branch: vBuildingBranchCreateRequest,
-  customer: vBuildingCustomerCreateRequest,
-  patch: vPatchedBuildingRequest,
+  branch: schemas.vBuildingBranchCreateRequest,
+  customer: schemas.vBuildingCustomerCreateRequest,
+  patch: schemas.vPatchedBuildingRequest,
   labels: FIELD_LABELS,
 })

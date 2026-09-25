@@ -76,9 +76,7 @@
 </template>
 
 <script lang="ts" setup>
-import { memberModuleListOptions } from '@/api/@tanstack/vue-query.gen'
-import { MemberModulePart } from '@/api/resources.gen'
-import type { ModulePart } from '@/api/types.gen'
+
 import {
   useResourceForm,
   useQueryErrorToast,
@@ -109,9 +107,9 @@ const {
   buttonDisabled,
   submitForm,
   cancelForm,
-} = useResourceForm<ModulePartFormValues, ModulePart, ReturnType<typeof parseModulePart>, ModulePartFieldErrors>({
+} = useResourceForm<ModulePartFormValues, Api.ModulePart, ReturnType<typeof parseModulePart>, ModulePartFieldErrors>({
   pk: () => props.pk,
-  resource: MemberModulePart,
+  resource: Api.MemberModulePart,
   invalidate: invalidateModulePartListQueries,
   empty: emptyModulePart,
   fromRecord: (record) => ({
@@ -138,7 +136,7 @@ const {
 // rather than rejecting it, so this is the most one response can carry.
 
 const modulesQuery = useQuery(
-  memberModuleListOptions({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
+  Api.MemberModule.list.options({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
 )
 
 useQueryErrorToast(modulesQuery.error, $trans('Error loading modules'))

@@ -1,4 +1,4 @@
-import type { Engineer } from '@/api/types.gen'
+
 import type { InvoiceLineDraft, InvoiceLineType } from './calculations'
 
 /**
@@ -13,7 +13,7 @@ export interface CostPanelContext {
   /** The order the costs belong to; a panel only mounts once the bootstrap has answered. */
   readonly orderPk: Readonly<Ref<number | null | undefined>>
   /** The engineers on the order, for their names. */
-  readonly engineers: Readonly<Ref<readonly Engineer[]>>
+  readonly engineers: Readonly<Ref<readonly Api.Engineer[]>>
   /** The lines the line panel currently holds: a type already on the invoice hides "create lines". */
   readonly invoiceLines: Readonly<Ref<readonly { type?: string }[]>>
   /** A panel turned its costs into invoice lines; the form adds them to the line panel. */

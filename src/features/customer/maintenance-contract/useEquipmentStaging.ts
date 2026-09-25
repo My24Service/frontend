@@ -1,9 +1,5 @@
-import {
-  customerMaintenanceEquipmentListOptions,
-  equipmentEquipmentAutocompleteListOptions,
-  equipmentEquipmentCreateQuickCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { MaintenanceEquipment, MaintenanceEquipmentRowRequest } from '@/api/types.gen'
+
+
 import { toDinero } from '@/services/money'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {
@@ -44,7 +40,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
    * lands in the server's one transaction. No write is made from here: the save
    * belongs to the form, which is the only party that knows the contract.
    */
-  function equipmentBody(): MaintenanceEquipmentRowRequest[] {
+  function equipmentBody(): Api.MaintenanceEquipmentRowRequest[] {
     return parseEquipmentSetBody(rows.value)
   }
 
@@ -55,7 +51,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
    * a second copy of every one of them. This is the same adoption the read
    * below does with the rows the contract already has.
    */
-  function adoptStoredRows(records: readonly MaintenanceEquipment[]) {
+  function adoptStoredRows(records: readonly Api.MaintenanceEquipment[]) {
     rows.value = records.map((row) => equipmentRowFromRecord(row, defaultCurrency()))
   }
 
@@ -69,7 +65,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   // rather than rejecting it.
 
   const equipmentQuery = useQuery(() => ({
-    ...customerMaintenanceEquipmentListOptions({
+    ...Api.CustomerMaintenanceEquipment.list.options({
       query: {contract: options.contractId(), page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
     }),
     enabled: !options.isCreate(),
@@ -90,7 +86,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   const searchQueryTerm = refDebounced(searchTerm, 500)
 
   const searchQuery = useQuery(() => ({
-    ...equipmentEquipmentAutocompleteListOptions({
+    ...Api.EquipmentEquipmentAutocomplete.list.options({
       query: {q: searchQueryTerm.value, customer: options.customerId() as number},
     }),
     enabled: options.customerId() !== undefined && searchQueryTerm.value.length > 0,
@@ -184,7 +180,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   // The quick-create modal -------------------------------------------------
 
   const newEquipmentName = ref('')
-  const quickCreateEquipment = useMutation({...equipmentEquipmentCreateQuickCreateMutation()})
+  const quickCreateEquipment = useMutation({...Api.EquipmentEquipmentCreateQuick.create.mutation()})
 
   async function submitCreateEquipment() {
     if (!mainStore.getMemberHasBranches) {

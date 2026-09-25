@@ -205,8 +205,7 @@
 </template>
 
 <script lang="ts" setup>
-import { OrderOrder } from '@/api/resources.gen'
-import type { OrderCreate, OrderUpdate } from '@/api/types.gen'
+
 import { useResourceForm } from '@/features/forms'
 import ContactPanel from './ContactPanel.vue'
 import DateTimeFields from './DateTimeFields.vue'
@@ -301,7 +300,7 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: OrderOrder,
+  resource: Api.OrderOrder,
   empty: emptyOrder,
   fromRecord: orderFromRecord,
   validate: (values, context) => validateOrderForm(values, variant.value, context),
@@ -310,7 +309,7 @@ const {
     infolines: infolines.value?.rows,
   }),
   onSaved: async (result, context) => {
-    const saved = result as OrderCreate | OrderUpdate
+    const saved = result as Api.OrderCreate | Api.OrderUpdate
     const orderId = context.isCreate ? saved.id : context.id
     const orderCode = saved.order_id ?? record.value?.order_id ?? ''
 

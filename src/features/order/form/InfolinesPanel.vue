@@ -58,14 +58,14 @@
 </template>
 
 <script lang="ts" setup>
-import type { EngineerInfoLine, EngineerInfoLineNested } from '@/api/types.gen'
+
 import { infolineFromRecord, type InfolineRow } from './schemas'
 import { useStagedRows } from './use-staged-rows'
 
 /** The notes for the engineer on an order, staged here and sent in the order body. */
 const props = defineProps<{
   /** The lines on the record; a change (a load) replaces the staged set. */
-  lines: EngineerInfoLine[]
+  lines: Api.EngineerInfoLine[]
 }>()
 
 const infolines = useStagedRows<InfolineRow>(() => ({info: ''}))
@@ -76,7 +76,7 @@ watch(() => props.lines, (lines) => infolines.seed(lines.map(infolineFromRecord)
 const rows = infolines.rows
 
 /** Take the lines the save returned, so the staged set carries the stored ids. */
-function adopt(lines: EngineerInfoLineNested[]) {
+function adopt(lines: Api.EngineerInfoLineNested[]) {
   infolines.seed(lines.map(infolineFromRecord))
 }
 

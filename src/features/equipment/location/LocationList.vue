@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-location-modal',
         confirmText: $trans('Are you sure you want to delete this location?'),
-        destroyMutation: equipmentLocationDestroyMutation,
-        invalidate: EquipmentLocation.invalidate,
+        destroyMutation: Api.EquipmentLocation.destroy.mutation,
+        invalidate: Api.EquipmentLocation.invalidate,
         deletedDetail: $trans('Location has been deleted'),
         deleteError: $trans('Error deleting location'),
       }"
@@ -43,12 +43,7 @@
 import { RouterLink } from 'vue-router'
 import { equipmentLocationExportQrRetrieve } from '@/api/sdk.gen'
 import { useFileDownload, XLSX_MIME } from '@/features/shared'
-import {
-  equipmentLocationDestroyMutation,
-  equipmentLocationListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedLocationList } from '@/api/types.gen'
-import { EquipmentLocation } from '@/api/resources.gen'
+
 import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
 import { useLocationColumns } from './use-location-columns'
 const props = withDefaults(defineProps<{
@@ -60,7 +55,7 @@ const props = withDefaults(defineProps<{
   from_settings: false,
 })
 
-type LocationRow = ListRow<PaginatedLocationList>
+type LocationRow = ListRow<Api.PaginatedLocationList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
@@ -84,7 +79,7 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
   // The endpoint declares search, paging, `ordering` and the column filters
   // (apps/equipment/views.py), so the kit forwards all three: the sort state
   // and the filters both travel in the query and in the address bar.
-  listOptions: (query) => equipmentLocationListOptions({
+  listOptions: (query) => Api.EquipmentLocation.list.options({
     query: {
       ...baseListParams(query),
 

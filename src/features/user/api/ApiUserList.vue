@@ -25,8 +25,8 @@
       :delete-modal="{
         modalId: 'delete-api-user-modal',
         confirmText: $trans('Are you sure you want to delete this API user?'),
-        destroyMutation: companyApiuserDestroyMutation,
-        invalidate: (qc) => qc.invalidateQueries({queryKey: companyApiuserListQueryKey()}),
+        destroyMutation: Api.CompanyApiuser.destroy.mutation,
+        invalidate: (qc) => qc.invalidateQueries({queryKey: Api.CompanyApiuser.list.queryKey()}),
         deletedDetail: $trans('API user has been deleted'),
         deleteError: $trans('Error deleting API user'),
       }"
@@ -50,13 +50,6 @@ import { RouterLink } from 'vue-router'
 import { addDays, format } from 'date-fns'
 
 import {
-  companyApiuserDestroyMutation,
-  companyApiuserListOptions,
-  companyApiuserListQueryKey,
-  companyApiuserRevokeCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedApiUserList } from '@/api/types.gen'
-import {
   ServerTable,
   baseListParams,
   createActionColumn,
@@ -70,7 +63,7 @@ const authStore = useAuthStore()
 const queryClient = useQueryClient()
 const {create} = useToast()
 
-type ApiUserRow = ListRow<PaginatedApiUserList>
+type ApiUserRow = ListRow<Api.PaginatedApiUserList>
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated.
@@ -163,7 +156,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ApiUserRow>({
   key: 'api-user-table',
   columns,
-  listOptions: (query) => companyApiuserListOptions({
+  listOptions: (query) => Api.CompanyApiuser.list.options({
     query: {
       ...baseListParams(query),
     },
@@ -178,10 +171,10 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
 const {confirm: showRevokeModal, handleOk: handleRevokeOk} = useConfirmedAction({
   modalRefName: 'revokeModal',
   mutationOptions: () => ({
-    ...companyApiuserRevokeCreateMutation(),
+    ...Api.CompanyApiuser.extras.revokeCreate.mutation(),
     onSuccess: async () => {
       infoToast(create, $trans('Revoked'), $trans('API key has been revoked'))
-      await queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()})
+      await queryClient.invalidateQueries({queryKey: Api.CompanyApiuser.list.queryKey()})
     },
     onError: () => {
       errorToast(create, $trans('Error revoking API key'))

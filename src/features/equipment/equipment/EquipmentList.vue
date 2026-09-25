@@ -54,8 +54,8 @@
       :delete-modal="{
         modalId: 'delete-equipment-modal',
         confirmText: $trans('Are you sure you want to delete this equipment?'),
-        destroyMutation: equipmentEquipmentDestroyMutation,
-        invalidate: EquipmentEquipment.invalidate,
+        destroyMutation: Api.EquipmentEquipment.destroy.mutation,
+        invalidate: Api.EquipmentEquipment.invalidate,
         deletedDetail: $trans('Equipment has been deleted'),
         deleteError: $trans('Error deleting equipment'),
       }"
@@ -82,13 +82,7 @@
 import { RouterLink } from 'vue-router'
 import { equipmentEquipmentExportQrRetrieve } from '@/api/sdk.gen'
 import { useFileDownload, XLSX_MIME } from '@/features/shared'
-import {
-  equipmentEquipmentDestroyMutation,
-  equipmentEquipmentListOptions,
-  equipmentEquipmentStateCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { EquipmentTypeEnum, PaginatedEquipmentList } from '@/api/types.gen'
-import { EquipmentEquipment } from '@/api/resources.gen'
+
 import { EQUIPMENT_TYPES } from '@/constants'
 import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
 import { useEquipmentColumns } from './use-equipment-columns'
@@ -98,13 +92,13 @@ const props = withDefaults(defineProps<{
   /** The route name stem this mount answers to (`equipment-equipment`, `settings-equipment`, ...). */
   route_prefix: string
   /** The equipment type the address asked for; the router's path carries it. */
-  type?: EquipmentTypeEnum
+  type?: Api.EquipmentTypeEnum
 }>(), {
   from_settings: false,
   type: EQUIPMENT_TYPES.TECHNICAL,
 })
 
-type EquipmentRow = ListRow<PaginatedEquipmentList>
+type EquipmentRow = ListRow<Api.PaginatedEquipmentList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const addStateModal = useTemplateRef<{show: () => void, hide: () => void}>('addStateModal')
@@ -134,7 +128,7 @@ const columns = useEquipmentColumns({
 const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetching, refresh} = useServerTable<EquipmentRow>({
   key: 'equipment-table',
   columns,
-  listOptions: (query) => equipmentEquipmentListOptions({
+  listOptions: (query) => Api.EquipmentEquipment.list.options({
     query: {
       ...baseListParams(query),
 
@@ -157,7 +151,7 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
 const state = reactive({equipment: 0, state: '', replace_months: ''})
 
 const {create} = useToast()
-const createState = useMutation(equipmentEquipmentStateCreateMutation())
+const createState = useMutation(Api.EquipmentEquipmentState.create.mutation())
 
 function showAddStateModal(id: number) {
   state.equipment = id

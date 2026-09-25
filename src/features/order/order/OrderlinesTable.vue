@@ -31,13 +31,13 @@
 </template>
 
 <script setup lang="ts">
-import type { OrderLine } from '@/api/types.gen'
+
 /**
  * The read-only orderlines table both order details render: the temps
  * view over the record's own lines, the maintenance contents panel over
  * the equipment-displayed ones.
  */
 defineProps<{
-  lines: OrderLine[]
+  lines: Api.OrderLine[]
 }>()
 </script>

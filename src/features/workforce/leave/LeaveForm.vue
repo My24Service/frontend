@@ -234,10 +234,9 @@
 import moment from 'moment'
 import { nl } from 'date-fns/locale'
 import VueMultiselect from 'vue-multiselect'
-import { companyLeaveTypeListOptions } from '@/api/@tanstack/vue-query.gen'
+
 import { companyUserLeaveHoursAdminGetTotalsCreate } from '@/api/sdk.gen'
-import type { UserSelectRow } from '@/api/types.gen'
-import { CompanyUserLeaveHoursAdmin } from '@/api/resources.gen'
+
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {
   useQueryErrorToast,
@@ -276,7 +275,7 @@ void toast
 const today = moment().format('YYYY-MM-DD')
 const now = moment().format('HH:mm')
 
-const leaveTypesQuery = useQuery(() => companyLeaveTypeListOptions({
+const leaveTypesQuery = useQuery(() => Api.CompanyLeaveType.list.options({
   query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
 }))
 useQueryErrorToast(leaveTypesQuery.error, $trans('Error loading leave types'))
@@ -286,7 +285,7 @@ const {term, options, loading: searching} = useUserSearch()
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: CompanyUserLeaveHoursAdmin,
+  resource: Api.CompanyUserLeaveHoursAdmin,
   empty: () => emptyLeave(today, now),
   fromRecord: leaveFromRecord,
   validate: validateLeave,
@@ -311,7 +310,7 @@ watch(record, (data) => {
   if (data) userName.value = data.full_name
 }, {immediate: true})
 
-function userLabel(option: UserSelectRow): string {
+function userLabel(option: Api.UserSelectRow): string {
   return option.name
 }
 
@@ -319,7 +318,7 @@ function onSearch(value: string) {
   term.value = value
 }
 
-function selectUser(option: UserSelectRow) {
+function selectUser(option: Api.UserSelectRow) {
   values.value.user = option.id
   userName.value = option.name
 }

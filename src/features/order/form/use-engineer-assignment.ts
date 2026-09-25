@@ -1,5 +1,5 @@
-import { mobileAssignUserCreateMutation, mobileUnassignUserCreateMutation } from '@/api/@tanstack/vue-query.gen'
-import type { AssignedUserInfo, EngineerForSelect } from '@/api/types.gen'
+
+
 import { useEngineerOptions } from './use-order-pickers'
 
 /** The backend refused to unassign: the engineer has booked hours or materials. */
@@ -15,15 +15,15 @@ export function useEngineerAssignment() {
   const {create} = useToast()
   const {engineers} = useEngineerOptions(() => true)
 
-  const selected = ref<EngineerForSelect[]>([])
-  const removed = ref<AssignedUserInfo[]>([])
+  const selected = ref<Api.EngineerForSelect[]>([])
+  const removed = ref<Api.AssignedUserInfo[]>([])
 
   /** Whether anything is staged: a pick to assign or a mark to unassign. */
   const hasChanges = computed(() => selected.value.length > 0 || removed.value.length > 0)
 
-  const isRemoved = (engineer: AssignedUserInfo) => removed.value.includes(engineer)
+  const isRemoved = (engineer: Api.AssignedUserInfo) => removed.value.includes(engineer)
 
-  function unassign(engineer: AssignedUserInfo) {
+  function unassign(engineer: Api.AssignedUserInfo) {
     if (!isRemoved(engineer)) removed.value.push(engineer)
   }
 
@@ -33,8 +33,8 @@ export function useEngineerAssignment() {
     removed.value = []
   }
 
-  const assignMutation = useMutation({...mobileAssignUserCreateMutation()})
-  const unassignMutation = useMutation({...mobileUnassignUserCreateMutation()})
+  const assignMutation = useMutation({...Api.MobileAssignUser.create.mutation()})
+  const unassignMutation = useMutation({...Api.MobileUnassignUser.create.mutation()})
 
   async function replay(orderId: number, orderCode: string) {
     const refused: string[] = []

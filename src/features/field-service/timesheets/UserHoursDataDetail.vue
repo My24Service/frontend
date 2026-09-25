@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import type {ListTimesheetTotalsResponse} from '@/api/types.gen'
+
 import {displayDurationFromSeconds, translateHoursField} from './hours-fields'
 import {buildDayHeaderColumns, useHoursWeekNav, type TableField} from './use-hours-week-nav'
 import {useUserHoursPivot} from './useUserHoursPivot'
@@ -100,7 +100,7 @@ const breadcrumb = computed(() => [
  * day of the week, plus the field's own week total. The day columns come from
  * `useHoursWeekNav`.
  */
-function processData(payload: ListTimesheetTotalsResponse) {
+function processData(payload: Api.ListTimesheetTotalsResponse) {
   fullName.value = payload.full_name
   day_fields.value = payload.day_fields
   day_field_types.value = payload.day_field_types

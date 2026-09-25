@@ -31,8 +31,6 @@
 import moment from 'moment/min/moment-with-locales'
 import { RouterLink } from 'vue-router'
 
-import { mobileAssignedorderFinishedListListOptions } from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedAssignedOrderViewList } from '@/api/types.gen'
 import {
   ServerTable,
   baseListParams,
@@ -41,7 +39,7 @@ import {
   type ListRow,
 } from '@/features/table'
 
-type FinishedRow = ListRow<PaginatedAssignedOrderViewList>
+type FinishedRow = ListRow<Api.PaginatedAssignedOrderViewList>
 
 /**
  * The orders that were worked and finished, month by month.
@@ -129,7 +127,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   // The endpoint declares no `ordering`, so the kit's sort state is never
   // forwarded: an undeclared parameter is not sent.
   enableSorting: false,
-  listOptions: (query) => mobileAssignedorderFinishedListListOptions({
+  listOptions: (query) => Api.MobileAssignedorderFinishedList.list.options({
     query: {
       ...baseListParams(query),
       ...(monthOffset.value === 0 ? {} : {month: month.value.month() + 1, year: year.value}),

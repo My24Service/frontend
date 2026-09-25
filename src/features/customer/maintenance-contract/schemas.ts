@@ -1,13 +1,6 @@
 import * as v from 'valibot'
 import type Dinero from 'dinero.js'
 
-import type { MaintenanceContract, MaintenanceContractWithEquipmentRequestRequest, MaintenanceEquipment, MaintenanceEquipmentRowRequest } from '@/api/types.gen'
-import {
-  vMaintenanceContractRequest,
-  vMaintenanceContractWithEquipmentRequestRequest,
-  vMaintenanceEquipmentRowRequest,
-  vMaintenanceEquipmentRequest,
-} from '@/api/valibot.gen'
 import {
   fieldErrors,
   type FieldErrors,
@@ -15,7 +8,7 @@ import {
 } from '@/features/forms'
 /** The wire shape, except that the picker is empty until a customer is chosen. */
 export type MaintenanceContractFormValues =
-  Omit<v.InferInput<typeof vMaintenanceContractRequest>, 'customer'> & {customer: number | null}
+  Omit<v.InferInput<typeof schemas.vMaintenanceContractRequest>, 'customer'> & {customer: number | null}
 
 export function emptyContract(): MaintenanceContractFormValues {
   return {
@@ -25,7 +18,7 @@ export function emptyContract(): MaintenanceContractFormValues {
 }
 
 export function contractFromRecord(
-  record: MaintenanceContract,
+  record: Api.MaintenanceContract,
 ): MaintenanceContractFormValues {
   return {
     customer: record.customer,
@@ -44,7 +37,7 @@ const FIELD_LABELS = {
 export function validateContractForm(
   values: MaintenanceContractFormValues,
 ): ContractFieldErrors {
-  return fieldErrors(vMaintenanceContractRequest, values, {}, FIELD_LABELS)
+  return fieldErrors(schemas.vMaintenanceContractRequest, values, {}, FIELD_LABELS)
 }
 
 export type EquipmentRowState = {
@@ -83,7 +76,7 @@ export function equipmentRowFromRecord(
   }
 }
 
-export type MaintenanceEquipmentRow = MaintenanceEquipment
+export type MaintenanceEquipmentRow = Api.MaintenanceEquipment
 
 /**
  * The row as the replace-set body takes it. Two things a row does not carry:
@@ -118,8 +111,8 @@ function shapeEquipmentRow(row: EquipmentRowState) {
  */
 export function parseEquipmentSetBody(
   rows: readonly EquipmentRowState[],
-): MaintenanceEquipmentRowRequest[] {
-  return rows.map((row) => v.parse(vMaintenanceEquipmentRowRequest, shapeEquipmentRow(row)))
+): Api.MaintenanceEquipmentRowRequest[] {
+  return rows.map((row) => v.parse(schemas.vMaintenanceEquipmentRowRequest, shapeEquipmentRow(row)))
 }
 
 /**
@@ -134,9 +127,9 @@ export function parseEquipmentSetBody(
  */
 export function parseContractWithEquipmentBody(
   values: MaintenanceContractFormValues,
-  equipment: MaintenanceEquipmentRowRequest[],
-): MaintenanceContractWithEquipmentRequestRequest {
-  return v.parse(vMaintenanceContractWithEquipmentRequestRequest, {...values, equipment})
+  equipment: Api.MaintenanceEquipmentRowRequest[],
+): Api.MaintenanceContractWithEquipmentRequestRequest {
+  return v.parse(schemas.vMaintenanceContractWithEquipmentRequestRequest, {...values, equipment})
 }
 
 const EQUIPMENT_ROW_LABELS = {
@@ -152,7 +145,7 @@ const EQUIPMENT_ROW_LABELS = {
  */
 export function equipmentRowErrors(row: EquipmentRowState): FieldErrors<'equipment' | 'times_per_year'> {
   const {equipment, times_per_year} = fieldErrors<'equipment' | 'times_per_year'>(
-    vMaintenanceEquipmentRequest, shapeEquipmentRow(row), {}, EQUIPMENT_ROW_LABELS)
+    schemas.vMaintenanceEquipmentRequest, shapeEquipmentRow(row), {}, EQUIPMENT_ROW_LABELS)
   return {
     ...(equipment ? {equipment} : {}),
     ...(times_per_year ? {times_per_year} : {}),

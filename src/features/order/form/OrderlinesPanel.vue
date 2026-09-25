@@ -216,7 +216,6 @@
 <script lang="ts" setup>
 import VueMultiselect from 'vue-multiselect'
 
-import type { OrderLine, OrderLineNested } from '@/api/types.gen'
 import QuickCreateModal from './QuickCreateModal.vue'
 import {
   emptyOrderline,
@@ -236,7 +235,7 @@ import { useStagedRows } from './use-staged-rows'
  */
 const props = defineProps<{
   /** The lines on the record; a change (a load) replaces the staged set. */
-  lines: OrderLine[]
+  lines: Api.OrderLine[]
   role: FormRole
   hasBranches: boolean
   usesEquipment: boolean
@@ -338,7 +337,7 @@ async function submitCreateLocation() {
 const rows = orderlines.rows
 
 /** Take the lines the save returned, so the staged set carries the stored ids. */
-function adopt(lines: OrderLineNested[]) {
+function adopt(lines: Api.OrderLineNested[]) {
   orderlines.seed(lines.map(orderlineFromRecord))
 }
 

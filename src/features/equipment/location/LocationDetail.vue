@@ -95,9 +95,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  equipmentLocationRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
+
 import { useQueryErrorToast } from '@/features/forms'
 import { DocumentsComponent } from '@/features/equipment/documents'
 import {
@@ -130,7 +128,7 @@ const props = withDefaults(defineProps<{
 const id = Number(props.pk)
 const mainStore = useMainStore()
 
-const detailQuery = useQuery(equipmentLocationRetrieveOptions({path: {id}}))
+const detailQuery = useQuery(Api.EquipmentLocation.retrieve.options({path: {id}}))
 useQueryErrorToast(detailQuery.error, $trans('Error fetching location detail'))
 const location = computed(() => detailQuery.data.value)
 

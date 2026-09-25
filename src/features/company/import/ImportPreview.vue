@@ -93,12 +93,8 @@
 </template>
 
 <script setup lang="ts">
-import {
-  companyImportDoCreateMutation,
-  companyImportGetLookupFieldsRetrieveOptions,
-  companyImportPreviewRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import { CompanyImport } from '@/api/resources.gen'
+import { companyImportGetLookupFieldsRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+
 import {
   useQueryErrorToast,
 } from '@/features/forms'
@@ -128,7 +124,7 @@ const isDoing = ref(false)
 
 const id = computed(() => Number(props.pk))
 
-const previewQuery = useQuery(companyImportPreviewRetrieveOptions({ path: { id: id.value } }))
+const previewQuery = useQuery(Api.CompanyImport.extras.previewRetrieve.options({ path: { id: id.value } }))
 const lookupQuery = useQuery(companyImportGetLookupFieldsRetrieveOptions())
 useQueryErrorToast(previewQuery.error, $trans('Error loading import preview'))
 useQueryErrorToast(lookupQuery.error, $trans('Error loading import preview'))
@@ -233,7 +229,7 @@ function fieldsFor(key: SheetKey) {
   }
 }
 
-const doMutation = useMutation(companyImportDoCreateMutation())
+const doMutation = useMutation(Api.CompanyImport.extras.doCreate.mutation())
 
 /**
  * The import confirmation, as a modal rather than the legacy blocking
@@ -250,7 +246,7 @@ async function importAll() {
   try {
     await doMutation.mutateAsync({ path: { id: id.value } })
     infoToast(toast, $trans('Imported'), $trans('Data has been imported'))
-    await CompanyImport.invalidate(queryClient)
+    await Api.CompanyImport.invalidate(queryClient)
     importModal.value?.hide()
     await router.push(toRoute(`${props.route_prefix}-list` as RouteName))
   } catch {

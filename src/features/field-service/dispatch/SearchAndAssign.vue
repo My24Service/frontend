@@ -108,8 +108,6 @@
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import moment from 'moment'
 
-import { orderOrderListOptions, orderOrderPartialUpdateMutation } from '@/api/@tanstack/vue-query.gen'
-import type { Order } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
 import EditStartDate from './EditStartDate.vue'
 
@@ -138,7 +136,7 @@ const query = ref('')
 /** The term the results on screen answer; `query` is only the draft. */
 const committed = ref('')
 const lastQuery = ref<string | false>(false)
-const selectedOrders = ref<Order[]>([])
+const selectedOrders = ref<Api.Order[]>([])
 
 const mustIncludeReference = computed(() => store.getOrderListMustIncludeReference)
 
@@ -151,7 +149,7 @@ const mustIncludeReference = computed(() => store.getOrderListMustIncludeReferen
 const orderStatusColorCode = computed(() => my24.status2color(store.getStatuscodes, undefined))
 
 const listQuery = useQuery(() => ({
-  ...orderOrderListOptions({query: {page: 1, q: committed.value}}),
+  ...Api.OrderOrder.list.options({query: {page: 1, q: committed.value}}),
   // Nothing to ask for until the draft is worth a request.
   enabled: committed.value.trim().length > 2,
 }))
@@ -159,17 +157,17 @@ const listQuery = useQuery(() => ({
 const isLoading = computed(() => listQuery.isFetching.value)
 
 /** Results, or none while the box holds a term too short to have searched. */
-const orders = computed<Order[]>(() =>
+const orders = computed<Api.Order[]>(() =>
   committed.value.trim().length > 2 ? (listQuery.data.value?.results ?? []) : [])
 
-const patchOrder = useMutation({...orderOrderPartialUpdateMutation()})
+const patchOrder = useMutation({...Api.OrderOrder.update.mutation()})
 
 const hasSelectedOrders = () => selectedOrders.value.length > 0
 
 const buttonLabel = computed(() => (hasSelectedOrders() ? $trans('Assign these orders') : $trans('Close')))
 
 /** Stage an order; picking the same one twice is a no-op. */
-function selectOrder(order: Order) {
+function selectOrder(order: Api.Order) {
   if (selectedOrders.value.some((selected) => selected.id === order.id)) {
     return
   }
@@ -205,7 +203,7 @@ function search() {
 
 const searchDebounced = AwesomeDebouncePromise(search, 500)
 
-function editStartDate(order: Order) {
+function editStartDate(order: Api.Order) {
   editStartDateModal.value?.setFromOrder(order)
   editStartDateModal.value?.show()
 }
