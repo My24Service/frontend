@@ -39,7 +39,7 @@ export function useOrderSeeds(
 
   const maintenanceSeed = computed<MaintenanceSeed | null>(() => {
     if (!options.maintenance() || !options.isCreate()) return null
-    const staged = mainStore.getMaintenanceEquipment as unknown
+    const staged = mainStore.getMaintenanceEquipment
     return staged && typeof staged === 'object' && 'customer_pk' in staged ? (staged as MaintenanceSeed) : null
   })
 

@@ -26,7 +26,7 @@ export function useSchedule() {
   const queryClient = useQueryClient()
   const loading = useLoading()
 
-  const orderTypes = computed<string[]>(() => (mainStore.getOrderTypes as string[] | undefined) ?? [])
+  const orderTypes = computed<string[]>(() => mainStore.getOrderTypes ?? [])
 
   function orderTypeColorIndex(orderType: string): number {
     const index = orderTypes.value.indexOf(orderType)

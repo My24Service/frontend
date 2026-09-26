@@ -112,7 +112,7 @@ const props = withDefaults(defineProps<{
 
 const router = useRouter()
 const mainStore = useMainStore()
-const currency = computed(() => mainStore.getDefaultCurrency)
+const currency = computed<string>(() => mainStore.getDefaultCurrency)
 
 const id = computed(() => (props.pk == null ? null : Number(props.pk)))
 

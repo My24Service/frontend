@@ -8,6 +8,6 @@ export function useOrderTypeOptions() {
   const mainStore = useMainStore()
   return computed(() => [
     {value: '', text: $trans('Select order type')},
-    ...((mainStore.getOrderTypes ?? []) as string[]).map((type) => ({value: type, text: type})),
+    ...((mainStore.getOrderTypes ?? []).map((type) => ({value: type, text: type}))),
   ])
 }

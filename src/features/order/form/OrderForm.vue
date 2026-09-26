@@ -221,6 +221,7 @@ import {
   parseOrderBody,
   validateOrderForm,
   type FormRole,
+  type OrderlineRow,
 } from './schemas'
 import { UnassignRefused } from './use-engineer-assignment'
 import { useOrderSeeds } from './use-order-seeds'
@@ -411,7 +412,9 @@ const seeds = useOrderSeeds(order, {
   fromQuotation: () => props.fromQuotation,
   quotationId: () => props.quotationId,
   maintenance: () => props.maintenance,
-  stageOrderline: (row) => orderlines.value?.stage(row),
+  stageOrderline: (row: OrderlineRow): void => {
+    orderlines.value?.stage(row)
+  },
 })
 
 const isLoading = computed(() => baseIsLoading.value || seeds.isLoading.value)

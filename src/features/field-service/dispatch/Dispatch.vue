@@ -294,7 +294,7 @@ import {
 } from '@/features/field-service/assignment'
 import DispatchWeek from './DispatchWeek.vue'
 import SearchAndAssign from './SearchAndAssign.vue'
-import AssignedOrderDatesForm, { type AssignedOrderDates } from './AssignedOrderDatesForm.vue'
+import AssignedOrderDatesForm from './AssignedOrderDatesForm.vue'
 import type { DispatchBoardAssignedOrder } from './dispatch-window'
 
 /**
@@ -362,6 +362,24 @@ const selectedOrderUserId = ref<number | null>(null)
 const selectedOrderIsPartner = ref(false)
 const minDate = ref<Date | null>(null)
 const maxDate = ref<Date | null>(null)
+
+/**
+ * The dates the change-date and split modals edit: the four `alt_*` values
+ * the requests carry, seeded from the assignment's own times.
+ *
+ * A local mirror of `AssignedOrderDatesForm`'s model: a named type cannot be
+ * imported from a `.vue` module here (the `*.vue` shim those resolve through
+ * declares no named exports), so the shape is written out once.
+ */
+interface AssignedOrderDates {
+  order?: number
+  alt_start_date: Date | string | null
+  alt_start_time: string | null
+  alt_end_date: Date | string | null
+  alt_end_time: string | null
+  start_time: string | null
+  end_time: string | null
+}
 
 /** Always an object: the modals render their pickers from it unconditionally. */
 const assignedOrder = ref<AssignedOrderDates>({

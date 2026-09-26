@@ -107,7 +107,7 @@ const store = useMainStore()
  */
 const statuscodeOptions = computed<{id: number | null; statuscode: string}[]>(() => [
   {id: null, statuscode: ''},
-  ...((store.getStatuscodes ?? []) as Api.Statuscode[]).map((statuscode) => ({
+  ...((store.getStatuscodes ?? [])).map((statuscode) => ({
     id: statuscode.id,
     statuscode: statuscode.statuscode,
   })),

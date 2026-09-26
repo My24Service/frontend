@@ -170,7 +170,8 @@ const mainStore = useMainStore()
 
 // The legacy read the countries once, in `created()`, and the store's list is
 // static for a session; a computed keeps that read where the template binds it.
-const countries = computed(() => mainStore.getCountries)
+const countries = computed<{ value: string; text: string }[]>(() =>
+  (mainStore.getCountries ?? []).map((code) => ({ value: code, text: code })))
 
 // The legacy set moment's locale from the member's language before parsing the
 // record's dates; parsing an isoDate is locale-independent, but the locale is
