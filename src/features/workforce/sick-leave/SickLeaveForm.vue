@@ -149,8 +149,7 @@ const form = useResourceForm({
   resource: Api.CompanyUserSickLeaveAdmin,
   empty: () => emptySickLeave(today),
   fromRecord: sickLeaveFromRecord,
-  validate: sickLeaveWrite.validate,
-  parse: sickLeaveWrite.parse,
+  contract: sickLeaveWrite,
   copy: {
     fetchError: $trans('Error loading sick leave'),
     created: $trans('Created'),

@@ -1,7 +1,5 @@
-import * as v from 'valibot'
-
 import {
-  fieldErrors,
+  writeContract,
   requiredMessages,
   type FieldErrors,
   type FieldLabels,
@@ -25,10 +23,8 @@ export const FIELD_LABELS = {
 /** The line under an untouched field: the same required line the validation shows. */
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)
 
-export function validateModule(values: Api.ModuleRequest): ModuleFieldErrors {
-  return fieldErrors(Api.MemberModule.create.body, values, {}, FIELD_LABELS)
-}
-
-export function parseModule(values: Api.ModuleRequest): Api.ModuleRequest {
-  return v.parse(Api.MemberModule.create.body, values)
-}
+/** What the form checks and sends: the whole module, on a create and an edit alike. */
+export const moduleWrite = writeContract(Api.MemberModule, {
+  validateWith: Api.MemberModule.create.body,
+  labels: FIELD_LABELS,
+})

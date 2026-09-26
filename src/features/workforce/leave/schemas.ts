@@ -8,6 +8,7 @@ import {
   type FieldMessages,
   type FieldLabels,
   type WriteContext,
+  writeContract,
 } from '@/features/forms'
 /**
  * A leave as the form holds it.
@@ -264,24 +265,19 @@ export const LEAVE_TYPE_MESSAGES = {
   ),
 } as const satisfies FieldMessages<keyof LeaveTypeFieldErrors>
 
-/** `name` already carries `minLength(1)` in the generated component. */
-export function validateLeaveType(values: Api.LeaveTypeRequest): LeaveTypeFieldErrors {
-  return fieldErrors(schemas.vLeaveTypeRequest, values, LEAVE_TYPE_MESSAGES, LEAVE_TYPE_LABELS)
-}
-
 /**
- * The body both writes send: the two fields the modal shows and nothing else.
- *
- * Both parse the create component, which is the one that says what a whole
- * leave type needs; the patch body the edit sends is a superset of what PATCH
- * requires, and the two components declare the same keys. The legacy edit
- * handler spread the whole record into the form and PATCHed it back, which
- * carried `id`, `created` and `modified` - the parse drops what the endpoint
- * does not declare.
+ * What the leave-type modal checks and sends: the two fields it shows and
+ * nothing else. Both writes validate against the create body, the one that
+ * says what a whole leave type needs (`name` already carries `minLength(1)`
+ * there). The legacy edit handler spread the whole record into the form and
+ * PATCHed it back, which carried `id`, `created` and `modified` - the parse
+ * drops what the endpoint does not declare.
  */
-export function parseLeaveType(values: Api.LeaveTypeRequest): Api.LeaveTypeRequest {
-  return v.parse(schemas.vLeaveTypeRequest, values)
-}
+export const leaveTypeWrite = writeContract(Api.CompanyLeaveType, {
+  validateWith: Api.CompanyLeaveType.create.body,
+  labels: LEAVE_TYPE_LABELS,
+  messages: LEAVE_TYPE_MESSAGES,
+})
 
 /** The totals probe's answer, as the screen prints it. */
 export function humanizeDuration(hours: number | null | undefined, minutes: number | null | undefined): string {

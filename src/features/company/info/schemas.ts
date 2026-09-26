@@ -1,7 +1,5 @@
-import * as v from 'valibot'
-
 import {
-  fieldErrors,
+  writeContract,
   type FieldErrors,
   type FieldLabels,
 } from '@/features/forms'
@@ -114,21 +112,14 @@ function shaped(values: InfoFormValues) {
 }
 
 /**
- * The patch body leaves every field optional, and every one of the ten the
- * legacy screen required is non-blank once present. The shaped body always
- * carries all ten, so a blank one is refused without a rule of this file's
- * own.
+ * What the form checks and sends: the patch body, which leaves every field
+ * optional. Every one of the ten the legacy screen required is non-blank once
+ * present, and the shaped body always carries all ten, so a blank one is
+ * refused without a rule of this file's own. Parsing strips what the endpoint
+ * does not declare - the record's readonly companions the legacy screen sent
+ * along ride no more, and DRF ignored them either way.
  */
-export function validateInfo(values: InfoFormValues): InfoFormErrors {
-  return fieldErrors(schemas.vPatchedMemberRequest, shaped(values), {}, FIELD_LABELS)
-}
-
-/**
- * The body to send, as the generated patch component resolves it: the form's
- * fields, stripped of anything the endpoint does not declare - the record's
- * readonly companions the legacy screen sent along ride no more, and DRF
- * ignored them either way.
- */
-export function parseInfo(values: InfoFormValues) {
-  return v.parse(schemas.vPatchedMemberRequest, shaped(values))
-}
+export const infoWrite = writeContract(Api.MemberMemberMe, {
+  shape: shaped,
+  labels: FIELD_LABELS,
+})

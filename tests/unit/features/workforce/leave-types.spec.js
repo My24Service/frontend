@@ -31,6 +31,8 @@ const lists = () => api.requests().filter((request) => request.method === 'get' 
 beforeEach(() => {
   window.history.replaceState(null, '', '/')
   api.get(endpoint, () => paginated([leaveType()], { count: 4 }))
+  // The edit modal reads the record it edits, as every resource form does.
+  api.get(endpoint + '{id}/', () => leaveType())
   api.post(endpoint, fixtureFor(vLeaveType, { id: 6, name: 'Ziekte' }))
   api.patch(endpoint + '{id}/', fixtureFor(vLeaveType))
   api.delete(endpoint + '{id}/', noContent)
@@ -104,6 +106,7 @@ describe('LeaveTypes edit', () => {
 
     await wrapper.get('tbody .edit-icon').trigger('click')
     await settle()
+    expect(api.requests().filter((request) => request.path === endpoint + '5/')).toHaveLength(1)
     modal(modalId).typeInto('#name', 'Vakantie 2026')
     modal(modalId).ok()
     await settle()
@@ -134,6 +137,31 @@ describe('LeaveTypes edit', () => {
 
     expect(modal(modalId).isOpen()).toBe(false)
     expect(lists()).toHaveLength(2)
+  })
+  // The modal is one form instance serving one open after another: a cancelled
+  // edit must not linger into the next open of the same row (whose record is
+  // cached, so nothing refetches to overwrite it), nor into a create.
+  test('reopening shows the record again, and a create after an edit starts blank', async () => {
+    const wrapper = await mountTypes()
+    await settle()
+    const name = () => document.querySelector(`#${modalId} #name`).value
+
+    await wrapper.get('tbody .edit-icon').trigger('click')
+    await settle()
+    modal(modalId).typeInto('#name', 'Half typed')
+    await settle()
+    modal(modalId).cancel()
+    await settle()
+
+    await wrapper.get('tbody .edit-icon').trigger('click')
+    await settle()
+    expect(name()).toBe('Vakantie')
+
+    modal(modalId).cancel()
+    await settle()
+    await wrapper.findAll('button').find((button) => button.text().includes('Add leave types')).trigger('click')
+    await settle()
+    expect(name()).toBe('')
   })
 })
 

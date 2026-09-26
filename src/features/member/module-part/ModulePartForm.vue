@@ -83,8 +83,7 @@ import {
 import {
   emptyModulePart,
   PLACEHOLDERS,
-  parseModulePart,
-  validateModulePart,
+  modulePartWrite,
   type ModulePartFieldErrors,
   type ModulePartFormValues,
 } from './schemas'
@@ -106,7 +105,7 @@ const {
   buttonDisabled,
   submitForm,
   cancelForm,
-} = useResourceForm<ModulePartFormValues, Api.ModulePart, ReturnType<typeof parseModulePart>, ModulePartFieldErrors>({
+} = useResourceForm<ModulePartFormValues, Api.ModulePart, ReturnType<typeof modulePartWrite.parse>, ModulePartFieldErrors>({
   pk: () => props.pk,
   resource: Api.MemberModulePart,
   invalidate: invalidateModulePartListQueries,
@@ -116,8 +115,7 @@ const {
     module: record.module,
     is_always_selected: record.is_always_selected ?? false,
   }),
-  validate: validateModulePart,
-  parse: parseModulePart,
+  contract: modulePartWrite,
   copy: {
     fetchError: $trans('Error fetching module part'),
     created: $trans('Created'),

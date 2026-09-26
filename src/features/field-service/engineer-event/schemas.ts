@@ -2,7 +2,7 @@ import * as v from 'valibot'
 
 import {
   type FieldLabels,
-  fieldErrors,
+  writeContract,
   type FieldErrors,
   type FieldMessages,
 } from '@/features/forms'
@@ -70,19 +70,15 @@ function shaped(values: EngineerEventTypeFormValues): Record<string, unknown> {
   }
 }
 
-export function validateEngineerEventType(values: EngineerEventTypeFormValues): EngineerEventTypeFieldErrors {
-  return fieldErrors(schemas.vEngineerEventTypeRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
-}
-
 /**
- * The body both writes send.
- *
- * Both parse the create component — the one that says what a whole event type
- * needs, and the one whose `event_type` is required. The PATCH body is a
- * superset of what PATCH requires: the two generated components declare the
- * same three keys, and the create is the stricter of the pair about the one
- * the form cannot save without.
+ * What the form checks and sends. Both writes validate against the create
+ * body - the one that says what a whole event type needs, and whose
+ * `event_type` is required; the edit then sends the same three keys as a
+ * PATCH, which declares them all.
  */
-export function parseEngineerEventType(values: EngineerEventTypeFormValues): Api.EngineerEventTypeRequest {
-  return v.parse(schemas.vEngineerEventTypeRequest, shaped(values))
-}
+export const engineerEventTypeWrite = writeContract(Api.CompanyEngineerEventType, {
+  validateWith: Api.CompanyEngineerEventType.create.body,
+  shape: shaped,
+  labels: FIELD_LABELS,
+  messages: FIELD_MESSAGES,
+})

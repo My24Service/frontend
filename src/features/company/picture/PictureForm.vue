@@ -100,8 +100,7 @@ const form = useResourceForm({
   resource: Api.CompanyPicture,
   empty: emptyPicture,
   fromRecord: pictureFromRecord,
-  validate: pictureWrite.validate,
-  parse: pictureWrite.parse,
+  contract: pictureWrite,
   copy: {
     fetchError: $trans('Error fetching picture'),
     created: $trans('Created'),

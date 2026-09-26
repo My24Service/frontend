@@ -134,8 +134,7 @@ const form = useResourceForm({
   resource: Api.CompanyImport,
   empty: emptyImport,
   fromRecord: importFromRecord,
-  validate: importWrite.validate,
-  parse: importWrite.parse,
+  contract: importWrite,
   // The write's id rides out through `onSaved`: a create only knows it
   // afterwards, and the ride after the save needs it for the preview.
   onSaved: async (result, context) => {

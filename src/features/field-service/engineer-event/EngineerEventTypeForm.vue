@@ -80,8 +80,7 @@ import {
   FIELD_MESSAGES,
   emptyEngineerEventType,
   engineerEventTypeFromRecord,
-  parseEngineerEventType,
-  validateEngineerEventType,
+  engineerEventTypeWrite,
 } from './schemas'
 
 /**
@@ -128,8 +127,7 @@ const {
   resource: Api.CompanyEngineerEventType,
   empty: emptyEngineerEventType,
   fromRecord: engineerEventTypeFromRecord,
-  validate: validateEngineerEventType,
-  parse: parseEngineerEventType,
+  contract: engineerEventTypeWrite,
   copy: {
     fetchError: $trans('Error fetching event type'),
     created: $trans('Created'),

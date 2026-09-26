@@ -47,8 +47,7 @@ import { useResourceForm } from '@/features/forms'
 import {
   emptyModule,
   PLACEHOLDERS,
-  parseModule,
-  validateModule,
+  moduleWrite,
   type ModuleFieldErrors,
 } from './schemas'
 import { invalidateModuleListQueries } from '../invalidation'
@@ -67,14 +66,13 @@ const {
   buttonDisabled,
   submitForm,
   cancelForm,
-} = useResourceForm<Api.ModuleRequest, Api.Module, ReturnType<typeof parseModule>, ModuleFieldErrors>({
+} = useResourceForm<Api.ModuleRequest, Api.Module, ReturnType<typeof moduleWrite.parse>, ModuleFieldErrors>({
   pk: () => props.pk,
   resource: Api.MemberModule,
   invalidate: invalidateModuleListQueries,
   empty: emptyModule,
   fromRecord: (record) => ({name: record.name}),
-  validate: validateModule,
-  parse: parseModule,
+  contract: moduleWrite,
   copy: {
     fetchError: $trans('Error fetching module'),
     created: $trans('Created'),

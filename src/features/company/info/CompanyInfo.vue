@@ -360,8 +360,7 @@ import {
 import {
   emptyInfo,
   infoFromRecord,
-  parseInfo,
-  validateInfo,
+  infoWrite,
 } from './schemas'
 
 /**
@@ -389,8 +388,7 @@ const form = useResourceForm({
   updateVars: (body) => ({body}),
   empty: emptyInfo,
   fromRecord: infoFromRecord,
-  validate: validateInfo,
-  parse: parseInfo,
+  contract: infoWrite,
   // A save stays on the screen, read-only again, where the invalidation
   // refetches the record behind the values.
   afterSave: async () => {

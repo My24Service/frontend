@@ -2,11 +2,11 @@ import * as v from 'valibot'
 
 import {
   type FieldLabels,
-  fieldErrors,
   humanizeKey,
   requiredMessage,
   type FieldErrors,
   type FieldMessages,
+  writeContract,
 } from '@/features/forms'
 /**
  * The typed tenant settings, as the settings screen edits them: every key
@@ -143,10 +143,10 @@ const settingsFormSchema = v.object({
   ...Object.fromEntries(DECIMAL_KEYS.map((key) => [key, v.pipe(v.string(), v.regex(/^-?\d{1,8}(?:\.\d{1,2})?$/))])),
 })
 
-export function validateSettings(values: SettingsFormValues): SettingsFieldErrors {
-  return fieldErrors(settingsFormSchema, toWire(values), FIELD_MESSAGES, FIELD_LABELS)
-}
-
-export function parseSettings(values: SettingsFormValues): Api.PatchedMemberSettingsRequest {
-  return v.parse(schemas.vPatchedMemberSettingsRequest, toWire(values))
-}
+/** What the form checks (the stricter schema above) and sends (the patch body). */
+export const settingsWrite = writeContract(Api.MemberMemberMySettings, {
+  validateWith: settingsFormSchema,
+  shape: toWire,
+  labels: FIELD_LABELS,
+  messages: FIELD_MESSAGES,
+})

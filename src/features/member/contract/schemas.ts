@@ -1,7 +1,5 @@
-import * as v from 'valibot'
-
 import {
-  fieldErrors,
+  writeContract,
   requiredMessages,
   type FieldErrors,
   type FieldLabels,
@@ -26,10 +24,8 @@ export const FIELD_LABELS = {
 /** The line under an untouched field: the same required line the validation shows. */
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)
 
-export function validateContract(values: Api.ContractCreateRequest): ContractFieldErrors {
-  return fieldErrors(Api.MemberContract.create.body, values, {}, FIELD_LABELS)
-}
-
-export function parseContract(values: Api.ContractCreateRequest): Api.ContractCreateRequest {
-  return v.parse(Api.MemberContract.create.body, values)
-}
+/** What the form checks and sends: the whole contract, on a create and an edit alike. */
+export const contractWrite = writeContract(Api.MemberContract, {
+  validateWith: Api.MemberContract.create.body,
+  labels: FIELD_LABELS,
+})

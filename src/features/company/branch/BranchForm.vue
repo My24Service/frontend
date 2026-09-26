@@ -271,8 +271,7 @@ const branchCopy = {
 const branchConfig = {
   empty: emptyBranch,
   fromRecord: branchFromRecord,
-  validate: branchWrite.validate,
-  parse: branchWrite.parse,
+  contract: branchWrite,
   copy: branchCopy,
 }
 

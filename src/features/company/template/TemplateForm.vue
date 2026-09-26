@@ -302,8 +302,7 @@ const form = useResourceForm({
   resource: Api.CompanyTemplate,
   empty: emptyTemplate,
   fromRecord: templateFromRecord,
-  validate: templateWrite.validate,
-  parse: templateWrite.parse,
+  contract: templateWrite,
   // A create save goes back; an edit save stays on the screen, where the
   // invalidation refetches the record behind the values - the legacy screen
   // reloaded it the same way.

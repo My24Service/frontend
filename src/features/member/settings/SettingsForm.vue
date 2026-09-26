@@ -47,11 +47,10 @@ import {
   FIELD_LABELS,
   FIELD_MESSAGES,
   isBooleanKey,
-  parseSettings,
   SETTING_GROUPS,
   settingLabel,
   settingsFromRecord,
-  validateSettings,
+  settingsWrite,
 } from './schemas'
 
 const queryClient = useQueryClient()
@@ -72,8 +71,7 @@ const {
   resource: Api.MemberMemberMySettings,
   empty: emptySettings,
   fromRecord: settingsFromRecord,
-  validate: validateSettings,
-  parse: parseSettings,
+  contract: settingsWrite,
   // stay on the screen: there is no list to go back to
   afterSave: async () => {
     await queryClient.invalidateQueries({queryKey: Api.MemberMemberMySettings.retrieve.queryKey()})

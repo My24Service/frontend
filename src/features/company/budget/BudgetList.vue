@@ -3,11 +3,11 @@
     <b-modal
       id="model-modal"
       ref="modelModal"
-      :title="isEdit ? $trans('Edit budget') : $trans('New budget')"
-      @ok.prevent="submitModal"
+      :title="isCreate ? $trans('New budget') : $trans('Edit budget')"
+      @ok.prevent="submitForm()"
     >
       <form ref="model-form">
-        <b-container v-if="modal">
+        <b-container>
           <b-row>
             <b-col cols="4">
               <BFormGroup
@@ -16,24 +16,24 @@
               >
                 <BFormInput
                   id="model-year"
-                  v-model="modal.year"
+                  v-model="values.year"
                   size="sm"
-                  :state="submitClicked ? !modalErrors.year : null"
+                  :state="submitClicked ? !errors.year : null"
                 />
-                <b-form-invalid-feedback :state="submitClicked ? !modalErrors.year : null">
-                  {{ modalErrors.year }}
+                <b-form-invalid-feedback :state="submitClicked ? !errors.year : null">
+                  {{ errors.year }}
                 </b-form-invalid-feedback>
               </BFormGroup>
             </b-col>
             <b-col cols="8">
               <BFormGroup :label="$trans('Amount')">
                 <PriceInput
-                  v-model="modal.amount"
+                  v-model="values.amount"
                   :currency="modalCurrency"
                   @priceChanged="priceChanged"
                 />
-                <b-form-invalid-feedback :state="submitClicked ? !modalErrors.amount : null">
-                  {{ modalErrors.amount }}
+                <b-form-invalid-feedback :state="submitClicked ? !errors.amount : null">
+                  {{ errors.amount }}
                 </b-form-invalid-feedback>
               </BFormGroup>
             </b-col>
@@ -82,25 +82,18 @@ import { RouterLink } from 'vue-router'
 import RowAction from '@/components/RowAction.vue'
 import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { formatMoney, formatMoneyPlain, toDinero } from '@/services/money'
-import {
-  budgetModalFromRecord,
-  budgetWrite,
-  emptyBudget,
-  type BudgetModalErrors,
-  type BudgetModalValues,
-} from './schemas'
+import { useResourceForm } from '@/features/forms'
+import { budgetModalFromRecord, budgetWrite, emptyBudget } from './schemas'
 
 /**
  * The budget list with its create/edit modal. The table is the shared
- * server-paged kit; the modal is local state on the equipment list's
- * add-state pattern: it stays open when the save fails, and only a
- * successful write hides it and refetches the list.
+ * server-paged kit; the modal is the resource form kit with the row's id as
+ * its `pk`: it stays open when the save fails, and only a successful write
+ * hides it and refetches the list.
  */
 type BudgetRow = ListRow<Api.PaginatedBudgetList>
 
 const mainStore = useMainStore()
-const queryClient = useQueryClient()
-const { create: toast } = useToast()
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const modelModal = useTemplateRef<{show: () => void, hide: () => void}>('modelModal')
@@ -148,67 +141,39 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
 
 // The modal ---------------------------------------------------------------
 
-const modal = ref<(BudgetModalValues & { id: number | null, currency: string }) | null>(null)
-const modalErrors = ref<BudgetModalErrors>({})
-const submitClicked = ref(false)
-const isEdit = computed(() => modal.value != null && modal.value.id != null)
-const modalCurrency = computed(() => modal.value?.currency ?? mainStore.getDefaultCurrency)
-const modalSaving = ref(false)
+/** null while the modal is creating; the row's id while it is editing. */
+const editingId = ref<number | null>(null)
 
-function showAddModal() {
-  modal.value = { ...emptyBudget(), id: null, currency: mainStore.getDefaultCurrency }
-  modalErrors.value = {}
-  submitClicked.value = false
+const {values, errors, submitClicked, isCreate, record, submitForm, reset} = useResourceForm({
+  pk: () => editingId.value,
+  resource: Api.CompanyBudget,
+  empty: emptyBudget,
+  fromRecord: budgetModalFromRecord,
+  contract: budgetWrite,
+  afterSave: () => modelModal.value?.hide(),
+  copy: {
+    fetchError: $trans('Error fetching budget'),
+    created: $trans('Created'),
+    createdDetail: $trans('Budget added'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('Budget modified'),
+    createError: $trans('Error handling budget'),
+    updateError: $trans('Error handling budget'),
+  },
+})
+
+const modalCurrency = computed(() => record.value?.amount_currency ?? mainStore.getDefaultCurrency)
+
+function open(id: number | null) {
+  editingId.value = id
+  reset()
   modelModal.value?.show()
 }
 
-async function showEditModal(id: number) {
-  const record = await queryClient.fetchQuery(Api.CompanyBudget.retrieve.options({ path: { id } }))
-  modal.value = { ...budgetModalFromRecord(record), id, currency: (record).amount_currency }
-  modalErrors.value = {}
-  submitClicked.value = false
-  modelModal.value?.show()
-}
-
-const createMutation = useMutation(Api.CompanyBudget.create.mutation())
-const updateMutation = useMutation(Api.CompanyBudget.update.mutation())
-
-/**
- * The modal write, on the add-state pattern: validation and write failures
- * keep the modal open with the copy the user reads; only a success hides it
- * and refetches the list. The legacy modal closed on OK whatever happened,
- * so a failed save looked like a success.
- */
-async function submitModal() {
-  if (!modal.value || modalSaving.value) return
-  modalSaving.value = true
-
-  try {
-    submitClicked.value = true
-    const found = budgetWrite.validate(modal.value, {isCreate: !isEdit.value})
-    modalErrors.value = found
-    if (Object.keys(found).length > 0) return
-
-    if (isEdit.value) {
-      await updateMutation.mutateAsync({
-        path: { id: modal.value.id as number },
-        body: budgetWrite.parseUpdate(modal.value),
-      })
-      infoToast(toast, $trans('Updated'), $trans('Budget modified'))
-    } else {
-      await createMutation.mutateAsync({ body: budgetWrite.parseCreate(modal.value) })
-      infoToast(toast, $trans('Created'), $trans('Budget added'))
-    }
-    await Api.CompanyBudget.invalidate(queryClient)
-    modelModal.value?.hide()
-  } catch {
-    errorToast(toast, $trans('Error handling budget'))
-  } finally {
-    modalSaving.value = false
-  }
-}
+const showAddModal = () => open(null)
+const showEditModal = (id: number) => open(id)
 
 function priceChanged(dinero: ReturnType<typeof toDinero>) {
-  if (modal.value) modal.value.amount = formatMoneyPlain(dinero)
+  values.value.amount = formatMoneyPlain(dinero)
 }
 </script>

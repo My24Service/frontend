@@ -3,7 +3,7 @@ import * as v from 'valibot'
 
 import { vMemberContractCreateBody } from '@/api/valibot.gen'
 
-import { emptyContract, validateContract } from '@/features/member'
+import { emptyContract, contractWrite } from '@/features/member'
 
 const valid = { name: 'My24Service Normal', module_paths: [{module: 7, parts: [258, 255]}] }
 
@@ -39,27 +39,27 @@ describe('emptyContract', () => {
   })
 
   test('the default is not yet submittable', () => {
-    expect(validateContract(emptyContract())).toEqual({
+    expect(contractWrite.validate(emptyContract(), { isCreate: true })).toEqual({
       name: 'Please enter a name',
       module_paths: 'Please select a module parts',
     })
   })
 })
 
-describe('validateContract', () => {
+describe('contractWrite.validate', () => {
   test('passes a good payload with no messages', () => {
-    expect(validateContract(valid)).toEqual({})
+    expect(contractWrite.validate(valid, { isCreate: true })).toEqual({})
   })
 
   test('blames the name field for a blank or over-long name', () => {
-    expect(validateContract({...valid, name: ''})).toEqual({ name: 'Please enter a name' })
-    expect(validateContract({...valid, name: 'a'.repeat(256)})).toEqual({
+    expect(contractWrite.validate({...valid, name: ''}, { isCreate: true })).toEqual({ name: 'Please enter a name' })
+    expect(contractWrite.validate({...valid, name: 'a'.repeat(256)}, { isCreate: true })).toEqual({
       name: 'Please use at most 255 characters',
     })
   })
 
   test('blames the module paths when nothing is selected', () => {
-    expect(validateContract({...valid, module_paths: []})).toEqual({
+    expect(contractWrite.validate({...valid, module_paths: []}, { isCreate: true })).toEqual({
       module_paths: 'Please select a module parts',
     })
   })
