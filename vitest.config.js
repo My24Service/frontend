@@ -72,6 +72,11 @@ export default defineConfig({
       imports: autoImportEntries,
       // Templates call auto-imported helpers too (`:to="toRoute(...)"`).
       vueTemplate: true,
+      // Same directory scan as the app build (vite.config.js): `useCommon` and
+      // its neighbours in src/composables are auto-imported there, so specs
+      // have to see them too or every SFC that reads one fails with
+      // "ReferenceError: useCommon is not defined".
+      dirs: ['src/composables/**/*'],
       // The app build owns auto-imports.d.ts; tests must not rewrite it.
       dts: false,
     }),
