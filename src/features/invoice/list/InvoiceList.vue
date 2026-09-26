@@ -38,6 +38,7 @@ import RowAction from '@/components/RowAction.vue'
 import {
   ServerTable,
   createAppColumnHelper,
+  useListModeReset,
   useServerTable,
   WHOLE_COLLECTION_PAGE_SIZE,
 } from '@/features/table'
@@ -109,21 +110,7 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
   loadError: $trans('Error loading invoices'),
 })
 
-// A new list domain must not inherit a page that may not exist there. Run
-// before the query observer so no request escapes with the previous page.
-// Initial URL restoration remains useServerTable's responsibility.
-watch(() => route.name, () => {
-  const page = Number(route.query.page ?? 1)
-  const pageSize = Number(route.query.page_size ?? pagination.value.pageSize)
-  if (typeof route.query.q === 'string') {
-    searchDraft.value = route.query.q
-    globalFilter.value = route.query.q
-  }
-  pagination.value = {
-    pageIndex: Number.isInteger(page) && page > 0 ? page - 1 : 0,
-    pageSize: Number.isInteger(pageSize) && pageSize > 0 ? pageSize : 20,
-  }
-}, {flush: 'sync'})
+useListModeReset(route, {searchDraft, globalFilter, pagination})
 </script>
 
 <style scoped>

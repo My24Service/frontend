@@ -21,6 +21,7 @@ export {
   type ListRow,
 } from './list-columns'
 export { useConfirmedAction } from './use-confirmed-action'
+export { useListModeReset } from './use-list-mode-reset'
 
 // `ColumnMeta` is the kit's own augmentation of the framework type (declared in
 // `./table`), so it is re-exported from the framework: the augmentation is what
