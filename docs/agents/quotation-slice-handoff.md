@@ -1,5 +1,10 @@
 # Handoff: quotation slice — state at interruption
 
+> **Status (2026-09-26): done.** Every screen is migrated into
+> `src/features/quotation/` and the legacy slice is deleted. What was built and
+> why: `src/features/quotation/README.md`; the calls made along the way:
+> `docs/quotation-slice-decisions.md`. The rest of this file is the history.
+
 Branch: `feature/refactor-quotation-slice` (off `develop-evert` at `fa73c3da`).
 Written when the four parallel screen subagents were cancelled mid-flight; the
 shared seams are landed, no screen is migrated yet.
