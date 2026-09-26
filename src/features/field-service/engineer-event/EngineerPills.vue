@@ -16,7 +16,6 @@
 
 <script lang="ts" setup>
 import PillsNav, {useCompanyUserPills} from '@/components/PillsNav.vue'
-import type { PillNavItem } from '@/components/PillsNav.vue'
 /**
  * The chrome both event screens carry: the company-user pills row above, and
  * this Slice's own List / Events / Event types row below it, one size down.
@@ -44,20 +43,7 @@ import type { PillNavItem } from '@/components/PillsNav.vue'
  *    way `PillsNav` settled the same question.
  */
 const route = useRoute()
-/**
- * The company-user pills. `useCompanyUserPills` is a named export of a `.vue`
- * module, which the type-checked lint resolves through the stock `*.vue`
- * shim (default export only - see the typescriptSfcs note in
- * eslint.config.js), so the factory arrives untyped; the guard recovers its
- * static type without a cast.
- */
-function isPillsFactory(value: unknown): value is () => ComputedRef<PillNavItem[]> {
-  return typeof value === 'function'
-}
-const pillsFactory: unknown = useCompanyUserPills
-const userPills: ComputedRef<PillNavItem[]> = isPillsFactory(pillsFactory)
-  ? pillsFactory()
-  : computed<PillNavItem[]>(() => [])
+const userPills = useCompanyUserPills()
 
 const items: {name: RouteName; label: () => string}[] = [
   {name: 'users-engineers', label: () => $trans('List')},

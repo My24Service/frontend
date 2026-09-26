@@ -1,4 +1,5 @@
 // eslint.i18n.config.js
+import tseslint from "typescript-eslint";
 import baseConfig from "./eslint.config.js";
 
 // Extract the i18n rules from the base config, stripping the rest so this config
@@ -21,4 +22,17 @@ const stripped = baseConfig.map((block) => {
   };
 });
 
-export default stripped;
+// Neither rule needs type information, so every file gets a plain parse:
+// the base config's eslint-plugin-typed-vue would otherwise build a program
+// per SFC for nothing.
+export default [
+  ...stripped,
+  // The base config's `ignores` is scoped to its own blocks, not these two.
+  { ignores: ["src/api/**"] },
+  {
+    files: ["**/*.vue"],
+    processor: "vue/vue",
+    languageOptions: { parserOptions: { parser: tseslint.parser } },
+  },
+  { files: ["**/*.{ts,mts,cts}"], languageOptions: { parser: tseslint.parser } },
+];

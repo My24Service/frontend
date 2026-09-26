@@ -5,3 +5,6 @@ allowBuilds:
   vue-demi: true
   fsevents: true
   vite-plugin-theme-preprocessor@git+https://codeberg.org/My24Service/vite-plugin-theme-preprocessor.git: true
+  # The eslint-plugin-typed-vue fork: its prepare script builds dist/. pnpm pins
+  # a git dependency's build permission to one commit, so bump this with it.
+  eslint-plugin-typed-vue@https://codeload.github.com/Evertt/eslint-plugin-typed-vue/tar.gz/f4b80934928181a1d8d78d33994b4631da61c1a1: true

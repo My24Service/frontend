@@ -1,5 +1,6 @@
 import vueI18n from "@intlify/eslint-plugin-vue-i18n";
 import vue from "eslint-plugin-vue";
+import typedVue from "eslint-plugin-typed-vue";
 import tseslint from "typescript-eslint";
 import unusedImports from "eslint-plugin-unused-imports";
 import globals from "globals";
@@ -46,32 +47,32 @@ const MARK_RANGES =
   "\\u2B00-\\u2BFF";
 
 /**
- * The `.vue` files whose `<script>` is TypeScript.
+ * The `.vue` files, split by the language of their `<script>`.
  *
  * The type-checked preset is only meaningful where there are types, and it
- * *misfires* where there are none: the program behind it applies no Volar
- * transform, so inside a component written as a bare `export default {}` the
- * `this` in its methods is the enclosing object literal, and every access
- * through it is reported as an unsafe `any`. Those reports are the bulk of what
- * the preset finds here, and none of them is a defect.
+ * *misfires* where there are none: inside a component written as a bare
+ * `export default {}` in plain JavaScript, `this` and the template's bindings
+ * carry no types, and every access through them is reported as an unsafe
+ * `any`. Those reports would be the bulk of what the preset finds here, and
+ * none of them is a defect. The TypeScript SFCs get eslint-plugin-typed-vue
+ * (see below); the JavaScript ones a plain parse.
  *
  * Computed rather than listed: a hand-kept list rots the first time someone
  * adds a component, and this file is the only place that would need changing.
  */
-function typescriptSfcs(dir) {
-  const found = [];
+function sfcsByScriptLang(dir, found = { typescript: [], javascript: [] }) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
-    if (entry.isDirectory()) found.push(...typescriptSfcs(path));
-    else if (
-      entry.name.endsWith(".vue") &&
-      /<script[^>]*\blang=["']ts["']/.test(readFileSync(path, "utf8"))
-    ) {
-      found.push(path);
+    if (entry.isDirectory()) sfcsByScriptLang(path, found);
+    else if (entry.name.endsWith(".vue")) {
+      const isTypescript = /<script[^>]*\blang=["']ts["']/.test(readFileSync(path, "utf8"));
+      found[isTypescript ? "typescript" : "javascript"].push(path);
     }
   }
   return found;
 }
+
+const SFCS = sfcsByScriptLang("src");
 
 /** What the type-checked rules may see: TypeScript, and the SFCs that use it. */
 const TYPE_CHECKED_FILES = [
@@ -79,7 +80,7 @@ const TYPE_CHECKED_FILES = [
   "**/*.tsx",
   "**/*.mts",
   "**/*.cts",
-  ...typescriptSfcs("src"),
+  ...SFCS.typescript,
 ];
 
 export default defineConfig({
@@ -94,6 +95,17 @@ export default defineConfig({
       files: entry.files ?? TYPE_CHECKED_FILES,
     })),
     vue.configs["flat/essential"],
+    // eslint-plugin-typed-vue: a Volar-backed program, so a type or function
+    // imported from an SFC is typed rather than the `*.vue` shim's `any`, and
+    // the templates of the TypeScript SFCs are type-checked too.
+    ...typedVue.configs.recommended,
+    // The JavaScript SFCs get none of it: none of the type-checked rules apply
+    // to them, and the plugin would build a program per file regardless.
+    {
+      files: SFCS.javascript,
+      processor: "vue/vue",
+      languageOptions: { parserOptions: { parser: tseslint.parser } },
+    },
     // Untranslated bare text in Vue templates / attributes
     {
       files: ["**/*.vue"],
@@ -285,8 +297,10 @@ export default defineConfig({
   ],
   languageOptions: {
     parserOptions: {
-      projectService: true,
-      parser: tseslint.parser,
+      // eslint-plugin-typed-vue injects its own programs, which the project
+      // service cannot provide (it has no Volar transform for `.vue`).
+      projectService: false,
+      tsconfigRootDir: import.meta.dirname,
       extraFileExtensions: ["vue"],
     },
   },
