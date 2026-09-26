@@ -107,7 +107,7 @@ const locationsQuery = useQuery(() => ({...Api.CompanyEngineerGetLocations.list.
 const locations = computed<Api.EngineerLocation[]>(() => locationsQuery.data.value ?? [])
 
 function refresh() {
-  locationsQuery.refetch()
+  void locationsQuery.refetch()
 }
 
 /**

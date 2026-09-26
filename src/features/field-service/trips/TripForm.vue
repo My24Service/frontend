@@ -203,7 +203,7 @@ const form = useResourceForm({
   fromRecord: tripFromRecord,
   validate: (values) => validateTripForm(withStagedOrders(values), conditionsOf(values)),
   parse: (values) => parseTripBody(withStagedOrders(values), conditionsOf(values)),
-  onSaved: async (result) => {
+  onSaved: (result) => {
     createdTripId.value = (result as Api.Trip | undefined)?.id ?? null
   },
   copy: {

@@ -369,7 +369,7 @@ async function show() {
 }
 
 function hide() {
-  modal.value?.hide()
+  void modal.value?.hide()
 }
 
 defineExpose({

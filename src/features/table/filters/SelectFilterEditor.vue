@@ -125,7 +125,7 @@ function move(step: number) {
   const count = visible.value.length
   if (count === 0) return
   highlighted.value = (highlighted.value + step + count) % count
-  nextTick(() => {
+  void nextTick(() => {
     const option = root.value?.querySelector<HTMLElement>(`#${CSS.escape(optionId(highlighted.value))}`)
     if (searchable.value) option?.scrollIntoView?.({block: 'nearest'})
     else option?.focus()
@@ -165,11 +165,11 @@ async function load(search: string) {
 
 watchDebounced(term, (value) => {
   highlighted.value = -1
-  if (isAsync.value) load(value)
+  if (isAsync.value) void load(value)
 }, {debounce: 250})
 
 onMounted(() => {
-  if (isAsync.value) load('')
+  if (isAsync.value) void load('')
 })
 
 defineExpose({

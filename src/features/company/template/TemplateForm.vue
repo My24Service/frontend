@@ -306,7 +306,7 @@ const form = useResourceForm({
   // A create save goes back; an edit save stays on the screen, where the
   // invalidation refetches the record behind the values - the legacy screen
   // reloaded it the same way.
-  afterSave: async () => {
+  afterSave: () => {
     if (isCreateRoute) router.go(-1)
     else isEdit.value = false
   },

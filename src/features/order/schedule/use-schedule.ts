@@ -89,7 +89,7 @@ export function useSchedule() {
   const selectedOrder = ref<Api.OrderDetail | null>(null)
   const orderModal = ref<{show: () => void} | null>(null)
 
-  const eventClick: CalendarOptions['eventClick'] = async (info) => {
+  async function handleEventClick(info: Parameters<NonNullable<CalendarOptions['eventClick']>>[0]) {
     const loader = loading.show()
     try {
       selectedOrder.value = await queryClient.fetchQuery(Api.OrderOrder.retrieve.options({path: {id: info.event.id}}))
@@ -102,6 +102,8 @@ export function useSchedule() {
       loader.hide()
     }
   }
+
+  const eventClick: CalendarOptions['eventClick'] = (info) => { void handleEventClick(info) }
 
   // The calendar -----------------------------------------------------------
 

@@ -391,7 +391,7 @@ const form = useResourceForm({
   contract: infoWrite,
   // A save stays on the screen, read-only again, where the invalidation
   // refetches the record behind the values.
-  afterSave: async () => {
+  afterSave: () => {
     isEditing.value = false
   },
   copy: {

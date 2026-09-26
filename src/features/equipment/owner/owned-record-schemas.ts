@@ -55,7 +55,7 @@ export function ownedRecordSchemas<TValues extends OwnedValues>(schemas: {
 
   return {
     /** The generated entries' own issues under the caller's labels, plus the owner rule. */
-    validate(values: TValues, context: WriteContext, owner: OwnerRule): FieldErrors<Field> {
+    validate: (values: TValues, context: WriteContext, owner: OwnerRule): FieldErrors<Field> => {
       const errors: FieldErrors<Field> = fieldErrors(schemaFor(context, owner.kind), values, {}, schemas.labels)
 
       if (context.isCreate && owner.responsible && values[owner.kind] == null) {
@@ -75,7 +75,7 @@ export function ownedRecordSchemas<TValues extends OwnedValues>(schemas: {
      * which declares both owner keys - the form round-trips the record rather
      * than diffing it, as the legacy screens did.
      */
-    parse(values: TValues, context: WriteContext, kind: OwnerKind): unknown {
+    parse: (values: TValues, context: WriteContext, kind: OwnerKind): unknown => {
       return v.parse(schemaFor(context, kind), values)
     },
   }

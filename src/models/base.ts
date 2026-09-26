@@ -296,12 +296,10 @@ class BaseModel {
     // that each key is only added once to the listArgs.
     const sanitizedArgs: Record<string, unknown> = {};
 
-    for (const argIndex in this.listArgs) {
+    for (const listArg of this.listArgs) {
       // HVG20250319:
       // listArgs can be [ 'param1=value1', 'param2=value2' ], but it can also contain
       // [ 'param1=value1&param2=value2', 'param3=value3' ]
-      const listArg = this.listArgs[ argIndex ];
-
       const assignments = listArg.indexOf('&') > 0
         ? listArg.split('&' )
         : [ listArg ];
@@ -333,7 +331,8 @@ class BaseModel {
     // Start building up the listArgs from the sanitized list of arguments.
     const listArgs: string[] = []
     for (const arg in sanitizedArgs) {
-      listArgs.push( `${arg}=${sanitizedArgs[arg]}` );
+      const value = sanitizedArgs[arg];
+      listArgs.push(`${arg}=${typeof value === 'string' ? value : JSON.stringify(value)}`);
     }
 
     const url = `${this.getListUrl()}?${listArgs.join('&')}`

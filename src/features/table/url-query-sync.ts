@@ -111,7 +111,7 @@ export function useUrlQuerySync(
       if (RESERVED.has(key) || value === '' || value == null) continue
       // An array wire value rides the escaped join, mirroring `asString`:
       // the read side restores the same text, commas inside values intact.
-      desired[key] = Array.isArray(value) ? joinArrayItems(value.map(String)) : String(value)
+      desired[key] = Array.isArray(value) ? joinArrayItems(value.map(String)) : (typeof value === 'string' ? value : JSON.stringify(value) ?? '')
     }
 
     for (const key of Object.keys(params)) {

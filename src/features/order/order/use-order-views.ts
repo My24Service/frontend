@@ -109,7 +109,7 @@ export function useOrderViews(options: {
 
     for (const filter of options.columnFilters.value) {
       if (filter.id === USER_FILTER) continue
-      if (filter.value != null && filter.value !== '') target[filter.id] = String(filter.value)
+      if (typeof filter.value === 'string' ? filter.value !== '' : typeof filter.value === 'number' || typeof filter.value === 'boolean') target[filter.id] = String(filter.value)
     }
 
     delete target.user_filter
@@ -137,13 +137,13 @@ export function useOrderViews(options: {
 
     const query = targetQuery(next)
     if (view.id === 'unaccepted') {
-      router.push({name: 'orders-not-accepted', query})
+      void router.push({name: 'orders-not-accepted', query})
       return
     }
     // The literal names, not a computed one: the router is typed per route,
     // and a widened RouteName cannot satisfy any single one of them.
-    if (options.mobile.value) router.push({name: 'mobile-orders', query})
-    else router.push({name: 'order-list', query})
+    if (options.mobile.value) void router.push({name: 'mobile-orders', query})
+    else void router.push({name: 'order-list', query})
   }
 
   return {views: computed(() => state.value.views), active: computed(() => state.value.active), select}

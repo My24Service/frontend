@@ -33,7 +33,7 @@ export function useDispatchSelection() {
 
   function assign() {
     // `/mobile/dispatch/:assignModeProp?` — the dispatch screen JSON.parses the segment.
-    router.push({name: 'mobile-dispatch', params: {assignModeProp: 'true'}})
+    void router.push({name: 'mobile-dispatch', params: {assignModeProp: 'true'}})
   }
 
   return {selected, select, remove, assign}

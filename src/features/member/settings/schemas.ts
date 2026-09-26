@@ -13,7 +13,7 @@ import {
  * of the generated `MemberSettings`, grouped. The two lists ride the form
  * as comma-separated text; the integers as the text a number input holds.
  */
-export type SettingKey = keyof Api.MemberSettings & string
+export type SettingKey = Extract<keyof Api.MemberSettings, string>
 
 export const LIST_KEYS = ['countries', 'order_types'] as const satisfies readonly SettingKey[]
 export const TEXT_KEYS = ['date_format', 'default_currency'] as const satisfies readonly SettingKey[]

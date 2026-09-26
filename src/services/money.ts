@@ -21,11 +21,11 @@ function toDinero(priceDecimal: number | string | null | undefined, currency: st
     amount = parseInt(amount.toFixed(0))
     if (isNaN(amount)) {
       console.error('toDinero - invalid input for amount', priceDecimal)
-      throw `toDinero - invalid input for amount: ${priceDecimal}`
+      throw new Error(`toDinero - invalid input for amount: ${priceDecimal}`)
     }
     return Dinero({ amount, currency })
   } else {
-    throw `${currency} not supported`
+    throw new Error(`${currency} not supported`)
   }
 }
 

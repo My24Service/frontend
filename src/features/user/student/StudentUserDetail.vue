@@ -112,7 +112,7 @@ const address = computed(() =>
 )
 
 function goBack() {
-  router.push({name: 'users-studentusers'})
+  void router.push({name: 'users-studentusers'})
 }
 </script>
 

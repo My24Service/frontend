@@ -226,6 +226,6 @@ function showInvoiceDialog() {
   viewer.value?.show()
 }
 function sendInvoice() {
-  if (invoice.value) router.push({ name: 'invoice-send', query: { invoiceId: invoice.value.id } })
+  if (invoice.value) void router.push({ name: 'invoice-send', query: { invoiceId: invoice.value.id } })
 }
 </script>

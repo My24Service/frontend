@@ -96,7 +96,7 @@ export function useDetailOrders({kind, pk, enabled = true}: {
   })
 
   function renderStats() {
-    bundle.refetch()
+    void bundle.refetch()
   }
 
   /** The orders block's own search: it resets to page one, as it always has. */

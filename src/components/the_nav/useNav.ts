@@ -11,9 +11,9 @@ import { memberMemberRequestedCountRetrieve } from '@/api/sdk.gen'
 // parts[parts.length] instead of parts[parts.length - 1]).
 export interface UseNav {
   route: RouteLocationNormalizedLoaded
-  isTopActive(section: string): boolean
-  isSubActive(names: string[]): boolean
-  isEquipmentTypeActive(type: string, groups?: string[]): boolean
+  isTopActive: (this: void, section: string) => boolean
+  isSubActive: (this: void, names: string[]) => boolean
+  isEquipmentTypeActive: (this: void, type: string, groups?: string[]) => boolean
 }
 
 export function useNav(): UseNav {
@@ -46,7 +46,7 @@ export function useNav(): UseNav {
 
 export interface UseRequestedCount {
   requestedCount: Ref<number>
-  loadRequestedCount(): Promise<void>
+  loadRequestedCount: (this: void) => Promise<void>
 }
 
 // The requested-members badge call, fetched once per nav mount when the user

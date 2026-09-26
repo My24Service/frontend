@@ -175,7 +175,7 @@ const {
     ...staging.stagedErrors(),
   }),
   parse: (values) => parseContractWithEquipmentBody(values, staging.equipmentBody()),
-  onSaved: async (result) => {
+  onSaved: (result) => {
     // The response is the contract detail plus the stored equipment rows, ids
     // and all — which is what makes a second save address the rows the first
     // one wrote instead of creating them again.
@@ -248,7 +248,7 @@ function selectCustomer(option: {id: number; name: string; address?: string; cit
     country_code: option.country_code,
     tel: option.tel,
   }
-  nextTick(() => contractName.value?.focus())
+  void nextTick(() => contractName.value?.focus())
 }
 
 /** The sum of the staged rows, which the equipment set owns. */

@@ -15,7 +15,7 @@ interface InterceptorError {
 }
 
 async function errorHandler(error: InterceptorError) {
-  console.error(`got error: ${error}`)
+  console.error('got error:', error)
   const headers = error.config?.headers
   const sentAuth = typeof headers?.get === 'function'
     ? headers.get('Authorization')
@@ -29,7 +29,7 @@ async function errorHandler(error: InterceptorError) {
   } else {
     console.log(error)
   }
-  return Promise.reject(error)
+  return Promise.reject(error instanceof Error ? error : new Error('Request failed', { cause: error }))
 }
 
 export default (client: AxiosInstance) => {

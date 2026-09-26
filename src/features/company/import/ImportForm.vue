@@ -137,7 +137,7 @@ const form = useResourceForm({
   contract: importWrite,
   // The write's id rides out through `onSaved`: a create only knows it
   // afterwards, and the ride after the save needs it for the preview.
-  onSaved: async (result, context) => {
+  onSaved: (result, context) => {
     if (context.isCreate) savedId.value = (result as { id: number }).id
   },
   afterSave: async () => {

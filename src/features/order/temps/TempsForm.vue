@@ -217,7 +217,7 @@ const {
       await accept(context.id)
     }
   },
-  afterSave: async () => {
+  afterSave: () => {
     router.go(-1)
   },
   copy: {

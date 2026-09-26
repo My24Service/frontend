@@ -116,7 +116,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
 
     rowEdit.value.equipment = option.id
     rowEdit.value.equipment_name = option.name
-    nextTick(() => timesPerYear.value?.focus())
+    void nextTick(() => timesPerYear.value?.focus())
   }
 
   function addEquipment() {
@@ -201,7 +201,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
       rowEdit.value.equipment = response.id
       rowEdit.value.equipment_name = response.name
       newEquipmentModal.value?.hide()
-      nextTick(() => timesPerYear.value?.focus())
+      void nextTick(() => timesPerYear.value?.focus())
     } catch {
       errorToast(create, $trans('Error adding equipment'))
     }

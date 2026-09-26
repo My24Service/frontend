@@ -172,7 +172,7 @@ export const percentPieOptions = {
   maintainAspectRatio: false,
   plugins: {
     datalabels: {
-      formatter: (value: unknown) => `${value}%`,
+      formatter: (value: unknown) => `${typeof value === 'string' || typeof value === 'number' ? value : JSON.stringify(value)}%`,
       color: '#fff',
     },
   },

@@ -65,7 +65,10 @@ type CustomerRow = ListRow<Api.CustomerCustomer.ListResponse>
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 function branchText(value: unknown): string {
-  return typeof value === 'string' ? value : value == null ? '' : String(value)
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  if (value == null) return ''
+  return JSON.stringify(value)
 }
 
 const columnHelper = createAppColumnHelper<CustomerRow>()
@@ -199,7 +202,7 @@ function downloadList() {
   globalFilter.value = searchDraft.value
 
   const q = globalFilter.value
-  download.fromApi(
+  void download.fromApi(
     () => customerExportRetrieve({query: q ? {q} : {}, throwOnError: true}),
     'customers.xlsx', XLSX_MIME)
 }

@@ -60,7 +60,7 @@ const submitClicked = ref(false)
 const isSubmitting = ref(false)
 
 function forgotPassword() {
-  router.push({ name: 'reset-password' })
+  void router.push({ name: 'reset-password' })
 }
 
 const usernameFilled = computed(() => credentials.value.username.trim() !== '')

@@ -155,7 +155,7 @@ export function useServerTable<TData extends RowData>(config: ServerTableOptions
   if (loadError) useQueryErrorToast(error, loadError)
 
   function refresh() {
-    listQuery.refetch()
+    void listQuery.refetch()
   }
 
   watch(count, (c) => {

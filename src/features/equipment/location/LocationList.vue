@@ -89,7 +89,7 @@ function downloadList() {
   globalFilter.value = searchDraft.value
 
   const q = globalFilter.value
-  download.fromApi(
+  void download.fromApi(
     () => equipmentLocationExportQrRetrieve({query: q ? {q} : {}, throwOnError: true}),
     'locations.xlsx', XLSX_MIME)
 }

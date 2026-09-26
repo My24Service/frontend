@@ -480,7 +480,7 @@ async function openActionsModal(userId: number, order_pk: number, assignedorder:
     selectedOrder.value = await queryClient.fetchQuery(
       Api.OrderOrder.retrieve.options({path: {id: String(order_pk)}}))
     showOverlay.value = false
-    await actionsModal.value?.show()
+    actionsModal.value?.show()
   } catch (error) {
     console.log('error fetching order', error)
     errorToast(toast, $trans('Error fetching order'))
@@ -491,13 +491,13 @@ async function openActionsModal(userId: number, order_pk: number, assignedorder:
 async function viewOrder() {
   await actionsModal.value?.hide()
   if (!selectedOrder.value?.id) return
-  router.push({name: 'order-view', params: {pk: selectedOrder.value.id}})
+  void router.push({name: 'order-view', params: {pk: selectedOrder.value.id}})
 }
 
 async function editOrder() {
   await actionsModal.value?.hide()
   if (!selectedOrder.value?.id) return
-  router.push({name: 'order-edit', params: {pk: selectedOrder.value.id}})
+  void router.push({name: 'order-edit', params: {pk: selectedOrder.value.id}})
 }
 
 // change date ----------------------------------------------------------------
@@ -531,13 +531,13 @@ function resetAssignedOrderDates() {
 
 function changeDate() {
   assignedOrder.value = newDatesModel()
-  actionsModal.value?.hide()
+  void actionsModal.value?.hide()
   changeDateModal.value?.show()
 }
 
 function changeDateOk(event: {preventDefault: () => void}) {
   event.preventDefault()
-  changeDateSubmit()
+  void changeDateSubmit()
 }
 
 async function changeDateSubmit() {
@@ -578,7 +578,7 @@ function newSplitModel(): AssignedOrderDates {
 
 function splitOrder() {
   assignedOrder.value = newSplitModel()
-  actionsModal.value?.hide()
+  void actionsModal.value?.hide()
   splitOrderModal.value?.show()
 }
 
@@ -657,7 +657,7 @@ function showSearchModal() {
  * selection is left alone when the modal closes without one, which is what the
  * legacy board did.
  */
-async function searchAndAssignDone(newAssignMode: boolean) {
+function searchAndAssignDone(newAssignMode: boolean) {
   loadDone.value = false
   assignMode.value = newAssignMode
 

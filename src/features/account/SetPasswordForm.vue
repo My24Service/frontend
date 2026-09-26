@@ -91,7 +91,7 @@ async function submitForm() {
   try {
     await resetMutation.mutateAsync({ body: parseSetPassword(link, values.value.password1) })
     infoToast(create, $trans('Password reset'), $trans('Reset password successful'))
-    router.push({ path: '/' })
+    void router.push({ path: '/' })
   } catch {
     errorToast(create, $trans('Something went wrong, please try again'))
   }

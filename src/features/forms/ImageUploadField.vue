@@ -65,7 +65,7 @@ function onSelected(event: Event) {
 
   if (props.allowedExtensions && !props.allowedExtensions.includes(extensionOf(file.name))) return
 
-  stage(file).then((dataUrl) => {
+  void stage(file).then((dataUrl) => {
     emit('selected', dataUrl)
   })
 }

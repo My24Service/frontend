@@ -41,7 +41,7 @@ export function listQueryFrom(query: ServerPagedListQuery): OrderListQuery {
   const filters: Record<string, string> = {}
   for (const name of COLUMN_FILTERS) {
     const value = query[name]
-    if (value != null && value !== '') filters[name] = String(value)
+    if (typeof value === 'string' ? value !== '' : typeof value === 'number' || typeof value === 'boolean') filters[name] = String(value)
   }
   return {...baseListParams(query), ...filters}
 }

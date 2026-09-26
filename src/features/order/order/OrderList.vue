@@ -119,7 +119,7 @@ const unaccepted = useUnacceptedCount()
 
 function reload() {
   refresh()
-  unaccepted.refetch()
+  void unaccepted.refetch()
 }
 
 const {views, active: activeView, select: selectView} = useOrderViews({mode, mobile: isMobile, columnFilters})

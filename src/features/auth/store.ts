@@ -82,7 +82,7 @@ export const useAuthStore = defineStore('auth', {
     async login(username: string, password: string): Promise<void> {
       const { data } = await jwtTokenCreate({
         body: { username, password, app: 'web' },
-        responseValidator: async (response) => v.parse(schemas.vJwtTokenCreateResponse, response),
+        responseValidator: (response) => Promise.resolve(v.parse(schemas.vJwtTokenCreateResponse, response)),
         throwOnError: true,
       })
 
@@ -101,7 +101,7 @@ export const useAuthStore = defineStore('auth', {
       }
       const { data } = await jwtTokenRefreshCreate({
         body: { token },
-        responseValidator: async (response) => v.parse(schemas.vJwtTokenRefreshCreateResponse, response),
+        responseValidator: (response) => Promise.resolve(v.parse(schemas.vJwtTokenRefreshCreateResponse, response)),
         throwOnError: true,
       })
       // A logout (or another refresh) during the round-trip wins over this

@@ -182,7 +182,7 @@ function downloadList() {
   // type's rows, so a spreadsheet covering both answers a different question
   // than the one on screen. The legacy export forwarded the search term alone.
   const q = globalFilter.value
-  download.fromApi(
+  void download.fromApi(
     () => equipmentEquipmentExportQrRetrieve({query: {...(q ? {q} : {}), type: props.type}, throwOnError: true}),
     'equipment.xlsx', XLSX_MIME)
 }

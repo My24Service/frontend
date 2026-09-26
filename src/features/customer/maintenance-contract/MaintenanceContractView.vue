@@ -226,7 +226,7 @@ const maintenanceOrders = computed(() => ordersQuery.data.value?.results ?? [])
 const ordersCount = computed(() => ordersQuery.data.value?.count ?? 0)
 
 function refreshOrders() {
-  ordersQuery.refetch()
+  void ordersQuery.refetch()
 }
 
 // The contract, its equipment and its orders all fail into one message, which
@@ -290,7 +290,7 @@ function createOrder() {
   }
   mainStore.setMaintenanceEquipment(data)
 
-  router.push({name: 'order-add-maintenance'})
+  void router.push({name: 'order-add-maintenance'})
 }
 
 const equipmentFields = [

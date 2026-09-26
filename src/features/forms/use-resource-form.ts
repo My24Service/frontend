@@ -191,7 +191,7 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
    * success toast, so a failure here reports as a failed save and the form
    * keeps the user on it.
    */
-  onSaved?: (result: unknown, context: WriteContext) => Promise<void>
+  onSaved?: (result: unknown, context: WriteContext) => void | Promise<void>
   copy: ResourceFormCopy
   /**
    * Maps a write failure to the toast body. Defaults to the identity (the
@@ -341,9 +341,7 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
 
   const createMutation = useMutation({
     ...(createOptions ?? {
-      mutationFn: async () => {
-        throw new Error('useResourceForm: this form has no `create` mutation, but was asked to create')
-      },
+      mutationFn: () => Promise.reject(new Error('useResourceForm: this form has no `create` mutation, but was asked to create')),
     }),
     onSuccess: async (result: unknown) => {
       // Read the context before recording the id: this first call's `onSaved`

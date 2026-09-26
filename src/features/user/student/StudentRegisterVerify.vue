@@ -80,7 +80,7 @@ async function sendResetPasswordLink() {
   }
 }
 
-verify()
+void verify()
 </script>
 
 <style scoped>
