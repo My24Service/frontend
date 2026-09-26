@@ -23,8 +23,8 @@
       :show-no-results="true"
       :hide-selected="true"
       :custom-label="labelOf"
-      @search-change="$emit('search', $event)"
-      @select="$emit('select', $event)"
+      @search-change="(term: string) => $emit('search', term)"
+      @select="(option: OwnerOption) => $emit('select', option)"
     >
       <template #noResult>
         {{ $trans('Oops! No elements found. Consider changing the search query.') }}

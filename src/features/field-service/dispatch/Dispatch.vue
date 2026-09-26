@@ -297,8 +297,8 @@ import DispatchWeek from './DispatchWeek.vue'
 import SearchAndAssign from './SearchAndAssign.vue'
 import AssignedOrderDatesForm, { type AssignedOrderDates } from './AssignedOrderDatesForm.vue'
 import type { DispatchBoardAssignedOrder } from './dispatch-window'
-
 import type { AssignOrder } from '@/stores/main'
+
 /**
  * The dispatch week board: the planning screen for the mobile workforce.
  *
@@ -335,8 +335,22 @@ const socket = new MemberNewDataSocket()
 // `newData` that the planning moved.
 const newData = ref(false)
 
-const mode = ref(localStorage.getItem('displayMode') ? JSON.parse(localStorage.getItem('displayMode') as string) : 'wide')
-const showUsersMode = ref(localStorage.getItem('showUsersMode') ? JSON.parse(localStorage.getItem('showUsersMode') as string) : 'active')
+/**
+ * A display choice the board remembers in localStorage, JSON-encoded. A value
+ * that is missing or unreadable reads as the default rather than throwing
+ * the whole board over in setup.
+ */
+function storedChoice(key: string, fallback: string): string {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? 'null')
+    return typeof parsed === 'string' ? parsed : fallback
+  } catch {
+    return fallback
+  }
+}
+
+const mode = ref(storedChoice('displayMode', 'wide'))
+const showUsersMode = ref(storedChoice('showUsersMode', 'active'))
 
 const modeOptions = [
   {item: 'compact', name: $trans('Compact')},

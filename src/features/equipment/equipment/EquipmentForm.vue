@@ -273,7 +273,7 @@
               auto-apply
               arrow-navigation
               :formats="{ input: 'dd/MM/yyyy' }"
-              @update:model-value="applyDate('installation_date', $event)"
+              @update:model-value="(value: Date | null) => applyDate('installation_date', value)"
             />
           </BFormGroup>
 
@@ -291,7 +291,7 @@
               auto-apply
               arrow-navigation
               :formats="{ input: 'dd/MM/yyyy' }"
-              @update:model-value="applyDate('production_date', $event)"
+              @update:model-value="(value: Date | null) => applyDate('production_date', value)"
             />
           </BFormGroup>
 
