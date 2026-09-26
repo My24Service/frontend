@@ -43,12 +43,12 @@ export const FIELD_MESSAGES = {
     // A shape the rule's line would not say.
     dob: () => $trans('Please use yyyy-mm-dd for the date of birth'),
   },
-} satisfies FieldMessages
+} as const satisfies FieldMessages
 
 export const FIELD_LABELS = {
   ...IDENTITY_FIELD_LABELS,
   'student_user.mobile': () => $trans('Mobile'),
-} satisfies FieldLabels
+} as const satisfies FieldLabels
 
 /**
  * Only the inputs the schema cannot take as typed need shaping. `dob` is

@@ -58,7 +58,7 @@ export const REGISTRATION_FIELD_MESSAGES = {
   student_user: {
     info: () => $trans('Please tell us something about yourself'),
   },
-} satisfies FieldMessages<'email' | 'first_name' | 'last_name' | 'student_user'>
+} as const satisfies FieldMessages<'email' | 'first_name' | 'last_name' | 'student_user'>
 
 /**
  * The nine labels the two nested providers read: the outer trio and the six
@@ -74,7 +74,7 @@ export const FIELD_LABELS = {
   postal: () => $trans('Postal'),
   city: () => $trans('City'),
   info: () => $trans('Tell something about yourself'),
-} satisfies FieldLabels<StudentRegistrationLabel>
+} as const satisfies FieldLabels<StudentRegistrationLabel>
 
 /**
  * The values as the wire takes them: the mobile goes out normalized (the

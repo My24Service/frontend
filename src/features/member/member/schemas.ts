@@ -43,7 +43,7 @@ export function memberFromRecord(record: Api.Member): Api.MemberRequest {
   }
 }
 
-export type MemberFieldErrors = FieldErrors<keyof Api.MemberRequest & string>
+export type MemberFieldErrors = FieldErrors<keyof Api.MemberRequest>
 
 /** The one rule the schema cannot say: the API answered that the code is taken. */
 export const COMPANYCODE_TAKEN_MESSAGE = () => $trans('Company code is already in use')
@@ -67,7 +67,7 @@ export const FIELD_LABELS = {
   contacts: () => $trans('Contacts'),
   activities: () => $trans('Activities'),
   info: () => $trans('Info'),
-} satisfies FieldLabels<keyof Api.MemberRequest & string>
+} as const satisfies FieldLabels<keyof Api.MemberRequest>
 
 export const COMPANYCODE_DEBOUNCE_MS = 500
 

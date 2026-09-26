@@ -46,7 +46,7 @@ export function locationFromRecord(record: Api.Location): LocationFormValues {
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof LocationFormValues>
+} as const satisfies FieldLabels<keyof LocationFormValues>
 
 /**
  * Validation and the wire body, shared with the other owned records: the

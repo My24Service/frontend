@@ -82,7 +82,7 @@ export const IDENTITY_FIELD_MESSAGES = {
   username: usernameMessage,
   password1: USER_MESSAGES.password_required,
   password2: USER_MESSAGES.passwords_mismatch,
-} satisfies FieldMessages<UserIdentityField>
+} as const satisfies FieldMessages<UserIdentityField>
 
 /**
  * What the identity block calls its fields, written once because the panel draws
@@ -97,7 +97,7 @@ export const IDENTITY_FIELD_LABELS = {
   first_name: () => $trans('First name'),
   last_name: () => $trans('Last name'),
   email: () => $trans('Email'),
-} satisfies FieldLabels<UserIdentityField>
+} as const satisfies FieldLabels<UserIdentityField>
 
 /** The errors a user form can show: the identity block's plus its own leaves. */
 export type UserFieldErrors<K extends string = never> = FieldErrors<UserIdentityField | K>
@@ -151,10 +151,10 @@ export function userFormContract<
   payloadOf?: (values: V) => unknown
 }) {
   return {
-    validate(values: V, options: { isCreate: boolean }): FieldErrors<K> & FieldErrors<'password1' | 'password2'> {
+    validate(this: void, values: V, options: { isCreate: boolean }): FieldErrors<K> & FieldErrors<'password1' | 'password2'> {
       return userFormErrors<K>(schema, payloadOf(values), values, messages, labels, options)
     },
-    parse(values: V, options: { isCreate: boolean; password?: string }): v.InferOutput<S> & { password?: string } {
+    parse(this: void, values: V, options: { isCreate: boolean; password?: string }): v.InferOutput<S> & { password?: string } {
       return withPassword(v.parse(schema, payloadOf(values)), values, options)
     },
   }

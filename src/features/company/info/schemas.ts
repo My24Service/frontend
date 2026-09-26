@@ -86,7 +86,7 @@ export const FIELD_LABELS = {
   contacts: () => $trans('Contacts'),
   info: () => $trans('Info'),
   activities: () => $trans('Activities'),
-} satisfies FieldLabels<keyof InfoFormValues>
+} as const satisfies FieldLabels<keyof InfoFormValues>
 
 /**
  * The wire-shaped body: the staged logos ride only when files were picked -

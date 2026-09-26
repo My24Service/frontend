@@ -45,7 +45,7 @@ type LoginFieldErrors = FieldErrors<'username' | 'password'>
 const FIELD_LABELS = {
   username: () => $trans('Username'),
   password: () => $trans('Password'),
-} satisfies FieldLabels<'username' | 'password'>
+} as const satisfies FieldLabels<'username' | 'password'>
 
 const $loading = useLoading()
 

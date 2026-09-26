@@ -20,7 +20,7 @@ export const emailFormSchema = v.object({
 })
 
 export type EmailFormValues = v.InferInput<typeof emailFormSchema>
-export type EmailField = keyof EmailFormValues & string
+export type EmailField = keyof EmailFormValues
 
 /**
  * Both fields are `check`s, whose issue says nothing a rule line could read:
@@ -32,14 +32,14 @@ export const FIELD_MESSAGES = {
   subject: (issue) => issue?.type === 'max_length'
     ? ruleMessage(issue, FIELD_LABELS.subject())
     : requiredMessage(FIELD_LABELS.subject()),
-} satisfies FieldMessages<EmailField>
+} as const satisfies FieldMessages<EmailField>
 
 export const FIELD_LABELS = {
   recipients: () => $trans('Email recipients'),
   subject: () => $trans('Subject'),
   body: () => $trans('Body'),
-} satisfies FieldLabels<EmailField>
+} as const satisfies FieldLabels<EmailField>
 
 export function validateEmail(values: EmailFormValues) {
-  return fieldErrors<EmailField>(emailFormSchema, values, FIELD_MESSAGES, FIELD_LABELS)
+  return fieldErrors(emailFormSchema, values, FIELD_MESSAGES, FIELD_LABELS)
 }

@@ -34,7 +34,7 @@ export function pictureFromRecord(record: Api.Picture): PictureFormValues {
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof PictureFormValues>
+} as const satisfies FieldLabels<keyof PictureFormValues>
 
 /**
  * The wire-shaped body: the staged upload rides only when a file was picked.

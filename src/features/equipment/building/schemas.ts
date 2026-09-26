@@ -37,7 +37,7 @@ export function buildingFromRecord(record: Api.Building): BuildingFormValues {
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof BuildingFormValues>
+} as const satisfies FieldLabels<keyof BuildingFormValues>
 
 /**
  * Validation and the wire body, shared with the other owned records: the

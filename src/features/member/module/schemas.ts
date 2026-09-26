@@ -16,11 +16,11 @@ export function emptyModule(): Api.ModuleRequest {
   return formDefaults(Api.MemberModule.create.body)
 }
 
-export type ModuleFieldErrors = FieldErrors<keyof Api.ModuleRequest & string>
+export type ModuleFieldErrors = FieldErrors<keyof Api.ModuleRequest>
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof Api.ModuleRequest & string>
+} as const satisfies FieldLabels<keyof Api.ModuleRequest>
 
 /** The line under an untouched field: the same required line the validation shows. */
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)

@@ -92,7 +92,7 @@ labels:
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   module: () => $trans('Module'),
-} satisfies FieldLabels<keyof ModulePartFormValues & string>
+} as const satisfies FieldLabels<keyof ModulePartFormValues>
 
 export function validateModulePart(values: ModulePartFormValues): ModulePartFieldErrors {
   return fieldErrors(vMemberModulePartCreateBody, values, {}, FIELD_LABELS)
@@ -110,7 +110,7 @@ from the same templates where one fits — `selectMessage(FIELD_LABELS.branch())
 export const FIELD_MESSAGES = {
   start_time: () => $trans('Please enter a valid start time HH:mm'),
   branch: () => selectMessage(FIELD_LABELS.branch()),
-} satisfies FieldMessages<keyof OrderFieldErrors & string>
+} as const satisfies FieldMessages<keyof OrderFieldErrors>
 ```
 
 A template that shows a hint under an untouched input reads it from
@@ -129,7 +129,7 @@ A field's label is copy like any other, and it names the field in every rule lin
 export const FIELD_LABELS = {
   address: () => $trans('Address'),
   vat_number: () => $trans('VAT number'),
-} satisfies FieldLabels<keyof MemberRequest & string>
+} as const satisfies FieldLabels<keyof MemberRequest>
 ```
 
 The keys are the form's own field names, so a label for a field that does not

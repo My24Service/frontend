@@ -24,7 +24,7 @@ export type ModulePartFieldErrors = FieldErrors<keyof ModulePartFormValues>
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   module: () => $trans('Module'),
-} satisfies FieldLabels<keyof ModulePartFormValues>
+} as const satisfies FieldLabels<keyof ModulePartFormValues>
 
 /** The line under an untouched field: the same required line the validation shows. */
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)

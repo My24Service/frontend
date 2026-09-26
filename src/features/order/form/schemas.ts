@@ -282,7 +282,7 @@ export const FIELD_LABELS = {
   end_date: () => $trans('End date'),
   start_time: () => $trans('Start time'),
   end_time: () => $trans('End time'),
-} satisfies FieldLabels<Exclude<keyof OrderFieldErrors, 'orderlines'>>
+} as const satisfies FieldLabels<Exclude<keyof OrderFieldErrors, 'orderlines'>>
 
 /**
  * The pickers are chosen rather than typed, which the schema cannot tell
@@ -295,7 +295,7 @@ export const FIELD_MESSAGES = {
   order_type: () => selectMessage(FIELD_LABELS.order_type()),
   start_time: () => $trans('Please enter a valid start time HH:mm'),
   end_time: () => $trans('Please enter a valid end time HH:mm'),
-} satisfies FieldMessages<Exclude<keyof OrderFieldErrors, 'orderlines'>>
+} as const satisfies FieldMessages<Exclude<keyof OrderFieldErrors, 'orderlines'>>
 
 /**
  * The address fields the legacy forms required beyond what the serializers
@@ -328,7 +328,7 @@ export function validateOrderForm(
   context: {isCreate: boolean},
 ): OrderFieldErrors {
   const schema = context.isCreate ? orderCreateSchemaFor(variant) : orderUpdateSchemaFor(variant)
-  const errors = fieldErrors<keyof OrderFieldErrors>(schema, wireValues(values, context), FIELD_MESSAGES, FIELD_LABELS)
+  const errors: OrderFieldErrors = fieldErrors(schema, wireValues(values, context), FIELD_MESSAGES, FIELD_LABELS)
 
   if (variant.role !== 'customer') {
     for (const field of ADDRESS_REQUIRED) {

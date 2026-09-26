@@ -101,7 +101,7 @@ export const FIELD_LABELS = {
   end_date: () => $trans('End date'),
   start_time: () => $trans('Start time'),
   end_time: () => $trans('End time'),
-} satisfies FieldLabels<keyof LeaveFormValues>
+} as const satisfies FieldLabels<keyof LeaveFormValues>
 
 /**
  * The two lines a rule cannot read off the issue: a time that must read HH:mm
@@ -113,7 +113,7 @@ export const FIELD_MESSAGES = {
   leave_type: () => selectMessage(FIELD_LABELS.leave_type()),
   start_time: () => $trans('Please enter a valid start time HH:mm'),
   end_time: () => $trans('Please enter a valid end time HH:mm'),
-} satisfies FieldMessages<keyof LeaveFieldErrors>
+} as const satisfies FieldMessages<keyof LeaveFieldErrors>
 
 /**
  * The create body, with the four fields the endpoint cannot do without made
@@ -189,7 +189,7 @@ function shaped(values: LeaveFormValues): Record<string, unknown> {
  * that is not whole is refused here instead of silently riding as "no time".
  */
 export function validateLeave(values: LeaveFormValues): LeaveFieldErrors {
-  const errors = fieldErrors<keyof LeaveFormValues & string>(
+  const errors: LeaveFieldErrors = fieldErrors(
     vLeaveBody, shaped(values), FIELD_MESSAGES, FIELD_LABELS,
   )
 
@@ -236,7 +236,7 @@ export function leaveProbeBody(values: LeaveFormValues) {
 // ---------------------------------------------------------------------------
 // Leave types
 
-export type LeaveTypeFieldErrors = FieldErrors<keyof Api.LeaveTypeRequest & string>
+export type LeaveTypeFieldErrors = FieldErrors<keyof Api.LeaveTypeRequest>
 
 export function emptyLeaveType(): Api.LeaveTypeRequest {
   return {name: '', counts_as_leave: true}
@@ -249,7 +249,7 @@ export function leaveTypeFromRecord(record: Api.LeaveType): Api.LeaveTypeRequest
 export const LEAVE_TYPE_LABELS = {
   name: () => $trans('Name'),
   counts_as_leave: () => $trans('Counts as leave'),
-} satisfies FieldLabels<keyof Api.LeaveTypeRequest & string>
+} as const satisfies FieldLabels<keyof Api.LeaveTypeRequest>
 
 /**
  * The modal's `Name` sits beside a "Counts as leave" switch, where the derived
@@ -262,7 +262,7 @@ export const LEAVE_TYPE_MESSAGES = {
     () => $trans('Please enter a leave type name'),
     () => $trans('Please use at most 150 characters'),
   ),
-} satisfies FieldMessages<keyof LeaveTypeFieldErrors>
+} as const satisfies FieldMessages<keyof LeaveTypeFieldErrors>
 
 /** `name` already carries `minLength(1)` in the generated component. */
 export function validateLeaveType(values: Api.LeaveTypeRequest): LeaveTypeFieldErrors {

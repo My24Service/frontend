@@ -25,7 +25,9 @@ export type FieldValue = string | number | boolean | Date | unknown[] | null | u
  * field: the page's catalogue is built by scanning the source for those literals,
  * so a label conjured at runtime would read English in a Dutch UI.
  */
-export type FieldLabels<K extends string = string> = Partial<Record<K, () => string>>
+export type FieldLabels<K extends PropertyKey = string> = {
+  [P in Extract<K, string>]?: () => string
+}
 
 export interface ValidatedFormContext {
   /**

@@ -2,7 +2,7 @@
   <slot />
 </template>
 
-<script setup lang="ts" generic="TValues extends object">
+<script setup lang="ts" generic="TValues extends Record<string, unknown>">
 import {
   provideValidatedForm,
   type FieldValue,
@@ -40,7 +40,7 @@ const props = defineProps<{
   errors?: Partial<Record<string, string | undefined>>
   /** The form's FIELD_MESSAGES: the copy shown under each field. */
   messages?: FieldMessages<keyof TValues>
-  /** The form's FIELD_LABELS: what each field is called. */
+    /** The form's FIELD_LABELS: what each field is called. */
   labels?: FieldLabels<keyof TValues>
   /** True once the form has been submitted at least once. */
   submitted?: boolean
@@ -63,16 +63,16 @@ provideValidatedForm({
   },
   errorOf: (field) => props.errors?.[props.path ? `${props.path}.${field}` : field],
   messageOf: (field) => {
-    const message = props.messages?.[field as keyof TValues & string]
+    const message = props.messages?.[field]
     if (typeof message === 'function') return message()
     // With no copy of its own, a field's placeholder is its required line.
-    const label = props.labels?.[field as keyof TValues & string]
+    const label = props.labels?.[field]
     return label ? requiredMessage(label()) : undefined
   },
-  labelOf: (field) => props.labels?.[field as keyof TValues & string]?.() ?? field,
+  labelOf: (field) => props.labels?.[field]?.() ?? field,
   hasField: (field) => Object.prototype.hasOwnProperty.call(values.value, field),
   get submitted() {
     return props.submitted ?? false
   },
-} satisfies ValidatedFormContext)
+} as const satisfies ValidatedFormContext)
 </script>

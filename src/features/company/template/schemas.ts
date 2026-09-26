@@ -41,12 +41,12 @@ export function templateFromRecord(record: Api.Template): TemplateFormValues {
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   template_type: () => $trans('Type'),
-} satisfies FieldLabels<keyof TemplateFormValues>
+} as const satisfies FieldLabels<keyof TemplateFormValues>
 
 /** The file is chosen, not typed, and the values drop it when none was picked. */
 export const FIELD_MESSAGES = {
   file: () => selectMessage($trans('File')),
-} satisfies FieldMessages<keyof TemplateFormValues>
+} as const satisfies FieldMessages<keyof TemplateFormValues>
 
 /**
  * The wire-shaped body: blank text rides as absent keys, not nulls or empty

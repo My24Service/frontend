@@ -89,7 +89,7 @@ const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions and the add link. */
   from_settings?: boolean
   /** The route name stem this mount answers to (`equipment-equipment`, `settings-equipment`, ...). */
-  route_prefix: string
+  route_prefix: 'customers-equipment' | 'equipment-equipment' | 'settings-equipment'
   /** The equipment type the address asked for; the router's path carries it. */
   type?: Api.EquipmentTypeEnum
 }>(), {

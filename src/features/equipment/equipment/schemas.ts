@@ -96,7 +96,7 @@ export function wireDate(value: Date | null | undefined): string | null {
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof EquipmentFormValues>
+} as const satisfies FieldLabels<keyof EquipmentFormValues>
 
 /**
  * Validation and the wire body, shared with the other owned records: the

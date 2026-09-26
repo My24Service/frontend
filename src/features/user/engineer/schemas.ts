@@ -46,7 +46,7 @@ export const FIELD_LABELS = {
   ...IDENTITY_FIELD_LABELS,
   'engineer.mobile': () => $trans('Mobile phone'),
   'engineer.preferred_location': () => $trans('Preferred location'),
-} satisfies FieldLabels
+} as const satisfies FieldLabels
 
 /**
  * Only the inputs the schema cannot take as typed need shaping. `country_code`

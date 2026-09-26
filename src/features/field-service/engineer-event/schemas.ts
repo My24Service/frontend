@@ -43,7 +43,7 @@ export function engineerEventTypeFromRecord(record: Api.EngineerEventType): Engi
 
 export const FIELD_LABELS = {
   event_type: () => $trans('Event type'),
-} satisfies FieldLabels<keyof EngineerEventTypeFormValues>
+} as const satisfies FieldLabels<keyof EngineerEventTypeFormValues>
 
 /**
  * The legacy screen's own line for the one required field. The derived
@@ -52,7 +52,7 @@ export const FIELD_LABELS = {
  */
 export const FIELD_MESSAGES = {
   event_type: () => $trans('Please enter a type'),
-} satisfies FieldMessages<keyof EngineerEventTypeFormValues>
+} as const satisfies FieldMessages<keyof EngineerEventTypeFormValues>
 
 /**
  * The wire body.

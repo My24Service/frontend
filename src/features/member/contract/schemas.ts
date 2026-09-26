@@ -16,12 +16,12 @@ export function emptyContract(): Api.ContractCreateRequest {
   return formDefaults(Api.MemberContract.create.body, {max_users: undefined})
 }
 
-export type ContractFieldErrors = FieldErrors<keyof Api.ContractCreateRequest & string>
+export type ContractFieldErrors = FieldErrors<keyof Api.ContractCreateRequest>
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   module_paths: () => $trans('Module parts'),
-} satisfies FieldLabels<keyof Api.ContractCreateRequest & string>
+} as const satisfies FieldLabels<keyof Api.ContractCreateRequest>
 
 /** The line under an untouched field: the same required line the validation shows. */
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)

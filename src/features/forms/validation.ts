@@ -9,11 +9,19 @@ export type FieldMessageTree = {
   [segment: string]: FieldMessage | FieldMessageTree | undefined
 }
 
-export type FieldMessages<K extends string = string> = Partial<
-  Record<K, FieldMessage | FieldMessageTree>
->
+export type FieldMessages<K extends PropertyKey = string> = {
+  [P in Extract<K, string>]?: FieldMessage | FieldMessageTree
+}
 
-export type FieldErrors<K extends string> = Partial<Record<K, string>>
+export type FieldErrors<K extends PropertyKey = string> =
+  TF.Simplify<Partial<Record<Extract<K, string>, string>>>
+
+/**
+ * The fields a schema's errors can be keyed by. A bare `GenericSchema` names
+ * none, so its errors fall back to any string key.
+ */
+export type SchemaField<S extends v.GenericSchema> =
+  unknown extends v.InferInput<S> ? string : TF.Paths<NonNullable<v.InferInput<S>>>
 
 /**
  * A settings-style key made readable: `order_entry_status` becomes
@@ -84,10 +92,11 @@ export function selectMessage(label: string): string {
  * shows under an untouched input before validation has run. Built from the
  * labels so the placeholder and the error read the same.
  */
-export function requiredMessages<K extends string>(labels: FieldLabels<K>): Record<K, () => string> {
+export function requiredMessages<L extends FieldLabels, K extends Extract<keyof L, string> = Extract<keyof L, string>>(
+  labels: L,
+): TF.Simplify<Record<K, () => string>> {
   const out = {} as Record<K, () => string>
-  for (const key of Object.keys(labels) as K[]) {
-    const label = labels[key]
+  for (const [key, label] of Object.entries(labels) as [K, (() => string) | undefined][]) {
     if (label) out[key] = () => requiredMessage(label())
   }
   return out
@@ -181,21 +190,21 @@ function labelOf(labels: FieldLabels, path: readonly string[]): string {
   return label ? label() : humanizeKey(last)
 }
 
-export function fieldErrors<K extends string>(
-  schema: v.GenericSchema,
+export function fieldErrors<S extends v.GenericSchema, K extends PropertyKey = SchemaField<S>>(
+  schema: S,
   values: unknown,
   messages: FieldMessages = {},
   labels: FieldLabels = {},
 ): FieldErrors<K> {
   const result = v.safeParse(schema, values)
-  if (result.success) return {}
+  if (result.success) return {} as FieldErrors<K>
 
-  const errors: FieldErrors<K> = {}
+  const errors = {} as FieldErrors<K>
   for (const issue of result.issues) {
     const path = (issue.path ?? []).map((segment) => String(segment.key))
     const leaf = deepestMessage(messages, path)
     // With no message to name the field, the issue's own path is the field.
-    const field = (leaf?.key ?? (path.length ? path.join('.') : undefined)) as K | undefined
+    const field = (leaf?.key ?? (path.length ? path.join('.') : undefined)) as Extract<K, string> | undefined
     if (field === undefined || errors[field] !== undefined) continue
 
     errors[field] = leaf ? leaf.message(issue) : ruleMessage(issue, labelOf(labels, path))

@@ -83,7 +83,7 @@ export function writeContract<
   return {
     resource,
     validate(values: TValues, context: Pick<WriteContext, 'isCreate'>): FieldErrors<TField> {
-      return fieldErrors<TField>(validateWith ?? schemaFor(context), shape(values), messages, labels)
+      return fieldErrors(validateWith ?? schemaFor(context), shape(values), messages, labels)
     },
     parse(
       values: TValues,

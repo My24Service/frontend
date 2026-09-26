@@ -64,13 +64,13 @@ export const FIELD_LABELS = {
   postal: () => $trans('Postal'),
   city: () => $trans('City'),
   country_code: () => $trans('Country'),
-} satisfies FieldLabels<keyof CustomerFormValues>
+} as const satisfies FieldLabels<keyof CustomerFormValues>
 
 /** The two phone fields: a format the rule's generic line would not explain. */
 export const FIELD_MESSAGES = {
   tel: () => $trans('Please provide a valid phone number'),
   mobile: () => $trans('Please provide a valid phone number'),
-} satisfies FieldMessages<keyof CustomerFormValues>
+} as const satisfies FieldMessages<keyof CustomerFormValues>
 
 /** The line under an untouched field: the required line, or the field's own copy. */
 export const PLACEHOLDERS = { ...requiredMessages(FIELD_LABELS), ...FIELD_MESSAGES }

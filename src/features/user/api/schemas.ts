@@ -36,7 +36,7 @@ export const FIELD_MESSAGES = {
     // "Valid from" is no noun the rule's line could name; a date is asked for.
     expire_start_dt: () => $trans('Please enter a date'),
   },
-} satisfies FieldMessages
+} as const satisfies FieldMessages
 
 // The request nests the token's own fields, so their labels are keyed by
 // the path `fieldErrors` reports them under — `api_user.name` — and the
@@ -46,7 +46,7 @@ export const FIELD_LABELS = {
   'api_user.name': () => $trans('Name'),
   'api_user.expire_start_dt': () => $trans('Valid from'),
   'api_user.expire_in_days': () => $trans('Expire in days'),
-} satisfies FieldLabels
+} as const satisfies FieldLabels
 
 /** The line under an untouched token field: the same required line the validation shows. */
 export const PLACEHOLDERS = { ...requiredMessages(FIELD_LABELS), 'api_user.expire_start_dt': FIELD_MESSAGES.api_user.expire_start_dt }

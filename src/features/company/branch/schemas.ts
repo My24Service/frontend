@@ -66,7 +66,7 @@ export const FIELD_LABELS = {
   address: () => $trans('Address'),
   postal: () => $trans('Postal'),
   city: () => $trans('City'),
-} satisfies FieldLabels<keyof BranchFormValues>
+} as const satisfies FieldLabels<keyof BranchFormValues>
 
 /**
  * The wire-shaped body: blank optionals ride as absent keys, not nulls or

@@ -8,7 +8,7 @@ export type EquipmentRow = ListRow<Api.PaginatedEquipmentList>
 
 export interface EquipmentColumnOptions {
   /** The route name stem this mount answers to (`equipment-equipment`, `settings-equipment`, ...). */
-  routePrefix: string
+  routePrefix: 'customers-equipment' | 'equipment-equipment' | 'settings-equipment'
   /** The equipment type the address asked for; the router's path carries it. */
   type: Api.EquipmentTypeEnum
   /** Mounted by the settings layout, which adds the icons column. */
@@ -109,9 +109,9 @@ export function useEquipmentColumns(options: EquipmentColumnOptions) {
           method: () => options.onAddState(row.original.id),
         }),
         h(RowAction, {icon: 'edit',
-          router_name: (hasBranches.value
+          router_name: hasBranches.value
             ? `${options.routePrefix}-edit-${options.type}`
-            : `${options.routePrefix}-edit`) as RouteName,
+            : `${options.routePrefix}-edit`,
           router_params: {pk: row.original.id},
           title: $trans('Edit'),
         }),

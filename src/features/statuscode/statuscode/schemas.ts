@@ -80,12 +80,12 @@ export type StatuscodeFieldErrors = FieldErrors<keyof StatuscodeFormValues>
 /** The colour is picked from a palette, so its empty line asks to select. */
 export const FIELD_MESSAGES = {
   color: () => selectMessage($trans('Label color')),
-} satisfies FieldMessages<keyof StatuscodeFormValues>
+} as const satisfies FieldMessages<keyof StatuscodeFormValues>
 
 export const FIELD_LABELS = {
   statuscode: () => $trans('Statuscode'),
   num_days: () => $trans('Number of days'),
-} satisfies FieldLabels<keyof StatuscodeFormValues>
+} as const satisfies FieldLabels<keyof StatuscodeFormValues>
 
 /** A blank text field goes out as null, so an edit can clear it. */
 function blankToNull(value: string | null | undefined): string | null {

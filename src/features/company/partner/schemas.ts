@@ -22,7 +22,7 @@ export function emptyPartnerRequest(): PartnerRequestFormValues {
 
 export const FIELD_LABELS = {
   to_member: () => $trans('Member'),
-} satisfies FieldLabels<keyof PartnerRequestFormValues>
+} as const satisfies FieldLabels<keyof PartnerRequestFormValues>
 
 /**
  * The wire-shaped body. `from_member` rides as null: the generated entry is

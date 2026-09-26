@@ -20,7 +20,7 @@ export type SendResetLinkErrors = FieldErrors<'email'>
 
 export const SEND_RESET_LINK_FIELD_LABELS = {
   email: () => $trans('email'),
-} satisfies FieldLabels<'email'>
+} as const satisfies FieldLabels<'email'>
 
 export function validateSendResetLink(values: SendResetLinkValues): SendResetLinkErrors {
   return fieldErrors(sendResetLinkSchema, values, {}, SEND_RESET_LINK_FIELD_LABELS)
@@ -40,7 +40,7 @@ export type SetPasswordErrors = FieldErrors<'password1' | 'password2'>
 export const SET_PASSWORD_FIELD_LABELS = {
   password1: () => $trans('Password'),
   password2: () => $trans('Password again'),
-} satisfies FieldLabels<'password1' | 'password2'>
+} as const satisfies FieldLabels<'password1' | 'password2'>
 
 /**
  * The copy under each box: the same two lines the user forms show, owned by
@@ -49,7 +49,7 @@ export const SET_PASSWORD_FIELD_LABELS = {
 export const SET_PASSWORD_FIELD_MESSAGES = {
   password1: PASSWORD_MESSAGES.password_required,
   password2: PASSWORD_MESSAGES.passwords_mismatch,
-} satisfies FieldMessages<'password1' | 'password2'>
+} as const satisfies FieldMessages<'password1' | 'password2'>
 
 export function validateSetPassword(values: SetPasswordValues): SetPasswordErrors {
   return passwordErrors(values, { isCreate: true })

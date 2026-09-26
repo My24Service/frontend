@@ -78,7 +78,7 @@ export type ActionFieldErrors = FieldErrors<keyof ActionFormValues>
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   num_days: () => $trans('Number of days'),
-} satisfies FieldLabels<keyof ActionFormValues>
+} as const satisfies FieldLabels<keyof ActionFormValues>
 
 function blankToNull(value: string | null | undefined): string | null {
   return value ? value : null

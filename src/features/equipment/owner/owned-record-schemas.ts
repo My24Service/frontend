@@ -45,7 +45,7 @@ export function ownedRecordSchemas<TValues extends OwnedValues>(schemas: {
   patch: v.GenericSchema
   labels: FieldLabels<keyof TValues>
 }) {
-  type Field = keyof TValues & string
+  type Field = keyof TValues
 
   /** The variant this tenant uses on a create; the patch body on an edit. */
   function schemaFor(context: WriteContext, kind: OwnerKind): v.GenericSchema {
@@ -56,7 +56,7 @@ export function ownedRecordSchemas<TValues extends OwnedValues>(schemas: {
   return {
     /** The generated entries' own issues under the caller's labels, plus the owner rule. */
     validate(values: TValues, context: WriteContext, owner: OwnerRule): FieldErrors<Field> {
-      const errors = fieldErrors<Field>(schemaFor(context, owner.kind), values, {}, schemas.labels)
+      const errors: FieldErrors<Field> = fieldErrors(schemaFor(context, owner.kind), values, {}, schemas.labels)
 
       if (context.isCreate && owner.responsible && values[owner.kind] == null) {
         errors[owner.kind] = selectMessage(owner.kind === 'branch' ? $trans('Branch') : $trans('Customer'))

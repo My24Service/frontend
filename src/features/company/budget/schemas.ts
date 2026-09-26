@@ -28,7 +28,7 @@ export function budgetModalFromRecord(record: Api.Budget): BudgetModalValues {
 export const FIELD_LABELS = {
   year: () => $trans('Year'),
   amount: () => $trans('Amount'),
-} satisfies FieldLabels<keyof BudgetModalValues>
+} as const satisfies FieldLabels<keyof BudgetModalValues>
 
 /**
  * The wire-shaped body: the year as a number, the amount only when filled.

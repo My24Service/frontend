@@ -32,7 +32,7 @@ export type ContractFieldErrors = FieldErrors<'customer' | 'name' | 'remarks' | 
 const FIELD_LABELS = {
   customer: () => $trans('Customer'),
   name: () => $trans('Contract name'),
-} satisfies FieldLabels<'customer' | 'name'>
+} as const satisfies FieldLabels<'customer' | 'name'>
 
 export function validateContractForm(
   values: MaintenanceContractFormValues,
@@ -135,7 +135,7 @@ export function parseContractWithEquipmentBody(
 const EQUIPMENT_ROW_LABELS = {
   equipment: () => $trans('Equipment'),
   times_per_year: () => $trans('Times / year'),
-} satisfies FieldLabels<'equipment' | 'times_per_year'>
+} as const satisfies FieldLabels<'equipment' | 'times_per_year'>
 
 /**
  * A staged row is checked while it is still a draft, before any save names it.
@@ -144,7 +144,7 @@ const EQUIPMENT_ROW_LABELS = {
  * wrong on its own.
  */
 export function equipmentRowErrors(row: EquipmentRowState): FieldErrors<'equipment' | 'times_per_year'> {
-  const {equipment, times_per_year} = fieldErrors<'equipment' | 'times_per_year'>(
+  const {equipment, times_per_year} = fieldErrors(
     schemas.vMaintenanceEquipmentRequest, shapeEquipmentRow(row), {}, EQUIPMENT_ROW_LABELS)
   return {
     ...(equipment ? {equipment} : {}),
