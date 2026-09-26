@@ -423,6 +423,7 @@ const currentWorkorderLogo = computed(() => record.value?.companylogo_workorder 
 const companyLogo = useTemplateRef<{$el: HTMLElement}>('companyLogo')
 const workorderLogo = useTemplateRef<{$el: HTMLElement}>('workorderLogo')
 
+const { create } = useToast()
 const { preview: logoPreview, stage: stageLogoFile } = useStagedImage()
 const { preview: workorderPreview, stage: stageWorkorderFile } = useStagedImage()
 const pickedLogo = ref<File | File[] | null>(null)
@@ -466,6 +467,10 @@ function stageLogo(
   if (!file) return
   return stage(file).then((dataUrl) => {
     values.value[into] = dataUrl
+  }).catch((error: unknown) => {
+    // A file the browser cannot read would otherwise fail without a word.
+    console.error('error reading logo', error)
+    errorToast(create, $trans('Something went wrong, please try again'))
   })
 }
 

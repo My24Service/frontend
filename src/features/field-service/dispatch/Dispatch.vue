@@ -278,6 +278,7 @@
 
 <script setup lang="ts">
 import moment from 'moment/min/moment-with-locales'
+import { BModal } from 'bootstrap-vue-next'
 import { nl } from 'date-fns/locale'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import VueMultiselect from 'vue-multiselect'
@@ -411,9 +412,9 @@ const selectedEngineers = ref<Api.UserSelectRow[]>([])
 const searchingEngineers = ref(false)
 
 const searchAssignModal = useTemplateRef<InstanceType<typeof SearchAndAssign>>('search-modal-wide')
-const changeDateModal = useTemplateRef<{show: () => void; hide: () => void}>('dispatch-change-date-modal')
-const splitOrderModal = useTemplateRef<{show: () => void; hide: () => void}>('dispatch-split-order-modal')
-const actionsModal = useTemplateRef<{show: () => void; hide: () => Promise<unknown>}>('dispatch-order-actions-modal')
+const changeDateModal = useTemplateRef<InstanceType<typeof BModal>>('dispatch-change-date-modal')
+const splitOrderModal = useTemplateRef<InstanceType<typeof BModal>>('dispatch-split-order-modal')
+const actionsModal = useTemplateRef<InstanceType<typeof BModal>>('dispatch-order-actions-modal')
 
 const startWeek = computed(() => Number(moment(startDate.value).format('w')))
 
@@ -511,7 +512,7 @@ async function openActionsModal(userId: number, order_pk: number, assignedorder:
     selectedOrder.value = await queryClient.fetchQuery(
       Api.OrderOrder.retrieve.options({path: {id: String(order_pk)}}))
     showOverlay.value = false
-    actionsModal.value?.show()
+    await actionsModal.value?.show()
   } catch (error) {
     console.log('error fetching order', error)
     errorToast(toast, $trans('Error fetching order'))
@@ -560,10 +561,13 @@ function resetAssignedOrderDates() {
   assignedOrder.value = newSplitModel()
 }
 
-function changeDate() {
+// The actions modal is fully hidden before the next one opens, as in
+// viewOrder/editOrder: its focus return would otherwise land after the new
+// modal has taken focus.
+async function changeDate() {
   assignedOrder.value = newDatesModel()
-  void actionsModal.value?.hide()
-  changeDateModal.value?.show()
+  await actionsModal.value?.hide()
+  await changeDateModal.value?.show()
 }
 
 function changeDateOk(event: {preventDefault: () => void}) {
@@ -587,7 +591,7 @@ async function changeDateSubmit() {
       },
     })
 
-    changeDateModal.value?.hide()
+    void changeDateModal.value?.hide()
     await invalidateWeek()
     showOverlay.value = false
   } catch (error) {
@@ -607,14 +611,14 @@ function newSplitModel(): AssignedOrderDates {
   }
 }
 
-function splitOrder() {
+async function splitOrder() {
   assignedOrder.value = newSplitModel()
-  void actionsModal.value?.hide()
-  splitOrderModal.value?.show()
+  await actionsModal.value?.hide()
+  await splitOrderModal.value?.show()
 }
 
 function cancelSplitOrder() {
-  splitOrderModal.value?.hide()
+  void splitOrderModal.value?.hide()
 }
 
 /**
@@ -641,7 +645,7 @@ async function splitOrderSubmit() {
       },
     })
 
-    splitOrderModal.value?.hide()
+    void splitOrderModal.value?.hide()
     infoToast(toast, $trans('Success'), $trans('Order split'))
     await invalidateWeek()
     showOverlay.value = false

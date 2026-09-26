@@ -158,6 +158,11 @@ async function load(search: string) {
       loaded.value = options
       emit('options', options)
     }
+  } catch (error) {
+    // Fired from a debounced watcher, so nothing upstream catches this: a
+    // failed search lists nothing rather than the previous term's matches.
+    console.error('error loading filter options', error)
+    if (id === request) loaded.value = []
   } finally {
     if (id === request) loading.value = false
   }

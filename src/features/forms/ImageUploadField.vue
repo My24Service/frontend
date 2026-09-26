@@ -59,14 +59,20 @@ const acceptedFormatsDescription = computed(() =>
     ? `${$trans('Accepted file formats')}: ${props.allowedExtensions.join(', ')}`
     : undefined)
 
-function onSelected(event: Event) {
+const { create } = useToast()
+
+async function onSelected(event: Event) {
   const file = chosenFile(event)
   if (!file) return
 
   if (props.allowedExtensions && !props.allowedExtensions.includes(extensionOf(file.name))) return
 
-  void stage(file).then((dataUrl) => {
-    emit('selected', dataUrl)
-  })
+  // A file the browser cannot read would otherwise fail without a word.
+  try {
+    emit('selected', await stage(file))
+  } catch (error) {
+    console.error('error reading image', error)
+    errorToast(create, $trans('Something went wrong, please try again'))
+  }
 }
 </script>

@@ -53,13 +53,18 @@ export interface UseRequestedCount {
 // may see it. Direct call into the generated client - #326 deleted the
 // hand-written Member service this used to ride on. throwOnError keeps the
 // call shape the call-shape specs pin: GET /api/member/member/requested_count/
-// with no query and no body.
+// with no query and no body. The callers fire it from setup without awaiting,
+// so a failure is caught here: the badge stays at its last count.
 export function useRequestedCount(): UseRequestedCount {
   const requestedCount = ref<number>(0)
 
   async function loadRequestedCount(): Promise<void> {
-    const { data } = await memberMemberRequestedCountRetrieve({ throwOnError: true })
-    requestedCount.value = data.count
+    try {
+      const { data } = await memberMemberRequestedCountRetrieve({ throwOnError: true })
+      requestedCount.value = data.count
+    } catch (error) {
+      console.error('error fetching requested member count', error)
+    }
   }
 
   return { requestedCount, loadRequestedCount }
