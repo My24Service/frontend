@@ -3,6 +3,7 @@ import { HttpResponse } from 'msw'
 import { defineComponent, ref } from 'vue'
 import {
   useCostCollection,
+  useOrderCostSource,
   provideCostPanelContext,
   HoursPanel,
   DistancePanel,
@@ -47,13 +48,19 @@ function defaults() {
 /**
  * What the form provides every cost panel. The two callbacks are spies so a
  * spec can see what a panel handed back the way the form would.
+ *
+ * The keys follow the shared `CostPanelContext` (`parentPk`, `lines`,
+ * `linesCreated`): the extraction renamed them off the invoice's vocabulary,
+ * and this helper is the only spec-side reader of those names. Every
+ * assertion below - the request shapes, the bodies, the rendered copy - is
+ * unchanged.
  */
 function context(overrides = {}) {
   return {
-    orderPk: ref(42),
+    parentPk: ref(42),
     engineers: ref([fixtureFor(vEngineer, {id: 7, full_name: 'Alex Engineer'})]),
-    invoiceLines: ref([]),
-    invoiceLinesCreated: vi.fn(),
+    lines: ref([]),
+    linesCreated: vi.fn(),
     emptyCollectionClicked: vi.fn(),
     ...overrides,
   }
@@ -170,7 +177,7 @@ test('the edited durations feed the summary amount of a total invoice line', asy
   await click(wrapper, 'Save costs')
   await selectRate(wrapper, 'total')
   await click(wrapper, 'Create invoice lines')
-  expect(form.invoiceLinesCreated.mock.calls[0][0][0]).toMatchObject({type: 'work', amount: '3:00', description: 'Work hours'})
+  expect(form.linesCreated.mock.calls[0][0][0]).toMatchObject({type: 'work', amount: '3:00', description: 'Work hours'})
 })
 test('editing travel hours neither touches the work totals nor the travel totals it was built from', async () => {
   const props = defaults()
@@ -202,6 +209,7 @@ test('saving a stored collection sends one bulk set with the stored id', async (
     setup() {
       return useCostCollection({
         context: context(), costType: () => 'work_hours',
+        source: useOrderCostSource(ref(42), () => 'work_hours'),
         currency: () => 'EUR',
         buildRows: () => [],
         description: row => row.user_full_name, title: () => 'Work hours', amount: () => '2:00',
@@ -248,7 +256,7 @@ test.each(['user_totals', 'total'])('invoice emissions preserve %s amounts and t
   const wrapper = await openPanel({saved: [storedCost()], form})
   await selectRate(wrapper, option)
   await click(wrapper, 'Create invoice lines')
-  const emitted = form.invoiceLinesCreated.mock.calls
+  const emitted = form.linesCreated.mock.calls
   expect(emitted).toHaveLength(1)
   const lines = emitted[0][0]
   expect(lines).toHaveLength(1)
@@ -294,10 +302,10 @@ test('none option does not emit invoice drafts', async () => {
   const wrapper = await openPanel({saved: [storedCost()], form})
   await selectRate(wrapper, 'none')
   await click(wrapper, 'Create invoice lines')
-  expect(form.invoiceLinesCreated).not.toHaveBeenCalled()
+  expect(form.linesCreated).not.toHaveBeenCalled()
 })
 test('existing parent invoice lines suppress duplicate creation controls', async () => {
-  const wrapper = await openPanel({saved: [storedCost()], form: context({invoiceLines: ref([{type: 'work'}])})})
+  const wrapper = await openPanel({saved: [storedCost()], form: context({lines: ref([{type: 'work'}])})})
   expect(wrapper.text()).not.toContain('Create invoice lines')
 })
 test('a cost panel outside a form refuses to mount', () => {

@@ -119,8 +119,7 @@
 <script setup lang="ts">
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoney, formatMoneyPlain, toDinero } from '@/services/money'
-import { calculateInvoiceLine, hydrateInvoicePrices, type InvoiceLineDraft } from '../calculations'
-import VAT from './VAT.vue'
+import { calculateInvoiceLine, hydrateInvoicePrices, VAT, type InvoiceLineDraft } from '@/features/costing'
 
 type Money = ReturnType<typeof toDinero>
 type LineRow = Omit<Api.InvoiceLine, 'id' | 'invoice'> & {

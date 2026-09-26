@@ -1,6 +1,6 @@
 <template>
   <div class="use-on-invoice-container">
-    <h5>{{ $trans("Add costs on infolines")}}</h5>
+    <h5>{{ title }}</h5>
 
     <BFormGroup>
       <div class="flex-columns">
@@ -13,7 +13,7 @@
           class="btn btn-sm update-button"
           type="button"
         >
-          {{ $trans("Create invoice lines") }}
+          {{ buttonLabel }}
         </BButton>
       </div>
     </BFormGroup>
@@ -26,7 +26,16 @@ import type { InvoiceLineOption } from '../calculations'
 const props = withDefaults(defineProps<{
   value?: InvoiceLineOption | null
   useOnInvoiceOptions?: { value: InvoiceLineOption; text: string }[]
-}>(), { value: null, useOnInvoiceOptions: () => [] })
+  /** The heading above the options; the invoice and quotation word it differently. */
+  title?: string
+  /** The label of the button that creates the lines. */
+  buttonLabel?: string
+}>(), {
+  value: null,
+  useOnInvoiceOptions: () => [],
+  title: () => $trans('Add costs on infolines'),
+  buttonLabel: () => $trans('Create invoice lines'),
+})
 const emit = defineEmits<{ buttonClicked: [value: InvoiceLineOption | null] }>()
 const useOnInvoiceSelected = ref(props.value ?? props.useOnInvoiceOptions[0]?.value ?? null)
 watch(() => props.value, (value) => {

@@ -165,8 +165,8 @@ import { CustomerCard } from '@/features/customer'
 import { useQueryErrorToast } from '@/features/forms'
 import { InvoicePDFViewer } from '@/features/invoice/pdf'
 import { formatMoneyPlain, toDinero } from '@/services/money'
-import type { InvoiceLineDraft, InvoiceLineType } from './calculations'
-import { provideCostPanelContext } from './cost-panel-context'
+import type { InvoiceLineDraft, InvoiceLineType } from '@/features/costing'
+import { provideCostPanelContext } from '@/features/costing'
 import { useTeamleaderProducts, type ProductChooserHandle } from './use-teamleader-products'
 import {
   CallOutCostsPanel,
@@ -334,10 +334,10 @@ function emptyCollectionClicked(type: Exclude<InvoiceLineType, 'manual'>) {
 }
 
 provideCostPanelContext({
-  orderPk: computed(() => bootstrap.value?.order_pk),
+  parentPk: computed(() => bootstrap.value?.order_pk),
   engineers,
-  invoiceLines,
-  invoiceLinesCreated,
+  lines: invoiceLines,
+  linesCreated: invoiceLinesCreated,
   emptyCollectionClicked,
 })
 

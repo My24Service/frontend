@@ -84,16 +84,17 @@
 </template>
 
 <script setup lang="ts">
-import HeaderCell from './Header.vue'
-import VAT from './VAT.vue'
-import CostCollectionShell from './CostCollectionShell.vue'
 import {
+  CostCollectionShell,
+  Header as HeaderCell,
+  VAT,
   makeCostRow,
   useCostCollection,
+  useCostPanelContext,
+  COST_TYPE,
   type CostRow,
-} from '../use-cost-collection'
-import { useCostPanelContext } from '../cost-panel-context'
-import { COST_TYPE } from '../calculations'
+} from '@/features/costing'
+import { useOrderCostSource } from '../order-cost-source'
 
 type UserTotal = Api.ActivityUserTotal & { is_partner?: boolean }
 /**
@@ -119,12 +120,13 @@ const {
   createInvoiceLinesClicked, changeVatType, priceChanged, getFullname,
 } = useCostCollection({
   context,
+  source: useOrderCostSource(context.parentPk, () => costType),
   costType: () => costType,
   currency: () => default_currency,
   buildRows: () => (props.user_totals ?? []).map(activity => makeCostRow({
     ...activity,
     cost_type: costType,
-    order: context.orderPk.value ?? undefined,
+    order: context.parentPk.value ?? undefined,
     user_id: Number(activity.user_id),
     user: activity.is_partner ? null : Number(activity.user_id),
     user_full_name: activity.is_partner ? activity.full_name : null,

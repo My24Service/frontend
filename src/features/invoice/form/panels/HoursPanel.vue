@@ -78,20 +78,19 @@
 </template>
 
 <script setup lang="ts">
-import HeaderCell from './Header.vue'
-import VAT from './VAT.vue'
-import CostCollectionShell from './CostCollectionShell.vue'
 import {
+  CostCollectionShell,
+  Header as HeaderCell,
+  VAT,
   makeCostRow,
   useCostCollection,
-  type CostRow,
-} from '../use-cost-collection'
-import { useCostPanelContext } from '../cost-panel-context'
-import {
+  useCostPanelContext,
   COST_TYPE,
   normalizeCostDuration,
+  type CostRow,
   type HoursCostType,
-} from '../calculations'
+} from '@/features/costing'
+import { useOrderCostSource } from '../order-cost-source'
 import type { TeamleaderHourlyRate } from '../use-teamleader-products'
 
 // The editor also accepts the older per-user duration aliases and partner metadata.
@@ -167,7 +166,7 @@ function buildRows() {
     return [makeCostRow({
       ...activity,
       cost_type: costType.value,
-      order: context.orderPk.value ?? undefined,
+      order: context.parentPk.value ?? undefined,
       user_id: Number(activity.user_id),
       user: activity.is_partner ? null : Number(activity.user_id),
       user_full_name: activity.is_partner ? activity.full_name : null,
@@ -183,6 +182,7 @@ const {
   createInvoiceLinesClicked, changeVatType, priceChanged, getFullname,
 } = useCostCollection({
   context,
+  source: useOrderCostSource(context.parentPk, () => costType.value),
   costType: () => costType.value,
   currency: () => default_currency,
   buildRows,

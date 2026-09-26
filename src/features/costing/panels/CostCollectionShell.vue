@@ -16,7 +16,7 @@
 
       <slot name="stored-extra" />
 
-      <AddToInvoiceLinesDiv
+      <AddToLinesDiv
         v-if="!parentHasInvoiceLines"
         :useOnInvoiceOptions="useOnInvoiceOptions"
         @buttonClicked="(value) => $emit('create-invoice-lines', value)"
@@ -45,7 +45,7 @@
 <script setup lang="ts">
 import type { CostType, InvoiceLineOption, InvoiceTotals } from '../calculations'
 import type { CostRow } from '../use-cost-collection'
-import AddToInvoiceLinesDiv from './AddToInvoiceLinesDiv.vue'
+import AddToLinesDiv from './AddToLinesDiv.vue'
 import CollectionButton from './CollectionButton.vue'
 import CostsTable from './CostsTable.vue'
 import TotalRow from './TotalRow.vue'

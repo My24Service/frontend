@@ -76,17 +76,18 @@
 </template>
 
 <script setup lang="ts">
-import HeaderCell from './Header.vue'
-import VAT from './VAT.vue'
-import CostCollectionShell from './CostCollectionShell.vue'
 import {
+  CostCollectionShell,
+  Header as HeaderCell,
+  VAT,
   makeCostRow,
   useCostCollection,
+  useCostPanelContext,
+  COST_TYPE,
   type CostRow,
-} from '../use-cost-collection'
-import { useCostPanelContext } from '../cost-panel-context'
+} from '@/features/costing'
 import { PIXEL_URL } from '@/constants'
-import { COST_TYPE } from '../calculations'
+import { useOrderCostSource } from '../order-cost-source'
 
 type UsedMaterial = Api.AssignedOrderMaterialTotals & {
   user_id?: number | string
@@ -132,6 +133,7 @@ const {
   createInvoiceLinesClicked, changeVatType, priceChanged, setPrice, loadData,
 } = useCostCollection({
   context,
+  source: useOrderCostSource(context.parentPk, () => costType),
   costType: () => costType,
   currency: () => default_currency,
   buildRows: () => materialRows.value.map(material => {
@@ -141,7 +143,7 @@ const {
       name: material.name ?? undefined,
       identifier: material.identifier ?? undefined,
       cost_type: costType,
-      order: context.orderPk.value ?? undefined,
+      order: context.parentPk.value ?? undefined,
       material: id,
       material_id: id,
       amount_decimal: material.amount,

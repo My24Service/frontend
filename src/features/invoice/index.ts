@@ -11,6 +11,7 @@ export {
   normalizeCostDuration,
   sumInvoiceTotals,
   useCostCollection,
+  useOrderCostSource,
   provideCostPanelContext,
   configuredHourlyRate,
   productLinkBody,

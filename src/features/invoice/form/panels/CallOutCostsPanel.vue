@@ -62,12 +62,16 @@
 </template>
 
 <script setup lang="ts">
-import HeaderCell from './Header.vue'
-import VAT from './VAT.vue'
-import CostCollectionShell from './CostCollectionShell.vue'
-import { makeCostRow, useCostCollection } from '../use-cost-collection'
-import { useCostPanelContext } from '../cost-panel-context'
-import { COST_TYPE } from '../calculations'
+import {
+  CostCollectionShell,
+  Header as HeaderCell,
+  VAT,
+  makeCostRow,
+  useCostCollection,
+  useCostPanelContext,
+  COST_TYPE,
+} from '@/features/costing'
+import { useOrderCostSource } from '../order-cost-source'
 
 /**
  * The single call-out cost line of an order as a cost collection, its draft
@@ -84,7 +88,7 @@ const default_currency = mainStore.requiredDefaultCurrency
 const invoice_default_vat = mainStore.requiredInvoiceDefaultVat
 const costType = COST_TYPE.CALL_OUT_COSTS
 function draftRow() {
-  return makeCostRow({ cost_type: costType, order: context.orderPk.value ?? undefined, amount_int: 1 },
+  return makeCostRow({ cost_type: costType, order: context.parentPk.value ?? undefined, amount_int: 1 },
     { price: props.invoice_default_call_out_costs, currency: default_currency }, invoice_default_vat)
 }
 const {
@@ -93,6 +97,7 @@ const {
   createInvoiceLinesClicked, changeVatType, priceChanged,
 } = useCostCollection({
   context,
+  source: useOrderCostSource(context.parentPk, () => costType),
   costType: () => costType,
   currency: () => default_currency,
   buildRows: () => [draftRow()],

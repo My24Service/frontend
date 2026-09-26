@@ -1,5 +1,3 @@
-import * as v from 'valibot'
-
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoneyPlain, toDinero } from '@/services/money'
 import {
@@ -13,6 +11,16 @@ import {
 } from './calculations'
 import type { CostPanelContext } from './cost-panel-context'
 
+/**
+ * One row of a cost collection: the fields the panels edit plus the stored
+ * fields the server may answer with.
+ *
+ * Deliberately loose where the two consumers disagree (`Api.OrderCost.Record`
+ * is the invoice's record, `Api.QuotationCost.Record` the quotation's), because
+ * the panels only ever read the fields named here and each consumer's
+ * `rowBody` is what narrows a row to its own endpoint's request schema before
+ * it goes on the wire.
+ */
 export type CostRow = Omit<Partial<Api.OrderCost.Record>, keyof CalculatedPrices | 'id' | 'amount_decimal' | 'amount_duration' | 'amount_duration_read' | 'amount_int' | 'vat_type' | 'price_currency'> & CalculatedPrices & {
   id?: number
   cost_type: Api.CostTypeEnum
@@ -38,6 +46,44 @@ export type CostRow = Omit<Partial<Api.OrderCost.Record>, keyof CalculatedPrices
   price_selling?: string | number
   price_selling_currency?: string
   selling_price?: string
+}
+
+/**
+ * What only a consumer of the cost machinery knows: where the rows are read
+ * from, where the replace-set is written, and how a row is narrowed to that
+ * endpoint's request body.
+ *
+ * The invoice panel fills this with `Api.OrderCost` scoped to an order; the
+ * quotation panel with `Api.QuotationCost` scoped to a quotation and chapter.
+ * Everything else - the draft rows, the totals, the shell - is the same and
+ * lives here.
+ */
+export interface CostCollectionSource {
+  /**
+   * The cached list query for this collection, or `null` while the consumer
+   * has nothing to read yet (the invoice form's bootstrap has not answered an
+   * order). Returning `null` keeps the query disabled rather than reading a
+   * placeholder id.
+   */
+  listOptions: () => Record<string, unknown> | null
+  /**
+   * Write the panel's rows as one replace-set and answer with the stored rows.
+   *
+   * A plain function rather than the generated mutation options: those
+   * re-expose their response and variables through invariant slots, so only
+   * `any` - or one endpoint's exact types - could name them here, and naming
+   * one endpoint's types would pin this interface to one consumer. Each
+   * consumer narrows inside its own implementation instead.
+   */
+  replace: (path: Record<string, string>, body: Record<string, unknown>[]) => Promise<readonly CostRow[]>
+  /**
+   * The path parameters of the replace-set. Throws when the consumer has no
+   * parent to write against, the way the invoice form refuses to save costs
+   * without an order.
+   */
+  replacePath: () => Record<string, string>
+  /** Narrow one edited row to the endpoint's request body. */
+  rowBody: (row: CostRow) => Record<string, unknown>
 }
 
 /**
@@ -74,9 +120,11 @@ function amountFields(row: CostRow): CostAmount {
   }
 }
 
-interface CollectionOptions {
+export interface CollectionOptions {
   /** The form's shared reads and callbacks; see `CostPanelContext`. */
-  context: Pick<CostPanelContext, 'orderPk' | 'engineers' | 'invoiceLines' | 'invoiceLinesCreated' | 'emptyCollectionClicked'>
+  context: Pick<CostPanelContext, 'parentPk' | 'engineers' | 'lines' | 'linesCreated' | 'emptyCollectionClicked'>
+  /** Where this collection is read from and written to. */
+  source: CostCollectionSource
   costType: () => Api.CostTypeEnum
   /** The tenant default currency from the server bootstrap, for empty sums. */
   currency: () => string
@@ -87,31 +135,34 @@ interface CollectionOptions {
 }
 
 /**
- * One kind of order costs (hours, distance, call-out costs, used materials)
- * as the cost panels edit it: the stored rows when the server has any for
- * this order and type, otherwise locally built drafts seeded with the panel's
- * default rate. Each row carries its own `price`, which the panel edits in
- * place; there is no rate to resolve at save time.
+ * One kind of order or quotation costs (hours, distance, call-out costs, used
+ * materials) as the cost panels edit it: the stored rows when the server has
+ * any for this parent and type, otherwise locally built drafts seeded with the
+ * panel's default rate. Each row carries its own `price`, which the panel edits
+ * in place; there is no rate to resolve at save time.
  *
- * The read is one cached query per order and cost type, like the document
- * collections, disabled until the form's bootstrap has answered with an
- * order. The write is one bulk replace-set: the panel's rows go in a single
- * request, the server prices them, and the panel adopts the returned rows,
- * so their stored ids and totals are what the server stored. Totals on
- * unsaved drafts stay zero until that save.
+ * The read is one cached query per parent and cost type, like the document
+ * collections, disabled until the form's bootstrap has answered. The write is
+ * one bulk replace-set: the panel's rows go in a single request, the server
+ * prices them, and the panel adopts the returned rows, so their stored ids and
+ * totals are what the server stored. Totals on unsaved drafts stay zero until
+ * that save.
+ *
+ * `source` is the only part the consumer supplies; everything else is the same
+ * for the invoice (order costs) and the quotation (chapter costs).
  */
 export function useCostCollection(options: CollectionOptions) {
-  const { context } = options
+  const { context, source } = options
   const { create } = useToast()
 
-  const listQuery = useQuery(() => ({
-    ...Api.OrderCost.list.options({
-      query: { order: context.orderPk.value ?? 0, cost_type: options.costType() },
-    }),
-    enabled: context.orderPk.value != null,
-    refetchOnWindowFocus: false,
-  }))
-  const replaceMutation = useMutation(Api.OrderCost.extras.orderCreate.mutation())
+  const listQuery = useQuery(() => {
+    const query = source.listOptions()
+    return {
+      ...(query ?? {}),
+      enabled: query !== null,
+      refetchOnWindowFocus: false,
+    } as never
+  })
   useQueryErrorToast(listQuery.error, $trans('Error loading costs'))
 
   const collection = ref<CostRow[]>([])
@@ -120,9 +171,14 @@ export function useCostCollection(options: CollectionOptions) {
   const isLoading = computed(() => {
     return listQuery.isLoading.value || saving.value
   })
-  // Stored rows exist when the server answered with any for this order and type.
+  // The generated list options resist a single generic signature (see
+  // `useResourceForm`), so the query above is deliberately loose and this is
+  // the accessor its consumers read: the cached page of stored rows.
+  type CostListData = { results?: CostRow[] }
+  const listData = (data: unknown): CostListData => (data ?? {})
+  // Stored rows exist when the server answered with any for this parent and type.
   const hasStoredData = computed(() => {
-    return (listQuery.data.value?.results?.length ?? 0) > 0
+    return (listData(listQuery.data.value).results?.length ?? 0) > 0
   })
   const totals = computed(() => sumInvoiceTotals(collection.value, options.currency()))
   const total_dinero = computed(() => totals.value.total_dinero)
@@ -135,11 +191,11 @@ export function useCostCollection(options: CollectionOptions) {
   function checkParentHasInvoiceLines(lines: readonly { type?: string }[] | null | undefined) {
     return !!lines?.some(line => line.type === invoiceLineType(options.costType()))
   }
-  const parentHasInvoiceLines = computed(() => checkParentHasInvoiceLines(context.invoiceLines.value))
+  const parentHasInvoiceLines = computed(() => checkParentHasInvoiceLines(context.lines.value))
 
-  function reconcile(records: readonly Api.OrderCost.Record[]) {
+  function reconcile(records: readonly CostRow[]) {
     if (records.length > 0) {
-      collection.value = records.map((row: Api.OrderCost.Record) => makeCostRow({ ...row, ...hydrateInvoicePrices(row), amount_int: row.amount_int ?? 0, amount_decimal: row.amount_decimal ?? 0, amount_duration_read: row.amount_duration_read ?? '' }, { price: row.price, currency: row.price_currency }, row.vat_type ?? '0'))
+      collection.value = records.map((row) => makeCostRow({ ...row, ...hydrateInvoicePrices(row), amount_int: row.amount_int ?? 0, amount_decimal: row.amount_decimal ?? 0, amount_duration_read: row.amount_duration_read ?? '' }, { price: row.price, currency: row.price_currency }, row.vat_type ?? '0'))
     } else {
       collection.value = options.buildRows()
     }
@@ -148,41 +204,8 @@ export function useCostCollection(options: CollectionOptions) {
   // The server rows are the source of truth once they exist; without them the
   // panel edits locally built drafts priced off the form's bootstrap data.
   watch(listQuery.data, (data) => {
-    reconcile(data?.results ?? [])
+    reconcile(listData(data).results ?? [])
   }, { immediate: true })
-
-  function rowBody(row: CostRow): Api.OrderCostRowRequest {
-    // The order and cost type travel in the URL; totals are priced by the
-    // server and never sent.
-    //
-    // Parsed through the endpoint's own request component rather than annotated:
-    // the row's `price_currency` is a plain string here (it comes from the
-    // dineros the panel calculates with) while the endpoint takes one of three,
-    // so the generated component is what narrows it - and it is the same schema
-    // the specs' seam validates a stub against.
-    return v.parse(schemas.vOrderCostRowRequest, {
-      ...(row.id == null ? {} : { id: row.id }),
-      user: row.user ?? null,
-      user_full_name: row.user_full_name ?? null,
-      material: row.material ?? null,
-      amount_int: row.amount_int == null ? null : Number(row.amount_int),
-      amount_decimal: row.amount_decimal == null ? null : String(row.amount_decimal),
-      amount_duration: row.amount_duration == null ? null : String(row.amount_duration),
-      price: row.price,
-      vat_type: String(row.vat_type),
-      // The currency the row is priced in: the server prices vat and total from
-      // `price` in this currency, and without the key the column keeps its own
-      // default, which relabels a USD or GBP tenant's amounts as EUR. Sent only
-      // when the row has one - the field rejects null.
-      ...(row.price_currency ? { price_currency: row.price_currency } : {}),
-    })
-  }
-
-  function replacePath() {
-    const order = context.orderPk.value
-    if (order == null) throw new Error('An order is required to save costs')
-    return { order_id: String(order), cost_type: options.costType() }
-  }
 
   /**
    * Reload the stored rows after a write, or rebuild the drafts when the
@@ -193,12 +216,12 @@ export function useCostCollection(options: CollectionOptions) {
    * unnecessary here - which is why that wrapper is gone.
    */
   async function loadData() {
-    if (context.orderPk.value == null) {
+    if (source.listOptions() === null) {
       reconcile([])
       return
     }
     const result = await listQuery.refetch({ throwOnError: true })
-    reconcile(result.data?.results ?? [])
+    reconcile(listData(result.data).results ?? [])
   }
 
   async function saveCollection() {
@@ -207,10 +230,10 @@ export function useCostCollection(options: CollectionOptions) {
       // Adopt the returned rows first, so a retry after a failed follow-up
       // updates them instead of creating duplicates; the reload then syncs
       // the list cache the stored/draft switch reads.
-      reconcile(await replaceMutation.mutateAsync({
-        path: replacePath(),
-        body: collection.value.map(rowBody),
-      }))
+      reconcile(await source.replace(
+        source.replacePath(),
+        collection.value.map(source.rowBody),
+      ))
       await loadData()
       infoToast(create, $trans('Saved'), $trans('Costs saved'))
     } catch {
@@ -225,7 +248,7 @@ export function useCostCollection(options: CollectionOptions) {
     try {
       // An empty set deletes every stored row of this type; the reload then
       // rebuilds the drafts, like the old per-row deletes followed by a reload.
-      await replaceMutation.mutateAsync({ path: replacePath(), body: [] })
+      await source.replace(source.replacePath(), [])
       await loadData()
     } catch {
       errorToast(create, $trans('Error removing costs'))
@@ -243,7 +266,7 @@ export function useCostCollection(options: CollectionOptions) {
     const lines = createInvoiceLines(costs, selected, {
       item: options.description, total: options.title(),
     }, { type: invoiceLineType(options.costType()), amount: options.amount() ?? 0 }, options.currency())
-    if (selected !== 'none') context.invoiceLinesCreated(lines)
+    if (selected !== 'none') context.linesCreated(lines)
   }
   function changeVatType(row: CostRow, value: string | number) {
     row.vat_type = value
