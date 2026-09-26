@@ -169,7 +169,13 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { useLoading } from 'vue-loading-overlay'
 
-import { TeamleaderService } from '@/models/company/Teamleader'
+import {
+  TeamleaderService,
+  type TeamleaderProductDetail,
+  type TeamleaderProductSummary,
+} from '@/models/company/Teamleader'
+import type { TaxRate } from '@/api/types.gen'
+
 interface ChooserMaterial {
   id: number
   name?: string | null
@@ -177,31 +183,6 @@ interface ChooserMaterial {
   description?: string | null
   price_purchase_ex: string
   price_selling_ex: string
-}
-
-interface TaxRateResponse {
-  uuid: string
-  rate: string
-  description: string
-}
-
-interface TeamleaderProductSummary {
-  id: string
-  name: string
-  code: string
-  description: string
-}
-
-interface TeamleaderProductDetail {
-  name: string
-  code: string
-  description: string
-  product_category_detail: { name: string }
-  purchase_price: { amount: string; currency: string } | null
-  selling_price: { amount: string; currency: string } | null
-  tax_detail: { rate: string }
-  added_at: string
-  updated_at: string
 }
 
 interface TeamleaderProductDraft {
@@ -221,19 +202,6 @@ interface TaxRateOption {
   text: string
 }
 
-/**
- * The Teamleader backend surface this chooser uses, restated with the shapes
- * it answers. `TeamleaderService` is untyped JS, so every `await` on it is
- * `any` until the handle itself carries the contract.
- */
-interface TeamleaderServiceClient {
-  configDetail(): Promise<unknown>
-  fetchTaxRates(): Promise<{ results: TaxRateResponse[] }>
-  fetchProductDetail(id: string): Promise<TeamleaderProductDetail>
-  fetchProducts(query: string | null): Promise<TeamleaderProductSummary[]>
-  createLinkProduct(data: Record<string, unknown>): Promise<{ is_ok: boolean; material: number }>
-}
-
 const props = withDefaults(defineProps<{
   material?: ChooserMaterial
   withCreateButton?: boolean
@@ -249,7 +217,7 @@ const emit = defineEmits<{
 const { create } = useToast()
 const loading = useLoading()
 const mainStore = useMainStore()
-const service: TeamleaderServiceClient = new TeamleaderService()
+const service = new TeamleaderService()
 
 const modal = ref<InstanceType<typeof BModal> | null>(null)
 const products = ref<TeamleaderProductSummary[]>([])
@@ -317,14 +285,14 @@ function onRowClicked(item: TeamleaderProductSummary) {
 
 async function newTeamleaderProduct() {
   await service.configDetail()
-  const response = await service.fetchTaxRates()
-  taxRates.value = response.results.map((rate: TaxRateResponse) => {
+  const rates = (await service.fetchTaxRates()).results ?? []
+  taxRates.value = rates.map((rate: TaxRate) => {
     return {
       value: rate.uuid,
       text: `${rate.description} (${rate.rate})`
     }
   })
-  const defaultRate = response.results.find((rate: TaxRateResponse) => rate.rate === '0.21')
+  const defaultRate = rates.find((rate: TaxRate) => rate.rate === '0.21')
   product.value = {
     name: props.material?.name ?? '',
     code: props.material?.identifier ?? null,
@@ -338,6 +306,9 @@ async function newTeamleaderProduct() {
 }
 
 async function createLinkProduct() {
+  // The create button only renders in form mode, over a draft.
+  if (!product.value || !('tax_rate_id' in product.value)) return
+
   // New products are priced in the tenant default, like every other price
   // the client sends without an explicit currency choice.
   const currency = mainStore.getDefaultCurrency
