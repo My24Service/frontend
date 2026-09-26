@@ -10,8 +10,7 @@ import setInterceptors from '@/services/auth/clientDriver'
 
 /**
  * The get-initial-data answer as the main store consumes it. `memberInfo`
- * takes the store's `MainMemberInfo` shape (an absent logo reads `undefined`,
- * never `null`), and `member_texts` the `Record<string, string>` the
+ * takes the store's `MainMemberInfo` shape, and `member_texts` the `Record<string, string>` the
  * `window.member_type_text` contract in `src/services/i18n.ts` declares.
  */
 export interface My24InitialData extends Omit<GetInitialDataResponse, 'memberInfo'> {
@@ -168,11 +167,11 @@ class My24 {
       return statuscode
     }
 
-    // `statuscode` is null here (both matches returned above), so the
-    // original `statuscode && ...` disjunct is dead and only the null check
-    // decides.
+    // Both matches above came back empty. (The original also tested
+    // `statuscode && statuscode.color_for_assignedorders` here, which could
+    // never hold at this point.)
     if (order.assignedorder_status === null) {
-      return statuscode
+      return null
     }
 
     return this.getStatuscode(statuscodes, order.assignedorder_status)

@@ -214,7 +214,7 @@ const { create } = useToast()
 const router = useRouter()
 const queryClient = useQueryClient()
 const mainStore = useMainStore()
-const currency = mainStore.getDefaultCurrency
+const currency = mainStore.requiredDefaultCurrency
 
 const viewer = useTemplateRef<{ show: () => void }>('invoice-viewer')
 const invoiceLinesPanel = useTemplateRef<InstanceType<typeof InvoiceLine>>('invoice-lines')
@@ -349,7 +349,7 @@ function invoiceRequestBody(): Api.InvoiceRequest {
     order: bootstrap.value?.order_pk,
     ...draft.value,
     term_of_payment_days: Number(draft.value.term_of_payment_days),
-    vat_type: invoice.value?.vat_type ?? String(mainStore.getInvoiceDefaultVat),
+    vat_type: invoice.value?.vat_type ?? String(mainStore.requiredInvoiceDefaultVat),
     total: formatMoneyPlain(totalDinero.value),
     vat: formatMoneyPlain(vatDinero.value),
   })

@@ -80,8 +80,8 @@ const props = withDefaults(defineProps<{
 }>(), { invoice_default_call_out_costs: null })
 const context = useCostPanelContext()
 const mainStore = useMainStore()
-const default_currency = mainStore.getDefaultCurrency
-const invoice_default_vat = mainStore.getInvoiceDefaultVat
+const default_currency = mainStore.requiredDefaultCurrency
+const invoice_default_vat = mainStore.requiredInvoiceDefaultVat
 const costType = COST_TYPE.CALL_OUT_COSTS
 function draftRow() {
   return makeCostRow({ cost_type: costType, order: context.orderPk.value ?? undefined, amount_int: 1 },

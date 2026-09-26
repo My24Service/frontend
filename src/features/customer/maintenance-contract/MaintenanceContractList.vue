@@ -58,7 +58,7 @@ const mainStore = useMainStore()
 
 function dineroFor(row: ContractRow) {
   // sum_tariffs is required on the contract; the tenant default prices it.
-  return toDinero(row.sum_tariffs, mainStore.getDefaultCurrency)
+  return toDinero(row.sum_tariffs, mainStore.requiredDefaultCurrency)
 }
 
 const columnHelper = createAppColumnHelper<ContractRow>()

@@ -289,7 +289,7 @@ const isCustomer = computed(() => authStore.isCustomer)
 
 function formatContractValue(contract: Api.MaintenanceContract): string {
   // sum_tariffs is required on the contract; the tenant default prices it.
-  return formatMoney(toDinero(contract.sum_tariffs, mainStore.getDefaultCurrency))
+  return formatMoney(toDinero(contract.sum_tariffs, mainStore.requiredDefaultCurrency))
 }
 
 const ordersPage = ref(1)

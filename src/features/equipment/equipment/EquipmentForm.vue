@@ -390,7 +390,7 @@ const hasBranches = computed(() => wireKind.value === 'branch')
 
 /** What a new equipment's price is quoted in, as the legacy model took it. */
 const mainStore = useMainStore()
-const defaultCurrency = computed(() => mainStore.getDefaultCurrency)
+const defaultCurrency = computed(() => mainStore.requiredDefaultCurrency)
 
 const nameInput = useTemplateRef<{focus?: () => void}>('name')
 /** The document panel, which only a create has to hand an id to. */

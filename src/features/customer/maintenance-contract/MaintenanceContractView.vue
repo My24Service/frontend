@@ -212,7 +212,7 @@ function rowDinero(row: Api.MaintenanceEquipment) {
 const sumTariffsDinero = computed(() =>
   // sum_tariffs is required on the contract; only the unloaded record falls
   // back to zero, priced in the tenant default.
-  toDinero(maintenanceContract.value?.sum_tariffs ?? '0.00', mainStore.getDefaultCurrency))
+  toDinero(maintenanceContract.value?.sum_tariffs ?? '0.00', mainStore.requiredDefaultCurrency))
 
 const ordersPerPage = 20
 const ordersPage = ref(1)

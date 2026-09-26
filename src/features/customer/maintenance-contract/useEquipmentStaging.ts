@@ -25,7 +25,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   const mainStore = useMainStore()
   const {create} = useToast()
 
-  const defaultCurrency = () => mainStore.getDefaultCurrency
+  const defaultCurrency = () => mainStore.requiredDefaultCurrency
 
   // The staged set ---------------------------------------------------------
 

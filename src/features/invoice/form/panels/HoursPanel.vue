@@ -120,8 +120,8 @@ const props = withDefaults(defineProps<{
 }>(), { type: null, hours_total: null, user_totals: null, teamleaderHours: null })
 const context = useCostPanelContext()
 const mainStore = useMainStore()
-const default_currency = mainStore.getDefaultCurrency
-const invoice_default_vat = mainStore.getInvoiceDefaultVat
+const default_currency = mainStore.requiredDefaultCurrency
+const invoice_default_vat = mainStore.requiredInvoiceDefaultVat
 const totalHours = ref<string | null>(null)
 const costType = computed(() => {
   if (props.type == null) throw new Error('An hours cost type is required')

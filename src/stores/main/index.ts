@@ -10,19 +10,21 @@ import type {
   InitialDataMember,
   InitialDataSettings,
   MemberTypeEnum,
+  Order,
   ProductFamilyEnum,
   Profile,
   Statuscode,
 } from '@/api/types.gen'
 
+/** The get-initial-data member bootstrap, as the store holds it. */
+export type MainMemberInfo = InitialDataMember
+
 /**
- * The get-initial-data member bootstrap as the store holds it. `companylogo`
- * drops the API's `null`: the brand readers (NavBrand, TheSidebar) declare it
- * `companylogo?: string`, and an absent logo reads `undefined` once loaded.
+ * An order picked for dispatch, as far as the dispatch screen reads it: its
+ * ids, and who is already on it. The search modal stages full order rows and
+ * the mobile lists stage just these three keys; both are one of these.
  */
-export type MainMemberInfo = Omit<InitialDataMember, 'companylogo'> & {
-  companylogo?: string
-}
+export type AssignOrder = Pick<Order, 'id' | 'order_id' | 'assigned_user_info'>
 
 export interface MainState {
   /** Legacy list state, kept for shape: nothing in the tree reads it. */
@@ -47,11 +49,8 @@ export interface MainState {
   streamInfo: unknown
   /** [] until a maintenance contract stages its order seed (an object). */
   maintenanceEquipment: unknown
-  /**
-   * Orders picked for dispatch. Heterogeneous by writer: full Api.Order rows
-   * from the dispatch flows, id-picks from useDispatchSelection.
-   */
-  assignOrders: any[]
+  /** Orders picked for dispatch, carried across the navigation to the board. */
+  assignOrders: AssignOrder[]
   /** Read by getMaintenanceProducts; nothing ever populates it. */
   maintenanceProducts: unknown[]
   initialDataFetched: boolean
@@ -94,11 +93,9 @@ export const useMainStore = defineStore('main', {
       return state.memberInfo?.has_api_users
     },
     getMemberHasBranches: (state: MainState): boolean => {
-      // Exact boolean: NavItems/TheSidebar read it into computed<boolean>
-      // and NavCtx declares hasBranches: boolean.
-      return state.memberInfo!.has_branches!
+      return state.memberInfo?.has_branches ?? false
     },
-    getMemberLogo: (state: MainState): string | undefined => {
+    getMemberLogo: (state: MainState): string | null | undefined => {
       return state.memberInfo?.companylogo
     },
     getMemberName: (state: MainState): string | undefined => {
@@ -136,22 +133,30 @@ export const useMainStore = defineStore('main', {
     getVATTypes: (state: MainState): number[] | undefined => {
       return state.memberInfo?.vat_types
     },
-    getInvoiceDefaultVat: (state: MainState): number => {
-      // Exact number: the invoice cost panels feed it to makeCostRow's
-      // `vat: string | number`.
-      const vat = state.memberInfo?.settings?.invoice_default_vat
-      if (vat === undefined) throw new Error('main store: member info not loaded')
-      return vat
+    getInvoiceDefaultVat: (state: MainState): number | undefined => {
+      return state.memberInfo?.settings?.invoice_default_vat
     },
     getInvoiceDefaultHourlyRate: (state: MainState): string | undefined => {
       return state.memberInfo?.settings?.invoice_default_hourly_rate
     },
-    getDefaultCurrency: (state: MainState): string => {
-      // Exact string: BudgetView reads it into computed<string> and
-      // toDinero's currency param is string.
-      const currency = state.memberInfo?.settings?.default_currency
-      if (currency === undefined) throw new Error('main store: member info not loaded')
+    getDefaultCurrency: (state: MainState): string | undefined => {
+      return state.memberInfo?.settings?.default_currency
+    },
+    /**
+     * The tenant's default currency, for screens that only render once the
+     * member info is loaded. `getDefaultCurrency` reads `undefined` before
+     * that; this says so loudly instead of passing it on.
+     */
+    requiredDefaultCurrency(): string {
+      const currency = this.getDefaultCurrency
+      if (currency === undefined) throw new Error('main store: default currency read before member info loaded')
       return currency
+    },
+    /** The tenant's default VAT rate; see requiredDefaultCurrency. */
+    requiredInvoiceDefaultVat(): number {
+      const vat = this.getInvoiceDefaultVat
+      if (vat === undefined) throw new Error('main store: default VAT read before member info loaded')
+      return vat
     },
     getInvoiceDefaultTermOfPaymentDays: (state: MainState): number | undefined => {
       return state.memberInfo?.settings?.invoice_default_term_of_payment_days
@@ -210,9 +215,8 @@ export const useMainStore = defineStore('main', {
     getOrderTypes(): string[] | undefined {
       return this.memberInfo?.order_types
     },
-    getMemberType(): MemberTypeEnum {
-      // Exact flavour string: NavCtx declares memberType: string.
-      return this.memberInfo!.member_type!
+    getMemberType(): MemberTypeEnum | undefined {
+      return this.memberInfo?.member_type
     },
     getProfile: (state: MainState): Profile | null => state.profile,
     getProductFamily: (state: MainState): ProductFamilyEnum => state.profile ? state.profile.family : 'default',
@@ -222,7 +226,7 @@ export const useMainStore = defineStore('main', {
     getMaintenanceProducts(): unknown[] {
       return this.maintenanceProducts
     },
-    getAssignOrders(): any[] {
+    getAssignOrders(): AssignOrder[] {
       return this.assignOrders
     },
     isInitialDataFetched: (state: MainState): boolean => {
@@ -249,7 +253,7 @@ export const useMainStore = defineStore('main', {
     setUnacceptedCount(count: number): void {
       this.unacceptedCount = count
     },
-    setAssignOrders(orders: any[]): void {
+    setAssignOrders(orders: AssignOrder[]): void {
       this.assignOrders = orders
     },
     setMaintenanceEquipment(maintenanceEquipment: unknown): void {

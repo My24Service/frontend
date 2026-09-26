@@ -1,8 +1,10 @@
+import type { AssignOrder } from '@/stores/main'
+
 /**
  * What the dispatch screen needs of a picked order: its ids, and who is
  * already on it (listed there as already assigned).
  */
-export type SelectedOrder = Pick<Api.Order, 'id' | 'order_id' | 'assigned_user_info'>
+export type SelectedOrder = AssignOrder
 
 /**
  * The orders picked on the mobile dispatch lists, to hand to the dispatch
@@ -13,15 +15,7 @@ export function useDispatchSelection() {
   const router = useRouter()
   const mainStore = useMainStore()
 
-  const selected = computed<SelectedOrder[]>(() => {
-    const orders = mainStore.getAssignOrders
-    if (!Array.isArray(orders)) {
-      return []
-    }
-    // The store keeps the pick heterogeneous (`any[]`), so each staged row is
-    // read back through the selection type rather than returned untyped.
-    return orders.map((order: SelectedOrder) => order)
-  })
+  const selected = computed<SelectedOrder[]>(() => mainStore.getAssignOrders)
 
   function select(order: SelectedOrder) {
     if (selected.value.some((entry) => entry.id === order.id)) return

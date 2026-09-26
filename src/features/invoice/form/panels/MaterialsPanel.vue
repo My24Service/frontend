@@ -110,8 +110,8 @@ const props = withDefaults(defineProps<{
 }>(), { material_models: null, used_materials: null, teamleaderProducts: null })
 const context = useCostPanelContext()
 const mainStore = useMainStore()
-const default_currency = mainStore.getDefaultCurrency
-const invoice_default_vat = mainStore.getInvoiceDefaultVat
+const default_currency = mainStore.requiredDefaultCurrency
+const invoice_default_vat = mainStore.requiredInvoiceDefaultVat
 const costType = COST_TYPE.USED_MATERIALS
 function getTlProduct(materialId: number | null | undefined) {
   return props.teamleaderProducts?.find(product => product.material.id === materialId)

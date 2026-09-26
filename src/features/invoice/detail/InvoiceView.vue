@@ -206,7 +206,7 @@ const detailQuery = useQuery(() => ({
 }))
 useQueryErrorToast(detailQuery.error, $trans('Error loading invoice'))
 const isLoading = detailQuery.isLoading
-const companyLogo = computed(() => mainStore.getMemberLogo)
+const companyLogo = computed(() => mainStore.getMemberLogo ?? undefined)
 const invoice = computed(() => {
   const record = detailQuery.data.value
   if (!record) return undefined

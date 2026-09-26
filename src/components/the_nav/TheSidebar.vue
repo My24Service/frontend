@@ -52,14 +52,7 @@
 </template>
 
 <script setup lang="ts">
-// The member brand, as the brand component declares it. Declared here rather
-// than imported from NavBrand.vue: type-aware lint cannot resolve a type
-// import out of an SFC's `<script setup>`, so the import reads as an
-// unresolved error-type.
-interface MemberInfo {
-  name: string
-  companylogo?: string
-}
+import { type MemberInfo } from '@/components/NavBrand.vue'
 
 // The sidebar for both product families. The shltr layout is the base; the
 // default family branches on `profile.family` for its root class, brand,

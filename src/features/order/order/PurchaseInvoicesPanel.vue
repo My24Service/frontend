@@ -153,7 +153,7 @@ const props = defineProps<{
 // src/features/customer/README.md, "The whole-collection bound".
 
 const mainStore = useMainStore()
-const currency = computed(() => mainStore.getDefaultCurrency)
+const currency = computed(() => mainStore.requiredDefaultCurrency)
 
 const queryClient = useQueryClient()
 const {create} = useToast()
