@@ -29,7 +29,10 @@ async function errorHandler(error: InterceptorError) {
   } else {
     console.log(error)
   }
-  return Promise.reject(error instanceof Error ? error : new Error('Request failed', { cause: error }))
+  // An interceptor passes axios's rejection on as it came: callers read
+  // `error.response` off it, which a wrapping Error would hide.
+  // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+  return Promise.reject(error)
 }
 
 export default (client: AxiosInstance) => {
