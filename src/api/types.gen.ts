@@ -26885,7 +26885,7 @@ export type QuotationQuotationPartialUpdateResponses = {
 export type QuotationQuotationPartialUpdateResponse = QuotationQuotationPartialUpdateResponses[keyof QuotationQuotationPartialUpdateResponses];
 
 export type QuotationQuotationDownloadDefinitivePdfCreateData = {
-    body?: QuotationRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this quotation.
@@ -26896,8 +26896,15 @@ export type QuotationQuotationDownloadDefinitivePdfCreateData = {
     url: '/api/quotation/quotation/{id}/download_definitive_pdf/';
 };
 
+export type QuotationQuotationDownloadDefinitivePdfCreateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
+};
+
 export type QuotationQuotationDownloadDefinitivePdfCreateResponses = {
-    200: Quotation;
+    200: Blob | File;
 };
 
 export type QuotationQuotationDownloadDefinitivePdfCreateResponse = QuotationQuotationDownloadDefinitivePdfCreateResponses[keyof QuotationQuotationDownloadDefinitivePdfCreateResponses];
@@ -26928,7 +26935,7 @@ export type QuotationQuotationGenerateDefinitivePdfCreateResponses = {
 export type QuotationQuotationGenerateDefinitivePdfCreateResponse = QuotationQuotationGenerateDefinitivePdfCreateResponses[keyof QuotationQuotationGenerateDefinitivePdfCreateResponses];
 
 export type QuotationQuotationGeneratePreviewPdfCreateData = {
-    body?: QuotationRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this quotation.
@@ -26939,8 +26946,15 @@ export type QuotationQuotationGeneratePreviewPdfCreateData = {
     url: '/api/quotation/quotation/{id}/generate_preview_pdf/';
 };
 
+export type QuotationQuotationGeneratePreviewPdfCreateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
+};
+
 export type QuotationQuotationGeneratePreviewPdfCreateResponses = {
-    200: Quotation;
+    200: Blob | File;
 };
 
 export type QuotationQuotationGeneratePreviewPdfCreateResponse = QuotationQuotationGeneratePreviewPdfCreateResponses[keyof QuotationQuotationGeneratePreviewPdfCreateResponses];

@@ -8755,8 +8755,6 @@ export const vPatchedOrderFilterRequest = v.object({
  *   GET /api/quotation/quotation/{id}/
  *   PATCH /api/quotation/quotation/{id}/
  *   POST /api/quotation/quotation/
- *   POST /api/quotation/quotation/{id}/download_definitive_pdf/
- *   POST /api/quotation/quotation/{id}/generate_preview_pdf/
  *
  * Nested in: PaginatedQuotationList
  */
@@ -9238,8 +9236,6 @@ export const vPaginatedQuotationPreliminaryResponseList = v.object({
  * @endpoints
  * Request body:
  *   POST /api/quotation/quotation/
- *   POST /api/quotation/quotation/{id}/download_definitive_pdf/
- *   POST /api/quotation/quotation/{id}/generate_preview_pdf/
  *   POST /api/quotation/quotation/{id}/make_definitive/
  */
 export const vQuotationRequest = v.object({
@@ -22963,13 +22959,11 @@ export const vQuotationQuotationPartialUpdatePath = v.object({
 
 export const vQuotationQuotationPartialUpdateResponse = vQuotation;
 
-export const vQuotationQuotationDownloadDefinitivePdfCreateBody = vQuotationRequest;
-
 export const vQuotationQuotationDownloadDefinitivePdfCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vQuotationQuotationDownloadDefinitivePdfCreateResponse = vQuotation;
+export const vQuotationQuotationDownloadDefinitivePdfCreateResponse = v.string();
 
 export const vQuotationQuotationGenerateDefinitivePdfCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -22977,13 +22971,11 @@ export const vQuotationQuotationGenerateDefinitivePdfCreatePath = v.object({
 
 export const vQuotationQuotationGenerateDefinitivePdfCreateResponse = vQuotationDetail;
 
-export const vQuotationQuotationGeneratePreviewPdfCreateBody = vQuotationRequest;
-
 export const vQuotationQuotationGeneratePreviewPdfCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vQuotationQuotationGeneratePreviewPdfCreateResponse = vQuotation;
+export const vQuotationQuotationGeneratePreviewPdfCreateResponse = v.string();
 
 export const vQuotationQuotationGetMaterialsForAppListPath = v.object({
     id: v.pipe(v.number(), v.integer())

@@ -20574,24 +20574,16 @@ paths:
         required: true
       tags:
       - quotation
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/QuotationRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/QuotationRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/QuotationRequest'
       responses:
         '200':
           content:
-            application/json:
+            application/pdf:
               schema:
-                $ref: '#/components/schemas/Quotation'
+                type: string
+                format: binary
           description: ''
+        '400':
+          description: No response body
   /api/quotation/quotation/{id}/generate_definitive_pdf/:
     post:
       operationId: quotation_quotation_generate_definitive_pdf_create
@@ -20629,24 +20621,16 @@ paths:
         required: true
       tags:
       - quotation
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/QuotationRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/QuotationRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/QuotationRequest'
       responses:
         '200':
           content:
-            application/json:
+            application/pdf:
               schema:
-                $ref: '#/components/schemas/Quotation'
+                type: string
+                format: binary
           description: ''
+        '400':
+          description: No response body
   /api/quotation/quotation/{id}/get_materials_for_app/:
     get:
       operationId: quotation_quotation_get_materials_for_app_list

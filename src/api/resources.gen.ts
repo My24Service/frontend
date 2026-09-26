@@ -1223,8 +1223,6 @@ import {
   vQuotationOfferPartialUpdateBody,
   vQuotationQuotationAutocompleteListQuery,
   vQuotationQuotationCreateBody,
-  vQuotationQuotationDownloadDefinitivePdfCreateBody,
-  vQuotationQuotationGeneratePreviewPdfCreateBody,
   vQuotationQuotationImageCreateBody,
   vQuotationQuotationImageListQuery,
   vQuotationQuotationImagePartialUpdateBody,
@@ -5745,11 +5743,11 @@ export const QuotationQuotation = /*#__PURE__*/ resource({
   destroy: {mutation: quotationQuotationDestroyMutation},
   extras: {
     /** `/api/quotation/quotation/{id}/download_definitive_pdf/` */
-    downloadDefinitivePdfCreate: {mutation: quotationQuotationDownloadDefinitivePdfCreateMutation, body: vQuotationQuotationDownloadDefinitivePdfCreateBody},
+    downloadDefinitivePdfCreate: {mutation: quotationQuotationDownloadDefinitivePdfCreateMutation},
     /** `/api/quotation/quotation/{id}/generate_definitive_pdf/` */
     generateDefinitivePdfCreate: {mutation: quotationQuotationGenerateDefinitivePdfCreateMutation},
     /** `/api/quotation/quotation/{id}/generate_preview_pdf/` */
-    generatePreviewPdfCreate: {mutation: quotationQuotationGeneratePreviewPdfCreateMutation, body: vQuotationQuotationGeneratePreviewPdfCreateBody},
+    generatePreviewPdfCreate: {mutation: quotationQuotationGeneratePreviewPdfCreateMutation},
     /** `/api/quotation/quotation/{id}/get_materials_for_app/` */
     getMaterialsForAppList: {options: quotationQuotationGetMaterialsForAppListOptions, queryKey: quotationQuotationGetMaterialsForAppListQueryKey},
     /** `/api/quotation/quotation/{id}/make_definitive/` */
