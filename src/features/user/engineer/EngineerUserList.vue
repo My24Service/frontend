@@ -39,7 +39,7 @@
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 
-const authStore = useAuthStore()
+const { authStore } = useCommon()
 
 type EngineerUserRow = ListRow<Api.PaginatedEngineerList>
 

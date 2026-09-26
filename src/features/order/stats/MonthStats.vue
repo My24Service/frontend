@@ -45,7 +45,7 @@ import { monthCharts } from './chart-data'
 import { useOrderStatsQuery } from './use-order-stats-query'
 
 /** A month of orders: the weekly totals, the statuses per week, the assignments per week. */
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 
 const today = new Date()
 const year = ref(today.getFullYear())

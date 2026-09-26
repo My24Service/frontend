@@ -245,11 +245,7 @@ const props = withDefaults(defineProps<{
   statuscodePk: null,
 })
 
-const router = useRouter()
-const queryClient = useQueryClient()
-const authStore = useAuthStore()
-const mainStore = useMainStore()
-const {create: toast} = useToast()
+const { authStore, mainStore, router, toast, queryClient } = useCommon()
 
 const {
   values: action,

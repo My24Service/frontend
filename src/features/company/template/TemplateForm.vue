@@ -283,8 +283,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const { create: toast } = useToast()
-const router = useRouter()
+const { router, toast } = useCommon()
 
 /** The view/edit switch on the `:pk` route. A create is always a form. */
 const isEdit = ref(false)

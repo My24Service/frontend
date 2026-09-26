@@ -89,8 +89,7 @@ const props = defineProps<{
   customerId: number
 }>()
 
-const queryClient = useQueryClient()
-const {create} = useToast()
+const { toast: create, queryClient } = useCommon()
 
 // The partner dropdown must offer every partner, not the first page of them.
 // 1000 is the API's own ceiling: `My24Pagination.max_page_size` (my24service

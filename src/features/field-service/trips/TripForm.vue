@@ -166,7 +166,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 
 // The legacy read the countries once, in `created()`, and the store's list is
 // static for a session; a computed keeps that read where the template binds it.

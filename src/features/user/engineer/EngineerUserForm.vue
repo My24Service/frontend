@@ -269,9 +269,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const mainStore = useMainStore()
-const queryClient = useQueryClient()
-const {create} = useToast()
+const { mainStore, toast: create, queryClient } = useCommon()
 
 // The record nests its profile the way the write body does, so the form's
 // fields fill straight from it; the passwords start blank. The two decimals

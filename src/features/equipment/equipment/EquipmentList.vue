@@ -105,9 +105,8 @@ const addStateModal = useTemplateRef<{show: () => void, hide: () => void}>('addS
 // Read through computeds, not once: the member's branch setting and the
 // user's role must stay live while the list is mounted, and the template's
 // add link reads the branch setting on every render.
-const mainStore = useMainStore()
+const { authStore, mainStore, toast: create } = useCommon()
 const hasBranches = computed(() => mainStore.getMemberHasBranches)
-const authStore = useAuthStore()
 // "Planning" in the legacy screen's sense: neither a branch employee nor a
 // customer. Those two roles are the ones that see neither the owner column nor
 // the brand column.
@@ -138,7 +137,6 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
 // string while it is being typed - it is the wire shape that is a number.
 const state = reactive({equipment: 0, state: '', replace_months: ''})
 
-const {create} = useToast()
 const createState = useMutation(Api.EquipmentEquipmentState.create.mutation())
 
 function showAddStateModal(id: number) {

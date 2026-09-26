@@ -218,7 +218,7 @@ const props = withDefaults(defineProps<{
   showUserCanView: false,
 })
 
-const {create} = useToast()
+const { toast: create } = useCommon()
 
 const fields = [
   {key: 'name', label: $trans('Name')},

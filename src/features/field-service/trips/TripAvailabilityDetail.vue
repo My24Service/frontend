@@ -110,8 +110,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const {create} = useToast()
+const { router, toast: create } = useCommon()
 const {assignTrip, unassignTrip, isPending} = useTripAssignment()
 
 const tripId = computed(() => Number(props.pk))

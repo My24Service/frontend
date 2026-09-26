@@ -25,7 +25,7 @@
  * pills are this Slice's own navigation, not a per-tenant product decision, so
  * they render for every tenant. The ledger in the module README records it.
  */
-const route = useRoute()
+const { route } = useCommon()
 
 const items: {name: RouteName; label: () => string}[] = [
   {name: 'company-time-registration', label: () => $trans('Time registration')},

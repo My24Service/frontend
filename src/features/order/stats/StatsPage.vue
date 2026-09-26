@@ -92,7 +92,7 @@ const emit = defineEmits<{
   'update:orderType': [value: string]
 }>()
 
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 const orderTypeOptions = computed(() => [
   {value: 'all', text: 'all'},
   ...((mainStore.getOrderTypes ?? []).map((type) => ({value: type, text: type}))),

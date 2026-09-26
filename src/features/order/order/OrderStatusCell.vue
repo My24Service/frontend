@@ -34,7 +34,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{changed: [status: string]}>()
 
-const {create} = useToast()
+const { toast: create } = useCommon()
 const {mutateAsync} = useMutation({...Api.OrderStatus.create.mutation()})
 
 // The select keeps showing the attempted status once its write lands, until

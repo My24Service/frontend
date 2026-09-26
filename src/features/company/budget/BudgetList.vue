@@ -93,7 +93,7 @@ import { budgetModalFromRecord, budgetWrite, emptyBudget } from './schemas'
  */
 type BudgetRow = ListRow<Api.PaginatedBudgetList>
 
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const modelModal = useTemplateRef<{show: () => void, hide: () => void}>('modelModal')

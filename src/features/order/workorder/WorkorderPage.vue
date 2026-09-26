@@ -337,7 +337,7 @@ const props = defineProps<{
   uuid: string
 }>()
 
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 
 const query = useQuery(() => orderWorkorderDataRetrieveOptions({path: {id: props.uuid}}))
 useQueryErrorToast(query.error, $trans('Error loading workorder'))

@@ -125,7 +125,7 @@ import {
   type StudentRegistrationErrors,
 } from './registration'
 
-const { create } = useToast()
+const { toast: create } = useCommon()
 
 const values = ref(emptyStudentRegistration())
 const errors = ref<StudentRegistrationErrors>({})

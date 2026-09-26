@@ -47,8 +47,8 @@ const props = defineProps<{
   isLoading?: boolean
 }>()
 
-const hasBranches = useMainStore().getMemberHasBranches
-const authStore = useAuthStore()
+const { authStore, mainStore } = useCommon()
+const hasBranches = mainStore.getMemberHasBranches
 const planning = !authStore.isEmployee && !authStore.isCustomer
 
 const fields = computed(() => [

@@ -254,12 +254,7 @@ const MODES: {value: WindowMode; label: () => string}[] = [
   {value: 'year', label: () => $trans('Per year')},
 ]
 
-const route = useRoute()
-const router = useRouter()
-const queryClient = useQueryClient()
-const mainStore = useMainStore()
-const authStore = useAuthStore()
-const {create: toast} = useToast()
+const { authStore, mainStore, route, router, toast, queryClient } = useCommon()
 
 const lang: string = mainStore.getCurrentLanguage || 'nl'
 const monday = lang === 'en' ? 1 : 0

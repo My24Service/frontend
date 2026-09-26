@@ -50,9 +50,7 @@ import { addDays, format } from 'date-fns'
 
 import { ServerTable, createActionColumn, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 
-const authStore = useAuthStore()
-const queryClient = useQueryClient()
-const {create} = useToast()
+const { authStore, toast: create, queryClient } = useCommon()
 
 type ApiUserRow = ListRow<Api.PaginatedApiUserList>
 

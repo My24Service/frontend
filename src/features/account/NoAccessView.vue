@@ -20,10 +20,8 @@
 
 <script lang="ts" setup>
 import { LoginForm } from '@/features/auth'
-const authStore = useAuthStore()
-const route = useRoute()
-const router = useRouter()
 
+const { authStore, route, router } = useCommon()
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 
 function safeNextPath(value: LocationQueryValue | LocationQueryValue[]): string | null {

@@ -98,8 +98,7 @@ import { invalidateDispatchBoard } from '../invalidation'
  */
 const emit = defineEmits<{(event: 'assigned'): void}>()
 
-const queryClient = useQueryClient()
-const {create: toast} = useToast()
+const { toast, queryClient } = useCommon()
 
 const modalRef = useTemplateRef<{show: () => void; hide: () => void}>('attach-order-modal')
 

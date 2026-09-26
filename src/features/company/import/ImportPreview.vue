@@ -114,10 +114,8 @@ const props = defineProps<{
   route_prefix: string
 }>()
 
-const router = useRouter()
-const queryClient = useQueryClient()
-const { create: toast } = useToast()
-const hasBranches = useMainStore().getMemberHasBranches
+const { mainStore, router, toast, queryClient } = useCommon()
+const hasBranches = mainStore.getMemberHasBranches
 
 const importModal = useTemplateRef<{show: () => void, hide: () => void}>('importModal')
 const isDoing = ref(false)

@@ -47,14 +47,12 @@ function customerOptions(rows: Api.AddressAutocompleteRow[]): FilterOption[] {
   return rows.map((row) => ({value: String(row.id), label: row.name ?? row.value}))
 }
 
-const queryClient = useQueryClient()
+const { mainStore, queryClient } = useCommon()
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated. Typed structurally because
 // ServerTable is generic over the row type.
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
-
-const mainStore = useMainStore()
 
 function dineroFor(row: ContractRow) {
   // sum_tariffs is required on the contract; the tenant default prices it.

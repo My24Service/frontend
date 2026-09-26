@@ -151,7 +151,7 @@ const props = withDefaults(defineProps<{
 })
 
 const id = Number(props.pk)
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 
 const detailQuery = useQuery(Api.EquipmentEquipment.retrieve.options({path: {id}}))
 useQueryErrorToast(detailQuery.error, $trans('Error fetching equipment detail'))

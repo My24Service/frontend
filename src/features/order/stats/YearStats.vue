@@ -37,7 +37,7 @@ import { yearCharts } from './chart-data'
 import { useOrderStatsQuery } from './use-order-stats-query'
 
 /** A year of orders: the monthly totals, then the statuses per month. */
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 
 const year = ref(new Date().getFullYear())
 const {orderType, query, statuscodes} = useOrderStatsQuery<Api.YearListResponse>(

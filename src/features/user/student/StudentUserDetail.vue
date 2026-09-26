@@ -91,7 +91,7 @@ const props = defineProps<{
   pk: string | number
 }>()
 
-const router = useRouter()
+const { router } = useCommon()
 
 const detailQuery = useQuery(() => Api.CompanyStudentuser.retrieve.options({path: {id: Number(props.pk)}}))
 

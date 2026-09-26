@@ -323,10 +323,7 @@ const props = withDefaults(defineProps<{
   assignModeProp: 'false',
 })
 
-const router = useRouter()
-const store = useMainStore()
-const queryClient = useQueryClient()
-const { create: toast } = useToast()
+const { mainStore, router, toast, queryClient } = useCommon()
 const { assignOrders, unassignOrder } = useOrderAssignment()
 
 const socket = new MemberNewDataSocket()
@@ -431,13 +428,13 @@ onMounted(async () => {
   socket.setOnmessageHandler(onNewData)
   socket.getSocket()
 
-  moment.locale(store.getCurrentLanguage || 'nl')
-  const monday = store.getCurrentLanguage === 'en' ? 1 : 0
+  moment.locale(mainStore.getCurrentLanguage || 'nl')
+  const monday = mainStore.getCurrentLanguage === 'en' ? 1 : 0
   startDate.value = moment().weekday(monday).toDate()
 
   assignMode.value = parseAssignModeFlag(props.assignModeProp)
   if (assignMode.value) {
-    selectedOrders.value = [...store.getAssignOrders]
+    selectedOrders.value = [...mainStore.getAssignOrders]
     alreadyAssignedUsers.value = assignedUsersOf(selectedOrders.value)
   } else {
     alreadyAssignedUsers.value = []
@@ -693,7 +690,7 @@ function searchAndAssignDone(newAssignMode: boolean) {
   assignMode.value = newAssignMode
 
   if (newAssignMode) {
-    selectedOrders.value = [...store.getAssignOrders]
+    selectedOrders.value = [...mainStore.getAssignOrders]
     alreadyAssignedUsers.value = assignedUsersOf(selectedOrders.value)
   } else {
     alreadyAssignedUsers.value = []
@@ -779,7 +776,7 @@ function cancelAssign() {
   selectedOrders.value = []
   alreadyAssignedUsers.value = []
   assignMode.value = false
-  store.setAssignOrders([])
+  mainStore.setAssignOrders([])
 }
 
 function removeSelectedOrder(index: number) {

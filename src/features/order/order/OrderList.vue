@@ -87,8 +87,7 @@ const props = withDefaults(defineProps<{
 
 const mode = computed<ListMode>(() => (isListMode(props.queryMode) ? props.queryMode : 'all'))
 
-const route = useRoute()
-const authStore = useAuthStore()
+const { authStore, route } = useCommon()
 
 const isMobile = computed(() => route.path.startsWith('/mobile'))
 const canDelete = computed(() => !authStore.isCustomer && !authStore.isBranchEmployee)

@@ -50,9 +50,9 @@ type FinishedRow = ListRow<Api.PaginatedAssignedOrderViewList>
  * moved it — so the default view asks the endpoint the same question the legacy
  * screen asked.
  */
-const store = useMainStore()
+const { mainStore } = useCommon()
 
-moment.locale(store.getCurrentLanguage || 'nl')
+moment.locale(mainStore.getCurrentLanguage || 'nl')
 
 /** How many months the board has been moved from this one. */
 const monthOffset = ref(0)

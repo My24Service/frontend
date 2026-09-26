@@ -262,8 +262,7 @@ const props = withDefaults(defineProps<{
   isRequest: false,
 })
 
-const authStore = useAuthStore()
-const mainStore = useMainStore()
+const { authStore, mainStore } = useCommon()
 
 const {isCreate} = useRoutePk(() => props.pk)
 

@@ -91,7 +91,7 @@ type EventRow = ListRow<Api.PaginatedEngineerEventList>
 const PAGE_SIZE = 50
 const PAGE_SIZES = [PAGE_SIZE]
 
-const {create: toast} = useToast()
+const { toast } = useCommon()
 
 const columnHelper = createAppColumnHelper<EventRow>()
 const orderModal = useTemplateRef<{show: (eventId: number, engineerUserId: number) => void}>('attach-order-modal')

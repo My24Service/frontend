@@ -69,9 +69,9 @@ interface PlacedOrder {
   layout: {slot: number; days: number; d: string}
 }
 
-const store = useMainStore()
+const { mainStore } = useCommon()
 
-const statuscodes = computed(() => store.getStatuscodes)
+const statuscodes = computed(() => mainStore.getStatuscodes)
 
 const containerDivClass = computed(() => {
   if (props.alreadyAssigned) {

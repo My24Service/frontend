@@ -110,9 +110,7 @@ import {
  * echoes the choice. The member search already ran on the generated client
  * in the legacy screen; the write is what moves over here.
  */
-const router = useRouter()
-const queryClient = useQueryClient()
-const { create: toast } = useToast()
+const { router, toast, queryClient } = useCommon()
 
 const values = ref(emptyPartnerRequest())
 const errors = ref<PartnerRequestFormErrors>({})

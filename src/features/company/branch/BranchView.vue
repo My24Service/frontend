@@ -233,7 +233,7 @@ const props = withDefaults(defineProps<{
   from_settings: false,
 })
 
-const authStore = useAuthStore()
+const { authStore } = useCommon()
 const isEmployee = computed(() => authStore.isBranchEmployee)
 const ownId = computed(() => authStore.branchEmployeeBranch as number | null)
 

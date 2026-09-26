@@ -179,8 +179,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const mainStore = useMainStore()
+const { mainStore, router } = useCommon()
 
 const hasBranches = computed(() => Boolean(mainStore.getMemberHasBranches))
 const orderTypeOptions = useOrderTypeOptions()

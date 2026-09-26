@@ -77,8 +77,7 @@ const partnerPills: PillNavItem[] = [
  */
 type RequestRow = ListRow<Api.PaginatedPartnerRequestList>
 
-const queryClient = useQueryClient()
-const { create: toast } = useToast()
+const { toast, queryClient } = useCommon()
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 

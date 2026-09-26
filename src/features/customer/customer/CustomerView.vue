@@ -271,7 +271,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
+const { authStore, mainStore, router } = useCommon()
 
 const customerId = computed(() => Number(props.pk))
 
@@ -283,8 +283,6 @@ const PER_PAGE = 20
 // my24service `source/apps/core/rest.py:236`), which DRF clamps a larger value
 // down to rather than rejecting it.
 
-const authStore = useAuthStore()
-const mainStore = useMainStore()
 const isCustomer = computed(() => authStore.isCustomer)
 
 function formatContractValue(contract: Api.MaintenanceContract): string {

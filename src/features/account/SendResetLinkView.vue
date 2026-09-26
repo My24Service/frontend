@@ -46,8 +46,7 @@ import {
   type SendResetLinkValues,
 } from './schemas'
 
-const router = useRouter()
-const { create } = useToast()
+const { router, toast: create } = useCommon()
 
 const values = ref<SendResetLinkValues>({ email: '' })
 const errors = ref<SendResetLinkErrors>({})

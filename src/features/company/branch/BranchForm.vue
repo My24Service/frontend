@@ -250,10 +250,10 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const mainStore = useMainStore()
+const { authStore, mainStore } = useCommon()
 // A branch employee is pinned to their own branch: every visit to this form
 // is an edit of it, exactly as the legacy screen's `isCreate` read it.
-const isMyBranch = computed(() => useAuthStore().isBranchEmployee)
+const isMyBranch = computed(() => authStore.isBranchEmployee)
 
 const countries = computed(() => mainStore.getCountries)
 

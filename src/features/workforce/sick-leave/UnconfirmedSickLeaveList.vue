@@ -47,8 +47,7 @@ import SubNav from '../SubNav.vue'
  */
 type SickLeaveRow = ListRow<Api.PaginatedUserSickLeaveList>
 
-const queryClient = useQueryClient()
-const {create: toast} = useToast()
+const { toast, queryClient } = useCommon()
 
 const helper = createAppColumnHelper<SickLeaveRow>()
 

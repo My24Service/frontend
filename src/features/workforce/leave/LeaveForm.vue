@@ -269,7 +269,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const {create: toast} = useToast()
+const { toast } = useCommon()
 void toast
 
 const today = moment().format('YYYY-MM-DD')

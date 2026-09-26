@@ -64,9 +64,7 @@ const props = withDefaults(defineProps<{
   isView?: boolean
 }>(), {isView: false})
 
-const {create} = useToast()
-const router = useRouter()
-const authStore = useAuthStore()
+const { authStore, router, toast: create, queryClient } = useCommon()
 // A customer or branch employee may read the PDF but not regenerate it.
 const canManagePdf = computed(() => !authStore.isCustomer && !authStore.isBranchEmployee)
 
@@ -81,7 +79,6 @@ const isLoading = ref(false)
 const invoiceURL = ref<string | null>(null)
 const pdfBlobError = ref<PdfBlobError | null>(null)
 
-const queryClient = useQueryClient()
 const previewMutation = useMutation(Api.InvoiceInvoice.extras.generatePreviewPdfCreate.mutation())
 const downloadMutation = useMutation(Api.InvoiceInvoice.extras.downloadPdfCreate.mutation())
 const recreateMutation = useMutation(Api.InvoiceInvoice.extras.recreatePdfCreate.mutation())

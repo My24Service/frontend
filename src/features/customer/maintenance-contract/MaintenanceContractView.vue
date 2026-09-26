@@ -180,8 +180,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const mainStore = useMainStore()
+const { mainStore, router } = useCommon()
 
 const contractId = computed(() => Number(props.pk))
 

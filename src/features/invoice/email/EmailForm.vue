@@ -95,10 +95,7 @@ import {
 import { downloadBlob } from '@/features/shared'
 import { emailFormSchema, FIELD_LABELS, FIELD_MESSAGES, validateEmail, tagValidator } from './schemas'
 
-const route = useRoute()
-const router = useRouter()
-const queryClient = useQueryClient()
-const { create } = useToast()
+const { route, router, toast: create, queryClient } = useCommon()
 const invoiceId = computed(() => Number(route.query.invoiceId))
 const validId = computed(() => Number.isSafeInteger(invoiceId.value) && invoiceId.value > 0)
 const draftQuery = useQuery(() => ({ ...invoiceEmailGetUnsentEmailRetrieveOptions({query: {invoiceId: invoiceId.value}}), enabled: validId.value }))

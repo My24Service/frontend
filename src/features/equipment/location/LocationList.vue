@@ -58,7 +58,7 @@ type LocationRow = ListRow<Api.PaginatedLocationList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
-const authStore = useAuthStore()
+const { authStore } = useCommon()
 // "Planning" in the legacy screen's sense: neither a branch employee nor a
 // customer. Those two roles see no owner column.
 const planning = !authStore.isEmployee && !authStore.isCustomer

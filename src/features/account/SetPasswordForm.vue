@@ -59,9 +59,7 @@ import {
   type SetPasswordValues,
 } from './schemas'
 
-const route = useRoute()
-const router = useRouter()
-const { create } = useToast()
+const { route, router, toast: create } = useCommon()
 
 const values = ref<SetPasswordValues>({ password1: '', password2: '' })
 const errors = ref<SetPasswordErrors>({})

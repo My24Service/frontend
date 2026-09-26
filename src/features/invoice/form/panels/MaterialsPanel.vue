@@ -109,7 +109,7 @@ const props = withDefaults(defineProps<{
   teamleaderProducts?: Api.ProductList[] | null
 }>(), { material_models: null, used_materials: null, teamleaderProducts: null })
 const context = useCostPanelContext()
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 const default_currency = mainStore.requiredDefaultCurrency
 const invoice_default_vat = mainStore.requiredInvoiceDefaultVat
 const costType = COST_TYPE.USED_MATERIALS

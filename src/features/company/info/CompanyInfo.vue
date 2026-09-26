@@ -374,7 +374,7 @@ import {
  * the nav reads its name and logo from - the legacy screen did not either, so
  * a rename shows in the nav on the next load. See the module README.
  */
-const mainStore = useMainStore()
+const { mainStore, toast: create } = useCommon()
 
 const isEditing = ref(false)
 const countries = computed(() => mainStore.getCountries)
@@ -423,7 +423,6 @@ const currentWorkorderLogo = computed(() => record.value?.companylogo_workorder 
 const companyLogo = useTemplateRef<{$el: HTMLElement}>('companyLogo')
 const workorderLogo = useTemplateRef<{$el: HTMLElement}>('workorderLogo')
 
-const { create } = useToast()
 const { preview: logoPreview, stage: stageLogoFile } = useStagedImage()
 const { preview: workorderPreview, stage: stageWorkorderFile } = useStagedImage()
 const pickedLogo = ref<File | File[] | null>(null)

@@ -119,7 +119,7 @@ const props = withDefaults(defineProps<{
   teamleaderHours?: TeamleaderHourlyRate | null
 }>(), { type: null, hours_total: null, user_totals: null, teamleaderHours: null })
 const context = useCostPanelContext()
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 const default_currency = mainStore.requiredDefaultCurrency
 const invoice_default_vat = mainStore.requiredInvoiceDefaultVat
 const totalHours = ref<string | null>(null)

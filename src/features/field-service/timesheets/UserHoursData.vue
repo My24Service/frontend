@@ -80,7 +80,7 @@ const props = withDefaults(defineProps<{
   detail_route_name: undefined,
 })
 
-const route = useRoute()
+const { route } = useCommon()
 
 const {startDate, today, week, nextWeek, backWeek} = useHoursWeekNav()
 

@@ -53,7 +53,7 @@ import {
   settingsWrite,
 } from './schemas'
 
-const queryClient = useQueryClient()
+const { queryClient } = useCommon()
 
 const {
   values: settings,

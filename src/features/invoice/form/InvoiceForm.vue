@@ -210,10 +210,7 @@ const props = defineProps<{
 }>()
 
 const isEdit = computed(() => Boolean(props.pk))
-const { create } = useToast()
-const router = useRouter()
-const queryClient = useQueryClient()
-const mainStore = useMainStore()
+const { mainStore, router, toast: create, queryClient } = useCommon()
 const currency = mainStore.requiredDefaultCurrency
 
 const viewer = useTemplateRef<{ show: () => void }>('invoice-viewer')

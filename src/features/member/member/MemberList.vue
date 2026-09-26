@@ -60,7 +60,7 @@ const props = withDefaults(defineProps<{
   variant: 'active',
 })
 
-const authStore = useAuthStore()
+const { authStore } = useCommon()
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated. Typed structurally because

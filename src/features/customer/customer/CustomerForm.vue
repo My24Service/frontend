@@ -271,7 +271,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 
 const {
   values: customer,

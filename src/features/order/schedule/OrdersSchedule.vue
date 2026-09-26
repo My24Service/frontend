@@ -125,7 +125,7 @@ import { useSchedule } from './use-schedule'
  * The `start`/`end` route params the legacy declared were never read by
  * either design and are not taken here.
  */
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 const isDefaultFamily = computed(() => mainStore.getProductFamily === 'default')
 
 const {

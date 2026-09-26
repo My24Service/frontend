@@ -257,10 +257,7 @@ const props = withDefaults(defineProps<{
   quotationId: null,
 })
 
-const router = useRouter()
-const authStore = useAuthStore()
-const mainStore = useMainStore()
-const {create: toastCreate} = useToast()
+const { authStore, mainStore, router, toast: toastCreate } = useCommon()
 
 const hasBranches = computed(() => Boolean(mainStore.getMemberHasBranches))
 const usesEquipment = computed(() => Boolean(mainStore.getMemberUsesEquipment))

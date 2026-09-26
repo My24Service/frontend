@@ -79,7 +79,7 @@ const props = withDefaults(defineProps<{
   invoice_default_call_out_costs?: number | string | null
 }>(), { invoice_default_call_out_costs: null })
 const context = useCostPanelContext()
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 const default_currency = mainStore.requiredDefaultCurrency
 const invoice_default_vat = mainStore.requiredInvoiceDefaultVat
 const costType = COST_TYPE.CALL_OUT_COSTS

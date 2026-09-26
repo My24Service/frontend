@@ -34,8 +34,7 @@ import { readLinkParams } from '@/features/account'
  */
 type Phase = 'verifying' | 'verified' | 'verify-failed' | 'link-sent' | 'link-failed'
 
-const route = useRoute()
-const { create } = useToast()
+const { route, toast: create } = useCommon()
 
 const phase = ref<Phase>('verifying')
 

@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 const defaultVat = mainStore.getInvoiceDefaultVat
 const props = withDefaults(defineProps<{
   modelValue?: string | number

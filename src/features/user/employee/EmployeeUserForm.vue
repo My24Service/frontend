@@ -95,8 +95,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const authStore = useAuthStore()
-const mainStore = useMainStore()
+const { authStore, mainStore } = useCommon()
 
 const isBranchEmployee = computed(() => authStore.isBranchEmployee)
 const hasBranches = computed(() => mainStore.getMemberHasBranches)

@@ -59,7 +59,7 @@ const acceptedFormatsDescription = computed(() =>
     ? `${$trans('Accepted file formats')}: ${props.allowedExtensions.join(', ')}`
     : undefined)
 
-const { create } = useToast()
+const { toast: create } = useCommon()
 
 async function onSelected(event: Event) {
   const file = chosenFile(event)

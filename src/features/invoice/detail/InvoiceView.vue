@@ -193,9 +193,7 @@ import { StatusesComponent } from '@/features/shared'
 import { InvoicePDFViewer } from '@/features/invoice/pdf'
 
 const props = defineProps<{ uuid: string }>()
-const route = useRoute()
-const router = useRouter()
-const mainStore = useMainStore()
+const { mainStore, route, router } = useCommon()
 const viewer = useTemplateRef<{ show: () => void }>('invoice-viewer')
 const detailQuery = useQuery(() => ({
   ...invoiceInvoiceDetailRetrieveOptions({

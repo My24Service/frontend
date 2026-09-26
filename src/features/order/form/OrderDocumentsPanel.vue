@@ -156,7 +156,7 @@ const props = defineProps<{
   documents: Api.OrderDocument.Record[]
 }>()
 
-const {create} = useToast()
+const { toast: create } = useCommon()
 
 // The staging the orderlines and infolines share; this panel adds only the
 // file picking and the add/edit form the documents need.

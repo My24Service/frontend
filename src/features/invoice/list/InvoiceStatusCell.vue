@@ -33,8 +33,7 @@ function isAutomatic(code: Api.Statuscode) {
   return Boolean(code.settings_key || code.roles?.length)
 }
 
-const queryClient = useQueryClient()
-const {create} = useToast()
+const { toast: create, queryClient } = useCommon()
 const {mutateAsync} = useMutation({...Api.InvoiceInvoiceStatus.create.mutation()})
 
 const {currentCode, current, selected, color, isPending, change} = useStatusCell({

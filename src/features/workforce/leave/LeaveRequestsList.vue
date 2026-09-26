@@ -60,8 +60,7 @@ import SubNav from '../SubNav.vue'
  */
 type LeaveRequestRow = ListRow<Api.PaginatedUserLeaveHoursList>
 
-const queryClient = useQueryClient()
-const {create: toast} = useToast()
+const { toast, queryClient } = useCommon()
 
 const helper = createAppColumnHelper<LeaveRequestRow>()
 

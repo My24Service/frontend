@@ -49,10 +49,7 @@ const FIELD_LABELS = {
 
 const $loading = useLoading()
 
-const authStore = useAuthStore()
-const mainStore = useMainStore()
-const { create } = useToast()
-const router = useRouter()
+const { authStore, mainStore, router, toast: create } = useCommon()
 
 const credentials = ref<LoginFormValues>({ username: '', password: '' })
 const errors = ref<LoginFieldErrors>({})

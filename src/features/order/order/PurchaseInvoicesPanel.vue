@@ -152,11 +152,8 @@ const props = defineProps<{
 // is the API's own ceiling (`My24Pagination.max_page_size`), see
 // src/features/customer/README.md, "The whole-collection bound".
 
-const mainStore = useMainStore()
+const { mainStore, toast: create, queryClient } = useCommon()
 const currency = computed(() => mainStore.requiredDefaultCurrency)
-
-const queryClient = useQueryClient()
-const {create} = useToast()
 
 const listQuery = useQuery(() => Api.InvoicePurchase.list.options({
   query: {order: props.orderId, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},

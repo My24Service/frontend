@@ -42,8 +42,7 @@ import IBiCheckSquareFill from '~icons/bi/check-square-fill'
 
 type StudentUserRow = ListRow<Api.PaginatedStudentUserList>
 
-const queryClient = useQueryClient()
-const {create} = useToast()
+const { toast: create, queryClient } = useCommon()
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated.

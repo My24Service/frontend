@@ -43,7 +43,7 @@ import {
 } from '@/features/table'
 import InvoiceStatusCell from './InvoiceStatusCell.vue'
 
-const route = useRoute()
+const { route } = useCommon()
 const pageTitle = computed(() => route.name === 'preliminary-invoices'
   ? $trans('Preliminary invoices')
   : route.name === 'invoices-sent' ? $trans('Sent invoices') : $trans('Definitive invoices'))

@@ -124,7 +124,7 @@ const props = defineProps<{
   route_prefix: string
 }>()
 
-const router = useRouter()
+const { router } = useCommon()
 
 /** The route decides the write once, at setup: no pk, a create. */
 const isCreateRoute = props.pk == null

@@ -126,8 +126,7 @@ const emit = defineEmits<{
   (event: 'search-and-assign-done', hasSelection: boolean): void
 }>()
 
-const store = useMainStore()
-const {create: toast} = useToast()
+const { mainStore, toast } = useCommon()
 
 const modal = useTemplateRef<{show: () => void; hide: () => void}>('search-modal-wide')
 const editStartDateModal = useTemplateRef<InstanceType<typeof EditStartDate>>('edit-start-date')
@@ -138,7 +137,7 @@ const committed = ref('')
 const lastQuery = ref<string | false>(false)
 const selectedOrders = ref<Api.Order[]>([])
 
-const mustIncludeReference = computed(() => store.getOrderListMustIncludeReference)
+const mustIncludeReference = computed(() => mainStore.getOrderListMustIncludeReference)
 
 /**
  * The dot beside a row's status. It reads the store's legend, which is what
@@ -146,7 +145,7 @@ const mustIncludeReference = computed(() => store.getOrderListMustIncludeReferen
  * never consulted and the dot is the fallback grey. Preserved as it renders;
  * see the README's preserved defects.
  */
-const orderStatusColorCode = computed(() => my24.status2color(store.getStatuscodes, undefined))
+const orderStatusColorCode = computed(() => my24.status2color(mainStore.getStatuscodes, undefined))
 
 const listQuery = useQuery(() => ({
   ...Api.OrderOrder.list.options({query: {page: 1, q: committed.value}}),
@@ -173,12 +172,12 @@ function selectOrder(order: Api.Order) {
   }
 
   selectedOrders.value.push(order)
-  store.setAssignOrders(selectedOrders.value)
+  mainStore.setAssignOrders(selectedOrders.value)
 }
 
 function removeSelectedOrder(index: number) {
   selectedOrders.value.splice(index, 1)
-  store.setAssignOrders(selectedOrders.value)
+  mainStore.setAssignOrders(selectedOrders.value)
 }
 
 /**
@@ -246,7 +245,7 @@ function hide() {
 
 /** Closing hands the selection to the board, which is the one that assigns it. */
 function searchAndAssignDone() {
-  store.setAssignOrders(selectedOrders.value)
+  mainStore.setAssignOrders(selectedOrders.value)
   emit('search-and-assign-done', hasSelectedOrders())
   hide()
 }

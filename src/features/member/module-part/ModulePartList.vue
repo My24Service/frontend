@@ -47,7 +47,7 @@ function moduleOptions(rows: {id: number, name: string}[]): FilterOption[] {
   return rows.map((row) => ({value: String(row.id), label: row.name}))
 }
 
-const queryClient = useQueryClient()
+const { queryClient } = useCommon()
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated. Typed structurally because

@@ -140,9 +140,7 @@ const emit = defineEmits<{
   invoiceLineDeleted: []
   updateInvoiceTotals: [totals: [string, string]]
 }>()
-const { create } = useToast()
-const mainStore = useMainStore()
-const queryClient = useQueryClient()
+const { mainStore, toast: create, queryClient } = useCommon()
 const currency = mainStore.requiredDefaultCurrency
 const defaultVat = String(mainStore.requiredInvoiceDefaultVat)
 const lines = ref<LineRow[]>([])

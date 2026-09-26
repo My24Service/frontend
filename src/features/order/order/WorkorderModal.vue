@@ -70,7 +70,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{recreated: []}>()
 
-const router = useRouter()
+const { router, toast: create } = useCommon()
 const modal = useTemplateRef<{show: () => void}>('workorder-viewer')
 const iframeLoading = ref(true)
 // The iframe gets its src on the first open, not at mount: a detail view
@@ -92,7 +92,6 @@ function openInNewTab() {
   window.open(workorderUrl.value, '_blank')
 }
 
-const {create} = useToast()
 const recreate = useMutation({
   ...Api.OrderOrder.extras.recreatePdfCreate.mutation(),
   onSuccess: () => {

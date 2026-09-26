@@ -66,8 +66,7 @@ const props = defineProps<{
   route_prefix: string
 }>()
 
-const queryClient = useQueryClient()
-const { create: toast } = useToast()
+const { toast, queryClient } = useCommon()
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const revertModal = useTemplateRef<{show: () => void, hide: () => void}>('revertModal')

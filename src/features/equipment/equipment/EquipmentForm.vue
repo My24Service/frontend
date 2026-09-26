@@ -388,8 +388,8 @@ const {wireKind, chooses} = useOwnerContext()
 // exactly the one whose type select has two values to choose between.
 const hasBranches = computed(() => wireKind.value === 'branch')
 
+const { mainStore } = useCommon()
 /** What a new equipment's price is quoted in, as the legacy model took it. */
-const mainStore = useMainStore()
 const defaultCurrency = computed(() => mainStore.requiredDefaultCurrency)
 
 const nameInput = useTemplateRef<{focus?: () => void}>('name')

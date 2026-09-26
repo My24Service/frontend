@@ -108,7 +108,7 @@ const props = withDefaults(defineProps<{
   invoice_default_price_per_km?: string | null
 }>(), { user_totals: null, distance_total: null, invoice_default_price_per_km: null })
 const context = useCostPanelContext()
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 const default_currency = mainStore.requiredDefaultCurrency
 const invoice_default_vat = mainStore.requiredInvoiceDefaultVat
 const costType = COST_TYPE.DISTANCE
