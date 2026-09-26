@@ -46,11 +46,11 @@ export default (client: AxiosInstance) => {
 
       return request
     },
-      error => errorHandler(error)
+      (error: InterceptorError) => errorHandler(error)
   )
 
   client.interceptors.response.use(
     response => response,
-    error => errorHandler(error)
+    (error: InterceptorError) => errorHandler(error)
   )
 }

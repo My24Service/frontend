@@ -1,5 +1,6 @@
 import * as v from 'valibot'
 import BaseModel from '../base'
+import type { AutocompleteRow } from '../base'
 import { vSupplier, vSupplierCreateUpdate } from '@/api/valibot.gen'
 import { formDefaults, formSchema, lenient, writeSchema } from '../schema'
 
@@ -72,7 +73,7 @@ class SupplierService extends BaseModel {
   url = '/inventory/supplier/'
 
   search(query: string) {
-    return this.axios.get(`${this.url}autocomplete/?q=${query}`).then((response) => response.data)
+    return this.axios.get<AutocompleteRow[]>(`${this.url}autocomplete/?q=${query}`).then((response) => response.data)
   }
 }
 

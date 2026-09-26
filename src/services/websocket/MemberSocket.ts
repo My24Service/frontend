@@ -9,7 +9,8 @@ class MemberSocket extends BaseSocket {
   onmessageHandler: ((data: unknown) => void) | null = null
 
   async init() {
-    this.room = await this._getRoom('/get-member-room/')
+    const room: unknown = await this._getRoom('/get-member-room/')
+    this.room = typeof room === 'string' ? room : null
     if (this.debug) {
       console.log(`${this.name}: received room: ${this.room}`)
     }

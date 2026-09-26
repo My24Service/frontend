@@ -221,6 +221,19 @@ interface TaxRateOption {
   text: string
 }
 
+/**
+ * The Teamleader backend surface this chooser uses, restated with the shapes
+ * it answers. `TeamleaderService` is untyped JS, so every `await` on it is
+ * `any` until the handle itself carries the contract.
+ */
+interface TeamleaderServiceClient {
+  configDetail(): Promise<unknown>
+  fetchTaxRates(): Promise<{ results: TaxRateResponse[] }>
+  fetchProductDetail(id: string): Promise<TeamleaderProductDetail>
+  fetchProducts(query: string | null): Promise<TeamleaderProductSummary[]>
+  createLinkProduct(data: Record<string, unknown>): Promise<{ is_ok: boolean; material: number }>
+}
+
 const props = withDefaults(defineProps<{
   material?: ChooserMaterial
   withCreateButton?: boolean
@@ -236,7 +249,7 @@ const emit = defineEmits<{
 const { create } = useToast()
 const loading = useLoading()
 const mainStore = useMainStore()
-const service = new TeamleaderService()
+const service: TeamleaderServiceClient = new TeamleaderService()
 
 const modal = ref<InstanceType<typeof BModal> | null>(null)
 const products = ref<TeamleaderProductSummary[]>([])
@@ -316,7 +329,7 @@ async function newTeamleaderProduct() {
     name: props.material?.name ?? '',
     code: props.material?.identifier ?? null,
     description: props.material?.description ?? null,
-    tax_rate_id: defaultRate.uuid,
+    tax_rate_id: defaultRate?.uuid ?? '',
     purchase_price: props.material?.price_purchase_ex ?? '',
     selling_price: props.material?.price_selling_ex ?? '',
     material: props.material?.id ?? 0,
@@ -336,12 +349,12 @@ async function createLinkProduct() {
 
   try {
     const response = await service.createLinkProduct(createData)
-    if (!response['is_ok']) {
+    if (!response.is_ok) {
       errorToast(create, 'Fout aanmaken van het product in Teamleader')
       return
     }
 
-    const materialId = response['material']
+    const materialId = response.material
     emit('product-created-linked', materialId)
   } catch (error) {
     console.error('error in create/link', error)

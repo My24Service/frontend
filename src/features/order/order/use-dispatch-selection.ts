@@ -15,7 +15,12 @@ export function useDispatchSelection() {
 
   const selected = computed<SelectedOrder[]>(() => {
     const orders = mainStore.getAssignOrders
-    return Array.isArray(orders) ? orders : []
+    if (!Array.isArray(orders)) {
+      return []
+    }
+    // The store keeps the pick heterogeneous (`any[]`), so each staged row is
+    // read back through the selection type rather than returned untyped.
+    return orders.map((order: SelectedOrder) => order)
   })
 
   function select(order: SelectedOrder) {

@@ -299,7 +299,7 @@ export const useMainStore = defineStore('main', {
     hasAccessToRoute(route: string): boolean {
       const authStore = useAuthStore()
       const mainStore = useMainStore()
-      let parts = route.split('/')
+      const parts = route.split('/')
       parts.shift()
       const lenParts = parts.length
       const [mod, part] = parts

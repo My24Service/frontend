@@ -345,6 +345,27 @@ const showUsersOptions = [
   {item: 'active', name: $trans('Active')},
 ]
 
+/**
+ * The route's assign-mode flag: a JSON boolean segment. Anything that is not
+ * one reads as off, the way the board's `false` default does.
+ */
+function parseAssignModeFlag(raw: string | undefined): boolean {
+  if (!raw) {
+    return false
+  }
+  const parsed: unknown = JSON.parse(raw)
+  return typeof parsed === 'boolean' ? parsed : false
+}
+
+/**
+ * The store's staged pick list, read back through the board's row type. The
+ * store keeps the pick heterogeneous (`any[]`), so the copy re-types each
+ * row rather than spreading the untyped array.
+ */
+function stagedAssignOrders(): Api.Order[] {
+  return store.getAssignOrders.map((order: Api.Order) => order)
+}
+
 const startDate = ref<Date>(new Date())
 const loadDone = ref(false)
 const buttonDisabled = ref(false)
@@ -425,9 +446,9 @@ onMounted(async () => {
   const monday = store.getCurrentLanguage === 'en' ? 1 : 0
   startDate.value = moment().weekday(monday).toDate()
 
-  assignMode.value = props.assignModeProp ? JSON.parse(props.assignModeProp) : false
+  assignMode.value = parseAssignModeFlag(props.assignModeProp)
   if (assignMode.value) {
-    selectedOrders.value = [...store.getAssignOrders]
+    selectedOrders.value = stagedAssignOrders()
     alreadyAssignedUsers.value = assignedUsersOf(selectedOrders.value)
   } else {
     alreadyAssignedUsers.value = []
@@ -680,7 +701,7 @@ function searchAndAssignDone(newAssignMode: boolean) {
   assignMode.value = newAssignMode
 
   if (newAssignMode) {
-    selectedOrders.value = [...store.getAssignOrders]
+    selectedOrders.value = stagedAssignOrders()
     alreadyAssignedUsers.value = assignedUsersOf(selectedOrders.value)
   } else {
     alreadyAssignedUsers.value = []

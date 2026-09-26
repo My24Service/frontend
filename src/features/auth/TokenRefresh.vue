@@ -43,7 +43,19 @@ function parseJwt(token: string): { exp: number } {
       .join(''),
   )
 
-  return JSON.parse(jsonPayload)
+  // The token payload is `{exp}`, but `JSON.parse` answers `any`: a payload
+  // that is missing or misshapen reads as expired rather than crashing the
+  // refresh check below.
+  const payload: unknown = JSON.parse(jsonPayload)
+  if (
+    typeof payload === 'object' &&
+    payload !== null &&
+    'exp' in payload &&
+    typeof payload.exp === 'number'
+  ) {
+    return { exp: payload.exp }
+  }
+  return { exp: NaN }
 }
 
 async function checkToken() {

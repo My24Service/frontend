@@ -1,5 +1,8 @@
 import { keepPreviousData } from '@tanstack/vue-query'
 import type {
+  QueryKey,
+} from '@tanstack/vue-query'
+import type {
   ColumnFiltersState,
   PaginationState,
   RowData,
@@ -14,7 +17,20 @@ import { useUrlQuerySync } from './url-query-sync'
 
 /** What a table needs of a generated resource: a list it can page. Any `Api.<Resource>` whose list is pageable is one. */
 export interface PageableResource {
-  listOptions(query: ServerPagedListQuery): object
+  listOptions(query: ServerPagedListQuery): ListQueryOptions
+}
+
+/**
+ * The shape every list-options factory returns, as far as this table is
+ * concerned: the generated `.options()` call's `queryKey`. Each endpoint's
+ * concrete options type differs (notably its `queryFn`, whose key tuple is
+ * mutable where `QueryKey` is readonly, so no single `queryFn` annotation
+ * accepts them all), and this composable never calls the function itself -
+ * it rides the spread below into `useQuery` untouched. Deliberately narrow:
+ * everything else on the factory object stays the factory's business.
+ */
+export interface ListQueryOptions {
+  queryKey: QueryKey
 }
 
 /**
@@ -25,7 +41,7 @@ export interface PageableResource {
  */
 type ListSource =
   | {resource: PageableResource; listOptions?: never}
-  | {resource?: never; listOptions: (query: ServerPagedListQuery) => unknown}
+  | {resource?: never; listOptions: (query: ServerPagedListQuery) => ListQueryOptions}
 
 export type ServerTableOptions<TData extends RowData> = Omit<
   Parameters<typeof hook.useAppTable<TData>>[0],
@@ -138,13 +154,9 @@ export function useServerTable<TData extends RowData>(config: ServerTableOptions
     )
   }
 
-  // The one seam where this composable touches the generated option types:
-  // each resource's factory returns a shape only it knows, and restating it
-  // here would reject exactly the objects this exists to accept. The cast is
-  // intentional: the factory return is genuinely unknown at this boundary.
-  //
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const listQuery = useQuery(() => ({...(listOptions(wireQuery.value) as any), placeholderData: keepPreviousData}))
+  // The options carry the generated queryKey/queryFn pair (see
+  // ListQueryOptions), so they spread into useQuery with no cast.
+  const listQuery = useQuery(() => ({...listOptions(wireQuery.value), placeholderData: keepPreviousData}))
 
   const isLoading = computed(() => listQuery.isLoading.value)
   const isFetching = computed(() => listQuery.isFetching.value)

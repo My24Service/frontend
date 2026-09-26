@@ -8,6 +8,25 @@ type PartnerMemberViewKey = 'partner_view' | 'to_member_view' | 'from_member_vie
 
 type RowWithMemberView<K extends PartnerMemberViewKey> = { [P in K]: Api.MinimalMember }
 
+/** The member fields the partner columns read. */
+type MemberViewField = 'name' | 'companycode' | 'city' | 'email'
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+/**
+ * One member field as the column renders it. The row type is generic, so
+ * indexing it answers `any`; the field is re-read through a guard instead.
+ */
+function memberField(member: unknown, field: MemberViewField): string {
+  if (!isRecord(member)) {
+    return ''
+  }
+  const value: unknown = member[field]
+  return typeof value === 'string' ? value : ''
+}
+
 /**
  * The member columns every partner list shows: the name and the three
  * identity fields that ride with it. A request row nests two views - the
@@ -26,7 +45,7 @@ export function partnerColumns<
   const nameId = `${viewKey.replace(/_view$/, '')}__name`
 
   return {
-    name: columnHelper.accessor((row: TData) => row[viewKey].name, {
+    name: columnHelper.accessor((row: TData) => memberField(row[viewKey], 'name'), {
       id: nameId,
       header: $trans('Name'),
     }),
@@ -34,19 +53,19 @@ export function partnerColumns<
       id: 'companycode',
       header: $trans('Company code'),
       enableSorting: false,
-      cell: ({ row }) => row.original[viewKey].companycode,
+      cell: ({ row }) => memberField(row.original[viewKey], 'companycode'),
     }),
     city: columnHelper.display({
       id: 'city',
       header: $trans('City'),
       enableSorting: false,
-      cell: ({ row }) => row.original[viewKey].city,
+      cell: ({ row }) => memberField(row.original[viewKey], 'city'),
     }),
     email: columnHelper.display({
       id: 'email',
       header: $trans('Email'),
       enableSorting: false,
-      cell: ({ row }) => row.original[viewKey].email,
+      cell: ({ row }) => memberField(row.original[viewKey], 'email'),
     }),
   }
 }

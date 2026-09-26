@@ -76,11 +76,15 @@ export function useQrCode({kind, id, record}: {
 
   async function recreateQr() {
     try {
-      const result = await recreateQrMutation.mutateAsync({path: {id}})
+      const result: unknown = await recreateQrMutation.mutateAsync({path: {id}})
       // Written into the detail cache rather than a local copy, so the QR
       // block and anything else reading the record stay one source.
-      queryClient.setQueryData(resource.queryKey(id), (previous) =>
-        previous ? {...previous, ...result} : previous)
+      queryClient.setQueryData(resource.queryKey(id), (previous: QrRecord | undefined) => {
+        if (!previous || typeof result !== 'object' || result === null) {
+          return previous
+        }
+        return {...previous, ...result}
+      })
     } catch {
       errorToast(create, $trans('Error recreating QR code'))
     }

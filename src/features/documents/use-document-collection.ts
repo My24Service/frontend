@@ -1,3 +1,5 @@
+import type { ListQueryOptions } from '@/features/table'
+
 /**
  * One row of a document collection, as the panel edits it.
  *
@@ -45,12 +47,10 @@ export interface DocumentCollection {
  * reaches a consumer.
  */
 export interface DocumentResource {
-  // `any` for the list options as well as the mutations: the resources'
-  // query options differ in their query type, and a shared parameter type
-  // cannot accept all of them - which is the whole reason each resource
-  // describes its own endpoint rather than the composable switching on a kind.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  list: (parentId: number) => any
+  // The generated `.options()` call's queryKey/queryFn pair (see
+  // ListQueryOptions): each document endpoint's concrete options type
+  // differs, but all of them carry these two.
+  list: (parentId: number) => ListQueryOptions
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   create: () => UseMutationOptions<any, any, any>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

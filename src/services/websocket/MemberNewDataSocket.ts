@@ -11,6 +11,22 @@ export interface MemberNewDataMessage {
   [key: string]: unknown
 }
 
+/**
+ * The `data` envelope one socket event parses to: the handler's payload
+ * rides `message`.
+ */
+interface MemberNewDataEnvelope {
+  message: MemberNewDataMessage
+}
+
+function isNewDataEnvelope(data: unknown): data is MemberNewDataEnvelope {
+  if (typeof data !== 'object' || data === null || !('message' in data)) {
+    return false
+  }
+  const message: unknown = data.message
+  return typeof message === 'object' && message !== null
+}
+
 
 // notifications all users of a member for new data
 class MemberNewDataSocket extends BaseSocket {
@@ -22,7 +38,8 @@ class MemberNewDataSocket extends BaseSocket {
 
   async init(type: string) {
     this.type = type
-    this.room = await this._getRoom('/get-member-new-data-room/')
+    const room: unknown = await this._getRoom('/get-member-new-data-room/')
+    this.room = typeof room === 'string' ? room : null
     if (this.debug) {
       console.log(`${this.name}: received room: ${this.room}`)
     }
@@ -43,8 +60,11 @@ class MemberNewDataSocket extends BaseSocket {
   _onMessageMethod(this: { root: MemberNewDataSocket }, e: MessageEvent) {
     const type = this.root.type
     if (type !== null && type in this.root.onmessageHandlers) {
-      const data = JSON.parse(e.data)
-      this.root.onmessageHandlers[type](data.message)
+      const text: unknown = e.data
+      const data: unknown = JSON.parse(typeof text === 'string' ? text : String(text))
+      if (isNewDataEnvelope(data)) {
+        this.root.onmessageHandlers[type](data.message)
+      }
     } else {
       // `root`: `this` here is the WebSocket the handler is bound to, which
       // has no `debug` - the flag lives on the socket, as in BaseSocket.

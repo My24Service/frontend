@@ -7,6 +7,7 @@ export {
 } from './table'
 export {
   useServerTable,
+  type ListQueryOptions,
   type PageableResource,
   type ServerTableOptions,
 } from './use-server-table'
