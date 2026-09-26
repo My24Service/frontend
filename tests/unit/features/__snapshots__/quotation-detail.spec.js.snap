@@ -1,0 +1,183 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renders the same markup as the legacy view 1`] = `
+"<div class="b-overlay-wrap position-relative">
+  <div class="app-page">
+    <div class="pdf-stub"></div>
+    <header>
+      <div class="page-title">
+        <h3><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+            <path fill="currentColor" d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1m1.354 4.354l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708.708"></path>
+          </svg><a href="/quotations/sent" class="">Quotation</a> / <strong>Q-7 ACME</strong><span><a class="btn btn-sm btn-primary" target="_blank" href="#"><svg viewBox="0 0 16 16" width="1.2em" height="1.2em"><g fill="currentColor"><path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"></path><path d="M4.603 14.087a.8.8 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102c.198-.307.526-.568.897-.787a7.7 7.7 0 0 1 1.482-.645a20 20 0 0 0 1.062-2.227a7.3 7.3 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136c.075-.354.274-.672.65-.823c.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538c.007.188-.012.396-.047.614c-.084.51-.27 1.134-.52 1.794a11 11 0 0 0 .98 1.686a5.8 5.8 0 0 1 1.334.05c.364.066.734.195.96.465c.12.144.193.32.2.518c.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416a.86.86 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.7 5.7 0 0 1-.911-.95a11.7 11.7 0 0 0-1.997.406a11.3 11.3 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.8.8 0 0 1-.58.029m1.379-1.901q-.25.115-.459.238c-.328.194-.541.383-.647.547c-.094.145-.096.25-.04.361q.016.032.026.044l.035-.012c.137-.056.355-.235.635-.572a8 8 0 0 0 .45-.606m1.64-1.33a13 13 0 0 1 1.01-.193a12 12 0 0 1-.51-.858a21 21 0 0 1-.5 1.05zm2.446.45q.226.245.435.41c.24.19.407.253.498.256a.1.1 0 0 0 .07-.015a.3.3 0 0 0 .094-.125a.44.44 0 0 0 .059-.2a.1.1 0 0 0-.026-.063c-.052-.062-.2-.152-.518-.209a4 4 0 0 0-.612-.053zM8.078 7.8a7 7 0 0 0 .2-.828q.046-.282.038-.465a.6.6 0 0 0-.032-.198a.5.5 0 0 0-.145.04c-.087.035-.158.106-.196.283c-.04.192-.03.469.046.822q.036.167.09.346z"></path></g></svg> View PDF</a></span><button class="btn btn-md btn-primary send-quotation-button" type="button">Send quotation</button></h3>
+        <div class="flex-columns"></div>
+      </div>
+    </header>
+    <div class="page-detail">
+      <div class="flex-columns">
+        <div class="panel col-2-3">
+          <div class="container pdf-container">
+            <div class="row">
+              <div class="col-sm-2 logo"><img class="thumbnail" src="/logo.png" style="border: 0px; max-height: 120px; max-width: 120px;" alt="My Company"></div>
+              <div class="col-sm-4 info"><b>My Company</b><br> Main 1<br> 1000AA Amsterdam<br> 020 - info@example.com</div>
+              <div class="col-sm-6 panel panel-default">
+                <div class="panel-body">
+                  <div class="row"><span class="pull-left col-sm-4"><b>Quotation number</b></span><span class="col-sm-6 underline"><span class="pull-right">Q-7</span></span></div>
+                  <div class="row"><span class="pull-left col-sm-4"><b>Quotation reference</b></span><span class="col-sm-6 underline"><span class="pull-right">REF-1&nbsp;</span></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="row">
+                  <div class="pull-left col-sm-6"><b>Customer ID</b></div>
+                  <div class="col-sm-6 underline"><span class="pull-right">C1</span></div>
+                </div>
+                <div class="row"><span class="pull-left col-sm-6"><b>Customer</b></span><span class="col-sm-6 underline"><span class="pull-right">ACME</span></span></div>
+                <div class="row"><span class="pull-left col-sm-6"><b>Address</b></span><span class="col-sm-6 underline"><span class="pull-right">Street 1</span></span></div>
+                <div class="row"><span class="pull-left col-sm-6"><b>Postal/city</b></span><span class="col-sm-6 underline"><span class="pull-right">NL-1234AB Utrecht</span></span></div>
+              </div>
+              <div class="col-sm-6">
+                <div class="row">
+                  <div class="pull-left col-sm-6"><b>Expire days</b></div>
+                  <div class="col-sm-6 underline"><span class="pull-right">30</span></div>
+                </div>
+                <div class="row"><span class="pull-left col-sm-6"><b>Created on</b></span><span class="col-sm-6 underline"><span class="pull-right">01/01/2026</span></span></div>
+                <div class="row"><span class="pull-left col-sm-6"><b>Modified on</b></span><span class="col-sm-6 underline"><span class="pull-right">02/01/2026</span></span></div>
+                <div class="row"><span class="pull-left col-sm-6"><b>Made definitive on</b></span><span class="col-sm-6 underline"><span class="pull-right">2026-01-03</span></span></div>
+                <div class="row"><span class="pull-left col-sm-6"><b>Contact</b></span><span class="col-sm-6 underline"><span class="pull-right">Jan</span></span></div>
+              </div>
+            </div>
+            <hr>
+            <div>
+              <h4>Roof</h4>
+              <div class="row">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th width="45%">Info</th>
+                      <th width="10%">Amount</th>
+                      <th width="15%">Price</th>
+                      <th width="15%">Total</th>
+                      <th width="15%">VAT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Tiles</td>
+                      <td>2.00</td>
+                      <td>€50.00</td>
+                      <td>€100.00</td>
+                      <td>€21.00</td>
+                    </tr>
+                    <tr>
+                      <td>Labour</td>
+                      <td>2.00</td>
+                      <td>€50.00</td>
+                      <td>€100.00</td>
+                      <td>€21.00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div>
+              <h4>Gutters</h4>
+              <div class="row">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th width="45%">Info</th>
+                      <th width="10%">Amount</th>
+                      <th width="15%">Price</th>
+                      <th width="15%">Total</th>
+                      <th width="15%">VAT</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Gutter</td>
+                      <td>2.00</td>
+                      <td>€50.00</td>
+                      <td>€100.00</td>
+                      <td>€21.00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="flex-columns space-between"><span class="total-text">Quotation total</span>
+              <div data-v-f75e12af="">
+                <div data-v-f75e12af="" class="d-flex justify-content-between"><span data-v-f75e12af="" class="value-container-bold">Total</span>
+                  <div data-v-f75e12af="" class="d-flex align-items-end">€242.00</div>
+                </div>
+                <div data-v-f75e12af="" class="d-flex justify-content-between">
+                  <!--v-if--><span data-v-f75e12af="" class="value-container-bold">VAT</span>
+                  <div data-v-f75e12af="" class="d-flex align-items-end">€42.00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr>
+          <div class="container">
+            <div class="row">
+              <div class="col-6">
+                <details open="">
+                  <summary class="flex-columns space-between">
+                    <h6>Documents</h6><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+                      <path fill="currentColor" fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"></path>
+                    </svg>
+                  </summary>
+                  <div>
+                    <div class="table-responsive-md data-table">
+                      <table class="table b-table table-sm" ariabusy="false">
+                        <!---->
+                        <thead class="">
+                          <tr class="">
+                            <th scope="col" class="">Name</th>
+                          </tr>
+                          <!---->
+                        </thead>
+                        <tbody class="">
+                          <!---->
+                          <tr class="">
+                            <td class="">
+                              <!----><a class="" target="_blank" href="https://mature-bell.com">plan.pdf <svg viewBox="0 0 16 16" width="1.2em" height="1.2em" font-scale=".8">
+                                  <g fill="currentColor">
+                                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"></path>
+                                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"></path>
+                                  </g>
+                                </svg></a>
+                            </td>
+                          </tr>
+                          <!---->
+                          <!---->
+                        </tbody>
+                        <!---->
+                        <!---->
+                      </table>
+                    </div>
+                  </div>
+                  <!--v-if-->
+                  <!--v-if-->
+                  <!--v-if-->
+                </details>
+              </div>
+              <div class="col-6">
+                <div>
+                  <h6><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+                      <path fill="currentColor" d="M.5 0a.5.5 0 0 1 .5.5v15a.5.5 0 0 1-1 0V.5A.5.5 0 0 1 .5 0M2 1.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5zm2 4a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5zm2 4a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5zm2 4a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5z"></path>
+                    </svg> Timeline</h6>
+                  <ul class="listing full-size" style="max-height: 75vh; overflow: auto;"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <transition-stub name="fade" enteractiveclass="fade showing" entertoclass="show" leaveactiveclass="fade showing" leavetoclass="showing" enterfromclass="showing" leavefromclass="" appear="false" persisted="false" css="true">
+    <!---->
+  </transition-stub>
+</div>"
+`;

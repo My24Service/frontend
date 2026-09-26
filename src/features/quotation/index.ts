@@ -1,1 +1,4 @@
 export { QuotationList } from './list'
+export { QuotationView } from './detail'
+export { QuotationPDFViewer } from './pdf'
+export { QuotationCustomerView } from './customer'

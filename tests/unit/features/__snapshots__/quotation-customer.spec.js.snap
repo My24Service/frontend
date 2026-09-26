@@ -1,0 +1,66 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renders the same markup as the legacy customer block 1`] = `
+"<div class="container">
+  <h6><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+      <g fill="currentColor">
+        <path d="M4 2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zM7.5 5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zM4.5 8a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z"></path>
+        <path d="M2 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1zm11 0H3v14h3v-2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V15h3z"></path>
+      </g>
+    </svg> Customer</h6>
+  <div class="row">
+    <div class="col-4">Customer</div>
+    <div class="col-8">
+      <p class="value">ACME</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-4">Customer ID</div>
+    <div class="col-8">
+      <p class="value">C1</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-4">Address</div>
+    <div class="col-8">
+      <p class="value">Street 1</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-4">Postal</div>
+    <div class="col-8">
+      <p class="value">NL-1234AB</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-4">City</div>
+    <div class="col-8">
+      <p class="value">Utrecht</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-4">Contacts</div>
+    <div class="col-8">
+      <p class="value">Jan</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-4">Email</div>
+    <div class="col-8">
+      <p class="value">jan@example.com</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-4">Mobile</div>
+    <div class="col-8">
+      <p class="value">06</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-4">Phone</div>
+    <div class="col-8">
+      <p class="value">-</p>
+    </div>
+  </div>
+</div>"
+`;
