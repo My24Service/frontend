@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`renders the same markup as the legacy customer block 1`] = `
+exports[`renders the legacy customer block's markup 1`] = `
 "<div class="container">
   <h6><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
       <g fill="currentColor">

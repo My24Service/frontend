@@ -3,7 +3,7 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Eight places in `src/features/` still add a
+sends the parse output (ADR-0003). Nine places in `src/features/` still add a
 rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
@@ -224,6 +224,26 @@ form refuses a send with no (or a malformed) recipient or a blank subject.
 The generated `maxLength(255)` stays underneath.
 
 **Backend change**: none.
+
+**Case 2.**
+
+### 9. Quotation form: the customer and a name
+
+**Frontend**: `src/features/quotation/form/schemas.ts`, `quotationFormSchema`
+(`filled(...)` piped onto `v.unwrap` of each entry), the form's
+`quotationWrite.validate`.
+
+**Generated**: `vQuotationRequest` declares `customer_id`, `quotation_name`,
+`quotation_address`, `quotation_postal`, `quotation_city` and `name` as
+`v.nullish(v.pipe(v.string(), v.maxLength(n)))` — `valibot.gen.ts:9245-9262`.
+
+**Reality**: the web form has always required a customer (picked, so it has
+an id, a name and an address) and a quotation name. The mobile app creates
+and edits quotations through the same endpoint
+(`scripts/usage-gate/mobile-callers.json` lists `/quotation/quotation`), so
+the API cannot refuse a quotation the app sends without them.
+
+**Backend change**: none, unless the mobile flows are audited first.
 
 **Case 2.**
 

@@ -4,11 +4,10 @@ import SubNav from '../components/SubNav.vue'
 import {AUTH_LEVELS} from "@/constants";
 
 // Route screens, split per chunk: the router holds a loader, not the module.
-const OfferForm = () => import('@/views/quotations/OfferForm.vue')
-const QuotationDetail = () => import('@/views/quotations/QuotationDetail.vue')
-const QuotationForm = () => import('../views/quotations/QuotationForm.vue')
-const QuotationList = () => import('../views/quotations/QuotationList.vue')
-const QuotationView = () => import('@/views/quotations/QuotationView.vue')
+const OfferForm = () => import('@/features/quotation/offer/OfferForm.vue')
+const QuotationForm = () => import('@/features/quotation/form/QuotationForm.vue')
+const QuotationList = () => import('@/features/quotation/list/QuotationList.vue')
+const QuotationView = () => import('@/features/quotation/detail/QuotationView.vue')
 
 export default [
 {
@@ -137,11 +136,12 @@ export default [
       name: 'quotation-detail',
       path: '/quotations/quotations/detail/:pk',
       props: {
-        'app-content': route => ({...route.params}),
+        // The read-only form: the legacy QuotationDetail was only this wrapper.
+        'app-content': route => ({...route.params, isView: true}),
         'app-subnav': { section: 'quotations' }
       },
       components: {
-        'app-content': QuotationDetail,
+        'app-content': QuotationForm,
         'app-subnav': SubNav
       },
     },

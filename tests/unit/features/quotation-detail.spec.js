@@ -60,12 +60,10 @@ async function mountView(component = QuotationView) {
 }
 const normalise = (html) => html.replace(/ id="[^"]*"/g, '').replace(/ for="[^"]*"/g, '')
 
-test('renders the same markup as the legacy view', async () => {
-  const { default: Legacy } = await import('@/views/quotations/QuotationView.vue')
-  const legacy = normalise((await mountView(Legacy)).html())
+test('renders the legacy view\'s markup', async () => {
+  // The snapshot was taken only after this view's HTML was proven byte-identical
+  // to the legacy QuotationView's (since deleted), for this same fixture.
   const current = normalise((await mountView()).html())
-  expect(current).toBe(legacy)
-  // Captured only after the comparison above passed; it outlives the legacy view.
   expect(current).toMatchSnapshot()
 })
 test('reads the quotation, its chapters and all its lines at once', async () => {

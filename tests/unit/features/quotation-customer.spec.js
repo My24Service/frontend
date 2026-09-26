@@ -15,16 +15,11 @@ const quotation = (overrides = {}) => fixtureFor(vQuotation, {
 })
 const values = (wrapper) => wrapper.findAll('p.value').map((p) => p.text())
 
-test('renders the same markup as the legacy customer block', async () => {
-  const { default: Legacy } = await import('@/views/quotations/CustomerView.vue')
-  const { QuotationModel } = await import('@/models/quotations/Quotation')
-  const legacy = mountForm(Legacy, { deep: true, props: { quotation: new QuotationModel(quotation()) } }).html()
+test('renders the legacy customer block\'s markup', () => {
+  // The snapshot was taken only after this block's HTML was proven identical
+  // (bar scoped-style hashes) to the legacy CustomerView's, since deleted.
   const current = mountForm(QuotationCustomerView, { deep: true, props: { quotation: quotation() } }).html()
-  // Scoped-style hashes differ per component file; the markup must not.
-  const unscoped = (html) => html.replace(/ data-v-[0-9a-f]+=""/g, '')
-  expect(unscoped(current)).toBe(unscoped(legacy))
-  // Captured only after the comparison above passed; it outlives the legacy block.
-  expect(unscoped(current)).toMatchSnapshot()
+  expect(current.replace(/ data-v-[0-9a-f]+=""/g, '')).toMatchSnapshot()
 })
 test('shows each customer field, a blank one as a dash', () => {
   const wrapper = mountForm(QuotationCustomerView, { deep: true, props: { quotation: quotation() } })

@@ -148,12 +148,10 @@ condition used to be staged and then fail the save.
 
 ### The Shims
 
-`src/models/quotations/QuotationStatuscode.js` and
-`src/models/invoices/InvoiceStatuscode.js` stay, each a one-method Shim over
-the generated client, because the not-yet-rewritten `QuotationList` and
-`InvoiceList` still read their type's statuscodes through them (for
-`TableStatusInfo`, which takes the service as a prop and never calls it). They
-go with the Quotation and Invoice Slices.
+None left. `src/models/quotations/QuotationStatuscode.js` and
+`src/models/invoices/InvoiceStatuscode.js` went with the Quotation and Invoice
+Slices: both lists read their type's statuscodes through the generated
+`StatuscodeStatuscode.list` with `code_type`.
 
 ## Ledger
 

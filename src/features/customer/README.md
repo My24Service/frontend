@@ -40,7 +40,7 @@ view before the first request, and the browser's back/forward applies the
 address to the state.
 
 `src/models/customer/Customer.js` is the Shim beside its
-callers (quotation, order, invoice, equipment and company screens); it
+callers (order, invoice, equipment and company screens); it
 keeps `CustomerModel`, the autocomplete `search` and
 `getMyCustomer`.
 

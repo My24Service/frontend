@@ -3341,7 +3341,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/quotations/QuotationList.vue': {
+    'src/features/quotation/list/QuotationList.vue': {
       routes:
         | 'preliminary-quotations'
         | 'quotation-list'
@@ -3351,9 +3351,10 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/quotations/QuotationForm.vue': {
+    'src/features/quotation/form/QuotationForm.vue': {
       routes:
         | 'quotation-add'
+        | 'quotation-detail'
         | 'quotation-edit'
         | 'quotation-edit-preliminary'
       views:
@@ -3361,15 +3362,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/quotations/QuotationDetail.vue': {
-      routes:
-        | 'quotation-detail'
-      views:
-        | never
-      pathParamNames:
-        | 'pk'
-    }
-    'src/views/quotations/QuotationView.vue': {
+    'src/features/quotation/detail/QuotationView.vue': {
       routes:
         | 'quotation-view'
         | 'quotations-sent-view'
@@ -3378,7 +3371,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/quotations/OfferForm.vue': {
+    'src/features/quotation/offer/OfferForm.vue': {
       routes:
         | 'quotation-send'
       views:

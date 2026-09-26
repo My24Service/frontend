@@ -6,6 +6,7 @@ import {
   type CalculatedPrices,
   type CostAmount,
   type InvoiceLineOption,
+  type InvoiceLineType,
   type InvoiceTotals,
   type PriceInput,
 } from '@/features/costing'
@@ -184,4 +185,15 @@ export function createQuotationLines<T extends LineCost>(
       material_name: option === 'total' ? null : cost?.material_name ?? null,
     }
   })
+}
+
+const COST_TYPES: readonly string[] = ['used_materials', 'work_hours', 'travel_hours', 'extra_work', 'actual_work', 'distance', 'call_out_costs']
+
+/**
+ * A stored quotation line's `cost_type` in the shared line vocabulary the
+ * cost panels compare with: a line made from costs carries the cost type
+ * (`work_hours`), which is the line type `work`; anything else is manual.
+ */
+export function lineTypeOfQuotationLine(costType: string | null | undefined): InvoiceLineType {
+  return costType && COST_TYPES.includes(costType) ? invoiceLineType(costType as Api.CostTypeEnum) : 'manual'
 }

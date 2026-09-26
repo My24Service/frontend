@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`renders the same markup as the legacy view 1`] = `
+exports[`renders the legacy view's markup 1`] = `
 "<div class="b-overlay-wrap position-relative">
   <div class="app-page">
     <div class="pdf-stub"></div>

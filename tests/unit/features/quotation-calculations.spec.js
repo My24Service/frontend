@@ -17,8 +17,8 @@ const priced = (row) => {
 /**
  * The quotation cost endpoint stores what the panel sends, so these numbers
  * are the client's own pricing. They were characterised against the legacy
- * `CostModel.updateTotals` (src/models/quotations/Cost.js) before it was
- * deleted: same inputs, same totals.
+ * `CostModel.updateTotals` before it was deleted: same inputs, same totals
+ * (including dinero's half-even rounding, e.g. 18.50 × 21% = 3.88).
  */
 describe('priceQuotationCost', () => {
   it.each([
