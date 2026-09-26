@@ -109,7 +109,8 @@ export function makeCostRow(
   }
 }
 
-function amountFields(row: CostRow): CostAmount {
+/** A row's amount as the field its cost type counts in, for turning it into a line. */
+export function costAmountOf(row: CostRow): CostAmount {
   switch (row.cost_type) {
     case 'used_materials': return { cost_type: row.cost_type, amount_decimal: row.amount_decimal }
     case 'work_hours':
@@ -126,8 +127,13 @@ function amountFields(row: CostRow): CostAmount {
 }
 
 export interface CollectionOptions {
-  /** The form's shared reads and callbacks; see `CostPanelContext`. */
-  context: Pick<CostPanelContext, 'parentPk' | 'engineers' | 'lines' | 'linesCreated' | 'emptyCollectionClicked'>
+  /**
+   * The form's shared reads and callbacks; see `CostPanelContext`. A consumer
+   * that builds its own line drafts (the quotation) leaves `linesCreated` out
+   * and never calls `createInvoiceLinesClicked`.
+   */
+  context: Pick<CostPanelContext, 'parentPk' | 'engineers' | 'lines' | 'emptyCollectionClicked'>
+    & Partial<Pick<CostPanelContext, 'linesCreated'>>
   /** Where this collection is read from and written to. */
   source: CostCollectionSource
   costType: () => Api.CostTypeEnum
@@ -159,6 +165,7 @@ export interface CollectionOptions {
 export function useCostCollection(options: CollectionOptions) {
   const { context, source } = options
   const { create } = useToast()
+  const queryClient = useQueryClient()
 
   const listQuery = useQuery(() => {
     const query = source.listOptions()
@@ -229,6 +236,25 @@ export function useCostCollection(options: CollectionOptions) {
     reconcile(listData(result.data).results ?? [])
   }
 
+  /**
+   * Adopt a replace-set's answer as the stored set: it is the whole set, so it
+   * is written into the list cache rather than read back. The quotation
+   * panels save this way; `saveCollection` below keeps the invoice's
+   * adopt-then-reload.
+   */
+  function adoptStored(rows: readonly CostRow[]) {
+    const query = source.listOptions() as { queryKey?: readonly unknown[] } | null
+    if (!query?.queryKey) {
+      reconcile(rows)
+      return
+    }
+    queryClient.setQueryData(query.queryKey, (old: unknown) => ({
+      ...(old && typeof old === 'object' ? old : {}),
+      count: rows.length, next: null, previous: null, results: [...rows],
+    }))
+    reconcile(rows)
+  }
+
   async function saveCollection() {
     saving.value = true
     try {
@@ -267,11 +293,11 @@ export function useCostCollection(options: CollectionOptions) {
   }
   function createInvoiceLinesClicked(selected: InvoiceLineOption | null) {
     if (selected === null) return
-    const costs = collection.value.map(row => ({ ...row, ...amountFields(row) }))
+    const costs = collection.value.map(row => ({ ...row, ...costAmountOf(row) }))
     const lines = createInvoiceLines(costs, selected, {
       item: options.description, total: options.title(),
     }, { type: invoiceLineType(options.costType()), amount: options.amount() ?? 0 }, options.currency())
-    if (selected !== 'none') context.linesCreated(lines)
+    if (selected !== 'none') context.linesCreated?.(lines)
   }
   function changeVatType(row: CostRow, value: string | number) {
     row.vat_type = value
@@ -292,7 +318,7 @@ export function useCostCollection(options: CollectionOptions) {
   return {
     collection, isLoading, hasStoredData, total_dinero, totalVAT_dinero,
     useOnInvoiceOptions, checkParentHasInvoiceLines, parentHasInvoiceLines,
-    loadData, saveCollection, emptyCollection, emptyCollectionClicked,
+    loadData, saveCollection, adoptStored, emptyCollection, emptyCollectionClicked,
     createInvoiceLinesClicked, changeVatType, priceChanged, setPrice, getFullname,
   }
 }

@@ -149,6 +149,20 @@ export function invoiceLineType(costType: CostType): Exclude<InvoiceLineType, 'm
   }
 }
 
+/** The cost type a (non-manual) line type was made from; `invoiceLineType` backwards. */
+export function costTypeForLineType(lineType: Exclude<InvoiceLineType, 'manual'>): CostType {
+  switch (lineType) {
+    case 'used-materials': return COST_TYPE.USED_MATERIALS
+    case 'work': return COST_TYPE.WORK_HOURS
+    case 'travel': return COST_TYPE.TRAVEL_HOURS
+    case 'extra-work': return COST_TYPE.EXTRA_WORK
+    case 'actual-work': return COST_TYPE.ACTUAL_WORK
+    case 'distance': return COST_TYPE.DISTANCE
+    case 'call-out-costs': return COST_TYPE.CALL_OUT_COSTS
+    default: return unreachable(lineType)
+  }
+}
+
 export function costToInvoiceLine(cost: CostAmount & CalculatedPrices, description: string): InvoiceLineDraft {
   // Copy the stored totals, not amount * price: durations are display strings.
   return {

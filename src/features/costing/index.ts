@@ -7,6 +7,7 @@ export {
   sumInvoiceTotals,
   costAmount,
   invoiceLineType,
+  costTypeForLineType,
   costToInvoiceLine,
   createInvoiceLines,
   normalizeCostDuration,
@@ -26,6 +27,7 @@ export {
   type CostPanelContext,
 } from './cost-panel-context'
 export {
+  costAmountOf,
   makeCostRow,
   useCostCollection,
   type CostRow,

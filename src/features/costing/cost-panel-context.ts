@@ -13,7 +13,7 @@ import type { InvoiceLineDraft, InvoiceLineType } from './calculations'
  * the quotation (and its chapter) and the quotation-line panel. Both call the
  * same shape.
  */
-export interface CostPanelContext {
+export interface CostPanelContext<TDraft = InvoiceLineDraft> {
   /**
    * The record the costs belong to - the order on the invoice form, the
    * quotation on the quotation form. A panel only mounts once the form's
@@ -24,20 +24,27 @@ export interface CostPanelContext {
   readonly engineers: Readonly<Ref<readonly Api.Engineer[]>>
   /** The lines the line panel currently holds: a type already present hides "create lines". */
   readonly lines: Readonly<Ref<readonly { type?: string }[]>>
-  /** A panel turned its costs into lines; the form adds them to the line panel. */
-  linesCreated(lines: InvoiceLineDraft[]): void
+  /**
+   * A panel turned its costs into lines; the form adds them to the line
+   * panel. The draft is the consumer's own line shape: an invoice line, or a
+   * quotation line that also carries its VAT rate and material.
+   */
+  linesCreated(lines: TDraft[]): void
   /** A panel removed its saved costs; the form drops the lines of that type. */
   emptyCollectionClicked(type: Exclude<InvoiceLineType, 'manual'>): void
 }
 
-const COST_PANEL: InjectionKey<CostPanelContext> = Symbol('cost-panel')
+const COST_PANEL: InjectionKey<CostPanelContext<unknown>> = Symbol('cost-panel')
 
-export function provideCostPanelContext(context: CostPanelContext): void {
-  provide(COST_PANEL, context)
+export function provideCostPanelContext<TDraft = InvoiceLineDraft>(context: CostPanelContext<TDraft>): void {
+  provide(COST_PANEL, context as CostPanelContext<unknown>)
 }
 
-/** The form's context, which a cost panel cannot do without. */
-export function useCostPanelContext(): CostPanelContext {
+/**
+ * The form's context, which a cost panel cannot do without. A panel names
+ * the draft type its form provides; the injection key cannot carry it.
+ */
+export function useCostPanelContext<TDraft = InvoiceLineDraft>(): CostPanelContext<TDraft> {
   const context = inject(COST_PANEL, null)
   if (!context) throw new Error('A cost panel must be mounted inside a provideCostPanelContext() form')
   return context

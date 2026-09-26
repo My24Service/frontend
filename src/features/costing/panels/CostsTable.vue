@@ -41,8 +41,14 @@ const tableFields = computed(() => {
     case COST_TYPE.WORK_HOURS:
     case COST_TYPE.TRAVEL_HOURS:
     case COST_TYPE.EXTRA_WORK:
-    case COST_TYPE.ACTUAL_WORK:
-      return [{ key: 'user_full_name', label: $trans('User') }, { key: 'amount_duration_read', label: $trans('Amount') }, ...prices]
+    case COST_TYPE.ACTUAL_WORK: {
+      const amount = { key: 'amount_duration_read', label: $trans('Amount') }
+      // Order hours are per engineer; a quotation's hours are an estimate
+      // nobody is named on, so the column only shows when a row has a user.
+      return props.collection.some(row => row.user_full_name)
+        ? [{ key: 'user_full_name', label: $trans('User') }, amount, ...prices]
+        : [amount, ...prices]
+    }
     case COST_TYPE.DISTANCE:
     case COST_TYPE.CALL_OUT_COSTS:
       return [{ key: 'amount_int', label: $trans('Amount') }, ...prices]
