@@ -42,7 +42,7 @@ const resetPluginCache = await import('eslint-plugin-typed-vue')
   .then((plugin) => plugin.resetCache)
   .catch(() => () => {})
 
-const eslint = new ESLint({ cache: true, fix })
+const eslint = new ESLint({ cache: true, cacheLocation: 'node_modules/.cache/.eslintcache', fix })
 
 /** A directory's own files first, then its subdirectories, so each directory's files run together. */
 function walk(path, found) {
