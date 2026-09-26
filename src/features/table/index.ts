@@ -37,6 +37,7 @@ export {
   periodEnd,
   periodFromDate,
   periodStart,
+  scalarText,
   splitArrayItems,
 } from './filters'
 export { default as ServerDataTable } from './ServerDataTable.vue'

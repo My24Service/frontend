@@ -1,4 +1,4 @@
-import { baseListParams, type ServerPagedListQuery } from '@/features/table'
+import { baseListParams, scalarText, type ServerPagedListQuery } from '@/features/table'
 
 /**
  * The lists the order list screen can show. Each is one `?mode=` value on
@@ -40,8 +40,8 @@ const COLUMN_FILTERS = [
 export function listQueryFrom(query: ServerPagedListQuery): OrderListQuery {
   const filters: Record<string, string> = {}
   for (const name of COLUMN_FILTERS) {
-    const value = query[name]
-    if (typeof value === 'string' ? value !== '' : typeof value === 'number' || typeof value === 'boolean') filters[name] = String(value)
+    const text = scalarText(query[name])
+    if (text !== null) filters[name] = text
   }
   return {...baseListParams(query), ...filters}
 }

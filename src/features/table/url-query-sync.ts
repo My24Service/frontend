@@ -1,5 +1,5 @@
 import type { ColumnFiltersState, PaginationState, SortingState } from '@tanstack/vue-table'
-import { joinArrayItems } from '@/features/table/filters'
+import { joinArrayItems, scalarText } from '@/features/table/filters'
 import type { ServerPagedListQuery } from './server-paged-list'
 
 const RESERVED = new Set(['page', 'page_size', 'q', 'ordering'])
@@ -108,10 +108,11 @@ export function useUrlQuerySync(
     if (query.q) desired.q = query.q
     if (query.ordering?.length) desired.ordering = query.ordering.join(',')
     for (const [key, value] of Object.entries(query)) {
-      if (RESERVED.has(key) || value === '' || value == null) continue
+      if (RESERVED.has(key)) continue
       // An array wire value rides the escaped join, mirroring `asString`:
       // the read side restores the same text, commas inside values intact.
-      desired[key] = Array.isArray(value) ? joinArrayItems(value.map(String)) : (typeof value === 'string' ? value : JSON.stringify(value) ?? '')
+      const text = Array.isArray(value) ? joinArrayItems(value.map(String)) : scalarText(value)
+      if (text !== null) desired[key] = text
     }
 
     for (const key of Object.keys(params)) {

@@ -1,6 +1,7 @@
 import type { ColumnFiltersState } from '@tanstack/vue-table'
 import type { LocationQueryRaw } from 'vue-router'
 
+import { scalarText } from '@/features/table'
 import type { ListMode } from './list-modes'
 
 const USER_FILTER = 'user_filter'
@@ -109,7 +110,8 @@ export function useOrderViews(options: {
 
     for (const filter of options.columnFilters.value) {
       if (filter.id === USER_FILTER) continue
-      if (typeof filter.value === 'string' ? filter.value !== '' : typeof filter.value === 'number' || typeof filter.value === 'boolean') target[filter.id] = String(filter.value)
+      const text = scalarText(filter.value)
+      if (text !== null) target[filter.id] = text
     }
 
     delete target.user_filter

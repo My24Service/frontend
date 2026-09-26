@@ -8,23 +8,13 @@ type PartnerMemberViewKey = 'partner_view' | 'to_member_view' | 'from_member_vie
 
 type RowWithMemberView<K extends PartnerMemberViewKey> = { [P in K]: Api.MinimalMember }
 
-/** The member fields the partner columns read. */
-type MemberViewField = 'name' | 'companycode' | 'city' | 'email'
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
-
 /**
- * One member field as the column renders it. The row type is generic, so
- * indexing it answers `any`; the field is re-read through a guard instead.
+ * The member view a row nests under `key`. Read through this rather than
+ * `row[key]` on the column's row type: that type is intersected with
+ * `RowData` (`Record<string, any>`), so indexing it answers `any`.
  */
-function memberField(member: unknown, field: MemberViewField): string {
-  if (!isRecord(member)) {
-    return ''
-  }
-  const value: unknown = member[field]
-  return typeof value === 'string' ? value : ''
+function memberView<K extends PartnerMemberViewKey>(row: RowWithMemberView<K>, key: K): Api.MinimalMember {
+  return row[key]
 }
 
 /**
@@ -45,7 +35,7 @@ export function partnerColumns<
   const nameId = `${viewKey.replace(/_view$/, '')}__name`
 
   return {
-    name: columnHelper.accessor((row: TData) => memberField(row[viewKey], 'name'), {
+    name: columnHelper.accessor((row: TData) => memberView(row, viewKey).name, {
       id: nameId,
       header: $trans('Name'),
     }),
@@ -53,19 +43,19 @@ export function partnerColumns<
       id: 'companycode',
       header: $trans('Company code'),
       enableSorting: false,
-      cell: ({ row }) => memberField(row.original[viewKey], 'companycode'),
+      cell: ({ row }) => memberView(row.original, viewKey).companycode,
     }),
     city: columnHelper.display({
       id: 'city',
       header: $trans('City'),
       enableSorting: false,
-      cell: ({ row }) => memberField(row.original[viewKey], 'city'),
+      cell: ({ row }) => memberView(row.original, viewKey).city,
     }),
     email: columnHelper.display({
       id: 'email',
       header: $trans('Email'),
       enableSorting: false,
-      cell: ({ row }) => memberField(row.original[viewKey], 'email'),
+      cell: ({ row }) => memberView(row.original, viewKey).email,
     }),
   }
 }

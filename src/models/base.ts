@@ -80,7 +80,7 @@ class BaseModel {
   fields: Record<string, unknown> = {}
   url = ''
   listArgs: string[] = []
-  queryArgs: Record<string, unknown> = {}
+  queryArgs: Record<string, string | number> = {}
   searchQuery: string | null = null
   userFilter: string | null = null
   sort: string | null = null
@@ -337,7 +337,7 @@ class BaseModel {
     // After searching, or changing orders the `page=xxx` values starts accumulating to something
     // like `page=1&page=1&page=1`, which is not desired. So an extra pass is done here to ensure
     // that each key is only added once to the listArgs.
-    const sanitizedArgs: Record<string, unknown> = {};
+    const sanitizedArgs: Record<string, string | number> = {};
 
     for (const listArg of this.listArgs) {
       // HVG20250319:
@@ -374,8 +374,7 @@ class BaseModel {
     // Start building up the listArgs from the sanitized list of arguments.
     const listArgs: string[] = []
     for (const arg in sanitizedArgs) {
-      const value = sanitizedArgs[arg];
-      listArgs.push(`${arg}=${typeof value === 'string' ? value : JSON.stringify(value)}`);
+      listArgs.push(`${arg}=${sanitizedArgs[arg]}`);
     }
 
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
