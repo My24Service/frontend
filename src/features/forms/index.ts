@@ -3,6 +3,14 @@ export { default as ImageUploadField } from './ImageUploadField.vue'
 export { default as ValidatedForm } from './ValidatedForm.vue'
 export { default as ValidatedFormField } from './ValidatedFormField.vue'
 export { toApiDate } from './dates'
+export { default as EmailRecipientsField } from './EmailRecipientsField.vue'
+export {
+  SEND_FIELD_LABELS,
+  SEND_FIELD_MESSAGES,
+  sendableRecipients,
+  sendableSubject,
+  tagValidator,
+} from './email-recipients'
 export {
   PASSWORD_MESSAGES,
   passwordErrors,

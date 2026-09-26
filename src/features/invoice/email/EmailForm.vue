@@ -38,26 +38,7 @@
               :submitted="isSubmitClicked"
             >
               <h6>{{ $trans("Email") }}</h6>
-              <BFormGroup
-                :label="$trans('Email recipients')"
-                label-for="tags-validation"
-                :state="isSubmitClicked ? !recipientInvalid : null"
-              >
-                <b-form-tags
-                  input-id="tags-validation"
-                  v-model="recipients"
-                  :tag-validator="tagValidator"
-                  :state="isSubmitClicked ? !recipientInvalid : null"
-                  :placeholder="$trans('Input the email address and press space')"
-                  :invalid-tag-text="$trans('Invalid email address')"
-                  :duplicate-tag-text="$trans('Duplicate email')"
-                  tag-variant="primary"
-                  separator=" "
-                ></b-form-tags>
-                <template #invalid-feedback>
-                  {{ $trans('You must provide at least 1 email recipient') }}
-                </template>
-              </BFormGroup>
+              <EmailRecipientsField v-model="recipients" :invalid="recipientInvalid" :submitted="isSubmitClicked" />
               <ValidatedFormField name="subject" label-cols="3" autofocus />
               <ValidatedFormField name="body" textarea rows="3" label-cols="3" />
             </ValidatedForm>
@@ -88,12 +69,14 @@ import { parse } from 'valibot'
 import { invoiceEmailGetUnsentEmailRetrieveOptions, invoiceEmailGetUnsentEmailRetrieveQueryKey, invoiceInvoiceDetailRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
 
 import {
+  EmailRecipientsField,
+  tagValidator,
   useQueryErrorToast,
   ValidatedForm,
   ValidatedFormField,
 } from '@/features/forms'
 import { downloadBlob } from '@/features/shared'
-import { emailFormSchema, FIELD_LABELS, FIELD_MESSAGES, validateEmail, tagValidator } from './schemas'
+import { emailFormSchema, FIELD_LABELS, FIELD_MESSAGES, validateEmail } from './schemas'
 
 const { route, router, toast: create, queryClient } = useCommon()
 const invoiceId = computed(() => Number(route.query.invoiceId))

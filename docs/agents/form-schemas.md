@@ -209,7 +209,7 @@ API must stay lax about it or was simply too loose, and the backend change that
 would retire it. It is not duplicated here — this file is the procedure, that
 one is the record.
 
-Six rules survive, all case 2; nothing is owed by the backend.
+Eight rules survive, all case 2; nothing is owed by the backend.
 
 ### 8. Derive the blank form; don't spell it out
 

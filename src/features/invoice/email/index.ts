@@ -1,6 +1,6 @@
 export { default as EmailForm } from './EmailForm.vue'
+export { tagValidator } from '@/features/forms'
 export {
-  tagValidator,
   emailFormSchema,
   FIELD_MESSAGES,
   FIELD_LABELS,

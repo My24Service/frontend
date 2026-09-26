@@ -3,7 +3,7 @@
 ## What this is
 
 A form in a Slice parses the generated valibot request schema and
-sends the parse output (ADR-0003). Seven places in `src/features/` still add a
+sends the parse output (ADR-0003). Eight places in `src/features/` still add a
 rule the generated schema does not carry. Each one is the same statement:
 *this form requires something the API says is optional*, and each is the
 second kind below: the API must stay lax about them and the form need not be.
@@ -202,6 +202,28 @@ form shows, and it belongs to the form. The same module refuses a blank
 
 **Backend change**: none. The request cannot carry a clock the form's own
 format defines.
+
+**Case 2.**
+
+### 8. Sending by e-mail: recipients and subject
+
+**Frontend**: `src/features/forms/email-recipients.ts`, `sendableRecipients`
+and `sendableSubject`, piped onto the generated entries by the invoice e-mail
+(`src/features/invoice/email/schemas.ts`, `emailFormSchema`) and the
+quotation offer (`src/features/quotation/offer/schemas.ts`,
+`offerSendSchema`).
+
+**Generated**: `recipients: v.nullish(v.string())` and `subject:
+v.nullish(v.pipe(v.string(), v.maxLength(255)))` — `valibot.gen.ts:2917-2918`
+in `vInvoiceEmailRequest`, `:4346-4347` in `vOfferRequest`.
+
+**Reality**: both endpoints store a *draft*: the unsent e-mail or offer is
+saved blank and read back by `get_unsent_email` / `get_unsent_offer`. The
+rule is about the send button, not the record, so the API stays lax and the
+form refuses a send with no (or a malformed) recipient or a blank subject.
+The generated `maxLength(255)` stays underneath.
+
+**Backend change**: none.
 
 **Case 2.**
 
