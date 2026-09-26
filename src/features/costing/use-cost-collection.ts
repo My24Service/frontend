@@ -30,6 +30,11 @@ export type CostRow = Omit<Partial<Api.OrderCost.Record>, keyof CalculatedPrices
   amount_duration_read: string
   vat_type: string | number
   price_currency: string
+  /** The chapter a quotation cost belongs to; order costs carry none. */
+  chapter?: number | null
+  /** The currencies the stored vat and total are in; sent when the row has one. */
+  vat_currency?: string
+  total_currency?: string
   is_partner?: boolean
   full_name?: string | null
   partner_companycode?: string | null
