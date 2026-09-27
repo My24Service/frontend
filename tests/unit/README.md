@@ -98,3 +98,40 @@ Three more supports sit on top of it, each written up in its own header:
 - `support/member-routes.js` — the routes the Member-Slice screens link to. A
   deep mount renders real `<router-link>`s, and one pointing at an unknown
   route throws rather than rendering.
+
+## Two projects: shared and isolated
+
+Most spec files run in the `shared` project, which turns vitest's per-file
+isolation off: a worker evaluates the app's module graph once and every file it
+runs reuses it, along with one happy-dom window. Re-evaluating that graph per
+file used to cost more than all the test bodies together. Specs that call
+`vi.mock` (or `vi.doMock`, `vi.unmock`, `vi.resetModules`) go to the
+`isolated` project instead, because a module mock cannot reach a graph an
+earlier file already loaded. `vitest.config.js` sorts files by scanning their
+source, so there is no list to keep up to date.
+
+`vitest --project shared` or `--project isolated` runs one of them.
+
+A shared worker keeps whatever a spec leaves behind, so a shared spec must
+put back what it changes:
+
+- Stub globals with `vi.stubGlobal`, not by assignment or
+  `Object.defineProperty`; stubs are undone before each test and after each
+  file. For `document.location`, `vi.spyOn(document, 'location', 'get')`.
+  `setupTests.js` fails the next file if `location` is left replaced, and names
+  the file that did it.
+- Restore anything assigned onto a shared object: an axios instance's
+  `defaults.adapter`, a model singleton's state (`useFreshModel` in
+  `support/list-harness.js`), a store outside a component.
+- Don't mock bootstrap-vue-next for toasts: `setupTests.js` does it once for
+  the suite. Read the spy through `toastCreate` / `toasts()` from
+  `support/form-harness.js`. The same file enables auto-unmount for every spec.
+
+To check that a change has not made the shared project order-dependent, shuffle
+the file order:
+
+    npx vitest run --project shared --sequence.shuffle.files --no-sequence.shuffle.tests --sequence.seed=2
+
+`npm run test:changed` runs only the spec files whose module graph reaches a
+file changed since the last commit (`vitest run --changed`; pass a ref, e.g.
+`-- origin/develop`, to compare against a branch).

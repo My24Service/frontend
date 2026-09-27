@@ -17,6 +17,7 @@
     "typecheck": "vue-tsc --noEmit",
     "usage-gate": "node scripts/usage-gate.mjs",
     "test": "vitest run",
+    "test:changed": "vitest run --changed",
     "test:profile": "node scripts/vitest-profile.mjs",
     "test:watch": "vitest",
     "test:mutation": "stryker run --incremental --reporters clear-text,progress,html,json"

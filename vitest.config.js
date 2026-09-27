@@ -144,6 +144,12 @@ export default defineConfig({
     globals: true,
     setupFiles: ['tests/unit/setupTests.js'],
     silent: 'passed-only',
+    // Every core, not vitest's default of all but one. The main process is
+    // near idle during a run (transforms come from the module cache), so the
+    // reserved core sat unused: measured 142s -> 117s on 4 cores, and
+    // 411s -> 227s on 2 (CircleCI's default medium class, where the default
+    // meant a single worker).
+    maxWorkers: '100%',
     // Undo every vi.stubGlobal / vi.stubEnv before each test (and, from
     // setupTests.js, after each file). In the shared project a stub left in
     // place outlives its spec file: one spec's fake `location` becomes the next

@@ -1,5 +1,10 @@
 # Can we get the same confidence from far fewer tests?
 
+> **Superseded on speed by `test-suite-performance.md` (2026-09-27).** The
+> per-file cost this note attributes to file count was module re-evaluation,
+> and turning isolation off for most specs removed it without merging a single
+> file. Its coverage findings (§3, §5.5) still stand.
+
 Research note, 2026-09-26. Written because the full suite takes minutes and we
 want to know whether a smaller suite can hold the same line.
 
