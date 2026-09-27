@@ -6,11 +6,6 @@ import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: spy } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({create: spy}) }
-})
-
 const api = installApiSeam()
 
 const BRANCH_AUTOCOMPLETE = [

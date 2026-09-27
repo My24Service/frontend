@@ -14,11 +14,6 @@ import { orderRoutes } from '../../support/order-routes.js'
 import { modal } from '../../support/modal.js'
 import { addFilter, chipTexts, editorInput, offeredFilters, pickMode } from '../../support/column-filters.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 // The list subscribes to the member websocket while mounted; under test it
 // must neither fetch a room nor connect. The registered handler is kept so a
 // test can deliver a message through it.

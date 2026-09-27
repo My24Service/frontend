@@ -1,6 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
-  enableAutoUnmount,
   mount,
 } from '@vue/test-utils'
 
@@ -23,8 +22,6 @@ import { useMainStore } from '@/stores/main'
  * logic. These specs pin the ordering it must keep.
  */
 
-enableAutoUnmount(afterEach)
-
 const fakeHttp = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
@@ -34,11 +31,6 @@ const fakeHttp = vi.hoisted(() => ({
 }))
 
 vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
 
 /** Drain macrotasks so the watcher settles. */
 async function flush() {

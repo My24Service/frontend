@@ -11,11 +11,6 @@ import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixtur
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts } from '../../support/form-harness.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 const api = installApiSeam()
 
 const MAIN = { getMemberHasBranches: true, getDefaultCurrency: 'EUR' }

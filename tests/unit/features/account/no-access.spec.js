@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { NoAccessView as NoAccess } from '@/features/account'
 import { LoginForm } from '@/features/auth'
@@ -15,8 +14,6 @@ import { mountForm, resetFakeHttp, toastCreate } from '../../support/form-harnes
  * `src/features/account/` unchanged apart from the composition API.
  */
 
-enableAutoUnmount(afterEach)
-
 const fakeHttp = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
@@ -26,11 +23,6 @@ const fakeHttp = vi.hoisted(() => ({
 }))
 
 vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
 
 async function flush() {
   for (let i = 0; i < 10; i++) await Promise.resolve()

@@ -5,9 +5,8 @@ import { InvoiceLinePanel } from '@/features/invoice'
 import { vInvoiceLine, vPaginatedInvoiceLineList } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'
-import { mountForm, toastCreate } from '../support/form-harness.js'
+import { mountForm } from '../support/form-harness.js'
 
-vi.mock('bootstrap-vue-next', async original => ({ ...(await original()), useToast: () => ({ create: toastCreate }) }))
 const api = installApiSeam()
 const base = '/api/invoice/invoice-line/'
 const detail = '/api/invoice/invoice-line/{id}/'

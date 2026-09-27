@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, expect, test, vi } from 'vitest'
 import {
   EmailForm,
   validateEmail,
@@ -8,11 +7,9 @@ import { vInvoice, vInvoiceEmail, vOrderDetail, vCustomer } from '@/api/valibot.
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { HttpResponse } from 'msw'
-import { mountListView, toastCreate, toasts, createTestQueryClient } from '../support/form-harness.js'
+import { mountListView, toasts, createTestQueryClient } from '../support/form-harness.js'
 import { serverError } from '../support/list-harness.js'
 import { invoiceEmailGetUnsentEmailRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
-vi.mock('bootstrap-vue-next', async (original) => ({...(await original()), useToast: () => ({create: toastCreate})}))
-enableAutoUnmount(afterEach)
 const api = installApiSeam()
 const base = '/api/invoice/email/'
 const routes = [{name: 'invoices-sent', path: '/sent', component: {template: '<div />'}}]

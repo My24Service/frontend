@@ -1,15 +1,12 @@
-import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, expect, test, vi } from 'vitest'
 import { HttpResponse } from 'msw'
 import { OfferForm, validateOffer } from '@/features/quotation'
 import { vOffer, vOfferQuotation } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
-import { mountListView, toastCreate, toasts } from '../support/form-harness.js'
+import { mountListView, toasts } from '../support/form-harness.js'
 import { serverError } from '../support/list-harness.js'
 
-vi.mock('bootstrap-vue-next', async (original) => ({...(await original()), useToast: () => ({create: toastCreate})}))
-enableAutoUnmount(afterEach)
 const api = installApiSeam()
 const base = '/api/quotation/offer/'
 const routes = [{name: 'quotations-sent', path: '/quotations/sent', component: {template: '<div />'}}]

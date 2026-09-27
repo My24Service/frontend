@@ -32,11 +32,6 @@ vi.mock('@/api/client.gen', async () => {
   return apiClientMock(fakeHttp)
 })
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
-
 const ROUTES = {
   '/inventory/material/stats_table/': { results: [], inventory_keys: {} },
 }

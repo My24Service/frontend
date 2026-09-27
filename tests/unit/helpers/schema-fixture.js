@@ -1,3 +1,4 @@
+import { expect } from 'vitest'
 import { faker } from '@faker-js/faker'
 
 /**
@@ -151,7 +152,21 @@ function byName(key) {
   return faker.lorem.word()
 }
 
+// Counted per spec file, so a file's fixtures do not depend on which files ran
+// before it. The shared project (vitest.config.js) evaluates this module once
+// per worker rather than once per file, so a plain module-level counter would
+// carry on from the previous file and shift every snapshot built from it.
 let nextSeed = 1
+let seedFile
+
+function takeSeed() {
+  const file = expect.getState().testPath
+  if (file !== seedFile) {
+    seedFile = file
+    nextSeed = 1
+  }
+  return nextSeed++
+}
 
 /**
  * Every required entry of an object schema, filled in, with `overrides`
@@ -167,7 +182,7 @@ let nextSeed = 1
  * otherwise every nested shape has to be spelled out by hand again.
  */
 export function fixtureFor(schema, overrides = {}, { seed } = {}) {
-  faker.seed(seed ?? nextSeed++)
+  faker.seed(seed ?? takeSeed())
   return build(schema, overrides)
 }
 

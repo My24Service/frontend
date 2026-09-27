@@ -18,11 +18,6 @@ import { modal } from '../../support/modal.js'
  * closes.
  */
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 const MODAL_ID = 'delete-shell-modal'
 
 let mutationFn

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { ModuleForm, ModuleList, ModulePartForm } from '@/features/member'
 import { vModule } from '@/api/valibot.gen'
@@ -9,11 +9,6 @@ import { mountForm, toasts } from '../../support/form-harness.js'
 import { mountList, openDelete } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 import { memberRoutes } from '../../support/member-routes.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 

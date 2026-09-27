@@ -23,11 +23,6 @@ import {
 // field is sent and when it is dropped, which is the whole point of the
 // refactor that follows.
 
-vi.mock('bootstrap-vue-next', async () => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { useToast: () => ({ create }) }
-})
-
 const models = [materialService, supplierModel]
 
 const DETAIL = {

@@ -6,6 +6,7 @@ import { BootstrapVueNextResolver } from 'bootstrap-vue-next/resolvers'
 import IconsResolve from 'unplugin-icons/resolver'
 import Icons from 'unplugin-icons/vite'
 import { ExternalPackageIconLoader } from 'unplugin-icons/loaders'
+import { globSync, readFileSync } from 'node:fs'
 import * as path from 'node:path'
 import { autoImportEntries } from './auto-imports.config.js'
 
@@ -53,6 +54,35 @@ function nameSfcsForStubbing() {
     },
   }
 }
+
+const SPECS = 'tests/unit/**/*.spec.{js,ts}'
+
+/**
+ * The spec files that need a module graph of their own.
+ *
+ * Most of the suite runs without isolation (the `shared` project below): each
+ * worker evaluates the app's module graph once and every spec file it runs
+ * reuses it. Measured on a 4-core box, `import` went from ~790 to ~105
+ * CPU-seconds (most of what is left is the isolated specs below) and the full
+ * run from ~440s to ~140s. Per-file isolation was costing more than the tests
+ * themselves.
+ *
+ * A spec that replaces an app module with `vi.mock` cannot share. The mock
+ * only reaches modules that import the mocked one *after* it is registered,
+ * and in a shared graph an earlier spec has already imported them against the
+ * real module - so the mock silently misses, and it also leaks into whatever
+ * spec that worker runs next. Those files keep full isolation.
+ *
+ * Detected from the source rather than listed, so a new spec lands in the
+ * right project without anyone remembering to put it there. Anything suite-wide
+ * that used to be mocked per file (bootstrap-vue-next's useToast) is mocked
+ * once in setupTests.js instead, which is what let most specs share at all.
+ */
+const NEEDS_ISOLATION = /\bvi\.(mock|doMock|unmock|resetModules)\(/
+
+const isolatedSpecs = globSync(SPECS).filter((file) =>
+  NEEDS_ISOLATION.test(readFileSync(file, 'utf8')),
+)
 
 // Deliberately separate from vite.config.js: the app build pulls in the theme
 // preprocessor and tailwind, neither of which the tests need. Vitest 4 no
@@ -113,8 +143,13 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['tests/unit/setupTests.js'],
-    include: ['tests/unit/**/*.spec.{js,ts}'],
     silent: 'passed-only',
+    // Undo every vi.stubGlobal / vi.stubEnv before each test (and, from
+    // setupTests.js, after each file). In the shared project a stub left in
+    // place outlives its spec file: one spec's fake `location` becomes the next
+    // file's `location`, and the router breaks there, far from the cause.
+    unstubGlobals: true,
+    unstubEnvs: true,
 
     // Persist transformed modules between runs. Without it every run re-does
     // the whole graph, and this graph is large: the generated API client alone
@@ -128,5 +163,23 @@ export default defineConfig({
     // `npx vitest --clearCache` resets it. The cache lives under Vite's
     // `cacheDir` (`node_modules/.vite`), which is already gitignored.
     experimental: { fsModuleCache: true },
+
+    projects: [
+      {
+        extends: true,
+        // `include` is set per project rather than at the root: `extends`
+        // concatenates arrays, so a root include would run every spec here too.
+        test: {
+          name: 'shared',
+          include: [SPECS],
+          exclude: isolatedSpecs,
+          isolate: false,
+        },
+      },
+      {
+        extends: true,
+        test: { name: 'isolated', include: isolatedSpecs },
+      },
+    ],
   },
 })

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { EmployeeUserList } from '@/features/user'
 import { vPaginatedEmployeeUserList } from '@/api/valibot.gen'
@@ -21,11 +21,6 @@ import { userRoutes } from '../../support/user-routes.js'
  * variants. The fake sits below the HTTP client, so these specs record the
  * request that would go on the wire.
  */
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 

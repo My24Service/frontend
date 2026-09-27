@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { SendResetLinkView } from '@/features/account'
 
@@ -17,13 +16,6 @@ import { serverError } from '../../support/list-harness.js'
  * body the endpoint's request schema rejects. Copy stays identical, including
  * the go-back on success.
  */
-
-enableAutoUnmount(afterEach)
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
 
 const api = installApiSeam()
 

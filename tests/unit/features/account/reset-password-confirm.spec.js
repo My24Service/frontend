@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { ResetPasswordConfirmView, SetPasswordForm } from '@/features/account'
 
@@ -21,13 +20,6 @@ import { serverError } from '../../support/list-harness.js'
  * query. A link without usable params fails fast with the error toast and
  * sends nothing.
  */
-
-enableAutoUnmount(afterEach)
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
 
 const api = installApiSeam()
 

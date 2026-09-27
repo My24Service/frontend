@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { jwtTokenCreate } from '@/api/sdk.gen'
 import { LoginForm, useAuthStore } from '@/features/auth'
@@ -17,8 +16,6 @@ import { requestShapes } from '../../support/request-recorder.js'
  * nowhere. Forgot-password routes into the account slice.
  */
 
-enableAutoUnmount(afterEach)
-
 const fakeHttp = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
@@ -32,11 +29,6 @@ vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
 vi.mock('@/api/client.gen', async () => {
   const { apiClientMock } = await import('../../support/api-client-mock.js')
   return apiClientMock(fakeHttp)
-})
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
 })
 
 vi.mock('vue-loading-overlay', () => ({

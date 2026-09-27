@@ -1,4 +1,4 @@
-import { beforeEach, vi } from 'vitest'
+import { vi } from 'vitest'
 import { mount, shallowMount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import { createMemoryHistory, createRouter } from 'vue-router'
@@ -15,35 +15,16 @@ import { queryClientOptions } from '@/services/query-client'
 import { useAuthStore } from '@/features/auth/store'
 import { useMainStore } from '@/stores/main'
 
+import { toastCreate } from './toast.js'
+
 // Shared harness for the form-view specs. The traps it exists to encode are
 // documented at each call site below - read them before writing a new form spec,
 // because most of them produce a *passing* test that measures nothing rather
 // than a visible failure.
 
-/**
- * The spy behind useToast().create.
- *
- * The bootstrap-vue-next mock itself has to stay in each spec file: vi.mock is
- * hoisted and scoped per module. Point it here so every spec shares one spy:
- *
- *   vi.mock('bootstrap-vue-next', async (importOriginal) => {
- *     const { toastCreate } = await import('../../support/form-harness.js')
- *     return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
- *   })
- *
- * Spread the original module - do not replace it wholesale. The auto-import
- * resolver rewrites <b-form-input> & friends into named imports from
- * bootstrap-vue-next, so a bare `{ useToast }` factory leaves every one of them
- * undefined and every template ref pointing at one of them null.
- */
-export const toastCreate = vi.fn()
-
-// Cleared between tests, here rather than in each spec. The spy is one
-// module-level object shared by every test in a file, so without this a spec
-// asserting that the user was told something can pass on a toast raised two
-// tests ago - and one asserting the user was told *nothing* can never pass at
-// all once any earlier test raised one.
-beforeEach(() => toastCreate.mockClear())
+// The spy behind useToast().create. setupTests.js mocks bootstrap-vue-next for
+// every spec and clears the spy before every test; see support/toast.js.
+export { toastCreate } from './toast.js'
 
 /**
  * Baseline behaviour for a fake axios client that replaces the `@/services/api`

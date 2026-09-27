@@ -5,9 +5,8 @@ import { QuotationPDFViewer } from '@/features/quotation'
 import { vQuotation, vQuotationDetail } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
-import { mountForm, toastCreate, toasts } from '../support/form-harness.js'
+import { mountForm, toasts } from '../support/form-harness.js'
 
-vi.mock('bootstrap-vue-next', async (original) => ({...(await original()), useToast: () => ({create: toastCreate})}))
 const api = installApiSeam()
 const base = '/api/quotation/quotation/{id}/'
 const quotation = (overrides = {}) => fixtureFor(vQuotation, {

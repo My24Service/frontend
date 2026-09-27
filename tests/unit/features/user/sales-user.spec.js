@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { SalesUserForm, SalesUserList } from '@/features/user'
 import { vPaginatedSalesUserList, vSalesUser } from '@/api/valibot.gen'
@@ -21,12 +21,6 @@ async function mountSalesList({ query = {}, auth = {} } = {}) {
 function rowTexts(wrapper) {
   return wrapper.findAll('tbody tr').map((row) => row.text())
 }
-
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 

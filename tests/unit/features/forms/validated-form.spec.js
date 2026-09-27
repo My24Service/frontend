@@ -1,13 +1,11 @@
-import { afterEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 import { defineComponent, h, reactive } from 'vue'
-import { enableAutoUnmount, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 
 import {
   ValidatedForm,
   ValidatedFormField,
 } from '@/features/forms'
-
-enableAutoUnmount(afterEach)
 
 /**
  * The seam between a form and the fields in it: a field names itself and the

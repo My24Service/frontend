@@ -8,11 +8,6 @@ import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'
 import { orderRoutes } from '../../support/order-routes.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 // The full-screen loader mounts into document.body through the library's
 // plugin, which the harness does not install.
 vi.mock('vue-loading-overlay', () => ({

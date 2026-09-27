@@ -1,5 +1,31 @@
-import { beforeEach, vi } from 'vitest'
-import { config } from '@vue/test-utils'
+import { afterAll, afterEach, beforeAll, beforeEach, expect, vi } from 'vitest'
+import { config, disableAutoUnmount, enableAutoUnmount } from '@vue/test-utils'
+
+import { toastCreate } from './support/toast.js'
+
+// useToast() hands out the one shared spy, for every spec (read it through
+// form-harness.js). Mocked here rather than per spec: a component graph that
+// one spec loaded against the real module and the next against a mock is two
+// graphs, which is what kept the suite from sharing one between spec files.
+//
+// Spread the original - do not replace it wholesale. The auto-import resolver
+// rewrites <b-form-input> & friends into named imports from bootstrap-vue-next,
+// so a bare `{ useToast }` factory leaves every one of them undefined.
+vi.mock('bootstrap-vue-next', async (importOriginal) => ({
+  ...(await importOriginal()),
+  useToast: () => ({ create: toastCreate }),
+}))
+
+// Every wrapper is unmounted after its test. A teleported modal stays in
+// `document.body` otherwise, and the next test's `#search-modal` may be the
+// previous test's (see support/modal.js).
+//
+// Disabled first because this file runs once per spec file, but in the shared
+// project (vitest.config.js) @vue/test-utils is loaded once per worker, and it
+// throws on a second enable. Re-enabling registers the hook with this spec
+// file's afterEach rather than leaving it on the first file's.
+disableAutoUnmount()
+enableAutoUnmount(afterEach)
 
 // bootstrap-vue-next components and the unplugin-icons `i-bi-*` components are
 // resolved at compile time (see vitest.config.js). VueDatePicker is the one
@@ -33,7 +59,13 @@ config.global.components = {
 // src/features/auth/token.ts, was tested against a channel the browser never
 // uses. happy-dom's `Storage` is the same class the global `Storage` refers
 // to, so an instance of it takes the native path.
-const testStorage = new Storage()
+//
+// One per worker, not one per spec file. In the shared project
+// (vitest.config.js) the app's modules are evaluated once per worker, so a
+// `useLocalStorage` bound at import time keeps whichever instance existed then;
+// a fresh instance per file would leave it reading a storage no spec can see.
+// `localStorage.clear()` below keeps tests apart instead.
+const testStorage = (globalThis.__my24TestStorage ??= new Storage())
 
 Object.defineProperty(globalThis, 'localStorage', {
   value: testStorage,
@@ -63,4 +95,36 @@ beforeEach(() => {
   window.member_type_text = undefined
   localStorage.clear()
   vi.restoreAllMocks()
+  // One spy for every test in the run. Without this a spec asserting that the
+  // user was told something can pass on a toast raised two tests ago.
+  toastCreate.mockClear()
+})
+
+// In the shared project (vitest.config.js) a worker keeps one window, and one
+// module graph, for every spec file it runs. A spec that replaces `location`
+// without undoing it breaks whichever file runs next in that worker - the
+// router, the websocket URL and the redirect helpers all read it - and that
+// file's failure says nothing about the cause. So check on the way in, and
+// name the file that ran before.
+const isRealLocation = (value) => value instanceof window.Location
+
+if (!isRealLocation(window.location) || !isRealLocation(document.location)) {
+  throw new Error(
+    `\`location\` was replaced and left in place by ${globalThis.__my24PreviousSpec ?? 'an earlier spec'}. ` +
+      "Use vi.stubGlobal('location', ...) or vi.spyOn(document, 'location', 'get'), " +
+      'which are undone after each test.',
+  )
+}
+
+let specFile
+beforeAll(() => {
+  specFile = expect.getState().testPath
+})
+afterAll(() => {
+  globalThis.__my24PreviousSpec = specFile
+  // `unstubGlobals` in vitest.config.js undoes stubs *before* each test, so a
+  // stub made by a file's last test would otherwise still be in place while the
+  // next file in the worker imports its modules.
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
 })

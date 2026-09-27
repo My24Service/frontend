@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 import { defineComponent, ref } from 'vue'
-import { enableAutoUnmount, flushPromises } from '@vue/test-utils'
+import { flushPromises } from '@vue/test-utils'
 
 import {
   ServerTable,
@@ -20,11 +20,6 @@ import {
 } from '../../support/column-filters.js'
 import { mountListView } from '../../support/form-harness.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 /**
  * The column-filter bar (src/features/table/filters/), driven through the
  * screen that renders it. The engine is real — `useServerTable` over an
@@ -41,8 +36,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * Mounted with the real `<transition>` (see support/column-filters.js) and
  * on the document, so the focus assertions mean something.
  */
-
-enableAutoUnmount(afterEach)
 
 const OWNERS = [
   { value: '1', label: 'Acme' },

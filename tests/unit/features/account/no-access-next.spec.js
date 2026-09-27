@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { NoAccessView } from '@/features/account'
 import {
@@ -26,8 +25,6 @@ import { mountListView, resetFakeHttp, toastCreate } from '../../support/form-ha
  * tests/unit/features/auth/login-form.spec.js does it.
  */
 
-enableAutoUnmount(afterEach)
-
 const fakeHttp = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
@@ -37,11 +34,6 @@ const fakeHttp = vi.hoisted(() => ({
 }))
 
 vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
 
 vi.mock('vue-loading-overlay', () => ({
   useLoading: () => ({ show: () => ({ hide: vi.fn() }) }),

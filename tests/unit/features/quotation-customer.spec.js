@@ -1,11 +1,8 @@
-import { afterEach, expect, test } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { expect, test } from 'vitest'
 import { QuotationCustomerView } from '@/features/quotation'
 import { vQuotation } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { mountForm } from '../support/form-harness.js'
-
-enableAutoUnmount(afterEach)
 
 const quotation = (overrides = {}) => fixtureFor(vQuotation, {
   id: 7, quotation_name: 'ACME', customer_id: 'C1', quotation_address: 'Street 1',

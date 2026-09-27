@@ -7,11 +7,6 @@ import { mountForm, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: spy } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: spy }) }
-})
-
 const api = installApiSeam()
 
 const PREVIEW_PATH = '/api/company/import/18/preview/'

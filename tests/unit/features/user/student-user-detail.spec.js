@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { StudentUserDetail } from '@/features/user'
 import { vStudentUser } from '@/api/valibot.gen'
@@ -26,13 +25,6 @@ import { userRoutes } from '../../support/user-routes.js'
  * The converted page reads the record as the API sends it, and that test
  * fails against the legacy page by design.
  */
-
-enableAutoUnmount(afterEach)
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
 
 const api = installApiSeam()
 

@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import TheLanguageChooser from '@/components/TheLanguageChooser.vue'
 
@@ -19,8 +18,6 @@ import { serverError } from '../../support/list-harness.js'
  * domain. The failure path stays silent apart from console.log, like the
  * code.
  */
-
-enableAutoUnmount(afterEach)
 
 const api = installApiSeam()
 

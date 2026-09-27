@@ -1,4 +1,4 @@
-import { describe, expect, test, vi } from 'vitest'
+import { describe, expect, test } from 'vitest'
 import { defineComponent, ref } from 'vue'
 
 import {
@@ -9,13 +9,6 @@ import {
 import { settle } from '../../support/api-seam/index.js'
 import { mountListView } from '../../support/form-harness.js'
 import { modal } from '../../support/modal.js'
-
-// `useServerTable` toasts load failures through `useToast`, so it needs
-// the same toast seam every list spec installs — see form-harness.js.
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 /**
  * The shared list screen (src/features/table/ServerTable.vue).

@@ -13,9 +13,8 @@ import {
 import { vActivityUserTotal, vInvoiceActivityTotals, vMaterial, vAssignedOrderMaterialTotals, vEngineer, vOrderCost, vPaginatedOrderCostList } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'
-import { mountForm, toastCreate, toasts } from '../support/form-harness.js'
+import { mountForm, toasts } from '../support/form-harness.js'
 
-vi.mock('bootstrap-vue-next', async (original) => ({...(await original()), useToast: () => ({create: toastCreate})}))
 const api = installApiSeam()
 const base = '/api/order/cost/'
 const bulk = '/api/order/cost/order/{order_id}/{cost_type}/'

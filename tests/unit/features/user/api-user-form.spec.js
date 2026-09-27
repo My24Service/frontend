@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { ApiUserForm } from '@/features/user'
 import { vApiUser } from '@/api/valibot.gen'
@@ -21,11 +21,6 @@ import { userRoutes } from '../../support/user-routes.js'
  * stripped), the validation gates, the username probe, the toasts and the
  * go-back navigation.
  */
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 

@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test } from 'vitest'
 import { HttpResponse } from 'msw'
 
 import { BFormFile } from 'bootstrap-vue-next'
@@ -16,14 +15,8 @@ import { companyLogoPng, member19 } from '../../fixtures/member-demo-tenant.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { createTestQueryClient, mountForm, mountListView, routerGo, toasts } from '../../support/form-harness.js'
 
-enableAutoUnmount(afterEach)
 import { serverError } from '../../support/list-harness.js'
 import { memberRoutes } from '../../support/member-routes.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 

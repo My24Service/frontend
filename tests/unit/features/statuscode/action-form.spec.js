@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { ActionForm } from '@/features/statuscode'
 import { vAction, vPaginatedPartnerDetailList } from '@/api/valibot.gen'
@@ -18,11 +18,6 @@ import { statuscodeRoutes } from '../../support/statuscode-routes.js'
  * update, the per-type action lists, the order type's partner load and Gripp
  * gate, the condition table, the delete, and the failure toasts.
  */
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 

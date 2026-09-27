@@ -9,11 +9,6 @@ import { mountForm } from '../../support/form-harness.js'
 import { modal } from '../../support/modal.js'
 import { orderRoutes } from '../../support/order-routes.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 vi.mock('vue-loading-overlay', () => ({
   useLoading: () => ({ show: () => ({ hide() {} }) }),
 }))

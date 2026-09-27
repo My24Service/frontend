@@ -34,11 +34,6 @@ import { customerRoutes } from '../../support/customer-routes.js'
 // called: if the loop comes back, the assertions below name the leaked requests
 // instead of failing with "no response registered".
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 const api = installApiSeam()
 
 const MAIN = { getMemberHasBranches: true, getDefaultCurrency: 'EUR', getCountries: [] }

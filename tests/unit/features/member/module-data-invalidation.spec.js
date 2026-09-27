@@ -25,11 +25,6 @@ import { mountList, openDelete } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 import { memberRoutes } from '../../support/member-routes.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 const api = installApiSeam()
 
 const PART_ITEM = itemSchemaOf(vPaginatedModulePartList)

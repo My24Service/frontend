@@ -5,13 +5,6 @@ import NotificationListener from '@/components/NotificationListener.vue'
 
 import { mountForm } from '../support/form-harness.js'
 
-// The component toasts through useToast(); the harness supplies the spy the
-// rest of the suite asserts on, which needs no BApp around the mount.
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 /**
  * The three sockets the notification component owns.
  *

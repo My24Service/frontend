@@ -5,13 +5,9 @@ import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { vAssignedOrderView, vEngineerMinimal } from '@/api/valibot.gen'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
-import { mountForm, toasts, toastCreate } from '../../support/form-harness.js'
+import { mountForm, toasts } from '../../support/form-harness.js'
 import { fieldServiceRoutes } from '../../support/field-service-routes.js'
 import { serverError } from '../../support/list-harness.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
 
 /**
  * Characterisation of the assigned-finished list, written against the LEGACY

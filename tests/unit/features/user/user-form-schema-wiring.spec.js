@@ -26,16 +26,10 @@ import {
   validateStudentUserForm,
 } from '@/features/user'
 
-
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'
 import { userRoutes } from '../../support/user-routes.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 /**
  * Every user form must hand `useUserForm` its own tested schema functions.

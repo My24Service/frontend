@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, expect, test, vi } from 'vitest'
 import { defineComponent } from 'vue'
 import { InvoiceView } from '@/features/invoice'
 import { vInvoiceView, vInvoiceLine } from '@/api/valibot.gen'
@@ -8,11 +7,6 @@ import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { mountForm, toasts } from '../support/form-harness.js'
 import { serverError } from '../support/list-harness.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-enableAutoUnmount(afterEach)
 const api = installApiSeam()
 const show = vi.fn()
 const PdfStub = defineComponent({

@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import TheNavLoggedIn from '@/components/TheNavLoggedIn.vue'
 
@@ -18,8 +17,6 @@ import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
  * logic. These specs pin the ordering it must keep.
  */
 
-enableAutoUnmount(afterEach)
-
 const fakeHttp = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
@@ -33,11 +30,6 @@ vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
 vi.mock('@/api/client.gen', async () => {
   const { apiClientMock } = await import('../../support/api-client-mock.js')
   return apiClientMock(fakeHttp)
-})
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
 })
 
 /** Drain macrotasks so the socket promise chain settles. */

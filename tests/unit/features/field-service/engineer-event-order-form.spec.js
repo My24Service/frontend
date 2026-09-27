@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 import { HttpResponse } from 'msw'
 import VueMultiselect from 'vue-multiselect'
 
@@ -12,11 +12,6 @@ import {
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts } from '../../support/form-harness.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const {toastCreate} = await import('../../support/form-harness.js')
-  return {...(await importOriginal()), useToast: () => ({create: toastCreate})}
-})
 
 /**
  * The attach-order modal: the whole request list it can send, as a literal —

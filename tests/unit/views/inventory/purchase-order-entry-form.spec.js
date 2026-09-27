@@ -37,11 +37,6 @@ import {
 // The edit path is a single entry and stays where it was: it PATCHes one row
 // through the model, which was never a per-row loop.
 
-vi.mock('bootstrap-vue-next', async () => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { useToast: () => ({ create }) }
-})
-
 const api = installApiSeam()
 
 const BULK = '/api/inventory/purchaseorder-entry/bulk/'

@@ -6,7 +6,6 @@ import { mountForm, toastCreate, toasts } from '../support/form-harness.js'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { vInvoiceDataResponse, vInvoice, vInvoiceLine, vCustomer, vPaginatedInvoiceLineList, vPaginatedOrderCostList } from '@/api/valibot.gen'
 
-vi.mock('bootstrap-vue-next', async original => ({ ...(await original()), useToast: () => ({ create: toastCreate }) }))
 const api = installApiSeam()
 const BOOT = '/api/invoice/invoice/data/{id}/'
 const INVOICE = '/api/invoice/invoice/'

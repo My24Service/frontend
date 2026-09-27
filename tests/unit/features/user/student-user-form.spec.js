@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { StudentUserForm } from '@/features/user'
 import { vStudentUser } from '@/api/valibot.gen'
@@ -24,11 +24,6 @@ import { userRoutes } from '../../support/user-routes.js'
  * `/accounts/register/` flow with its own validations) converts in its own
  * follow-up and is not mounted here.
  */
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 

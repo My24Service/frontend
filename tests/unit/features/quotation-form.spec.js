@@ -5,9 +5,7 @@ import { QuotationForm, quotationWrite } from '@/features/quotation'
 import { vChapter, vQuotation } from '@/api/valibot.gen'
 import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
-import { mountListView, toastCreate, toasts } from '../support/form-harness.js'
-
-vi.mock('bootstrap-vue-next', async (original) => ({...(await original()), useToast: () => ({create: toastCreate})}))
+import { mountListView, toasts } from '../support/form-harness.js'
 
 const api = installApiSeam()
 const base = '/api/quotation/quotation/'

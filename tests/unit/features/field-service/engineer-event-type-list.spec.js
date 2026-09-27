@@ -1,18 +1,14 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { EngineerEventTypeList } from '@/features/field-service'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { vEngineerEventType } from '@/api/valibot.gen'
 
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
-import { mountForm, toasts, toastCreate } from '../../support/form-harness.js'
+import { mountForm, toasts } from '../../support/form-harness.js'
 import { fieldServiceRoutes } from '../../support/field-service-routes.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
 
 /**
  * Characterisation of the engineer-event-type list, written against the LEGACY

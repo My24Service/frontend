@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import {
   SettingsForm,
@@ -17,11 +17,6 @@ import { memberRoutes } from '../../support/member-routes.js'
  * /api/member/member/my_settings/. Seams: the typed read into the form, the
  * lists as comma text, what the form refuses, and the patch on the wire.
  */
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 

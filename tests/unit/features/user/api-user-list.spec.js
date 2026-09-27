@@ -23,11 +23,6 @@ import { userRoutes } from '../../support/user-routes.js'
  * the request that would go on the wire.
  */
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedApiUserList)

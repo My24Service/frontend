@@ -38,12 +38,6 @@ import {
 
 // vi.mock is hoisted and scoped per module, so the mock itself has to live here;
 // it points at the harness's shared spy.
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  // Spread the original: the auto-import resolver turns <b-form-input> & co
-  // into named imports from here, so replacing the module would blank them out.
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
 
 const api = installApiSeam()
 

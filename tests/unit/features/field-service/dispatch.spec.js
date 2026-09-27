@@ -6,13 +6,9 @@ import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { vAssignedOrder, vAssignedOrderCreate, vEngineerLocation, vOrderDetail } from '@/api/valibot.gen'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
-import { mountForm, toasts, toastCreate } from '../../support/form-harness.js'
+import { mountForm, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { fieldServiceRoutes } from '../../support/field-service-routes.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
 
 // The board subscribes to the member websocket while mounted; under test it
 // must neither fetch a room nor connect. The registered handler is kept so a

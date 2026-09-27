@@ -5,10 +5,8 @@ import { ChapterPanel, QuotationLinePanel } from '@/features/quotation/form/pane
 import { vChapter, vQuotationLine } from '@/api/valibot.gen'
 import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'
-import { mountForm, toastCreate, toasts } from '../support/form-harness.js'
+import { mountForm, toasts } from '../support/form-harness.js'
 import { modal } from '../support/modal.js'
-
-vi.mock('bootstrap-vue-next', async (original) => ({...(await original()), useToast: () => ({create: toastCreate})}))
 
 const api = installApiSeam()
 const QUOTATION = 42
