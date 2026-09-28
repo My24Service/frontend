@@ -1038,8 +1038,10 @@ import {
   vEquipmentLocationListForSelectListQuery,
   vEquipmentLocationListQuery,
   vEquipmentLocationPartialUpdateBody,
+  vInventoryInventoryLocationsForMaterialListQuery,
   vInventoryInventoryLocationsListQuery,
   vInventoryInventoryMaterialsForLocationListQuery,
+  vInventoryInventoryMaterialsListQuery,
   vInventoryMaterialAutocompleteListQuery,
   vInventoryMaterialCreateBody,
   vInventoryMaterialListQuery,
@@ -3538,12 +3540,15 @@ export const InventoryInventoryLocationsForMaterial = /*#__PURE__*/ resource({
   kind: 'collection',
   id: 'number',
   list: {options: inventoryInventoryLocationsForMaterialListOptions, queryKey: inventoryInventoryLocationsForMaterialListQueryKey},
+  filters: ['material'] satisfies (keyof InventoryInventoryLocationsForMaterial.ListQuery)[],
   reads: ['inventoryInventoryLocationsForMaterialList'],
 })
 
 export declare namespace InventoryInventoryLocationsForMaterial {
   /** What `list` answers with. */
   export type ListResponse = InventoryInventoryLocationsForMaterialListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryInventoryLocationsForMaterialListQuery>
 }
 
 /** `api/inventory/inventory-materials` */
@@ -3552,12 +3557,15 @@ export const InventoryInventoryMaterials = /*#__PURE__*/ resource({
   kind: 'collection',
   id: 'number',
   list: {options: inventoryInventoryMaterialsListOptions, queryKey: inventoryInventoryMaterialsListQueryKey},
+  filters: [],
   reads: ['inventoryInventoryMaterialsList'],
 })
 
 export declare namespace InventoryInventoryMaterials {
   /** What `list` answers with. */
   export type ListResponse = InventoryInventoryMaterialsListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryInventoryMaterialsListQuery>
 }
 
 /** `api/inventory/inventory-materials-for-location` */

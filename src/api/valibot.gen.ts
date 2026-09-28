@@ -19784,6 +19784,11 @@ export const vGetMemberRoomRetrieveResponse = vRoomResponse;
 
 export const vGetUserRoomRetrieveResponse = vRoomResponse;
 
+export const vInventoryInventoryForMaterialLocationRetrieveQuery = v.object({
+    location: v.optional(v.pipe(v.number(), v.integer())),
+    material: v.optional(v.pipe(v.number(), v.integer()))
+});
+
 export const vInventoryInventoryForMaterialLocationRetrieveResponse = vInventoryResponse;
 
 export const vInventoryInventoryLocationsListQuery = v.object({
@@ -19792,7 +19797,16 @@ export const vInventoryInventoryLocationsListQuery = v.object({
 
 export const vInventoryInventoryLocationsListResponse = v.array(vInventoryLocations);
 
+export const vInventoryInventoryLocationsForMaterialListQuery = v.object({
+    material: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
+});
+
 export const vInventoryInventoryLocationsForMaterialListResponse = v.array(vInventoryLocations);
+
+export const vInventoryInventoryMaterialsListQuery = v.object({
+    q: v.optional(v.string())
+});
 
 export const vInventoryInventoryMaterialsListResponse = v.array(vInventoryMaterialsMinimal);
 

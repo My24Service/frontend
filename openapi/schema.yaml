@@ -8072,6 +8072,17 @@ paths:
   /api/inventory/inventory-for-material-location/:
     get:
       operationId: inventory_inventory_for_material_location_retrieve
+      parameters:
+      - in: query
+        name: location
+        schema:
+          type: integer
+        description: Stock location id.
+      - in: query
+        name: material
+        schema:
+          type: integer
+        description: Material id.
       tags:
       - inventory
       security:
@@ -8109,6 +8120,18 @@ paths:
   /api/inventory/inventory-locations-for-material/:
     get:
       operationId: inventory_inventory_locations_for_material_list
+      parameters:
+      - in: query
+        name: material
+        schema:
+          type: integer
+        description: Only stock locations holding this material id.
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on identifier, name, unit or
+          stock location name.
       tags:
       - inventory
       security:
@@ -8125,6 +8148,13 @@ paths:
   /api/inventory/inventory-materials/:
     get:
       operationId: inventory_inventory_materials_list
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on identifier, name, unit or
+          stock location name.
       tags:
       - inventory
       security:

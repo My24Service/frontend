@@ -18848,7 +18848,16 @@ export type GetUserRoomRetrieveResponse = GetUserRoomRetrieveResponses[keyof Get
 export type InventoryInventoryForMaterialLocationRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Stock location id.
+         */
+        location?: number;
+        /**
+         * Material id.
+         */
+        material?: number;
+    };
     url: '/api/inventory/inventory-for-material-location/';
 };
 
@@ -18879,7 +18888,16 @@ export type InventoryInventoryLocationsListResponse = InventoryInventoryLocation
 export type InventoryInventoryLocationsForMaterialListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Only stock locations holding this material id.
+         */
+        material?: number;
+        /**
+         * Case-insensitive substring match on identifier, name, unit or stock location name.
+         */
+        q?: string;
+    };
     url: '/api/inventory/inventory-locations-for-material/';
 };
 
@@ -18892,7 +18910,12 @@ export type InventoryInventoryLocationsForMaterialListResponse = InventoryInvent
 export type InventoryInventoryMaterialsListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on identifier, name, unit or stock location name.
+         */
+        q?: string;
+    };
     url: '/api/inventory/inventory-materials/';
 };
 
