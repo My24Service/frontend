@@ -1,6 +1,6 @@
 <template>
   <UserFormShell
-    :username="apiUser.username"
+    :edited-username="apiUser.username"
     :is-create="isCreate"
     :is-loading="isLoading"
     :button-disabled="buttonDisabled"

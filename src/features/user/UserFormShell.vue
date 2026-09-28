@@ -6,9 +6,9 @@
           <h3>
             <IBiPeople></IBiPeople>
             <span class="backlink" @click="$emit('cancel')">{{ $trans("People") }}</span> /
-            <strong> {{ username }}</strong>
-            <span class="dimmed" v-if="isCreate && !username">{{ $trans('new') }}</span>
-            <span class="dimmed" v-if="!isCreate && !username">{{ $trans('edit') }}</span>
+            <strong> {{ editedUsername }}</strong>
+            <span class="dimmed" v-if="isCreate && !editedUsername">{{ $trans('new') }}</span>
+            <span class="dimmed" v-if="!isCreate && !editedUsername">{{ $trans('edit') }}</span>
           </h3>
           <div class="flex-columns">
             <BButton @click="$emit('cancel')" type="button" variant="secondary" class="outline">
@@ -34,7 +34,12 @@
  * `submitForm` never sees the click's MouseEvent.
  */
 defineProps<{
-  username: string
+  /**
+   * The edited user's name. Not `username`: the app-wide componentMixin
+   * already has a `username` computed (the logged-in user's), and Vue warns
+   * on every mount when a prop shadows it.
+   */
+  editedUsername: string
   isCreate: boolean
   isLoading: boolean
   buttonDisabled: boolean
