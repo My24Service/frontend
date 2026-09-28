@@ -30,10 +30,9 @@ export { toastCreate } from './toast.js'
  * Baseline behaviour for the client fake from `useFakeHttp()`
  * (support/fake-http.js).
  *
- * `installFakeClients` below works by assigning onto model *singletons*, which
- * is no help when the component does `new OrderService()` in its own setup.
  * `useFakeHttp` spies on the axios instances themselves, which every holder
- * shares, so it reaches those too. Prefer the network seam for a new spec.
+ * shares, so it reaches a model singleton and a service a component builds in
+ * its own setup alike. Prefer the network seam for a new spec.
  *
  * Call `resetFakeHttp(fakeHttp, routes)` in beforeEach: the CSRF token
  * resolves, every other GET resolves to `routes[url]` if listed and to `[]`
@@ -67,11 +66,6 @@ export function resetFakeHttp(fakeHttp, routes = {}) {
   fakeHttp.delete.mockResolvedValue({ data: {} })
 
   return fakeHttp
-}
-
-/** URLs passed to a given verb on a client, in call order. */
-export function urlsOf(fakeHttp, verb) {
-  return fakeHttp[verb].mock.calls.map(([url]) => url)
 }
 
 // The SDK (`@/api/client.gen`) half of that fake is ./api-client-mock.js, which
@@ -116,53 +110,7 @@ export function createTestQueryClient() {
   return new QueryClient(queryPluginOptions.queryClientConfig)
 }
 
-
-const realClients = new Map()
-let http = null
 let routerGoSpy = null
-
-/**
- * Point a set of model singletons at a fake axios client and return it.
- *
- * BaseModel holds `axios` as an *instance* field, so assigning onto the model is
- * a complete seam - no vi.mock hoisting to reason about, and the real model code
- * (preInsert/preUpdate date formatting and the like) stays in the picture. The
- * models are module-level singletons shared with the component under test, so
- * the real clients are saved here and must be put back by restoreClients().
- *
- * `defaultGet` is what any GET other than the CSRF token resolves to. It differs
- * per form: autocomplete endpoints return a bare array, list() reads
- * response.data.results.
- */
-export function installFakeClients(models, { defaultGet = { data: [] } } = {}) {
-  http = {
-    get: vi.fn((url) => {
-      if (url === '/get-csrf-token/') {
-        return Promise.resolve({ data: { token: 'csrf-token' } })
-      }
-      return Promise.resolve(defaultGet)
-    }),
-    post: vi.fn(() => Promise.resolve({ data: { id: 100 } })),
-    patch: vi.fn(() => Promise.resolve({ data: {} })),
-    delete: vi.fn(() => Promise.resolve({ data: {} })),
-  }
-
-  for (const model of models) {
-    realClients.set(model, model.axios)
-    model.axios = http
-  }
-
-  return http
-}
-
-/** Put the real axios clients back. Call from afterEach. */
-export function restoreClients() {
-  for (const [model, client] of realClients.entries()) {
-    model.axios = client
-  }
-  realClients.clear()
-  http = null
-}
 
 /**
  * Mount a form view with the plugins the app installs.
@@ -287,11 +235,6 @@ export async function mountListView(component, options = {}) {
 /** The router.go spy for the most recently mounted form. */
 export function routerGo() {
   return routerGoSpy
-}
-
-/** URLs passed to a given verb, in call order. */
-export function urls(verb) {
-  return http[verb].mock.calls.map(([url]) => url)
 }
 
 /** Toast titles in call order. */

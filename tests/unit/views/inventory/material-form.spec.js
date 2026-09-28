@@ -1,19 +1,16 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-
-import materialService from '@/models/inventory/Material.js'
-import supplierModel from '@/models/inventory/Supplier'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import MaterialForm from '@/views/inventory/MaterialForm.vue'
-
 import {
-  installFakeClients,
-  mountForm,
-  restoreClients,
-  routerGo,
-  toastCreate,
-  toastTitles,
-  urls,
-} from '../../support/form-harness.js'
+  vInventoryMaterialCreateResponse,
+  vInventoryMaterialPartialUpdateResponse,
+  vMaterial,
+} from '@/api/valibot.gen'
+
+import { fixtureFor } from '../../helpers/schema-fixture.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm, routerGo, toastCreate, toastTitles } from '../../support/form-harness.js'
+import { serverError } from '../../support/list-harness.js'
 
 // CHARACTERISATION TESTS.
 //
@@ -23,7 +20,7 @@ import {
 // field is sent and when it is dropped, which is the whole point of the
 // refactor that follows.
 
-const models = [materialService, supplierModel]
+const api = installApiSeam()
 
 const DETAIL = {
   id: 42,
@@ -33,8 +30,6 @@ const DETAIL = {
   image: 'https://example.test/media/widget.png',
 }
 
-let http
-
 function mount(props = {}, stubs = {}) {
   return mountForm(MaterialForm, { props, stubs })
 }
@@ -43,35 +38,35 @@ function mount(props = {}, stubs = {}) {
 const UPLOAD = 'data:image/png;base64,AAAA'
 
 beforeEach(() => {
-  http = installFakeClients(models)
-  http.get.mockImplementation((url) => {
-    if (url === '/get-csrf-token/') {
-      return Promise.resolve({ data: { token: 'csrf-token' } })
-    }
-    if (url === '/inventory/material/42/') {
-      return Promise.resolve({ data: { ...DETAIL } })
-    }
-    // supplierModel.search() returns a bare array.
-    return Promise.resolve({ data: [] })
-  })
+  api.get('/api/inventory/material/{id}/', fixtureFor(vMaterial, DETAIL))
+  // The supplier picker searches on mount.
+  api.get('/api/inventory/supplier/autocomplete/', [])
+  api.post('/api/inventory/material/', fixtureFor(vInventoryMaterialCreateResponse, { id: 100 }))
+  api.patch('/api/inventory/material/{id}/', fixtureFor(vInventoryMaterialPartialUpdateResponse, DETAIL))
   toastCreate.mockClear()
 })
 
-afterEach(() => {
-  restoreClients()
-})
+/** The paths and bodies of the requests made with `method`, in order. */
+const sent = (method) => api.requests().filter((request) => request.method === method)
+const payloadOf = (method) => sent(method)[0]?.body
+
+/** Submit, and let the write and whatever follows it land. */
+async function submit(wrapper) {
+  await wrapper.vm.submitForm()
+  await settle()
+}
 
 describe('MaterialForm - create', () => {
   test('posts the material and navigates back', async () => {
     const wrapper = mount()
-    await wrapper.vm.$nextTick()
+    await settle()
 
     wrapper.vm.material.name = 'Widget'
 
-    await wrapper.vm.submitForm()
+    await submit(wrapper)
 
-    expect(urls('post')).toEqual(['/inventory/material/'])
-    const [, payload] = http.post.mock.calls[0]
+    expect(sent('post').map(({ path }) => path)).toEqual(['/api/inventory/material/'])
+    const payload = payloadOf('post')
     expect(payload).toMatchObject({ name: 'Widget' })
 
     expect(toastTitles()).toEqual(['Created'])
@@ -82,51 +77,51 @@ describe('MaterialForm - create', () => {
 
   test('drops a null image rather than sending it', async () => {
     const wrapper = mount()
-    await wrapper.vm.$nextTick()
+    await settle()
 
     wrapper.vm.material.name = 'Widget'
     wrapper.vm.material.image = null
 
-    await wrapper.vm.submitForm()
+    await submit(wrapper)
 
-    const [, payload] = http.post.mock.calls[0]
+    const payload = payloadOf('post')
     expect(payload).not.toHaveProperty('image')
   })
 
   test('sends a newly picked image', async () => {
     const wrapper = mount()
-    await wrapper.vm.$nextTick()
+    await settle()
 
     wrapper.vm.material.name = 'Widget'
     wrapper.vm.material.image = UPLOAD
 
-    await wrapper.vm.submitForm()
+    await submit(wrapper)
 
-    const [, payload] = http.post.mock.calls[0]
+    const payload = payloadOf('post')
     expect(payload.image).toBe(UPLOAD)
   })
 
   test('sends nothing when the name is missing', async () => {
     const wrapper = mount()
-    await wrapper.vm.$nextTick()
+    await settle()
 
     wrapper.vm.material.name = ''
 
-    await wrapper.vm.submitForm()
+    await submit(wrapper)
 
-    expect(http.post).not.toHaveBeenCalled()
+    expect(sent('post')).toEqual([])
     expect(routerGo()).not.toHaveBeenCalled()
   })
 
   test('does not navigate when the post fails', async () => {
-    http.post.mockRejectedValueOnce(new Error('boom'))
+    api.post('/api/inventory/material/', serverError)
 
     const wrapper = mount()
-    await wrapper.vm.$nextTick()
+    await settle()
 
     wrapper.vm.material.name = 'Widget'
 
-    await wrapper.vm.submitForm()
+    await submit(wrapper)
 
     expect(toastTitles()).toEqual(['Error'])
     expect(routerGo()).not.toHaveBeenCalled()
@@ -136,7 +131,7 @@ describe('MaterialForm - create', () => {
 
   test('selectSupplier copies the supplier id and name onto the material', async () => {
     const wrapper = mount()
-    await wrapper.vm.$nextTick()
+    await settle()
 
     wrapper.vm.selectSupplier({ id: 3, name: 'ACME' })
 
@@ -163,10 +158,10 @@ describe('MaterialForm - edit', () => {
     const wrapper = await readyEdit()
 
     wrapper.vm.material.name = 'Gadget'
-    await wrapper.vm.submitForm()
+    await submit(wrapper)
 
-    expect(urls('patch')).toEqual(['/inventory/material/42/'])
-    const [, payload] = http.patch.mock.calls[0]
+    expect(sent('patch').map(({ path }) => path)).toEqual(['/api/inventory/material/42/'])
+    const payload = payloadOf('patch')
     expect(payload).toMatchObject({ id: 42, name: 'Gadget' })
 
     expect(toastTitles()).toEqual(['Updated'])
@@ -179,9 +174,9 @@ describe('MaterialForm - edit', () => {
   test('does not send the existing image URL back', async () => {
     const wrapper = await readyEdit()
 
-    await wrapper.vm.submitForm()
+    await submit(wrapper)
 
-    const [, payload] = http.patch.mock.calls[0]
+    const payload = payloadOf('patch')
     expect(payload).not.toHaveProperty('image')
   })
 
@@ -191,17 +186,17 @@ describe('MaterialForm - edit', () => {
     // What imageSelected() does: replace the URL with the file's data URI.
     wrapper.vm.material.image = UPLOAD
 
-    await wrapper.vm.submitForm()
+    await submit(wrapper)
 
-    const [, payload] = http.patch.mock.calls[0]
+    const payload = payloadOf('patch')
     expect(payload.image).toBe(UPLOAD)
   })
 
   test('does not navigate when the patch fails', async () => {
     const wrapper = await readyEdit()
 
-    http.patch.mockRejectedValueOnce(new Error('boom'))
-    await wrapper.vm.submitForm()
+    api.patch('/api/inventory/material/{id}/', serverError)
+    await submit(wrapper)
 
     expect(toastTitles()).toEqual(['Error'])
     expect(routerGo()).not.toHaveBeenCalled()

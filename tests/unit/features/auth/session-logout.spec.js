@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import TheNavLoggedIn from '@/components/TheNavLoggedIn.vue'
 
-import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
-import { useFakeHttp } from '../../support/fake-http.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm } from '../../support/form-harness.js'
 
 /**
  * Behaviour characterisation for the logout sequence
@@ -18,11 +18,16 @@ import { useFakeHttp } from '../../support/fake-http.js'
  * logic. These specs pin the ordering it must keep.
  */
 
-const fakeHttp = useFakeHttp()
+const api = installApiSeam()
 
 /** Drain macrotasks so the socket promise chain settles. */
 async function flush() {
-  for (let i = 0; i < 10; i++) await new Promise((resolve) => setTimeout(resolve, 0))
+  for (let i = 0; i < 2; i++) await settle()
+}
+
+/** The requests made from here on. */
+function requestsFrom(start) {
+  return api.requests().slice(start)
 }
 
 const MAIN = {
@@ -32,7 +37,8 @@ const MAIN = {
 }
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp)
+  // Mounting connects the new-data socket, which first asks for its room.
+  api.get('/api/get-member-new-data-room/', { room: 'room-acme' })
   MAIN.checkInitialData.mockClear()
   MAIN.getInitialData.mockClear()
 })
@@ -85,20 +91,21 @@ describe('TheNavLoggedIn logout', () => {
   test('it makes no server call', async () => {
     const wrapper = await mountNav()
     wrapper.vm.$router.currentRoute.path = '/customers/customers'
+    const start = api.requests().length
 
     await wrapper.vm.doLogout()
     await flush()
 
-    expect(fakeHttp.post.mock.calls.length).toBe(0)
+    expect(requestsFrom(start)).toEqual([])
   })
 
   test('it looks up no websocket room to close the sockets', async () => {
     const wrapper = await mountNav()
-    fakeHttp.get.mockClear()
+    const start = api.requests().length
 
     await wrapper.vm.doLogout()
     await flush()
 
-    expect(fakeHttp.get.mock.calls.map(([url]) => url).filter((url) => url.includes('room'))).toEqual([])
+    expect(requestsFrom(start).filter(({ path }) => path.includes('room'))).toEqual([])
   })
 })

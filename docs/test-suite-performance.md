@@ -180,8 +180,23 @@ column the table does not have. It now links the equipment by name, like the
 technical table.
 
 The client fake could see none of this; that is the gap the seam exists to
-close. The call-shape specs still on `useFakeHttp()` (inventory, login and
-session) have not been tried on the seam yet.
+close.
+
+### The remaining client-fake specs
+
+Seven of the eight remaining client-fake specs are on the seam now: login,
+logout, the post-login redirect, both no-access specs, the inventory stats
+table and the material form. Four of them should make no request at all, and
+now fail if one is made. The login and material-form bodies are also checked
+against the generated request schemas. None of them hit a schema mismatch.
+
+The eighth, `material-move-form-call-shape.spec`, stays on `useFakeHttp()`.
+The material search sends `q` to `GET /api/inventory/inventory-materials/`,
+and the schema declares no query parameters for that endpoint (its sibling
+`inventory-materials-for-location` does declare `q`). Move the spec once the
+schema declares it. Moving it turned up a frontend bug too: `Inventory.js` put
+the search term into the URL unencoded, so a term with `&`, `#` or `+` was cut
+short or changed. It is encoded now, and the spec pins it.
 
 ## What is left, and what it would take
 

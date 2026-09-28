@@ -6,8 +6,8 @@ import {
   useAuthToken,
 } from '@/features/auth'
 
-import { mountListView, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
-import { useFakeHttp } from '../../support/fake-http.js'
+import { installApiSeam } from '../../support/api-seam/index.js'
+import { mountListView, toastCreate } from '../../support/form-harness.js'
 
 /**
  * Return-to-next behaviour for the access gate
@@ -26,7 +26,9 @@ import { useFakeHttp } from '../../support/fake-http.js'
  * tests/unit/features/auth/login-form.spec.js does it.
  */
 
-const fakeHttp = useFakeHttp()
+// On the seam with nothing stubbed: login is stubbed below, so the gate asks
+// the backend for nothing, and a request would fail the test.
+installApiSeam()
 
 /** Drain macrotasks so the login chain, the watcher, and the router settle. */
 async function flush() {
@@ -46,7 +48,6 @@ const MAIN = {
 }
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp)
   toastCreate.mockClear()
   MAIN.getInitialData.mockClear()
 })

@@ -11,7 +11,7 @@ import componentMixin from '@/mixins/common'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 
-import { useFakeHttp } from '../../support/fake-http.js'
+import { installApiSeam } from '../../support/api-seam/index.js'
 
 /**
  * Behaviour characterisation for the post-login redirect
@@ -24,7 +24,9 @@ import { useFakeHttp } from '../../support/fake-http.js'
  * logic. These specs pin the ordering it must keep.
  */
 
-const fakeHttp = useFakeHttp()
+// On the seam with nothing stubbed: the redirect reads only the stores, and a
+// request would fail the test.
+installApiSeam()
 
 /** Drain macrotasks so the watcher settles. */
 async function flush() {

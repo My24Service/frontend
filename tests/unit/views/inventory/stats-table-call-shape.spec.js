@@ -1,13 +1,14 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import materialModel from '@/models/inventory/Material.js'
 
 import StatsTable from '@/views/inventory/StatsTable.vue'
+import { vInventoryMaterialStatsTableRetrieveResponse } from '@/api/valibot.gen'
 
-import { requestShapes } from '../../support/request-recorder.js'
-import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
-import { captureDownloads } from '../../support/downloads.js'
-import { useFakeHttp } from '../../support/fake-http.js'
+import { fixtureFor } from '../../helpers/schema-fixture.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm } from '../../support/form-harness.js'
+import { captureDownloads, xlsxResponse } from '../../support/downloads.js'
 
 // CALL-SHAPE SPEC.
 //
@@ -18,34 +19,29 @@ import { useFakeHttp } from '../../support/fake-http.js'
 // op. These tests pin that the request shape is unchanged: same path, same
 // year, and q only when a search term is actually set.
 
-const fakeHttp = useFakeHttp()
-
-const ROUTES = {
-  '/inventory/material/stats_table/': { results: [], inventory_keys: {} },
-}
+const api = installApiSeam()
 
 const YEAR = new Date().getFullYear()
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp, ROUTES)
+  api.get('/api/inventory/material/stats_table/', fixtureFor(vInventoryMaterialStatsTableRetrieveResponse))
   // The view reads the search query off the shared MaterialService singleton;
   // leave it clean for each test.
   materialModel.searchQuery = null
 })
 
-/** Let every pending promise in the load path resolve. */
-async function flush() {
-  for (let i = 0; i < 10; i++) {
-    await Promise.resolve()
-  }
-}
+/** Let every request in the load path land. */
+const flush = settle
+
+/** The GETs made from `start` on. */
+const getsFrom = (start = 0) => api.requests().slice(start).filter((request) => request.method === 'get')
 
 describe('StatsTable - stats table call shape', () => {
   test('mount loads the stats table for the current year', async () => {
     mountForm(StatsTable)
     await flush()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+    expect(getsFrom()).toEqual([
       { method: 'get', path: '/api/inventory/material/stats_table/', query: { year: String(YEAR) }, body: undefined },
     ])
   })
@@ -53,12 +49,13 @@ describe('StatsTable - stats table call shape', () => {
   test('sends the search query as q', async () => {
     const wrapper = mountForm(StatsTable)
     await flush()
-    fakeHttp.get.mockClear()
+    const start = api.requests().length
 
     wrapper.vm.model.setSearchQuery('acme')
     await wrapper.vm.loadData()
+    await flush()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+    expect(getsFrom(start)).toEqual([
       { method: 'get', path: '/api/inventory/material/stats_table/', query: { year: String(YEAR), q: 'acme' }, body: undefined },
     ])
   })
@@ -66,12 +63,12 @@ describe('StatsTable - stats table call shape', () => {
   test('nextYear reloads with the incremented year', async () => {
     const wrapper = mountForm(StatsTable)
     await flush()
-    fakeHttp.get.mockClear()
+    const start = api.requests().length
 
     wrapper.vm.nextYear()
     await flush()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+    expect(getsFrom(start)).toEqual([
       { method: 'get', path: '/api/inventory/material/stats_table/', query: { year: String(YEAR + 1) }, body: undefined },
     ])
   })
@@ -85,12 +82,13 @@ describe('StatsTable - stats table call shape', () => {
   test('a cleared search drops the q parameter', async () => {
     const wrapper = mountForm(StatsTable)
     await flush()
-    fakeHttp.get.mockClear()
+    const start = api.requests().length
 
     wrapper.vm.model.setSearchQuery('')
     await wrapper.vm.loadData()
+    await flush()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+    expect(getsFrom(start)).toEqual([
       { method: 'get', path: '/api/inventory/material/stats_table/', query: { year: String(YEAR) }, body: undefined },
     ])
   })
@@ -102,11 +100,12 @@ describe('StatsTable - stats table call shape', () => {
   test('an untouched search box does not send q at all', async () => {
     const wrapper = mountForm(StatsTable)
     await flush()
-    fakeHttp.get.mockClear()
+    const start = api.requests().length
 
     await wrapper.vm.loadData()
+    await flush()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+    expect(getsFrom(start)).toEqual([
       { method: 'get', path: '/api/inventory/material/stats_table/', query: { year: String(YEAR) }, body: undefined },
     ])
   })
@@ -117,21 +116,21 @@ describe('StatsTable - export', () => {
   // `/api/`, with the search term pasted into the query unencoded.
   test('exports the year and search term through the export endpoint', async () => {
     const saved = captureDownloads()
-    fakeHttp.get.mockImplementation(async () => ({ data: new Blob(['xlsx']), status: 200 }))
+    api.get('/api/inventory/stats_table_export/', xlsxResponse)
     const wrapper = mountForm(StatsTable)
     await flush()
-    fakeHttp.get.mockClear()
+    const start = api.requests().length
 
     wrapper.vm.model.setSearchQuery('bout & moer')
     await wrapper.vm.downloadList()
+    await flush()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+    expect(getsFrom(start)).toEqual([
       {
         method: 'get', path: '/api/inventory/stats_table_export/',
         query: { year: String(YEAR), q: 'bout & moer' }, body: undefined,
       },
     ])
     expect(saved).toEqual(['stats_table.xlsx'])
-    vi.restoreAllMocks()
   })
 })

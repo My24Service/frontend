@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { NoAccessView as NoAccess } from '@/features/account'
 import { LoginForm } from '@/features/auth'
 
-import { mountForm, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
-import { useFakeHttp } from '../../support/fake-http.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm, toastCreate } from '../../support/form-harness.js'
 
 /**
  * Behaviour characterisation for the access gate (src/features/account/NoAccessView.vue).
@@ -15,21 +15,18 @@ import { useFakeHttp } from '../../support/fake-http.js'
  * `src/features/account/` unchanged apart from the composition API.
  */
 
-const fakeHttp = useFakeHttp()
-
-async function flush() {
-  for (let i = 0; i < 10; i++) await Promise.resolve()
-}
+// On the seam with nothing stubbed: mounting either branch asks for nothing,
+// and a request would fail the test.
+installApiSeam()
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp)
   toastCreate.mockClear()
 })
 
 describe('NoAccess view', () => {
   test('logged in explains the missing permission', async () => {
     const wrapper = mountForm(NoAccess, { deep: true, auth: { isLoggedIn: true } })
-    await flush()
+    await settle()
 
     expect(wrapper.text()).toContain('No access')
     expect(wrapper.findComponent(LoginForm).exists()).toBe(false)
@@ -37,14 +34,14 @@ describe('NoAccess view', () => {
 
   test('logged out shows the login form', async () => {
     const wrapper = mountForm(NoAccess, { deep: true, auth: { isLoggedIn: false } })
-    await flush()
+    await settle()
 
     expect(wrapper.findComponent(LoginForm).exists()).toBe(true)
   })
 
   test('the login form offers the forgot-password route', async () => {
     const wrapper = mountForm(NoAccess, { deep: true, auth: { isLoggedIn: false } })
-    await flush()
+    await settle()
 
     expect(wrapper.text()).toContain('Forgot password?')
   })
