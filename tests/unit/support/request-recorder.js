@@ -2,8 +2,8 @@
  * Normalized view of the HTTP requests a call-shape spec's fake client saw.
  *
  * The generated SDK client and the legacy `BaseModel`/`@/services/api` client
- * reach the network through *different* seams, so a call-shape spec mocks both
- * into one shared `vi.hoisted` fake (see `api-client-mock.js`) and then reads
+ * reach the network through *different* seams, so a call-shape spec routes both
+ * into one shared fake (`useFakeHttp`, support/fake-http.js) and then reads
  * that fake through this helper. The two seams disagree on two things this
  * normalizes away, so a spec written against the pre-refactor code still passes
  * against the refactored code:
@@ -14,9 +14,6 @@
  *   prefix.
  * - Query serialization. Both seams land `?a=1&b=2` on the URL, so `query`
  *   here is the parsed object rather than a raw string.
- *
- * It must stay dependency-free, like `api-client-mock.js` (imported from
- * `vi.mock` factories while the spec graph is still resolving).
  */
 
 const API_PREFIX = '/api/'

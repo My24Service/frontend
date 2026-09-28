@@ -1,9 +1,10 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { NoAccessView as NoAccess } from '@/features/account'
 import { LoginForm } from '@/features/auth'
 
 import { mountForm, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
+import { useFakeHttp } from '../../support/fake-http.js'
 
 /**
  * Behaviour characterisation for the access gate (src/features/account/NoAccessView.vue).
@@ -14,15 +15,7 @@ import { mountForm, resetFakeHttp, toastCreate } from '../../support/form-harnes
  * `src/features/account/` unchanged apart from the composition API.
  */
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
+const fakeHttp = useFakeHttp()
 
 async function flush() {
   for (let i = 0; i < 10; i++) await Promise.resolve()

@@ -1,29 +1,11 @@
 /**
- * The `@/api/client.gen` mock factory, kept dependency-free on purpose.
+ * The generated client's half of the client fake (support/fake-http.js).
  *
  * The generated SDK calls `client.{verb}({ url, path, query, body })` where
  * `path` carries the `{id}` route params. This interpolates them back into the
- * URL and forwards a plain `(url[, body])` call to the same vi.hoisted axios
- * fake the spec uses for `@/services/api`, so `urlsOf`/payload assertions keep
- * working unchanged.
- *
- * It must import nothing from the app, and in particular NOT from
- * `form-harness.js`. It is loaded through an async `vi.mock` factory while the
- * spec's import graph is still being evaluated, so it may only await a module
- * that loads on its own: a module that is itself mid-evaluation never settles,
- * and the symptom is a suite that hangs with no output rather than an error
- * (the same shape as the `@/services/api` trap documented in
- * `form-harness.js`). Importing nothing keeps this file on the safe side of
- * that line whatever the harness imports, which is why it lives in its own
- * file rather than in the harness.
- *
- * Use it from an async factory - a sync factory cannot see a statically
- * imported binding, because `vi.mock` is hoisted above the imports:
- *
- *   vi.mock('@/api/client.gen', async () => {
- *     const { apiClientMock } = await import('../../support/api-client-mock.js')
- *     return apiClientMock(fakeHttp)
- *   })
+ * URL and forwards a plain `(url[, body])` call to the same fake the spec uses
+ * for `@/services/api`, so `urlsOf`/payload assertions work unchanged.
+ * `useFakeHttp` installs these as spies on the real client.
  */
 export function apiClientMock(fakeHttp) {
   const resolve = (url, opts) => {

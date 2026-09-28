@@ -1,9 +1,13 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 import { nextTick } from 'vue'
 
 import NotificationListener from '@/components/NotificationListener.vue'
+import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
+import memberSocket from '@/services/websocket/MemberSocket'
+import userSocket from '@/services/websocket/UserSocket'
 
 import { mountForm } from '../support/form-harness.js'
+import { stubSocket } from '../support/sockets.js'
 
 /**
  * The three sockets the notification component owns.
@@ -17,29 +21,22 @@ import { mountForm } from '../support/form-harness.js'
  * same breath, which is what `TheNavLoggedIn.doLogout` already does.
  */
 
-const sockets = vi.hoisted(() => {
-  function fake() {
-    return {
-      events: [],
-      async init(...args) { this.events.push(['init', ...args]) },
-      setOnmessageHandler(fn) { this.events.push(['handler', fn]) },
-      getSocket() { this.events.push('getSocket') },
-      removeOnmessageHandler() { this.events.push('removeHandler') },
-      removeSocket() { this.events.push('removeSocket') },
-    }
+// One recorder per socket. The member-new-data socket is constructed by the
+// component itself, so its class's prototype is what gets stubbed; the other
+// two are module singletons and are stubbed as they are.
+function recorder() {
+  const record = { events: [] }
+  record.methods = {
+    async init(...args) { record.events.push(['init', ...args]) },
+    setOnmessageHandler(fn) { record.events.push(['handler', fn]) },
+    getSocket() { record.events.push('getSocket') },
+    removeOnmessageHandler() { record.events.push('removeHandler') },
+    removeSocket() { record.events.push('removeSocket') },
   }
+  return record
+}
 
-  return { user: fake(), member: fake(), newData: fake() }
-})
-
-vi.mock('@/services/websocket/UserSocket', () => ({ default: sockets.user }))
-vi.mock('@/services/websocket/MemberSocket', () => ({ default: sockets.member }))
-vi.mock('@/services/websocket/MemberNewDataSocket', () => ({
-  // The component constructs its own instance; hand it the recorded fake.
-  default: class {
-    constructor() { return sockets.newData }
-  },
-}))
+const sockets = { user: recorder(), member: recorder(), newData: recorder() }
 
 async function flush() {
   await nextTick()
@@ -55,6 +52,9 @@ const all = () => [sockets.user, sockets.member, sockets.newData]
 
 beforeEach(() => {
   for (const socket of all()) socket.events = []
+  stubSocket(userSocket, sockets.user.methods)
+  stubSocket(memberSocket, sockets.member.methods)
+  stubSocket(MemberNewDataSocket.prototype, sockets.newData.methods)
 })
 
 describe('NotificationListener', () => {

@@ -5,6 +5,7 @@ import CompanyDashboard from '@/views/company/CompanyDashboard.vue'
 
 import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
 import { requestShapes } from '../../support/request-recorder.js'
+import { useFakeHttp } from '../../support/fake-http.js'
 
 // Call-shape characterisation for the migrated call sites in the two dashboard
 // views assigned to this cluster.
@@ -24,20 +25,7 @@ import { requestShapes } from '../../support/request-recorder.js'
 // wrappers called without a filter; the generated endpoints keep the same URLs
 // and send no query. The dashboard list() call before them is BaseModel CRUD.
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
+const fakeHttp = useFakeHttp()
 
 const MIXIN_ROUTES = {
   '/member/member/me/': { pk: 1, username: 'engineer' },

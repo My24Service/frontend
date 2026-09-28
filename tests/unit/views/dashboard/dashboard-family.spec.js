@@ -7,25 +7,13 @@ import DashboardBlock from '@/views/dashboard/components/DashboardBlock.vue'
 import DashboardBlockShltr from '@/views/dashboard/components/DashboardBlockShltr.vue'
 
 import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
+import { useFakeHttp } from '../../support/fake-http.js'
 
 // One Dashboard for both product families (block B, step 5). The shltr
 // layout is the base; `profile.family === 'default'` swaps in the default
 // card primitives, stats tile, section order and scoped styles.
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
+const fakeHttp = useFakeHttp()
 
 const ROUTES = {
   '/member/member/me/': { pk: 1, username: 'planning' },

@@ -2,27 +2,20 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { HttpResponse } from 'msw'
 
 import { Dispatch } from '@/features/field-service'
+import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { vAssignedOrder, vAssignedOrderCreate, vEngineerLocation, vOrderDetail } from '@/api/valibot.gen'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts } from '../../support/form-harness.js'
+import { stubSocket } from '../../support/sockets.js'
 import { serverError } from '../../support/list-harness.js'
 import { fieldServiceRoutes } from '../../support/field-service-routes.js'
 
 // The board subscribes to the member websocket while mounted; under test it
 // must neither fetch a room nor connect. The registered handler is kept so a
 // test can deliver the dispatch message through it.
-const socket = vi.hoisted(() => ({ handlers: {}, removed: [] }))
-vi.mock('@/services/websocket/MemberNewDataSocket', () => ({
-  default: class {
-    async init() {}
-    setOnmessageHandler(fn) { socket.handlers.dispatch = fn }
-    removeOnmessageHandler() { socket.removed.push('dispatch') }
-    getSocket() {}
-    removeSocket() {}
-  },
-}))
+const socket = { handlers: {}, removed: [] }
 
 /**
  * Characterisation of the dispatch week board, written against the LEGACY
@@ -71,6 +64,10 @@ function orderRow(overrides = {}) {
 beforeEach(() => {
   socket.handlers = {}
   socket.removed = []
+  stubSocket(MemberNewDataSocket.prototype, {
+    setOnmessageHandler(fn) { socket.handlers.dispatch = fn },
+    removeOnmessageHandler() { socket.removed.push('dispatch') },
+  })
   // Only Date is faked: `settle()` waits on real timers, and freezing those
   // would hang every spec in this file.
   vi.useFakeTimers({toFake: ['Date']})

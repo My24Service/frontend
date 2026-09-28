@@ -1,24 +1,14 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
 
 import { NEW_DATA_EVENTS } from '@/constants'
 import { useMemberNewData } from '@/features/order'
+import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 
-const mock = vi.hoisted(() => ({ events: [], gate: null }))
+import { stubSocket } from '../../support/sockets.js'
 
-vi.mock('@/services/websocket/MemberNewDataSocket', () => ({
-  default: class {
-    async init(type) {
-      mock.events.push(['init', type])
-      if (mock.gate) await mock.gate
-    }
-    setOnmessageHandler(fn) { mock.events.push(['handler', fn]) }
-    removeOnmessageHandler() { mock.events.push('removeHandler') }
-    getSocket() { mock.events.push('getSocket') }
-    removeSocket() { mock.events.push('removeSocket') }
-  },
-}))
+const mock = { events: [], gate: null }
 
 const Harness = defineComponent({
   setup() {
@@ -46,6 +36,16 @@ function names() {
 beforeEach(() => {
   mock.events = []
   mock.gate = null
+  stubSocket(MemberNewDataSocket.prototype, {
+    async init(type) {
+      mock.events.push(['init', type])
+      if (mock.gate) await mock.gate
+    },
+    setOnmessageHandler(fn) { mock.events.push(['handler', fn]) },
+    removeOnmessageHandler() { mock.events.push('removeHandler') },
+    getSocket() { mock.events.push('getSocket') },
+    removeSocket() { mock.events.push('removeSocket') },
+  })
 })
 
 describe('useMemberNewData', () => {

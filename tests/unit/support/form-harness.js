@@ -27,28 +27,15 @@ import { toastCreate } from './toast.js'
 export { toastCreate } from './toast.js'
 
 /**
- * Baseline behaviour for a fake axios client that replaces the `@/services/api`
- * module itself.
+ * Baseline behaviour for the client fake from `useFakeHttp()`
+ * (support/fake-http.js).
  *
  * `installFakeClients` below works by assigning onto model *singletons*, which
- * is no help when the component does `new OrderService()` in its own setup -
- * that instance takes its `axios` from the `@/services/api` module at
- * construction time, so mocking the module is the only seam that reaches it.
+ * is no help when the component does `new OrderService()` in its own setup.
+ * `useFakeHttp` spies on the axios instances themselves, which every holder
+ * shares, so it reaches those too. Prefer the network seam for a new spec.
  *
- * The mock's client must be created with `vi.hoisted` **in the spec**, not
- * imported from here:
- *
- *   const fakeHttp = vi.hoisted(() => ({
- *     get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
- *   }))
- *   vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
- *
- * An `async` factory that imports this file instead deadlocks the run - vitest
- * is resolving `@/services/api`, this module's own imports reach it again
- * through `@/mixins/common`, and nothing ever finishes loading. The symptom is
- * a suite that hangs with no output at all rather than an error.
- *
- * Then `resetFakeHttp(fakeHttp, routes)` in beforeEach: the CSRF token
+ * Call `resetFakeHttp(fakeHttp, routes)` in beforeEach: the CSRF token
  * resolves, every other GET resolves to `routes[url]` if listed and to `[]`
  * otherwise, and writes succeed.
  */
@@ -87,15 +74,9 @@ export function urlsOf(fakeHttp, verb) {
   return fakeHttp[verb].mock.calls.map(([url]) => url)
 }
 
-// The SDK (`@/api/client.gen`) mock lives in ./api-client-mock.js, NOT here:
-// a spec's `vi.mock('@/api/client.gen', async () => await import(...))` factory
-// runs while the spec is still importing, so it may only await a module that
-// loads on its own - and this one does not. This module's own imports are the
-// app graph (@/mixins/common -> @/services/my24 -> @/services/api, the auth
-// store, @/stores/main), which is the very graph the `@/services/api`
-// factories above replace; a factory that waits on a module being evaluated
-// hangs with no output rather than failing. `apiClientMock` must stay in a
-// dependency-free module; see the comment there.
+// The SDK (`@/api/client.gen`) half of that fake is ./api-client-mock.js, which
+// translates the generated client's `{url, path, query, body}` calls into the
+// plain `(url[, body])` calls the fake records.
 
 /**
  * The query plugin, as main.ts installs it, with one override.

@@ -5,6 +5,7 @@ import { LoginForm, useAuthStore } from '@/features/auth'
 
 import { mountForm, resetFakeHttp, toastCreate, toasts } from '../../support/form-harness.js'
 import { requestShapes } from '../../support/request-recorder.js'
+import { useFakeHttp } from '../../support/fake-http.js'
 
 /**
  * Behaviour characterisation for the login form
@@ -16,24 +17,7 @@ import { requestShapes } from '../../support/request-recorder.js'
  * nowhere. Forgot-password routes into the account slice.
  */
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
-
-vi.mock('vue-loading-overlay', () => ({
-  useLoading: () => ({ show: () => ({ hide: vi.fn() }) }),
-}))
+const fakeHttp = useFakeHttp()
 
 /** Drain macrotasks so the SDK promise chain settles. */
 async function flush() {

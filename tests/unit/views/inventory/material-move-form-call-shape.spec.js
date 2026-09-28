@@ -4,6 +4,7 @@ import MaterialMoveForm from '@/views/inventory/MaterialMoveForm.vue'
 
 import { requestShapes } from '../../support/request-recorder.js'
 import { mountForm, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
+import { useFakeHttp } from '../../support/fake-http.js'
 
 // CALL-SHAPE SPEC.
 //
@@ -16,20 +17,7 @@ import { mountForm, resetFakeHttp, toastCreate } from '../../support/form-harnes
 // amount, which is exactly what the old URL interpolation and body put on the
 // wire.
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
+const fakeHttp = useFakeHttp()
 
 beforeEach(() => {
   resetFakeHttp(fakeHttp, {})

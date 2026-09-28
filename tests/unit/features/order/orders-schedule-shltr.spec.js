@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { OrdersSchedule } from '@/features/order'
 import { vOrderDetail, vOrderEvent } from '@/api/valibot.gen'
@@ -8,10 +8,6 @@ import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'
 import { modal } from '../../support/modal.js'
 import { orderRoutes } from '../../support/order-routes.js'
-
-vi.mock('vue-loading-overlay', () => ({
-  useLoading: () => ({ show: () => ({ hide() {} }) }),
-}))
 
 const api = installApiSeam()
 

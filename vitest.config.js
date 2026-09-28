@@ -63,9 +63,8 @@ const SPECS = 'tests/unit/**/*.spec.{js,ts}'
  * Most of the suite runs without isolation (the `shared` project below): each
  * worker evaluates the app's module graph once and every spec file it runs
  * reuses it. Measured on a 4-core box, `import` went from ~790 to ~105
- * CPU-seconds (most of what is left is the isolated specs below) and the full
- * run from ~440s to ~140s. Per-file isolation was costing more than the tests
- * themselves.
+ * CPU-seconds and the full run from ~440s to ~140s. Per-file isolation was
+ * costing more than the tests themselves.
  *
  * A spec that replaces an app module with `vi.mock` cannot share. The mock
  * only reaches modules that import the mocked one *after* it is registered,
@@ -80,8 +79,14 @@ const SPECS = 'tests/unit/**/*.spec.{js,ts}'
  */
 const NEEDS_ISOLATION = /\bvi\.(mock|doMock|unmock|resetModules)\(/
 
+// Comments are stripped first, so a spec explaining why it does *not* use
+// vi.mock stays shared. Crude (a `//` inside a string would cut the line
+// short), which errs towards sharing a file that then fails loudly.
+const withoutComments = (source) =>
+  source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1')
+
 const isolatedSpecs = globSync(SPECS).filter((file) =>
-  NEEDS_ISOLATION.test(readFileSync(file, 'utf8')),
+  NEEDS_ISOLATION.test(withoutComments(readFileSync(file, 'utf8'))),
 )
 
 // Deliberately separate from vite.config.js: the app build pulls in the theme

@@ -123,9 +123,19 @@ put back what it changes:
 - Restore anything assigned onto a shared object: an axios instance's
   `defaults.adapter`, a model singleton's state (`useFreshModel` in
   `support/list-harness.js`), a store outside a component.
-- Don't mock bootstrap-vue-next for toasts: `setupTests.js` does it once for
-  the suite. Read the spy through `toastCreate` / `toasts()` from
-  `support/form-harness.js`. The same file enables auto-unmount for every spec.
+- Don't mock bootstrap-vue-next for toasts or vue-loading-overlay:
+  `setupTests.js` does both once for the suite. Read the toast spy through
+  `toastCreate` / `toasts()` from `support/form-harness.js`. The same file
+  enables auto-unmount for every spec.
+- Don't `vi.spyOn` a `localStorage` method: happy-dom's `Storage` cannot
+  restore it, and the next file inherits a storage that cannot write. Replace
+  it with `Object.defineProperty` and put the original back (see
+  `features/auth/auth-store.spec.js`). `setupTests.js` fails the next file if
+  storage is left broken.
+- Reach for a spy before `vi.mock`, which sends the spec to the isolated
+  project: `useFakeHttp()` (`support/fake-http.js`) for the legacy client
+  fakes, `stubSocket()` (`support/sockets.js`) for the websockets. The HTTP
+  clients' `defaults.adapter` is put back before every test.
 
 ## Input delays are zero
 

@@ -4,12 +4,14 @@ import { OrderList } from '@/features/order'
 import { vOrderStatus, vPaginatedOrderList } from '@/api/valibot.gen'
 import { NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES } from '@/constants'
 import { useMainStore } from '@/stores/main'
+import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 
 import { flushPromises } from '@vue/test-utils'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountListView, toasts } from '../../support/form-harness.js'
+import { stubSocket } from '../../support/sockets.js'
 import { orderRoutes } from '../../support/order-routes.js'
 import { modal } from '../../support/modal.js'
 import { addFilter, chipTexts, editorInput, offeredFilters, pickMode } from '../../support/column-filters.js'
@@ -17,16 +19,7 @@ import { addFilter, chipTexts, editorInput, offeredFilters, pickMode } from '../
 // The list subscribes to the member websocket while mounted; under test it
 // must neither fetch a room nor connect. The registered handler is kept so a
 // test can deliver a message through it.
-const socket = vi.hoisted(() => ({ handler: null }))
-vi.mock('@/services/websocket/MemberNewDataSocket', () => ({
-  default: class {
-    async init() {}
-    setOnmessageHandler(fn) { socket.handler = fn }
-    removeOnmessageHandler() { socket.handler = null }
-    getSocket() {}
-    removeSocket() {}
-  },
-}))
+const socket = { handler: null }
 
 const api = installApiSeam()
 
@@ -145,6 +138,10 @@ async function mountList({ props = {}, main = {}, auth = {} } = {}) {
 beforeEach(() => {
   resetUrl()
   socket.handler = null
+  stubSocket(MemberNewDataSocket.prototype, {
+    setOnmessageHandler(fn) { socket.handler = fn },
+    removeOnmessageHandler() { socket.handler = null },
+  })
   // Every list mode rides `?mode=` on the one list endpoint, so one mock
   // serves them all; rows are OrderSerializer rows in every mode.
   api.get('/api/order/order/', orderPage())

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import TheNavLoggedIn from '@/components/TheNavLoggedIn.vue'
 
 import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
+import { useFakeHttp } from '../../support/fake-http.js'
 
 /**
  * Behaviour characterisation for the logout sequence
@@ -17,20 +18,7 @@ import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
  * logic. These specs pin the ordering it must keep.
  */
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
+const fakeHttp = useFakeHttp()
 
 /** Drain macrotasks so the socket promise chain settles. */
 async function flush() {

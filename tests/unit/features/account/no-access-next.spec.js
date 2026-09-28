@@ -7,6 +7,7 @@ import {
 } from '@/features/auth'
 
 import { mountListView, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
+import { useFakeHttp } from '../../support/fake-http.js'
 
 /**
  * Return-to-next behaviour for the access gate
@@ -25,19 +26,7 @@ import { mountListView, resetFakeHttp, toastCreate } from '../../support/form-ha
  * tests/unit/features/auth/login-form.spec.js does it.
  */
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('vue-loading-overlay', () => ({
-  useLoading: () => ({ show: () => ({ hide: vi.fn() }) }),
-}))
+const fakeHttp = useFakeHttp()
 
 /** Drain macrotasks so the login chain, the watcher, and the router settle. */
 async function flush() {

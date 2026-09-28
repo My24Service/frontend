@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { OrdersSchedule } from '@/features/order'
 import { vOrderEvent } from '@/api/valibot.gen'
@@ -10,10 +10,6 @@ import { orderRoutes } from '../../support/order-routes.js'
 
 // The full-screen loader mounts into document.body through the library's
 // plugin, which the harness does not install.
-vi.mock('vue-loading-overlay', () => ({
-  useLoading: () => ({ show: () => ({ hide() {} }) }),
-}))
-
 const api = installApiSeam()
 
 const EVENTS = () => [

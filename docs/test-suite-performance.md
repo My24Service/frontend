@@ -13,11 +13,13 @@ files and 2,716 tests, unless it says otherwise.
 | before (warm module cache) | 437 s | 792 | 340 |
 | shared/isolated projects | 142 s | ~105 | ~300 |
 | + `maxWorkers: '100%'` | 114–120 s | ~120 | ~310 |
+| + input delays zero in specs | 92 s | ~100 | ~247 |
+| + 22 of 23 isolated specs moved to shared | 68 s | ~46 | ~218 |
 | 2 cores, before: default workers (= 1) | 411 s | | |
-| 2 cores, after: `maxWorkers: '100%'` | 227 s | | |
+| 2 cores, after all of the above | 113 s | | |
 
 All 2,716 tests pass in every configuration. The shared project also passes
-with five different shuffled file orders (`--sequence.shuffle.files`).
+with six different shuffled file orders (`--sequence.shuffle.files`).
 
 ## Where the time went
 
@@ -119,18 +121,61 @@ bottleneck, wall time moves by only ~15 s. `cache` (on by default) only orders
 files: failed and slow ones first. It skips no work. `--changed`/`related`
 are the flags that skip files; see above.
 
+## The isolated specs
+
+Of the 23 files that needed a module graph of their own, 22 now share:
+
+- **vue-loading-overlay** is mocked inert once in `setupTests.js`, like the
+  toast (2 files needed nothing else).
+- **Websocket mocks** became spies on the socket class or singleton
+  (`stubSocket`, `support/sockets.js`; 5 files). `auth-store.spec` mocked
+  `forgetSocketRooms` to check it was called; it now checks the effect: a
+  room cached before logout is asked for again after it.
+- **Legacy HTTP client fakes** (`vi.mock('@/services/api')` +
+  `vi.mock('@/api/client.gen')`): three moved to the network seam (NavItems,
+  SubNav, OrderTypesPie), and gained a `settle()` their "no request" claims
+  lacked. The others keep their fake, now installed by `useFakeHttp()`
+  (`support/fake-http.js`), which spies on the real clients instead of
+  replacing the modules. `base-socket.spec` spies on the one `get` it needs.
+- **`base-collection.spec`** had no mock at all; a comment mentioning
+  `vi.mock` fooled the scan, which now ignores comments.
+
+`user-form-schema-wiring.spec` stays isolated by design: it replaces
+`useUserForm` with a recorder to prove each screen passes its own schema
+functions, and a named ESM export cannot be spied on.
+
+Sharing a worker surfaced three more leaks, fixed at the source:
+`auth-store.spec` also swapped the generated client's adapter (setupTests.js
+now restores every client's adapter before each test), and it spied on
+`localStorage.setItem`, which happy-dom's Proxy-based `Storage` cannot
+restore, leaving the worker's one storage unable to write. `setupTests.js`
+now fails a file that starts with a broken storage, naming the file before it.
+
+`useAuthToken` now creates its `useLocalStorage` ref in a detached effect
+scope. VueUse ties the ref-to-storage watcher to the scope active at
+creation, so a component reading the token first during `setup()` would stop
+the token being persisted when it unmounted. That holds in the app as much as
+in a shared test worker.
+
+### Why the dashboard and inventory specs could not move to the seam
+
+The seam rejects a request the schema does not declare, and the legacy
+screens send several:
+
+| screen | request | undeclared |
+|---|---|---|
+| dashboard (`dashboardMixin`) | `GET /api/equipment/equipment-document/` | `type` |
+| dashboard (`dashboardMixin`) | `GET /api/invoice/purchase/year/` | `year` |
+| CompanyDashboard | `GET /api/member/member/get_dashboard/` | `page` |
+
+Either the backend ignores them, in which case the screen shows unfiltered
+data, or `openapi/schema.yaml` is missing them. Worth checking on the backend.
+The client fake cannot see this; that is the gap the seam exists to close.
+
 ## What is left, and what it would take
 
-**The 23 isolated files.** They cost ~96 CPU-seconds of import for ~27 s of
-tests, the largest remaining import cost. They are the specs still on the
-legacy client fakes (`vi.mock('@/services/api')`, `vi.mock('@/api/client.gen')`,
-the websocket mocks). Moving a spec to the network seam removes its
-`vi.mock`, and the spec then moves to the shared project by itself.
-
-**CI.** Two cheap changes to `.circleci/config.yml`, not made here because
-they could not be tested:
-
-- cache `node_modules/.vite` between runs (keyed on the lockfile), so CI also
-  gets the warm transform cache
-- consider `resource_class: large` (4 vCPU) for the test job; the suite scales
-  with cores
+**CI.** `resource_class: large` (4 vCPU, 20 credits/min against medium's 10)
+runs the test step in ~68 s instead of ~113 s, so it costs slightly more
+credits per run for about 45 s of speed; not worth it now. Caching
+`node_modules/.vite` between runs (keyed on the lockfile) would give CI the
+warm transform cache; not done here because the config could not be tested.

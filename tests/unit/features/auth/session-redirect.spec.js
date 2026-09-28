@@ -11,6 +11,8 @@ import componentMixin from '@/mixins/common'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 
+import { useFakeHttp } from '../../support/fake-http.js'
+
 /**
  * Behaviour characterisation for the post-login redirect
  * (src/components/TheIndex.vue).
@@ -22,15 +24,7 @@ import { useMainStore } from '@/stores/main'
  * logic. These specs pin the ordering it must keep.
  */
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
+const fakeHttp = useFakeHttp()
 
 /** Drain macrotasks so the watcher settles. */
 async function flush() {

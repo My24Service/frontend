@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { EngineerEventList } from '@/features/field-service'
+import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { vEngineer, vEngineerEvent } from '@/api/valibot.gen'
 
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts } from '../../support/form-harness.js'
+import { stubSocket } from '../../support/sockets.js'
 import { fieldServiceRoutes } from '../../support/field-service-routes.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
@@ -14,16 +16,7 @@ import { captureDownloads, xlsxResponse } from '../../support/downloads.js'
 // The list subscribes to the member websocket while mounted; under test it must
 // neither fetch a room nor connect. The registered handler is kept so a test
 // can deliver the engineer-event message through it.
-const socket = vi.hoisted(() => ({handlers: {}, removed: []}))
-vi.mock('@/services/websocket/MemberNewDataSocket', () => ({
-  default: class {
-    async init() {}
-    setOnmessageHandler(fn) { socket.handlers.event = fn }
-    removeOnmessageHandler() { socket.removed.push('event') }
-    getSocket() {}
-    removeSocket() {}
-  },
-}))
+const socket = {handlers: {}, removed: []}
 
 /**
  * Characterisation of the engineer-event list, written against the LEGACY
@@ -93,6 +86,10 @@ beforeEach(() => {
   window.history.replaceState(null, '', '/')
   socket.handlers = {}
   socket.removed = []
+  stubSocket(MemberNewDataSocket.prototype, {
+    setOnmessageHandler(fn) { socket.handlers.event = fn },
+    removeOnmessageHandler() { socket.removed.push('event') },
+  })
   api.get(ENDPOINT, () => paginated([row()], {count: 1}))
   // The attach-order modal reads the engineer the event belongs to as it opens.
   api.get('/api/company/engineer/{id}/', () => fixtureFor(vEngineer, {id: 5}))

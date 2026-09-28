@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import NavItems from '@/components/NavItems.vue'
 
-import { mountForm, resetFakeHttp } from '../support/form-harness.js'
-import { requestShapes } from '../support/request-recorder.js'
+import { installApiSeam, settle } from '../support/api-seam/index.js'
+import { mountForm } from '../support/form-harness.js'
 
 // Call-shape characterisation for the migrated count badge call of the
 // collapsed nav component (one NavItems with a mode prop replaced the three
@@ -16,20 +16,7 @@ import { requestShapes } from '../support/request-recorder.js'
 // body. The `showMembers` (isAdmin) guard around the call predates the
 // refactor and is pinned too.
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
+const api = installApiSeam()
 
 const STAFF = {
   userInfo: { user: { pk: 1, is_staff: true, is_superuser: false, username: 'staff' }, submodel: 'staff' },
@@ -52,10 +39,10 @@ const MAIN = {
 }
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp, {
-    '/member/member/requested_count/': { count: 3 },
-  })
+  api.get('/api/member/member/requested_count/', { count: 3 })
 })
+
+const gets = () => api.requests().filter((request) => request.method === 'get')
 
 describe.each([
   ['default', 'default'],
@@ -64,9 +51,9 @@ describe.each([
 ])('NavItems (%s mode)', (name, mode) => {
   test('fetches the requested member count from the requested_count action', async () => {
     mountForm(NavItems, { main: MAIN, auth: STAFF, props: { mode } })
-    await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalledTimes(1))
+    await settle()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+    expect(gets()).toEqual([
       {
         method: 'get',
         path: '/api/member/member/requested_count/',
@@ -78,7 +65,8 @@ describe.each([
 
   test('skips the count request when the user is not an admin', async () => {
     mountForm(NavItems, { main: MAIN, auth: NON_ADMIN, props: { mode } })
+    await settle()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([])
+    expect(gets()).toEqual([])
   })
 })

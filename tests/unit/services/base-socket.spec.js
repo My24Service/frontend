@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import api from '@/services/api'
 import BaseSocket, { forgetSocketRooms } from '@/services/websocket/BaseSocket.js'
 
-const roomHttp = vi.hoisted(() => ({ get: vi.fn() }))
-vi.mock('@/services/api', () => ({ default: roomHttp }))
+// The room request goes through the shared legacy client; spied per test
+// below rather than mocking the module, so this spec shares a worker.
+let roomHttp
 
 // The base socket's _connect is disabled under NODE_ENV=test and returns a real
 // WebSocket otherwise. Overriding it lets the specs drive close events on a
@@ -117,7 +119,7 @@ describe('BaseSocket room cache', () => {
   beforeEach(() => {
     forgetSocketRooms()
     localStorage.clear()
-    roomHttp.get.mockReset()
+    roomHttp = { get: vi.spyOn(api, 'get') }
     roomHttp.get.mockResolvedValueOnce({ data: { room: 'room-jan' } })
       .mockResolvedValueOnce({ data: { room: 'room-piet' } })
   })

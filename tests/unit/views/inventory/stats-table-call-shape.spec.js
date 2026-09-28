@@ -7,6 +7,7 @@ import StatsTable from '@/views/inventory/StatsTable.vue'
 import { requestShapes } from '../../support/request-recorder.js'
 import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
 import { captureDownloads } from '../../support/downloads.js'
+import { useFakeHttp } from '../../support/fake-http.js'
 
 // CALL-SHAPE SPEC.
 //
@@ -17,20 +18,7 @@ import { captureDownloads } from '../../support/downloads.js'
 // op. These tests pin that the request shape is unchanged: same path, same
 // year, and q only when a search term is actually set.
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
+const fakeHttp = useFakeHttp()
 
 const ROUTES = {
   '/inventory/material/stats_table/': { results: [], inventory_keys: {} },
