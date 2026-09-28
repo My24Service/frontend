@@ -1,6 +1,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, expect, vi } from 'vitest'
 import { config, disableAutoUnmount, enableAutoUnmount } from '@vue/test-utils'
 
+import { client as generatedClient } from '@/api/client.gen'
+import legacyClient, { normalClient } from '@/services/api'
 import { inputDelays } from '@/services/input-delays'
 
 import { toastCreate } from './support/toast.js'
@@ -16,6 +18,16 @@ import { toastCreate } from './support/toast.js'
 vi.mock('bootstrap-vue-next', async (importOriginal) => ({
   ...(await importOriginal()),
   useToast: () => ({ create: toastCreate }),
+}))
+
+// The full-page loading overlay, inert: `show()` hands back a handle whose
+// `hide()` does nothing. No spec asserts the overlay itself, and a real one
+// mounts outside the wrapper, where it would outlive the test. Mocked here for
+// the same reason as the toast above: per-file mocks keep a spec out of the
+// shared project.
+vi.mock('vue-loading-overlay', async (importOriginal) => ({
+  ...(await importOriginal()),
+  useLoading: () => ({ show: () => ({ hide() {} }) }),
 }))
 
 // Every wrapper is unmounted after its test. A teleported modal stays in
@@ -91,12 +103,24 @@ globalThis.django = {
 // modules reference it as a global.
 globalThis.$trans = (text) => text
 
+// The HTTP clients are one object each for the whole worker, and a spec that
+// fakes the wire by assigning `defaults.adapter` changes them for every spec
+// after it. Captured once, put back before every test.
+// Keyed by instance, first sight wins: an isolated spec file has fresh clients,
+// and a shared worker sees each one first while it is still untouched.
+const realAdapters = (globalThis.__my24RealAdapters ??= new WeakMap())
+const httpClients = [generatedClient.instance, legacyClient, normalClient]
+for (const client of httpClients) {
+  if (!realAdapters.has(client)) realAdapters.set(client, client.defaults.adapter)
+}
+
 beforeEach(() => {
   // Each test starts from a clean global-config slate: `$trans` consults these.
   window.django = undefined
   window.member_type_text = undefined
   localStorage.clear()
   vi.restoreAllMocks()
+  for (const client of httpClients) client.defaults.adapter = realAdapters.get(client)
   // One spy for every test in the run. Without this a spec asserting that the
   // user was told something can pass on a toast raised two tests ago.
   toastCreate.mockClear()
@@ -121,6 +145,24 @@ if (!isRealLocation(window.location) || !isRealLocation(document.location)) {
     `\`location\` was replaced and left in place by ${globalThis.__my24PreviousSpec ?? 'an earlier spec'}. ` +
       "Use vi.stubGlobal('location', ...) or vi.spyOn(document, 'location', 'get'), " +
       'which are undone after each test.',
+  )
+}
+
+// Same for the one localStorage: a spec that replaced one of its methods and
+// could not put it back leaves every later file unable to persist anything.
+let storageWorks = false
+try {
+  localStorage.setItem('__my24_probe', '1')
+  storageWorks = localStorage.getItem('__my24_probe') === '1'
+  localStorage.removeItem('__my24_probe')
+} catch {
+  // reported below
+}
+if (!storageWorks) {
+  throw new Error(
+    `localStorage can no longer write, left that way by ${globalThis.__my24PreviousSpec ?? 'an earlier spec'}. ` +
+      "Replace a Storage method with Object.defineProperty and put the original back; vi.spyOn on happy-dom's " +
+      'Storage cannot be restored.',
   )
 }
 

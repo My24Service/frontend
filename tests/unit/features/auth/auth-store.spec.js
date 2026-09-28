@@ -7,12 +7,8 @@ import {
   useAuthToken,
 } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
-import { forgetSocketRooms } from '@/services/websocket/BaseSocket.js'
-
-vi.mock('@/services/websocket/BaseSocket.js', async (importOriginal) => ({
-  ...(await importOriginal()),
-  forgetSocketRooms: vi.fn(),
-}))
+import axios from '@/services/api'
+import BaseSocket, { forgetSocketRooms } from '@/services/websocket/BaseSocket.js'
 
 /**
  * Behaviour characterisation for the session lifecycle.
@@ -123,10 +119,21 @@ describe('auth store logout', () => {
     expect(adapter).not.toHaveBeenCalled()
   })
 
-  test('it forgets the websocket rooms, which belong to the user leaving', () => {
+  test('it forgets the websocket rooms, which belong to the user leaving', async () => {
+    // The room cache is module state; start from an empty one.
+    forgetSocketRooms()
+    const roomRequest = vi.spyOn(axios, 'get').mockResolvedValue({ data: { room: 'room-jan' } })
+    const socket = new BaseSocket()
+
+    await socket._getRoom('/get-user-room/')
+    await socket._getRoom('/get-user-room/')
+    expect(roomRequest).toHaveBeenCalledTimes(1)
+
     useAuthStore().logout()
 
-    expect(forgetSocketRooms).toHaveBeenCalled()
+    // The next user's socket asks for its own room instead of reusing this one.
+    await socket._getRoom('/get-user-room/')
+    expect(roomRequest).toHaveBeenCalledTimes(2)
   })
 })
 
@@ -222,15 +229,27 @@ describe('auth store response boundary', () => {
 })
 
 describe('auth store storage failures', () => {
+  // Not vi.spyOn(localStorage, 'setItem'): happy-dom's Storage is a Proxy that
+  // hides its bound methods from getOwnPropertyDescriptor, so the spy cannot be
+  // restored and the suite's one localStorage stays broken for every later
+  // spec in the worker. defineProperty does reach the instance, both ways.
+  const realSetItem = localStorage.setItem
+  function failWrites() {
+    const setItem = vi.fn(() => {
+      throw new Error('QuotaExceededError')
+    })
+    Object.defineProperty(localStorage, 'setItem', { value: setItem, configurable: true, writable: true })
+    return setItem
+  }
+
   afterEach(() => {
+    Object.defineProperty(localStorage, 'setItem', { value: realSetItem, configurable: true, writable: true })
     vi.restoreAllMocks()
   })
 
   test('a write failure does not fail a login that has already succeeded', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {})
-    const setItem = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
-      throw new Error('QuotaExceededError')
-    })
+    const setItem = failWrites()
     const authStore = useAuthStore()
 
     await authStore.login('jan', 'secret')
