@@ -26,7 +26,9 @@ class InventoryService extends BaseModel {
       query = ''
     }
 
-    const url = `/inventory/inventory-materials/?q=${query}`
+    // Encoded: a term with `&`, `#` or `+` pasted in raw was cut short or
+    // changed on the way to the backend.
+    const url = `/inventory/inventory-materials/?${new URLSearchParams({ q: query })}`
 
     return this.axios.get(url).then((result) => result.data)
   }
@@ -46,7 +48,7 @@ class InventoryService extends BaseModel {
       query = ''
     }
 
-    const url = `/inventory/inventory-materials-for-location/?location=${stocklocation_pk}&q=${query}`
+    const url = `/inventory/inventory-materials-for-location/?${new URLSearchParams({ location: stocklocation_pk, q: query })}`
     return this.axios.get(url).then((result) => result.data)
   }
 }
