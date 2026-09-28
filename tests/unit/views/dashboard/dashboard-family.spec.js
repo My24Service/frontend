@@ -6,27 +6,41 @@ import BranchPhotoCardShltr from '@/views/dashboard/components/BranchPhotoCardSh
 import DashboardBlock from '@/views/dashboard/components/DashboardBlock.vue'
 import DashboardBlockShltr from '@/views/dashboard/components/DashboardBlockShltr.vue'
 
-import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
-import { useFakeHttp } from '../../support/fake-http.js'
+import { vBranch, vEquipmentDocument, vMember } from '@/api/valibot.gen'
+
+import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
+import { installApiSeam } from '../../support/api-seam/index.js'
+import { mountForm } from '../../support/form-harness.js'
 
 // One Dashboard for both product families (block B, step 5). The shltr
 // layout is the base; `profile.family === 'default'` swaps in the default
 // card primitives, stats tile, section order and scoped styles.
 
-const fakeHttp = useFakeHttp()
-
-const ROUTES = {
-  '/member/member/me/': { pk: 1, username: 'planning' },
-  '/company/branch/first/': { id: 7, name: 'First Branch', address: 'Street 1', postal: '1234', city: 'Town' },
-  '/equipment/equipment-document/': { count: 0, results: [] },
-}
+const api = installApiSeam()
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp, ROUTES)
+  api.get('/api/member/member/me/', fixtureFor(vMember, { id: 1 }))
+  api.get('/api/company/branch/first/', fixtureFor(vBranch, {
+    id: 7, name: 'First Branch', address: 'Street 1', postal: '1234', city: 'Town',
+  }))
+  api.get('/api/equipment/equipment-document/', ({ query }) => paginated([
+    fixtureFor(vEquipmentDocument, {
+      name: `${query.type} manual`,
+      equipment: query.type === 'technical' ? 11 : 12,
+      equipment_view: { name: query.type === 'technical' ? 'Boiler' : 'Main building' },
+    }),
+  ]))
+  api.get('/api/invoice/purchase/year/', [])
 })
 
-async function mountDashboard(family) {
+async function mountDashboard(family, { deep = false } = {}) {
   const wrapper = mountForm(DashboardView, {
+    deep,
+    // A deep mount renders the document tables; the widgets beside them read
+    // and draw for themselves and are not what these specs are about.
+    stubs: deep ? { BarChart: true, OrderTypesPie: true, WorkOrdersTable: true, LogComponent: true } : {},
+    // The document rows link their equipment.
+    routes: [{ path: '/equipment/:pk', name: 'equipment-equipment-view', component: { template: '<div />' } }],
     auth: { isBranchEmployee: false },
     main: { getProductFamily: family },
   })
@@ -34,6 +48,18 @@ async function mountDashboard(family) {
   await vi.waitFor(() => expect(wrapper.vm.isLoading).toBe(false))
   return wrapper
 }
+
+describe('DashboardView documents', () => {
+  test('both tables link each document to its equipment by name', async () => {
+    // Deep, so the tables render their rows.
+    const wrapper = await mountDashboard('default', { deep: true })
+
+    const equipmentLinks = (tableId) =>
+      wrapper.findAll(`#${tableId} a`).filter((link) => !link.classes('document-link')).map((link) => link.text())
+    expect(equipmentLinks('equipment-documents-table')).toEqual(['Boiler'])
+    expect(equipmentLinks('location-documents-table')).toEqual(['Main building'])
+  })
+})
 
 describe('DashboardView per product family', () => {
   test('default: own card primitives, bootstrap stats cards, documents before work orders', async () => {

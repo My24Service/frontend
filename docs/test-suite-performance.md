@@ -132,8 +132,8 @@ Of the 23 files that needed a module graph of their own, 22 now share:
   `forgetSocketRooms` to check it was called; it now checks the effect: a
   room cached before logout is asked for again after it.
 - **Legacy HTTP client fakes** (`vi.mock('@/services/api')` +
-  `vi.mock('@/api/client.gen')`): three moved to the network seam (NavItems,
-  SubNav, OrderTypesPie), and gained a `settle()` their "no request" claims
+  `vi.mock('@/api/client.gen')`): five moved to the network seam (NavItems,
+  SubNav, OrderTypesPie and, once the schema was fixed, both dashboards), and gained a `settle()` their "no request" claims
   lacked. The others keep their fake, now installed by `useFakeHttp()`
   (`support/fake-http.js`), which spies on the real clients instead of
   replacing the modules. `base-socket.spec` spies on the one `get` it needs.
@@ -157,20 +157,31 @@ creation, so a component reading the token first during `setup()` would stop
 the token being persisted when it unmounted. That holds in the app as much as
 in a shared test worker.
 
-### Why the dashboard and inventory specs could not move to the seam
+### What the seam found on the dashboards
 
 The seam rejects a request the schema does not declare, and the legacy
-screens send several:
+dashboard screens sent three:
 
-| screen | request | undeclared |
-|---|---|---|
-| dashboard (`dashboardMixin`) | `GET /api/equipment/equipment-document/` | `type` |
-| dashboard (`dashboardMixin`) | `GET /api/invoice/purchase/year/` | `year` |
-| CompanyDashboard | `GET /api/member/member/get_dashboard/` | `page` |
+| screen | request | undeclared | outcome |
+|---|---|---|---|
+| dashboard (`dashboardMixin`) | `GET /api/equipment/equipment-document/` | `type` | schema was missing it and `equipment__branch` |
+| dashboard (`dashboardMixin`) | `GET /api/invoice/purchase/year/` | `year` | schema was missing it |
+| CompanyDashboard | `GET /api/member/member/get_dashboard/` | `page` | the backend ignores it |
 
-Either the backend ignores them, in which case the screen shows unfiltered
-data, or `openapi/schema.yaml` is missing them. Worth checking on the backend.
-The client fake cannot see this; that is the gap the seam exists to close.
+The backend already honoured `type`, `equipment__branch` and `year`, and the
+schema now declares them. The frontend had a bug of its own there: the legacy
+`DocumentService` set the branch filter and then the type filter through
+`setListArgs`, which replaces, so the dashboard listed every branch's
+documents. The three reads now call the generated operations with both
+filters in one query and without `page`, and the legacy services behind them
+are deleted. Both dashboard specs are on the seam. The facility-documents table
+also printed the raw equipment id: it had a cell template for a `location`
+column the table does not have. It now links the equipment by name, like the
+technical table.
+
+The client fake could see none of this; that is the gap the seam exists to
+close. The call-shape specs still on `useFakeHttp()` (inventory, login and
+session) have not been tried on the seam yet.
 
 ## What is left, and what it would take
 

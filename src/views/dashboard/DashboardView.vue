@@ -147,9 +147,9 @@
                 <span class="pl-4">{{ data.item.name }}</span>
               </BLink>
             </template>
-            <template #cell(location)="data">
-              <BLink :to="{ name: 'equipment-location-view', params: { pk: data.item.location } }">
-                {{ data.item.location_view.name }}
+            <template #cell(equipment)="data">
+              <BLink :to="{ name: 'equipment-equipment-view', params: { pk: data.item.equipment } }">
+                {{ data.item.equipment_view.name }}
               </BLink>
             </template>
             <template #cell(created)="data">

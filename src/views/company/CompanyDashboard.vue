@@ -158,7 +158,7 @@ import {
   PieChart,
 } from '@/features/shared'
 import OrderStats from "../../components/OrderStats.vue"
-import dashboardModel from '../../models/company/Dashboard.js'
+import {memberMemberGetDashboardRetrieve} from "@/api/sdk.gen";
 import {OrderService} from "@/models/orders/Order";
 import componentMixin from "@/mixins/common";
 
@@ -240,9 +240,13 @@ export default {
     async loadData() {
       this.isLoading = true
 
-      dashboardModel.setListArgs(`year=${this.year}`)
       try {
-        const data = await dashboardModel.list()
+        // The generated op, not the legacy list(): the endpoint returns one
+        // dashboard object, and list() added a `page` the backend ignores.
+        const {data} = await memberMemberGetDashboardRetrieve({
+          query: {year: this.year},
+          throwOnError: true,
+        })
 
         // CUSTOMERS: bar graph top customers
         let graphDataCustomers = [], labelsCustomers = [];

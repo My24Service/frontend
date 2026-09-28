@@ -1,59 +1,62 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import dashboardMixin from '@/views/dashboard/dashboard_view/dashboardMixin'
 import CompanyDashboard from '@/views/company/CompanyDashboard.vue'
+import {
+  vBranch,
+  vEquipmentDocument,
+  vMember,
+  vOrderOrderCountsYearOrderTypeStatsRetrieveResponse,
+  vOrderOrderOrderCountsStatsRetrieveResponse,
+  vOrderOrderOrderTypesMonthStatsRetrieveResponse,
+  vOrderOrderOrderTypesStatsRetrieveResponse,
+} from '@/api/valibot.gen'
 
-import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
-import { requestShapes } from '../../support/request-recorder.js'
-import { useFakeHttp } from '../../support/fake-http.js'
+import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm } from '../../support/form-harness.js'
 
-// Call-shape characterisation for the migrated call sites in the two dashboard
-// views assigned to this cluster.
+// The requests the two dashboard views put on the wire.
 //
-// dashboardMixin.loadData() (shared by the dashboard views) used
-// to call MemberService.getMe() (GET `/member/member/me/`), and - depending on
-// the role - BranchService.getMyBranch() (GET `/company/branch-my/`) or
-// BranchService.first() (GET `/company/branch/first/`). It now calls the
-// generated memberMemberMeRetrieve, companyBranchMyRetrieve and
-// companyBranchFirstRetrieve; all three URLs are unchanged, no query, no body.
-// The surrounding document/purchase-invoice loads are BaseModel CRUD and are
-// only seeded so the flow reaches the migrated calls.
+// dashboardMixin.loadData() (shared by the dashboard views) reads me/, then -
+// depending on the role - the user's own branch or the first branch, then that
+// branch's technical and facility documents and the year's monthly purchase
+// totals. CompanyDashboard reads the year's dashboard and the four unfiltered
+// order stats.
 //
-// CompanyDashboard.vue replaced OrderService.get{OrderTypesStats,MonthsStats,
-// OrderTypesMonthsStats,CountsYearOrdertypeStats}Branch() - all four unfiltered
-// GETs on `/order/order/<action>/` - with the four @/models/orders/order-stats
-// wrappers called without a filter; the generated endpoints keep the same URLs
-// and send no query. The dashboard list() call before them is BaseModel CRUD.
+// On the network seam, so a query parameter the schema does not declare fails
+// the spec. That is how the documents' branch filter was found missing (the
+// legacy service replaced it with the type filter) and the dashboard's stray
+// `page` found present.
 
-const fakeHttp = useFakeHttp()
+const api = installApiSeam()
 
-const MIXIN_ROUTES = {
-  '/member/member/me/': { pk: 1, username: 'engineer' },
-  '/company/branch-my/': { id: 7, name: 'My Branch' },
-  '/company/branch/first/': { id: 7, name: 'First Branch' },
-  // BaseModel CRUD around the migrated calls; page-shaped so loadCollection()
-  // can map over .results.
-  '/equipment/equipment-document/': { count: 0, results: [] },
-}
+const BRANCH_ID = 7
 
 const MixinHost = { name: 'MixinHost', mixins: [dashboardMixin], template: '<div />' }
 
-beforeEach(() => {
-  resetFakeHttp(fakeHttp, MIXIN_ROUTES)
-})
+const gets = () => api.requests().filter((request) => request.method === 'get')
 
 describe('dashboardMixin.loadData', () => {
+  beforeEach(() => {
+    api.get('/api/member/member/me/', fixtureFor(vMember, { id: 1 }))
+    api.get('/api/company/branch-my/', fixtureFor(vBranch, { id: BRANCH_ID, name: 'My Branch' }))
+    api.get('/api/company/branch/first/', fixtureFor(vBranch, { id: BRANCH_ID, name: 'First Branch' }))
+    api.get('/api/equipment/equipment-document/', ({ query }) =>
+      paginated([fixtureFor(vEquipmentDocument, { name: `a ${query.type} document` })]),
+    )
+    // Months without purchases are absent; March has one.
+    api.get('/api/invoice/purchase/year/', [{ month: 3, total: '120.50' }])
+  })
+
+  const branchReads = () =>
+    gets().filter(({ path }) => path === '/api/member/member/me/' || path.startsWith('/api/company/branch'))
+
   test('loads me and the first branch when the user is not a branch employee', async () => {
     mountForm(MixinHost, { auth: { isBranchEmployee: false } })
-    await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalledTimes(5))
+    await settle()
 
-    // me/ and branch/first/ are the migrated calls; the two document loads and
-    // the purchase-invoice year overview are BaseModel CRUD around them.
-    expect(
-      requestShapes(fakeHttp, { method: 'get' }).filter(
-        ({ path }) => path === '/api/member/member/me/' || path.startsWith('/api/company/branch'),
-      ),
-    ).toEqual([
+    expect(branchReads()).toEqual([
       { method: 'get', path: '/api/member/member/me/', query: {}, body: undefined },
       { method: 'get', path: '/api/company/branch/first/', query: {}, body: undefined },
     ])
@@ -61,16 +64,45 @@ describe('dashboardMixin.loadData', () => {
 
   test('loads me and my own branch when the user is a branch employee', async () => {
     mountForm(MixinHost, { auth: { isBranchEmployee: true } })
-    await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalledTimes(5))
+    await settle()
 
-    expect(
-      requestShapes(fakeHttp, { method: 'get' }).filter(
-        ({ path }) => path === '/api/member/member/me/' || path.startsWith('/api/company/branch'),
-      ),
-    ).toEqual([
+    expect(branchReads()).toEqual([
       { method: 'get', path: '/api/member/member/me/', query: {}, body: undefined },
       { method: 'get', path: '/api/company/branch-my/', query: {}, body: undefined },
     ])
+  })
+
+  test("reads the branch's documents per equipment type, both filters in one query", async () => {
+    const wrapper = mountForm(MixinHost, { auth: { isBranchEmployee: false } })
+    await settle()
+
+    expect(gets().filter(({ path }) => path === '/api/equipment/equipment-document/')).toEqual([
+      {
+        method: 'get',
+        path: '/api/equipment/equipment-document/',
+        query: { equipment__branch: String(BRANCH_ID), type: 'technical' },
+        body: undefined,
+      },
+      {
+        method: 'get',
+        path: '/api/equipment/equipment-document/',
+        query: { equipment__branch: String(BRANCH_ID), type: 'facility' },
+        body: undefined,
+      },
+    ])
+    expect(wrapper.vm.technicalDocuments.map((document) => document.name)).toEqual(['a technical document'])
+    expect(wrapper.vm.facilityDocuments.map((document) => document.name)).toEqual(['a facility document'])
+  })
+
+  test("charts the year's purchases per month, a month without any as zero", async () => {
+    const wrapper = mountForm(MixinHost, { auth: { isBranchEmployee: false } })
+    await settle()
+
+    const year = new Date().getFullYear()
+    expect(gets().filter(({ path }) => path === '/api/invoice/purchase/year/')).toEqual([
+      { method: 'get', path: '/api/invoice/purchase/year/', query: { year: String(year) }, body: undefined },
+    ])
+    expect(wrapper.vm.chartdataMonthBar.datasets[0].data).toEqual([0, 0, 120.5, 0, 0, 0, 0, 0, 0, 0, 0, 0])
   })
 })
 
@@ -86,53 +118,29 @@ describe('CompanyDashboard', () => {
     transactions: {},
   }
 
-  const ROUTES = {
-    '/member/member/get_dashboard/': DASHBOARD,
-    '/order/order/order_types_stats/': { order_types_stats: {} },
-    '/order/order/order_counts_stats/': { order_counts_stats: {} },
-    '/order/order/order_types_month_stats/': { order_types_month_stats: {} },
-    '/order/order/counts_year_order_type_stats/': { counts_year_order_type_stats: {} },
-  }
+  const STATS = [
+    ['/api/order/order/order_types_stats/', vOrderOrderOrderTypesStatsRetrieveResponse],
+    ['/api/order/order/order_counts_stats/', vOrderOrderOrderCountsStatsRetrieveResponse],
+    ['/api/order/order/order_types_month_stats/', vOrderOrderOrderTypesMonthStatsRetrieveResponse],
+    ['/api/order/order/counts_year_order_type_stats/', vOrderOrderCountsYearOrderTypeStatsRetrieveResponse],
+  ]
 
-  test('loads the dashboard list and the four unfiltered stats', async () => {
-    resetFakeHttp(fakeHttp, ROUTES)
+  test("loads the year's dashboard, unpaginated, and the four unfiltered stats", async () => {
+    api.get('/api/member/member/get_dashboard/', DASHBOARD)
+    for (const [path, schema] of STATS) api.get(path, fixtureFor(schema))
     const year = new Date().getFullYear()
 
     mountForm(CompanyDashboard, { main: { getMemberHasBranches: false } })
-    await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalledTimes(5))
+    await settle()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
-      {
-        method: 'get',
-        path: '/api/member/member/get_dashboard/',
-        // BaseModel.list() appends its pagination to the query.
-        query: { year: String(year), page: '1' },
-        body: undefined,
-      },
-      {
-        method: 'get',
-        path: '/api/order/order/order_types_stats/',
-        query: {},
-        body: undefined,
-      },
-      {
-        method: 'get',
-        path: '/api/order/order/order_counts_stats/',
-        query: {},
-        body: undefined,
-      },
-      {
-        method: 'get',
-        path: '/api/order/order/order_types_month_stats/',
-        query: {},
-        body: undefined,
-      },
-      {
-        method: 'get',
-        path: '/api/order/order/counts_year_order_type_stats/',
-        query: {},
-        body: undefined,
-      },
-    ])
+    const [dashboard, ...stats] = gets()
+    // One dashboard object: no `page`, which the backend ignores.
+    expect(dashboard).toEqual({
+      method: 'get', path: '/api/member/member/get_dashboard/', query: { year: String(year) }, body: undefined,
+    })
+    // The four stats go out in parallel, so the order they reach the wire in
+    // is not the component's to fix.
+    expect(stats.map(({ path, query }) => ({ path, query })).sort((a, b) => a.path.localeCompare(b.path)))
+      .toEqual(STATS.map(([path]) => ({ path, query: {} })).sort((a, b) => a.path.localeCompare(b.path)))
   })
 })
