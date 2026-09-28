@@ -18046,6 +18046,10 @@ export type EquipmentEquipmentDocumentListData = {
     query?: {
         equipment?: number;
         /**
+         * Only documents of equipment in this branch.
+         */
+        equipment__branch?: number;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -18057,6 +18061,10 @@ export type EquipmentEquipmentDocumentListData = {
          * A search term.
          */
         q?: string;
+        /**
+         * Only documents of equipment of this type.
+         */
+        type?: 'facility' | 'technical';
     };
     url: '/api/equipment/equipment-document/';
 };
@@ -21026,6 +21034,10 @@ export type InvoicePurchaseYearListData = {
          * A search term.
          */
         q?: string;
+        /**
+         * Only data for this year.
+         */
+        year?: number;
     };
     url: '/api/invoice/purchase/year/';
 };

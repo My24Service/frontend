@@ -3349,7 +3349,7 @@ export const EquipmentEquipmentDocument = /*#__PURE__*/ resource({
   kind: 'collection',
   id: 'number',
   list: {options: equipmentEquipmentDocumentListOptions, queryKey: equipmentEquipmentDocumentListQueryKey},
-  filters: ['equipment'] satisfies (keyof EquipmentEquipmentDocument.ListQuery)[],
+  filters: ['equipment', 'equipment__branch', 'type'] satisfies (keyof EquipmentEquipmentDocument.ListQuery)[],
   retrieve: {options: equipmentEquipmentDocumentRetrieveOptions, queryKey: equipmentEquipmentDocumentRetrieveQueryKey},
   create: {mutation: equipmentEquipmentDocumentCreateMutation, body: vEquipmentEquipmentDocumentCreateBody},
   update: {mutation: equipmentEquipmentDocumentPartialUpdateMutation, body: vEquipmentEquipmentDocumentPartialUpdateBody},
@@ -4208,7 +4208,7 @@ export const InvoicePurchaseYear = /*#__PURE__*/ resource({
   kind: 'collection',
   id: 'number',
   list: {options: invoicePurchaseYearListOptions, queryKey: invoicePurchaseYearListQueryKey},
-  filters: ['order'] satisfies (keyof InvoicePurchaseYear.ListQuery)[],
+  filters: ['order', 'year'] satisfies (keyof InvoicePurchaseYear.ListQuery)[],
   reads: ['invoicePurchaseYearList'],
 })
 

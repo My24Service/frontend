@@ -19504,9 +19504,11 @@ export const vEquipmentEquipmentCreateResponse = vEquipmentCreateRequest;
 
 export const vEquipmentEquipmentDocumentListQuery = v.object({
     equipment: v.optional(v.pipe(v.number(), v.integer())),
+    equipment__branch: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
     page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
-    q: v.optional(v.string())
+    q: v.optional(v.string()),
+    type: v.optional(v.picklist(['facility', 'technical']))
 });
 
 export const vEquipmentEquipmentDocumentListResponse = vPaginatedEquipmentDocumentList;
@@ -20515,7 +20517,8 @@ export const vInvoicePurchasePartialUpdateResponse = vPurchase;
 
 export const vInvoicePurchaseYearListQuery = v.object({
     order: v.optional(v.pipe(v.number(), v.integer())),
-    q: v.optional(v.string())
+    q: v.optional(v.string()),
+    year: v.optional(v.pipe(v.number(), v.integer()))
 });
 
 export const vInvoicePurchaseYearListResponse = v.array(vPurchaseYear);

@@ -6980,6 +6980,11 @@ paths:
         name: equipment
         schema:
           type: integer
+      - in: query
+        name: equipment__branch
+        schema:
+          type: integer
+        description: Only documents of equipment in this branch.
       - name: page
         required: false
         in: query
@@ -7001,6 +7006,14 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - facility
+          - technical
+        description: Only documents of equipment of this type.
       tags:
       - equipment
       responses:
@@ -11214,6 +11227,11 @@ paths:
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Only data for this year.
       tags:
       - invoice
       responses:
