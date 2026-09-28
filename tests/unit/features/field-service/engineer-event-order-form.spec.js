@@ -129,8 +129,7 @@ describe('EngineerEventOrderForm', () => {
     const wrapper = mountModal()
 
     wrapper.findComponent(VueMultiselect).vm.$emit('search-change', 'acme')
-    // 500 ms, the modal's own debounce.
-    await new Promise((resolve) => setTimeout(resolve, 700))
+    // The modal's own debounce, zero in specs.
     await settle()
 
     expect(reads()).toEqual([
@@ -144,7 +143,6 @@ describe('EngineerEventOrderForm', () => {
 
     wrapper.findComponent(VueMultiselect).vm.$emit('search-change', 'acme')
     wrapper.findComponent(VueMultiselect).vm.$emit('search-change', '')
-    await new Promise((resolve) => setTimeout(resolve, 700))
     await settle()
 
     expect(reads()).toEqual([])

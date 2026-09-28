@@ -119,6 +119,7 @@ import {
   type CustomerUserFormValues,
 } from './schemas'
 import { useQueryErrorToast } from '@/features/forms'
+import { typingDelay } from '@/services/input-delays'
 
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -193,7 +194,7 @@ watch(
 // picker); selecting an option pins the id and the display line, clearing
 // nulls both again.
 const customerSearchTerm = ref('')
-const customerQueryTerm = refDebounced(customerSearchTerm, 500)
+const customerQueryTerm = refDebounced(customerSearchTerm, typingDelay)
 
 const customerSearchQuery = useQuery(() => ({
   ...Api.CustomerCustomerAutocomplete.list.options({query: {q: customerQueryTerm.value}}),

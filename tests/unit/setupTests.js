@@ -1,6 +1,8 @@
 import { afterAll, afterEach, beforeAll, beforeEach, expect, vi } from 'vitest'
 import { config, disableAutoUnmount, enableAutoUnmount } from '@vue/test-utils'
 
+import { inputDelays } from '@/services/input-delays'
+
 import { toastCreate } from './support/toast.js'
 
 // useToast() hands out the one shared spy, for every spec (read it through
@@ -98,6 +100,12 @@ beforeEach(() => {
   // One spy for every test in the run. Without this a spec asserting that the
   // user was told something can pass on a toast raised two tests ago.
   toastCreate.mockClear()
+  // No debounce waits: input acts the moment it is typed. Sleeping through the
+  // real 250-500 ms delays was about a quarter of the suite's test time. A spec
+  // that asserts a delay sets it for that test, from DEFAULT_INPUT_DELAYS.
+  inputDelays.typingMs = 0
+  inputDelays.tableFilterMs = 0
+  inputDelays.optionSearchMs = 0
 })
 
 // In the shared project (vitest.config.js) a worker keeps one window, and one

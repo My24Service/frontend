@@ -88,8 +88,8 @@ describe('EngineerEventTypeList', () => {
     const wrapper = await mountList()
 
     await wrapper.get('input[aria-label="Search event types"]').setValue('door')
-    // 300 ms, the table kit's own debounce.
-    await new Promise((resolve) => setTimeout(resolve, 400))
+    // The table kit's own debounce, zero in specs.
+    await settle()
 
     expect(reads().at(-1).query).toMatchObject({q: 'door', page: '1'})
   })

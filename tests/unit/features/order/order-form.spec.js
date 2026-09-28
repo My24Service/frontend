@@ -22,6 +22,7 @@ import {
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { useRealInputDelays } from '../../support/input-delays.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { orderRoutes } from '../../support/order-routes.js'
 
@@ -186,7 +187,6 @@ async function clickButton(wrapper, text) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 600))
   await settle()
 }
 
@@ -232,13 +232,15 @@ describe('OrderForm, planning create (no branches)', () => {
   })
 
   test('searches customers by query, debounced half a second', async () => {
+    useRealInputDelays()
     const wrapper = await mountOrderForm()
 
     await multiselect(wrapper, 'order-owner-search').vm.$emit('search-change', 'acme')
     await settle()
     expect(api.requests().map((r) => r.path)).not.toContain('/api/customer/customer/autocomplete/')
 
-    await pastDebounce()
+    await new Promise((resolve) => setTimeout(resolve, 600))
+    await settle()
 
     expect(api.requests().at(-1)).toEqual({
       method: 'get', path: '/api/customer/customer/autocomplete/', query: { q: 'acme' }, body: undefined,

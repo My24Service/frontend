@@ -278,8 +278,7 @@ describe('materials', () => {
       ]})
       await click(wrapper, 'Add material')
       await wrapper.get('.material-search').setValue('nu')
-      // The search is debounced half a second.
-      await new Promise((resolve) => setTimeout(resolve, 550))
+      // The search is debounced; zero in specs.
       await settle()
       expect(api.requests().find((r) => r.path === '/api/inventory/material/autocomplete/').query).toEqual({q: 'nu'})
       await wrapper.get('.pick').trigger('click')

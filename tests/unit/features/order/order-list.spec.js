@@ -87,7 +87,6 @@ function orderPage({ count = 45, schema = ITEM } = {}) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 

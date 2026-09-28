@@ -38,7 +38,6 @@ function contractPage({ count = 30 } = {}) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 
@@ -238,8 +237,8 @@ describe('MaintenanceContractList column filters', () => {
 
     await addFilter(wrapper, 'Remarks')
     await editorInput(wrapper, 'remarks').setValue('annual')
-    // The kit commits the search and the filters on a 300 ms debounce.
-    await new Promise((resolve) => setTimeout(resolve, 350))
+    // The kit commits the search and the filters through its debounce, which
+    // setupTests.js sets to zero.
     await settle()
 
     expect(api.requests().at(-1).query).toMatchObject({remarks: 'annual'})

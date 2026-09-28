@@ -82,7 +82,6 @@ async function chooseFile(wrapper, name = 'invoice.docx') {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 550))
   await settle()
 }
 

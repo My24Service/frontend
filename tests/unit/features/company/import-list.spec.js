@@ -79,7 +79,6 @@ describe('ImportList', () => {
     await settle()
 
     await wrapper.get('input[aria-label="Search imports"]').setValue('customers')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({ q: 'customers', page: '1' })

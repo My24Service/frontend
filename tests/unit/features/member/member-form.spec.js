@@ -13,6 +13,7 @@ import {
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { companyLogoPng, member19 } from '../../fixtures/member-demo-tenant.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { useRealInputDelays } from '../../support/input-delays.js'
 import { createTestQueryClient, mountForm, mountListView, routerGo, toasts } from '../../support/form-harness.js'
 
 import { serverError } from '../../support/list-harness.js'
@@ -403,6 +404,7 @@ describe('MemberForm, creating a member', () => {
 
 describe('MemberForm, the company-code check', () => {
   test('is debounced: one probe for the finished code, none for the prefixes', async () => {
+    useRealInputDelays()
     const wrapper = await mountMemberForm()
 
     await typeCompanyCodePerKeystroke(wrapper, COMPANYCODE)
@@ -421,6 +423,7 @@ describe('MemberForm, the company-code check', () => {
   })
 
   test('asks only after the ticketed half-second of quiet', async () => {
+    useRealInputDelays()
     const wrapper = await mountMemberForm()
 
     await typeCompanyCodePerKeystroke(wrapper, COMPANYCODE)

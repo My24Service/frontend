@@ -83,7 +83,6 @@ function mountLeave(pk = null) {
 
 async function pickUser(wrapper) {
   wrapper.findComponent(multiselectStub).vm.$emit('search-change', 'jansen')
-  await new Promise((resolve) => setTimeout(resolve, 600))
   await settle()
   wrapper.findComponent(multiselectStub).vm.$emit('select', {id: 7, name: 'Jan Jansen'})
   await wrapper.vm.$nextTick()

@@ -39,7 +39,6 @@ function memberPage(names = ['Acme BV', 'Umbrella NV'], { count = 45 } = {}) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 
@@ -352,7 +351,6 @@ describe('MemberList column filters', () => {
       .find((candidate) => candidate.text() === 'temps')
     if (!option) throw new Error('no temps option in the member type editor')
     await option.trigger('click')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     expect(api.requests().at(-1).query).toMatchObject({member_type: 'temps'})

@@ -139,7 +139,6 @@ async function clickButton(wrapper, text) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 700))
   await settle()
 }
 

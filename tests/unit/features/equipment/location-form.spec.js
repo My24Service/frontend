@@ -67,7 +67,6 @@ async function click(wrapper, label) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 550))
   await settle()
 }
 

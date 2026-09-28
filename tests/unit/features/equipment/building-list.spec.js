@@ -88,7 +88,6 @@ describe('BuildingList', () => {
     const wrapper = await mountBuildings()
 
     await wrapper.get('input[aria-label="Search buildings"]').setValue('hoofd')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({q: 'hoofd', page: '1'})
@@ -177,8 +176,8 @@ describe('BuildingList column filters', () =>
 
     await addFilter(wrapper, 'Name')
     await editorInput(wrapper, 'name').setValue('Hoofdgebouw')
-    // The kit commits the search and the filters on a 300 ms debounce.
-    await new Promise((resolve) => setTimeout(resolve, 350))
+    // The kit commits the search and the filters through its debounce, which
+    // setupTests.js sets to zero.
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({name: 'Hoofdgebouw'})

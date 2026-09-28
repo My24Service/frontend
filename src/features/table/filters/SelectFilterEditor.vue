@@ -59,6 +59,7 @@
 import type { ColumnFilterSpec, FilterOption } from '../table'
 import { joinArrayItems, splitArrayItems } from './filter-grammar'
 import { focusFirstControl } from './focus-first-control'
+import { optionSearchDelay } from '@/services/input-delays'
 
 /**
  * Any of several picks from a list: the column's own options, or — when
@@ -171,7 +172,7 @@ async function load(search: string) {
 watchDebounced(term, (value) => {
   highlighted.value = -1
   if (isAsync.value) void load(value)
-}, {debounce: 250})
+}, {debounce: optionSearchDelay})
 
 onMounted(() => {
   if (isAsync.value) void load('')

@@ -49,7 +49,6 @@ const NEW_LOCATION = fixtureFor(vStockLocationCreateUpdate, { id: 9, name: 'Depo
 const COUNTRIES = [{ value: 'NL', text: 'Nederland' }]
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 

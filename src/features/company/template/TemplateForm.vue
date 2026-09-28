@@ -256,6 +256,7 @@ import {
   useResourceForm,
 } from '@/features/forms'
 import { chosenFile, fileNameOf, readAsDataUrl } from '@/features/shared'
+import { typingDelay } from '@/services/input-delays'
 import {
   emptyTemplate,
   templateFromRecord,
@@ -331,7 +332,7 @@ const previewBlob = ref<Blob | null>(null)
 const previewUrl = useObjectUrl(previewBlob)
 const previewResult = ref<{ uuid: string, label: string } | null>(null)
 const previewTerm = ref('')
-const previewDebounced = refDebounced(previewTerm, 500)
+const previewDebounced = refDebounced(previewTerm, typingDelay)
 
 /**
  * Stage the picked file as a data URL for the body. The record's own file

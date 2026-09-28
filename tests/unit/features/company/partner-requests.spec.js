@@ -101,7 +101,6 @@ describe('PartnerRequestsSentList', () => {
     await settle()
 
     await wrapper.get('input[aria-label="Search partner requests"]').setValue('acme')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     const sent = api.requests().filter((request) => request.method === 'get' && request.path === SENT_PATH)

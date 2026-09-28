@@ -72,7 +72,6 @@ function customerPage({ count = 45 } = {}) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 

@@ -75,7 +75,6 @@ const listRequests = () => api.requests().filter((request) => request.method ===
 const bodies = () => toasts().map((toast) => toast.body)
 async function search(wrapper, value) {
   await wrapper.get('input[aria-label="Search invoices"]').setValue(value)
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 

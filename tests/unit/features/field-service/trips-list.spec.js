@@ -47,9 +47,8 @@ beforeEach(() => {
 
 afterEach(() => window.history.replaceState(null, '', '/'))
 
-/** The toolbar search commits on a 300 ms debounce. */
+/** The toolbar search commits through the table kit's debounce, zero in specs. */
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 

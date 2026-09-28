@@ -78,7 +78,6 @@ describe('BudgetList', () => {
     await settle()
 
     await wrapper.get('input[aria-label="Search budgets"]').setValue('2026')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({ q: '2026', page: '1' })

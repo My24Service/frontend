@@ -123,6 +123,7 @@ import VueMultiselect from 'vue-multiselect'
 
 import CustomerCard from '../CustomerCard.vue'
 import { formatMoney } from '@/services/money'
+import { typingDelay } from '@/services/input-delays'
 import { useResourceForm } from '@/features/forms'
 import StagedEquipmentPanel from './StagedEquipmentPanel.vue'
 import { useEquipmentStaging } from './useEquipmentStaging'
@@ -226,7 +227,7 @@ watch(
 )
 
 const customerSearchTerm = ref('')
-const customerQueryTerm = refDebounced(customerSearchTerm, 500)
+const customerQueryTerm = refDebounced(customerSearchTerm, typingDelay)
 
 const customerSearchQuery = useQuery(() => ({
   ...Api.CustomerCustomerAutocomplete.list.options({query: {q: customerQueryTerm.value}}),

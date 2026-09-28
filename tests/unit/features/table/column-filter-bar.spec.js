@@ -135,9 +135,8 @@ async function mountSeeded(props = {}) {
   return wrapper
 }
 
-/** The last query the engine sent, once the 300 ms filter debounce has run. */
+/** The last query the engine sent, once the filter debounce (zero in specs) has run. */
 async function lastQuery(wrapper) {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
   return wrapper.vm.queries.at(-1)
 }
@@ -370,7 +369,7 @@ describe('the select editor', () => {
     expect(wrapper.findAll('.column-filter-popover [role="option"]').map((option) => option.text())).toEqual(['Acme', 'Beta', 'Gamma'])
 
     await editorInput(wrapper, 'owner').setValue('gam')
-    await new Promise((resolve) => setTimeout(resolve, 300))
+    await settle()
     await flushPromises()
     expect(wrapper.vm.loadOptions).toHaveBeenLastCalledWith('gam')
     expect(wrapper.findAll('.column-filter-popover [role="option"]').map((option) => option.text())).toEqual(['Gamma'])

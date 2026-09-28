@@ -127,6 +127,16 @@ put back what it changes:
   the suite. Read the spy through `toastCreate` / `toasts()` from
   `support/form-harness.js`. The same file enables auto-unmount for every spec.
 
+## Input delays are zero
+
+The application's debounces (search boxes, autocompletes, the username and
+company-code probes, a list's search and column filters) read their delay from
+`src/services/input-delays.ts`, and `setupTests.js` sets every one of them to
+zero before each test. Input acts the moment it is typed, so a spec needs a
+`settle()` after typing, never a sleep. A spec about a delay itself (nothing
+asked before the half-second, one ask after it) calls `useRealInputDelays()`
+from `support/input-delays.js` first; the next test starts from zero again.
+
 To check that a change has not made the shared project order-dependent, shuffle
 the file order:
 

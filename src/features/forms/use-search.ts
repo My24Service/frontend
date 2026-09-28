@@ -1,8 +1,7 @@
 import type { AxiosError } from 'axios'
 
 import { useQueryErrorToast } from './use-query-error-toast'
-
-const DEBOUNCE_MS = 500
+import { typingDelay } from '@/services/input-delays'
 
 /**
  * A search-as-you-type picker's read: the term typed, debounced half a
@@ -16,7 +15,7 @@ export function useSearch<TData, TKey extends readonly unknown[], TOption>(
   results: (data: TData) => TOption[],
 ) {
   const term = ref('')
-  const queryTerm = refDebounced(term, DEBOUNCE_MS)
+  const queryTerm = refDebounced(term, typingDelay)
   const query = useQuery(() => ({
     ...optionsFor(queryTerm.value),
     enabled: enabled() && queryTerm.value.length > 0,

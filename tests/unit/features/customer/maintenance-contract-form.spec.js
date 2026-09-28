@@ -11,6 +11,7 @@ import {
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
+import { useRealInputDelays } from '../../support/input-delays.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { customerRoutes } from '../../support/customer-routes.js'
 
@@ -224,6 +225,7 @@ describe('MaintenanceContractForm, create', () => {
   })
 
   test('searches customers by query, debounced half a second', async () => {
+    useRealInputDelays()
     const wrapper = await mountContractForm()
 
     await multiselects(wrapper)[0].vm.$emit('search-change', 'acme')
@@ -244,7 +246,6 @@ describe('MaintenanceContractForm, create', () => {
 
     await multiselects(wrapper)[1].vm.$emit('search-change', 'pump')
     await settle()
-    await new Promise((resolve) => setTimeout(resolve, 600))
     await settle()
 
     expect(api.requests()).toEqual([

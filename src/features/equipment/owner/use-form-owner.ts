@@ -2,6 +2,7 @@ import {
   useQueryErrorToast,
   useQueryOf,
 } from '@/features/forms'
+import { typingDelay } from '@/services/input-delays'
 import type { OwnedRecord, OwnedValues, OwnerKind } from './owner-kind'
 
 /** An autocomplete row from either owner endpoint: they share id/name/city. */
@@ -51,7 +52,7 @@ export function useFormOwner(options: {
 
   const owner = ref<OwnerRecord | null>(null)
   const searchTerm = ref('')
-  const debouncedTerm = refDebounced(searchTerm, 500)
+  const debouncedTerm = refDebounced(searchTerm, typingDelay)
   const isBranchOwner = computed(() => wireKind.value === 'branch')
 
   const ownerLabel = computed(() => (isBranchOwner.value ? $trans('Branch') : $trans('Customer')))

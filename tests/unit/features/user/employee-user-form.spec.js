@@ -49,7 +49,6 @@ const BRANCHES = {
 const MY_BRANCH = fixtureFor(vBranch, { id: 7, name: 'Rotterdam', city: 'Rotterdam' })
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 

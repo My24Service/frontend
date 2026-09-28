@@ -4,12 +4,12 @@ import {
   type UseAvailabilityProbeReturn,
 } from '@/features/forms'
 
-import { COMPANYCODE_DEBOUNCE_MS } from './schemas'
+import { typingDelay } from '@/services/input-delays'
 
 export function useCompanyCodeProbe(
   companycode: () => string,
   originalCompanycode: Ref<string | null>,
-  { debounceMs = COMPANYCODE_DEBOUNCE_MS }: { debounceMs?: number } = {},
+  { debounceMs = typingDelay }: { debounceMs?: MaybeRefOrGetter<number> } = {},
 ): UseCompanyCodeProbeReturn {
   return useAvailabilityProbe({
     read: companycode,

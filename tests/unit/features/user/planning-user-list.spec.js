@@ -59,7 +59,6 @@ function planningPage({ count = 30 } = {}) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 

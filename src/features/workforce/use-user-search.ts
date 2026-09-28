@@ -1,4 +1,5 @@
 import { useQueryErrorToast } from '@/features/forms'
+import { typingDelay } from '@/services/input-delays'
 /**
  * The "type to search a user" picker the leave and sick-leave forms both carry.
  *
@@ -15,7 +16,7 @@ import { useQueryErrorToast } from '@/features/forms'
  */
 export function useUserSearch() {
   const term = ref('')
-  const queryTerm = refDebounced(term, 500)
+  const queryTerm = refDebounced(term, typingDelay)
 
   const search = useQuery(() => ({
     ...Api.CompanyUserList.list.options({query: {q: queryTerm.value}}),

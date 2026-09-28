@@ -33,7 +33,6 @@ const bodies = () => toasts().map((toast) => toast.body)
 const writes = () => api.requests().filter((request) => ['post', 'patch'].includes(request.method))
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 550))
   await settle()
 }
 

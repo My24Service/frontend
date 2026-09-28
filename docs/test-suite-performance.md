@@ -65,6 +65,15 @@ without a `resource_class`: there the default meant a single worker
 Slice (`features/member/member/schemas.ts`) selects 22 spec files. A change to
 shared table code selects 168. A change to the main store selects nearly all.
 
+**Input delays are zero in specs.** About a quarter of test time (~80 of ~316
+test-seconds) was spent sleeping through the production debounces: 300 ms in
+the table kit, 500 ms in the searches and probes. Fake timers are not an option
+here, because `settle()`, MSW and happy-dom's fetch all run on real timers,
+and faking them freezes the harness. The debounces now read their delay from
+`src/services/input-delays.ts`; `setupTests.js` sets it to zero, and 64 spec
+sleeps became `settle()`. Five specs are about the delay itself and put the
+real one back for their own test. Full suite: 114 s → 92 s.
+
 ## Levers that were measured and rejected
 
 **Fewer tests.** Time is not spread evenly over tests, so test count is the
@@ -111,14 +120,6 @@ files: failed and slow ones first. It skips no work. `--changed`/`related`
 are the flags that skip files; see above.
 
 ## What is left, and what it would take
-
-**Real debounce waits: ~80 of ~316 test-seconds are idle.** Specs wait out the
-production debounces: 300 ms in `use-server-table`, 500 ms in the username,
-company-code and search probes. Most of the idle time is in
-`column-filter-bar`, `member-form`, the user forms and the lists. Recovering
-it means making those delays injectable, as `useCompanyCodeProbe` already
-allows (`{debounceMs}`), or using fake timers in those specs. Both touch what
-the specs assert, so neither was done here.
 
 **The 23 isolated files.** They cost ~96 CPU-seconds of import for ~27 s of
 tests, the largest remaining import cost. They are the specs still on the

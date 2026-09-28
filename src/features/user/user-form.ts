@@ -65,9 +65,6 @@ const USER_MESSAGES = {
   ...PASSWORD_MESSAGES,
 } as const
 
-/** Debounced, not per keystroke — the company-code ticket's half-second. */
-export const USERNAME_PROBE_DEBOUNCE_MS = 500
-
 /** Blank vs. a charset violation — the generated entry checks both. */
 function usernameMessage(issue?: v.BaseIssue<unknown>): string {
   return issue?.type === 'regex'

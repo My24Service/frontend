@@ -69,8 +69,6 @@ export const FIELD_LABELS = {
   info: () => $trans('Info'),
 } as const satisfies FieldLabels<keyof Api.MemberRequest>
 
-export const COMPANYCODE_DEBOUNCE_MS = 500
-
 export function validateMemberForm(
   values: Api.MemberRequest,
   { requireLogo = false }: { requireLogo?: boolean } = {},

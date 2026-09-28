@@ -1,4 +1,5 @@
 import { toDinero } from '@/services/money'
+import { typingDelay } from '@/services/input-delays'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {
   emptyEquipmentRow,
@@ -81,7 +82,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   // The picker -------------------------------------------------------------
 
   const searchTerm = ref('')
-  const searchQueryTerm = refDebounced(searchTerm, 500)
+  const searchQueryTerm = refDebounced(searchTerm, typingDelay)
 
   const searchQuery = useQuery(() => ({
     ...Api.EquipmentEquipmentAutocomplete.list.options({

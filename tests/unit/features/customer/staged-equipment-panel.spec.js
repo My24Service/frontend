@@ -9,6 +9,7 @@ import { vPaginatedMaintenanceEquipmentList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
+import { useRealInputDelays } from '../../support/input-delays.js'
 import { mountForm, toasts } from '../../support/form-harness.js'
 
 const api = installApiSeam()
@@ -175,6 +176,7 @@ describe('StagedEquipmentPanel, the staged rows', () => {
 
 describe('StagedEquipmentPanel, the picker', () => {
   test('searches the customer\'s equipment, debounced half a second', async () => {
+    useRealInputDelays()
     const wrapper = await mountPanel()
 
     await picker(wrapper).vm.$emit('search-change', 'pump')

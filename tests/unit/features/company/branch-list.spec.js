@@ -103,7 +103,6 @@ describe('BranchList', () => {
     await settle()
 
     await wrapper.get('input[aria-label="Search branches"]').setValue('noord')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({ q: 'noord', page: '1' })

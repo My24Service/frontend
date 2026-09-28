@@ -10,6 +10,8 @@ import type {
   Updater,
 } from '@tanstack/vue-table'
 import type { AxiosError } from 'axios'
+
+import { tableFilterDelay } from '@/services/input-delays'
 import { useQueryErrorToast } from '@/features/forms'
 import { hook } from './table'
 import type { PagedEnvelope, ServerPagedListQuery } from './server-paged-list'
@@ -79,8 +81,6 @@ function sameFilterValues(a: ColumnFiltersState, b: ColumnFiltersState): boolean
 }
 
 export function useServerTable<TData extends RowData>(config: ServerTableOptions<TData>) {
-  const debounceMs = 300
-
   const {resource, listOptions: explicitOptions, urlSync, loadError, pageSize = 20, getRowId, ...tableOptions} = config
   const listOptions = resource ? (query: ServerPagedListQuery) => resource.listOptions(query) : explicitOptions
 
@@ -116,7 +116,7 @@ export function useServerTable<TData extends RowData>(config: ServerTableOptions
       }
       if (resetPage) pagination.value = {...pagination.value, pageIndex: 0}
     },
-    { debounce: debounceMs, deep: true },
+    { debounce: tableFilterDelay, deep: true },
   )
 
   const wireQuery = computed<ServerPagedListQuery>(() => {
