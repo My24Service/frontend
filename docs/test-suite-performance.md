@@ -134,9 +134,9 @@ Of the 23 files that needed a module graph of their own, 22 now share:
 - **Legacy HTTP client fakes** (`vi.mock('@/services/api')` +
   `vi.mock('@/api/client.gen')`): five moved to the network seam (NavItems,
   SubNav, OrderTypesPie and, once the schema was fixed, both dashboards), and gained a `settle()` their "no request" claims
-  lacked. The others keep their fake, now installed by `useFakeHttp()`
-  (`support/fake-http.js`), which spies on the real clients instead of
-  replacing the modules. `base-socket.spec` spies on the one `get` it needs.
+  lacked. The others kept their fake for a while, installed by `useFakeHttp()`, which
+  spied on the real clients instead of replacing the modules; they have since
+  moved to the seam as well (see below). `base-socket.spec` spies on the one `get` it needs.
 - **`base-collection.spec`** had no mock at all; a comment mentioning
   `vi.mock` fooled the scan, which now ignores comments.
 
@@ -184,19 +184,24 @@ close.
 
 ### The remaining client-fake specs
 
-Seven of the eight remaining client-fake specs are on the seam now: login,
-logout, the post-login redirect, both no-access specs, the inventory stats
-table and the material form. Four of them should make no request at all, and
+The eight remaining client-fake specs are on the seam now. Seven went across
+without a mismatch: login, logout, the post-login redirect, both no-access
+specs, the inventory stats table and the material form. Four of them should
+make no request at all, and
 now fail if one is made. The login and material-form bodies are also checked
 against the generated request schemas. None of them hit a schema mismatch.
 
-The eighth, `material-move-form-call-shape.spec`, stays on `useFakeHttp()`.
-The material search sends `q` to `GET /api/inventory/inventory-materials/`,
-and the schema declares no query parameters for that endpoint (its sibling
-`inventory-materials-for-location` does declare `q`). Move the spec once the
-schema declares it. Moving it turned up a frontend bug too: `Inventory.js` put
-the search term into the URL unencoded, so a term with `&`, `#` or `+` was cut
-short or changed. It is encoded now, and the spec pins it.
+The eighth, `material-move-form-call-shape.spec`, hit one: the material
+search sends `q` to `GET /api/inventory/inventory-materials/`, which the schema
+declared no query parameters for (its sibling `inventory-materials-for-location`
+did). The backend filters on it; the schema now declares it, along with the
+parameters two other inventory lookups read, and the spec is on the seam too.
+Moving it turned up a frontend bug as well: `Inventory.js` put the search term
+into the URL unencoded, so a term with `&`, `#` or `+` was cut short or
+changed. It is encoded now, and the spec pins it.
+
+With that, no spec uses a client fake; `fake-http.js`, `api-client-mock.js`,
+`request-recorder.js` and `resetFakeHttp` are deleted.
 
 ## What is left, and what it would take
 

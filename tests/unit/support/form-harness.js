@@ -27,52 +27,6 @@ import { toastCreate } from './toast.js'
 export { toastCreate } from './toast.js'
 
 /**
- * Baseline behaviour for the client fake from `useFakeHttp()`
- * (support/fake-http.js).
- *
- * `useFakeHttp` spies on the axios instances themselves, which every holder
- * shares, so it reaches a model singleton and a service a component builds in
- * its own setup alike. Prefer the network seam for a new spec.
- *
- * Call `resetFakeHttp(fakeHttp, routes)` in beforeEach: the CSRF token
- * resolves, every other GET resolves to `routes[url]` if listed and to `[]`
- * otherwise, and writes succeed.
- */
-export function resetFakeHttp(fakeHttp, routes = {}) {
-  fakeHttp.get.mockReset()
-  fakeHttp.post.mockReset()
-  fakeHttp.patch.mockReset()
-  fakeHttp.delete.mockReset()
-
-  fakeHttp.get.mockImplementation((url) => {
-    if (url === '/get-csrf-token/') {
-      return Promise.resolve({ data: { token: 'csrf-token' } })
-    }
-    // Route keys omit the query string, but autocomplete calls now carry
-    // `?q=...` (the generated client serializes `opts.query`). Match on the
-    // path so a fixture keyed on `/api/.../autocomplete/` serves every query.
-    const path = String(url).split('?')[0]
-    if (path in routes) {
-      // A fresh copy per call. The forms write back onto the object they were
-      // given (`order.orderlines = processedOrderlines`), so handing out the
-      // same fixture twice lets one test mangle the next one's data - a
-      // failure that looks like a bug in the component under test.
-      return Promise.resolve({ data: structuredClone(routes[path]) })
-    }
-    return Promise.resolve({ data: [] })
-  })
-  fakeHttp.post.mockResolvedValue({ data: { id: 100 } })
-  fakeHttp.patch.mockResolvedValue({ data: {} })
-  fakeHttp.delete.mockResolvedValue({ data: {} })
-
-  return fakeHttp
-}
-
-// The SDK (`@/api/client.gen`) half of that fake is ./api-client-mock.js, which
-// translates the generated client's `{url, path, query, body}` calls into the
-// plain `(url[, body])` calls the fake records.
-
-/**
  * The query plugin, as main.ts installs it, with one override.
  *
  * The app's own options come from services/query-client.ts so a spec observes

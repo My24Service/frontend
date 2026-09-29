@@ -7,10 +7,9 @@ Three kinds of test live here.
 The **model and service specs** (`models/`, `services/`, `utils/`, `mixins/`)
 test units directly.
 
-The **call-shape specs** (`views/`, `components/`) pin the requests a screen
-puts on the wire — path, query, and body. They mount a view against a fake
-HTTP client (`support/api-client-mock.js`, read through
-`support/request-recorder.js`).
+The **call-shape specs** (`views/`, `components/`) pin the requests a legacy
+screen puts on the wire — path, query, and body — through the network seam
+below, like the Slice specs.
 
 The **schema-conformance specs** (`api/`, alongside the call-shape ones) mount
 nothing. They parse a literal payload against a generated valibot schema and
@@ -23,10 +22,10 @@ The **seam specs** (`features/*/*.spec.js`, `api/api-seam.spec.js`) run
 against the network seam (`support/api-seam/`), below both HTTP clients. Read
 its header for what it refuses. They drive the Slices in `src/features/`.
 
-## The two seams, and why both exist
+## Why the network seam, and not a client fake
 
-A call-shape spec on a **client fake** records whatever request the code made
-and asserts it as correct. A parameter the code stopped sending simply is not
+The suite used to have a second seam: a **client fake** that replaced the HTTP
+clients and recorded whatever request the code made, asserting it as correct. A parameter the code stopped sending simply is not
 in the recording, so the spec stays green while the screen loses a query
 parameter.
 
@@ -42,13 +41,16 @@ have sent fails the spec that wrote it. Build fixtures with
 `helpers/schema-fixture.js` and that is a one-liner; an explicit `HttpResponse`
 opts out, which is what a failure-path spec wants.
 
-Await `settle()` from the seam, never the `for (i…) await Promise.resolve()`
-idiom the client-fake specs use. A real request comes back on a macrotask, so
+Await `settle()` from the seam, never a `for (i…) await Promise.resolve()`
+loop. A real request comes back on a macrotask, so
 a microtask flush returns before it has even been recorded — and an assertion
 that a request was *not* made then passes without observing anything.
 
-The network seam is where new specs go. `support/api-client-mock.js` and
-`support/request-recorder.js` die when the last client-fake spec converts.
+Every spec that talks to the backend is on the network seam now; the client
+fake is gone. Moving the last ones found three query parameters the dashboards
+sent that the schema did not declare, and one on the material search; the
+backend declared the ones it honours and the frontend stopped sending the
+rest. Keep new specs there.
 
 ## How requests are pinned
 
@@ -133,9 +135,9 @@ put back what it changes:
   `features/auth/auth-store.spec.js`). `setupTests.js` fails the next file if
   storage is left broken.
 - Reach for a spy before `vi.mock`, which sends the spec to the isolated
-  project: `useFakeHttp()` (`support/fake-http.js`) for the legacy client
-  fakes, `stubSocket()` (`support/sockets.js`) for the websockets. The HTTP
-  clients' `defaults.adapter` is put back before every test.
+  project: `stubSocket()` (`support/sockets.js`) for the websockets. For HTTP,
+  the network seam. The HTTP clients' `defaults.adapter` is put back before
+  every test.
 
 ## Input delays are zero
 

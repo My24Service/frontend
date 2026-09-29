@@ -109,9 +109,8 @@ nothing in this Slice calls them.
 `tests/unit/support/api-client-mock.js` gained `getConfig` when the Timesheet
 lists were still on it: the generated `*QueryKey` factories ask the client for
 its `baseURL` when they build a key, which the four verbs alone did not answer.
-Those screens are on the seam now, and so is the attach-order modal, so this
-Slice has no client-shape spec left; the fake keeps answering `getConfig` for
-the ones that remain elsewhere in the suite.
+Those screens are on the seam now, and so is the attach-order modal. The fake
+itself is gone: every spec in the suite is on the network seam.
 
 ## Declared exceptions — the ledger
 

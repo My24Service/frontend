@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import MaterialMoveForm from '@/views/inventory/MaterialMoveForm.vue'
+import { vInventoryMaterialMoveCreateResponse, vStockLocation } from '@/api/valibot.gen'
 
-import { requestShapes } from '../../support/request-recorder.js'
-import { mountForm, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
-import { useFakeHttp } from '../../support/fake-http.js'
+import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm, toastCreate } from '../../support/form-harness.js'
 
 // CALL-SHAPE SPEC.
 //
@@ -17,23 +18,20 @@ import { useFakeHttp } from '../../support/fake-http.js'
 // amount, which is exactly what the old URL interpolation and body put on the
 // wire.
 
-// Still on the client fake, not the network seam: the materials search sends
-// `q` to GET /api/inventory/inventory-materials/, which openapi/schema.yaml
-// declares no query parameters for, and the seam would reject every test here.
-// Move it once the schema declares `q` (see docs/test-suite-performance.md).
-const fakeHttp = useFakeHttp()
+const api = installApiSeam()
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp, {})
+  // What the pickers read on mount.
+  api.get('/api/inventory/inventory-materials/', [])
+  api.get('/api/inventory/stock-location/', paginated([fixtureFor(vStockLocation, { id: 2 })]))
+  api.post('/api/inventory/material/{id}/move/', fixtureFor(vInventoryMaterialMoveCreateResponse))
   toastCreate.mockClear()
 })
 
-/** Let every pending promise in the submit path resolve. */
-async function flush() {
-  for (let i = 0; i < 10; i++) {
-    await Promise.resolve()
-  }
-}
+/** Let every request in flight land. */
+const flush = settle
+
+const requestsOf = (method, start = 0) => api.requests().slice(start).filter((request) => request.method === method)
 
 async function mountMoveForm() {
   const wrapper = mountForm(MaterialMoveForm)
@@ -47,12 +45,12 @@ async function mountMoveForm() {
 describe('MaterialMoveForm - material search', () => {
   test('a search term reaches the backend whole, however it is spelled', async () => {
     const wrapper = await mountMoveForm()
-    fakeHttp.get.mockClear()
+    const start = api.requests().length
 
     await wrapper.vm.getMaterials('bout & moer #5+')
     await flush()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+    expect(requestsOf('get', start)).toEqual([
       { method: 'get', path: '/api/inventory/inventory-materials/', query: { q: 'bout & moer #5+' }, body: undefined },
     ])
   })
@@ -68,8 +66,9 @@ describe('MaterialMoveForm - material move call shape', () => {
     wrapper.vm.amount = '10'
 
     await wrapper.vm.submitForm()
+    await flush()
 
-    expect(requestShapes(fakeHttp, { method: 'post' })).toEqual([
+    expect(requestsOf('post')).toEqual([
       {
         method: 'post',
         path: '/api/inventory/material/5/move/',
@@ -78,5 +77,4 @@ describe('MaterialMoveForm - material move call shape', () => {
       },
     ])
   })
-
 })
