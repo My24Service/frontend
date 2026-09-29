@@ -105,7 +105,6 @@
             sort-icon-left
           >
             <template #cell(name)="data">
-              <span class="badge" v-if="data.item.is_new">{{ $trans('New') }}</span>
               <BLink class="document-link" :href="data.item.url" target="_blank">
                 <i :class="'fs-3 bi ' + getFileIcon(data.item.url)"></i>
                 <span class="pl-4">{{ data.item.name }}</span>
@@ -141,7 +140,6 @@
             sort-icon-left
           >
             <template #cell(name)="data">
-              <span class="badge" v-if="data.item.is_new">{{ $trans('New') }}</span>
               <BLink class="document-link" :href="data.item.url" target="_blank">
                 <i :class="'fs-3 bi ' + getFileIcon(data.item.url)"></i>
                 <span class="pl-4">{{ data.item.name }}</span>
@@ -330,11 +328,6 @@ export default {
   color: #ffffff;
 }
 
-.family-default :deep(.data-table > .table-hover > tbody > tr:hover span.badge) {
-  background-color: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-}
-
 /* Document type icons */
 .family-default :deep(.bi-filetype-pdf) {
   color: #179da0;
@@ -358,18 +351,6 @@ export default {
 .family-default :deep(.data-table > .table-hover > tbody > tr:hover td i.bi-filetype-xls),
 .family-default :deep(.data-table > .table-hover > tbody > tr:hover td i.bi-filetype-xlsx) {
   color: #ffffff;
-}
-
-.family-default span.badge {
-  background-color: rgba(23, 157, 160, 0.1);
-  color: #179da0;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 3px 6px;
-  border-radius: 4px;
-  margin-right: 6px;
 }
 
 .family-default.app-page {
