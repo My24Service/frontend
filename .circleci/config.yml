@@ -33,7 +33,8 @@ jobs:
             - .pnpm-store
       - run:
           name: Run test suite
-          command: pnpm test
+          # Needs sharding, otherwise the container runs OOM
+          command: pnpm test --shard 1/2 && pnpm test --shard 2/2
       - run:
           # Contract usage gate (block A). Warns only for now: it exits 0 and
           # lists operations no client calls. Switches to a failure in block A
