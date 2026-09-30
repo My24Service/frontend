@@ -1,66 +1,61 @@
 import * as v from 'valibot'
 
 import {
+  fieldsFromRecord,
   type FieldErrors,
   type FieldLabels,
   writeContract,
 } from '@/features/forms'
+import { formDefaults } from '@/models/schema'
+
+const body = Api.InventorySupplier.create.body
+
+/** The text fields a supplier may leave blank. */
+const OPTIONAL_TEXT = ['identifier', 'email', 'tel', 'mobile', 'contact'] as const
 
 /**
- * The form's own state: the ten supplier fields this form owns, every one a
- * string the inputs bind to. The record's `remarks` and `external_identifier`
- * are not on this form, so they are not here and an edit leaves them alone.
+ * The ten fields this form owns, picked from the create body: the form saves
+ * the whole supplier it owns, and that is the component that says what a whole
+ * supplier needs. The record's `remarks` and `external_identifier` are not on
+ * this form, so they are not here and an edit leaves them alone.
+ *
+ * `name`, `address`, `postal` and `city` are piped with a minimum. Case 1
+ * (`docs/schema-strengthenings.md` entry 10): the request declares them
+ * nullish with no minimum, so a blank one passes the generated schema, and a
+ * supplier needs them. `v.unwrap` drops the null and keeps the maximum codegen
+ * put underneath.
  */
-export type SupplierFormValues = {
-  identifier: string
-  name: string
-  address: string
-  postal: string
-  city: string
-  country_code: string
-  email: string
-  tel: string
-  mobile: string
-  contact: string
-}
+const supplierFormSchema = v.object({
+  ...v.pick(body, ['name', 'address', 'postal', 'city', 'country_code', ...OPTIONAL_TEXT]).entries,
+  name: v.pipe(v.unwrap(body.entries.name), v.minLength(1)),
+  address: v.pipe(v.unwrap(body.entries.address), v.minLength(1)),
+  postal: v.pipe(v.unwrap(body.entries.postal), v.minLength(1)),
+  city: v.pipe(v.unwrap(body.entries.city), v.minLength(1)),
+})
+
+/** The form's own state: the picked fields, as the schema takes them. */
+export type SupplierFormValues = Required<v.InferInput<typeof supplierFormSchema>>
 
 export type SupplierFieldErrors = FieldErrors<keyof SupplierFormValues>
 
 /**
- * A blank supplier: the ten fields of the form, blank, and the country a new
- * supplier starts in. The generated create body has twelve keys; the form owns
- * ten, so the blank is written out rather than derived from the whole.
+ * A blank supplier, in the country a new supplier starts in. The text inputs
+ * start at `''` rather than the null a nullish entry blanks to, as the legacy
+ * form sent them.
  */
 export function emptySupplier(): SupplierFormValues {
-  return {
-    identifier: '',
-    name: '',
-    address: '',
-    postal: '',
-    city: '',
+  return formDefaults(supplierFormSchema, {
+    ...Object.fromEntries(OPTIONAL_TEXT.map((key) => [key, ''])),
     country_code: 'NL',
-    email: '',
-    tel: '',
-    mobile: '',
-    contact: '',
-  }
+  })
 }
 
-/** The fetched record as form values. */
+/**
+ * The fetched record as form values. A country the record leaves out keeps the
+ * blank's: the create body will not take a blank one.
+ */
 export function supplierFromRecord(record: Api.InventorySupplier.Record): SupplierFormValues {
-  return {
-    identifier: record.identifier ?? '',
-    name: record.name ?? '',
-    address: record.address ?? '',
-    postal: record.postal ?? '',
-    city: record.city ?? '',
-    // Optional on the record; the create body will not take a blank one.
-    country_code: record.country_code ?? 'NL',
-    email: record.email ?? '',
-    tel: record.tel ?? '',
-    mobile: record.mobile ?? '',
-    contact: record.contact ?? '',
-  }
+  return {...emptySupplier(), ...fieldsFromRecord(supplierFormSchema, record)}
 }
 
 // The generated entries carry the maxima; the labels name the field in each of
@@ -78,26 +73,9 @@ export const FIELD_LABELS = {
   contact: () => $trans('Contact'),
 } as const satisfies FieldLabels<keyof SupplierFormValues>
 
-const body = Api.InventorySupplier.create.body.entries
-
 /**
- * The create body with the four fields a supplier needs. The request declares
- * `name`, `address`, `postal` and `city` nullish with no minimum, so a blank
- * one passes the generated schema. `v.unwrap` drops the null and keeps the
- * maximum codegen put underneath. Recorded in `docs/schema-strengthenings.md`.
- */
-const supplierFormSchema = v.object({
-  ...body,
-  name: v.pipe(v.unwrap(body.name), v.minLength(1)),
-  address: v.pipe(v.unwrap(body.address), v.minLength(1)),
-  postal: v.pipe(v.unwrap(body.postal), v.minLength(1)),
-  city: v.pipe(v.unwrap(body.city), v.minLength(1)),
-})
-
-/**
- * Every write validates against the strengthened create body: the form saves
- * the whole supplier it owns, and that is the component that says what a whole
- * supplier needs. The patch body it sends on an edit is a superset of that.
+ * Every write validates against the strengthened create body. The patch body
+ * an edit sends is a superset of that.
  */
 export const supplierWrite = writeContract(Api.InventorySupplier, {
   validateWith: supplierFormSchema,

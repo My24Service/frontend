@@ -1,67 +1,77 @@
 import * as v from 'valibot'
+import { objectOmit } from '@vueuse/core'
 
 import {
+  fieldsFromRecord,
   type FieldErrors,
   type FieldLabels,
   writeContract,
 } from '@/features/forms'
+import { formDefaults } from '@/models/schema'
+
+const body = Api.InventoryMaterial.update.body
+
+/** The text fields a material may leave blank. */
+const OPTIONAL_TEXT = ['name_short', 'identifier', 'unit', 'location', 'product_type'] as const
+
+/** The six prices, each a decimal string on the wire. */
+const PRICES = [
+  'price_purchase',
+  'price_selling',
+  'price_selling_alt',
+  'price_purchase_ex',
+  'price_selling_ex',
+  'price_selling_alt_ex',
+] as const
 
 /**
- * The form's own state. The generated request declares the prices as optional
- * strings and the supplier as a nullish id; the form holds every text field as
- * a string and a supplier not yet picked as `null`. Two entries are not wire
- * fields at all:
+ * The fields this form owns, picked from the patch body: it is the one body
+ * that declares every key the form holds (`location` is on the patch body
+ * and not on the create body), and for every key the two share, the create
+ * body's rules are the same. So an edit validates what it sends, and a
+ * create validates the same rules its body carries. The create body's twenty
+ * keys include the currencies, which are the server's to default, and the
+ * image, which the form stages on its own (see `shaped`).
  *
- * - `supplier_name` is the read-only companion the picker fills in so the
- *   chosen supplier shows; it never rides the body.
- * - `image` is the staged upload as a data URL, `null` while no file was
- *   picked. The record's own image is a URL the write endpoint would save as
- *   the image, so it stays out of the values and only shows as the current
- *   image.
+ * The name is piped with a minimum. Case 1 (`docs/schema-strengthenings.md`
+ * entry 10): the request declares it nullish with no minimum, so a blank name
+ * passes the generated schema, and a material needs one. `v.unwrap` drops the
+ * null and keeps the maximum codegen put underneath.
  */
-export type MaterialFormValues = {
-  name: string
-  name_short: string
-  identifier: string
-  unit: string
-  supplier_relation: number | null
+const materialFormSchema = v.object({
+  ...v.pick(body, ['name', ...OPTIONAL_TEXT, 'supplier_relation', ...PRICES]).entries,
+  name: v.pipe(v.unwrap(body.entries.name), v.minLength(1)),
+})
+
+/**
+ * The form's own state: the picked fields as the schema takes them, and two
+ * that never ride the body as they are held.
+ */
+export type MaterialFormValues = Required<v.InferInput<typeof materialFormSchema>> & {
+  /** The read-only companion the picker fills in so the chosen supplier shows. */
   supplier_name: string
-  location: string
-  product_type: string
-  price_purchase: string
-  price_selling: string
-  price_selling_alt: string
-  price_purchase_ex: string
-  price_selling_ex: string
-  price_selling_alt_ex: string
-  /** A newly picked file as a data URL, or null when no file was chosen. */
+  /**
+   * A newly picked file as a data URL, or null when no file was chosen. The
+   * record's own image is a URL the write endpoint would save as the image,
+   * so it stays out of the values and only shows as the current image.
+   */
   image: string | null
 }
 
 export type MaterialFieldErrors = FieldErrors<keyof MaterialFormValues>
 
 /**
- * A blank material. The form binds a subset of the create body's twenty keys
- * (the currencies are the server's to default), so the blank is written out
- * rather than derived from the whole component. The prices start at "0.00",
- * as the legacy model's did.
+ * A blank material. The text inputs start at `''` rather than the null a
+ * nullish entry blanks to, as the legacy form sent them; the prices start at
+ * "0.00", as the legacy model's did.
  */
 export function emptyMaterial(): MaterialFormValues {
   return {
-    name: '',
-    name_short: '',
-    identifier: '',
-    unit: '',
-    supplier_relation: null,
+    ...formDefaults(materialFormSchema, {
+      ...Object.fromEntries(OPTIONAL_TEXT.map((key) => [key, ''])),
+      ...Object.fromEntries(PRICES.map((key) => [key, '0.00'])),
+    }),
     supplier_name: '',
-    location: '',
-    product_type: '',
-    price_purchase: '0.00',
-    price_selling: '0.00',
-    price_selling_alt: '0.00',
-    price_purchase_ex: '0.00',
-    price_selling_ex: '0.00',
-    price_selling_alt_ex: '0.00',
     image: null,
   }
 }
@@ -69,21 +79,9 @@ export function emptyMaterial(): MaterialFormValues {
 /** The fetched record as form values. The stored image URL is left out. */
 export function materialFromRecord(record: Api.InventoryMaterial.Record): MaterialFormValues {
   return {
-    name: record.name ?? '',
-    name_short: record.name_short ?? '',
-    identifier: record.identifier ?? '',
-    unit: record.unit ?? '',
-    supplier_relation: record.supplier_relation ?? null,
+    ...emptyMaterial(),
+    ...fieldsFromRecord(materialFormSchema, record),
     supplier_name: record.supplier_name ?? '',
-    location: record.location ?? '',
-    product_type: record.product_type ?? '',
-    price_purchase: record.price_purchase,
-    price_selling: record.price_selling,
-    price_selling_alt: record.price_selling_alt,
-    price_purchase_ex: record.price_purchase_ex,
-    price_selling_ex: record.price_selling_ex,
-    price_selling_alt_ex: record.price_selling_alt_ex,
-    image: null,
   }
 }
 
@@ -106,46 +104,30 @@ export const FIELD_LABELS = {
 } as const satisfies FieldLabels<keyof MaterialFormValues>
 
 /**
- * The create body with a name that must be given. The request declares it
- * `nullable` with no minimum, so a blank name passes the generated schema;
- * a material needs one. `v.unwrap` drops the null and keeps the maximum
- * codegen put underneath. Recorded in `docs/schema-strengthenings.md`.
- */
-const materialFormSchema = v.object({
-  ...Api.InventoryMaterial.create.body.entries,
-  name: v.pipe(v.unwrap(Api.InventoryMaterial.create.body.entries.name), v.minLength(1)),
-})
-
-/**
  * The wire body. Only a fresh upload (a `data:` URI) carries the image: what
  * the API hands back is a URL, and sending that back would save the material
  * with its own URL as the image. A supplier not picked is left out rather than
- * sent as an id nothing has.
+ * sent as an id nothing has. A cleared price is left out too: the generated
+ * decimal pattern matches `''`, which the API answers with a 400, and both
+ * bodies take the price as optional, so an absent one keeps the server's
+ * default on a create and the stored price on an edit.
  */
-function shaped(values: MaterialFormValues) {
-  const body: Record<string, unknown> = {
-    name: values.name,
-    name_short: values.name_short,
-    identifier: values.identifier,
-    unit: values.unit,
-    location: values.location,
-    product_type: values.product_type,
-    price_purchase: values.price_purchase,
-    price_selling: values.price_selling,
-    price_selling_alt: values.price_selling_alt,
-    price_purchase_ex: values.price_purchase_ex,
-    price_selling_ex: values.price_selling_ex,
-    price_selling_alt_ex: values.price_selling_alt_ex,
+function shaped(values: MaterialFormValues): Api.InventoryMaterial.UpdateInput {
+  const shape: Api.InventoryMaterial.UpdateInput = objectOmit(
+    values,
+    ['supplier_name', 'image', 'supplier_relation', ...PRICES],
+  )
+  for (const key of PRICES) {
+    if (values[key] !== '') shape[key] = values[key]
   }
-  if (values.supplier_relation != null) body.supplier_relation = values.supplier_relation
-  if (values.image?.startsWith('data:')) body.image = values.image
-  return body
+  if (values.supplier_relation != null) shape.supplier_relation = values.supplier_relation
+  if (values.image?.startsWith('data:')) shape.image = values.image
+  return shape
 }
 
 /**
- * Every write validates against the strengthened create body: the form saves a
- * whole material, and that is the component that says what a whole material
- * needs. The patch body it sends on an edit is a superset of what PATCH needs.
+ * Every write validates against the strengthened form schema: the generated
+ * entries of what it sends, with the name's minimum on top.
  */
 export const materialWrite = writeContract(Api.InventoryMaterial, {
   validateWith: materialFormSchema,

@@ -235,6 +235,14 @@ describe('StockLocationView', () => {
 
     expect(bodies()).toContain('Error fetching stock location/inventory')
   })
+
+  test('both reads failing tell the user once', async () => {
+    api.get(RECORD, serverError)
+    api.get(STOCK, serverError)
+    await mountView()
+
+    expect(bodies().filter((body) => body === 'Error fetching stock location/inventory')).toHaveLength(1)
+  })
 })
 
 describe('StockLocationForm', () => {

@@ -43,6 +43,9 @@
                 label-for="supplier_country_code"
               >
                 <BFormSelect id="supplier_country_code" v-model="values.country_code" :options="countries" size="sm"></BFormSelect>
+                <b-form-invalid-feedback :state="submitClicked ? !errors.country_code : null">
+                  {{ errors.country_code }}
+                </b-form-invalid-feedback>
               </BFormGroup>
             </div>
 

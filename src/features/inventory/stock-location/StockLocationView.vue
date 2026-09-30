@@ -8,7 +8,7 @@
           {{ record?.name }} <small class="dimmed">({{ record?.identifier }})</small>
         </h3>
         <router-link
-          :to="{name: 'stock-location-edit', params: {pk: id ?? 0}}"
+          :to="{name: 'stock-location-edit', params: {pk: id}}"
           class="btn btn-primary"
         >
           {{ `${$trans('Edit')} ${$trans('stock location')}` }}
@@ -44,27 +44,22 @@ import { useQueryErrorToast } from '@/features/forms'
  * material. Two parallel reads; the legacy screen answered either failing with
  * one message and so does this.
  */
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   /** The route's `:pk`. */
-  pk?: string | number | null
-}>(), {
-  pk: null,
-})
+  pk: string | number
+}>()
 
 const { router } = useCommon()
 
-const id = computed(() => (props.pk == null ? null : Number(props.pk)))
+const id = computed(() => Number(props.pk))
 
-const detailQuery = useQuery(() => ({
-  ...Api.InventoryStockLocation.retrieveOptions(id.value ?? 0),
-  enabled: id.value != null,
-}))
-const inventoryQuery = useQuery(() => ({
-  ...Api.InventoryInventoryMaterialsForLocation.list.options({query: {location: id.value ?? 0}}),
-  enabled: id.value != null,
-}))
-useQueryErrorToast(detailQuery.error, $trans('Error fetching stock location/inventory'))
-useQueryErrorToast(inventoryQuery.error, $trans('Error fetching stock location/inventory'))
+const detailQuery = useQuery(() => Api.InventoryStockLocation.retrieveOptions(id.value))
+const inventoryQuery = useQuery(() => Api.InventoryInventoryMaterialsForLocation.list.options({query: {location: id.value}}))
+// One flag for both reads, so both failing toasts once.
+useQueryErrorToast(
+  computed(() => Boolean(detailQuery.error.value || inventoryQuery.error.value)),
+  $trans('Error fetching stock location/inventory'),
+)
 
 const record = computed(() => detailQuery.data.value)
 const inventory = computed(() => inventoryQuery.data.value ?? [])

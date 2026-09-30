@@ -11,7 +11,7 @@
             {{ $trans('Back') }}
           </BButton>
           <router-link
-            :to="{name: 'material-edit', params: {pk: id ?? 0}}"
+            :to="{name: 'material-edit', params: {pk: id}}"
             class="btn btn-primary"
           >
             {{ $trans('Edit material') }}
@@ -73,27 +73,22 @@ import { useQueryErrorToast } from '@/features/forms'
  * Two parallel reads instead of the legacy screen's sequence. The legacy
  * screen answered either failing with one message and so does this.
  */
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   /** The route's `:pk`. */
-  pk?: string | number | null
-}>(), {
-  pk: null,
-})
+  pk: string | number
+}>()
 
 const { router } = useCommon()
 
-const id = computed(() => (props.pk == null ? null : Number(props.pk)))
+const id = computed(() => Number(props.pk))
 
-const detailQuery = useQuery(() => ({
-  ...Api.InventoryMaterial.retrieveOptions(id.value ?? 0),
-  enabled: id.value != null,
-}))
-const inventoryQuery = useQuery(() => ({
-  ...Api.InventoryInventoryLocationsForMaterial.list.options({query: {material: id.value ?? 0}}),
-  enabled: id.value != null,
-}))
-useQueryErrorToast(detailQuery.error, $trans('Error fetching inventory'))
-useQueryErrorToast(inventoryQuery.error, $trans('Error fetching inventory'))
+const detailQuery = useQuery(() => Api.InventoryMaterial.retrieveOptions(id.value))
+const inventoryQuery = useQuery(() => Api.InventoryInventoryLocationsForMaterial.list.options({query: {material: id.value}}))
+// One flag for both reads, so both failing toasts once.
+useQueryErrorToast(
+  computed(() => Boolean(detailQuery.error.value || inventoryQuery.error.value)),
+  $trans('Error fetching inventory'),
+)
 
 const record = computed(() => detailQuery.data.value)
 const inventory = computed(() => inventoryQuery.data.value ?? [])

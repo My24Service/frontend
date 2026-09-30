@@ -274,6 +274,14 @@ describe('SupplierView', () => {
 
     expect(bodies()).toContain('Error fetching supplier/materials')
   })
+
+  test('both reads failing tell the user once', async () => {
+    api.get(RECORD, serverError)
+    api.get(MATERIALS, serverError)
+    await mountView()
+
+    expect(bodies().filter((body) => body === 'Error fetching supplier/materials')).toHaveLength(1)
+  })
 })
 
 describe('SupplierForm', () => {
@@ -440,6 +448,18 @@ describe('SupplierForm', () => {
       await click(wrapper, 'Submit')
 
       expect(wrapper.text()).toContain('Please enter a name')
+      expect(writes()).toEqual([])
+    })
+
+    // The country is validated like any field; its error shows under the select.
+    test('a stored blank country shows its error and blocks the patch', async () => {
+      api.get(RECORD, () => supplier({ country_code: '' }))
+      const wrapper = await mountSupplier({ pk: 7 })
+
+      await click(wrapper, 'Submit')
+
+      const group = wrapper.get('#supplier_country_code').element.closest('.form-group, .row, fieldset')
+      expect(group.textContent).toContain('Please enter a country')
       expect(writes()).toEqual([])
     })
 

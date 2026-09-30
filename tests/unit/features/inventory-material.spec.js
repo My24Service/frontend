@@ -264,6 +264,14 @@ describe('MaterialView reads', () => {
 
     expect(bodies()).toContain('Error fetching inventory')
   })
+
+  test('both reads failing tell the user once', async () => {
+    api.get(RECORD, serverError)
+    api.get(STOCK, serverError)
+    await mountView()
+
+    expect(bodies().filter((body) => body === 'Error fetching inventory')).toHaveLength(1)
+  })
 })
 
 // The supplier picker: the multiselect has no meaningful DOM under happy-dom, so
@@ -339,7 +347,6 @@ describe('MaterialForm', () => {
       await type(wrapper, '#material_name_short', 'Wdg')
       await type(wrapper, '#material_identifier', 'W-1')
       await type(wrapper, '#material_unit', 'pcs')
-      await type(wrapper, '#material_location', 'Shelf 4')
       await type(wrapper, '#material_product_type', 'Gadgets')
       await type(wrapper, '#material_price_purchase', '1.50')
       await type(wrapper, '#material_price_selling_alt_ex', '2.27')
@@ -349,10 +356,31 @@ describe('MaterialForm', () => {
         name: 'Widget', name_short: 'Wdg', identifier: 'W-1', unit: 'pcs',
         product_type: 'Gadgets', price_purchase: '1.50', price_selling: '0.00', price_selling_alt_ex: '2.27',
       })
-      // The create body has no `location` (the backend's create serializer does not
-      // list it), so what was typed is parsed away, as it was silently ignored
-      // in the legacy screen. An edit does send it.
       expect(writes()[0].body).not.toHaveProperty('location')
+    })
+
+    // The create body has no `location` (the backend's create serializer does not
+    // list it): the legacy screen offered the input and silently lost what was
+    // typed. An edit does send it.
+    test('offers no location, which a create cannot send', async () => {
+      const wrapper = await mountMaterial()
+
+      expect(wrapper.find('#material_location').exists()).toBe(false)
+    })
+
+    // The generated decimal pattern matches '', which the API answers with a
+    // 400. The create body takes the price as optional, so a cleared one is
+    // left out and the server's default applies.
+    test('a cleared price is left out rather than sent blank', async () => {
+      const wrapper = await mountMaterial()
+
+      await type(wrapper, '#material_name', 'Widget')
+      await type(wrapper, '#material_price_selling', '')
+      await click(wrapper, 'Submit')
+
+      expect(writes()).toHaveLength(1)
+      expect(writes()[0].body).not.toHaveProperty('price_selling')
+      expect(writes()[0].body).toMatchObject({ price_purchase: '0.00' })
     })
 
     test('a create leaves the image out unless a file was picked', async () => {
@@ -439,7 +467,7 @@ describe('MaterialForm', () => {
       const wrapper = await mountMaterial()
 
       await wrapper.get('.supplier-search').setValue('acm')
-      await new Promise((resolve) => setTimeout(resolve, 550))
+      // The search is debounced; zero in specs.
       await settle()
 
       expect(requestsOf('get', SUPPLIERS)).toHaveLength(1)
@@ -451,7 +479,7 @@ describe('MaterialForm', () => {
       const wrapper = await mountMaterial()
 
       await wrapper.get('.supplier-search').setValue('acm')
-      await new Promise((resolve) => setTimeout(resolve, 550))
+      // The search is debounced; zero in specs.
       await settle()
       await wrapper.get('.supplier-option').trigger('click')
       await settle()
@@ -468,7 +496,7 @@ describe('MaterialForm', () => {
       const wrapper = await mountMaterial()
 
       await wrapper.get('.supplier-search').setValue('acm')
-      await new Promise((resolve) => setTimeout(resolve, 550))
+      // The search is debounced; zero in specs.
       await settle()
 
       expect(bodies()).toContain('Error fetching suppliers')
@@ -527,6 +555,42 @@ describe('MaterialForm', () => {
       await click(wrapper, 'Submit')
 
       expect(writes()[0].body).not.toHaveProperty('image')
+    })
+
+    test('sends the location, which only an edit offers', async () => {
+      const wrapper = await readyEdit()
+
+      await type(wrapper, '#material_location', 'Shelf 5')
+      await click(wrapper, 'Submit')
+
+      expect(writes()[0].body.location).toBe('Shelf 5')
+    })
+
+    // The edit sends the patch body, whose `location` has a maximum of 100.
+    // It was validated against the create body, which has no `location`, so
+    // a long one passed validation and the save failed in the parse. The
+    // validation refuses it now: a field error, and no failed-save toast.
+    test('a location over 100 characters is refused by validation', async () => {
+      const wrapper = await readyEdit()
+
+      await type(wrapper, '#material_location', 'x'.repeat(101))
+      await click(wrapper, 'Submit')
+
+      expect(wrapper.text()).toContain('Please use at most 100 characters')
+      expect(bodies()).not.toContain('Error updating material')
+      expect(writes()).toEqual([])
+      expect(routerGo()).not.toHaveBeenCalled()
+    })
+
+    test('a cleared price is left out, so the stored one stays', async () => {
+      const wrapper = await readyEdit()
+
+      await type(wrapper, '#material_price_selling_alt', '')
+      await click(wrapper, 'Submit')
+
+      expect(writes()).toHaveLength(1)
+      expect(writes()[0].body).not.toHaveProperty('price_selling_alt')
+      expect(writes()[0].body).toMatchObject({ price_selling: '2.50' })
     })
 
     test('sends the image when a new file was picked', async () => {

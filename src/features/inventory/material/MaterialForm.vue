@@ -68,7 +68,8 @@
               </BFormGroup>
 
               <ValidatedFormField name="supplier_name" label-cols="4" readonly />
-              <ValidatedFormField name="location" label-cols="4" />
+              <!-- The create body has no `location`: only an edit sends it. -->
+              <ValidatedFormField v-if="!isCreate" name="location" label-cols="4" />
               <ValidatedFormField name="product_type" label-cols="4" />
 
               <h6>{{ $trans("Pricing") }}</h6>

@@ -10,7 +10,7 @@
           <BButton @click="goBack" class="btn btn-info" type="button" variant="secondary">
             {{ $trans('Back') }}</BButton>
           <router-link
-            :to="{name: 'supplier-edit', params: {pk: id ?? 0}}"
+            :to="{name: 'supplier-edit', params: {pk: id}}"
             class="btn btn-primary"
           >
             {{$trans('Edit supplier') }}
@@ -87,31 +87,26 @@ import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
  * legacy screen answered either read failing with one message and so does
  * this.
  */
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   /** The route's `:pk`. */
-  pk?: string | number | null
-}>(), {
-  pk: null,
-})
+  pk: string | number
+}>()
 
 const { router } = useCommon()
 
-const id = computed(() => (props.pk == null ? null : Number(props.pk)))
+const id = computed(() => Number(props.pk))
 
-const detailQuery = useQuery(() => ({
-  ...Api.InventorySupplier.retrieveOptions(id.value ?? 0),
-  enabled: id.value != null,
+const detailQuery = useQuery(() => Api.InventorySupplier.retrieveOptions(id.value))
+const materialsQuery = useQuery(() => Api.InventoryMaterial.listOptions({
+  page: 1,
+  page_size: WHOLE_COLLECTION_PAGE_SIZE,
+  supplier_relation: id.value,
 }))
-const materialsQuery = useQuery(() => ({
-  ...Api.InventoryMaterial.listOptions({
-    page: 1,
-    page_size: WHOLE_COLLECTION_PAGE_SIZE,
-    supplier_relation: id.value ?? 0,
-  }),
-  enabled: id.value != null,
-}))
-useQueryErrorToast(detailQuery.error, $trans('Error fetching supplier/materials'))
-useQueryErrorToast(materialsQuery.error, $trans('Error fetching supplier/materials'))
+// One flag for both reads, so both failing toasts once.
+useQueryErrorToast(
+  computed(() => Boolean(detailQuery.error.value || materialsQuery.error.value)),
+  $trans('Error fetching supplier/materials'),
+)
 
 const record = computed(() => detailQuery.data.value)
 const materials = computed(() => materialsQuery.data.value?.results ?? [])
