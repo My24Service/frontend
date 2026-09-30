@@ -162,6 +162,11 @@ export default defineConfig({
     unstubGlobals: true,
     unstubEnvs: true,
 
+    // Some tests may fail because of vitest's timeout,
+    // but only on a cold run, never on a warm run.
+    // So an automatic retry in those cases usually fixes the issue.
+    retry: 1,
+
     // Persist transformed modules between runs. Without it every run re-does
     // the whole graph, and this graph is large: the generated API client alone
     // is ~2.7 MB over four files and the test seam reaches it from most specs.

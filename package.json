@@ -16,10 +16,10 @@
     "lint:i18n": "eslint --cache --cache-location node_modules/.cache/eslint-i18n/ --config eslint.i18n.config.js --concurrency auto src",
     "typecheck": "vue-tsc --noEmit",
     "usage-gate": "node scripts/usage-gate.mjs",
-    "test": "vitest run --retry 1",
-    "test:changed": "vitest run --retry 1 --changed",
+    "test": "vitest run",
+    "test:changed": "vitest run --changed",
     "test:profile": "node scripts/vitest-profile.mjs",
-    "test:watch": "vitest --retry 1",
+    "test:watch": "vitest",
     "test:mutation": "stryker run --incremental --reporters clear-text,progress,html,json"
   },
   "dependencies": {
