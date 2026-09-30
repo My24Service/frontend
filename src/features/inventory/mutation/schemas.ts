@@ -14,29 +14,33 @@ import {
  * The two corrections the mutation form offers. The API knows more types
  * (purchase, sales, the moves); those are written by their own flows.
  */
-export type CorrectionType = 'correction-in' | 'correction-out'
+export type CorrectionType = Extract<Api.MutationTypeEnum, 'correction-in' | 'correction-out'>
 
-/** An amount the user typed: a decimal that is more than nothing. `parseInt`, as the form always read it. */
-const isPositive = (value: string) => parseInt(value) > 0
+/**
+ * An amount the user typed is more than nothing, read as the decimal it is:
+ * the serializer's `min_value`, which does not reach the generated schema.
+ * `0.5` is an amount; `0` and `0.00` are not.
+ */
+const isPositive = (value: string) => Number(value) > 0
 
 // ---------------------------------------------------------------------------
 // the mutation form
 
-/**
- * The form's own state. `material_name` and `location_name` are client-only:
- * they are the labels of the two pickers, and come from other endpoints'
- * payloads - the serializer exposes the two pks only. `material` and
- * `location` are null until picked.
- */
-export interface MutationFormValues {
-  material: number | null
-  material_name: string
-  location: number | null
-  location_name: string
-  mutation_type: CorrectionType
-  /** A decimal on the wire; the input holds text. */
-  amount: string
-}
+const mutationBody = Api.InventoryStockmutationsimpleList.create.body
+
+/** The form's own state: the create body, with what the form holds differently named. */
+export type MutationFormValues =
+  Omit<v.InferInput<typeof mutationBody>, 'material' | 'location' | 'mutation_type'> & {
+    // Pickers: empty rather than absent until chosen.
+    material: number | null
+    location: number | null
+    // The form offers the corrections only, and always sends one.
+    mutation_type: CorrectionType
+    // Client-only: the two pickers' labels, from other endpoints' payloads -
+    // the serializer exposes the two pks only.
+    material_name: string
+    location_name: string
+  }
 
 export type MutationFieldErrors = FieldErrors<keyof MutationFormValues>
 
@@ -64,14 +68,11 @@ export const FIELD_MESSAGES = {
   amount: () => requiredMessage(FIELD_LABELS.amount()),
 } as const satisfies FieldMessages<keyof MutationFormValues>
 
-const mutationBody = Api.InventoryStockmutationsimpleList.create.body
-
 /**
  * What the form checks: the create body, which requires a material and a
  * location, with a positive amount on top. The API refuses a zero or negative
  * amount too (`min_value` on the serializer), but a decimal's minimum does not
- * reach the generated schema, so the form says it itself - as it always read
- * the field, with `parseInt`.
+ * reach the generated schema, so the form says it itself.
  */
 const vMutationForm = v.object({
   ...mutationBody.entries,
@@ -99,8 +100,9 @@ export const mutationWrite = writeContract(Api.InventoryStockmutationsimpleList,
 // the move form
 
 /**
- * The move's state: the material whose path the move posts to, the two
- * locations and the amount. The keys the body carries keep the body's names.
+ * What the move checks and sends, read off the form's picks: the material
+ * whose path the move posts to, the two locations and the amount, each null
+ * until picked. The keys the body carries keep the body's names.
  */
 export interface MoveFormValues {
   material: number | null
@@ -110,10 +112,6 @@ export interface MoveFormValues {
 }
 
 export type MoveFieldErrors = FieldErrors<keyof MoveFormValues>
-
-export function emptyMove(): MoveFormValues {
-  return {material: null, from_location_id: null, to_location_id: null, amount: ''}
-}
 
 export const MOVE_FIELD_LABELS = {
   material: () => $trans('Material'),

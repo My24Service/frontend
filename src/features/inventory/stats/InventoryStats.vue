@@ -105,14 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  inventoryMaterialTotalSalesPerCustomerRetrieveOptions,
-  inventoryMaterialTotalSalesPerMaterialCustomerRetrieveOptions,
-  inventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveOptions,
-  inventoryMaterialTotalSalesPerSupplierRetrieveOptions,
-  inventoryMaterialTotalSalesRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import { useQueryErrorToast } from '@/features/forms'
+import { useQueryErrorToast, useQueryOf } from '@/features/forms'
 import { BarChart } from '@/features/shared'
 import {
   barLabelFor,
@@ -120,6 +113,7 @@ import {
   datasetLabelFor,
   graphFieldOptions,
   modeOptions,
+  salesOptions,
   type GraphField,
   type SalesMode,
   type SalesRow,
@@ -127,13 +121,9 @@ import {
 
 /**
  * Sales by material, supplier or customer for a year, as a bar chart over a
- * table. One read per mode, each on the year's own key: going back a year and
+ * table. Each mode's read has the year in its key: going back a year and
  * forth again, or switching modes, is answered from the query cache, and a
  * year change never shows another year's rows.
- *
- * The five total-sales reads have no binding on a resource (they hang under
- * `InventoryMaterial.reads` only), so the generated `*Options` are used
- * directly.
  */
 const year = ref(new Date().getFullYear())
 const mode = ref<SalesMode>('total-material-sales')
@@ -149,45 +139,13 @@ const chartOptions = {
   maintainAspectRatio: false,
 }
 
-interface SalesRead {
-  data: Readonly<Ref<{result: SalesRow[]} | undefined>>
-  isLoading: Readonly<Ref<boolean>>
-  error: Readonly<Ref<unknown>>
-}
-
-/** Only the current mode's read runs; the others wait for their turn. */
-const isCurrent = (candidate: SalesMode) => mode.value === candidate
-
-const reads: Record<SalesMode, SalesRead> = {
-  'total-material-sales': useQuery(() => ({
-    ...inventoryMaterialTotalSalesRetrieveOptions({query: {year: year.value}}),
-    enabled: isCurrent('total-material-sales'),
-  })),
-  'total-sales-per-supplier': useQuery(() => ({
-    ...inventoryMaterialTotalSalesPerSupplierRetrieveOptions({query: {year: year.value}}),
-    enabled: isCurrent('total-sales-per-supplier'),
-  })),
-  'total-material-sales-per-customer': useQuery(() => ({
-    ...inventoryMaterialTotalSalesPerCustomerRetrieveOptions({query: {year: year.value}}),
-    enabled: isCurrent('total-material-sales-per-customer'),
-  })),
-  'total-sales-per-material-customer': useQuery(() => ({
-    ...inventoryMaterialTotalSalesPerMaterialCustomerRetrieveOptions({query: {year: year.value}}),
-    enabled: isCurrent('total-sales-per-material-customer'),
-  })),
-  'total-sales-per-material-supplier': useQuery(() => ({
-    ...inventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveOptions({query: {year: year.value}}),
-    enabled: isCurrent('total-sales-per-material-supplier'),
-  })),
-}
-
+const salesQuery = useQueryOf<{result: SalesRow[]}>(() => salesOptions(mode.value, year.value))
 // A read that fails says so; the legacy screen swallowed it and spun forever.
-for (const read of Object.values(reads)) useQueryErrorToast(read.error, $trans('Error fetching data'))
+useQueryErrorToast(salesQuery.error, $trans('Error fetching data'))
 
-const current = computed(() => reads[mode.value])
-const sales = computed(() => current.value.data.value)
-const isLoading = computed(() => current.value.isLoading.value)
-const rows = computed<SalesRow[]>(() => sales.value?.result ?? [])
+const sales = computed(() => salesQuery.data.value)
+const isLoading = computed(() => salesQuery.isLoading.value)
+const rows = computed(() => sales.value?.result ?? [])
 const tableFields = computed(() => columnsFor(mode.value))
 
 const chartData = computed(() => ({

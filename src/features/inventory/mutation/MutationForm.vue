@@ -13,7 +13,7 @@
             {{ $trans('Cancel') }}
           </BButton>
           <BButton
-            :disabled="buttonDisabled"
+            :disabled="createMutation.isPending.value"
             class="btn btn-primary"
             type="button"
             variant="primary"
@@ -54,6 +54,7 @@
                 :show-no-results="false"
                 :hide-selected="true"
                 :custom-label="materialLabel"
+                :loading="materialsLoading"
                 @search-change="(value: string) => { term = value }"
                 @select="selectMaterial"
               >
@@ -155,10 +156,13 @@ import VueMultiselect from 'vue-multiselect'
 import {
   emptyMutation,
   mutationWrite,
+  type CorrectionType,
   type MutationFieldErrors,
 } from './schemas'
 import {
   invalidateStock,
+  locationLabel,
+  materialLabel,
   useLocationsOfMaterial,
   useStockMaterialSearch,
   type StockLocationOfMaterial,
@@ -178,10 +182,10 @@ const submitClicked = ref(false)
 
 const amountInput = useTemplateRef<{focus: () => void}>('amount')
 
-const { term, options: materials } = useStockMaterialSearch()
+const { term, options: materials, loading: materialsLoading } = useStockMaterialSearch()
 const { locations } = useLocationsOfMaterial(() => values.value.material)
 
-const mutationTypes = [
+const mutationTypes: {value: CorrectionType, text: string}[] = [
   {value: 'correction-in', text: $trans('Correction in')},
   {value: 'correction-out', text: $trans('Correction out')},
 ]
@@ -200,15 +204,17 @@ function state(field: keyof MutationFieldErrors) {
 }
 
 const createMutation = useMutation(Api.InventoryStockmutationsimpleList.create.mutation())
-const buttonDisabled = computed(() => createMutation.isPending.value)
 
-const materialLabel = (material: StockMaterial) =>
-  `${material.material_name}, ${$trans('in stock')}: ${material.total_amount}`
-
-const locationLabel = (location: StockLocationOfMaterial) =>
-  `${location.location_name} (${location.total_amount})`
-
+/**
+ * A location belongs to the material it was picked for: another material
+ * drops it, so a correction never books a material at a location that does
+ * not hold it.
+ */
 function selectMaterial(option: StockMaterial) {
+  if (option.material_id !== values.value.material) {
+    values.value.location = null
+    values.value.location_name = ''
+  }
   values.value.material = option.material_id
   values.value.material_name = option.material_name
   amountInput.value?.focus()
@@ -231,7 +237,8 @@ async function submitForm() {
     return
   }
   infoToast(toast, $trans('Created'), $trans('Mutation created'))
-  await invalidateStock(queryClient)
+  // Not awaited: the list the user lands on reads fresh figures either way.
+  void invalidateStock(queryClient)
   await router.push({name: 'mutation-list'})
 }
 

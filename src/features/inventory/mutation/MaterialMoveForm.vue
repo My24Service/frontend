@@ -51,7 +51,7 @@
               <BFormInput
                 id="move-material-amount"
                 ref="amount"
-                v-model="values.amount"
+                v-model="amount"
                 size="sm"
                 type="number"
                 :max="selectedMaterial.total_amount"
@@ -92,6 +92,7 @@
               :show-no-results="false"
               :hide-selected="true"
               :custom-label="materialLabel"
+              :loading="materialsLoading"
               @search-change="(value: string) => { term = value }"
               @select="selectMaterial"
             >
@@ -132,7 +133,7 @@
               id="move-material-from-location-search"
               track-by="location_id"
               open-direction="bottom"
-              placeholder="Select location (type to search)"
+              :placeholder="$trans('Select location')"
               :options="fromLocations"
               :multiple="false"
               :searchable="false"
@@ -141,7 +142,7 @@
               :limit="10"
               :max-height="600"
               :show-no-results="false"
-              :custom-label="fromLocationLabel"
+              :custom-label="locationLabel"
               @select="selectFrom"
             >
               <template #noResult>
@@ -213,13 +214,15 @@ import VueMultiselect from 'vue-multiselect'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import { useQueryErrorToast } from '@/features/forms'
 import {
-  emptyMove,
   parseMove,
   validateMove,
   type MoveFieldErrors,
+  type MoveFormValues,
 } from './schemas'
 import {
   invalidateStock,
+  locationLabel,
+  materialLabel,
   useLocationsOfMaterial,
   useStockMaterialSearch,
   type StockLocationOfMaterial,
@@ -238,18 +241,27 @@ type DestinationLocation = Api.InventoryStockLocation.Record
 const { toast, queryClient } = useCommon()
 const router = useRouter()
 
-const values = ref(emptyMove())
 const submitClicked = ref(false)
 const isBulk = ref(false)
 
+// The form's state is what was picked, and the amount typed.
 const selectedMaterial = ref<StockMaterial | null>(null)
 const selectedFrom = ref<StockLocationOfMaterial | null>(null)
 const selectedTo = ref<DestinationLocation | null>(null)
+const amount = ref('')
+
+/** What the move checks and sends, read off the picks. */
+const values = computed<MoveFormValues>(() => ({
+  material: selectedMaterial.value?.material_id ?? null,
+  from_location_id: selectedFrom.value?.location_id ?? null,
+  to_location_id: selectedTo.value?.id ?? null,
+  amount: amount.value,
+}))
 
 const amountInput = useTemplateRef<{focus: () => void}>('amount')
 const searchMaterial = useTemplateRef<{$el: HTMLElement}>('searchMaterial')
 
-const { term, options: materials } = useStockMaterialSearch()
+const { term, options: materials, loading: materialsLoading } = useStockMaterialSearch()
 
 // The material whose locations the departure list reads. Not the picked
 // material itself: in bulk mode it stays on the first one.
@@ -272,19 +284,17 @@ function state(field: keyof MoveFieldErrors) {
 const moveMutation = useMutation(Api.InventoryMaterial.extras.moveCreate.mutation())
 
 /** The split button is dead until there is somewhere to move from and to, and while a move is on its way. */
-const cannotSubmit = computed(() =>
-  !values.value.from_location_id || !values.value.to_location_id || moveMutation.isPending.value)
+const cannotSubmit = computed(() => !selectedFrom.value || !selectedTo.value || moveMutation.isPending.value)
 
-const materialLabel = (material: StockMaterial) =>
-  `${material.material_name}, ${$trans('in stock')}: ${material.total_amount}`
-const fromLocationLabel = (location: StockLocationOfMaterial) =>
-  `${location.location_name} (${location.total_amount})`
 const toLocationLabel = (location: DestinationLocation) => `${location.name}`
 
 async function selectMaterial(option: StockMaterial) {
   selectedMaterial.value = option
-  values.value.material = option.material_id
   if (!isBulk.value) {
+    // The departure is one of the picked material's locations, so another
+    // material drops it. Bulk keeps it on purpose: the departure list stays
+    // the first material's.
+    if (option.material_id !== departureOf.value) selectedFrom.value = null
     departureOf.value = option.material_id
     return
   }
@@ -295,12 +305,10 @@ async function selectMaterial(option: StockMaterial) {
 
 function selectFrom(option: StockLocationOfMaterial) {
   selectedFrom.value = option
-  values.value.from_location_id = option.location_id
 }
 
 function selectTo(option: DestinationLocation) {
   selectedTo.value = option
-  values.value.to_location_id = option.id
 }
 
 async function submit(bulk: boolean) {
@@ -315,14 +323,15 @@ async function submit(bulk: boolean) {
     return
   }
   infoToast(toast, $trans('Moved'), $trans('Material moved'))
-  await invalidateStock(queryClient)
+  // Not awaited: neither the list the user lands on nor the next bulk pick
+  // has to wait for the refetch.
+  void invalidateStock(queryClient)
 
   if (!bulk) {
     await router.push({name: 'mutation-list'})
     return
   }
-  values.value.amount = '0'
-  values.value.material = null
+  amount.value = '0'
   selectedMaterial.value = null
   isBulk.value = true
   submitClicked.value = false

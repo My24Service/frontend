@@ -1,16 +1,21 @@
 <template>
   <div class="app-page">
-    <header>
-      <div class="page-title">
-        <h3><IBiBarChartLineFill />{{ title }}</h3>
-      </div>
-    </header>
+    <ListPageHeader
+      v-model:search-draft="searchDraft"
+      :title="title"
+      :search-label="$trans('Search')"
+      :refresh="refresh"
+    >
+      <template #icon><IBiBarChartLineFill /></template>
+      <template #toolbar-extra>
+        <ActionButton
+          icon="download"
+          :method="downloadList"
+          :title="$trans('Download')"
+        />
+      </template>
+    </ListPageHeader>
 
-    <SearchModal
-      id="search-modal"
-      ref="searchModal"
-      @do-search="handleSearchOk"
-    />
     <div class="app-detail panel">
       <b-row align-v="center">
         <b-col cols="1">
@@ -43,23 +48,6 @@
         responsive="md"
         class="data-table"
       >
-        <template #head(icons)="">
-          <div class="float-right">
-            <BButton-toolbar>
-              <BButton-group class="mr-1">
-                <ActionButton
-                  icon="search"
-                  :method="showSearchModal"
-                />
-                <ActionButton
-                  icon="download"
-                  :method="downloadList"
-                  :title="$trans('Download')"
-                />
-              </BButton-group>
-            </BButton-toolbar>
-          </div>
-        </template>
         <template #table-busy>
           <div class="text-center my-2">
             <b-spinner class="align-middle" />&nbsp;&nbsp;
@@ -96,21 +84,24 @@ import { inventoryMaterialStatsTableRetrieveOptions } from '@/api/@tanstack/vue-
 import { inventoryStatsTableExportRetrieve } from '@/api/sdk.gen'
 import { useQueryErrorToast } from '@/features/forms'
 import { useFileDownload, XLSX_MIME } from '@/features/shared'
+import { ListPageHeader } from '@/features/table'
+import { tableFilterDelay } from '@/services/input-delays'
 
 /**
  * How each material sold in a year: turnover, profit, margin, stock and where
  * the stock lies. The year and the search term are the read's key, so a new
  * year or term is a new read and going back to an old one is answered from the
- * cache.
+ * cache. The table is not paged, so only the list header is the table kit's:
+ * the title, refresh, the search field and the download beside them.
  *
  * The stats read has no binding on a resource (it hangs under
  * `InventoryMaterial.reads` only), so the generated `*Options` is used directly.
  */
 const year = ref(new Date().getFullYear())
-/** The committed search term; empty sends no `q`. */
-const search = ref('')
-
-const searchModal = useTemplateRef<{show: () => void, hide: () => void}>('searchModal')
+/** What is in the search field. */
+const searchDraft = ref('')
+/** The term at rest, as the kit's lists commit theirs; empty sends no `q`. */
+const search = refDebounced(searchDraft, tableFilterDelay)
 
 const title = computed(() => interpolate($trans('Stats in %(year)s'), {year: year.value}))
 
@@ -119,6 +110,10 @@ const wireQuery = computed(() => ({year: year.value, ...(search.value ? {q: sear
 
 const statsQuery = useQuery(() => inventoryMaterialStatsTableRetrieveOptions({query: wireQuery.value}))
 useQueryErrorToast(statsQuery.error, $trans('Error fetching data'))
+
+function refresh() {
+  void statsQuery.refetch()
+}
 
 const isLoading = computed(() => statsQuery.isLoading.value)
 const rows = computed(() => statsQuery.data.value?.results ?? [])
@@ -134,17 +129,7 @@ const tableFields = [
   {thAttr: {width: '10%'}, key: 'margin_product', label: $trans('Margin product'), sortable: true},
   {thAttr: {width: '10%'}, key: 'current_stock', label: $trans('Stock'), sortable: true},
   {thAttr: {width: '10%'}, key: 'sum_inventory', label: $trans('Locations'), sortable: false},
-  {key: 'icons'},
 ]
-
-function showSearchModal() {
-  searchModal.value?.show()
-}
-
-function handleSearchOk(value: string) {
-  searchModal.value?.hide()
-  search.value = value ?? ''
-}
 
 const download = useFileDownload()
 

@@ -15,9 +15,9 @@ import { InventoryStats, StatsTable } from '@/features/inventory/stats'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { captureDownloads, xlsxResponse } from '../support/downloads.js'
+import { useRealInputDelays } from '../support/input-delays.js'
 import { mountForm, toasts } from '../support/form-harness.js'
 import { serverError } from '../support/list-harness.js'
-import { modal } from '../support/modal.js'
 
 const api = installApiSeam()
 
@@ -29,7 +29,11 @@ const YEAR = new Date().getFullYear()
  *
  * Both screens were compared with the legacy ones on the same stubs and were
  * identical, save for the per-customer table's first heading (Customer, which
- * the legacy screen wrote as Supplier); the snapshots below are that markup.
+ * the legacy screen wrote as Supplier). Since then, on purpose: the chart
+ * legends are catalogue msgids ("Total sales in 2026", not "Total sales in :
+ * 2026"), and the stats table's search and download sit in the table kit's
+ * list header, with its refresh, instead of a search modal and a blank last
+ * column.
  */
 const markup = (wrapper) => wrapper.html()
   .replace(/ data-v-[0-9a-f]+(="")?/g, '')
@@ -132,7 +136,7 @@ describe('InventoryStats', () => {
 
     expect(chart(wrapper)).toMatchObject({
       labels: ['Bolt'],
-      datasets: [{ label: `Total sales in : ${YEAR}`, data: [12] }],
+      datasets: [{ label: `Total sales in ${YEAR}`, data: [12] }],
     })
   })
 
@@ -155,12 +159,12 @@ describe('InventoryStats', () => {
   })
 
   describe.each([
-    ['total-sales-per-supplier', ['Supplier', 'Total amount', 'Total selling', 'Total purchase', 'Profit'], ['Acme']],
-    ['total-material-sales-per-customer', ['Customer', 'Total amount', 'Total selling', 'Total purchase', 'Profit'], ['Jansen']],
-    ['total-sales-per-material-customer', ['Customer', 'Material', 'Total amount', 'Total selling', 'Total purchase', 'Profit'], ['Jansen / Bolt']],
-    ['total-sales-per-material-supplier', ['Supplier', 'Material', 'Total amount', 'Total selling', 'Total purchase', 'Profit'], ['Acme / Bolt']],
-  ])('%s', (mode, columns, bars) => {
-    test('reads its own endpoint for the year, with its own columns and bar labels', async () => {
+    ['total-sales-per-supplier', ['Supplier', 'Total amount', 'Total selling', 'Total purchase', 'Profit'], ['Acme'], 'Total sales per supplier in'],
+    ['total-material-sales-per-customer', ['Customer', 'Total amount', 'Total selling', 'Total purchase', 'Profit'], ['Jansen'], 'Total sales per customer in'],
+    ['total-sales-per-material-customer', ['Customer', 'Material', 'Total amount', 'Total selling', 'Total purchase', 'Profit'], ['Jansen / Bolt'], 'Total sales per customer per material in'],
+    ['total-sales-per-material-supplier', ['Supplier', 'Material', 'Total amount', 'Total selling', 'Total purchase', 'Profit'], ['Acme / Bolt'], 'Total sales per supplier per material in'],
+  ])('%s', (mode, columns, bars, legend) => {
+    test('reads its own endpoint for the year, with its own columns, bar labels and legend', async () => {
       const wrapper = await mountStats()
 
       await chooseMode(wrapper, mode)
@@ -170,6 +174,7 @@ describe('InventoryStats', () => {
       ])
       expect(headers(wrapper)).toEqual(columns)
       expect(chart(wrapper).labels).toEqual(bars)
+      expect(chart(wrapper).datasets[0].label).toBe(`${legend} ${YEAR}`)
     })
   })
 
@@ -209,7 +214,7 @@ describe('InventoryStats', () => {
 
     expect(gets(PATHS['total-material-sales']).map((request) => request.query.year)).toEqual([String(YEAR), String(YEAR - 1)])
     expect(wrapper.get('h3').text()).toContain(`Total sales in ${YEAR - 1}`)
-    expect(chart(wrapper).datasets[0].label).toBe(`Total sales in : ${YEAR - 1}`)
+    expect(chart(wrapper).datasets[0].label).toBe(`Total sales in ${YEAR - 1}`)
   })
 
   test('going forward a year asks for that year', async () => {
@@ -293,10 +298,7 @@ describe('StatsTable', () => {
 
   const statsGets = (from = 0) => api.requests().slice(from).filter((request) => request.method === 'get' && request.path === STATS)
   async function searchFor(wrapper, term) {
-    await wrapper.get('button[title="Search"]').trigger('click')
-    await settle()
-    modal('search-modal').type(term)
-    modal('search-modal').ok()
+    await wrapper.get('header input[aria-label="Search"]').setValue(term)
     await settle()
   }
 
@@ -321,7 +323,7 @@ describe('StatsTable', () => {
 
     const cells = wrapper.get('#stats-table tbody tr').findAll('td').map((td) => td.text().replace(/\s+/g, ' '))
     expect(cells).toEqual([
-      'Acme', 'Bolt', '7', '€ 105.50', '€ 30.00', '12.35 %', '40', 'Shelf A: 25Shelf B: 15', '',
+      'Acme', 'Bolt', '7', '€ 105.50', '€ 30.00', '12.35 %', '40', 'Shelf A: 25Shelf B: 15',
     ])
   })
 
@@ -329,7 +331,7 @@ describe('StatsTable', () => {
     const wrapper = await mountStats()
 
     const headers = wrapper.findAll('#stats-table thead th').map((th) => th.text())
-    expect(headers.slice(0, 8)).toEqual([
+    expect(headers).toEqual([
       'Supplier', 'Product', 'Total sales', 'Turnover', 'Profit', 'Margin product', 'Stock', 'Locations',
     ])
   })
@@ -358,8 +360,9 @@ describe('StatsTable', () => {
     expect(statsGets(start).map((request) => request.query)).toEqual([{ year: String(YEAR - 1) }])
   })
 
-  // Legacy: 'sends the search query as q'.
-  test('a search from the search modal is sent as q', async () => {
+  // Legacy: 'sends the search query as q'. The search is the header's field,
+  // as on every list, not the legacy modal.
+  test('a search from the header field is sent as q', async () => {
     const wrapper = await mountStats()
     const start = api.requests().length
 
@@ -386,6 +389,36 @@ describe('StatsTable', () => {
 
     expect(statsGets().some((request) => 'q' in request.query && request.query.q === '')).toBe(false)
     expect(wrapper.findAll('#stats-table tbody tr td').map((td) => td.text())).toContain('Bolt')
+  })
+
+  // The kit's list delay: nothing is asked while the user types, one read once
+  // the term is at rest.
+  test('the search goes out once typing comes to rest, not per keystroke', async () => {
+    useRealInputDelays()
+    const wrapper = await mountStats()
+    const start = api.requests().length
+    const field = wrapper.get('header input[aria-label="Search"]')
+
+    await field.setValue('ac')
+    await settle()
+    await field.setValue('acme')
+    await settle()
+    expect(statsGets(start)).toEqual([])
+
+    await new Promise((resolve) => setTimeout(resolve, 400))
+    await settle()
+
+    expect(statsGets(start).map((request) => request.query)).toEqual([{ year: String(YEAR), q: 'acme' }])
+  })
+
+  test('the header refresh reads the stats again', async () => {
+    const wrapper = await mountStats()
+    const start = api.requests().length
+
+    await wrapper.get('button[title="Refresh"]').trigger('click')
+    await settle()
+
+    expect(statsGets(start).map((request) => request.query)).toEqual([{ year: String(YEAR) }])
   })
 
   test('the search keeps the year on screen', async () => {

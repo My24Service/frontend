@@ -8,6 +8,14 @@ export type StockMaterial = Api.InventoryInventoryMaterials.ListResponse[number]
 /** A stock location holding a material, with how much of it. */
 export type StockLocationOfMaterial = Api.InventoryInventoryLocationsForMaterial.ListResponse[number]
 
+/** How the in-stock picker names a material: its name and what is left of it. */
+export const materialLabel = (material: StockMaterial) =>
+  `${material.material_name}, ${$trans('in stock')}: ${material.total_amount}`
+
+/** How a location that holds a material is offered: its name and how much it holds. */
+export const locationLabel = (location: StockLocationOfMaterial) =>
+  `${location.location_name} (${location.total_amount})`
+
 /**
  * The picker both stock screens start from: materials that are in stock,
  * searched as the user types. Nothing is read until a term is typed.

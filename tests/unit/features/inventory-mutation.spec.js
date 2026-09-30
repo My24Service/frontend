@@ -296,6 +296,73 @@ describe('MutationForm', () => {
     expect(button(wrapper, 'Submit').attributes('disabled')).toBeUndefined()
   })
 
+  // REGRESSION. The amount was read with `parseInt`, so half a unit read as
+  // nothing, although the decimal pattern and the serializer take it.
+  test('half a unit is an amount', async () => {
+    const wrapper = await mountMutation()
+    await fill(wrapper, '0.5')
+
+    await click(wrapper, 'Submit')
+
+    expect(posts()).toHaveLength(1)
+    expect(posts()[0].body).toMatchObject({ amount: '0.5' })
+  })
+
+  test.each(['0', '0.00', '-1'])('an amount of %s is refused', async (amount) => {
+    const wrapper = await mountMutation()
+    await fill(wrapper, amount)
+
+    await click(wrapper, 'Submit')
+
+    expect(wrapper.text()).toContain('Please enter an amount')
+    expect(posts()).toEqual([])
+  })
+
+  // REGRESSION. Picking another material kept the location picked for the
+  // first one, so a correction could book a material at a location that
+  // never held it.
+  test('picking another material drops the location picked for the first', async () => {
+    api.get(MATERIALS, [material(), material({ material_id: 6, material_name: 'Nut', total_amount: 9 })])
+    const wrapper = await mountMutation()
+    await fill(wrapper)
+
+    await pick(wrapper, PICKER, 'Nut, in stock: 9')
+    expect(wrapper.get('#add-mutation-location-name').element.value).toBe('')
+
+    await click(wrapper, 'Submit')
+
+    expect(wrapper.text()).toContain('Please select a location')
+    expect(posts()).toEqual([])
+  })
+
+  test('picking the same material again keeps its location', async () => {
+    const wrapper = await mountMutation()
+    await fill(wrapper)
+
+    await pick(wrapper, PICKER, 'Bolt, in stock: 40')
+
+    expect(wrapper.get('#add-mutation-location-name').element.value).toBe('Shelf A')
+  })
+
+  test('Submit is disabled while the create is on its way, and a second click posts nothing', async () => {
+    let release
+    api.post(MUTATIONS, ({ body }) => new Promise((resolve) => { release = () => resolve(mutation({ ...body, id: 9 })) }))
+    const wrapper = await mountMutation()
+    await fill(wrapper)
+
+    await click(wrapper, 'Submit')
+    expect(button(wrapper, 'Submit').attributes('disabled')).toBeDefined()
+    await button(wrapper, 'Submit').trigger('click')
+    await settle()
+    expect(posts()).toHaveLength(1)
+
+    release()
+    await settle()
+
+    expect(posts()).toHaveLength(1)
+    expect(wrapper.vm.$router.currentRoute.value.name).toBe('mutation-list')
+  })
+
   test('cancel goes back', async () => {
     const wrapper = await mountMutation()
 
@@ -443,6 +510,55 @@ describe('MaterialMoveForm', () => {
 
     expect(wrapper.text()).toContain('Please enter an amount')
     expect(moves()).toEqual([])
+  })
+
+  test('half a unit is an amount', async () => {
+    const wrapper = await mountMove()
+    await fill(wrapper)
+    await wrapper.get('#move-material-amount').setValue('0.5')
+
+    await click(wrapper, 'Submit')
+
+    expect(moves().map((request) => request.body)).toEqual([{ from_location_id: 2, to_location_id: 3, amount: '0.5' }])
+  })
+
+  // REGRESSION. Picking another material kept the departure picked for the
+  // first one, so a move could take a material from a location that never
+  // held it.
+  test('picking another material drops the departure picked for the first', async () => {
+    api.get(MATERIALS, [material(), material({ material_id: 6, material_name: 'Nut', total_amount: 9 })])
+    const wrapper = await mountMove()
+    await fill(wrapper)
+
+    await pickMaterial(wrapper, 'Nut, in stock: 9')
+
+    const headings = wrapper.findAll('h3').map((h) => h.text()).join(' ')
+    expect(headings).not.toContain('Shelf A')
+    expect(headings).toContain('Departure location')
+    expect(headings).toContain('Shelf B')
+    expect(submitButton(wrapper).attributes('disabled')).toBeDefined()
+  })
+
+  test('Submit and Bulk are disabled while a move is on its way, and a second click posts nothing', async () => {
+    let release
+    api.post(MOVE, () => new Promise((resolve) => { release = () => resolve(fixtureFor(vInventoryMaterialMoveCreateResponse)) }))
+    const wrapper = await mountMove()
+    await fill(wrapper)
+    await wrapper.get('#move-material-amount').setValue('10')
+
+    await click(wrapper, 'Submit')
+    expect(submitButton(wrapper).attributes('disabled')).toBeDefined()
+    expect(bulkButton(wrapper).attributes('disabled')).toBeDefined()
+    await submitButton(wrapper).trigger('click')
+    await bulkButton(wrapper).trigger('click')
+    await settle()
+    expect(moves()).toHaveLength(1)
+
+    release()
+    await settle()
+
+    expect(moves()).toHaveLength(1)
+    expect(wrapper.vm.$router.currentRoute.value.name).toBe('mutation-list')
   })
 
   test('a failed move says so and offers the submit again', async () => {

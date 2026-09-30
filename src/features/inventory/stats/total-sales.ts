@@ -1,44 +1,96 @@
-/**
- * The five ways the inventory stats screen breaks sales down, and what each
- * one needs to be read: which columns its table shows and what a bar of its
- * chart is called. What each one *reads* is the screen's business, because
- * the five reads are five differently typed generated queries.
- */
-export const SALES_MODES = [
-  'total-material-sales',
-  'total-sales-per-supplier',
-  'total-material-sales-per-customer',
-  'total-sales-per-material-customer',
-  'total-sales-per-material-supplier',
-] as const
-
-export type SalesMode = (typeof SALES_MODES)[number]
-
-/** A row of any of the five total-sales answers. */
-export type SalesRow =
-  | Api.MaterialTotalSalesRow
-  | Api.SupplierTotalSalesRow
-  | Api.CustomerTotalSalesRow
-  | Api.SupplierMaterialTotalSalesRow
-  | Api.CustomerMaterialTotalSalesRow
+import {
+  inventoryMaterialTotalSalesPerCustomerRetrieveOptions,
+  inventoryMaterialTotalSalesPerMaterialCustomerRetrieveOptions,
+  inventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveOptions,
+  inventoryMaterialTotalSalesPerSupplierRetrieveOptions,
+  inventoryMaterialTotalSalesRetrieveOptions,
+} from '@/api/@tanstack/vue-query.gen'
+import type { QueryOptionsLike } from '@/features/forms'
 
 /** The numbers a bar can show. */
 export type GraphField = 'sum_amount' | 'sum_price_selling' | 'profit'
 
-export interface SalesColumn {
-  key: string
-  label: string
-  sortable: boolean
+/** The row each mode's read answers with. */
+interface SalesRows {
+  'total-material-sales': Api.MaterialTotalSalesRow
+  'total-sales-per-supplier': Api.SupplierTotalSalesRow
+  'total-material-sales-per-customer': Api.CustomerTotalSalesRow
+  'total-sales-per-material-customer': Api.CustomerMaterialTotalSalesRow
+  'total-sales-per-material-supplier': Api.SupplierMaterialTotalSalesRow
 }
 
-export function modeOptions() {
-  return [
-    {value: 'total-material-sales', text: $trans('Total material sales')},
-    {value: 'total-sales-per-supplier', text: $trans('Total sales per supplier')},
-    {value: 'total-material-sales-per-customer', text: $trans('Total material sales per customer')},
-    {value: 'total-sales-per-material-customer', text: $trans('Total sales per material per customer')},
-    {value: 'total-sales-per-material-supplier', text: $trans('Total sales per material per supplier')},
-  ]
+export type SalesMode = keyof SalesRows
+
+/** A row of any of the five total-sales answers. */
+export type SalesRow = SalesRows[SalesMode]
+
+/** What a total-sales row can be named by, one column each. */
+type NameKey = 'material_name' | 'supplier_name' | 'customer_name'
+
+/**
+ * One way of breaking sales down. The generated `*Options` are used directly:
+ * the five reads have no binding on a resource (they hang under
+ * `InventoryMaterial.reads` only).
+ */
+interface ModeSpec<Row> {
+  /** What the mode is called in the picker. */
+  label: () => string
+  /** What a row is named by, in the order the table and a bar show them. */
+  names: readonly (NameKey & keyof Row)[]
+  /** The chart's legend: what one bar is a total of. Holds the year as `%(year)s`. */
+  legend: () => string
+  /**
+   * The mode's read for a year. Only its key is named: the five generated
+   * reads differ in everything else, and `useQueryOf` switches between them.
+   */
+  options: (year: number) => Pick<QueryOptionsLike, 'queryKey'>
+}
+
+/**
+ * The five ways the inventory stats screen breaks sales down. Everything the
+ * screen knows about a mode is read off its row here.
+ */
+const SALES_MODES = {
+  'total-material-sales': {
+    label: () => $trans('Total material sales'),
+    names: ['material_name'],
+    legend: () => $trans('Total sales in %(year)s'),
+    options: (year) => inventoryMaterialTotalSalesRetrieveOptions({query: {year}}),
+  },
+  'total-sales-per-supplier': {
+    label: () => $trans('Total sales per supplier'),
+    names: ['supplier_name'],
+    legend: () => $trans('Total sales per supplier in %(year)s'),
+    options: (year) => inventoryMaterialTotalSalesPerSupplierRetrieveOptions({query: {year}}),
+  },
+  'total-material-sales-per-customer': {
+    label: () => $trans('Total material sales per customer'),
+    names: ['customer_name'],
+    legend: () => $trans('Total sales per customer in %(year)s'),
+    options: (year) => inventoryMaterialTotalSalesPerCustomerRetrieveOptions({query: {year}}),
+  },
+  'total-sales-per-material-customer': {
+    label: () => $trans('Total sales per material per customer'),
+    names: ['customer_name', 'material_name'],
+    legend: () => $trans('Total sales per customer per material in %(year)s'),
+    options: (year) => inventoryMaterialTotalSalesPerMaterialCustomerRetrieveOptions({query: {year}}),
+  },
+  'total-sales-per-material-supplier': {
+    label: () => $trans('Total sales per material per supplier'),
+    names: ['supplier_name', 'material_name'],
+    legend: () => $trans('Total sales per supplier per material in %(year)s'),
+    options: (year) => inventoryMaterialTotalSalesPerSupplierPerMaterialRetrieveOptions({query: {year}}),
+  },
+} as const satisfies {[M in SalesMode]: ModeSpec<SalesRows[M]>}
+
+/** A mode's read for a year, answering `{result: SalesRow[]}` whatever the mode. */
+export function salesOptions(mode: SalesMode, year: number): Pick<QueryOptionsLike, 'queryKey'> {
+  return SALES_MODES[mode].options(year)
+}
+
+/** The picker's options, in the table's order. The table's keys are exactly the modes. */
+export function modeOptions(): {value: SalesMode, text: string}[] {
+  return (Object.keys(SALES_MODES) as SalesMode[]).map((value) => ({value, text: SALES_MODES[value].label()}))
 }
 
 export function graphFieldOptions() {
@@ -49,11 +101,24 @@ export function graphFieldOptions() {
   ]
 }
 
+export interface SalesColumn {
+  key: string
+  label: string
+  sortable: boolean
+}
+
+const NAME_LABELS = {
+  material_name: () => $trans('Material'),
+  supplier_name: () => $trans('Supplier'),
+  customer_name: () => $trans('Customer'),
+} as const satisfies Record<NameKey, () => string>
+
 const column = (key: string, label: string): SalesColumn => ({key, label, sortable: true})
 
-/** The four numbers every mode ends its table with. */
-function figureColumns(): SalesColumn[] {
+/** A mode's table: its names, then the four numbers every mode ends with. */
+export function columnsFor(mode: SalesMode): SalesColumn[] {
   return [
+    ...SALES_MODES[mode].names.map((key) => column(key, NAME_LABELS[key]())),
     column('sum_amount', $trans('Total amount')),
     column('sum_price_selling', $trans('Total selling')),
     column('sum_price_purchase', $trans('Total purchase')),
@@ -61,69 +126,20 @@ function figureColumns(): SalesColumn[] {
   ]
 }
 
-export function columnsFor(mode: SalesMode): SalesColumn[] {
-  switch (mode) {
-    case 'total-material-sales':
-      return [column('material_name', $trans('Material')), ...figureColumns()]
-    case 'total-sales-per-supplier':
-      return [column('supplier_name', $trans('Supplier')), ...figureColumns()]
-    case 'total-material-sales-per-customer':
-      return [column('customer_name', $trans('Customer')), ...figureColumns()]
-    case 'total-sales-per-material-supplier':
-      return [
-        column('supplier_name', $trans('Supplier')),
-        column('material_name', $trans('Material')),
-        ...figureColumns(),
-      ]
-    case 'total-sales-per-material-customer':
-      return [
-        column('customer_name', $trans('Customer')),
-        column('material_name', $trans('Material')),
-        ...figureColumns(),
-      ]
-  }
-}
-
 /** The legend of the chart: what one bar is a total of, and for which year. */
 export function datasetLabelFor(mode: SalesMode, year: number): string {
-  switch (mode) {
-    case 'total-material-sales':
-      return `Total sales in : ${year}`
-    case 'total-sales-per-supplier':
-      return `Total sales per supplier in : ${year}`
-    case 'total-material-sales-per-customer':
-      return `Total sales per customer in : ${year}`
-    case 'total-sales-per-material-supplier':
-      return `Total sales per supplier per material in : ${year}`
-    case 'total-sales-per-material-customer':
-      return `Total sales per customer per material in : ${year}`
-  }
-}
-
-type NameKey = 'material_name' | 'supplier_name' | 'customer_name'
-
-/** A row's name, empty when the row has none: a sale may sit on a material or supplier with no name. */
-function nameOf(row: SalesRow, key: NameKey): string {
-  const value: unknown = Reflect.get(row, key)
-  return typeof value === 'string' ? value : ''
+  return interpolate(SALES_MODES[mode].legend(), {year})
 }
 
 function shortened(text: string): string {
   return text.length > 15 ? `${text.slice(0, 14)}...` : text
 }
 
-/** What a bar is called on the chart's axis: the row's names, cut to fit. */
+/**
+ * What a bar is called on the chart's axis: the row's names, each cut to fit.
+ * A name may be empty: a sale may sit on a material or supplier with no name.
+ */
 export function barLabelFor(mode: SalesMode, row: SalesRow): string {
-  switch (mode) {
-    case 'total-material-sales':
-      return shortened(nameOf(row, 'material_name'))
-    case 'total-sales-per-supplier':
-      return shortened(nameOf(row, 'supplier_name'))
-    case 'total-material-sales-per-customer':
-      return shortened(nameOf(row, 'customer_name'))
-    case 'total-sales-per-material-supplier':
-      return `${shortened(nameOf(row, 'supplier_name'))} / ${shortened(nameOf(row, 'material_name'))}`
-    case 'total-sales-per-material-customer':
-      return `${shortened(nameOf(row, 'customer_name'))} / ${shortened(nameOf(row, 'material_name'))}`
-  }
+  const named: Partial<Record<NameKey, string | null>> = row
+  return SALES_MODES[mode].names.map((key) => shortened(named[key] ?? '')).join(' / ')
 }
