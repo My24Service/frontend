@@ -27,6 +27,10 @@ const stripped = baseConfig.map((block) => {
 // per SFC for nothing.
 export default [
   ...stripped,
+  // Every other rule is stripped, so every disable directive in src (for
+  // no-explicit-any, no-unused-vars, ...) is unused under this config. The
+  // full `lint` still reports the stale ones.
+  { linterOptions: { reportUnusedDisableDirectives: "off" } },
   // The base config's `ignores` is scoped to its own blocks, not these two.
   { ignores: ["src/api/**"] },
   {

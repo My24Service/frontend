@@ -42,7 +42,7 @@ describe('formDefaults', () => {
   test('infers null for a nullable scalar', () => {
     // A nullable column's true "no value" is null. The form-text-input
     // exception (nullable but bound to '') is a UI decision and must be stated
-    // explicitly, as the legacy stock-location model did for name/identifier.
+    // explicitly, as an override.
     expect(formDefaults(vStockLocation).external_identifier).toBeNull()
   })
 
