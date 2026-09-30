@@ -1,0 +1,119 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SupplierReservationView > renders the legacy view's markup 1`] = `
+"<div class="app-page">
+  <header>
+    <div class="page-title">
+      <h3><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+          <g fill="currentColor">
+            <path d="M10 7v1.076c.54.166 1 .597 1 1.224v2.4c0 .816-.781 1.3-1.5 1.3h-3c-.719 0-1.5-.484-1.5-1.3V9.3c0-.627.46-1.058 1-1.224V7a2 2 0 1 1 4 0M7 7v1h2V7a1 1 0 0 0-2 0M6 9.3v2.4c0 .042.02.107.105.175A.64.64 0 0 0 6.5 12h3a.64.64 0 0 0 .395-.125c.085-.068.105-.133.105-.175V9.3c0-.042-.02-.107-.105-.175A.64.64 0 0 0 9.5 9h-3a.64.64 0 0 0-.395.125C6.02 9.193 6 9.258 6 9.3"></path>
+            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"></path>
+          </g>
+        </svg><a href="/inventory/supplier-reservations" class="">Reservations</a> / 42</h3>
+      <div class="flex-columns"><button class="btn btn-md btn-secondary btn btn-info" type="button">Back</button><a href="/inventory/supplier-reservations/form/42" class="btn btn-primary">Edit</a></div>
+    </div>
+  </header>
+  <div class="page-details panel">
+    <div class="b-overlay-wrap position-relative">
+      <h3>Reservation info</h3>
+      <div class="row">
+        <div class="col-6">
+          <table class="table b-table">
+            <tr class="">
+              <td class=""><strong>Supplier:</strong></td>
+              <td class="">ACME</td>
+            </tr>
+            <tr class="">
+              <td class=""><strong>Address:</strong></td>
+              <td class="">Street 1</td>
+            </tr>
+            <tr class="">
+              <td class=""><strong>Country/Postal/city:</strong></td>
+              <td class="">NL- 1000AA Amsterdam</td>
+            </tr>
+            <tr class="">
+              <td class=""><strong>Contact:</strong></td>
+              <td class="">Jan</td>
+            </tr>
+            <tr class="">
+              <td class=""><strong>Tel:</strong></td>
+              <td class="">020</td>
+            </tr>
+          </table>
+        </div>
+        <div class="col-6">
+          <table class="table b-table">
+            <tr class="">
+              <td class=""><strong>Created:</strong></td>
+              <td class="">01/03/2026</td>
+            </tr>
+            <tr class="">
+              <td class=""><strong>Modified:</strong></td>
+              <td class="">02/03/2026</td>
+            </tr>
+            <tr class="">
+              <td class=""><strong>Mobile:</strong></td>
+              <td class="">06</td>
+            </tr>
+            <tr class="">
+              <td class=""><strong>Email:</strong></td>
+              <td class=""><a class="px-1" href="mailto:a@b.nl">a@b.nl</a></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <h4>Products</h4>
+          <div class="table-responsive-sm">
+            <table class="table b-table table-borderless table-dark table-sm" ariabusy="false">
+              <!---->
+              <thead class="">
+                <tr class="">
+                  <th scope="col" class="">Name</th>
+                  <th scope="col" class="">Amount</th>
+                  <th scope="col" class="">Remarks</th>
+                </tr>
+                <!---->
+              </thead>
+              <tbody class="">
+                <!---->
+                <tr class="">
+                  <td class="">
+                    <!---->Gadget
+                  </td>
+                  <td class="">
+                    <!---->5
+                  </td>
+                  <td class="">
+                    <!---->
+                  </td>
+                </tr>
+                <!---->
+                <tr class="">
+                  <td class="">
+                    <!---->Widget
+                  </td>
+                  <td class="">
+                    <!---->3
+                  </td>
+                  <td class="">
+                    <!---->first
+                  </td>
+                </tr>
+                <!---->
+                <!---->
+              </tbody>
+              <!---->
+              <!---->
+            </table>
+          </div>
+        </div>
+      </div>
+      <transition-stub name="fade" enteractiveclass="fade showing" entertoclass="show" leaveactiveclass="fade showing" leavetoclass="showing" enterfromclass="showing" leavefromclass="" appear="false" persisted="false" css="true">
+        <!---->
+      </transition-stub>
+    </div>
+  </div>
+</div>"
+`;
