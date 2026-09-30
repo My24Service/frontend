@@ -10,23 +10,19 @@ import { fieldErrors, useStagedRows, type FieldErrors, type FieldLabels, type Fi
  * that stored row, a row without one is created, and a stored row the set no
  * longer names is deleted. So a row that has never been saved has none, never
  * a placeholder id.
- *
- * The staged rows and the editor share this type because `useStagedRows` edits
- * a copy of a row in the row's own type. `material` is null only in the editor:
- * `add` and `commitEdit` refuse a row without a product, and `materialsBody`
- * parses every row, so one that got through anyway fails loudly instead of
- * being left out of the save.
  */
-export interface MaterialRowState {
+export interface MaterialRow {
   id?: number
-  /** The product picked; null until one is. */
-  material: number | null
+  material: number
   /** The product's name, for the table and the read-only Name input. */
   name: string
   /** Bound to a text input, so text until the save turns it into a number. */
   amount: string
   remarks: string | null
 }
+
+/** The row editor's state: a row whose product is null until one is picked. */
+export type MaterialDraft = Omit<MaterialRow, 'material'> & {material: number | null}
 
 /** A stored row, of a purchase order or a reservation (a reservation's products, taken over). */
 export type MaterialRowRecord = Api.PurchaseOrderMaterial | Api.SupplierReservationMaterial
@@ -44,12 +40,12 @@ export interface ProductSearch {
   loading: ComputedRef<boolean>
 }
 
-export function emptyMaterialRow(): MaterialRowState {
+export function emptyMaterialRow(): MaterialDraft {
   return {material: null, name: '', amount: '0', remarks: ''}
 }
 
 /** A stored row, as the panel edits it: its id kept, so a save updates it. */
-export function rowFromRecord(record: MaterialRowRecord): MaterialRowState {
+export function rowFromRecord(record: MaterialRowRecord): MaterialRow {
   return {
     id: record.id,
     material: record.material,
@@ -66,7 +62,7 @@ export function rowFromRecord(record: MaterialRowRecord): MaterialRowState {
  * replace-set it would name a stored order row that is not the reservation's
  * to address.
  */
-export function newRowFromRecord(record: MaterialRowRecord): MaterialRowState {
+export function newRowFromRecord(record: MaterialRowRecord): MaterialRow {
   const {id: _reservationRowId, ...row} = rowFromRecord(record)
   return row
 }
@@ -76,8 +72,8 @@ export function newRowFromRecord(record: MaterialRowRecord): MaterialRowState {
  * or the reservation's. Each carries its own parent key beside these four, and
  * the panel fills only these.
  */
-const reservationRow = v.unwrap(Api.InventorySupplierReservationWithMaterials.create.body.entries.materials).item
-type MaterialRowEntries = Pick<typeof reservationRow.entries, 'id' | 'material' | 'amount' | 'remarks'>
+type ReservationRow = (typeof Api.InventorySupplierReservationWithMaterials.create.body.entries.materials)['wrapped']['item']
+type MaterialRowEntries = Pick<ReservationRow['entries'], 'id' | 'material' | 'amount' | 'remarks'>
 export type MaterialRowSchema = v.ObjectSchema<MaterialRowEntries & v.ObjectEntries, undefined>
 
 export type MaterialRowErrors = FieldErrors<'material' | 'amount' | 'remarks'>
@@ -95,13 +91,23 @@ const DRAFT_MESSAGES = {
 } as const satisfies FieldMessages<keyof MaterialRowErrors>
 
 /** The row as the request reads it; the amount the input left blank is absent, not zero. */
-function rowInput(row: MaterialRowState) {
+function rowInput(row: MaterialDraft) {
   return {
     ...(row.id === undefined ? {} : {id: row.id}),
     material: row.material,
     amount: row.amount.trim() === '' ? undefined : Number(row.amount),
     remarks: row.remarks,
   }
+}
+
+/**
+ * A draft the editor let through, as a staged row. `addRow` and `commitEdit`
+ * commit only a valid draft, and a valid draft has its product; a throw here
+ * is a bug in that check, not a row to leave out.
+ */
+function committed(draft: MaterialDraft): MaterialRow {
+  if (draft.material === null) throw new Error('A material row needs a product before it is staged')
+  return {...draft, material: draft.material}
 }
 
 /**
@@ -120,7 +126,7 @@ function rowInput(row: MaterialRowState) {
 export function useMaterialRows<S extends MaterialRowSchema>(rowSchema: S) {
   // The set, the edit on a copy and the index bookkeeping are the forms kit's.
   // The rows ride the parent's body, so its `replay`/`deletedIds` go unused.
-  const staged = useStagedRows<MaterialRowState>(emptyMaterialRow)
+  const staged = useStagedRows(emptyMaterialRow, committed)
   const {rows, rowEdit: draft, editingIndex, isEditing} = staged
 
   const draftSchema = v.object({
@@ -128,7 +134,7 @@ export function useMaterialRows<S extends MaterialRowSchema>(rowSchema: S) {
     amount: v.pipe(v.unwrap(rowSchema.entries.amount), v.minValue(1)),
   })
 
-  const draftErrorsOf = (row: MaterialRowState): MaterialRowErrors =>
+  const draftErrorsOf = (row: MaterialDraft): MaterialRowErrors =>
     fieldErrors(draftSchema, rowInput(row), DRAFT_MESSAGES, DRAFT_LABELS)
 
   /** Errors stay quiet on a blank editor; they speak once a product was picked or a commit tried. */
@@ -185,7 +191,7 @@ export function useMaterialRows<S extends MaterialRowSchema>(rowSchema: S) {
   }
 
   /** Replace the whole set: a stored one loaded, a supplier changed, a reservation taken over. */
-  function setRows(next: MaterialRowState[]) {
+  function setRows(next: MaterialRow[]) {
     staged.seed(next)
     touched.value = false
   }

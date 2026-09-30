@@ -162,9 +162,6 @@ paid on the backend (my24service `875b5d8a`).
 - The mutation summary interpolates the location name into HTML without
   escaping; the fix belongs in `StockMutationSimpleSerializer.get_summary`.
 - `MaterialCreateSerializer` does not list `location`.
-- A committed product row is typed like the draft (`material: number | null`).
-  `useStagedRows` has one type for both; typing committed rows `material:
-  number` needs the kit to take a draft type and a commit step.
 - `formSchema` (`src/models/schema.ts`) types every picked entry `unknown`
   through its `clientOnly` default, so the three simple forms pick with
   `v.pick` instead.

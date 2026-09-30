@@ -1,3 +1,27 @@
+/** The staged set a form edits: the rows, the draft being composed or edited, and what was removed. */
+export interface StagedRows<TRow extends {id?: number}, TDraft = TRow> {
+  rows: Ref<TRow[]>
+  deletedIds: Ref<number[]>
+  rowEdit: Ref<TDraft>
+  editingIndex: Ref<number | null>
+  isEditing: ComputedRef<boolean>
+  /** Replace the staged set with the record's rows (a load or a discard). */
+  seed(loaded: TRow[]): void
+  add(): void
+  edit(index: number): void
+  commitEdit(): void
+  cancelEdit(): void
+  remove(index: number): void
+  replay(
+    parentId: number,
+    writes: {
+      create: (row: TRow, parentId: number) => Promise<{id?: number} | void>
+      update: (id: number, row: TRow, parentId: number) => Promise<unknown>
+      destroy: (id: number) => Promise<unknown>
+    },
+  ): Promise<void>
+}
+
 /**
  * A set of child rows staged in a form: the rows, the one being edited (on a
  * copy, so Cancel discards it) and the ids of stored rows removed.
@@ -11,11 +35,25 @@
  *
  * The composable owns the state; the writes are the caller's, so it stays free
  * of any op.
+ *
+ * The editor may hold less than a row: a product not picked yet is `null` in
+ * the draft and never in a staged row. Such a caller passes `commit`, which
+ * turns a draft it has checked into a row, and `rows` is typed as what it
+ * holds. Without one, the draft is a row and is committed as a copy.
  */
-export function useStagedRows<TRow extends {id?: number}>(empty: () => TRow) {
+export function useStagedRows<TRow extends {id?: number}>(empty: () => TRow): StagedRows<TRow, TRow>
+export function useStagedRows<TDraft, TRow extends TDraft & {id?: number}>(
+  empty: () => TDraft,
+  commit: (draft: TDraft) => TRow,
+): StagedRows<TRow, TDraft>
+export function useStagedRows<TDraft, TRow extends TDraft & {id?: number}>(
+  empty: () => TDraft,
+  // Omitted only through the first overload, where the draft is the row.
+  commit: (draft: TDraft) => TRow = (draft) => ({...draft}) as unknown as TRow,
+): StagedRows<TRow, TDraft> {
   const rows = ref([]) as Ref<TRow[]>
   const deletedIds = ref<number[]>([])
-  const rowEdit = ref(empty()) as Ref<TRow>
+  const rowEdit = ref(empty()) as Ref<TDraft>
   const editingIndex = ref<number | null>(null)
   const isEditing = computed(() => editingIndex.value !== null)
 
@@ -27,7 +65,7 @@ export function useStagedRows<TRow extends {id?: number}>(empty: () => TRow) {
   }
 
   function add() {
-    rows.value.push({...rowEdit.value})
+    rows.value.push(commit(rowEdit.value))
     rowEdit.value = empty()
   }
 
@@ -38,7 +76,7 @@ export function useStagedRows<TRow extends {id?: number}>(empty: () => TRow) {
 
   function commitEdit() {
     if (editingIndex.value === null) return
-    rows.value.splice(editingIndex.value, 1, {...rowEdit.value})
+    rows.value.splice(editingIndex.value, 1, commit(rowEdit.value))
     cancelEdit()
   }
 
