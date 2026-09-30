@@ -82,12 +82,10 @@ import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 /**
  * The supplier detail page: the record and the materials it supplies.
  *
- * The materials are read as the whole collection (`supplier_relation` is the
- * material list's own filter), not the default page of twenty. The list
- * options are called directly rather than through `listOptions`: that one
- * stringifies a filter's value, and `supplier_relation` is an integer the
- * request validation refuses as text. The legacy screen answered either read
- * failing with one message and so does this.
+ * The materials are read as the whole collection, through the material
+ * list's own `supplier_relation` filter, not the default page of twenty. The
+ * legacy screen answered either read failing with one message and so does
+ * this.
  */
 const props = withDefaults(defineProps<{
   /** The route's `:pk`. */
@@ -105,11 +103,11 @@ const detailQuery = useQuery(() => ({
   enabled: id.value != null,
 }))
 const materialsQuery = useQuery(() => ({
-  ...Api.InventoryMaterial.list.options({query: {
+  ...Api.InventoryMaterial.listOptions({
     page: 1,
     page_size: WHOLE_COLLECTION_PAGE_SIZE,
     supplier_relation: id.value ?? 0,
-  }}),
+  }),
   enabled: id.value != null,
 }))
 useQueryErrorToast(detailQuery.error, $trans('Error fetching supplier/materials'))

@@ -134,9 +134,6 @@ paid on the backend (my24service `875b5d8a`).
 - The mutation summary interpolates the location name into HTML without
   escaping; the fix belongs in `StockMutationSimpleSerializer.get_summary`.
 - `MaterialCreateSerializer` does not list `location`.
-- `resource.listOptions` stringifies integer column filters, which the
-  generated list query then rejects (`src/api/resource-runtime.gen.ts`). The
-  supplier view reads its materials through `list.options` for that reason.
 
 ## Tests
 
