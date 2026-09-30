@@ -1,7 +1,10 @@
 import { type QueryClient, type UseMutationOptions } from '@tanstack/vue-query'
+import * as v from 'valibot'
 
 import { useRoutePk } from './use-route-pk'
 import { useQueryErrorToast } from './use-query-error-toast'
+import type { FieldLabels } from './validated-form-context'
+import { issueErrors, type FieldMessages } from './validation'
 
 /**
  * Which write a form is about to make, and the id it addresses.
@@ -117,6 +120,9 @@ export type FormValidation<TValues, TBody, TErrors> =
     contract: {
       validate(values: NoInfer<TValues>, context: WriteContext): TErrors
       parse(values: NoInfer<TValues>, context: WriteContext): TBody
+      /** The contract's copy, which names the fields a failed `parse` refuses. */
+      labels?: FieldLabels
+      messages?: FieldMessages
     }
     validate?: never
     parse?: never
@@ -412,12 +418,24 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
       errors.value = found
       if (Object.keys(found).length > 0) return false
 
+      const context = writeContext.value
       // The parsed output is the body — typed by the request schema and
       // stripped of anything it does not declare.
-      const body = parse(values.value, writeContext.value)
+      let body: TBody
+      try {
+        body = parse(values.value, context)
+      } catch (error) {
+        // Validation passed and the body still refused: the form checks
+        // something other than what it sends. Say so on the field it names
+        // and in the save's error toast, rather than rejecting with nothing
+        // on screen. Anything else is a bug in the form and keeps throwing.
+        if (!v.isValiError(error)) throw error
+        errors.value = issueErrors(error.issues, config.contract?.messages, config.contract?.labels) as TErrors
+        errorToast(toast, context.isCreate ? config.copy.createError : config.copy.updateError)
+        return false
+      }
 
       try {
-        const context = writeContext.value
         if (context.isCreate) {
           await createMutation.mutateAsync(
             (config.createVars ?? ((b: TBody) => ({ body: b })))(body, context))

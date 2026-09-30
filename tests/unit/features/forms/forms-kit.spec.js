@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import { defineComponent, h, nextTick, ref } from 'vue'
 import { mount } from '@vue/test-utils'
+import * as v from 'valibot'
 
 import {
   companySalesuserCreateMutation,
@@ -16,6 +17,7 @@ import {
   useRoutePk,
   useQueryErrorToast,
   useResourceForm,
+  writeContract,
 } from '@/features/forms'
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
@@ -62,6 +64,7 @@ const TestForm = defineComponent({
   props: {
     pk: { type: [String, Number], default: null },
     onSaved: { type: Function, default: undefined },
+    parse: { type: Function, default: undefined },
   },
   setup(props) {
     const form = useResourceForm({
@@ -80,7 +83,7 @@ const TestForm = defineComponent({
         if (!values.username) errors.username = 'Username is required'
         return errors
       },
-      parse: (values) => validBody(values),
+      parse: props.parse ?? ((values) => validBody(values)),
       copy: COPY,
       onSaved: props.onSaved,
     })
@@ -357,6 +360,74 @@ describe('useResourceForm, what submitForm answers', () => {
 
     expect(written).toBe(true)
     expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+})
+
+describe('useResourceForm, a body that validation let through and parse refuses', () => {
+  /**
+   * A form whose validation checks something other than what it sends: the
+   * values pass `validate`, and `parse` throws a ValiError. That used to
+   * reject `submitForm` with nothing on screen - no toast, no field error.
+   */
+  const strictBody = v.object({
+    username: v.pipe(v.string(), v.minLength(1)),
+    first_name: v.pipe(v.string(), v.minLength(1)),
+  })
+
+  test('answers false, sends nothing, and says so in the save error toast', async () => {
+    const wrapper = await mountTestForm({ parse: (values) => v.parse(strictBody, values) })
+    await wrapper.get('#test_username').setValue('jan')
+
+    expect(await wrapper.vm.submitForm()).toBe(false)
+    await settle()
+
+    expect(api.requests().filter((sent) => sent.method === 'post')).toEqual([])
+    expect(toasts().map((toast) => toast.body)).toContain('Error creating test')
+    expect(routerGo()).not.toHaveBeenCalled()
+    expect(wrapper.vm.errors).toEqual({ first_name: 'Please enter a first name' })
+  })
+
+  test('names the field with the contract\'s own label', async () => {
+    const ContractForm = defineComponent({
+      setup() {
+        return useResourceForm({
+          pk: () => null,
+          retrieve: (id) => companySalesuserRetrieveOptions({ path: { id } }),
+          create: companySalesuserCreateMutation(),
+          update: companySalesuserPartialUpdateMutation(),
+          invalidate: (qc) => qc.invalidateQueries({ queryKey: companySalesuserListQueryKey() }),
+          empty: () => ({ username: 'jan', first_name: '' }),
+          fromRecord: (record) => record,
+          contract: writeContract(
+            { path: '/api/company/salesuser/', create: { body: strictBody } },
+            {
+              validateWith: v.object({ username: v.string(), first_name: v.string() }),
+              labels: { first_name: () => 'Given name' },
+            },
+          ),
+          copy: COPY,
+        })
+      },
+      template: '<div />',
+    })
+    const wrapper = mountForm(ContractForm, { deep: true, routes: [] })
+    await settle()
+
+    expect(await wrapper.vm.submitForm()).toBe(false)
+    expect(wrapper.vm.errors).toEqual({ first_name: 'Please enter a given name' })
+  })
+
+  test('an error other than a ValiError still throws: it is a bug in the form', async () => {
+    const wrapper = await mountTestForm({
+      parse: () => {
+        throw new TypeError('values.x is undefined')
+      },
+    })
+    await wrapper.get('#test_username').setValue('jan')
+
+    await expect(wrapper.vm.submitForm()).rejects.toThrow(TypeError)
+    // The re-entry guard is released, so the next submit is not swallowed.
+    expect(wrapper.vm.saving).toBe(false)
   })
 })
 

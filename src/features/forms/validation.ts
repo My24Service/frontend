@@ -198,9 +198,21 @@ export function fieldErrors<S extends v.GenericSchema, K extends PropertyKey = S
 ): FieldErrors<K> {
   const result = v.safeParse(schema, values)
   if (result.success) return {} as FieldErrors<K>
+  return issueErrors<K>(result.issues, messages, labels)
+}
 
+/**
+ * `fieldErrors` for issues already raised: one line per field, the first
+ * issue on it winning. `useResourceForm` reads a failed `parse` through this,
+ * so a body the validation let through still lands on the field it names.
+ */
+export function issueErrors<K extends PropertyKey = string>(
+  issues: readonly v.BaseIssue<unknown>[],
+  messages: FieldMessages = {},
+  labels: FieldLabels = {},
+): FieldErrors<K> {
   const errors = {} as FieldErrors<K>
-  for (const issue of result.issues) {
+  for (const issue of issues) {
     const path = (issue.path ?? []).map((segment) => String(segment.key))
     const leaf = deepestMessage(messages, path)
     // With no message to name the field, the issue's own path is the field.

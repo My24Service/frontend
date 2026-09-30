@@ -61,6 +61,7 @@ export {
   ruleMessage,
   requiredOrMaxLength,
   fieldErrors,
+  issueErrors,
   type FieldMessage,
   type FieldMessageTree,
   type FieldMessages,
