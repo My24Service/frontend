@@ -463,6 +463,7 @@ for (const prefix of [...groups.keys()].sort()) {
     }
   }
 
+  let listQuery
   if (operations.list) {
     response(operations.list.id, 'ListResponse', `What \`list\` answers with.`)
     // Only when the operation declares query parameters: a list with no
@@ -472,6 +473,7 @@ for (const prefix of [...groups.keys()].sort()) {
     if (hasQueryParams.get(operations.list.id)) {
       const query = bind(valibotExports, `v${toCase(operations.list.id, 'PascalCase')}Query`, 'valibot.gen', operations.list.id)
       valibotImports.add(query)
+      listQuery = query
       types.push({alias: 'ListQuery', expr: `InferInput<typeof ${query}>`, doc: `The \`list\` query parameters.`})
     }
   }
@@ -491,7 +493,7 @@ for (const prefix of [...groups.keys()].sort()) {
   // Whether the resource gets `listOptions` at all (see `isPageable`).
   const pageable = Boolean(operations.list && pageableLists.get(operations.list.id))
 
-  resources.push({ name, path, kind, idType, entries, reads: readIds, types, pageable, listId: operations.list?.id, extras: [] })
+  resources.push({ name, path, kind, idType, entries, reads: readIds, types, pageable, listId: operations.list?.id, listQuery, extras: [] })
 }
 
 // The record-level verbs, each hung on the resource whose path its own path
@@ -573,7 +575,7 @@ const typeBlock = (name, types) =>
     .join('\n')}\n}`
 
 const resourceBlocks = resources.map((resource) => {
-  const {name, path, kind, idType, entries, reads, types, pageable, listId, extras: resourceExtras} = resource
+  const {name, path, kind, idType, entries, reads, types, pageable, listId, listQuery, extras: resourceExtras} = resource
   const fields = [`  path: '${path}',`, `  kind: '${kind}',`]
   if (kind === 'collection') fields.push(`  id: '${idType}',`)
   for (const [key, entry] of Object.entries(entries)) {
@@ -590,6 +592,9 @@ const resourceBlocks = resources.map((resource) => {
           ? `  filters: [],`
           : `  filters: [${filterKeys.map((key) => `'${key}'`).join(', ')}] satisfies (keyof ${name}.ListQuery)[],`,
       )
+      // The query schema, so `listOptions` can send each filter as the type
+      // the schema declares (`columnFilters` in the runtime).
+      fields.push(`  query: ${listQuery},`)
     }
   }
   // The record-level verbs: a screen that needs `/branch/{id}/dashboard/` names
