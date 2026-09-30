@@ -178,3 +178,16 @@ deletions, the READMEs and the COMPLETION summary come last.
   pause and left a mutation behind: `:items` in SupplierView, and
   `enableSorting` in MutationList. Both subagents found and restored them,
   and the final full run is green.
+
+## Browser check
+
+Django on :8000 and `frontend-dev` on `riedel.localhost:3000`, logged in as
+the riedel admin. Every inventory route renders against the live backend:
+the lists, the purchase-order, reservation, entry and material forms, a
+stock-location view, the move form and both stats screens. Every
+`/api/inventory/` request answered 200, and the whole-collection reads went
+out as `page_size=1000`. riedel holds no materials, purchase orders or
+reservations, so nothing was written and no populated view or save was
+exercised live. The specs cover those. One blank page on the first visits
+was Vite re-optimising `BProgress` mid-session, not the code; a reload
+cleared it.
