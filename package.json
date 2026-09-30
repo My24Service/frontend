@@ -13,7 +13,7 @@
     "use-api-namespace": "node scripts/codemods/use-api-namespace.mjs",
     "lint": "node --max-old-space-size=8192 scripts/lint.mjs",
     "lint:fix": "node --max-old-space-size=8192 scripts/lint.mjs --fix",
-    "lint:i18n": "eslint --cache --cache-location node_modules/.cache/eslint-i18n/ --config eslint.i18n.config.js --concurrency auto src",
+    "lint:i18n": "eslint --cache --cache-location node_modules/.cache/eslint-i18n/ --config eslint.i18n.config.js --concurrency auto --report-unused-disable-directives-severity off src",
     "typecheck": "vue-tsc --noEmit",
     "usage-gate": "node scripts/usage-gate.mjs",
     "test": "vitest run",
