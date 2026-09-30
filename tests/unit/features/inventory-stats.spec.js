@@ -10,7 +10,7 @@ import {
   vSupplierMaterialTotalSalesRow,
   vSupplierTotalSalesRow,
 } from '@/api/valibot.gen'
-import { InventoryStats, StatsTable } from '@/features/inventory/stats'
+import { InventoryStats, StatsTable } from '@/features/inventory'
 
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { vPurchaseOrderEntry } from '@/api/valibot.gen'
 import * as Api from '@/services/api-client'
-import { PurchaseOrderEntryList } from '@/features/inventory/entry'
+import { PurchaseOrderEntryList } from '@/features/inventory'
 import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'
 import { createTestQueryClient, mountListView, toasts } from '../support/form-harness.js'

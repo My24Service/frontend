@@ -8,7 +8,7 @@ import {
   vStockLocation,
   vStockMutationSimple,
 } from '@/api/valibot.gen'
-import { MaterialMoveForm, MutationForm, MutationList } from '@/features/inventory/mutation'
+import { MaterialMoveForm, MutationForm, MutationList } from '@/features/inventory'
 
 import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'

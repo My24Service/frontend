@@ -7,7 +7,7 @@ import {
   vMaterial,
   vSupplierAutocomplete,
 } from '@/api/valibot.gen'
-import { MaterialForm, MaterialList, MaterialView } from '@/features/inventory/material'
+import { MaterialForm, MaterialList, MaterialView } from '@/features/inventory'
 import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'
 import { mountForm, mountListView, routerGo, toasts } from '../support/form-harness.js'

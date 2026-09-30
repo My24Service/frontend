@@ -9,7 +9,7 @@ import {
   vSupplierReservationAutocomplete,
   vSupplierReservationMaterial,
 } from '@/api/valibot.gen'
-import { PurchaseOrderForm } from '@/features/inventory/purchase-order'
+import { PurchaseOrderForm } from '@/features/inventory'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../support/form-harness.js'

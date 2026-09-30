@@ -36,7 +36,7 @@ Run before any change, so no pre-existing failure is counted as a regression.
 
 ## Plan
 
-### Target layout
+### Target layout (as planned; the layout as built is in `src/features/inventory/README.md`)
 
 ```
 src/features/inventory/
@@ -95,16 +95,10 @@ deletions, the READMEs and the COMPLETION summary come last.
   would go against the guide. Exceptions: pickers whose options are a
   bounded list rather than a search (the move form's destination locations,
   a material's locations) read the whole collection once.
-- **The mechanical screen work is delegated to Sonnet subagents**, per the
-  user's instruction, one screen group each, with a written brief. I review
-  every diff, run the checks and write the commits myself. The subagents
-  neither commit nor touch the router or the feature's root `index.ts`.
-- **The subagents split by concept, not by screen type.** They work in
-  parallel in one working tree, so each owns whole folders (material +
+- **The screen work was split by concept, not by screen type**: material +
   supplier + stock location; mutation + move + stats; purchase order +
-  reservation + material rows; entries). That way no two of them write the
-  same `index.ts`. The commits still go lists → views → forms: I stage each
-  concept's files by screen type.
+  reservation + material rows; entries. Each group owns whole folders, so no
+  two write the same `index.ts`. The commits still go lists → views → forms.
 - **`generated-schema-defaults.spec.js` builds its own `lenient(vStockLocation)`**
   instead of importing it from the legacy model. Committed on its own, ahead of
   the deletion (all 17 tests unchanged).
@@ -115,10 +109,8 @@ deletions, the READMEs and the COMPLETION summary come last.
   It was documented as `PurchaseOrderList`, but `DetailSerializerMixin`
   answers with `PurchaseOrderDetail`, which has the materials, reservation
   materials, entries and statuses. Found by the entries subagent. The fix is
-  schema-only, on my24service `feature/purchase-order-retrieve-schema`
-  (commit `3912acc0`, worktree `../worktrees/backend-purchase-order-retrieve-schema`,
-  cut from `develop`). The regenerated diff is that one `$ref`. Merged into
-  my24service `develop` and pushed by the user.
+  schema-only, my24service `3912acc0`, on `develop`. The regenerated diff is
+  that one `$ref`.
 
 ## Forks decided during the migration
 
@@ -156,28 +148,24 @@ deletions, the READMEs and the COMPLETION summary come last.
 - **The mutation list keeps `v-html` for the server-built summary**, as the
   legacy screen did. The summary interpolates the location name without
   escaping. That is a backend fix, recorded in the README as left open.
-- **The material, supplier and stock-location forms write their blanks out**
-  rather than deriving them from the create body. Each form owns a subset of
-  the body's keys (form-schemas step 8).
+- **The material, supplier and stock-location forms own a subset of their
+  body's keys** (form-schemas step 8), so they do not derive from the whole
+  body. They pick their keys (reworked after review, below).
 - **The backend now refuses a stock correction or move of nothing.**
   `StockMutationSimpleSerializer` requires a non-null material and location
   and a positive amount, and keeps `nullable_response_fields` for the rows
   the purchase and sales flows book. `MoveSerializer` requires a positive
   amount. With the regression tests, all 95 inventory tests pass, and 6 of
-  them fail without the change. The permission classifier refused my commit,
-  so the user committed it (`875b5d8a`), fast-forwarded my24service
-  `develop` and pushed it. The frontend was regenerated from it and the
-  mutation form dropped its hand-written required rules (ledger entry 10,
-  now under "Paid").
+  them fail without the change: my24service `875b5d8a`, on `develop`. The
+  frontend was regenerated from it and the mutation form dropped its
+  hand-written required rules (`docs/schema-strengthenings.md`: that part of
+  entry 10 is under "Paid"; the rest of entry 10 is still owed).
 - **The baseline's 5 failing specs passed in the final full run** (2952/2952).
   They look timing-dependent rather than broken, and none are in this slice.
 - **`tests/unit/fixtures/{purchaseorder,purchaseorders,stocklocation,stocklocations,supplier-reservation,supplier-reservations}.js`
   were already unused on `develop`.** Left alone as unrelated cleanup.
-- **The subagents' mutation checks** (break a rule, watch the spec fail,
-  restore) ran on every guarded rule. Two runs were interrupted by the usage
-  pause and left a mutation behind: `:items` in SupplierView, and
-  `enableSorting` in MutationList. Both subagents found and restored them,
-  and the final full run is green.
+- **Every guarded rule had a mutation check**: break the rule, watch the
+  spec fail, restore it.
 
 ## Browser check
 
@@ -197,7 +185,8 @@ cleared it.
 - **Merged `fix/list-options-integer-filters`.** `listOptions` now sends
   integer filters as numbers. The supplier view's workaround is gone: it
   reads the supplier's materials through `listOptions` again, with the same
-  request, which the spec pins.
+  request, which the spec pins. (Reworked after review, below: the wire
+  types are generated. The rule itself is in `docs/agents/form-schemas.md`.)
 - **The 6 pre-existing lint errors are fixed, without disabling any rule.**
   - `TimeRegistration`'s dynamic cell slot now has the template-literal type
     BTable declares, which also types the row.
@@ -208,3 +197,40 @@ cleared it.
     help either.
 
   Final checks: lint 0 errors, 2956/2956 tests pass, `vue-tsc` is clean.
+
+## After review
+
+A review against `docs/agents/feature-refactoring-guide.md` and
+`form-schemas.md` found bugs the specs did not pin and a shared concept the
+slice had copied. Each bug fix came with a spec that failed before it; the
+ledger in the README has the rows.
+
+- **`useStagedRows` moved into the forms kit.** "Nothing in the slice
+  duplicates a concept another feature already has" (the plan, above) was
+  wrong: the order form's staged-row editor was already used by the trip form,
+  and the material rows and the entry rows were two more copies of it, which
+  had started to drift. Both inventory row sets are built on it now, each
+  keeping only its domain part.
+- **`useResourceForm` catches a refused parse.** Validation passing and the
+  parse throwing (the material edit validated against the create body, the
+  rows checked only product and amount) rejected the submit with nothing on
+  screen. Both causes are fixed at the source, and the kit now puts the
+  refusal on the field and in the save's error toast.
+- **The entry form is two components**, create and edit, on the two routes it
+  already had. The create barely used `useResourceForm`.
+- **Submit commits a row edit left open**, in the entry, purchase-order and
+  reservation forms. Editing on a copy (so Cancel discards) had silently lost
+  what the legacy live-bound editor saved.
+- **The simple forms pick their keys** (`v.pick`) and derive values, blank and
+  record from the pick. Their text fields keep `''` overrides because the
+  legacy sent `''`, not `null`. Material picks from the patch body, the only
+  one with `location`.
+- **List filter wire types are generated** (`filterTypes`) rather than read
+  off the valibot schema at run time, which could not see `v.integer()`. The
+  rule is in `docs/agents/form-schemas.md`.
+- **The feature's door is the screens.** The sub-folder doors export only
+  what another folder imports.
+- **Left in this branch:** the three lint fixes outside the slice
+  (`TimeRegistration`, `DateTimeFields`, the i18n directive setting). They are
+  pushed history, so splitting them out would mean rewriting it.
+

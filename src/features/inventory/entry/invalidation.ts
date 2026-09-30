@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/vue-query'
 
-import { invalidateStock } from '../mutation/use-stock-pickers'
+import { invalidateStock } from '../mutation'
 
 /**
  * What an entry write - a booking in, an edit, a delete - makes stale beyond

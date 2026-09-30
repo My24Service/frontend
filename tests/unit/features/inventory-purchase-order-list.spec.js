@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { vPurchaseOrderList, vPurchaseOrderStatus } from '@/api/valibot.gen'
-import { PurchaseOrderList } from '@/features/inventory/purchase-order'
+import { PurchaseOrderList } from '@/features/inventory'
 import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'
 import { mountListView, toasts } from '../support/form-harness.js'

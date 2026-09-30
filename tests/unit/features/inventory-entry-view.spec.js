@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import { vPurchaseOrderEntry } from '@/api/valibot.gen'
-import { PurchaseOrderEntryView } from '@/features/inventory/entry'
+import { PurchaseOrderEntryView } from '@/features/inventory'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../support/form-harness.js'

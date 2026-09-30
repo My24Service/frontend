@@ -5,7 +5,7 @@ import {
   vInventoryStockLocationPartialUpdateResponse,
   vStockLocation,
 } from '@/api/valibot.gen'
-import { StockLocationForm, StockLocationList, StockLocationView } from '@/features/inventory/stock-location'
+import { StockLocationForm, StockLocationList, StockLocationView } from '@/features/inventory'
 import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'
 import { mountForm, mountListView, routerGo, toasts } from '../support/form-harness.js'

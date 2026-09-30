@@ -7,7 +7,7 @@ import {
   vPurchaseOrderStatus,
   vSupplierReservationMaterial,
 } from '@/api/valibot.gen'
-import { PurchaseOrderView } from '@/features/inventory/purchase-order'
+import { PurchaseOrderView } from '@/features/inventory'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../support/form-harness.js'
