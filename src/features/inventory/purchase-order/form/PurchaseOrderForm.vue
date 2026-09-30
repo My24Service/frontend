@@ -26,7 +26,7 @@
             class="btn btn-primary"
             type="button"
             variant="primary"
-            @click="submitForm"
+            @click="submit"
           >
             {{ $trans('Submit') }}
           </BButton>
@@ -132,6 +132,16 @@ const {
 })
 
 const materialRows = useMaterialRows(materialRowSchema)
+
+/**
+ * What the open row editor shows is what the user means to save: the legacy
+ * editor was bound to its row. An invalid edit stops the save and says why.
+ */
+function submit() {
+  if (buttonDisabled.value) return
+  if (materialRows.isEditing.value && !materialRows.commitEdit()) return
+  void submitForm()
+}
 
 /**
  * The product search: the supplier's materials through the autocomplete,

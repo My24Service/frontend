@@ -121,7 +121,7 @@ export function useMaterialRows<S extends MaterialRowSchema>(rowSchema: S) {
   // The set, the edit on a copy and the index bookkeeping are the forms kit's.
   // The rows ride the parent's body, so its `replay`/`deletedIds` go unused.
   const staged = useStagedRows<MaterialRowState>(emptyMaterialRow)
-  const {rows, rowEdit: draft, editingIndex} = staged
+  const {rows, rowEdit: draft, editingIndex, isEditing} = staged
 
   const draftSchema = v.object({
     ...rowSchema.entries,
@@ -161,11 +161,14 @@ export function useMaterialRows<S extends MaterialRowSchema>(rowSchema: S) {
     touched.value = true
   }
 
-  function commitEdit() {
+  /** Write the edit back. False, with the draft's errors showing, when it is not a valid row. */
+  function commitEdit(): boolean {
+    if (!isEditing.value) return false
     touched.value = true
-    if (editingIndex.value === null || !isDraftValid.value) return
+    if (!isDraftValid.value) return false
     staged.commitEdit()
     touched.value = false
+    return true
   }
 
   function cancelEdit() {
@@ -205,6 +208,7 @@ export function useMaterialRows<S extends MaterialRowSchema>(rowSchema: S) {
     draftErrors,
     isDraftValid,
     editingIndex,
+    isEditing,
     addRow,
     editRow,
     commitEdit,

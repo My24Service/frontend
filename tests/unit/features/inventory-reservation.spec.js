@@ -462,6 +462,40 @@ describe('SupplierReservationForm', () => {
       ])
     })
 
+    // REGRESSION. The row editor works on a copy since the migration (the
+    // legacy bound it live to the row), so a Submit with an edit open saved
+    // the row as it was before the edit, and dropped the edit without a word.
+    test('Submit with a row edit open saves the edit', async () => {
+      const wrapper = await readyToEdit()
+      await editStagedRow(wrapper, 0)
+      await wrapper.get('#material-rows-amount').setValue('9')
+
+      await submit(wrapper)
+      await settle()
+
+      expect(writes()).toHaveLength(1)
+      expect(writes()[0].body.materials).toEqual([
+        { id: 7, material: 10, amount: 9, remarks: 'first' },
+        { id: 8, material: 11, amount: 5, remarks: null },
+      ])
+    })
+
+    test('Submit with an invalid row edit open sends nothing and says why', async () => {
+      const wrapper = await readyToEdit()
+      await editStagedRow(wrapper, 0)
+      await wrapper.get('#material-rows-amount').setValue('0')
+
+      await submit(wrapper)
+      await settle()
+
+      expect(writes()).toEqual([])
+      expect(routerGo()).not.toHaveBeenCalled()
+      expect(wrapper.findAll('.material-rows .invalid-feedback.d-block').map((feedback) => feedback.text())).toEqual([
+        'Please enter an amount',
+      ])
+      expect(button(wrapper, 'Submit').attributes('disabled')).toBeUndefined()
+    })
+
     test('deletes a removed product by leaving it out, not with a request of its own', async () => {
       const wrapper = await readyToEdit()
 

@@ -107,6 +107,7 @@ stats/              InventoryStats, StatsTable, total-sales.ts (the five modes)
 | Purchase order form | The body carries only what the request declares | It sent the read-only statuses, entries and reservation materials back |
 | Material rows | Cancel discards an edit; Edit product enforces Add's rule; errors wait for a pick | The editor was bound to the table row; Edit had no guard; a blank editor opened in error |
 | Material rows | Deleting the row being edited resets the editor | The edit index went stale |
+| Material rows | Submit saves a row edit left open; an invalid one stops the save and says why | The editor works on a copy, so the save sent the row as it was before the edit |
 | Reservation list | The delete toast reads "Reservation has been deleted" | It read "Entry Reservation been deleted" |
 | Reservation form | Picking another supplier clears the staged products | It kept the previous supplier's products |
 | Reservation form | Two panels; the supplier picker reads `supplier/autocomplete/` | One shared products panel; one supplier picker, like the order form's |
