@@ -401,6 +401,27 @@ A derived name a screen has no column for is simply absent from the table's
 query and never reaches the wire, which is what makes deriving safe even for a
 list with 30-odd parameters.
 
+**Each filter goes on the wire as the type its OpenAPI parameter declares.**
+The generated `*ListOptions` parse the query with the valibot schema and throw
+on `'7'` for an integer, while a filter read back from the URL is always a
+string. So the generator writes `filterTypes` beside `filters` - only the
+non-string ones, e.g. `filterTypes: {supplier_relation: 'integer'}` - and
+`columnFilters` converts by that literal:
+
+- `integer`: an integer, or a digits-only string with an optional `-`
+  (`'7'` -> `7`); `'7.5'`, `' '`, `'1e3'`, `'0x1F'` are not integers.
+- `number`: a finite number, or a plain decimal string.
+- `boolean`: `true`/`false`, or `true`/`false`/`1`/`0` as a string in any
+  case - what django-filter's `BooleanFilter` reads, so a link it accepts
+  still works.
+- anything else (string, enum, `oneOf` union): `String(value)`.
+
+A value its type cannot hold is **dropped**, not thrown on - which *widens*
+the list to the rows that filter would have excluded. That beats a list that
+fails to load over a hand-edited URL, but a screen that must not widen
+validates the value itself. `minimum`/`maximum` are not checked: an
+out-of-range integer still reaches the validator.
+
 drf-spectacular emits no `deprecated: true` for `sort_dir`/`sort_field`, so the
 exclusion cannot be read off the schema; it is `EXCLUDED_PARAMS` in the
 generator, with the reason, like `UNREACHABLE_SHADOWS`. A list whose endpoint

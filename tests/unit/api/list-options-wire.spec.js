@@ -53,3 +53,40 @@ describe('listOptions and an integer filter', () => {
     expect(options.queryKey[0].query.supplier_relation).toBe(7)
   })
 })
+
+describe('listOptions and the other wire types', () => {
+  const query = (resource, filters) => resource.listOptions({ page: 1, page_size: 20, ...filters }).queryKey[0].query
+
+  test('drops what is not an integer, rather than sending something the validator throws on', () => {
+    for (const value of ['7.5', ' ', 'abc', '1e3', '0x1F']) {
+      expect(query(Api.InventoryMaterial, { supplier_relation: value })).toEqual({ page: 1, page_size: 20 })
+    }
+  })
+
+  test('keeps a string parameter a string, a numeric-looking one included', () => {
+    expect(query(Api.EquipmentEquipment, { name: '123', num_orders: '4' })).toEqual({
+      page: 1, page_size: 20, name: '123', num_orders: '4',
+    })
+  })
+
+  test('sends a union or picklist parameter as a string', () => {
+    expect(query(Api.EquipmentEquipment, { branch: 7, type: 'facility' })).toEqual({
+      page: 1, page_size: 20, branch: '7', type: 'facility',
+    })
+  })
+
+  test('sends a boolean for a boolean parameter, from a flag or its URL spelling', () => {
+    expect(query(Api.MemberMember, { is_deleted: 'true', is_requested: 'false' })).toMatchObject({
+      is_deleted: true, is_requested: false,
+    })
+    expect(query(Api.MemberMember, { is_deleted: true })).toMatchObject({ is_deleted: true })
+  })
+
+  test('a boolean filter reaches the wire', async () => {
+    api.get('/api/member/member/', paginated([]))
+
+    await fetchList(Api.MemberMember.listOptions({ page: 1, page_size: 20, is_deleted: 'false' }))
+
+    expect(api.requests()[0].query).toEqual({ page: '1', page_size: '20', is_deleted: 'false' })
+  })
+})
