@@ -1,0 +1,90 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MaterialView > renders the legacy view's markup 1`] = `
+"<div class="app-page">
+  <header>
+    <div class="page-title">
+      <h3><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+          <path fill="currentColor" d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5L8 5.961L14.154 3.5zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"></path>
+        </svg><span class="backlink">Materials</span> / Widget</h3>
+      <div class="flex-columns"><button class="btn btn-md btn-secondary btn btn-info" type="button">Back</button><a href="/inventory/materials/form/42" class="btn btn-primary">Edit material</a></div>
+    </div>
+  </header>
+  <div class="page-detail">
+    <div class="b-overlay-wrap position-relative flex-columns">
+      <div class="panel col-1-3">
+        <h3>Widget</h3>
+        <dl>
+          <dt>Identifier</dt>
+          <dd>W-1</dd>
+          <dt>Shortname</dt>
+          <dd>Wdg</dd>
+          <dt>Unit</dt>
+          <dd>pcs</dd>
+          <dt>Supplier</dt>
+          <dd>ACME, Utrecht</dd>
+          <dt>Product type</dt>
+          <dd>Gadgets</dd>
+        </dl><br>
+        <dl>
+          <dt>Purchase price</dt>
+          <dd>1.50</dd>
+          <dt>Selling price</dt>
+          <dd>2.50</dd>
+          <dt>Alt. selling price</dt>
+          <dd>2.75</dd>
+          <dt>Purchase price ex.</dt>
+          <dd>1.24</dd>
+          <dt>Selling price ex.</dt>
+          <dd>2.07</dd>
+          <dt>Alt. selling price ex.</dt>
+          <dd>2.27</dd>
+        </dl>
+        <hr><img src="https://example.test/media/widget.png" alt="Widget - Product image">
+      </div>
+      <div class="panel col-2-3">
+        <h6>Inventory</h6>
+        <div class="table-responsive-sm">
+          <table class="table b-table" ariabusy="false">
+            <!---->
+            <thead class="">
+              <tr class="">
+                <th scope="col" class="">Location</th>
+                <th scope="col" class="">Total amount</th>
+              </tr>
+              <!---->
+            </thead>
+            <tbody class="">
+              <!---->
+              <tr class="">
+                <td class="">
+                  <!---->Main warehouse
+                </td>
+                <td class="">
+                  <!---->12
+                </td>
+              </tr>
+              <!---->
+              <tr class="">
+                <td class="">
+                  <!---->Van 3
+                </td>
+                <td class="">
+                  <!---->4
+                </td>
+              </tr>
+              <!---->
+              <!---->
+            </tbody>
+            <!---->
+            <!---->
+          </table>
+        </div>
+      </div>
+      <transition-stub name="fade" enteractiveclass="fade showing" entertoclass="show" leaveactiveclass="fade showing" leavetoclass="showing" enterfromclass="showing" leavefromclass="" appear="false" persisted="false" css="true">
+        <!---->
+      </transition-stub>
+    </div>
+  </div>
+</div>"
+`;
