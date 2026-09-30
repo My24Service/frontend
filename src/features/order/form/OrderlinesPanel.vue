@@ -226,7 +226,7 @@ import {
   type OrderlineRow,
 } from './schemas'
 import { useEquipmentPickers, type EquipmentOption } from './use-order-pickers'
-import { useStagedRows } from './use-staged-rows'
+import { useStagedRows } from '@/features/forms'
 
 /**
  * The order's lines, staged here and sent in the order body. A tenant with equipment

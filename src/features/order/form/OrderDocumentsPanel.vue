@@ -133,7 +133,7 @@ import * as v from 'valibot'
 
 import RowAction from '@/components/RowAction.vue'
 import { fileListOf, readAsDataUrl } from '@/features/shared'
-import { useStagedRows } from './use-staged-rows'
+import { useStagedRows } from '@/features/forms'
 
 /**
  * The order's documents, staged in the form and replayed with the order's

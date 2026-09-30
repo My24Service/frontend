@@ -53,7 +53,6 @@ form/
   QuickCreateModal.vue    …the one-field modal that creates an equipment or location by name
   InfolinesPanel.vue      the infolines
   OrderDocumentsPanel.vue the order's documents
-  use-staged-rows.ts      rows staged in a form and replayed on save (the panels above)
   use-order-pickers.ts    the customer/branch, equipment/location, engineer and sales-user
                            searches over the shared `useSearch`, and the pure `fillCustomer` /
                            `fillBranch` onto the contact block (`OrderContactBlock`)

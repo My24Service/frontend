@@ -1,12 +1,16 @@
 /**
- * A set of child rows staged in a form and replayed on save: the order's
- * orderlines and infolines both work this way (and the maintenance
- * contract's equipment rows before them). Rows the record already had keep
- * their id and are PATCHed, new ones are POSTed, removed ones are DELETEd —
- * in that order, after the parent write.
+ * A set of child rows staged in a form: the rows, the one being edited (on a
+ * copy, so Cancel discards it) and the ids of stored rows removed.
  *
- * The composable owns the rows, the one being edited and the ids to delete;
- * the writes are the caller's, so it stays free of any op.
+ * Two ways to save them. Rows that are their own resource are replayed after
+ * the parent write (the order's orderlines, infolines and documents): rows the
+ * record already had keep their id and are PATCHed, new ones are POSTed,
+ * removed ones are DELETEd, in that order. Rows that ride the parent's body
+ * (a trip's orders, a purchase order's products) are simply read off `rows`,
+ * and `replay`/`deletedIds` go unused.
+ *
+ * The composable owns the state; the writes are the caller's, so it stays free
+ * of any op.
  */
 export function useStagedRows<TRow extends {id?: number}>(empty: () => TRow) {
   const rows = ref([]) as Ref<TRow[]>

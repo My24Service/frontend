@@ -18,6 +18,7 @@ export {
 } from './password-rules'
 export { normalizePhone } from './phone'
 export { fieldsFromRecord } from './record-fields'
+export { useStagedRows } from './use-staged-rows'
 export { completeTime, truncateTime } from './time-strings'
 export {
   useAvailabilityProbe,
