@@ -63,8 +63,6 @@ export const datePickerStub = {
   template: '<div class="datepicker-stub" />',
 }
 
-export const debounced = () => new Promise((resolve) => setTimeout(resolve, 550))
-
 export function picker(wrapper, id) {
   return wrapper.findComponent(`#${id}`)
 }
@@ -73,10 +71,9 @@ export function button(wrapper, text) {
   return wrapper.findAll('button').find((candidate) => candidate.text() === text)
 }
 
-/** Type a search term into the product picker and let the debounced read land. */
+/** Type a search term into the product picker and let the read land (the debounce is zero in specs). */
 export async function searchProducts(wrapper, term) {
   picker(wrapper, 'material-rows-search').vm.$emit('search-change', term)
-  await debounced()
   await settle()
 }
 

@@ -10,32 +10,33 @@ import {
   type FieldMessages,
   type WriteContext,
 } from '@/features/forms'
-import type { MaterialRowBody } from '../../material-rows'
+import { formDefaults } from '@/models/schema'
+
+const CreateBody = Api.InventoryPurchaseorderWithMaterials.create.body
+const UpdateBody = Api.InventoryPurchaseorder.extras.withMaterialsPartialUpdate.body
+
+/** One product row of the order's with-materials body: the material rows panel checks its draft against it. */
+export const materialRowSchema = v.unwrap(CreateBody.entries.materials).item
+
+/**
+ * The order's own fields, as the form holds them: the create body less what
+ * the form never sends. `uuid` and `purchase_order_id` are the server's, the
+ * P.O. box is not on this screen, and the materials are the panel's.
+ */
+const orderFields = v.omit(CreateBody, ['uuid', 'purchase_order_id', 'order_po_box', 'materials'])
 
 /**
  * The form's own state. A purchase order keeps its own copy of the supplier's
  * address and contact details rather than pointing at the supplier record, so
  * that it still says where the goods were ordered from if the supplier later
  * moves - hence one text field per detail, all nullable the way the supplier's
- * are. The date is a `Date` for the picker; the wire takes `YYYY-MM-DD`.
+ * are.
  */
-export type PurchaseOrderFormValues = {
+export type PurchaseOrderFormValues = Omit<v.InferInput<typeof orderFields>, 'supplier' | 'expected_entry_date'> & {
   /** The supplier picked; null until then, which the request does not allow. */
   supplier: number | null
-  supplier_reservation: number | null
-  order_name: string | null
-  order_address: string | null
-  order_postal: string | null
-  order_city: string | null
-  order_country_code: string | null
-  order_reference: string | null
-  order_tel: string | null
-  order_mobile: string | null
-  order_email: string | null
-  order_contact: string | null
+  /** A `Date` for the picker; the wire takes `YYYY-MM-DD`. */
   expected_entry_date: Date | null
-  supplier_remarks: string | null
-  description: string | null
 }
 
 export type PurchaseOrderFieldErrors = FieldErrors<keyof PurchaseOrderFormValues>
@@ -43,21 +44,12 @@ export type PurchaseOrderFieldErrors = FieldErrors<keyof PurchaseOrderFormValues
 /** A new order starts empty, in the Netherlands, expected the next working day. */
 export function emptyPurchaseOrder(): PurchaseOrderFormValues {
   return {
-    supplier: null,
-    supplier_reservation: null,
-    order_name: '',
-    order_address: '',
-    order_postal: '',
-    order_city: '',
-    order_country_code: 'NL',
-    order_reference: '',
-    order_tel: '',
-    order_mobile: '',
-    order_email: '',
-    order_contact: '',
+    // The supplier is a required integer, so its inferred blank is `0`; an
+    // unchosen picker is `null`. The reference and description are the two
+    // text fields picking a supplier does not fill, and a new order sends them
+    // blank rather than null, as it always has.
+    ...formDefaults(orderFields, {supplier: null, order_country_code: 'NL', order_reference: '', description: ''}),
     expected_entry_date: nextWorkingDay(),
-    supplier_remarks: '',
-    description: '',
   }
 }
 
@@ -154,9 +146,6 @@ export const FIELD_MESSAGES = {
   expected_entry_date: () => $trans('Please enter a date'),
 } as const satisfies FieldMessages<keyof PurchaseOrderFormValues>
 
-const CreateBody = Api.InventoryPurchaseorderWithMaterials.create.body
-const UpdateBody = Api.InventoryPurchaseorder.extras.withMaterialsPartialUpdate.body
-
 /**
  * Validation reads the create body for both directions: the form saves a whole
  * order, and that is the component that says what a whole order needs. The
@@ -197,7 +186,7 @@ export type PurchaseOrderWithMaterialsBody =
  */
 export function parsePurchaseOrder(
   values: PurchaseOrderFormValues,
-  materials: MaterialRowBody[],
+  materials: v.InferOutput<typeof materialRowSchema>[],
   context: Pick<WriteContext, 'isCreate'>,
 ): PurchaseOrderWithMaterialsBody {
   return v.parse(context.isCreate ? CreateBody : UpdateBody, {...shaped(values), materials})

@@ -4,20 +4,15 @@ import {
   type FieldLabels,
 } from '@/features/forms'
 
-/** The status modal's state: which order it adds to, and the status text. */
-export interface PurchaseOrderStatusFormValues {
-  /** The order the modal was opened for; 0 until one is. */
-  purchase_order: number
-  status: string
-}
+// The modal holds the create body unchanged: which order it adds to, and the status text.
+export type PurchaseOrderStatusFieldErrors = FieldErrors<keyof Api.InventoryPurchaseorderStatus.CreateInput>
 
-export type PurchaseOrderStatusFieldErrors = FieldErrors<keyof PurchaseOrderStatusFormValues>
-
-export function emptyPurchaseOrderStatus(): PurchaseOrderStatusFormValues {
+/** The order is 0 until the modal is opened for one, which sets it. */
+export function emptyPurchaseOrderStatus(): Api.InventoryPurchaseorderStatus.CreateInput {
   return {purchase_order: 0, status: ''}
 }
 
-export function purchaseOrderStatusFromRecord(record: Api.PurchaseOrderStatus): PurchaseOrderStatusFormValues {
+export function purchaseOrderStatusFromRecord(record: Api.PurchaseOrderStatus): Api.InventoryPurchaseorderStatus.CreateInput {
   return {purchase_order: record.purchase_order, status: record.status}
 }
 
@@ -26,6 +21,6 @@ export function purchaseOrderStatusFromRecord(record: Api.PurchaseOrderStatus): 
 // with it filled in.
 const FIELD_LABELS = {
   status: () => $trans('Status'),
-} as const satisfies FieldLabels<keyof PurchaseOrderStatusFormValues>
+} as const satisfies FieldLabels<keyof Api.InventoryPurchaseorderStatus.CreateInput>
 
 export const purchaseOrderStatusWrite = writeContract(Api.InventoryPurchaseorderStatus, {labels: FIELD_LABELS})

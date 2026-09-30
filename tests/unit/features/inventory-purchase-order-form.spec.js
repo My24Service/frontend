@@ -250,6 +250,29 @@ describe('PurchaseOrderForm - create', () => {
     expect(writes()[0].body.materials).toEqual([{ material: 10, amount: 2, remarks: '' }])
   })
 
+  // REGRESSION: the editor checked only the product and the amount, so a
+  // remark over the request's 255 characters was staged, the save's parse
+  // threw, and Submit did nothing at all. The row is now refused in the panel.
+  test('a product remark over 255 characters is refused in the panel, not at the save', async () => {
+    const wrapper = await readyToSave()
+
+    await addProduct(wrapper, { id: 10, name: 'Widget' }, 2, 'x'.repeat(256))
+
+    expect(stagedRows(wrapper)).toEqual([])
+    expect(wrapper.findAll('.material-rows .invalid-feedback.d-block').map((node) => node.text())).toEqual([
+      'Please use at most 255 characters',
+    ])
+
+    await wrapper.get('#material-rows-remarks').setValue('x'.repeat(255))
+    await button(wrapper, 'Add product').trigger('click')
+    await settle()
+    await submit(wrapper)
+    await settle()
+
+    expect(writes()).toHaveLength(1)
+    expect(writes()[0].body.materials).toEqual([{ material: 10, amount: 2, remarks: 'x'.repeat(255) }])
+  })
+
   test('formats expected_entry_date as YYYY-MM-DD before sending', async () => {
     const wrapper = await readyToSave()
 
@@ -568,7 +591,7 @@ describe('PurchaseOrderForm - the supplier', () => {
     const wrapper = await readyToCreate()
 
     supplierPicker(wrapper).vm.$emit('search-change', 'acm')
-    await new Promise((resolve) => setTimeout(resolve, 550))
+    // The search is debounced; zero in specs.
     await settle()
 
     expect(api.requests()).toEqual([{ method: 'get', path: SUPPLIERS, query: { q: 'acm' } }])
@@ -596,7 +619,7 @@ describe('PurchaseOrderForm - the reservation', () => {
     const wrapper = await readyToCreate()
 
     reservationPicker(wrapper).vm.$emit('search-change', 'acm')
-    await new Promise((resolve) => setTimeout(resolve, 550))
+    // The search is debounced; zero in specs.
     await settle()
 
     expect(api.requests()).toEqual([{ method: 'get', path: RESERVATIONS, query: { q: 'acm' } }])

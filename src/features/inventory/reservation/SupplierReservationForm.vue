@@ -103,6 +103,7 @@
           </div>
           <MaterialRowsPanel
             :staging="materialRows"
+            :products="products"
             :supplier-chosen="values.supplier !== null"
             :placeholder="$trans('Select a supplier')"
           />
@@ -116,9 +117,10 @@
 import VueMultiselect from 'vue-multiselect'
 
 import { useResourceForm, useSearch } from '@/features/forms'
-import { MaterialRowsPanel, rowFromRecord, useCatalogueProductSearch, useMaterialRows } from '../material-rows'
+import { MaterialRowsPanel, rowFromRecord, useMaterialRows, type MaterialOption } from '../material-rows'
 import {
   emptyReservation,
+  materialRowSchema,
   parseReservation,
   reservationFromRecord,
   validateReservation,
@@ -172,7 +174,22 @@ const {
   },
 })
 
-const materialRows = useMaterialRows({products: useCatalogueProductSearch(() => values.value.supplier)})
+const materialRows = useMaterialRows(materialRowSchema)
+
+/**
+ * The product search: the supplier's catalogue itself, as the legacy
+ * reservation form searched it. Not the autocomplete the purchase order form
+ * reads, which answers only materials with a price row for this year, and so
+ * would hide part of the catalogue from a reservation.
+ */
+const products = useSearch(
+  (q) => Api.InventoryMaterial.list.options({
+    query: {q, supplier_relation: values.value.supplier ?? undefined, page: 1},
+  }),
+  () => values.value.supplier !== null,
+  $trans('Error fetching products'),
+  (data): MaterialOption[] => data.results ?? [],
+)
 
 /** The supplier shown in the read-only block: the stored one, or the one just picked. */
 const selectedSupplier = ref<Partial<Record<'name' | 'address' | 'city' | 'email', string | null>> | null>(null)

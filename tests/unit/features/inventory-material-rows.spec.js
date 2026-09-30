@@ -1,7 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { defineComponent } from 'vue'
 
-import { MaterialRowsPanel, MaterialRowsTable, useAutocompleteProductSearch, useMaterialRows } from '@/features/inventory/material-rows'
+import { useSearch } from '@/features/forms'
+import { MaterialRowsPanel, MaterialRowsTable, useMaterialRows } from '@/features/inventory/material-rows'
+import { materialRowSchema } from '@/features/inventory/purchase-order/form/schemas'
+import * as Api from '@/services/api-client'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { mountForm } from '../support/form-harness.js'
 import {
@@ -30,11 +33,18 @@ const Host = defineComponent({
   components: { MaterialRowsPanel },
   props: { supplierChosen: { type: Boolean, default: true }, stored: { type: Array, default: () => [] } },
   setup(props) {
-    const staging = useMaterialRows({ products: useAutocompleteProductSearch(() => 3) })
+    const staging = useMaterialRows(materialRowSchema)
     staging.setRows(props.stored.map((row) => ({ ...row })))
-    return { staging }
+    // The panel reads whatever search its form hands it; this one is supplier 3's autocomplete.
+    const products = useSearch(
+      (q) => Api.InventoryMaterialAutocomplete.list.options({ query: { q, supplier: 3 } }),
+      () => true,
+      'Error fetching products',
+      (found) => found,
+    )
+    return { staging, products }
   },
-  template: '<MaterialRowsPanel :staging="staging" :supplier-chosen="supplierChosen" placeholder="Pick a supplier first" />',
+  template: '<MaterialRowsPanel :staging="staging" :products="products" :supplier-chosen="supplierChosen" placeholder="Pick a supplier first" />',
 })
 
 let mounted = []
@@ -85,8 +95,8 @@ describe('the editor', () => {
     expect(amountInput(wrapper).element.value).toBe('0')
   })
 
-  // The focus is imperative: the panel binds the amount input's template ref to
-  // the ref the composable owns, so a broken binding fails silently.
+  // The focus is imperative: the panel's template ref on the amount input is
+  // what the pick focuses, so a broken binding fails silently.
   test('picking a product moves the focus to the amount', async () => {
     const wrapper = await mountRows({}, { attachTo: document.body })
 
@@ -95,11 +105,11 @@ describe('the editor', () => {
     expect(document.activeElement).toBe(amountInput(wrapper).element)
   })
 
-  test('the picker searches only through the shared search, so a term reads the supplier\'s products', async () => {
+  test('the picker searches only through the search it is handed, so a term reads the supplier\'s products', async () => {
     const wrapper = await mountRows()
 
     picker(wrapper, 'material-rows-search').vm.$emit('search-change', 'wid')
-    await new Promise((resolve) => setTimeout(resolve, 550))
+    // The search is debounced; zero in specs.
     await settle()
 
     expect(api.requests()).toEqual([
@@ -146,6 +156,19 @@ describe('adding a row', () => {
     expect(feedback(wrapper)).toEqual(['Please enter an amount'])
     await button(wrapper, 'Add product').trigger('click')
     expect(stagedRows(wrapper)).toEqual([])
+  })
+
+  // REGRESSION: the editor checked only the product and the amount, while the
+  // request's row caps the remark at 255 characters, so an over-long remark was
+  // staged and made the parent's save throw.
+  test('refuses a remark over 255 characters, and says so under it', async () => {
+    const wrapper = await mountRows()
+
+    await addProduct(wrapper, { id: 10, name: 'Widget' }, 2, 'x'.repeat(256))
+
+    expect(button(wrapper, 'Add product').attributes('disabled')).toBeDefined()
+    expect(stagedRows(wrapper)).toEqual([])
+    expect(feedback(wrapper)).toEqual(['Please use at most 255 characters'])
   })
 
   // The legacy editor touched both fields on every render, so a blank editor
@@ -287,13 +310,9 @@ describe('MaterialRowsTable', () => {
     ])
   })
 
-  test('the dark variant is dark, borderless and small', () => {
-    const plain = mountForm(MaterialRowsTable, { deep: true, props: { tableId: 'products', items } })
-    const dark = mountForm(MaterialRowsTable, { deep: true, props: { tableId: 'products', items, dark: true } })
+  test('the table\'s look falls through to it', () => {
+    const dark = mountForm(MaterialRowsTable, { deep: true, props: { tableId: 'products', items, dark: true, small: true } })
 
-    for (const cls of ['table-dark', 'table-borderless', 'table-sm']) {
-      expect(dark.get('table').classes()).toContain(cls)
-      expect(plain.get('table').classes()).not.toContain(cls)
-    }
+    expect(dark.get('table').classes()).toEqual(expect.arrayContaining(['table-dark', 'table-sm']))
   })
 })

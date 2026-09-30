@@ -125,6 +125,9 @@
               v-model="draft.remarks"
               rows="1"
             />
+            <b-form-invalid-feedback :state="!draftErrors.remarks">
+              {{ draftErrors.remarks }}
+            </b-form-invalid-feedback>
           </BFormGroup>
         </b-col>
       </b-row>
@@ -175,7 +178,7 @@
 <script setup lang="ts">
 import VueMultiselect from 'vue-multiselect'
 
-import type { MaterialRows } from './use-material-rows'
+import type { MaterialOption, MaterialRows, ProductSearch } from './use-material-rows'
 
 /**
  * The material rows of a purchase order or a reservation: the staged rows, the
@@ -184,6 +187,8 @@ import type { MaterialRows } from './use-material-rows'
  */
 const props = defineProps<{
   staging: MaterialRows
+  /** The picker's search: the form decides which catalogue its products come from. */
+  products: ProductSearch
   /** Products are the chosen supplier's, so the editor shows only once there is one. */
   supplierChosen: boolean
   /** What shows in the editor's place until then. */
@@ -192,10 +197,6 @@ const props = defineProps<{
 
 const {
   rows,
-  productOptions,
-  searching,
-  searchTerm,
-  selectMaterial,
   draft,
   draftErrors,
   isDraftValid,
@@ -205,8 +206,17 @@ const {
   commitEdit,
   cancelEdit,
   deleteRow,
-  amountInput,
 } = props.staging
+
+const {term: searchTerm, options: productOptions, loading: searching} = props.products
+
+const amountInput = useTemplateRef<{focus: () => void}>('amountInput')
+
+/** Fill the editor with the pick, then move on to the amount, which is what a pick is followed by. */
+function selectMaterial(option: MaterialOption) {
+  props.staging.selectMaterial(option)
+  void nextTick(() => amountInput.value?.focus())
+}
 
 const fields = [
   {key: 'name', label: $trans('Name')},

@@ -78,6 +78,8 @@
             <h4>{{ $trans('Products') }}</h4>
             <MaterialRowsTable
               dark
+              borderless
+              small
               table-id="reservation-materials-table"
               :items="reservation.materials"
             />
@@ -99,7 +101,7 @@ const props = defineProps<{
 
 const router = useRouter()
 
-const query = useQuery(() => Api.InventorySupplierReservation.retrieve.options({path: {id: Number(props.pk)}}))
+const query = useQuery(() => Api.InventorySupplierReservation.retrieveOptions(Number(props.pk)))
 useQueryErrorToast(query.error, $trans('Error fetching reservation'))
 const reservation = computed(() => query.data.value)
 const isLoading = computed(() => query.isLoading.value)

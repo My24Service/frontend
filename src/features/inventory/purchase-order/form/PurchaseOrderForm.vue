@@ -49,6 +49,7 @@
           />
           <MaterialRowsPanel
             :staging="materialRows"
+            :products="products"
             :supplier-chosen="values.supplier !== null"
             :placeholder="$trans('Select a supplier or reservation')"
           />
@@ -59,12 +60,13 @@
 </template>
 
 <script setup lang="ts">
-import { useResourceForm } from '@/features/forms'
-import { MaterialRowsPanel, newRowFromRecord, rowFromRecord, useAutocompleteProductSearch, useMaterialRows } from '../../material-rows'
+import { useResourceForm, useSearch } from '@/features/forms'
+import { MaterialRowsPanel, newRowFromRecord, rowFromRecord, useMaterialRows, type MaterialOption } from '../../material-rows'
 import PurchaseOrderSupplierFields from './PurchaseOrderSupplierFields.vue'
 import {
   applySupplier,
   emptyPurchaseOrder,
+  materialRowSchema,
   parsePurchaseOrder,
   purchaseOrderFromRecord,
   validatePurchaseOrder,
@@ -129,7 +131,21 @@ const {
   },
 })
 
-const materialRows = useMaterialRows({products: useAutocompleteProductSearch(() => values.value.supplier)})
+const materialRows = useMaterialRows(materialRowSchema)
+
+/**
+ * The product search: the supplier's materials through the autocomplete,
+ * which answers the current year's price rows (or the latest year's), as the
+ * legacy order form searched.
+ */
+const products = useSearch(
+  (q) => Api.InventoryMaterialAutocomplete.list.options({
+    query: {q, supplier: values.value.supplier ?? undefined},
+  }),
+  () => values.value.supplier !== null,
+  $trans('Error fetching products'),
+  (found): MaterialOption[] => found,
+)
 
 // The stored products come with the order. The set is the form's from then on:
 // what is added, edited and removed is sent back whole on the save.
