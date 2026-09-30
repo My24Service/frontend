@@ -2,7 +2,7 @@ export { default as ApiResult } from './ApiResult.vue'
 export { default as ImageUploadField } from './ImageUploadField.vue'
 export { default as ValidatedForm } from './ValidatedForm.vue'
 export { default as ValidatedFormField } from './ValidatedFormField.vue'
-export { toApiDate } from './dates'
+export { nextWorkingDay, toApiDate } from './dates'
 export { default as EmailRecipientsField } from './EmailRecipientsField.vue'
 export {
   SEND_FIELD_LABELS,
