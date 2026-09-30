@@ -82,6 +82,10 @@ export function writeContract<
 
   return {
     resource,
+    // Handed on so `useResourceForm` names a field a failed `parse` refuses
+    // the way `validate` would have.
+    labels,
+    messages,
     validate(values: TValues, context: Pick<WriteContext, 'isCreate'>): FieldErrors<TField> {
       return fieldErrors(validateWith ?? schemaFor(context), shape(values), messages, labels)
     },

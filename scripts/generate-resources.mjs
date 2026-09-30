@@ -171,6 +171,21 @@ const hasQueryParams = new Map()
 const pageableLists = new Map()
 /** operationId -> the query parameter names its list declares, for the filters. */
 const queryParamNames = new Map()
+/** operationId -> {name: wire type} for its query parameters that are not sent as strings. */
+const queryParamTypes = new Map()
+
+/**
+ * How one query parameter goes on the wire when not as a string, read off its
+ * OpenAPI schema: `integer`, `number` or `boolean`, the three the generated
+ * valibot query schema will not take as a string. Everything else - a string,
+ * an enum, a `oneOf` union, an array - is `undefined` and `columnFilters`
+ * sends it as `String(value)`. A 3.1 `type: [integer, 'null']` counts as its
+ * one non-null type.
+ */
+function wireType(schema) {
+  const types = [schema?.type].flat().filter((type) => type && type !== 'null')
+  return types.length === 1 && ['integer', 'number', 'boolean'].includes(types[0]) ? types[0] : undefined
+}
 
 /**
  * The four query parameters `baseListParams` already sends, so deriving a
@@ -298,6 +313,14 @@ for (const [path, item] of Object.entries(doc.paths ?? {})) {
     queryParamNames.set(
       id,
       (operation.parameters ?? []).filter((param) => param.in === 'query').map((param) => param.name),
+    )
+    queryParamTypes.set(
+      id,
+      Object.fromEntries(
+        (operation.parameters ?? [])
+          .filter((param) => param.in === 'query' && wireType(param.schema))
+          .map((param) => [param.name, wireType(param.schema)]),
+      ),
     )
     bodySchemas.set(id, Boolean(operation.requestBody) ? `v${toCase(id, 'PascalCase')}Body` : null)
     // A verb on one record (`branch/{id}/dashboard/`, `apiuser/{id}/revoke/`)
@@ -590,6 +613,16 @@ const resourceBlocks = resources.map((resource) => {
           ? `  filters: [],`
           : `  filters: [${filterKeys.map((key) => `'${key}'`).join(', ')}] satisfies (keyof ${name}.ListQuery)[],`,
       )
+      // The filters that are not strings on the wire, by the type their
+      // OpenAPI parameter declares, so `columnFilters` sends `7` rather than
+      // `'7'` to an integer the generated query schema would reject. Only
+      // written when there is one: a filter it does not name goes as a string.
+      const typed = filterKeys
+        .map((key) => [key, queryParamTypes.get(listId)?.[key]])
+        .filter(([, type]) => type)
+      if (typed.length > 0) {
+        fields.push(`  filterTypes: {${typed.map(([key, type]) => `${/^[A-Za-z_$][\w$]*$/.test(key) ? key : `'${key}'`}: '${type}'`).join(', ')}},`)
+      }
     }
   }
   // The record-level verbs: a screen that needs `/branch/{id}/dashboard/` names

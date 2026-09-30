@@ -45,18 +45,74 @@ export function baseListParams(query: ServerPagedListQuery): Record<string, unkn
 }
 
 /**
- * The named column filters that hold a value, as the API wants them. Only a
- * string, number or boolean has a wire form: an object, an array or the empty
- * string an unfilled filter holds is dropped, because `String({})` would filter
- * on `[object Object]` and `?name=` on nothing at all.
+ * How a column filter goes on the wire, when not as a string: what the list
+ * operation's OpenAPI parameter declares (`type: integer`, `number`,
+ * `boolean`). The generator writes it per resource as `filterTypes`; a filter
+ * it does not name - a string, an enum, a union - is sent as a string.
  */
-export function columnFilters(query: ServerPagedListQuery, filters: readonly string[]): Record<string, string> {
-  const out: Record<string, string> = {}
+export type FilterWireType = 'integer' | 'number' | 'boolean'
+
+const INTEGER = /^-?\d+$/
+const DECIMAL = /^-?(\d+\.?\d*|\.\d+)$/
+/**
+ * What django-filter's `BooleanWidget` reads, lowercased: `true`/`false` and
+ * `1`/`0`. A `?is_deleted=True` or `=1` in a link means a flag to the server,
+ * so it means one here too rather than being dropped.
+ */
+const FLAGS: Readonly<Record<string, boolean>> = {true: true, false: false, '1': true, '0': false}
+
+/** One filter value as `type` wants it on the wire, or `undefined` when it cannot hold it. */
+function wireValue(value: string | number | boolean, type: FilterWireType | undefined): string | number | boolean | undefined {
+  const text = typeof value === 'string' ? value.trim() : undefined
+  switch (type) {
+    case 'integer':
+      if (typeof value === 'number') return Number.isInteger(value) ? value : undefined
+      return text !== undefined && INTEGER.test(text) ? Number(text) : undefined
+    case 'number':
+      if (typeof value === 'number') return Number.isFinite(value) ? value : undefined
+      return text !== undefined && DECIMAL.test(text) ? Number(text) : undefined
+    case 'boolean':
+      return typeof value === 'boolean' ? value : text === undefined ? undefined : FLAGS[text.toLowerCase()]
+    default:
+      return String(value)
+  }
+}
+
+/**
+ * The named column filters that hold a value, as the endpoint's parameters
+ * want them. Only a string, number or boolean has a wire form: an object, an
+ * array or the empty string an unfilled filter holds is dropped, because
+ * `String({})` would filter on `[object Object]` and `?name=` on nothing at all.
+ *
+ * `types` says which filters are not strings (`filterTypes`, generated from
+ * the OpenAPI parameters). The generated `*ListOptions` parse the query with
+ * the valibot schema and throw on `"7"` for an integer, so each value is sent
+ * as its declared type, and a filter read back from the URL - always a
+ * string - is converted here rather than in every screen:
+ *
+ * - `integer`: an integer, or a string of digits with an optional `-`
+ *   (`'7'` -> `7`). `'7.5'`, `'1e3'`, `'0x1F'` and `' '` are not integers.
+ * - `number`: a finite number, or a plain decimal string (`'7.5'` -> `7.5`).
+ * - `boolean`: a boolean, or `true`/`false`/`1`/`0` in any case, as
+ *   django-filter's `BooleanFilter` reads them.
+ * - anything else goes as `String(value)`, a numeric-looking string included.
+ *
+ * A value its type cannot hold (`?supplier_relation=abc`) is dropped like an
+ * empty one rather than thrown on. Dropping a filter *widens* the list - the
+ * table shows every row that filter would have excluded - which is the
+ * lesser evil next to a list that fails to load over a hand-edited URL.
+ */
+export function columnFilters(
+  query: ServerPagedListQuery,
+  filters: readonly string[],
+  types: Readonly<Record<string, FilterWireType>> = {},
+): Record<string, string | number | boolean> {
+  const out: Record<string, string | number | boolean> = {}
   for (const key of filters) {
     const value = query[key]
-    if (typeof value === 'string' ? value !== '' : typeof value === 'number' || typeof value === 'boolean') {
-      out[key] = String(value)
-    }
+    if (value === '' || (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean')) continue
+    const wire = wireValue(value, types[key])
+    if (wire !== undefined) out[key] = wire
   }
   return out
 }
@@ -103,6 +159,8 @@ export interface CollectionDefinition<TId extends number | string> extends Defin
    * the endpoint declares. Its presence is what gives a resource `listOptions`.
    */
   readonly filters?: readonly string[]
+  /** The filters in `filters` that are not sent as strings, by their declared wire type. */
+  readonly filterTypes?: Readonly<Record<string, FilterWireType>>
   readonly retrieve?: ResourceRecordRead<TId>
   readonly create?: ResourceWrite
   readonly update?: ResourceWrite
@@ -193,6 +251,7 @@ export type ResourceMethods<D extends ResourceDefinition> = {
 type Self = ResourceDefinition & {
   readonly list?: ResourceRead
   readonly filters?: readonly string[]
+  readonly filterTypes?: Readonly<Record<string, FilterWireType>>
   readonly retrieve?: ResourceRead
 }
 
@@ -202,7 +261,7 @@ const methods = {
   },
   listOptions(this: Self, query: ServerPagedListQuery, filters: readonly string[] = this.filters ?? []) {
     const options = this.list!.options as (options: {query: Record<string, unknown>}) => object
-    return options({query: {...baseListParams(query), ...columnFilters(query, filters)}})
+    return options({query: {...baseListParams(query), ...columnFilters(query, filters, this.filterTypes)}})
   },
   retrieveOptions(this: Self, id?: number | string) {
     const options = this.retrieve!.options as (options?: {path: {id: unknown}}) => object

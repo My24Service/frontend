@@ -128,8 +128,8 @@ import VueMultiselect from 'vue-multiselect'
 import {
   useResourceForm,
   useSearch,
+  useStagedRows,
 } from '@/features/forms'
-import { useStagedRows } from '@/features/order'
 import {
   conditionsOf,
   emptyTrip,

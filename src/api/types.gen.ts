@@ -7958,8 +7958,8 @@ export type StockLocationCreateUpdateRequest = {
 
 export type StockMutationSimple = {
     readonly id: number;
-    material?: number | null;
-    location?: number | null;
+    material: number | null;
+    location: number | null;
     amount: string;
     mutation_type?: MutationTypeEnum;
     /**
@@ -7972,8 +7972,8 @@ export type StockMutationSimple = {
 };
 
 export type StockMutationSimpleRequest = {
-    material?: number | null;
-    location?: number | null;
+    material: number;
+    location: number;
     amount: string;
     mutation_type?: MutationTypeEnum;
     remarks?: string | null;
@@ -12533,8 +12533,8 @@ export type StockLocationCreateUpdateWritable = {
 };
 
 export type StockMutationSimpleWritable = {
-    material?: number | null;
-    location?: number | null;
+    material: number | null;
+    location: number | null;
     amount: string;
     mutation_type?: MutationTypeEnum;
     remarks?: string | null;
@@ -19666,7 +19666,7 @@ export type InventoryPurchaseorderRetrieveData = {
 };
 
 export type InventoryPurchaseorderRetrieveResponses = {
-    200: PurchaseOrderList;
+    200: PurchaseOrderDetail;
 };
 
 export type InventoryPurchaseorderRetrieveResponse = InventoryPurchaseorderRetrieveResponses[keyof InventoryPurchaseorderRetrieveResponses];

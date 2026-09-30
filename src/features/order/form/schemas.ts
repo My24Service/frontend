@@ -9,6 +9,7 @@ import {
   type FieldLabels,
   toApiDate,
   completeTime,
+  nextWorkingDay,
 } from '@/features/forms'
 /**
  * Who is filling the order form. The backend has one create serializer per
@@ -160,19 +161,6 @@ export type OrderFormValues =
     // always held, so inputs stay controlled
     order_email_extra: string[]
   }
-
-/**
- * The default start/end date: the next working day, computed per call so a
- * session left open past midnight does not keep handing out yesterday's
- * tomorrow.
- */
-export function nextWorkingDay(from: Date = new Date()): Date {
-  const date = new Date(from)
-  date.setDate(date.getDate() + 1)
-  if (date.getDay() === 0) date.setDate(date.getDate() + 1)
-  else if (date.getDay() === 6) date.setDate(date.getDate() + 2)
-  return date
-}
 
 export function emptyOrder(): OrderFormValues {
   return {

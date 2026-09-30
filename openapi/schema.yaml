@@ -9242,7 +9242,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PurchaseOrderList'
+                $ref: '#/components/schemas/PurchaseOrderDetail'
           description: ''
     patch:
       operationId: inventory_purchaseorder_partial_update
@@ -41710,6 +41710,8 @@ components:
       required:
       - amount
       - id
+      - location
+      - material
       - material_name
       - modified
       - summary
@@ -41718,10 +41720,8 @@ components:
       properties:
         material:
           type: integer
-          nullable: true
         location:
           type: integer
-          nullable: true
         amount:
           type: string
           format: decimal
@@ -41734,6 +41734,8 @@ components:
           maxLength: 255
       required:
       - amount
+      - location
+      - material
     StreamChannel:
       type: object
       description: The stream credentials GetUserInfo nests.

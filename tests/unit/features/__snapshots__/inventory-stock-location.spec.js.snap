@@ -1,0 +1,58 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`StockLocationView > renders the legacy view's markup 1`] = `
+"<div class="app-page">
+  <header>
+    <div class="page-title">
+      <h3><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+          <path fill="currentColor" d="M2.5 0a.5.5 0 0 1 .5.5V2h10V.5a.5.5 0 0 1 1 0v15a.5.5 0 0 1-1 0V15H3v.5a.5.5 0 0 1-1 0V.5a.5.5 0 0 1 .5-.5M3 14h10v-3H3zm0-4h10V7H3zm0-4h10V3H3z"></path>
+        </svg><span class="backlink">Stock Locations</span> / Main warehouse <small class="dimmed">(WH-1)</small></h3><a href="/inventory/stock-locations/form/5" class="btn btn-primary">Edit stock location</a>
+    </div>
+  </header>
+  <div class="page-detail">
+    <div class="panel col-2-3">
+      <h6>Inventory · Main warehouse</h6>
+      <div class="row">
+        <div class="col-12">
+          <div class="table-responsive-sm">
+            <table class="table b-table table-sm" ariabusy="false">
+              <!---->
+              <thead class="">
+                <tr class="">
+                  <th scope="col" class="">Material</th>
+                  <th scope="col" class="">Total amount</th>
+                </tr>
+                <!---->
+              </thead>
+              <tbody class="">
+                <!---->
+                <tr class="">
+                  <td class="">
+                    <!---->Widget
+                  </td>
+                  <td class="">
+                    <!---->12
+                  </td>
+                </tr>
+                <!---->
+                <tr class="">
+                  <td class="">
+                    <!---->Gadget
+                  </td>
+                  <td class="">
+                    <!---->4
+                  </td>
+                </tr>
+                <!---->
+                <!---->
+              </tbody>
+              <!---->
+              <!---->
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>"
+`;

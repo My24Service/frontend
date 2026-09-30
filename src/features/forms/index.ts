@@ -2,7 +2,7 @@ export { default as ApiResult } from './ApiResult.vue'
 export { default as ImageUploadField } from './ImageUploadField.vue'
 export { default as ValidatedForm } from './ValidatedForm.vue'
 export { default as ValidatedFormField } from './ValidatedFormField.vue'
-export { toApiDate } from './dates'
+export { nextWorkingDay, toApiDate } from './dates'
 export { default as EmailRecipientsField } from './EmailRecipientsField.vue'
 export {
   SEND_FIELD_LABELS,
@@ -18,6 +18,7 @@ export {
 } from './password-rules'
 export { normalizePhone } from './phone'
 export { fieldsFromRecord } from './record-fields'
+export { useStagedRows } from './use-staged-rows'
 export { completeTime, truncateTime } from './time-strings'
 export {
   useAvailabilityProbe,
@@ -60,6 +61,7 @@ export {
   ruleMessage,
   requiredOrMaxLength,
   fieldErrors,
+  issueErrors,
   type FieldMessage,
   type FieldMessageTree,
   type FieldMessages,

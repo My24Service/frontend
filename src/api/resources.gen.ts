@@ -1996,6 +1996,7 @@ export const CompanyEngineerEventTypeStats = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: companyEngineerEventTypeStatsListOptions, queryKey: companyEngineerEventTypeStatsListQueryKey},
   filters: ['engineer', 'year'] satisfies (keyof CompanyEngineerEventTypeStats.ListQuery)[],
+  filterTypes: {engineer: 'integer', year: 'integer'},
   reads: ['companyEngineerEventTypeStatsList'],
 })
 
@@ -2041,6 +2042,7 @@ export const CompanyEngineerevent = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: companyEngineereventListOptions, queryKey: companyEngineereventListQueryKey},
   filters: ['engineer'] satisfies (keyof CompanyEngineerevent.ListQuery)[],
+  filterTypes: {engineer: 'integer'},
   create: {mutation: companyEngineereventCreateMutation, body: vCompanyEngineereventCreateBody},
   destroy: {mutation: companyEngineereventDestroyMutation},
   extras: {
@@ -2462,6 +2464,7 @@ export const CompanySalesusercustomer = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: companySalesusercustomerListOptions, queryKey: companySalesusercustomerListQueryKey},
   filters: ['user'] satisfies (keyof CompanySalesusercustomer.ListQuery)[],
+  filterTypes: {user: 'integer'},
   retrieve: {options: companySalesusercustomerRetrieveOptions, queryKey: companySalesusercustomerRetrieveQueryKey},
   create: {mutation: companySalesusercustomerCreateMutation, body: vCompanySalesusercustomerCreateBody},
   update: {mutation: companySalesusercustomerPartialUpdateMutation, body: vCompanySalesusercustomerPartialUpdateBody},
@@ -2845,6 +2848,7 @@ export const CompanyUserSickLeaveAdmin = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: companyUserSickLeaveAdminListOptions, queryKey: companyUserSickLeaveAdminListQueryKey},
   filters: ['user'] satisfies (keyof CompanyUserSickLeaveAdmin.ListQuery)[],
+  filterTypes: {user: 'integer'},
   retrieve: {options: companyUserSickLeaveAdminRetrieveOptions, queryKey: companyUserSickLeaveAdminRetrieveQueryKey},
   create: {mutation: companyUserSickLeaveAdminCreateMutation, body: vCompanyUserSickLeaveAdminCreateBody},
   update: {mutation: companyUserSickLeaveAdminPartialUpdateMutation, body: vCompanyUserSickLeaveAdminPartialUpdateBody},
@@ -2882,6 +2886,7 @@ export const CompanyUserSickLeaveAdminAllSick = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: companyUserSickLeaveAdminAllSickListOptions, queryKey: companyUserSickLeaveAdminAllSickListQueryKey},
   filters: ['user'] satisfies (keyof CompanyUserSickLeaveAdminAllSick.ListQuery)[],
+  filterTypes: {user: 'integer'},
   reads: ['companyUserSickLeaveAdminAllSickList'],
 })
 
@@ -2899,6 +2904,7 @@ export const CompanyUserSickLeaveAdminAllUnconfirmed = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: companyUserSickLeaveAdminAllUnconfirmedListOptions, queryKey: companyUserSickLeaveAdminAllUnconfirmedListQueryKey},
   filters: ['user'] satisfies (keyof CompanyUserSickLeaveAdminAllUnconfirmed.ListQuery)[],
+  filterTypes: {user: 'integer'},
   reads: ['companyUserSickLeaveAdminAllUnconfirmedList'],
 })
 
@@ -2931,6 +2937,7 @@ export const CompanyUserWorkhours = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: companyUserWorkhoursListOptions, queryKey: companyUserWorkhoursListQueryKey},
   filters: ['start_date', 'user'] satisfies (keyof CompanyUserWorkhours.ListQuery)[],
+  filterTypes: {user: 'integer'},
   retrieve: {options: companyUserWorkhoursRetrieveOptions, queryKey: companyUserWorkhoursRetrieveQueryKey},
   create: {mutation: companyUserWorkhoursCreateMutation, body: vCompanyUserWorkhoursCreateBody},
   update: {mutation: companyUserWorkhoursPartialUpdateMutation, body: vCompanyUserWorkhoursPartialUpdateBody},
@@ -3065,6 +3072,7 @@ export const CustomerCustomerAutocomplete = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: customerCustomerAutocompleteListOptions, queryKey: customerCustomerAutocompleteListQueryKey},
   filters: ['city', 'contact', 'customer_id', 'id', 'name', 'num_orders', 'remarks'] satisfies (keyof CustomerCustomerAutocomplete.ListQuery)[],
+  filterTypes: {customer_id: 'integer'},
   reads: ['customerCustomerAutocompleteList'],
 })
 
@@ -3100,6 +3108,7 @@ export const CustomerDocument = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: customerDocumentListOptions, queryKey: customerDocumentListQueryKey},
   filters: ['customer'] satisfies (keyof CustomerDocument.ListQuery)[],
+  filterTypes: {customer: 'integer'},
   retrieve: {options: customerDocumentRetrieveOptions, queryKey: customerDocumentRetrieveQueryKey},
   create: {mutation: customerDocumentCreateMutation, body: vCustomerDocumentCreateBody},
   update: {mutation: customerDocumentPartialUpdateMutation, body: vCustomerDocumentPartialUpdateBody},
@@ -3181,6 +3190,7 @@ export const CustomerMaintenanceEquipment = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: customerMaintenanceEquipmentListOptions, queryKey: customerMaintenanceEquipmentListQueryKey},
   filters: ['contract'] satisfies (keyof CustomerMaintenanceEquipment.ListQuery)[],
+  filterTypes: {contract: 'integer'},
   retrieve: {options: customerMaintenanceEquipmentRetrieveOptions, queryKey: customerMaintenanceEquipmentRetrieveQueryKey},
   create: {mutation: customerMaintenanceEquipmentCreateMutation, body: vCustomerMaintenanceEquipmentCreateBody},
   update: {mutation: customerMaintenanceEquipmentPartialUpdateMutation, body: vCustomerMaintenanceEquipmentPartialUpdateBody},
@@ -3247,6 +3257,7 @@ export const EquipmentBuildingAutocomplete = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: equipmentBuildingAutocompleteListOptions, queryKey: equipmentBuildingAutocompleteListQueryKey},
   filters: ['branch', 'created', 'customer', 'modified', 'name'] satisfies (keyof EquipmentBuildingAutocomplete.ListQuery)[],
+  filterTypes: {branch: 'integer', customer: 'integer'},
   reads: ['equipmentBuildingAutocompleteList'],
 })
 
@@ -3320,6 +3331,7 @@ export const EquipmentEquipmentAutocomplete = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: equipmentEquipmentAutocompleteListOptions, queryKey: equipmentEquipmentAutocompleteListQueryKey},
   filters: ['branch', 'brand', 'customer', 'description', 'identifier', 'location', 'name', 'num_orders', 'serialnumber', 'type'] satisfies (keyof EquipmentEquipmentAutocomplete.ListQuery)[],
+  filterTypes: {branch: 'integer', customer: 'integer'},
   reads: ['equipmentEquipmentAutocompleteList'],
 })
 
@@ -3352,6 +3364,7 @@ export const EquipmentEquipmentDocument = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: equipmentEquipmentDocumentListOptions, queryKey: equipmentEquipmentDocumentListQueryKey},
   filters: ['equipment', 'equipment__branch', 'type'] satisfies (keyof EquipmentEquipmentDocument.ListQuery)[],
+  filterTypes: {equipment: 'integer', equipment__branch: 'integer'},
   retrieve: {options: equipmentEquipmentDocumentRetrieveOptions, queryKey: equipmentEquipmentDocumentRetrieveQueryKey},
   create: {mutation: equipmentEquipmentDocumentCreateMutation, body: vEquipmentEquipmentDocumentCreateBody},
   update: {mutation: equipmentEquipmentDocumentPartialUpdateMutation, body: vEquipmentEquipmentDocumentPartialUpdateBody},
@@ -3444,6 +3457,7 @@ export const EquipmentLocationAutocomplete = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: equipmentLocationAutocompleteListOptions, queryKey: equipmentLocationAutocompleteListQueryKey},
   filters: ['branch', 'created', 'customer', 'modified', 'name'] satisfies (keyof EquipmentLocationAutocomplete.ListQuery)[],
+  filterTypes: {branch: 'integer', customer: 'integer'},
   reads: ['equipmentLocationAutocompleteList'],
 })
 
@@ -3476,6 +3490,7 @@ export const EquipmentLocationDocument = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: equipmentLocationDocumentListOptions, queryKey: equipmentLocationDocumentListQueryKey},
   filters: ['location'] satisfies (keyof EquipmentLocationDocument.ListQuery)[],
+  filterTypes: {location: 'integer'},
   retrieve: {options: equipmentLocationDocumentRetrieveOptions, queryKey: equipmentLocationDocumentRetrieveQueryKey},
   create: {mutation: equipmentLocationDocumentCreateMutation, body: vEquipmentLocationDocumentCreateBody},
   update: {mutation: equipmentLocationDocumentPartialUpdateMutation, body: vEquipmentLocationDocumentPartialUpdateBody},
@@ -3507,6 +3522,7 @@ export const EquipmentLocationListForSelect = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: equipmentLocationListForSelectListOptions, queryKey: equipmentLocationListForSelectListQueryKey},
   filters: ['branch', 'created', 'customer', 'modified', 'name'] satisfies (keyof EquipmentLocationListForSelect.ListQuery)[],
+  filterTypes: {branch: 'integer', customer: 'integer'},
   reads: ['equipmentLocationListForSelectList'],
 })
 
@@ -3541,6 +3557,7 @@ export const InventoryInventoryLocationsForMaterial = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: inventoryInventoryLocationsForMaterialListOptions, queryKey: inventoryInventoryLocationsForMaterialListQueryKey},
   filters: ['material'] satisfies (keyof InventoryInventoryLocationsForMaterial.ListQuery)[],
+  filterTypes: {material: 'integer'},
   reads: ['inventoryInventoryLocationsForMaterialList'],
 })
 
@@ -3575,6 +3592,7 @@ export const InventoryInventoryMaterialsForLocation = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: inventoryInventoryMaterialsForLocationListOptions, queryKey: inventoryInventoryMaterialsForLocationListQueryKey},
   filters: ['location'] satisfies (keyof InventoryInventoryMaterialsForLocation.ListQuery)[],
+  filterTypes: {location: 'integer'},
   reads: ['inventoryInventoryMaterialsForLocationList'],
 })
 
@@ -3592,6 +3610,7 @@ export const InventoryMaterial = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: inventoryMaterialListOptions, queryKey: inventoryMaterialListQueryKey},
   filters: ['supplier_relation'] satisfies (keyof InventoryMaterial.ListQuery)[],
+  filterTypes: {supplier_relation: 'integer'},
   retrieve: {options: inventoryMaterialRetrieveOptions, queryKey: inventoryMaterialRetrieveQueryKey},
   create: {mutation: inventoryMaterialCreateMutation, body: vInventoryMaterialCreateBody},
   update: {mutation: inventoryMaterialPartialUpdateMutation, body: vInventoryMaterialPartialUpdateBody},
@@ -3627,6 +3646,7 @@ export const InventoryMaterialAutocomplete = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: inventoryMaterialAutocompleteListOptions, queryKey: inventoryMaterialAutocompleteListQueryKey},
   filters: ['supplier', 'supplier_relation', 'use_latest_year', 'year'] satisfies (keyof InventoryMaterialAutocomplete.ListQuery)[],
+  filterTypes: {supplier: 'integer', supplier_relation: 'integer', use_latest_year: 'boolean', year: 'integer'},
   reads: ['inventoryMaterialAutocompleteList'],
 })
 
@@ -3679,6 +3699,7 @@ export const InventoryPurchaseorderEntry = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: inventoryPurchaseorderEntryListOptions, queryKey: inventoryPurchaseorderEntryListQueryKey},
   filters: ['purchase_order_material'] satisfies (keyof InventoryPurchaseorderEntry.ListQuery)[],
+  filterTypes: {purchase_order_material: 'integer'},
   retrieve: {options: inventoryPurchaseorderEntryRetrieveOptions, queryKey: inventoryPurchaseorderEntryRetrieveQueryKey},
   create: {mutation: inventoryPurchaseorderEntryCreateMutation, body: vInventoryPurchaseorderEntryCreateBody},
   update: {mutation: inventoryPurchaseorderEntryPartialUpdateMutation, body: vInventoryPurchaseorderEntryPartialUpdateBody},
@@ -3725,6 +3746,7 @@ export const InventoryPurchaseorderMaterial = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: inventoryPurchaseorderMaterialListOptions, queryKey: inventoryPurchaseorderMaterialListQueryKey},
   filters: ['purchase_order'] satisfies (keyof InventoryPurchaseorderMaterial.ListQuery)[],
+  filterTypes: {purchase_order: 'integer'},
   retrieve: {options: inventoryPurchaseorderMaterialRetrieveOptions, queryKey: inventoryPurchaseorderMaterialRetrieveQueryKey},
   create: {mutation: inventoryPurchaseorderMaterialCreateMutation, body: vInventoryPurchaseorderMaterialCreateBody},
   update: {mutation: inventoryPurchaseorderMaterialPartialUpdateMutation, body: vInventoryPurchaseorderMaterialPartialUpdateBody},
@@ -3756,6 +3778,7 @@ export const InventoryPurchaseorderStatus = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: inventoryPurchaseorderStatusListOptions, queryKey: inventoryPurchaseorderStatusListQueryKey},
   filters: ['purchase_order'] satisfies (keyof InventoryPurchaseorderStatus.ListQuery)[],
+  filterTypes: {purchase_order: 'integer'},
   retrieve: {options: inventoryPurchaseorderStatusRetrieveOptions, queryKey: inventoryPurchaseorderStatusRetrieveQueryKey},
   create: {mutation: inventoryPurchaseorderStatusCreateMutation, body: vInventoryPurchaseorderStatusCreateBody},
   update: {mutation: inventoryPurchaseorderStatusPartialUpdateMutation, body: vInventoryPurchaseorderStatusPartialUpdateBody},
@@ -3903,6 +3926,7 @@ export const InventorySupplierReservation = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: inventorySupplierReservationListOptions, queryKey: inventorySupplierReservationListQueryKey},
   filters: ['supplier'] satisfies (keyof InventorySupplierReservation.ListQuery)[],
+  filterTypes: {supplier: 'integer'},
   retrieve: {options: inventorySupplierReservationRetrieveOptions, queryKey: inventorySupplierReservationRetrieveQueryKey},
   create: {mutation: inventorySupplierReservationCreateMutation, body: vInventorySupplierReservationCreateBody},
   update: {mutation: inventorySupplierReservationPartialUpdateMutation, body: vInventorySupplierReservationPartialUpdateBody},
@@ -3938,6 +3962,7 @@ export const InventorySupplierReservationAutocomplete = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: inventorySupplierReservationAutocompleteListOptions, queryKey: inventorySupplierReservationAutocompleteListQueryKey},
   filters: ['supplier'] satisfies (keyof InventorySupplierReservationAutocomplete.ListQuery)[],
+  filterTypes: {supplier: 'integer'},
   reads: ['inventorySupplierReservationAutocompleteList'],
 })
 
@@ -3970,6 +3995,7 @@ export const InventorySupplierReservationmaterial = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: inventorySupplierReservationmaterialListOptions, queryKey: inventorySupplierReservationmaterialListQueryKey},
   filters: ['material', 'reservation'] satisfies (keyof InventorySupplierReservationmaterial.ListQuery)[],
+  filterTypes: {material: 'integer', reservation: 'integer'},
   retrieve: {options: inventorySupplierReservationmaterialRetrieveOptions, queryKey: inventorySupplierReservationmaterialRetrieveQueryKey},
   create: {mutation: inventorySupplierReservationmaterialCreateMutation, body: vInventorySupplierReservationmaterialCreateBody},
   update: {mutation: inventorySupplierReservationmaterialPartialUpdateMutation, body: vInventorySupplierReservationmaterialPartialUpdateBody},
@@ -4048,6 +4074,7 @@ export const InvoiceInvoice = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: invoiceInvoiceListOptions, queryKey: invoiceInvoiceListQueryKey},
   filters: ['order'] satisfies (keyof InvoiceInvoice.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: invoiceInvoiceRetrieveOptions, queryKey: invoiceInvoiceRetrieveQueryKey},
   create: {mutation: invoiceInvoiceCreateMutation, body: vInvoiceInvoiceCreateBody},
   update: {mutation: invoiceInvoicePartialUpdateMutation, body: vInvoiceInvoicePartialUpdateBody},
@@ -4089,6 +4116,7 @@ export const InvoiceInvoiceAutocomplete = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: invoiceInvoiceAutocompleteListOptions, queryKey: invoiceInvoiceAutocompleteListQueryKey},
   filters: ['order'] satisfies (keyof InvoiceInvoiceAutocomplete.ListQuery)[],
+  filterTypes: {order: 'integer'},
   reads: ['invoiceInvoiceAutocompleteList'],
 })
 
@@ -4106,6 +4134,7 @@ export const InvoiceInvoiceLine = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: invoiceInvoiceLineListOptions, queryKey: invoiceInvoiceLineListQueryKey},
   filters: ['invoice'] satisfies (keyof InvoiceInvoiceLine.ListQuery)[],
+  filterTypes: {invoice: 'integer'},
   retrieve: {options: invoiceInvoiceLineRetrieveOptions, queryKey: invoiceInvoiceLineRetrieveQueryKey},
   create: {mutation: invoiceInvoiceLineCreateMutation, body: vInvoiceInvoiceLineCreateBody},
   update: {mutation: invoiceInvoiceLinePartialUpdateMutation, body: vInvoiceInvoiceLinePartialUpdateBody},
@@ -4137,6 +4166,7 @@ export const InvoiceInvoicePreliminary = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: invoiceInvoicePreliminaryListOptions, queryKey: invoiceInvoicePreliminaryListQueryKey},
   filters: ['order'] satisfies (keyof InvoiceInvoicePreliminary.ListQuery)[],
+  filterTypes: {order: 'integer'},
   reads: ['invoiceInvoicePreliminaryList'],
 })
 
@@ -4154,6 +4184,7 @@ export const InvoiceInvoiceSent = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: invoiceInvoiceSentListOptions, queryKey: invoiceInvoiceSentListQueryKey},
   filters: ['order'] satisfies (keyof InvoiceInvoiceSent.ListQuery)[],
+  filterTypes: {order: 'integer'},
   reads: ['invoiceInvoiceSentList'],
 })
 
@@ -4186,6 +4217,7 @@ export const InvoicePurchase = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: invoicePurchaseListOptions, queryKey: invoicePurchaseListQueryKey},
   filters: ['order'] satisfies (keyof InvoicePurchase.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: invoicePurchaseRetrieveOptions, queryKey: invoicePurchaseRetrieveQueryKey},
   create: {mutation: invoicePurchaseCreateMutation, body: vInvoicePurchaseCreateBody},
   update: {mutation: invoicePurchasePartialUpdateMutation, body: vInvoicePurchasePartialUpdateBody},
@@ -4217,6 +4249,7 @@ export const InvoicePurchaseYear = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: invoicePurchaseYearListOptions, queryKey: invoicePurchaseYearListQueryKey},
   filters: ['order', 'year'] satisfies (keyof InvoicePurchaseYear.ListQuery)[],
+  filterTypes: {order: 'integer', year: 'integer'},
   reads: ['invoicePurchaseYearList'],
 })
 
@@ -4358,6 +4391,7 @@ export const MemberMember = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: memberMemberListOptions, queryKey: memberMemberListQueryKey},
   filters: ['city', 'companycode', 'is_deleted', 'is_requested', 'member_type'] satisfies (keyof MemberMember.ListQuery)[],
+  filterTypes: {is_deleted: 'boolean', is_requested: 'boolean'},
   retrieve: {options: memberMemberRetrieveOptions, queryKey: memberMemberRetrieveQueryKey},
   create: {mutation: memberMemberCreateMutation, body: vMemberMemberCreateBody},
   update: {mutation: memberMemberPartialUpdateMutation, body: vMemberMemberPartialUpdateBody},
@@ -4565,6 +4599,7 @@ export const MobileAssignedorder = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: mobileAssignedorderListOptions, queryKey: mobileAssignedorderListQueryKey},
   filters: ['engineer', 'order', 'student_user'] satisfies (keyof MobileAssignedorder.ListQuery)[],
+  filterTypes: {engineer: 'integer', order: 'integer', student_user: 'integer'},
   retrieve: {options: mobileAssignedorderRetrieveOptions, queryKey: mobileAssignedorderRetrieveQueryKey},
   create: {mutation: mobileAssignedorderCreateMutation, body: vMobileAssignedorderCreateBody},
   update: {mutation: mobileAssignedorderPartialUpdateMutation, body: vMobileAssignedorderPartialUpdateBody},
@@ -4612,6 +4647,7 @@ export const MobileAssignedorderFinishedList = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: mobileAssignedorderFinishedListListOptions, queryKey: mobileAssignedorderFinishedListListQueryKey},
   filters: ['engineer', 'month', 'order', 'student_user', 'submodel_id', 'year'] satisfies (keyof MobileAssignedorderFinishedList.ListQuery)[],
+  filterTypes: {engineer: 'integer', month: 'integer', order: 'integer', student_user: 'integer', submodel_id: 'integer', year: 'integer'},
   reads: ['mobileAssignedorderFinishedListList'],
 })
 
@@ -4629,6 +4665,7 @@ export const MobileAssignedorderListApp = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: mobileAssignedorderListAppListOptions, queryKey: mobileAssignedorderListAppListQueryKey},
   filters: ['engineer', 'order', 'student_user'] satisfies (keyof MobileAssignedorderListApp.ListQuery)[],
+  filterTypes: {engineer: 'integer', order: 'integer', student_user: 'integer'},
   reads: ['mobileAssignedorderListAppList'],
 })
 
@@ -4692,6 +4729,7 @@ export const MobileAssignedorderactivity = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: mobileAssignedorderactivityListOptions, queryKey: mobileAssignedorderactivityListQueryKey},
   filters: ['assigned_order'] satisfies (keyof MobileAssignedorderactivity.ListQuery)[],
+  filterTypes: {assigned_order: 'integer'},
   retrieve: {options: mobileAssignedorderactivityRetrieveOptions, queryKey: mobileAssignedorderactivityRetrieveQueryKey},
   create: {mutation: mobileAssignedorderactivityCreateMutation, body: vMobileAssignedorderactivityCreateBody},
   update: {mutation: mobileAssignedorderactivityPartialUpdateMutation, body: vMobileAssignedorderactivityPartialUpdateBody},
@@ -4723,6 +4761,7 @@ export const MobileAssignedorderdocument = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: mobileAssignedorderdocumentListOptions, queryKey: mobileAssignedorderdocumentListQueryKey},
   filters: ['assigned_order'] satisfies (keyof MobileAssignedorderdocument.ListQuery)[],
+  filterTypes: {assigned_order: 'integer'},
   retrieve: {options: mobileAssignedorderdocumentRetrieveOptions, queryKey: mobileAssignedorderdocumentRetrieveQueryKey},
   create: {mutation: mobileAssignedorderdocumentCreateMutation, body: vMobileAssignedorderdocumentCreateBody},
   update: {mutation: mobileAssignedorderdocumentPartialUpdateMutation, body: vMobileAssignedorderdocumentPartialUpdateBody},
@@ -4754,6 +4793,7 @@ export const MobileAssignedordermaterial = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: mobileAssignedordermaterialListOptions, queryKey: mobileAssignedordermaterialListQueryKey},
   filters: ['assigned_order'] satisfies (keyof MobileAssignedordermaterial.ListQuery)[],
+  filterTypes: {assigned_order: 'integer'},
   retrieve: {options: mobileAssignedordermaterialRetrieveOptions, queryKey: mobileAssignedordermaterialRetrieveQueryKey},
   create: {mutation: mobileAssignedordermaterialCreateMutation, body: vMobileAssignedordermaterialCreateBody},
   update: {mutation: mobileAssignedordermaterialPartialUpdateMutation, body: vMobileAssignedordermaterialPartialUpdateBody},
@@ -5058,6 +5098,7 @@ export const OrderCost = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderCostListOptions, queryKey: orderCostListQueryKey},
   filters: ['cost_type', 'order'] satisfies (keyof OrderCost.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: orderCostRetrieveOptions, queryKey: orderCostRetrieveQueryKey},
   create: {mutation: orderCostCreateMutation, body: vOrderCostCreateBody},
   update: {mutation: orderCostPartialUpdateMutation, body: vOrderCostPartialUpdateBody},
@@ -5093,6 +5134,7 @@ export const OrderDocument = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderDocumentListOptions, queryKey: orderDocumentListQueryKey},
   filters: ['order'] satisfies (keyof OrderDocument.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: orderDocumentRetrieveOptions, queryKey: orderDocumentRetrieveQueryKey},
   create: {mutation: orderDocumentCreateMutation, body: vOrderDocumentCreateBody},
   update: {mutation: orderDocumentPartialUpdateMutation, body: vOrderDocumentPartialUpdateBody},
@@ -5189,6 +5231,7 @@ export const OrderInfoline = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderInfolineListOptions, queryKey: orderInfolineListQueryKey},
   filters: ['order'] satisfies (keyof OrderInfoline.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: orderInfolineRetrieveOptions, queryKey: orderInfolineRetrieveQueryKey},
   create: {mutation: orderInfolineCreateMutation, body: vOrderInfolineCreateBody},
   update: {mutation: orderInfolinePartialUpdateMutation, body: vOrderInfolinePartialUpdateBody},
@@ -5220,6 +5263,7 @@ export const OrderOrder = /*#__PURE__*/ resource({
   id: 'string',
   list: {options: orderOrderListOptions, queryKey: orderOrderListQueryKey},
   filters: ['assigned_count', 'branch', 'building', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'equipment', 'external_identifier', 'last_status', 'limit', 'location', 'mode', 'offset', 'order_address', 'order_by', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'orders', 'since', 'start_date', 'start_date__from', 'start_date__until', 'user_filter'] satisfies (keyof OrderOrder.ListQuery)[],
+  filterTypes: {building: 'integer', equipment: 'integer', limit: 'integer', location: 'integer', offset: 'integer', user_filter: 'integer'},
   retrieve: {options: orderOrderRetrieveOptions, queryKey: orderOrderRetrieveQueryKey},
   create: {mutation: orderOrderCreateMutation, body: vOrderOrderCreateBody},
   update: {mutation: orderOrderPartialUpdateMutation, body: vOrderOrderPartialUpdateBody},
@@ -5267,6 +5311,7 @@ export const OrderOrderAllForCustomerNotAccepted = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderAllForCustomerNotAcceptedListOptions, queryKey: orderOrderAllForCustomerNotAcceptedListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderAllForCustomerNotAccepted.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderAllForCustomerNotAcceptedList'],
 })
 
@@ -5284,6 +5329,7 @@ export const OrderOrderAllForCustomerV2 = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderAllForCustomerV2ListOptions, queryKey: orderOrderAllForCustomerV2ListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderAllForCustomerV2.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderAllForCustomerV2List'],
 })
 
@@ -5301,6 +5347,7 @@ export const OrderOrderAllForEquipmentLocation = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderAllForEquipmentLocationListOptions, queryKey: orderOrderAllForEquipmentLocationListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'equipment', 'external_identifier', 'last_status', 'limit', 'location', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderAllForEquipmentLocation.ListQuery)[],
+  filterTypes: {equipment: 'integer', limit: 'integer', location: 'integer', offset: 'integer'},
   reads: ['orderOrderAllForEquipmentLocationList'],
 })
 
@@ -5318,6 +5365,7 @@ export const OrderOrderAssignable = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderAssignableListOptions, queryKey: orderOrderAssignableListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderAssignable.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderAssignableList'],
 })
 
@@ -5352,6 +5400,7 @@ export const OrderOrderDispatchListAll = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderDispatchListAllListOptions, queryKey: orderOrderDispatchListAllListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderDispatchListAll.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderDispatchListAllList'],
 })
 
@@ -5369,6 +5418,7 @@ export const OrderOrderDispatchListFinished = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderDispatchListFinishedListOptions, queryKey: orderOrderDispatchListFinishedListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderDispatchListFinished.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderDispatchListFinishedList'],
 })
 
@@ -5386,6 +5436,7 @@ export const OrderOrderDispatchListInprogress = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderDispatchListInprogressListOptions, queryKey: orderOrderDispatchListInprogressListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderDispatchListInprogress.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderDispatchListInprogressList'],
 })
 
@@ -5403,6 +5454,7 @@ export const OrderOrderDispatchListUnassigned = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderDispatchListUnassignedListOptions, queryKey: orderOrderDispatchListUnassignedListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderDispatchListUnassigned.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderDispatchListUnassignedList'],
 })
 
@@ -5420,6 +5472,7 @@ export const OrderOrderGetWithinRange = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderGetWithinRangeListOptions, queryKey: orderOrderGetWithinRangeListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderGetWithinRange.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderGetWithinRangeList'],
 })
 
@@ -5437,6 +5490,7 @@ export const OrderOrderMaintenanceOrders = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderMaintenanceOrdersListOptions, queryKey: orderOrderMaintenanceOrdersListQueryKey},
   filters: ['assigned_count', 'branch', 'contract', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderMaintenanceOrders.ListQuery)[],
+  filterTypes: {contract: 'integer', limit: 'integer', offset: 'integer'},
   reads: ['orderOrderMaintenanceOrdersList'],
 })
 
@@ -5470,6 +5524,7 @@ export const OrderOrderOrderAvailability = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderOrderAvailabilityListOptions, queryKey: orderOrderOrderAvailabilityListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderOrderAvailability.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderOrderAvailabilityList'],
 })
 
@@ -5487,6 +5542,7 @@ export const OrderOrderPast = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderPastListOptions, queryKey: orderOrderPastListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderPast.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderPastList'],
 })
 
@@ -5504,6 +5560,7 @@ export const OrderOrderSalesOrders = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderSalesOrdersListOptions, queryKey: orderOrderSalesOrdersListQueryKey},
   filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until', 'year'] satisfies (keyof OrderOrderSalesOrders.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer', year: 'integer'},
   reads: ['orderOrderSalesOrdersList'],
 })
 
@@ -5521,6 +5578,7 @@ export const OrderOrderline = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderlineListOptions, queryKey: orderOrderlineListQueryKey},
   filters: ['order'] satisfies (keyof OrderOrderline.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: orderOrderlineRetrieveOptions, queryKey: orderOrderlineRetrieveQueryKey},
   create: {mutation: orderOrderlineCreateMutation, body: vOrderOrderlineCreateBody},
   update: {mutation: orderOrderlinePartialUpdateMutation, body: vOrderOrderlinePartialUpdateBody},
@@ -5552,6 +5610,7 @@ export const OrderOrderlineLatestWorkorders = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: orderOrderlineLatestWorkordersListOptions, queryKey: orderOrderlineLatestWorkordersListQueryKey},
   filters: ['building', 'equipment', 'location', 'order'] satisfies (keyof OrderOrderlineLatestWorkorders.ListQuery)[],
+  filterTypes: {building: 'integer', equipment: 'integer', location: 'integer', order: 'integer'},
   reads: ['orderOrderlineLatestWorkordersList'],
 })
 
@@ -5617,6 +5676,7 @@ export const QuotationChapter = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: quotationChapterListOptions, queryKey: quotationChapterListQueryKey},
   filters: ['quotation'] satisfies (keyof QuotationChapter.ListQuery)[],
+  filterTypes: {quotation: 'integer'},
   retrieve: {options: quotationChapterRetrieveOptions, queryKey: quotationChapterRetrieveQueryKey},
   create: {mutation: quotationChapterCreateMutation, body: vQuotationChapterCreateBody},
   update: {mutation: quotationChapterPartialUpdateMutation, body: vQuotationChapterPartialUpdateBody},
@@ -5648,6 +5708,7 @@ export const QuotationCost = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: quotationCostListOptions, queryKey: quotationCostListQueryKey},
   filters: ['chapter', 'cost_type', 'quotation'] satisfies (keyof QuotationCost.ListQuery)[],
+  filterTypes: {chapter: 'integer', quotation: 'integer'},
   retrieve: {options: quotationCostRetrieveOptions, queryKey: quotationCostRetrieveQueryKey},
   create: {mutation: quotationCostCreateMutation, body: vQuotationCostCreateBody},
   update: {mutation: quotationCostPartialUpdateMutation, body: vQuotationCostPartialUpdateBody},
@@ -5683,6 +5744,7 @@ export const QuotationDocument = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: quotationDocumentListOptions, queryKey: quotationDocumentListQueryKey},
   filters: ['quotation'] satisfies (keyof QuotationDocument.ListQuery)[],
+  filterTypes: {quotation: 'integer'},
   retrieve: {options: quotationDocumentRetrieveOptions, queryKey: quotationDocumentRetrieveQueryKey},
   create: {mutation: quotationDocumentCreateMutation, body: vQuotationDocumentCreateBody},
   update: {mutation: quotationDocumentPartialUpdateMutation, body: vQuotationDocumentPartialUpdateBody},
@@ -5745,6 +5807,7 @@ export const QuotationQuotation = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: quotationQuotationListOptions, queryKey: quotationQuotationListQueryKey},
   filters: ['customer_relation'] satisfies (keyof QuotationQuotation.ListQuery)[],
+  filterTypes: {customer_relation: 'integer'},
   retrieve: {options: quotationQuotationRetrieveOptions, queryKey: quotationQuotationRetrieveQueryKey},
   create: {mutation: quotationQuotationCreateMutation, body: vQuotationQuotationCreateBody},
   update: {mutation: quotationQuotationPartialUpdateMutation, body: vQuotationQuotationPartialUpdateBody},
@@ -5788,6 +5851,7 @@ export const QuotationQuotationAutocomplete = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: quotationQuotationAutocompleteListOptions, queryKey: quotationQuotationAutocompleteListQueryKey},
   filters: ['customer_relation'] satisfies (keyof QuotationQuotationAutocomplete.ListQuery)[],
+  filterTypes: {customer_relation: 'integer'},
   reads: ['quotationQuotationAutocompleteList'],
 })
 
@@ -5805,6 +5869,7 @@ export const QuotationQuotationImage = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: quotationQuotationImageListOptions, queryKey: quotationQuotationImageListQueryKey},
   filters: ['quotation'] satisfies (keyof QuotationQuotationImage.ListQuery)[],
+  filterTypes: {quotation: 'integer'},
   retrieve: {options: quotationQuotationImageRetrieveOptions, queryKey: quotationQuotationImageRetrieveQueryKey},
   create: {mutation: quotationQuotationImageCreateMutation, body: vQuotationQuotationImageCreateBody},
   update: {mutation: quotationQuotationImagePartialUpdateMutation, body: vQuotationQuotationImagePartialUpdateBody},
@@ -5836,6 +5901,7 @@ export const QuotationQuotationLine = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: quotationQuotationLineListOptions, queryKey: quotationQuotationLineListQueryKey},
   filters: ['chapter', 'quotation'] satisfies (keyof QuotationQuotationLine.ListQuery)[],
+  filterTypes: {chapter: 'integer', quotation: 'integer'},
   retrieve: {options: quotationQuotationLineRetrieveOptions, queryKey: quotationQuotationLineRetrieveQueryKey},
   create: {mutation: quotationQuotationLineCreateMutation, body: vQuotationQuotationLineCreateBody},
   update: {mutation: quotationQuotationLinePartialUpdateMutation, body: vQuotationQuotationLinePartialUpdateBody},
@@ -5883,6 +5949,7 @@ export const QuotationQuotationLineImage = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: quotationQuotationLineImageListOptions, queryKey: quotationQuotationLineImageListQueryKey},
   filters: ['quotation_line'] satisfies (keyof QuotationQuotationLineImage.ListQuery)[],
+  filterTypes: {quotation_line: 'integer'},
   retrieve: {options: quotationQuotationLineImageRetrieveOptions, queryKey: quotationQuotationLineImageRetrieveQueryKey},
   create: {mutation: quotationQuotationLineImageCreateMutation, body: vQuotationQuotationLineImageCreateBody},
   update: {mutation: quotationQuotationLineImagePartialUpdateMutation, body: vQuotationQuotationLineImagePartialUpdateBody},
@@ -5914,6 +5981,7 @@ export const QuotationQuotationNotAccepted = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: quotationQuotationNotAcceptedListOptions, queryKey: quotationQuotationNotAcceptedListQueryKey},
   filters: ['customer_relation'] satisfies (keyof QuotationQuotationNotAccepted.ListQuery)[],
+  filterTypes: {customer_relation: 'integer'},
   reads: ['quotationQuotationNotAcceptedList'],
 })
 
@@ -5931,6 +5999,7 @@ export const QuotationQuotationPreliminary = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: quotationQuotationPreliminaryListOptions, queryKey: quotationQuotationPreliminaryListQueryKey},
   filters: ['customer_relation'] satisfies (keyof QuotationQuotationPreliminary.ListQuery)[],
+  filterTypes: {customer_relation: 'integer'},
   reads: ['quotationQuotationPreliminaryList'],
 })
 
@@ -5948,6 +6017,7 @@ export const QuotationQuotationSent = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: quotationQuotationSentListOptions, queryKey: quotationQuotationSentListQueryKey},
   filters: ['customer_relation'] satisfies (keyof QuotationQuotationSent.ListQuery)[],
+  filterTypes: {customer_relation: 'integer'},
   reads: ['quotationQuotationSentList'],
 })
 
@@ -5995,6 +6065,7 @@ export const StatuscodeAction = /*#__PURE__*/ resource({
   id: 'number',
   list: {options: statuscodeActionListOptions, queryKey: statuscodeActionListQueryKey},
   filters: ['statuscode'] satisfies (keyof StatuscodeAction.ListQuery)[],
+  filterTypes: {statuscode: 'integer'},
   retrieve: {options: statuscodeActionRetrieveOptions, queryKey: statuscodeActionRetrieveQueryKey},
   create: {mutation: statuscodeActionCreateMutation, body: vStatuscodeActionCreateBody},
   update: {mutation: statuscodeActionPartialUpdateMutation, body: vStatuscodeActionPartialUpdateBody},

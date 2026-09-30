@@ -375,7 +375,8 @@ function step(direction: number) {
 /** Whether a month or a year window drills down into the next mode along. */
 const drillMode = computed<WindowMode>(() => (mode.value === 'year' ? 'month' : 'week'))
 
-function cellSlot(field: string): string {
+/** The BTable cell slot of a column; typed as BTable names them, so the slot's `data` is typed too. */
+function cellSlot(field: string): `cell(${string})` {
   return `cell(${field})`
 }
 

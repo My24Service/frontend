@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
-  "_comment": "Mutation testing for the form-view characterisation specs. Runs entirely locally - the only cloud reporter Stryker has is 'dashboard', which is deliberately not enabled here and would need an API key. Scope a run with --mutate, e.g. npm run test:mutation -- --mutate 'src/views/inventory/MaterialForm.vue'.",
+  "_comment": "Mutation testing for the form-view characterisation specs. Runs entirely locally - the only cloud reporter Stryker has is 'dashboard', which is deliberately not enabled here and would need an API key. Scope a run with --mutate, e.g. npm run test:mutation -- --mutate 'src/features/inventory/material/MaterialForm.vue'.",
   "packageManager": "pnpm",
   "testRunner": "vitest",
   "plugins": [

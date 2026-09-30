@@ -59,7 +59,7 @@
 
 <script lang="ts" setup>
 import { infolineFromRecord, type InfolineRow } from './schemas'
-import { useStagedRows } from './use-staged-rows'
+import { useStagedRows } from '@/features/forms'
 
 /** The notes for the engineer on an order, staged here and sent in the order body. */
 const props = defineProps<{
