@@ -191,3 +191,20 @@ reservations, so nothing was written and no populated view or save was
 exercised live. The specs cover those. One blank page on the first visits
 was Vite re-optimising `BProgress` mid-session, not the code; a reload
 cleared it.
+
+## After the migration
+
+- **Merged `fix/list-options-integer-filters`.** `listOptions` now sends
+  integer filters as numbers. The supplier view's workaround is gone: it
+  reads the supplier's materials through `listOptions` again, with the same
+  request, which the spec pins.
+- **The 6 pre-existing lint errors are fixed, without disabling any rule.**
+  - `TimeRegistration`'s dynamic cell slot now has the template-literal type
+    BTable declares, which also types the row.
+  - `DateTimeFields` uses a local alias for the datepicker. The alias types
+    its one filled slot as a property instead of the library's method syntax.
+  - Template `eslint-disable` comments do not reach typed-vue's generated
+    code, and turning the rule off for the processor's virtual blocks did not
+    help either.
+
+  Final checks: lint 0 errors, 2956/2956 tests pass, `vue-tsc` is clean.
