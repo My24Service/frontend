@@ -8269,7 +8269,6 @@ export const vPurchaseOrderEntryRequest = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/inventory/purchaseorder/{id}/
  *   PATCH /api/inventory/purchaseorder/{id}/
  *   POST /api/inventory/purchaseorder/
  *
@@ -10441,6 +10440,7 @@ export const vPaginatedSupplierReservationMaterialList = v.object({
 /**
  * @endpoints
  * Response:
+ *   GET /api/inventory/purchaseorder/{id}/
  *   PATCH /api/inventory/purchaseorder/{id}/with-materials/
  *   POST /api/inventory/purchaseorder/with-materials/
  */
@@ -20067,7 +20067,7 @@ export const vInventoryPurchaseorderRetrievePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vInventoryPurchaseorderRetrieveResponse = vPurchaseOrderList;
+export const vInventoryPurchaseorderRetrieveResponse = vPurchaseOrderDetail;
 
 export const vInventoryPurchaseorderPartialUpdateBody = vPatchedPurchaseOrderListRequest;
 

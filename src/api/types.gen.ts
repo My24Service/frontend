@@ -19666,7 +19666,7 @@ export type InventoryPurchaseorderRetrieveData = {
 };
 
 export type InventoryPurchaseorderRetrieveResponses = {
-    200: PurchaseOrderList;
+    200: PurchaseOrderDetail;
 };
 
 export type InventoryPurchaseorderRetrieveResponse = InventoryPurchaseorderRetrieveResponses[keyof InventoryPurchaseorderRetrieveResponses];

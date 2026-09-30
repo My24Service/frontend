@@ -99,3 +99,23 @@ deletions, the READMEs and the COMPLETION summary come last.
   user's instruction, one screen group each, with a written brief. I review
   every diff, run the checks and write the commits myself. The subagents
   neither commit nor touch the router or the feature's root `index.ts`.
+- **The subagents split by concept, not by screen type.** They work in
+  parallel in one working tree, so each owns whole folders (material +
+  supplier + stock location; mutation + move + stats; purchase order +
+  reservation + material rows; entries). That way no two of them write the
+  same `index.ts`. The commits still go lists → views → forms: I stage each
+  concept's files by screen type.
+- **`generated-schema-defaults.spec.js` builds its own `lenient(vStockLocation)`**
+  instead of importing it from the legacy model. Committed on its own, ahead of
+  the deletion (all 17 tests unchanged).
+
+## API contract
+
+- **Fixed the backend schema for `GET /api/inventory/purchaseorder/{id}/`**.
+  It was documented as `PurchaseOrderList`, but `DetailSerializerMixin`
+  answers with `PurchaseOrderDetail`, which has the materials, reservation
+  materials, entries and statuses. Found by the entries subagent. The fix is
+  schema-only, on my24service `feature/purchase-order-retrieve-schema`
+  (commit `3912acc0`, worktree `../worktrees/backend-purchase-order-retrieve-schema`,
+  cut from `develop`). The regenerated diff is that one `$ref`. **Needs
+  merging before this branch ships.**

@@ -9242,7 +9242,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PurchaseOrderList'
+                $ref: '#/components/schemas/PurchaseOrderDetail'
           description: ''
     patch:
       operationId: inventory_purchaseorder_partial_update
