@@ -9,7 +9,7 @@ rule the generated schema does not carry. Each one is the same statement:
 second kind below: the API must stay lax about them and the form need not be.
 
 Entries of the first kind — the contract itself is off — go under "Owed by
-the backend" until the backend fixes them; that section is currently empty.
+the backend" until the backend fixes them.
 Its former entries are kept in "Paid" as the record of what was asked and
 what landed.
 
@@ -251,7 +251,51 @@ the API cannot refuse a quotation the app sends without them.
 
 The first kind: the contract is off, and the frontend is working around it
 rather than adding a rule. Each of these is a backend change first; the
-frontend workaround is deleted when it lands. **Currently empty.**
+frontend workaround is deleted when it lands.
+
+### 10. Inventory: required names, a correction or move of something (inventory slice, September 2026)
+
+The inventory forms refuse what their write serializers accept. Every rule
+below is one the legacy vuelidate forms already enforced, and the Flutter app,
+which writes the material, supplier and stock-location endpoints, requires the
+same fields client-side (`isEmpty` checks in
+`my24_flutter_inventory/lib/models/{material,supplier}/form_data.dart`). No
+client sends what the forms refuse, so none of these has to stay lax.
+
+- *material `name`*: `vMaterialCreateRequest` (`src/api/valibot.gen.ts:3575`)
+  declares it `nullable` with no minimum. The rule is in
+  `src/features/inventory/material/schemas.ts`.
+- *supplier `name`, `address`, `postal`, `city`*: `vSupplierCreateUpdateRequest`
+  (`:10357`) declares them nullish with no minimum. The rule is in
+  `src/features/inventory/supplier/schemas.ts`.
+- *stock location `name`*: `vStockLocationCreateUpdateRequest` (`:9813`),
+  nullish with no minimum. The rule is in
+  `src/features/inventory/stock-location/schemas.ts`.
+- *stock mutation `material`, `location`, a positive `amount`*:
+  `vStockMutationSimpleRequest` (`:9856`) declares the FKs nullish and takes
+  `''` or `0` as an amount. *Material move `amount`*: `vMoveRequest`
+  (`:4172`) takes zero and negatives. The rules are in
+  `src/features/inventory/mutation/schemas.ts`.
+- *purchase-order and reservation material rows, `amount` at least 1*:
+  `vPurchaseOrderMaterialRowRequest` (`:8378`) and
+  `vSupplierReservationMaterialRowRequest` (`:10564`) take 0. The rule is in
+  `src/features/inventory/material-rows/use-material-rows.ts`.
+- *purchase order `expected_entry_date`*: optional on the with-materials
+  bodies. The rule is in `src/features/inventory/purchase-order/form/schemas.ts`.
+- *purchase-order entry `amount` at least 1 and `entry_date`*:
+  `vPurchaseOrderEntryRequest` (`:8261`) takes 0 and no date. The rule is in
+  `src/features/inventory/entry/form/schemas.ts`. The Flutter app writes none
+  of the purchase-order, reservation or entry endpoints
+  (`scripts/usage-gate/mobile-callers.json`).
+
+The backend change: `extra_kwargs` `required`/`allow_null: False`/`allow_blank:
+False` on the write serializers, with `nullable_response_fields` where
+rows hold nulls, plus `min_value` on the amounts. A decimal's minimum does
+not reach the generated schema, so the two amount checks stay in the form even
+after that lands. The mutation and move half is written and tested (95
+inventory tests pass, and the new ones fail without it) but uncommitted, in
+`../worktrees/backend-purchase-order-retrieve-schema`. Committing it was held
+for the user.
 
 ## Paid
 
