@@ -17,7 +17,6 @@ export {
   orderUpdateCustomerSchema,
   orderCreateSchemaFor,
   orderUpdateSchemaFor,
-  nextWorkingDay,
   emptyOrder,
   orderFromRecord,
   FIELD_LABELS,

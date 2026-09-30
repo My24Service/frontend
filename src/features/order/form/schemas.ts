@@ -11,10 +11,6 @@ import {
   completeTime,
   nextWorkingDay,
 } from '@/features/forms'
-
-// The default date lives in the forms kit (the purchase order uses it too);
-// re-exported so the order feature's own door keeps offering it.
-export { nextWorkingDay }
 /**
  * Who is filling the order form. The backend has one create serializer per
  * role (and, for planning, per tenant shape), and the generated request
