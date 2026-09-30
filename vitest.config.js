@@ -112,12 +112,12 @@ export default defineConfig({
       // have to see them too or every SFC that reads one fails with
       // "ReferenceError: useCommon is not defined".
       dirs: ['src/composables/**/*'],
-      // The app build owns auto-imports.d.ts; tests must not rewrite it.
+      // The app build owns auto-imports.gen.d.ts; tests must not rewrite it.
       dts: false,
     }),
     Components({
       resolvers: [BootstrapVueNextResolver(), IconsResolve()],
-      // The app build owns components.d.ts; tests must not rewrite it.
+      // The app build owns components.gen.d.ts; tests must not rewrite it.
       dts: false,
     }),
     Icons({

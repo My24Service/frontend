@@ -77,7 +77,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       VueRouter({
-        dts: 'src/route-map.d.ts',
+        dts: 'src/route-map.gen.d.ts',
         routesFolder: [],
         beforeWriteFiles: (root) => insertHandWrittenRoutes(root, process.cwd()),
       }),
@@ -89,6 +89,7 @@ export default defineConfig(({ mode }) => {
         vueDirectives: true,
         viteOptimizeDeps: true,
         dumpUnimportItems: './auto-imports.json',
+        dts: 'auto-imports.gen.d.ts',
         dirs: [
           {
             glob: 'src/composables/**/*',
@@ -103,7 +104,7 @@ export default defineConfig(({ mode }) => {
           VueUseDirectiveResolver(),
           IconsResolve()
         ],
-        dts: true,
+        dts: 'components.gen.d.ts',
         // No `types` entry for vue-router: it declares RouterLink/RouterView
         // in GlobalComponents itself, and the plugin auto-detects it anyway.
         // The empty array switches that auto-detection off.

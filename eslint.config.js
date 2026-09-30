@@ -84,7 +84,11 @@ const TYPE_CHECKED_FILES = [
 ];
 
 export default defineConfig({
-  ignores: ["src/api/**"],
+  // Global ignores: an object holding only `ignores` skips these files before
+  // they are parsed, which an `/* eslint-disable */` header does not.
+  // `*.gen.*` marks generated files; src/api/ is regenerated whole by hey-api.
+  ignores: ["**/*.gen.*", "src/api/**"],
+}, {
   files: ["**/*.{ts,mts,cts,vue}"],
   extends: [
     tseslint.configs.recommended,
