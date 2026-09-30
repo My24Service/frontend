@@ -119,3 +119,62 @@ deletions, the READMEs and the COMPLETION summary come last.
   (commit `3912acc0`, worktree `../worktrees/backend-purchase-order-retrieve-schema`,
   cut from `develop`). The regenerated diff is that one `$ref`. **Needs
   merging before this branch ships.**
+
+## Forks decided during the migration
+
+- **The purchase-order, reservation and entry forms wire `useResourceForm` by
+  hand, not through `resource:`.** Their create and update go to different
+  resources: `with-materials` create is an action resource, the PATCH twin is
+  an `extras` verb, and the entry create is the bulk endpoint. The kit's
+  resource mode would bind them to the plain order/entry endpoints. The
+  maintenance-contract form is the precedent. `MutationForm` uses
+  `writeContract` + `useMutation`, because its resource has only list and
+  create. The move posts through `Api.InventoryMaterial.extras.moveCreate`.
+- **Each form injects its own product search into `material-rows/`.** The
+  subagent first gave both forms the order's `material/autocomplete/`. I
+  checked the backend: the autocomplete returns only materials with a price
+  row for this year (`get_base_qs_by_year`), so the reservation form would
+  have hidden part of a supplier's catalogue that it used to offer. The
+  reservation keeps its legacy `material/?supplier_relation=` read. A spec
+  pins it; I checked that it fails when the reservation uses the
+  autocomplete.
+- **The entry form reads the picked order's materials from the order's
+  detail**, as the legacy form did, once the retrieve schema was fixed. The
+  subagent had worked around the old schema through `purchaseorder-material`.
+- **The entry edit has no order or product pickers.** They were dead in edit
+  mode (blank fields; pickers empty until an order was searched), and a
+  stored entry keeps its order and product. They now show read-only.
+- **The stats reads use the generated `*Options` from
+  `@/api/@tanstack/vue-query.gen` directly.** The total-sales and stats-table
+  endpoints have no resource binding; they appear only in
+  `InventoryMaterial.reads`. The export stays `inventoryStatsTableExportRetrieve`
+  through `useFileDownload`.
+- **`nextWorkingDay` moved into the forms kit**, in its own commit. The
+  purchase-order form imported it from the order feature's form schemas, a
+  domain-to-domain dependency. The order form re-exports it, and its 222
+  specs pass unchanged.
+- **The mutation list keeps `v-html` for the server-built summary**, as the
+  legacy screen did. The summary interpolates the location name without
+  escaping. That is a backend fix, recorded in the README as left open.
+- **The material, supplier and stock-location forms write their blanks out**
+  rather than deriving them from the create body. Each form owns a subset of
+  the body's keys (form-schemas step 8).
+- **The mutation/move tightening on the backend is written but not
+  committed.** I tightened `StockMutationSimpleSerializer` (required,
+  non-null material and location, positive amount, `nullable_response_fields`
+  for the rows the purchase and sales flows book) and `MoveSerializer`
+  (positive amount). I added regression tests: all 95 inventory tests pass,
+  and 6 fail without the change. The permission classifier refused the
+  commit, so the change sits uncommitted in
+  `../worktrees/backend-purchase-order-retrieve-schema` for the user to
+  decide. The frontend is back on the committed schema, and the rules are
+  recorded as owed (`docs/schema-strengthenings.md` entry 10).
+- **The baseline's 5 failing specs passed in the final full run** (2952/2952).
+  They look timing-dependent rather than broken, and none are in this slice.
+- **`tests/unit/fixtures/{purchaseorder,purchaseorders,stocklocation,stocklocations,supplier-reservation,supplier-reservations}.js`
+  were already unused on `develop`.** Left alone as unrelated cleanup.
+- **The subagents' mutation checks** (break a rule, watch the spec fail,
+  restore) ran on every guarded rule. Two runs were interrupted by the usage
+  pause and left a mutation behind: `:items` in SupplierView, and
+  `enableSorting` in MutationList. Both subagents found and restored them,
+  and the final full run is green.
