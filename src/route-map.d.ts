@@ -2865,7 +2865,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/inventory/MaterialList.vue': {
+    'src/features/inventory/material/MaterialList.vue': {
       routes:
         | 'material-list'
       views:
@@ -2873,7 +2873,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/inventory/MaterialForm.vue': {
+    'src/features/inventory/material/MaterialForm.vue': {
       routes:
         | 'material-add'
         | 'material-edit'
@@ -2882,7 +2882,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/inventory/MaterialView.vue': {
+    'src/features/inventory/material/MaterialView.vue': {
       routes:
         | 'material-view'
       views:
@@ -2890,7 +2890,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/inventory/MaterialMoveForm.vue': {
+    'src/features/inventory/mutation/MaterialMoveForm.vue': {
       routes:
         | 'material-move'
       views:
@@ -2898,7 +2898,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/inventory/MutationList.vue': {
+    'src/features/inventory/mutation/MutationList.vue': {
       routes:
         | 'mutation-list'
       views:
@@ -2906,7 +2906,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/inventory/MutationForm.vue': {
+    'src/features/inventory/mutation/MutationForm.vue': {
       routes:
         | 'mutation-add'
       views:
@@ -2914,7 +2914,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/inventory/PurchaseOrderEntryList.vue': {
+    'src/features/inventory/entry/PurchaseOrderEntryList.vue': {
       routes:
         | 'purchaseorder-entry-list'
       views:
@@ -2922,7 +2922,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/inventory/PurchaseOrderEntryForm.vue': {
+    'src/features/inventory/entry/form/PurchaseOrderEntryForm.vue': {
       routes:
         | 'purchaseorder-entry-add'
         | 'purchaseorder-entry-edit'
@@ -2931,7 +2931,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/inventory/PurchaseOrderEntryView.vue': {
+    'src/features/inventory/entry/PurchaseOrderEntryView.vue': {
       routes:
         | 'purchaseorder-entry-view'
       views:
@@ -2939,7 +2939,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/inventory/PurchaseOrderList.vue': {
+    'src/features/inventory/purchase-order/list/PurchaseOrderList.vue': {
       routes:
         | 'purchaseorder-list'
       views:
@@ -2947,7 +2947,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/inventory/PurchaseOrderForm.vue': {
+    'src/features/inventory/purchase-order/form/PurchaseOrderForm.vue': {
       routes:
         | 'purchaseorder-add'
         | 'purchaseorder-add-from-reservation'
@@ -2958,7 +2958,7 @@ declare module 'vue-router/auto-routes' {
         | 'pk'
         | 'reservation_pk'
     }
-    'src/views/inventory/PurchaseOrderView.vue': {
+    'src/features/inventory/purchase-order/detail/PurchaseOrderView.vue': {
       routes:
         | 'purchaseorder-view'
       views:
@@ -2966,7 +2966,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/inventory/InventoryStats.vue': {
+    'src/features/inventory/stats/InventoryStats.vue': {
       routes:
         | 'inventory-stats'
       views:
@@ -2974,7 +2974,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/inventory/StatsTable.vue': {
+    'src/features/inventory/stats/StatsTable.vue': {
       routes:
         | 'inventory-stats-table'
       views:
@@ -2982,7 +2982,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/inventory/StockLocationList.vue': {
+    'src/features/inventory/stock-location/StockLocationList.vue': {
       routes:
         | 'stock-location-list'
       views:
@@ -2990,7 +2990,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/inventory/StockLocationForm.vue': {
+    'src/features/inventory/stock-location/StockLocationForm.vue': {
       routes:
         | 'stock-location-add'
         | 'stock-location-edit'
@@ -2999,7 +2999,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/inventory/StockLocationView.vue': {
+    'src/features/inventory/stock-location/StockLocationView.vue': {
       routes:
         | 'stock-location-view'
       views:
@@ -3007,7 +3007,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/inventory/SupplierReservationList.vue': {
+    'src/features/inventory/reservation/SupplierReservationList.vue': {
       routes:
         | 'supplier-reservation-list'
       views:
@@ -3015,7 +3015,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/inventory/SupplierReservationForm.vue': {
+    'src/features/inventory/reservation/SupplierReservationForm.vue': {
       routes:
         | 'supplier-reservation-add'
         | 'supplier-reservation-edit'
@@ -3024,7 +3024,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/inventory/SupplierReservationView.vue': {
+    'src/features/inventory/reservation/SupplierReservationView.vue': {
       routes:
         | 'supplier-reservation-view'
       views:
@@ -3032,7 +3032,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/inventory/SupplierList.vue': {
+    'src/features/inventory/supplier/SupplierList.vue': {
       routes:
         | 'supplier-list'
       views:
@@ -3040,7 +3040,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/views/inventory/SupplierForm.vue': {
+    'src/features/inventory/supplier/SupplierForm.vue': {
       routes:
         | 'supplier-add'
         | 'supplier-edit'
@@ -3049,7 +3049,7 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/views/inventory/SupplierView.vue': {
+    'src/features/inventory/supplier/SupplierView.vue': {
       routes:
         | 'supplier-view'
       views:
