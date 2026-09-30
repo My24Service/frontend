@@ -3,6 +3,6 @@ export { SupplierList, SupplierView, SupplierForm, supplierWrite } from './suppl
 export { StockLocationList, StockLocationView, StockLocationForm, stockLocationWrite } from './stock-location'
 export { MutationList, MutationForm, MaterialMoveForm, mutationWrite } from './mutation'
 export { PurchaseOrderList, PurchaseOrderView, PurchaseOrderForm } from './purchase-order'
-export { PurchaseOrderEntryList, PurchaseOrderEntryView, PurchaseOrderEntryForm } from './entry'
+export { PurchaseOrderEntryList, PurchaseOrderEntryView, PurchaseOrderEntryCreate, PurchaseOrderEntryEdit } from './entry'
 export { SupplierReservationList, SupplierReservationView, SupplierReservationForm } from './reservation'
 export { InventoryStats, StatsTable } from './stats'

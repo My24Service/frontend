@@ -2922,9 +2922,16 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
-    'src/features/inventory/entry/form/PurchaseOrderEntryForm.vue': {
+    'src/features/inventory/entry/form/PurchaseOrderEntryCreate.vue': {
       routes:
         | 'purchaseorder-entry-add'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/features/inventory/entry/form/PurchaseOrderEntryEdit.vue': {
+      routes:
         | 'purchaseorder-entry-edit'
       views:
         | never

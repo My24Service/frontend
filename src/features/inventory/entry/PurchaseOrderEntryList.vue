@@ -17,6 +17,7 @@
         modalId: 'delete-purchaseorder-entry-modal',
         confirmText: $trans('Are you sure you want to delete this entry?'),
         resource: Api.InventoryPurchaseorderEntry,
+        invalidate: invalidateEntryWrites,
         deletedDetail: $trans('Entry has been deleted'),
         deleteError: $trans('Error deleting entry'),
       }"
@@ -35,10 +36,12 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { invalidateEntryWrites } from './invalidation'
 
 /**
  * The purchase-order entries: what was booked in, per order and product. The
- * order id opens the edit; the row action deletes.
+ * order id opens the edit; the row action deletes, and refreshes what the
+entry counted toward and booked, as the forms' saves do.
  *
  * No column sorts. The endpoint declares no `ordering`, and the legacy
  * headers sorted only the rows of the page on screen (see the module README).

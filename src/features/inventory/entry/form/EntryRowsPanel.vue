@@ -55,7 +55,7 @@
               {{ $trans('Oops! No elements found. Consider changing the search query.') }}
             </template>
           </VueMultiselect>
-          <b-form-invalid-feedback :state="submitted ? !draftErrors.purchase_order_material : null">
+          <b-form-invalid-feedback :state="showDraftErrors ? !draftErrors.purchase_order_material : null">
             {{ draftErrors.purchase_order_material }}
           </b-form-invalid-feedback>
         </BFormGroup>
@@ -67,7 +67,7 @@
       v-model="draft"
       :stock-locations="stockLocations"
       :errors="draftErrors"
-      :submitted="submitted"
+      :show-errors="showDraftErrors"
     />
 
     <footer class="modal-footer">
@@ -82,13 +82,13 @@
       </BButton>
       &nbsp;
       <BButton
-        v-if="editingIndex !== null"
+        v-if="isEditing"
         class="btn btn-primary"
         size="sm"
         type="button"
         variant="warning"
-        :disabled="!canCommit"
-        @click="saveEdit"
+        :disabled="!isDraftValid"
+        @click="commitEdit"
       >
         {{ $trans('Edit entry') }}
       </BButton>
@@ -98,7 +98,7 @@
         size="sm"
         type="button"
         variant="primary"
-        :disabled="!canCommit"
+        :disabled="!isDraftValid"
         @click="addRow"
       >
         {{ $trans('Add entry') }}
@@ -123,8 +123,6 @@ import type { EntryRows } from './use-entry-rows'
 const props = defineProps<{
   staging: EntryRows
   stockLocations: readonly Api.StockLocation[]
-  /** Errors show only once a save was tried, as the legacy form did. */
-  submitted: boolean
 }>()
 
 const {
@@ -132,17 +130,18 @@ const {
   materials,
   draft,
   draftErrors,
-  canCommit,
-  editingIndex,
+  isDraftValid,
+  showDraftErrors,
+  isEditing,
   editRow,
   deleteRow,
   addRow,
-  saveEdit,
+  commitEdit,
   cancelEdit,
   selectMaterial,
 } = props.staging
 
-const fields = useTemplateRef<{focusAmount: () => void}>('fields')
+const fields = useTemplateRef<InstanceType<typeof EntryFields>>('fields')
 
 const entriesFields = [
   { key: 'material_name', label: $trans('Name') },
@@ -154,9 +153,12 @@ const entriesFields = [
   { key: 'icons', label: '' },
 ]
 
-// The label is a literal, not a translated string: it carries the order's own numbers.
 const materialLabel = (material: Api.PurchaseOrderMaterial) =>
-  `${material.material_view.name} (ordered: ${material.amount}, entries: ${material.num_entries})`
+  interpolate($trans('%(name)s (ordered: %(ordered)s, entries: %(entries)s)'), {
+    name: material.material_view.name ?? '',
+    ordered: material.amount ?? 0,
+    entries: material.num_entries,
+  })
 
 function pickMaterial(option: Api.PurchaseOrderMaterial) {
   selectMaterial(option)

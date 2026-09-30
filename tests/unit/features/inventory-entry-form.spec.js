@@ -8,13 +8,14 @@ import {
   vPurchaseOrderMaterial,
   vStockLocation,
 } from '@/api/valibot.gen'
-import { PurchaseOrderEntryForm } from '@/features/inventory/entry'
+import { PurchaseOrderEntryCreate, PurchaseOrderEntryEdit } from '@/features/inventory/entry'
 import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../support/form-harness.js'
 
 // The contract is the legacy purchase-order-entry-form spec. The create is ONE
-// request (the bulk endpoint, a bare array); the edit is one PATCH.
+// request (the bulk endpoint, a bare array); the edit is one PATCH. They are
+// two screens on two routes; `mountEntry` mounts the one the route would.
 
 const api = installApiSeam()
 
@@ -114,7 +115,7 @@ const datePickerStub = {
 }
 
 async function mountEntry(props = {}) {
-  const wrapper = mountForm(PurchaseOrderEntryForm, {
+  const wrapper = mountForm(props.pk == null ? PurchaseOrderEntryCreate : PurchaseOrderEntryEdit, {
     deep: true,
     props,
     attachTo: document.body,
@@ -293,6 +294,90 @@ describe('create: the order and its staged entries', () => {
 
     expect(rowsOf(wrapper)[0][3]).toBe('3')
   })
+
+  // REGRESSION (inherited from the legacy form): the default location was
+  // applied only when it changed, so one chosen before the order reached
+  // neither the rows the pick staged nor a row added by hand.
+  test('a default location chosen before the order is on every staged row, and on the next one', async () => {
+    const wrapper = await mountEntry()
+    await wrapper.get('#purchaseorder-entry-default-location').setValue('2')
+    await settle()
+
+    await pickOrder(wrapper)
+
+    expect(rowsOf(wrapper).map((row) => row[5])).toEqual(['Van', 'Van'])
+    expect(wrapper.get('#purchaseorder-entry-location').element.value).toBe('2')
+    await click(wrapper, 'Submit')
+    expect(writes()[0].body.map((row) => row.stock_location)).toEqual([2, 2])
+  })
+})
+
+describe('create: picking another order', () => {
+  const ORDER_B = fixtureFor(vPurchaseOrderList, {
+    id: 56,
+    purchase_order_id: 'PO-2',
+    order_name: 'Globex',
+    order_city: 'Utrecht',
+    expected_entry_date: '02/05/2026',
+    num_materials: 1,
+  })
+  const B_MATERIALS = [orderMaterial(9, 'Sprocket', 'kg', 4)]
+
+  const detail = (order, materials) =>
+    fixtureFor(vPurchaseOrderDetail, { ...order, materials, reservation_materials: null, statuses: [], entries: [] })
+
+  beforeEach(() => {
+    api.get(ORDERS, () => paginated([ORDER, ORDER_B]))
+  })
+
+  async function pickNth(wrapper, index) {
+    await wrapper.findAll('#purchaseorder-entry-order-search li button')[index].trigger('click')
+    await settle()
+  }
+
+  // REGRESSION. The header followed the new pick at once, but the rows were
+  // replaced only when its products arrived: a failed read left the first
+  // order's rows under the second order's header, and Submit booked them.
+  test('a second order whose products fail to load keeps none of the first order\'s rows', async () => {
+    api.get(ORDER_DETAIL, ({ params }) => (Number(params.id) === 56
+      ? HttpResponse.json({ detail: 'boom' }, { status: 500 })
+      : detail(ORDER, MATERIAL_ROWS)))
+    const wrapper = await mountEntry()
+    await search(wrapper, '#purchaseorder-entry-order-search', 'PO')
+    await pickNth(wrapper, 0)
+    expect(rowsOf(wrapper)).toHaveLength(2)
+
+    await pickNth(wrapper, 1)
+
+    expect(bodies()).toContain('Error fetching purchase order products')
+    expect(wrapper.get('#purchaseorder-entry-order-id').element.value).toBe('PO-2')
+    expect(wrapper.find('tbody').exists()).toBe(false)
+    await click(wrapper, 'Submit')
+    expect(writes()).toEqual([])
+  })
+
+  // REGRESSION. Whichever read answered last won: a slow answer for the first
+  // pick replaced the rows of the order picked after it.
+  test('a late answer for an order no longer picked does not replace the rows', async () => {
+    let releaseFirst
+    const firstHeld = new Promise((resolve) => { releaseFirst = resolve })
+    api.get(ORDER_DETAIL, async ({ params }) => {
+      if (Number(params.id) === 56) return detail(ORDER_B, B_MATERIALS)
+      await firstHeld
+      return detail(ORDER, MATERIAL_ROWS)
+    })
+    const wrapper = await mountEntry()
+    await search(wrapper, '#purchaseorder-entry-order-search', 'PO')
+
+    await pickNth(wrapper, 0)
+    await pickNth(wrapper, 1)
+    releaseFirst()
+    await settle()
+
+    expect(rowsOf(wrapper).map((row) => row[0])).toEqual(['Sprocket'])
+    await click(wrapper, 'Submit')
+    expect(writes()[0].body).toEqual(bulkBody([{ purchase_order: 56, purchase_order_material: 9, amount: 4 }]))
+  })
 })
 
 describe('create: adding a row', () => {
@@ -363,14 +448,27 @@ describe('create: adding a row', () => {
     expect(button(wrapper, 'Add entry').attributes('disabled')).toBeDefined()
   })
 
-  test('the row errors show once a save was tried', async () => {
+  // Changed deliberately: the row errors waited for a Submit, so a save of the
+  // staged rows lit the blank row editor red. They now wait for a product to
+  // be picked or a row to be edited, as the purchase order's material rows do.
+  test('a blank row editor stays quiet through a save', async () => {
+    const wrapper = await mountEntry()
+    await pickOrder(wrapper)
+
+    await click(wrapper, 'Submit')
+
+    expect(shownErrors(wrapper)).toEqual([])
+  })
+
+  test('the row errors show once a product is picked', async () => {
     const wrapper = await mountEntry()
     await pickOrder(wrapper)
     expect(shownErrors(wrapper)).toEqual([])
 
-    await click(wrapper, 'Submit')
+    await pickProduct(wrapper, 'Widget')
+    await typeAmount(wrapper, '0')
 
-    expect(shownErrors(wrapper)).toEqual(['Please select a product', 'Please enter an amount'])
+    expect(shownErrors(wrapper)).toEqual(['Please enter an amount'])
   })
 })
 
@@ -448,6 +546,45 @@ describe('create: the save', () => {
     ])
   })
 
+  // REGRESSION. Every entry books a stock mutation server-side (the bulk
+  // endpoint's own description), and the save refreshed only the order reads.
+  test('the save makes the stock reads stale', async () => {
+    const wrapper = await mountEntry()
+    await pickOrder(wrapper)
+    const before = reads(LOCATIONS).length
+
+    await click(wrapper, 'Submit')
+
+    expect(reads(LOCATIONS).length).toBeGreaterThan(before)
+  })
+
+  // REGRESSION. The row editor works on a copy since the migration (the
+  // legacy bound it live to the row), so a Submit with an edit open booked the
+  // row as it was before the edit, and dropped the edit without a word.
+  test('Submit with a row edit open books the edit', async () => {
+    const wrapper = await mountEntry()
+    await pickOrder(wrapper)
+    await rowLinks(wrapper, 0)[0].trigger('click')
+    await typeAmount(wrapper, '7')
+
+    await click(wrapper, 'Submit')
+
+    expect(writes()[0].body.map((row) => row.amount)).toEqual([7, 5])
+  })
+
+  test('Submit with an invalid row edit open sends nothing and says why', async () => {
+    const wrapper = await mountEntry()
+    await pickOrder(wrapper)
+    await rowLinks(wrapper, 0)[0].trigger('click')
+    await typeAmount(wrapper, '0')
+
+    await click(wrapper, 'Submit')
+
+    expect(writes()).toEqual([])
+    expect(routerGo()).not.toHaveBeenCalled()
+    expect(shownErrors(wrapper)).toEqual(['Please enter an amount'])
+  })
+
   test('nothing staged sends nothing, says nothing and goes back', async () => {
     const wrapper = await mountEntry()
 
@@ -498,6 +635,16 @@ describe('edit', () => {
     expect(titles()).toEqual(['Updated'])
     expect(bodies()).toEqual(['Entry has been updated'])
     expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+
+  // REGRESSION. A changed entry changes the stock it booked.
+  test('the save makes the stock reads stale', async () => {
+    const wrapper = await mountEntry({ pk: 42 })
+    const before = reads(LOCATIONS).length
+
+    await click(wrapper, 'Submit')
+
+    expect(reads(LOCATIONS).length).toBeGreaterThan(before)
   })
 
   test('sends the date the picker holds as YYYY-MM-DD', async () => {

@@ -115,15 +115,15 @@ import type { EntryFieldErrors, EntryValues } from './schemas'
 const props = defineProps<{
   stockLocations: readonly Api.StockLocation[]
   errors: EntryFieldErrors
-  /** Errors show only once a save was tried, as the legacy form did. */
-  submitted: boolean
+  /** Whether the errors show yet: the edit's once a save was tried, a staged row's once it was touched. */
+  showErrors: boolean
 }>()
 const entry = defineModel<EntryValues>({required: true})
 
 const amountInput = useTemplateRef<{focus: () => void}>('amountInput')
 
 function state(field: keyof EntryFieldErrors) {
-  return props.submitted ? !props.errors[field] : null
+  return props.showErrors ? !props.errors[field] : null
 }
 
 // The parent focuses the amount once a product is picked.

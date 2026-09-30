@@ -9,7 +9,8 @@ const MaterialMoveForm = () => import('../features/inventory/mutation/MaterialMo
 const MaterialView = () => import('../features/inventory/material/MaterialView.vue')
 const MutationForm = () => import('../features/inventory/mutation/MutationForm.vue')
 const MutationList = () => import('../features/inventory/mutation/MutationList.vue')
-const PurchaseOrderEntryForm = () => import('../features/inventory/entry/form/PurchaseOrderEntryForm.vue')
+const PurchaseOrderEntryCreate = () => import('../features/inventory/entry/form/PurchaseOrderEntryCreate.vue')
+const PurchaseOrderEntryEdit = () => import('../features/inventory/entry/form/PurchaseOrderEntryEdit.vue')
 const PurchaseOrderEntryList = () => import('../features/inventory/entry/PurchaseOrderEntryList.vue')
 const PurchaseOrderEntryView = () => import('../features/inventory/entry/PurchaseOrderEntryView.vue')
 const PurchaseOrderForm = () => import('../features/inventory/purchase-order/form/PurchaseOrderForm.vue')
@@ -342,7 +343,7 @@ export default [
         name: 'purchaseorder-entry-edit',
         path: '/inventory/purchaseorder-entries/form/:pk',
         components: {
-          'app-content': PurchaseOrderEntryForm,
+          'app-content': PurchaseOrderEntryEdit,
           'app-subnav': SubNav
         },
         props: {
@@ -354,7 +355,7 @@ export default [
         name: 'purchaseorder-entry-add',
         path: '/inventory/purchaseorder-entries/form',
         components: {
-          'app-content': PurchaseOrderEntryForm,
+          'app-content': PurchaseOrderEntryCreate,
           'app-subnav': SubNav
         },
         props: {

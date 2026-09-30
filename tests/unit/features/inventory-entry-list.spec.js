@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { vPurchaseOrderEntry } from '@/api/valibot.gen'
+import * as Api from '@/services/api-client'
 import { PurchaseOrderEntryList } from '@/features/inventory/entry'
 import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'
-import { mountListView, toasts } from '../support/form-harness.js'
+import { createTestQueryClient, mountListView, toasts } from '../support/form-harness.js'
 import { serverError } from '../support/list-harness.js'
 import { modal } from '../support/modal.js'
 
@@ -122,6 +123,31 @@ describe('PurchaseOrderEntryList row actions', () => {
     expect(api.requests().find((request) => request.method === 'delete').path).toBe(endpoint + '42/')
     expect(listRequests()).toHaveLength(2)
     expect(bodies()).toContain('Entry has been deleted')
+  })
+
+  // REGRESSION. The delete refreshed only the entry reads. An entry counts
+  // toward its order and its order's products, and booked stock server-side,
+  // so those reads went stale with it.
+  test('a delete makes the order, product and stock reads stale too', async () => {
+    api.get('/api/inventory/purchaseorder/', paginated([]))
+    api.get('/api/inventory/purchaseorder-material/', paginated([]))
+    api.get('/api/inventory/stock-location/', paginated([]))
+    const queryClient = createTestQueryClient()
+    const others = [
+      Api.InventoryPurchaseorder.list.options({ query: { page: 1 } }),
+      Api.InventoryPurchaseorderMaterial.list.options({ query: { page: 1 } }),
+      Api.InventoryStockLocation.list.options({ query: { page: 1 } }),
+    ]
+    await Promise.all(others.map((options) => queryClient.fetchQuery(options)))
+    const wrapper = await mountEntries({ queryClient })
+
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    modal('delete-purchaseorder-entry-modal').ok()
+    await settle()
+
+    expect(others.map((options) => queryClient.getQueryState(options.queryKey).isInvalidated))
+      .toEqual([true, true, true])
   })
 
   test('a failed delete keeps the row and reports it', async () => {
