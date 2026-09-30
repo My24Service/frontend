@@ -7,3 +7,6 @@
 name: unit tests
 discover: pnpm exec vitest list --filesOnly | sed -E 's/^\[[^]]+\] //'
 run: node scripts/vitest-shards.mjs "<< outputs.junit >>" << test.atoms >>
+options:
+  # Uploads the merged JUnit report, in place of a store_test_results step.
+  store-test-results: true
