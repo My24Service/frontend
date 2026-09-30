@@ -45,17 +45,57 @@ export function baseListParams(query: ServerPagedListQuery): Record<string, unkn
 }
 
 /**
- * The named column filters that hold a value, as the API wants them. Only a
- * string, number or boolean has a wire form: an object, an array or the empty
- * string an unfilled filter holds is dropped, because `String({})` would filter
- * on `[object Object]` and `?name=` on nothing at all.
+ * The base type a query schema declares for one parameter: `optional` and
+ * `pipe` unwrapped down to `number`, `string`, `boolean` and so on.
  */
-export function columnFilters(query: ServerPagedListQuery, filters: readonly string[]): Record<string, string> {
-  const out: Record<string, string> = {}
+function declaredType(schema: GenericSchema | undefined, key: string): string | undefined {
+  let entry = (schema as {entries?: Record<string, GenericSchema | undefined>} | undefined)?.entries?.[key]
+  for (let depth = 0; entry && depth < 8; depth++) {
+    const {wrapped, pipe} = entry as {wrapped?: GenericSchema; pipe?: GenericSchema[]}
+    const inner = wrapped ?? pipe?.[0]
+    if (!inner) break
+    entry = inner
+  }
+  return entry?.type
+}
+
+/**
+ * The named column filters that hold a value, as the request's query schema
+ * wants them. Only a string, number or boolean has a wire form: an object, an
+ * array or the empty string an unfilled filter holds is dropped, because
+ * `String({})` would filter on `[object Object]` and `?name=` on nothing at all.
+ *
+ * Each value is sent as the type the schema declares for that parameter, so an
+ * integer stays a number (the generated `*ListOptions` parse the query with
+ * that schema and reject `"7"` for an integer) and a string parameter still
+ * gets a string. That also settles what the URL hands over: a filter read back
+ * from the address is always a string, so `?supplier_relation=7` is converted
+ * to `7` here rather than in every screen. A value the schema's type cannot
+ * hold (`?supplier_relation=abc`) is dropped like an empty one. Without a
+ * declared type, a value goes as a string, as before.
+ */
+export function columnFilters(
+  query: ServerPagedListQuery,
+  filters: readonly string[],
+  schema?: GenericSchema,
+): Record<string, string | number | boolean> {
+  const out: Record<string, string | number | boolean> = {}
   for (const key of filters) {
     const value = query[key]
-    if (typeof value === 'string' ? value !== '' : typeof value === 'number' || typeof value === 'boolean') {
-      out[key] = String(value)
+    if (typeof value === 'string' ? value === '' : typeof value !== 'number' && typeof value !== 'boolean') continue
+    switch (declaredType(schema, key)) {
+      case 'number': {
+        const number = typeof value === 'string' ? Number(value) : value
+        if (typeof number === 'number' && Number.isFinite(number)) out[key] = number
+        break
+      }
+      case 'boolean': {
+        const flag = value === 'true' ? true : value === 'false' ? false : value
+        if (typeof flag === 'boolean') out[key] = flag
+        break
+      }
+      default:
+        out[key] = String(value)
     }
   }
   return out
@@ -103,6 +143,8 @@ export interface CollectionDefinition<TId extends number | string> extends Defin
    * the endpoint declares. Its presence is what gives a resource `listOptions`.
    */
   readonly filters?: readonly string[]
+  /** The valibot schema of `list`'s query, which `listOptions` types each filter against. */
+  readonly query?: GenericSchema
   readonly retrieve?: ResourceRecordRead<TId>
   readonly create?: ResourceWrite
   readonly update?: ResourceWrite
@@ -193,6 +235,7 @@ export type ResourceMethods<D extends ResourceDefinition> = {
 type Self = ResourceDefinition & {
   readonly list?: ResourceRead
   readonly filters?: readonly string[]
+  readonly query?: GenericSchema
   readonly retrieve?: ResourceRead
 }
 
@@ -202,7 +245,7 @@ const methods = {
   },
   listOptions(this: Self, query: ServerPagedListQuery, filters: readonly string[] = this.filters ?? []) {
     const options = this.list!.options as (options: {query: Record<string, unknown>}) => object
-    return options({query: {...baseListParams(query), ...columnFilters(query, filters)}})
+    return options({query: {...baseListParams(query), ...columnFilters(query, filters, this.query)}})
   },
   retrieveOptions(this: Self, id?: number | string) {
     const options = this.retrieve!.options as (options?: {path: {id: unknown}}) => object
