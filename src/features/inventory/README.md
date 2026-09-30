@@ -68,7 +68,7 @@ stats/              InventoryStats, StatsTable, total-sales.ts (the five modes)
   `stock_location`, which the API rejects.
 - **The purchase-order retrieve is the detail record**, with materials,
   reservation materials, entries and statuses. The schema said otherwise until
-  my24service `feature/purchase-order-retrieve-schema`.
+  my24service `3912acc0`.
 - **The mutation summary is HTML**, built server-side, and the list renders it
   with `v-html` on purpose (see "Left open").
 - **No inventory list declares `ordering`**, so the lists have no sortable
@@ -121,8 +121,9 @@ stats/              InventoryStats, StatsTable, total-sales.ts (the five modes)
 | Read-only views | Material, stock location, supplier, purchase order and reservation views match the legacy markup, apart from the rows above | Proven in each spec before the snapshot was taken |
 
 Owed by the backend (case 1, `docs/schema-strengthenings.md` entry 10): the
-required names, the mutation's material and location, positive amounts, and
-the expected and entry dates. The API is laxer than every client.
+required names, the row and entry amounts, and the expected and entry dates.
+The API is laxer than every client. The stock mutation and the move have been
+paid on the backend (my24service `875b5d8a`).
 
 ## Left open
 

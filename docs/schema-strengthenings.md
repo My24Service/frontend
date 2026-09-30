@@ -271,11 +271,6 @@ client sends what the forms refuse, so none of these has to stay lax.
 - *stock location `name`*: `vStockLocationCreateUpdateRequest` (`:9813`),
   nullish with no minimum. The rule is in
   `src/features/inventory/stock-location/schemas.ts`.
-- *stock mutation `material`, `location`, a positive `amount`*:
-  `vStockMutationSimpleRequest` (`:9856`) declares the FKs nullish and takes
-  `''` or `0` as an amount. *Material move `amount`*: `vMoveRequest`
-  (`:4172`) takes zero and negatives. The rules are in
-  `src/features/inventory/mutation/schemas.ts`.
 - *purchase-order and reservation material rows, `amount` at least 1*:
   `vPurchaseOrderMaterialRowRequest` (`:8378`) and
   `vSupplierReservationMaterialRowRequest` (`:10564`) take 0. The rule is in
@@ -289,19 +284,28 @@ client sends what the forms refuse, so none of these has to stay lax.
   (`scripts/usage-gate/mobile-callers.json`).
 
 The backend change: `extra_kwargs` `required`/`allow_null: False`/`allow_blank:
-False` on the write serializers, with `nullable_response_fields` where
-rows hold nulls, plus `min_value` on the amounts. A decimal's minimum does
-not reach the generated schema, so the two amount checks stay in the form even
-after that lands. The mutation and move half is written and tested (95
-inventory tests pass, and the new ones fail without it) but uncommitted, in
-`../worktrees/backend-purchase-order-retrieve-schema`. Committing it was held
-for the user.
+False` on the write serializers, with `nullable_response_fields` where rows
+hold nulls, plus `min_value` on the amounts. A decimal's minimum does not
+reach the generated schema, so an amount check stays in the form even after
+that lands. The stock mutation and material move have already been paid (see
+"Paid").
 
 ## Paid
 
 What was asked here and has since landed in the schema, kept so the history
 of a form's rule is followable. The frontend workaround each describes is
 gone.
+
+- **Stock mutation and material move (inventory slice, September 2026).**
+  `StockMutationSimpleSerializer` took a null material or location and any
+  amount, and `MoveSerializer` took a zero or negative amount. Both are
+  refused now: my24service `875b5d8a`, on `develop`.
+  `vStockMutationSimpleRequest` requires both FKs non-null, and
+  `nullable_response_fields` keeps the response honest for the rows the
+  purchase and sales flows book without them. The mutation form dropped its
+  `v.unwrap`s. The positive-amount checks stay in
+  `src/features/inventory/mutation/schemas.ts` only because a decimal's
+  `min_value` does not reach the generated schema. The API enforces it now.
 
 - **Nested bodies inside a `Patched*` component were not themselves
   patched.** `PatchedEngineerRequest.engineer` referenced the full

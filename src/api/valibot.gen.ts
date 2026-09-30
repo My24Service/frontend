@@ -9826,8 +9826,8 @@ export const vStockLocationCreateUpdateRequest = v.object({
  */
 export const vStockMutationSimple = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    material: v.nullish(v.pipe(v.number(), v.integer())),
-    location: v.nullish(v.pipe(v.number(), v.integer())),
+    material: v.nullable(v.pipe(v.number(), v.integer())),
+    location: v.nullable(v.pipe(v.number(), v.integer())),
     amount: v.pipe(v.string(), v.regex(/^-?\d{0,18}(?:\.\d{0,2})?$/)),
     mutation_type: v.optional(vMutationTypeEnum),
     modified: v.pipe(v.string(), v.readonly()),
@@ -9854,8 +9854,8 @@ export const vPaginatedStockMutationSimpleList = v.object({
  *   POST /api/inventory/stockmutationsimple-list/
  */
 export const vStockMutationSimpleRequest = v.object({
-    material: v.nullish(v.pipe(v.number(), v.integer())),
-    location: v.nullish(v.pipe(v.number(), v.integer())),
+    material: v.pipe(v.number(), v.integer()),
+    location: v.pipe(v.number(), v.integer()),
     amount: v.pipe(v.string(), v.regex(/^-?\d{0,18}(?:\.\d{0,2})?$/)),
     mutation_type: v.optional(vMutationTypeEnum),
     remarks: v.nullish(v.pipe(v.string(), v.maxLength(255)))
@@ -16815,8 +16815,8 @@ export const vStockLocationCreateUpdateWritable = v.object({
  * Nested in: PaginatedStockMutationSimpleList
  */
 export const vStockMutationSimpleWritable = v.object({
-    material: v.nullish(v.pipe(v.number(), v.integer())),
-    location: v.nullish(v.pipe(v.number(), v.integer())),
+    material: v.nullable(v.pipe(v.number(), v.integer())),
+    location: v.nullable(v.pipe(v.number(), v.integer())),
     amount: v.pipe(v.string(), v.regex(/^-?\d{0,18}(?:\.\d{0,2})?$/)),
     mutation_type: v.optional(vMutationTypeEnum),
     remarks: v.nullish(v.pipe(v.string(), v.maxLength(255)))

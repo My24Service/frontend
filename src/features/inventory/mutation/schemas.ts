@@ -67,15 +67,14 @@ export const FIELD_MESSAGES = {
 const mutationBody = Api.InventoryStockmutationsimpleList.create.body
 
 /**
- * What the form checks. The generated create body lets a mutation go without
- * a material or a location (`nullish`) and takes any amount its regex allows,
- * `''` and `0` included. Both are owed by the backend (case 1,
- * docs/schema-strengthenings.md): the form refuses what the API accepts.
+ * What the form checks: the create body, which requires a material and a
+ * location, with a positive amount on top. The API refuses a zero or negative
+ * amount too (`min_value` on the serializer), but a decimal's minimum does not
+ * reach the generated schema, so the form says it itself - as it always read
+ * the field, with `parseInt`.
  */
 const vMutationForm = v.object({
   ...mutationBody.entries,
-  material: v.unwrap(mutationBody.entries.material),
-  location: v.unwrap(mutationBody.entries.location),
   amount: v.pipe(mutationBody.entries.amount, v.check(isPositive)),
 })
 
@@ -132,9 +131,9 @@ export const MOVE_FIELD_MESSAGES = {
 const moveBody = Api.InventoryMaterial.extras.moveCreate.body
 
 /**
- * The generated move body takes any decimal its regex allows, `''` and
- * negatives included; a move of nothing is refused here. Owed by the backend
- * too (case 1).
+ * The move body with a positive amount on top: the API refuses anything else
+ * (`min_value` on `MoveSerializer`), but a decimal's minimum does not reach the
+ * generated schema.
  */
 const vMoveForm = v.object({
   material: vInventoryMaterialMoveCreatePath.entries.id,

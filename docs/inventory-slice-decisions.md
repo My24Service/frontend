@@ -117,8 +117,8 @@ deletions, the READMEs and the COMPLETION summary come last.
   materials, entries and statuses. Found by the entries subagent. The fix is
   schema-only, on my24service `feature/purchase-order-retrieve-schema`
   (commit `3912acc0`, worktree `../worktrees/backend-purchase-order-retrieve-schema`,
-  cut from `develop`). The regenerated diff is that one `$ref`. **Needs
-  merging before this branch ships.**
+  cut from `develop`). The regenerated diff is that one `$ref`. Merged into
+  my24service `develop` and pushed by the user.
 
 ## Forks decided during the migration
 
@@ -159,16 +159,16 @@ deletions, the READMEs and the COMPLETION summary come last.
 - **The material, supplier and stock-location forms write their blanks out**
   rather than deriving them from the create body. Each form owns a subset of
   the body's keys (form-schemas step 8).
-- **The mutation/move tightening on the backend is written but not
-  committed.** I tightened `StockMutationSimpleSerializer` (required,
-  non-null material and location, positive amount, `nullable_response_fields`
-  for the rows the purchase and sales flows book) and `MoveSerializer`
-  (positive amount). I added regression tests: all 95 inventory tests pass,
-  and 6 fail without the change. The permission classifier refused the
-  commit, so the change sits uncommitted in
-  `../worktrees/backend-purchase-order-retrieve-schema` for the user to
-  decide. The frontend is back on the committed schema, and the rules are
-  recorded as owed (`docs/schema-strengthenings.md` entry 10).
+- **The backend now refuses a stock correction or move of nothing.**
+  `StockMutationSimpleSerializer` requires a non-null material and location
+  and a positive amount, and keeps `nullable_response_fields` for the rows
+  the purchase and sales flows book. `MoveSerializer` requires a positive
+  amount. With the regression tests, all 95 inventory tests pass, and 6 of
+  them fail without the change. The permission classifier refused my commit,
+  so the user committed it (`875b5d8a`), fast-forwarded my24service
+  `develop` and pushed it. The frontend was regenerated from it and the
+  mutation form dropped its hand-written required rules (ledger entry 10,
+  now under "Paid").
 - **The baseline's 5 failing specs passed in the final full run** (2952/2952).
   They look timing-dependent rather than broken, and none are in this slice.
 - **`tests/unit/fixtures/{purchaseorder,purchaseorders,stocklocation,stocklocations,supplier-reservation,supplier-reservations}.js`
