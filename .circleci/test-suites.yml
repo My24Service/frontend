@@ -1,0 +1,9 @@
+# Unit tests. `vitest list` prefixes each file with its project ("[shared] "),
+# which the sed strips so the atoms are plain spec paths.
+#
+# The run goes through scripts/vitest-shards.mjs, which splits the selected
+# files over sequential vitest processes (VITEST_SHARDS, default 4) so the
+# container does not run out of memory, and merges their JUnit reports.
+name: unit tests
+discover: pnpm exec vitest list --filesOnly | sed -E 's/^\[[^]]+\] //'
+run: node scripts/vitest-shards.mjs "<< outputs.junit >>" << test.atoms >>
