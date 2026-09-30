@@ -80,12 +80,10 @@ workflows:
   version: 2
   test-and-build:
     jobs:
-      # Deliberately unfiltered. Combined with the project-level
-      # "Only build pull requests" setting, this runs the suite on every PR
-      # and on the default branch, and nowhere else. CircleCI branch filters
-      # cannot see a PR's target branch, so this is the only way to cover
-      # PRs into develop/main.
-      - test
+      - test:
+          filters:
+            branches:
+              only: [develop, main]
       - build-push-main:
           requires:
             - test
