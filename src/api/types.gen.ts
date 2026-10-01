@@ -13308,151 +13308,6 @@ export type CompanyActivityPartialUpdateResponses = {
 
 export type CompanyActivityPartialUpdateResponse = CompanyActivityPartialUpdateResponses[keyof CompanyActivityPartialUpdateResponses];
 
-export type CompanyApiuserListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/apiuser/';
-};
-
-export type CompanyApiuserListResponses = {
-    200: PaginatedApiUserList;
-};
-
-export type CompanyApiuserListResponse = CompanyApiuserListResponses[keyof CompanyApiuserListResponses];
-
-export type CompanyApiuserCreateData = {
-    body: ApiUserRequestWritable;
-    path?: never;
-    query?: never;
-    url: '/api/company/apiuser/';
-};
-
-export type CompanyApiuserCreateResponses = {
-    201: ApiUser;
-};
-
-export type CompanyApiuserCreateResponse = CompanyApiuserCreateResponses[keyof CompanyApiuserCreateResponses];
-
-export type CompanyApiuserDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/apiuser/{id}/';
-};
-
-export type CompanyApiuserDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyApiuserDestroyResponse = CompanyApiuserDestroyResponses[keyof CompanyApiuserDestroyResponses];
-
-export type CompanyApiuserRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/apiuser/{id}/';
-};
-
-export type CompanyApiuserRetrieveResponses = {
-    200: ApiUser;
-};
-
-export type CompanyApiuserRetrieveResponse = CompanyApiuserRetrieveResponses[keyof CompanyApiuserRetrieveResponses];
-
-export type CompanyApiuserPartialUpdateData = {
-    body?: PatchedApiUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/apiuser/{id}/';
-};
-
-export type CompanyApiuserPartialUpdateResponses = {
-    200: ApiUser;
-};
-
-export type CompanyApiuserPartialUpdateResponse = CompanyApiuserPartialUpdateResponses[keyof CompanyApiuserPartialUpdateResponses];
-
-export type CompanyApiuserRenewTokenCreateData = {
-    body: ApiUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/apiuser/{id}/renew_token/';
-};
-
-export type CompanyApiuserRenewTokenCreateResponses = {
-    200: SuccessResponse;
-};
-
-export type CompanyApiuserRenewTokenCreateResponse = CompanyApiuserRenewTokenCreateResponses[keyof CompanyApiuserRenewTokenCreateResponses];
-
-export type CompanyApiuserRevokeCreateData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/apiuser/{id}/revoke/';
-};
-
-export type CompanyApiuserRevokeCreateResponses = {
-    200: SuccessResponse;
-};
-
-export type CompanyApiuserRevokeCreateResponse = CompanyApiuserRevokeCreateResponses[keyof CompanyApiuserRevokeCreateResponses];
-
-export type CompanyApiuserDummyEndpointRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/apiuser/dummy_endpoint/';
-};
-
-export type CompanyApiuserDummyEndpointRetrieveResponses = {
-    200: SuccessResponse;
-};
-
-export type CompanyApiuserDummyEndpointRetrieveResponse = CompanyApiuserDummyEndpointRetrieveResponses[keyof CompanyApiuserDummyEndpointRetrieveResponses];
-
 export type CompanyBranchListData = {
     body?: never;
     path?: never;
@@ -13787,102 +13642,6 @@ export type CompanyBudgetExpectedCostsRetrieveResponses = {
 
 export type CompanyBudgetExpectedCostsRetrieveResponse = CompanyBudgetExpectedCostsRetrieveResponses[keyof CompanyBudgetExpectedCostsRetrieveResponses];
 
-export type CompanyCustomeruserListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/customeruser/';
-};
-
-export type CompanyCustomeruserListResponses = {
-    200: PaginatedCustomerUserList;
-};
-
-export type CompanyCustomeruserListResponse = CompanyCustomeruserListResponses[keyof CompanyCustomeruserListResponses];
-
-export type CompanyCustomeruserCreateData = {
-    body: CustomerUserRequestWritable;
-    path?: never;
-    query?: never;
-    url: '/api/company/customeruser/';
-};
-
-export type CompanyCustomeruserCreateResponses = {
-    201: CustomerUser;
-};
-
-export type CompanyCustomeruserCreateResponse = CompanyCustomeruserCreateResponses[keyof CompanyCustomeruserCreateResponses];
-
-export type CompanyCustomeruserDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/customeruser/{id}/';
-};
-
-export type CompanyCustomeruserDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyCustomeruserDestroyResponse = CompanyCustomeruserDestroyResponses[keyof CompanyCustomeruserDestroyResponses];
-
-export type CompanyCustomeruserRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/customeruser/{id}/';
-};
-
-export type CompanyCustomeruserRetrieveResponses = {
-    200: CustomerUser;
-};
-
-export type CompanyCustomeruserRetrieveResponse = CompanyCustomeruserRetrieveResponses[keyof CompanyCustomeruserRetrieveResponses];
-
-export type CompanyCustomeruserPartialUpdateData = {
-    body?: PatchedCustomerUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/customeruser/{id}/';
-};
-
-export type CompanyCustomeruserPartialUpdateResponses = {
-    200: CustomerUser;
-};
-
-export type CompanyCustomeruserPartialUpdateResponse = CompanyCustomeruserPartialUpdateResponses[keyof CompanyCustomeruserPartialUpdateResponses];
-
 export type CompanyDispatchAssignedordersUserListV4RetrieveData = {
     body?: never;
     path?: never;
@@ -13911,517 +13670,6 @@ export type CompanyDispatchAssignedordersUserListV4RetrieveResponses = {
 
 export type CompanyDispatchAssignedordersUserListV4RetrieveResponse = CompanyDispatchAssignedordersUserListV4RetrieveResponses[keyof CompanyDispatchAssignedordersUserListV4RetrieveResponses];
 
-export type CompanyEmployeeuserListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/employeeuser/';
-};
-
-export type CompanyEmployeeuserListResponses = {
-    200: PaginatedEmployeeUserList;
-};
-
-export type CompanyEmployeeuserListResponse = CompanyEmployeeuserListResponses[keyof CompanyEmployeeuserListResponses];
-
-export type CompanyEmployeeuserCreateData = {
-    body: EmployeeUserRequestWritable;
-    path?: never;
-    query?: never;
-    url: '/api/company/employeeuser/';
-};
-
-export type CompanyEmployeeuserCreateResponses = {
-    201: EmployeeUser;
-};
-
-export type CompanyEmployeeuserCreateResponse = CompanyEmployeeuserCreateResponses[keyof CompanyEmployeeuserCreateResponses];
-
-export type CompanyEmployeeuserDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/employeeuser/{id}/';
-};
-
-export type CompanyEmployeeuserDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyEmployeeuserDestroyResponse = CompanyEmployeeuserDestroyResponses[keyof CompanyEmployeeuserDestroyResponses];
-
-export type CompanyEmployeeuserRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/employeeuser/{id}/';
-};
-
-export type CompanyEmployeeuserRetrieveResponses = {
-    200: EmployeeUser;
-};
-
-export type CompanyEmployeeuserRetrieveResponse = CompanyEmployeeuserRetrieveResponses[keyof CompanyEmployeeuserRetrieveResponses];
-
-export type CompanyEmployeeuserPartialUpdateData = {
-    body?: PatchedEmployeeUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/employeeuser/{id}/';
-};
-
-export type CompanyEmployeeuserPartialUpdateResponses = {
-    200: EmployeeUser;
-};
-
-export type CompanyEmployeeuserPartialUpdateResponse = CompanyEmployeeuserPartialUpdateResponses[keyof CompanyEmployeeuserPartialUpdateResponses];
-
-export type CompanyEngineerListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/engineer/';
-};
-
-export type CompanyEngineerListResponses = {
-    200: PaginatedEngineerList;
-};
-
-export type CompanyEngineerListResponse = CompanyEngineerListResponses[keyof CompanyEngineerListResponses];
-
-export type CompanyEngineerCreateData = {
-    body: EngineerRequestWritable;
-    path?: never;
-    query?: never;
-    url: '/api/company/engineer/';
-};
-
-export type CompanyEngineerCreateResponses = {
-    201: Engineer;
-};
-
-export type CompanyEngineerCreateResponse = CompanyEngineerCreateResponses[keyof CompanyEngineerCreateResponses];
-
-export type CompanyEngineerEventTypeListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/engineer-event-type/';
-};
-
-export type CompanyEngineerEventTypeListResponses = {
-    200: PaginatedEngineerEventTypeList;
-};
-
-export type CompanyEngineerEventTypeListResponse = CompanyEngineerEventTypeListResponses[keyof CompanyEngineerEventTypeListResponses];
-
-export type CompanyEngineerEventTypeCreateData = {
-    body: EngineerEventTypeRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/engineer-event-type/';
-};
-
-export type CompanyEngineerEventTypeCreateResponses = {
-    201: EngineerEventType;
-};
-
-export type CompanyEngineerEventTypeCreateResponse = CompanyEngineerEventTypeCreateResponses[keyof CompanyEngineerEventTypeCreateResponses];
-
-export type CompanyEngineerEventTypeDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this engineer event type.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer-event-type/{id}/';
-};
-
-export type CompanyEngineerEventTypeDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyEngineerEventTypeDestroyResponse = CompanyEngineerEventTypeDestroyResponses[keyof CompanyEngineerEventTypeDestroyResponses];
-
-export type CompanyEngineerEventTypeRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this engineer event type.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer-event-type/{id}/';
-};
-
-export type CompanyEngineerEventTypeRetrieveResponses = {
-    200: EngineerEventType;
-};
-
-export type CompanyEngineerEventTypeRetrieveResponse = CompanyEngineerEventTypeRetrieveResponses[keyof CompanyEngineerEventTypeRetrieveResponses];
-
-export type CompanyEngineerEventTypePartialUpdateData = {
-    body?: PatchedEngineerEventTypeRequest;
-    path: {
-        /**
-         * A unique integer value identifying this engineer event type.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer-event-type/{id}/';
-};
-
-export type CompanyEngineerEventTypePartialUpdateResponses = {
-    200: EngineerEventType;
-};
-
-export type CompanyEngineerEventTypePartialUpdateResponse = CompanyEngineerEventTypePartialUpdateResponses[keyof CompanyEngineerEventTypePartialUpdateResponses];
-
-export type CompanyEngineerEventTypeStatsListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        engineer?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-        year?: number;
-    };
-    url: '/api/company/engineer-event-type/stats/';
-};
-
-export type CompanyEngineerEventTypeStatsListResponses = {
-    200: Array<EngineerEventType>;
-};
-
-export type CompanyEngineerEventTypeStatsListResponse = CompanyEngineerEventTypeStatsListResponses[keyof CompanyEngineerEventTypeStatsListResponses];
-
-export type CompanyEngineerExportXlsRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/engineer-export-xls/';
-};
-
-export type CompanyEngineerExportXlsRetrieveResponses = {
-    200: Blob | File;
-};
-
-export type CompanyEngineerExportXlsRetrieveResponse = CompanyEngineerExportXlsRetrieveResponses[keyof CompanyEngineerExportXlsRetrieveResponses];
-
-export type CompanyEngineerDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer/{id}/';
-};
-
-export type CompanyEngineerDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyEngineerDestroyResponse = CompanyEngineerDestroyResponses[keyof CompanyEngineerDestroyResponses];
-
-export type CompanyEngineerRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer/{id}/';
-};
-
-export type CompanyEngineerRetrieveResponses = {
-    200: Engineer;
-};
-
-export type CompanyEngineerRetrieveResponse = CompanyEngineerRetrieveResponses[keyof CompanyEngineerRetrieveResponses];
-
-export type CompanyEngineerPartialUpdateData = {
-    body?: PatchedEngineerRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer/{id}/';
-};
-
-export type CompanyEngineerPartialUpdateResponses = {
-    200: Engineer;
-};
-
-export type CompanyEngineerPartialUpdateResponse = CompanyEngineerPartialUpdateResponses[keyof CompanyEngineerPartialUpdateResponses];
-
-export type CompanyEngineerInfoRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer/{id}/info/';
-};
-
-export type CompanyEngineerInfoRetrieveResponses = {
-    200: Engineer;
-};
-
-export type CompanyEngineerInfoRetrieveResponse = CompanyEngineerInfoRetrieveResponses[keyof CompanyEngineerInfoRetrieveResponses];
-
-export type CompanyEngineerStoreLonLatCreateData = {
-    body: EngineerRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineer/{id}/store_lon_lat/';
-};
-
-export type CompanyEngineerStoreLonLatCreateResponses = {
-    200: ResultResponse;
-};
-
-export type CompanyEngineerStoreLonLatCreateResponse = CompanyEngineerStoreLonLatCreateResponses[keyof CompanyEngineerStoreLonLatCreateResponses];
-
-export type CompanyEngineerDeviceRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/engineer/device/';
-};
-
-export type CompanyEngineerDeviceRetrieveResponses = {
-    200: EngineerDeviceResponse;
-};
-
-export type CompanyEngineerDeviceRetrieveResponse = CompanyEngineerDeviceRetrieveResponses[keyof CompanyEngineerDeviceRetrieveResponses];
-
-export type CompanyEngineerGetLocationsListData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/engineer/get_locations/';
-};
-
-export type CompanyEngineerGetLocationsListResponses = {
-    200: Array<EngineerLocation>;
-};
-
-export type CompanyEngineerGetLocationsListResponse = CompanyEngineerGetLocationsListResponses[keyof CompanyEngineerGetLocationsListResponses];
-
-export type CompanyEngineerListForSelectListData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/engineer/list-for-select/';
-};
-
-export type CompanyEngineerListForSelectListResponses = {
-    200: Array<EngineerForSelect>;
-};
-
-export type CompanyEngineerListForSelectListResponse = CompanyEngineerListForSelectListResponses[keyof CompanyEngineerListForSelectListResponses];
-
-export type CompanyEngineereventListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        engineer?: number;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-    };
-    url: '/api/company/engineerevent/';
-};
-
-export type CompanyEngineereventListResponses = {
-    200: PaginatedEngineerEventList;
-};
-
-export type CompanyEngineereventListResponse = CompanyEngineereventListResponses[keyof CompanyEngineereventListResponses];
-
-export type CompanyEngineereventCreateData = {
-    body: EngineerEventRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/engineerevent/';
-};
-
-export type CompanyEngineereventCreateResponses = {
-    201: number;
-};
-
-export type CompanyEngineereventCreateResponse = CompanyEngineereventCreateResponses[keyof CompanyEngineereventCreateResponses];
-
-export type CompanyEngineereventUpdateRetrieveData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineerevent-update/{id}/';
-};
-
-export type CompanyEngineereventUpdateRetrieveResponses = {
-    200: EngineerEvent;
-};
-
-export type CompanyEngineereventUpdateRetrieveResponse = CompanyEngineereventUpdateRetrieveResponses[keyof CompanyEngineereventUpdateRetrieveResponses];
-
-export type CompanyEngineereventUpdatePartialUpdateData = {
-    body?: PatchedEngineerEventAttachOrderRequest;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineerevent-update/{id}/';
-};
-
-export type CompanyEngineereventUpdatePartialUpdateResponses = {
-    200: ResultResponse;
-};
-
-export type CompanyEngineereventUpdatePartialUpdateResponse = CompanyEngineereventUpdatePartialUpdateResponses[keyof CompanyEngineereventUpdatePartialUpdateResponses];
-
-export type CompanyEngineereventDestroyData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineerevent/{id}/';
-};
-
-export type CompanyEngineereventDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyEngineereventDestroyResponse = CompanyEngineereventDestroyResponses[keyof CompanyEngineereventDestroyResponses];
-
-export type CompanyEngineereventCreateOrderCreateData = {
-    body?: EngineerEventCreateOrderRequestRequest;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/engineerevent/{id}/create-order/';
-};
-
-export type CompanyEngineereventCreateOrderCreateErrors = {
-    400: EngineerEventCreateOrderError;
-    404: NotFoundResponse;
-};
-
-export type CompanyEngineereventCreateOrderCreateError = CompanyEngineereventCreateOrderCreateErrors[keyof CompanyEngineereventCreateOrderCreateErrors];
-
-export type CompanyEngineereventCreateOrderCreateResponses = {
-    201: EngineerEventCreateOrderResponse;
-};
-
-export type CompanyEngineereventCreateOrderCreateResponse = CompanyEngineereventCreateOrderCreateResponses[keyof CompanyEngineereventCreateOrderCreateResponses];
-
-export type CompanyEventsExportXlsRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/events-export-xls/';
-};
-
-export type CompanyEventsExportXlsRetrieveResponses = {
-    200: Blob | File;
-};
-
-export type CompanyEventsExportXlsRetrieveResponse = CompanyEventsExportXlsRetrieveResponses[keyof CompanyEventsExportXlsRetrieveResponses];
-
 export type CompanyIbanCheckCreateData = {
     body: IbanCheckRequestRequest;
     path?: never;
@@ -14434,689 +13682,6 @@ export type CompanyIbanCheckCreateResponses = {
 };
 
 export type CompanyIbanCheckCreateResponse = CompanyIbanCheckCreateResponses[keyof CompanyIbanCheckCreateResponses];
-
-export type CompanyImportListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/import/';
-};
-
-export type CompanyImportListResponses = {
-    200: PaginatedImportList;
-};
-
-export type CompanyImportListResponse = CompanyImportListResponses[keyof CompanyImportListResponses];
-
-export type CompanyImportCreateData = {
-    body: ImportRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/import/';
-};
-
-export type CompanyImportCreateResponses = {
-    201: Import;
-};
-
-export type CompanyImportCreateResponse = CompanyImportCreateResponses[keyof CompanyImportCreateResponses];
-
-export type CompanyImportDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this import.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/import/{id}/';
-};
-
-export type CompanyImportDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyImportDestroyResponse = CompanyImportDestroyResponses[keyof CompanyImportDestroyResponses];
-
-export type CompanyImportRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this import.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/import/{id}/';
-};
-
-export type CompanyImportRetrieveResponses = {
-    200: Import;
-};
-
-export type CompanyImportRetrieveResponse = CompanyImportRetrieveResponses[keyof CompanyImportRetrieveResponses];
-
-export type CompanyImportPartialUpdateData = {
-    body?: PatchedImportRequest;
-    path: {
-        /**
-         * A unique integer value identifying this import.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/import/{id}/';
-};
-
-export type CompanyImportPartialUpdateResponses = {
-    200: Import;
-};
-
-export type CompanyImportPartialUpdateResponse = CompanyImportPartialUpdateResponses[keyof CompanyImportPartialUpdateResponses];
-
-export type CompanyImportDoCreateData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this import.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/import/{id}/do/';
-};
-
-export type CompanyImportDoCreateResponses = {
-    200: ImportResult;
-};
-
-export type CompanyImportDoCreateResponse = CompanyImportDoCreateResponses[keyof CompanyImportDoCreateResponses];
-
-export type CompanyImportPreviewRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this import.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/import/{id}/preview/';
-};
-
-export type CompanyImportPreviewRetrieveResponses = {
-    200: ImportResult;
-};
-
-export type CompanyImportPreviewRetrieveResponse = CompanyImportPreviewRetrieveResponses[keyof CompanyImportPreviewRetrieveResponses];
-
-export type CompanyImportRevertCreateData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this import.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/import/{id}/revert/';
-};
-
-export type CompanyImportRevertCreateResponses = {
-    200: ImportRevert;
-};
-
-export type CompanyImportRevertCreateResponse = CompanyImportRevertCreateResponses[keyof CompanyImportRevertCreateResponses];
-
-export type CompanyImportGetAllowedExtensionsRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/import/get_allowed_extensions/';
-};
-
-export type CompanyImportGetAllowedExtensionsRetrieveResponses = {
-    200: Array<string>;
-};
-
-export type CompanyImportGetAllowedExtensionsRetrieveResponse = CompanyImportGetAllowedExtensionsRetrieveResponses[keyof CompanyImportGetAllowedExtensionsRetrieveResponses];
-
-export type CompanyImportGetLookupFieldsRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/import/get_lookup_fields/';
-};
-
-export type CompanyImportGetLookupFieldsRetrieveResponses = {
-    200: {
-        [key: string]: Array<string>;
-    };
-};
-
-export type CompanyImportGetLookupFieldsRetrieveResponse = CompanyImportGetLookupFieldsRetrieveResponses[keyof CompanyImportGetLookupFieldsRetrieveResponses];
-
-export type CompanyImportRequiredRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/import/required/';
-};
-
-export type CompanyImportRequiredRetrieveResponses = {
-    200: {
-        [key: string]: Array<string>;
-    };
-};
-
-export type CompanyImportRequiredRetrieveResponse = CompanyImportRequiredRetrieveResponses[keyof CompanyImportRequiredRetrieveResponses];
-
-export type CompanyLeaveTypeListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/leave-type/';
-};
-
-export type CompanyLeaveTypeListResponses = {
-    200: PaginatedLeaveTypeList;
-};
-
-export type CompanyLeaveTypeListResponse = CompanyLeaveTypeListResponses[keyof CompanyLeaveTypeListResponses];
-
-export type CompanyLeaveTypeCreateData = {
-    body: LeaveTypeRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/leave-type/';
-};
-
-export type CompanyLeaveTypeCreateResponses = {
-    201: LeaveType;
-};
-
-export type CompanyLeaveTypeCreateResponse = CompanyLeaveTypeCreateResponses[keyof CompanyLeaveTypeCreateResponses];
-
-export type CompanyLeaveTypeDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this leave type.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/leave-type/{id}/';
-};
-
-export type CompanyLeaveTypeDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyLeaveTypeDestroyResponse = CompanyLeaveTypeDestroyResponses[keyof CompanyLeaveTypeDestroyResponses];
-
-export type CompanyLeaveTypeRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this leave type.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/leave-type/{id}/';
-};
-
-export type CompanyLeaveTypeRetrieveResponses = {
-    200: LeaveType;
-};
-
-export type CompanyLeaveTypeRetrieveResponse = CompanyLeaveTypeRetrieveResponses[keyof CompanyLeaveTypeRetrieveResponses];
-
-export type CompanyLeaveTypePartialUpdateData = {
-    body?: PatchedLeaveTypeRequest;
-    path: {
-        /**
-         * A unique integer value identifying this leave type.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/leave-type/{id}/';
-};
-
-export type CompanyLeaveTypePartialUpdateResponses = {
-    200: LeaveType;
-};
-
-export type CompanyLeaveTypePartialUpdateResponse = CompanyLeaveTypePartialUpdateResponses[keyof CompanyLeaveTypePartialUpdateResponses];
-
-export type CompanyLeaveTypeListForSelectListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/leave-type/list_for_select/';
-};
-
-export type CompanyLeaveTypeListForSelectListResponses = {
-    200: Array<LeaveType>;
-};
-
-export type CompanyLeaveTypeListForSelectListResponse = CompanyLeaveTypeListForSelectListResponses[keyof CompanyLeaveTypeListForSelectListResponses];
-
-export type CompanyPartnerListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
-         */
-        ordering?: Array<'-created' | '-partner__name' | 'created' | 'partner__name'>;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/partner/';
-};
-
-export type CompanyPartnerListResponses = {
-    200: PaginatedPartnerDetailList;
-};
-
-export type CompanyPartnerListResponse = CompanyPartnerListResponses[keyof CompanyPartnerListResponses];
-
-export type CompanyPartnerCreateData = {
-    body?: PartnerDetailRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/partner/';
-};
-
-export type CompanyPartnerCreateResponses = {
-    201: PartnerDetail;
-};
-
-export type CompanyPartnerCreateResponse = CompanyPartnerCreateResponses[keyof CompanyPartnerCreateResponses];
-
-export type CompanyPartnerRequestListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/partner-request/';
-};
-
-export type CompanyPartnerRequestListResponses = {
-    200: PaginatedPartnerRequestList;
-};
-
-export type CompanyPartnerRequestListResponse = CompanyPartnerRequestListResponses[keyof CompanyPartnerRequestListResponses];
-
-export type CompanyPartnerRequestCreateData = {
-    body: PartnerRequestRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/partner-request/';
-};
-
-export type CompanyPartnerRequestCreateResponses = {
-    201: PartnerRequest;
-};
-
-export type CompanyPartnerRequestCreateResponse = CompanyPartnerRequestCreateResponses[keyof CompanyPartnerRequestCreateResponses];
-
-export type CompanyPartnerRequestDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this partner request.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner-request/{id}/';
-};
-
-export type CompanyPartnerRequestDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyPartnerRequestDestroyResponse = CompanyPartnerRequestDestroyResponses[keyof CompanyPartnerRequestDestroyResponses];
-
-export type CompanyPartnerRequestRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this partner request.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner-request/{id}/';
-};
-
-export type CompanyPartnerRequestRetrieveResponses = {
-    200: PartnerRequest;
-};
-
-export type CompanyPartnerRequestRetrieveResponse = CompanyPartnerRequestRetrieveResponses[keyof CompanyPartnerRequestRetrieveResponses];
-
-export type CompanyPartnerRequestPartialUpdateData = {
-    body?: PatchedPartnerRequestRequest;
-    path: {
-        /**
-         * A unique integer value identifying this partner request.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner-request/{id}/';
-};
-
-export type CompanyPartnerRequestPartialUpdateResponses = {
-    200: PartnerRequest;
-};
-
-export type CompanyPartnerRequestPartialUpdateResponse = CompanyPartnerRequestPartialUpdateResponses[keyof CompanyPartnerRequestPartialUpdateResponses];
-
-export type CompanyPartnerRequestAcceptPartialUpdateData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this partner request.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner-request/{id}/accept/';
-};
-
-export type CompanyPartnerRequestAcceptPartialUpdateResponses = {
-    200: SuccessResponse;
-};
-
-export type CompanyPartnerRequestAcceptPartialUpdateResponse = CompanyPartnerRequestAcceptPartialUpdateResponses[keyof CompanyPartnerRequestAcceptPartialUpdateResponses];
-
-export type CompanyPartnerRequestRejectPartialUpdateData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this partner request.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner-request/{id}/reject/';
-};
-
-export type CompanyPartnerRequestRejectPartialUpdateResponses = {
-    200: SuccessResponse;
-};
-
-export type CompanyPartnerRequestRejectPartialUpdateResponse = CompanyPartnerRequestRejectPartialUpdateResponses[keyof CompanyPartnerRequestRejectPartialUpdateResponses];
-
-export type CompanyPartnerRequestReceivedListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
-         */
-        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/partner-request/received/';
-};
-
-export type CompanyPartnerRequestReceivedListResponses = {
-    200: PaginatedPartnerRequestList;
-};
-
-export type CompanyPartnerRequestReceivedListResponse = CompanyPartnerRequestReceivedListResponses[keyof CompanyPartnerRequestReceivedListResponses];
-
-export type CompanyPartnerRequestSentListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
-         */
-        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/partner-request/sent/';
-};
-
-export type CompanyPartnerRequestSentListResponses = {
-    200: PaginatedPartnerRequestList;
-};
-
-export type CompanyPartnerRequestSentListResponse = CompanyPartnerRequestSentListResponses[keyof CompanyPartnerRequestSentListResponses];
-
-export type CompanyPartnerRequestSentCreateData = {
-    body: PartnerRequestRequest;
-    path?: never;
-    query?: {
-        /**
-         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
-         */
-        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/partner-request/sent/';
-};
-
-export type CompanyPartnerRequestSentCreateResponses = {
-    200: PaginatedPartnerRequestList;
-};
-
-export type CompanyPartnerRequestSentCreateResponse = CompanyPartnerRequestSentCreateResponses[keyof CompanyPartnerRequestSentCreateResponses];
-
-export type CompanyPartnerDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this partner.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner/{id}/';
-};
-
-export type CompanyPartnerDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyPartnerDestroyResponse = CompanyPartnerDestroyResponses[keyof CompanyPartnerDestroyResponses];
-
-export type CompanyPartnerRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this partner.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner/{id}/';
-};
-
-export type CompanyPartnerRetrieveResponses = {
-    200: PartnerDetail;
-};
-
-export type CompanyPartnerRetrieveResponse = CompanyPartnerRetrieveResponses[keyof CompanyPartnerRetrieveResponses];
-
-export type CompanyPartnerPartialUpdateData = {
-    body?: PatchedPartnerDetailRequest;
-    path: {
-        /**
-         * A unique integer value identifying this partner.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner/{id}/';
-};
-
-export type CompanyPartnerPartialUpdateResponses = {
-    200: PartnerDetail;
-};
-
-export type CompanyPartnerPartialUpdateResponse = CompanyPartnerPartialUpdateResponses[keyof CompanyPartnerPartialUpdateResponses];
-
-export type CompanyPartnerBranchCreateFromCustomerCreateData = {
-    body: PartnerCustomerIdRequest;
-    path: {
-        /**
-         * A unique integer value identifying this partner.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner/{id}/branch_create_from_customer/';
-};
-
-export type CompanyPartnerBranchCreateFromCustomerCreateResponses = {
-    200: PartnerBranchCreateFromCustomer;
-};
-
-export type CompanyPartnerBranchCreateFromCustomerCreateResponse = CompanyPartnerBranchCreateFromCustomerCreateResponses[keyof CompanyPartnerBranchCreateFromCustomerCreateResponses];
-
-export type CompanyPartnerBranchesRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this partner.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner/{id}/branches/';
-};
-
-export type CompanyPartnerBranchesRetrieveResponses = {
-    200: PartnerBranches;
-};
-
-export type CompanyPartnerBranchesRetrieveResponse = CompanyPartnerBranchesRetrieveResponses[keyof CompanyPartnerBranchesRetrieveResponses];
-
-export type CompanyPartnerCopyCustomerOrdersCreateData = {
-    body: PartnerCustomerIdRequest;
-    path: {
-        /**
-         * A unique integer value identifying this partner.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/partner/{id}/copy_customer_orders/';
-};
-
-export type CompanyPartnerCopyCustomerOrdersCreateResponses = {
-    200: PartnerCopyCustomerOrders;
-};
-
-export type CompanyPartnerCopyCustomerOrdersCreateResponse = CompanyPartnerCopyCustomerOrdersCreateResponses[keyof CompanyPartnerCopyCustomerOrdersCreateResponses];
 
 export type CompanyPictureListData = {
     body?: never;
@@ -15218,218 +13783,6 @@ export type CompanyPicturePartialUpdateResponses = {
 
 export type CompanyPicturePartialUpdateResponse = CompanyPicturePartialUpdateResponses[keyof CompanyPicturePartialUpdateResponses];
 
-export type CompanyPlanninguserListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/planninguser/';
-};
-
-export type CompanyPlanninguserListResponses = {
-    200: PaginatedPlanningUserList;
-};
-
-export type CompanyPlanninguserListResponse = CompanyPlanninguserListResponses[keyof CompanyPlanninguserListResponses];
-
-export type CompanyPlanninguserCreateData = {
-    body: PlanningUserRequestWritable;
-    path?: never;
-    query?: never;
-    url: '/api/company/planninguser/';
-};
-
-export type CompanyPlanninguserCreateResponses = {
-    201: PlanningUser;
-};
-
-export type CompanyPlanninguserCreateResponse = CompanyPlanninguserCreateResponses[keyof CompanyPlanninguserCreateResponses];
-
-export type CompanyPlanninguserDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/planninguser/{id}/';
-};
-
-export type CompanyPlanninguserDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyPlanninguserDestroyResponse = CompanyPlanninguserDestroyResponses[keyof CompanyPlanninguserDestroyResponses];
-
-export type CompanyPlanninguserRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/planninguser/{id}/';
-};
-
-export type CompanyPlanninguserRetrieveResponses = {
-    200: PlanningUser;
-};
-
-export type CompanyPlanninguserRetrieveResponse = CompanyPlanninguserRetrieveResponses[keyof CompanyPlanninguserRetrieveResponses];
-
-export type CompanyPlanninguserPartialUpdateData = {
-    body?: PatchedPlanningUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/planninguser/{id}/';
-};
-
-export type CompanyPlanninguserPartialUpdateResponses = {
-    200: PlanningUser;
-};
-
-export type CompanyPlanninguserPartialUpdateResponse = CompanyPlanninguserPartialUpdateResponses[keyof CompanyPlanninguserPartialUpdateResponses];
-
-export type CompanyProjectListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        name?: string;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/project/';
-};
-
-export type CompanyProjectListResponses = {
-    200: PaginatedProjectList;
-};
-
-export type CompanyProjectListResponse = CompanyProjectListResponses[keyof CompanyProjectListResponses];
-
-export type CompanyProjectCreateData = {
-    body: ProjectRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/project/';
-};
-
-export type CompanyProjectCreateResponses = {
-    201: Project;
-};
-
-export type CompanyProjectCreateResponse = CompanyProjectCreateResponses[keyof CompanyProjectCreateResponses];
-
-export type CompanyProjectDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this project.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/project/{id}/';
-};
-
-export type CompanyProjectDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyProjectDestroyResponse = CompanyProjectDestroyResponses[keyof CompanyProjectDestroyResponses];
-
-export type CompanyProjectRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this project.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/project/{id}/';
-};
-
-export type CompanyProjectRetrieveResponses = {
-    200: Project;
-};
-
-export type CompanyProjectRetrieveResponse = CompanyProjectRetrieveResponses[keyof CompanyProjectRetrieveResponses];
-
-export type CompanyProjectPartialUpdateData = {
-    body?: PatchedProjectRequest;
-    path: {
-        /**
-         * A unique integer value identifying this project.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/project/{id}/';
-};
-
-export type CompanyProjectPartialUpdateResponses = {
-    200: Project;
-};
-
-export type CompanyProjectPartialUpdateResponse = CompanyProjectPartialUpdateResponses[keyof CompanyProjectPartialUpdateResponses];
-
-export type CompanyProjectListForSelectListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        name?: string;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/project/list_for_select/';
-};
-
-export type CompanyProjectListForSelectListResponses = {
-    200: Array<Project>;
-};
-
-export type CompanyProjectListForSelectListResponse = CompanyProjectListForSelectListResponses[keyof CompanyProjectListForSelectListResponses];
-
 export type CompanyPublicPicturesListData = {
     body?: never;
     path?: never;
@@ -15447,431 +13800,6 @@ export type CompanyPublicPicturesListResponses = {
 };
 
 export type CompanyPublicPicturesListResponse = CompanyPublicPicturesListResponses[keyof CompanyPublicPicturesListResponses];
-
-export type CompanySalesuserListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/salesuser/';
-};
-
-export type CompanySalesuserListResponses = {
-    200: PaginatedSalesUserList;
-};
-
-export type CompanySalesuserListResponse = CompanySalesuserListResponses[keyof CompanySalesuserListResponses];
-
-export type CompanySalesuserCreateData = {
-    body: SalesUserRequestWritable;
-    path?: never;
-    query?: never;
-    url: '/api/company/salesuser/';
-};
-
-export type CompanySalesuserCreateResponses = {
-    201: SalesUser;
-};
-
-export type CompanySalesuserCreateResponse = CompanySalesuserCreateResponses[keyof CompanySalesuserCreateResponses];
-
-export type CompanySalesuserDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesuser/{id}/';
-};
-
-export type CompanySalesuserDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanySalesuserDestroyResponse = CompanySalesuserDestroyResponses[keyof CompanySalesuserDestroyResponses];
-
-export type CompanySalesuserRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesuser/{id}/';
-};
-
-export type CompanySalesuserRetrieveResponses = {
-    200: SalesUser;
-};
-
-export type CompanySalesuserRetrieveResponse = CompanySalesuserRetrieveResponses[keyof CompanySalesuserRetrieveResponses];
-
-export type CompanySalesuserPartialUpdateData = {
-    body?: PatchedSalesUserRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesuser/{id}/';
-};
-
-export type CompanySalesuserPartialUpdateResponses = {
-    200: SalesUser;
-};
-
-export type CompanySalesuserPartialUpdateResponse = CompanySalesuserPartialUpdateResponses[keyof CompanySalesuserPartialUpdateResponses];
-
-export type CompanySalesusercustomerListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-        user?: number;
-    };
-    url: '/api/company/salesusercustomer/';
-};
-
-export type CompanySalesusercustomerListResponses = {
-    200: PaginatedSalesUserCustomerExpandedList;
-};
-
-export type CompanySalesusercustomerListResponse = CompanySalesusercustomerListResponses[keyof CompanySalesusercustomerListResponses];
-
-export type CompanySalesusercustomerCreateData = {
-    body: SalesUserCustomerRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/salesusercustomer/';
-};
-
-export type CompanySalesusercustomerCreateResponses = {
-    201: SalesUserCustomer;
-};
-
-export type CompanySalesusercustomerCreateResponse = CompanySalesusercustomerCreateResponses[keyof CompanySalesusercustomerCreateResponses];
-
-export type CompanySalesusercustomerDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this sales user customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesusercustomer/{id}/';
-};
-
-export type CompanySalesusercustomerDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanySalesusercustomerDestroyResponse = CompanySalesusercustomerDestroyResponses[keyof CompanySalesusercustomerDestroyResponses];
-
-export type CompanySalesusercustomerRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this sales user customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesusercustomer/{id}/';
-};
-
-export type CompanySalesusercustomerRetrieveResponses = {
-    200: SalesUserCustomer;
-};
-
-export type CompanySalesusercustomerRetrieveResponse = CompanySalesusercustomerRetrieveResponses[keyof CompanySalesusercustomerRetrieveResponses];
-
-export type CompanySalesusercustomerPartialUpdateData = {
-    body?: PatchedSalesUserCustomerRequest;
-    path: {
-        /**
-         * A unique integer value identifying this sales user customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesusercustomer/{id}/';
-};
-
-export type CompanySalesusercustomerPartialUpdateResponses = {
-    200: SalesUserCustomer;
-};
-
-export type CompanySalesusercustomerPartialUpdateResponse = CompanySalesusercustomerPartialUpdateResponses[keyof CompanySalesusercustomerPartialUpdateResponses];
-
-export type CompanySalesusercustomerMyListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/salesusercustomer/my/';
-};
-
-export type CompanySalesusercustomerMyListResponses = {
-    200: PaginatedSalesUserCustomerExpandedList;
-};
-
-export type CompanySalesusercustomerMyListResponse = CompanySalesusercustomerMyListResponses[keyof CompanySalesusercustomerMyListResponses];
-
-export type CompanySalesusercustomerMyCreateData = {
-    body: SalesUserMyCustomerRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/salesusercustomer/my/';
-};
-
-export type CompanySalesusercustomerMyCreateResponses = {
-    201: SalesUserMyCustomer;
-};
-
-export type CompanySalesusercustomerMyCreateResponse = CompanySalesusercustomerMyCreateResponses[keyof CompanySalesusercustomerMyCreateResponses];
-
-export type CompanySalesusercustomerMyDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this sales user customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesusercustomer/my/{id}/';
-};
-
-export type CompanySalesusercustomerMyDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanySalesusercustomerMyDestroyResponse = CompanySalesusercustomerMyDestroyResponses[keyof CompanySalesusercustomerMyDestroyResponses];
-
-export type CompanySalesusercustomerMyRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this sales user customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesusercustomer/my/{id}/';
-};
-
-export type CompanySalesusercustomerMyRetrieveResponses = {
-    200: SalesUserCustomerExpanded;
-};
-
-export type CompanySalesusercustomerMyRetrieveResponse = CompanySalesusercustomerMyRetrieveResponses[keyof CompanySalesusercustomerMyRetrieveResponses];
-
-export type CompanySalesusercustomerMyPartialUpdateData = {
-    body?: PatchedSalesUserCustomerExpandedRequest;
-    path: {
-        /**
-         * A unique integer value identifying this sales user customer.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/salesusercustomer/my/{id}/';
-};
-
-export type CompanySalesusercustomerMyPartialUpdateErrors = {
-    /**
-     * No response body
-     */
-    400: unknown;
-};
-
-export type CompanyStreamInfoRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/stream-info/';
-};
-
-export type CompanyStreamInfoRetrieveResponses = {
-    200: StreamInfoResponse;
-};
-
-export type CompanyStreamInfoRetrieveResponse = CompanyStreamInfoRetrieveResponses[keyof CompanyStreamInfoRetrieveResponses];
-
-export type CompanyStreamPrivateChannelCreateCreateData = {
-    body: CreatePrivateChannelRequestRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/stream-private-channel-create/';
-};
-
-export type CompanyStreamPrivateChannelCreateCreateResponses = {
-    200: ChannelCreatedResponse;
-};
-
-export type CompanyStreamPrivateChannelCreateCreateResponse = CompanyStreamPrivateChannelCreateCreateResponses[keyof CompanyStreamPrivateChannelCreateCreateResponses];
-
-export type CompanyStudentExportXlsRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/student-export-xls/';
-};
-
-export type CompanyStudentExportXlsRetrieveResponses = {
-    200: Blob | File;
-};
-
-export type CompanyStudentExportXlsRetrieveResponse = CompanyStudentExportXlsRetrieveResponses[keyof CompanyStudentExportXlsRetrieveResponses];
-
-export type CompanyStudentuserListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/studentuser/';
-};
-
-export type CompanyStudentuserListResponses = {
-    200: PaginatedStudentUserList;
-};
-
-export type CompanyStudentuserListResponse = CompanyStudentuserListResponses[keyof CompanyStudentuserListResponses];
-
-export type CompanyStudentuserCreateData = {
-    body: StudentUserWriteRequestWritable;
-    path?: never;
-    query?: never;
-    url: '/api/company/studentuser/';
-};
-
-export type CompanyStudentuserCreateResponses = {
-    201: StudentUser;
-};
-
-export type CompanyStudentuserCreateResponse = CompanyStudentuserCreateResponses[keyof CompanyStudentuserCreateResponses];
-
-export type CompanyStudentuserDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/studentuser/{id}/';
-};
-
-export type CompanyStudentuserDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyStudentuserDestroyResponse = CompanyStudentuserDestroyResponses[keyof CompanyStudentuserDestroyResponses];
-
-export type CompanyStudentuserRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/studentuser/{id}/';
-};
-
-export type CompanyStudentuserRetrieveResponses = {
-    200: StudentUser;
-};
-
-export type CompanyStudentuserRetrieveResponse = CompanyStudentuserRetrieveResponses[keyof CompanyStudentuserRetrieveResponses];
-
-export type CompanyStudentuserPartialUpdateData = {
-    body?: PatchedStudentUserWriteRequestWritable;
-    path: {
-        /**
-         * A unique integer value identifying this user.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/studentuser/{id}/';
-};
-
-export type CompanyStudentuserPartialUpdateResponses = {
-    200: StudentUser;
-};
-
-export type CompanyStudentuserPartialUpdateResponse = CompanyStudentuserPartialUpdateResponses[keyof CompanyStudentuserPartialUpdateResponses];
 
 export type CompanyTemplateListData = {
     body?: never;
@@ -15983,954 +13911,6 @@ export type CompanyTemplatePreviewTemplatePdfCreateResponses = {
 
 export type CompanyTemplatePreviewTemplatePdfCreateResponse = CompanyTemplatePreviewTemplatePdfCreateResponses[keyof CompanyTemplatePreviewTemplatePdfCreateResponses];
 
-export type CompanyTimeRegistrationRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Window shown: week (default), month or year.
-         */
-        mode?: string;
-        /**
-         * Calendar month (1-12) the window is computed for. Honoured for month.
-         */
-        month?: number;
-        /**
-         * Anchor date (YYYY-MM-DD); the window is computed from it. Honoured for week and month, ignored for year.
-         */
-        start_date?: string;
-        /**
-         * User id the totals are computed for. Planning/staff only; everyone else always sees their own rows.
-         */
-        user?: number;
-        /**
-         * Calendar year the window is computed for. Honoured for month and year.
-         */
-        year?: number;
-    };
-    url: '/api/company/time-registration/';
-};
-
-export type CompanyTimeRegistrationRetrieveResponses = {
-    200: TimeRegistrationListResponse;
-};
-
-export type CompanyTimeRegistrationRetrieveResponse = CompanyTimeRegistrationRetrieveResponses[keyof CompanyTimeRegistrationRetrieveResponses];
-
-export type CompanyTimeRegistrationTimeCorrectionPartialUpdateData = {
-    body?: PatchedTimeCorrectionRequest;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/time-registration/time-correction/{id}/';
-};
-
-export type CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses = {
-    200: ResultResponse;
-};
-
-export type CompanyTimeRegistrationTimeCorrectionPartialUpdateResponse = CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses[keyof CompanyTimeRegistrationTimeCorrectionPartialUpdateResponses];
-
-export type CompanyTimeRegistrationTopUsersForCustomerRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Only rows for this customer id.
-         */
-        customer?: number;
-    };
-    url: '/api/company/time-registration/top-users-for-customer/';
-};
-
-export type CompanyTimeRegistrationTopUsersForCustomerRetrieveResponses = {
-    200: TopUsersForCustomerResponse;
-};
-
-export type CompanyTimeRegistrationTopUsersForCustomerRetrieveResponse = CompanyTimeRegistrationTopUsersForCustomerRetrieveResponses[keyof CompanyTimeRegistrationTopUsersForCustomerRetrieveResponses];
-
-export type CompanyUserDeviceTokenCreateData = {
-    body: DeviceTokenRequestRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-device-token/';
-};
-
-export type CompanyUserDeviceTokenCreateResponses = {
-    200: DeviceTokenCreated;
-};
-
-export type CompanyUserDeviceTokenCreateResponse = CompanyUserDeviceTokenCreateResponses[keyof CompanyUserDeviceTokenCreateResponses];
-
-export type CompanyUserInfoMeRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-info-me/';
-};
-
-export type CompanyUserInfoMeRetrieveResponses = {
-    200: UserInfoResponse;
-};
-
-export type CompanyUserInfoMeRetrieveResponse = CompanyUserInfoMeRetrieveResponses[keyof CompanyUserInfoMeRetrieveResponses];
-
-export type CompanyUserInfoRetrieveData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-info/{id}/';
-};
-
-export type CompanyUserInfoRetrieveResponses = {
-    200: UserInfoDetailResponse;
-};
-
-export type CompanyUserInfoRetrieveResponse = CompanyUserInfoRetrieveResponses[keyof CompanyUserInfoRetrieveResponses];
-
-export type CompanyUserLeaveHoursListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/user-leave-hours/';
-};
-
-export type CompanyUserLeaveHoursListResponses = {
-    200: PaginatedUserLeaveHoursList;
-};
-
-export type CompanyUserLeaveHoursListResponse = CompanyUserLeaveHoursListResponses[keyof CompanyUserLeaveHoursListResponses];
-
-export type CompanyUserLeaveHoursCreateData = {
-    body?: UserLeaveHoursNoPlanningRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-leave-hours/';
-};
-
-export type CompanyUserLeaveHoursCreateResponses = {
-    201: UserLeaveHours;
-};
-
-export type CompanyUserLeaveHoursCreateResponse = CompanyUserLeaveHoursCreateResponses[keyof CompanyUserLeaveHoursCreateResponses];
-
-export type CompanyUserLeaveHoursDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/{id}/';
-};
-
-export type CompanyUserLeaveHoursDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyUserLeaveHoursDestroyResponse = CompanyUserLeaveHoursDestroyResponses[keyof CompanyUserLeaveHoursDestroyResponses];
-
-export type CompanyUserLeaveHoursRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/{id}/';
-};
-
-export type CompanyUserLeaveHoursRetrieveResponses = {
-    200: UserLeaveHours;
-};
-
-export type CompanyUserLeaveHoursRetrieveResponse = CompanyUserLeaveHoursRetrieveResponses[keyof CompanyUserLeaveHoursRetrieveResponses];
-
-export type CompanyUserLeaveHoursPartialUpdateData = {
-    body?: PatchedUserLeaveHoursNoPlanningRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/{id}/';
-};
-
-export type CompanyUserLeaveHoursPartialUpdateResponses = {
-    200: UserLeaveHours;
-};
-
-export type CompanyUserLeaveHoursPartialUpdateResponse = CompanyUserLeaveHoursPartialUpdateResponses[keyof CompanyUserLeaveHoursPartialUpdateResponses];
-
-export type CompanyUserLeaveHoursAdminListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/user-leave-hours/admin/';
-};
-
-export type CompanyUserLeaveHoursAdminListResponses = {
-    200: PaginatedUserLeaveHoursList;
-};
-
-export type CompanyUserLeaveHoursAdminListResponse = CompanyUserLeaveHoursAdminListResponses[keyof CompanyUserLeaveHoursAdminListResponses];
-
-export type CompanyUserLeaveHoursAdminCreateData = {
-    body?: UserLeaveHoursPlanningRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-leave-hours/admin/';
-};
-
-export type CompanyUserLeaveHoursAdminCreateResponses = {
-    201: UserLeaveHours;
-};
-
-export type CompanyUserLeaveHoursAdminCreateResponse = CompanyUserLeaveHoursAdminCreateResponses[keyof CompanyUserLeaveHoursAdminCreateResponses];
-
-export type CompanyUserLeaveHoursAdminDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/admin/{id}/';
-};
-
-export type CompanyUserLeaveHoursAdminDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyUserLeaveHoursAdminDestroyResponse = CompanyUserLeaveHoursAdminDestroyResponses[keyof CompanyUserLeaveHoursAdminDestroyResponses];
-
-export type CompanyUserLeaveHoursAdminRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/admin/{id}/';
-};
-
-export type CompanyUserLeaveHoursAdminRetrieveResponses = {
-    200: UserLeaveHours;
-};
-
-export type CompanyUserLeaveHoursAdminRetrieveResponse = CompanyUserLeaveHoursAdminRetrieveResponses[keyof CompanyUserLeaveHoursAdminRetrieveResponses];
-
-export type CompanyUserLeaveHoursAdminPartialUpdateData = {
-    body?: PatchedUserLeaveHoursPlanningRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/admin/{id}/';
-};
-
-export type CompanyUserLeaveHoursAdminPartialUpdateResponses = {
-    200: UserLeaveHours;
-};
-
-export type CompanyUserLeaveHoursAdminPartialUpdateResponse = CompanyUserLeaveHoursAdminPartialUpdateResponses[keyof CompanyUserLeaveHoursAdminPartialUpdateResponses];
-
-export type CompanyUserLeaveHoursAdminSetAcceptedCreateData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/admin/{id}/set_accepted/';
-};
-
-export type CompanyUserLeaveHoursAdminSetAcceptedCreateResponses = {
-    200: ResultResponse;
-};
-
-export type CompanyUserLeaveHoursAdminSetAcceptedCreateResponse = CompanyUserLeaveHoursAdminSetAcceptedCreateResponses[keyof CompanyUserLeaveHoursAdminSetAcceptedCreateResponses];
-
-export type CompanyUserLeaveHoursAdminSetRejectedCreateData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user leave hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-leave-hours/admin/{id}/set_rejected/';
-};
-
-export type CompanyUserLeaveHoursAdminSetRejectedCreateResponses = {
-    200: ResultResponse;
-};
-
-export type CompanyUserLeaveHoursAdminSetRejectedCreateResponse = CompanyUserLeaveHoursAdminSetRejectedCreateResponses[keyof CompanyUserLeaveHoursAdminSetRejectedCreateResponses];
-
-export type CompanyUserLeaveHoursAdminAllNotAcceptedListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/user-leave-hours/admin/all_not_accepted/';
-};
-
-export type CompanyUserLeaveHoursAdminAllNotAcceptedListResponses = {
-    200: PaginatedUserLeaveHoursList;
-};
-
-export type CompanyUserLeaveHoursAdminAllNotAcceptedListResponse = CompanyUserLeaveHoursAdminAllNotAcceptedListResponses[keyof CompanyUserLeaveHoursAdminAllNotAcceptedListResponses];
-
-export type CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-leave-hours/admin/all_not_accepted_count/';
-};
-
-export type CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses = {
-    200: CountResponse;
-};
-
-export type CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponse = CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses[keyof CompanyUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses];
-
-export type CompanyUserLeaveHoursAdminGetTotalsCreateData = {
-    body?: UserLeaveHoursNoPlanningRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-leave-hours/admin/get_totals/';
-};
-
-export type CompanyUserLeaveHoursAdminGetTotalsCreateResponses = {
-    200: LeaveHoursTotals;
-};
-
-export type CompanyUserLeaveHoursAdminGetTotalsCreateResponse = CompanyUserLeaveHoursAdminGetTotalsCreateResponses[keyof CompanyUserLeaveHoursAdminGetTotalsCreateResponses];
-
-export type CompanyUserLeaveHoursAllNotAcceptedListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/user-leave-hours/all_not_accepted/';
-};
-
-export type CompanyUserLeaveHoursAllNotAcceptedListResponses = {
-    200: PaginatedUserLeaveHoursList;
-};
-
-export type CompanyUserLeaveHoursAllNotAcceptedListResponse = CompanyUserLeaveHoursAllNotAcceptedListResponses[keyof CompanyUserLeaveHoursAllNotAcceptedListResponses];
-
-export type CompanyUserLeaveHoursAllNotAcceptedCountRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-leave-hours/all_not_accepted_count/';
-};
-
-export type CompanyUserLeaveHoursAllNotAcceptedCountRetrieveResponses = {
-    200: CountResponse;
-};
-
-export type CompanyUserLeaveHoursAllNotAcceptedCountRetrieveResponse = CompanyUserLeaveHoursAllNotAcceptedCountRetrieveResponses[keyof CompanyUserLeaveHoursAllNotAcceptedCountRetrieveResponses];
-
-export type CompanyUserLeaveHoursGetTotalsCreateData = {
-    body?: UserLeaveHoursNoPlanningRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-leave-hours/get_totals/';
-};
-
-export type CompanyUserLeaveHoursGetTotalsCreateResponses = {
-    200: LeaveHoursTotals;
-};
-
-export type CompanyUserLeaveHoursGetTotalsCreateResponse = CompanyUserLeaveHoursGetTotalsCreateResponses[keyof CompanyUserLeaveHoursGetTotalsCreateResponses];
-
-export type CompanyUserListListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Case-insensitive substring match on username, first name or last name.
-         */
-        q?: string;
-        /**
-         * Only users carrying this user-type submodel.
-         */
-        user_type?: 'sales_user' | 'planning_user' | 'customer_user' | 'engineer' | 'student_user' | 'api_user' | 'employee_user';
-    };
-    url: '/api/company/user-list/';
-};
-
-export type CompanyUserListListResponses = {
-    200: Array<UserSelectRow>;
-};
-
-export type CompanyUserListListResponse = CompanyUserListListResponses[keyof CompanyUserListListResponses];
-
-export type CompanyUserSettingsRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-settings/';
-};
-
-export type CompanyUserSettingsRetrieveResponses = {
-    200: AppUserSettings;
-};
-
-export type CompanyUserSettingsRetrieveResponse = CompanyUserSettingsRetrieveResponses[keyof CompanyUserSettingsRetrieveResponses];
-
-export type CompanyUserSettingsPartialUpdateData = {
-    body?: PatchedAppUserSettingsRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-settings/';
-};
-
-export type CompanyUserSettingsPartialUpdateResponses = {
-    200: AppUserSettings;
-};
-
-export type CompanyUserSettingsPartialUpdateResponse = CompanyUserSettingsPartialUpdateResponses[keyof CompanyUserSettingsPartialUpdateResponses];
-
-export type CompanyUserSickLeaveListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-    };
-    url: '/api/company/user-sick-leave/';
-};
-
-export type CompanyUserSickLeaveListResponses = {
-    200: PaginatedUserSickLeaveList;
-};
-
-export type CompanyUserSickLeaveListResponse = CompanyUserSickLeaveListResponses[keyof CompanyUserSickLeaveListResponses];
-
-export type CompanyUserSickLeaveCreateData = {
-    body: UserSickLeaveRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-sick-leave/';
-};
-
-export type CompanyUserSickLeaveCreateResponses = {
-    201: UserSickLeave;
-};
-
-export type CompanyUserSickLeaveCreateResponse = CompanyUserSickLeaveCreateResponses[keyof CompanyUserSickLeaveCreateResponses];
-
-export type CompanyUserSickLeaveDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/{id}/';
-};
-
-export type CompanyUserSickLeaveDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyUserSickLeaveDestroyResponse = CompanyUserSickLeaveDestroyResponses[keyof CompanyUserSickLeaveDestroyResponses];
-
-export type CompanyUserSickLeaveRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/{id}/';
-};
-
-export type CompanyUserSickLeaveRetrieveResponses = {
-    200: UserSickLeave;
-};
-
-export type CompanyUserSickLeaveRetrieveResponse = CompanyUserSickLeaveRetrieveResponses[keyof CompanyUserSickLeaveRetrieveResponses];
-
-export type CompanyUserSickLeavePartialUpdateData = {
-    body?: PatchedUserSickLeaveRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/{id}/';
-};
-
-export type CompanyUserSickLeavePartialUpdateResponses = {
-    200: UserSickLeave;
-};
-
-export type CompanyUserSickLeavePartialUpdateResponse = CompanyUserSickLeavePartialUpdateResponses[keyof CompanyUserSickLeavePartialUpdateResponses];
-
-export type CompanyUserSickLeaveAdminListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-        user?: number;
-    };
-    url: '/api/company/user-sick-leave/admin/';
-};
-
-export type CompanyUserSickLeaveAdminListResponses = {
-    200: PaginatedUserSickLeaveList;
-};
-
-export type CompanyUserSickLeaveAdminListResponse = CompanyUserSickLeaveAdminListResponses[keyof CompanyUserSickLeaveAdminListResponses];
-
-export type CompanyUserSickLeaveAdminCreateData = {
-    body: UserSickLeaveRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-sick-leave/admin/';
-};
-
-export type CompanyUserSickLeaveAdminCreateResponses = {
-    201: UserSickLeave;
-};
-
-export type CompanyUserSickLeaveAdminCreateResponse = CompanyUserSickLeaveAdminCreateResponses[keyof CompanyUserSickLeaveAdminCreateResponses];
-
-export type CompanyUserSickLeaveAdminDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/admin/{id}/';
-};
-
-export type CompanyUserSickLeaveAdminDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyUserSickLeaveAdminDestroyResponse = CompanyUserSickLeaveAdminDestroyResponses[keyof CompanyUserSickLeaveAdminDestroyResponses];
-
-export type CompanyUserSickLeaveAdminRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/admin/{id}/';
-};
-
-export type CompanyUserSickLeaveAdminRetrieveResponses = {
-    200: UserSickLeave;
-};
-
-export type CompanyUserSickLeaveAdminRetrieveResponse = CompanyUserSickLeaveAdminRetrieveResponses[keyof CompanyUserSickLeaveAdminRetrieveResponses];
-
-export type CompanyUserSickLeaveAdminPartialUpdateData = {
-    body?: PatchedUserSickLeaveRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/admin/{id}/';
-};
-
-export type CompanyUserSickLeaveAdminPartialUpdateResponses = {
-    200: UserSickLeave;
-};
-
-export type CompanyUserSickLeaveAdminPartialUpdateResponse = CompanyUserSickLeaveAdminPartialUpdateResponses[keyof CompanyUserSickLeaveAdminPartialUpdateResponses];
-
-export type CompanyUserSickLeaveAdminEndSickCreateData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/admin/{id}/end_sick/';
-};
-
-export type CompanyUserSickLeaveAdminEndSickCreateResponses = {
-    200: ResultResponse;
-};
-
-export type CompanyUserSickLeaveAdminEndSickCreateResponse = CompanyUserSickLeaveAdminEndSickCreateResponses[keyof CompanyUserSickLeaveAdminEndSickCreateResponses];
-
-export type CompanyUserSickLeaveAdminSetConfirmedCreateData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user sick leave.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-sick-leave/admin/{id}/set_confirmed/';
-};
-
-export type CompanyUserSickLeaveAdminSetConfirmedCreateResponses = {
-    200: ResultResponse;
-};
-
-export type CompanyUserSickLeaveAdminSetConfirmedCreateResponse = CompanyUserSickLeaveAdminSetConfirmedCreateResponses[keyof CompanyUserSickLeaveAdminSetConfirmedCreateResponses];
-
-export type CompanyUserSickLeaveAdminAllSickListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-        user?: number;
-    };
-    url: '/api/company/user-sick-leave/admin/all_sick/';
-};
-
-export type CompanyUserSickLeaveAdminAllSickListResponses = {
-    200: PaginatedUserSickLeaveList;
-};
-
-export type CompanyUserSickLeaveAdminAllSickListResponse = CompanyUserSickLeaveAdminAllSickListResponses[keyof CompanyUserSickLeaveAdminAllSickListResponses];
-
-export type CompanyUserSickLeaveAdminAllSickCountRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-sick-leave/admin/all_sick_count/';
-};
-
-export type CompanyUserSickLeaveAdminAllSickCountRetrieveResponses = {
-    200: CountResponse;
-};
-
-export type CompanyUserSickLeaveAdminAllSickCountRetrieveResponse = CompanyUserSickLeaveAdminAllSickCountRetrieveResponses[keyof CompanyUserSickLeaveAdminAllSickCountRetrieveResponses];
-
-export type CompanyUserSickLeaveAdminAllUnconfirmedListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-        user?: number;
-    };
-    url: '/api/company/user-sick-leave/admin/all_unconfirmed/';
-};
-
-export type CompanyUserSickLeaveAdminAllUnconfirmedListResponses = {
-    200: PaginatedUserSickLeaveList;
-};
-
-export type CompanyUserSickLeaveAdminAllUnconfirmedListResponse = CompanyUserSickLeaveAdminAllUnconfirmedListResponses[keyof CompanyUserSickLeaveAdminAllUnconfirmedListResponses];
-
-export type CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-sick-leave/admin/all_unconfirmed_count/';
-};
-
-export type CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses = {
-    200: CountResponse;
-};
-
-export type CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponse = CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses[keyof CompanyUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses];
-
-export type CompanyUserSickLeaveEndSickCreateData = {
-    body: UserSickLeaveRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-sick-leave/end_sick/';
-};
-
-export type CompanyUserSickLeaveEndSickCreateResponses = {
-    200: ResultResponse;
-};
-
-export type CompanyUserSickLeaveEndSickCreateResponse = CompanyUserSickLeaveEndSickCreateResponses[keyof CompanyUserSickLeaveEndSickCreateResponses];
-
-export type CompanyUserWorkhoursListData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
-         */
-        page_size?: number;
-        /**
-         * A search term.
-         */
-        q?: string;
-        /**
-         * First day of the week shown (YYYY-MM-DD); defaults to today.
-         */
-        start_date?: string;
-        user?: number;
-    };
-    url: '/api/company/user-workhours/';
-};
-
-export type CompanyUserWorkhoursListResponses = {
-    200: PaginatedUserWorkHoursList;
-};
-
-export type CompanyUserWorkhoursListResponse = CompanyUserWorkhoursListResponses[keyof CompanyUserWorkhoursListResponses];
-
-export type CompanyUserWorkhoursCreateData = {
-    body?: UserWorkHoursRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-workhours/';
-};
-
-export type CompanyUserWorkhoursCreateResponses = {
-    201: UserWorkHours;
-};
-
-export type CompanyUserWorkhoursCreateResponse = CompanyUserWorkhoursCreateResponses[keyof CompanyUserWorkhoursCreateResponses];
-
-export type CompanyUserWorkhoursDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user work hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-workhours/{id}/';
-};
-
-export type CompanyUserWorkhoursDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyUserWorkhoursDestroyResponse = CompanyUserWorkhoursDestroyResponses[keyof CompanyUserWorkhoursDestroyResponses];
-
-export type CompanyUserWorkhoursRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this user work hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-workhours/{id}/';
-};
-
-export type CompanyUserWorkhoursRetrieveResponses = {
-    200: UserWorkHours;
-};
-
-export type CompanyUserWorkhoursRetrieveResponse = CompanyUserWorkhoursRetrieveResponses[keyof CompanyUserWorkhoursRetrieveResponses];
-
-export type CompanyUserWorkhoursPartialUpdateData = {
-    body?: PatchedUserWorkHoursRequest;
-    path: {
-        /**
-         * A unique integer value identifying this user work hours.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user-workhours/{id}/';
-};
-
-export type CompanyUserWorkhoursPartialUpdateResponses = {
-    200: UserWorkHours;
-};
-
-export type CompanyUserWorkhoursPartialUpdateResponse = CompanyUserWorkhoursPartialUpdateResponses[keyof CompanyUserWorkhoursPartialUpdateResponses];
-
-export type CompanyUserWorkhoursListTotalsRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/user-workhours/list_totals/';
-};
-
-export type CompanyUserWorkhoursListTotalsRetrieveResponses = {
-    200: UserWorkHoursListTotalsResponse;
-};
-
-export type CompanyUserWorkhoursListTotalsRetrieveResponse = CompanyUserWorkhoursListTotalsRetrieveResponses[keyof CompanyUserWorkhoursListTotalsRetrieveResponses];
-
-export type CompanyUserDeleteMeDestroyData = {
-    body?: never;
-    path: {
-        id: number;
-    };
-    query?: never;
-    url: '/api/company/user/delete-me/{id}/';
-};
-
-export type CompanyUserDeleteMeDestroyErrors = {
-    403: ForbiddenResponse;
-};
-
-export type CompanyUserDeleteMeDestroyError = CompanyUserDeleteMeDestroyErrors[keyof CompanyUserDeleteMeDestroyErrors];
-
-export type CompanyUserDeleteMeDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type CompanyUserDeleteMeDestroyResponse = CompanyUserDeleteMeDestroyResponses[keyof CompanyUserDeleteMeDestroyResponses];
-
 export type CompanyUsernameExistsRetrieveData = {
     body?: never;
     path?: never;
@@ -16948,65 +13928,6 @@ export type CompanyUsernameExistsRetrieveResponses = {
 };
 
 export type CompanyUsernameExistsRetrieveResponse = CompanyUsernameExistsRetrieveResponses[keyof CompanyUsernameExistsRetrieveResponses];
-
-export type CompanyUsersStudentProfileRetrieveData = {
-    body?: never;
-    path: {
-        uuid: string;
-    };
-    query?: never;
-    url: '/api/company/users/student/profile/{uuid}/';
-};
-
-export type CompanyUsersStudentProfileRetrieveResponses = {
-    200: StudentUserUserPublic;
-};
-
-export type CompanyUsersStudentProfileRetrieveResponse = CompanyUsersStudentProfileRetrieveResponses[keyof CompanyUsersStudentProfileRetrieveResponses];
-
-export type CompanyUsersStudentProfileMeRetrieveData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/company/users/student/profile/me/';
-};
-
-export type CompanyUsersStudentProfileMeRetrieveResponses = {
-    200: StudentUser;
-};
-
-export type CompanyUsersStudentProfileMeRetrieveResponse = CompanyUsersStudentProfileMeRetrieveResponses[keyof CompanyUsersStudentProfileMeRetrieveResponses];
-
-export type CompanyUsersStudentProfileMePartialUpdateData = {
-    body?: PatchedStudentUserWriteRequestWritable;
-    path?: never;
-    query?: never;
-    url: '/api/company/users/student/profile/me/';
-};
-
-export type CompanyUsersStudentProfileMePartialUpdateResponses = {
-    200: StudentUser;
-};
-
-export type CompanyUsersStudentProfileMePartialUpdateResponse = CompanyUsersStudentProfileMePartialUpdateResponses[keyof CompanyUsersStudentProfileMePartialUpdateResponses];
-
-export type CompanyUsersStudentRegisterFetchUserCreateData = {
-    body: WordPressUserFetchRequestRequest;
-    path?: never;
-    query?: never;
-    url: '/api/company/users/student/register/fetch-user/';
-};
-
-export type CompanyUsersStudentRegisterFetchUserCreateResponses = {
-    /**
-     * Whatever WordPress keeps for this user.
-     */
-    200: {
-        [key: string]: unknown;
-    };
-};
-
-export type CompanyUsersStudentRegisterFetchUserCreateResponse = CompanyUsersStudentRegisterFetchUserCreateResponses[keyof CompanyUsersStudentRegisterFetchUserCreateResponses];
 
 export type CompanyUsersVerifyRecaptchaCreateData = {
     body: RecaptchaVerifyRequestRequest;
@@ -18844,6 +15765,199 @@ export type GetUserRoomRetrieveResponses = {
 };
 
 export type GetUserRoomRetrieveResponse = GetUserRoomRetrieveResponses[keyof GetUserRoomRetrieveResponses];
+
+export type ImportingImportListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/importing/import/';
+};
+
+export type ImportingImportListResponses = {
+    200: PaginatedImportList;
+};
+
+export type ImportingImportListResponse = ImportingImportListResponses[keyof ImportingImportListResponses];
+
+export type ImportingImportCreateData = {
+    body: ImportRequest;
+    path?: never;
+    query?: never;
+    url: '/api/importing/import/';
+};
+
+export type ImportingImportCreateResponses = {
+    201: Import;
+};
+
+export type ImportingImportCreateResponse = ImportingImportCreateResponses[keyof ImportingImportCreateResponses];
+
+export type ImportingImportDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this import.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/importing/import/{id}/';
+};
+
+export type ImportingImportDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type ImportingImportDestroyResponse = ImportingImportDestroyResponses[keyof ImportingImportDestroyResponses];
+
+export type ImportingImportRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this import.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/importing/import/{id}/';
+};
+
+export type ImportingImportRetrieveResponses = {
+    200: Import;
+};
+
+export type ImportingImportRetrieveResponse = ImportingImportRetrieveResponses[keyof ImportingImportRetrieveResponses];
+
+export type ImportingImportPartialUpdateData = {
+    body?: PatchedImportRequest;
+    path: {
+        /**
+         * A unique integer value identifying this import.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/importing/import/{id}/';
+};
+
+export type ImportingImportPartialUpdateResponses = {
+    200: Import;
+};
+
+export type ImportingImportPartialUpdateResponse = ImportingImportPartialUpdateResponses[keyof ImportingImportPartialUpdateResponses];
+
+export type ImportingImportDoCreateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this import.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/importing/import/{id}/do/';
+};
+
+export type ImportingImportDoCreateResponses = {
+    200: ImportResult;
+};
+
+export type ImportingImportDoCreateResponse = ImportingImportDoCreateResponses[keyof ImportingImportDoCreateResponses];
+
+export type ImportingImportPreviewRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this import.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/importing/import/{id}/preview/';
+};
+
+export type ImportingImportPreviewRetrieveResponses = {
+    200: ImportResult;
+};
+
+export type ImportingImportPreviewRetrieveResponse = ImportingImportPreviewRetrieveResponses[keyof ImportingImportPreviewRetrieveResponses];
+
+export type ImportingImportRevertCreateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this import.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/importing/import/{id}/revert/';
+};
+
+export type ImportingImportRevertCreateResponses = {
+    200: ImportRevert;
+};
+
+export type ImportingImportRevertCreateResponse = ImportingImportRevertCreateResponses[keyof ImportingImportRevertCreateResponses];
+
+export type ImportingImportGetAllowedExtensionsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/importing/import/get_allowed_extensions/';
+};
+
+export type ImportingImportGetAllowedExtensionsRetrieveResponses = {
+    200: Array<string>;
+};
+
+export type ImportingImportGetAllowedExtensionsRetrieveResponse = ImportingImportGetAllowedExtensionsRetrieveResponses[keyof ImportingImportGetAllowedExtensionsRetrieveResponses];
+
+export type ImportingImportGetLookupFieldsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/importing/import/get_lookup_fields/';
+};
+
+export type ImportingImportGetLookupFieldsRetrieveResponses = {
+    200: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type ImportingImportGetLookupFieldsRetrieveResponse = ImportingImportGetLookupFieldsRetrieveResponses[keyof ImportingImportGetLookupFieldsRetrieveResponses];
+
+export type ImportingImportRequiredRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/importing/import/required/';
+};
+
+export type ImportingImportRequiredRetrieveResponses = {
+    200: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type ImportingImportRequiredRetrieveResponse = ImportingImportRequiredRetrieveResponses[keyof ImportingImportRequiredRetrieveResponses];
 
 export type InventoryInventoryForMaterialLocationRetrieveData = {
     body?: never;
@@ -26022,6 +23136,382 @@ export type OrderWorkorderDataRetrieveResponses = {
 
 export type OrderWorkorderDataRetrieveResponse = OrderWorkorderDataRetrieveResponses[keyof OrderWorkorderDataRetrieveResponses];
 
+export type PartnerPartnerListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-partner__name' | 'created' | 'partner__name'>;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/partner/partner/';
+};
+
+export type PartnerPartnerListResponses = {
+    200: PaginatedPartnerDetailList;
+};
+
+export type PartnerPartnerListResponse = PartnerPartnerListResponses[keyof PartnerPartnerListResponses];
+
+export type PartnerPartnerCreateData = {
+    body?: PartnerDetailRequest;
+    path?: never;
+    query?: never;
+    url: '/api/partner/partner/';
+};
+
+export type PartnerPartnerCreateResponses = {
+    201: PartnerDetail;
+};
+
+export type PartnerPartnerCreateResponse = PartnerPartnerCreateResponses[keyof PartnerPartnerCreateResponses];
+
+export type PartnerPartnerRequestListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/partner/partner-request/';
+};
+
+export type PartnerPartnerRequestListResponses = {
+    200: PaginatedPartnerRequestList;
+};
+
+export type PartnerPartnerRequestListResponse = PartnerPartnerRequestListResponses[keyof PartnerPartnerRequestListResponses];
+
+export type PartnerPartnerRequestCreateData = {
+    body: PartnerRequestRequest;
+    path?: never;
+    query?: never;
+    url: '/api/partner/partner-request/';
+};
+
+export type PartnerPartnerRequestCreateResponses = {
+    201: PartnerRequest;
+};
+
+export type PartnerPartnerRequestCreateResponse = PartnerPartnerRequestCreateResponses[keyof PartnerPartnerRequestCreateResponses];
+
+export type PartnerPartnerRequestDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this partner request.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/partner/partner-request/{id}/';
+};
+
+export type PartnerPartnerRequestDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type PartnerPartnerRequestDestroyResponse = PartnerPartnerRequestDestroyResponses[keyof PartnerPartnerRequestDestroyResponses];
+
+export type PartnerPartnerRequestRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this partner request.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/partner/partner-request/{id}/';
+};
+
+export type PartnerPartnerRequestRetrieveResponses = {
+    200: PartnerRequest;
+};
+
+export type PartnerPartnerRequestRetrieveResponse = PartnerPartnerRequestRetrieveResponses[keyof PartnerPartnerRequestRetrieveResponses];
+
+export type PartnerPartnerRequestPartialUpdateData = {
+    body?: PatchedPartnerRequestRequest;
+    path: {
+        /**
+         * A unique integer value identifying this partner request.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/partner/partner-request/{id}/';
+};
+
+export type PartnerPartnerRequestPartialUpdateResponses = {
+    200: PartnerRequest;
+};
+
+export type PartnerPartnerRequestPartialUpdateResponse = PartnerPartnerRequestPartialUpdateResponses[keyof PartnerPartnerRequestPartialUpdateResponses];
+
+export type PartnerPartnerRequestAcceptPartialUpdateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this partner request.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/partner/partner-request/{id}/accept/';
+};
+
+export type PartnerPartnerRequestAcceptPartialUpdateResponses = {
+    200: SuccessResponse;
+};
+
+export type PartnerPartnerRequestAcceptPartialUpdateResponse = PartnerPartnerRequestAcceptPartialUpdateResponses[keyof PartnerPartnerRequestAcceptPartialUpdateResponses];
+
+export type PartnerPartnerRequestRejectPartialUpdateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this partner request.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/partner/partner-request/{id}/reject/';
+};
+
+export type PartnerPartnerRequestRejectPartialUpdateResponses = {
+    200: SuccessResponse;
+};
+
+export type PartnerPartnerRequestRejectPartialUpdateResponse = PartnerPartnerRequestRejectPartialUpdateResponses[keyof PartnerPartnerRequestRejectPartialUpdateResponses];
+
+export type PartnerPartnerRequestReceivedListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/partner/partner-request/received/';
+};
+
+export type PartnerPartnerRequestReceivedListResponses = {
+    200: PaginatedPartnerRequestList;
+};
+
+export type PartnerPartnerRequestReceivedListResponse = PartnerPartnerRequestReceivedListResponses[keyof PartnerPartnerRequestReceivedListResponses];
+
+export type PartnerPartnerRequestSentListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/partner/partner-request/sent/';
+};
+
+export type PartnerPartnerRequestSentListResponses = {
+    200: PaginatedPartnerRequestList;
+};
+
+export type PartnerPartnerRequestSentListResponse = PartnerPartnerRequestSentListResponses[keyof PartnerPartnerRequestSentListResponses];
+
+export type PartnerPartnerRequestSentCreateData = {
+    body: PartnerRequestRequest;
+    path?: never;
+    query?: {
+        /**
+         * Fields to sort by, in order of precedence. Prefix a field with `-` for descending.
+         */
+        ordering?: Array<'-created' | '-from_member__name' | '-status' | '-to_member__name' | 'created' | 'from_member__name' | 'status' | 'to_member__name'>;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/partner/partner-request/sent/';
+};
+
+export type PartnerPartnerRequestSentCreateResponses = {
+    200: PaginatedPartnerRequestList;
+};
+
+export type PartnerPartnerRequestSentCreateResponse = PartnerPartnerRequestSentCreateResponses[keyof PartnerPartnerRequestSentCreateResponses];
+
+export type PartnerPartnerDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this partner.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/partner/partner/{id}/';
+};
+
+export type PartnerPartnerDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type PartnerPartnerDestroyResponse = PartnerPartnerDestroyResponses[keyof PartnerPartnerDestroyResponses];
+
+export type PartnerPartnerRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this partner.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/partner/partner/{id}/';
+};
+
+export type PartnerPartnerRetrieveResponses = {
+    200: PartnerDetail;
+};
+
+export type PartnerPartnerRetrieveResponse = PartnerPartnerRetrieveResponses[keyof PartnerPartnerRetrieveResponses];
+
+export type PartnerPartnerPartialUpdateData = {
+    body?: PatchedPartnerDetailRequest;
+    path: {
+        /**
+         * A unique integer value identifying this partner.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/partner/partner/{id}/';
+};
+
+export type PartnerPartnerPartialUpdateResponses = {
+    200: PartnerDetail;
+};
+
+export type PartnerPartnerPartialUpdateResponse = PartnerPartnerPartialUpdateResponses[keyof PartnerPartnerPartialUpdateResponses];
+
+export type PartnerPartnerBranchCreateFromCustomerCreateData = {
+    body: PartnerCustomerIdRequest;
+    path: {
+        /**
+         * A unique integer value identifying this partner.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/partner/partner/{id}/branch_create_from_customer/';
+};
+
+export type PartnerPartnerBranchCreateFromCustomerCreateResponses = {
+    200: PartnerBranchCreateFromCustomer;
+};
+
+export type PartnerPartnerBranchCreateFromCustomerCreateResponse = PartnerPartnerBranchCreateFromCustomerCreateResponses[keyof PartnerPartnerBranchCreateFromCustomerCreateResponses];
+
+export type PartnerPartnerBranchesRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this partner.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/partner/partner/{id}/branches/';
+};
+
+export type PartnerPartnerBranchesRetrieveResponses = {
+    200: PartnerBranches;
+};
+
+export type PartnerPartnerBranchesRetrieveResponse = PartnerPartnerBranchesRetrieveResponses[keyof PartnerPartnerBranchesRetrieveResponses];
+
+export type PartnerPartnerCopyCustomerOrdersCreateData = {
+    body: PartnerCustomerIdRequest;
+    path: {
+        /**
+         * A unique integer value identifying this partner.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/partner/partner/{id}/copy_customer_orders/';
+};
+
+export type PartnerPartnerCopyCustomerOrdersCreateResponses = {
+    200: PartnerCopyCustomerOrders;
+};
+
+export type PartnerPartnerCopyCustomerOrdersCreateResponse = PartnerPartnerCopyCustomerOrdersCreateResponses[keyof PartnerPartnerCopyCustomerOrdersCreateResponses];
+
 export type QuotationChapterListData = {
     body?: never;
     path?: never;
@@ -27797,3 +25287,2513 @@ export type TeamleaderWorkHoursProductPartialUpdateResponses = {
 };
 
 export type TeamleaderWorkHoursProductPartialUpdateResponse = TeamleaderWorkHoursProductPartialUpdateResponses[keyof TeamleaderWorkHoursProductPartialUpdateResponses];
+
+export type UserApiuserListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/user/apiuser/';
+};
+
+export type UserApiuserListResponses = {
+    200: PaginatedApiUserList;
+};
+
+export type UserApiuserListResponse = UserApiuserListResponses[keyof UserApiuserListResponses];
+
+export type UserApiuserCreateData = {
+    body: ApiUserRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/user/apiuser/';
+};
+
+export type UserApiuserCreateResponses = {
+    201: ApiUser;
+};
+
+export type UserApiuserCreateResponse = UserApiuserCreateResponses[keyof UserApiuserCreateResponses];
+
+export type UserApiuserDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/apiuser/{id}/';
+};
+
+export type UserApiuserDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserApiuserDestroyResponse = UserApiuserDestroyResponses[keyof UserApiuserDestroyResponses];
+
+export type UserApiuserRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/apiuser/{id}/';
+};
+
+export type UserApiuserRetrieveResponses = {
+    200: ApiUser;
+};
+
+export type UserApiuserRetrieveResponse = UserApiuserRetrieveResponses[keyof UserApiuserRetrieveResponses];
+
+export type UserApiuserPartialUpdateData = {
+    body?: PatchedApiUserRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/apiuser/{id}/';
+};
+
+export type UserApiuserPartialUpdateResponses = {
+    200: ApiUser;
+};
+
+export type UserApiuserPartialUpdateResponse = UserApiuserPartialUpdateResponses[keyof UserApiuserPartialUpdateResponses];
+
+export type UserApiuserRenewTokenCreateData = {
+    body: ApiUserRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/apiuser/{id}/renew_token/';
+};
+
+export type UserApiuserRenewTokenCreateResponses = {
+    200: SuccessResponse;
+};
+
+export type UserApiuserRenewTokenCreateResponse = UserApiuserRenewTokenCreateResponses[keyof UserApiuserRenewTokenCreateResponses];
+
+export type UserApiuserRevokeCreateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/apiuser/{id}/revoke/';
+};
+
+export type UserApiuserRevokeCreateResponses = {
+    200: SuccessResponse;
+};
+
+export type UserApiuserRevokeCreateResponse = UserApiuserRevokeCreateResponses[keyof UserApiuserRevokeCreateResponses];
+
+export type UserApiuserDummyEndpointRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/user/apiuser/dummy_endpoint/';
+};
+
+export type UserApiuserDummyEndpointRetrieveResponses = {
+    200: SuccessResponse;
+};
+
+export type UserApiuserDummyEndpointRetrieveResponse = UserApiuserDummyEndpointRetrieveResponses[keyof UserApiuserDummyEndpointRetrieveResponses];
+
+export type UserCustomeruserListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/user/customeruser/';
+};
+
+export type UserCustomeruserListResponses = {
+    200: PaginatedCustomerUserList;
+};
+
+export type UserCustomeruserListResponse = UserCustomeruserListResponses[keyof UserCustomeruserListResponses];
+
+export type UserCustomeruserCreateData = {
+    body: CustomerUserRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/user/customeruser/';
+};
+
+export type UserCustomeruserCreateResponses = {
+    201: CustomerUser;
+};
+
+export type UserCustomeruserCreateResponse = UserCustomeruserCreateResponses[keyof UserCustomeruserCreateResponses];
+
+export type UserCustomeruserDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/customeruser/{id}/';
+};
+
+export type UserCustomeruserDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserCustomeruserDestroyResponse = UserCustomeruserDestroyResponses[keyof UserCustomeruserDestroyResponses];
+
+export type UserCustomeruserRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/customeruser/{id}/';
+};
+
+export type UserCustomeruserRetrieveResponses = {
+    200: CustomerUser;
+};
+
+export type UserCustomeruserRetrieveResponse = UserCustomeruserRetrieveResponses[keyof UserCustomeruserRetrieveResponses];
+
+export type UserCustomeruserPartialUpdateData = {
+    body?: PatchedCustomerUserRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/customeruser/{id}/';
+};
+
+export type UserCustomeruserPartialUpdateResponses = {
+    200: CustomerUser;
+};
+
+export type UserCustomeruserPartialUpdateResponse = UserCustomeruserPartialUpdateResponses[keyof UserCustomeruserPartialUpdateResponses];
+
+export type UserEmployeeuserListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/user/employeeuser/';
+};
+
+export type UserEmployeeuserListResponses = {
+    200: PaginatedEmployeeUserList;
+};
+
+export type UserEmployeeuserListResponse = UserEmployeeuserListResponses[keyof UserEmployeeuserListResponses];
+
+export type UserEmployeeuserCreateData = {
+    body: EmployeeUserRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/user/employeeuser/';
+};
+
+export type UserEmployeeuserCreateResponses = {
+    201: EmployeeUser;
+};
+
+export type UserEmployeeuserCreateResponse = UserEmployeeuserCreateResponses[keyof UserEmployeeuserCreateResponses];
+
+export type UserEmployeeuserDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/employeeuser/{id}/';
+};
+
+export type UserEmployeeuserDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserEmployeeuserDestroyResponse = UserEmployeeuserDestroyResponses[keyof UserEmployeeuserDestroyResponses];
+
+export type UserEmployeeuserRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/employeeuser/{id}/';
+};
+
+export type UserEmployeeuserRetrieveResponses = {
+    200: EmployeeUser;
+};
+
+export type UserEmployeeuserRetrieveResponse = UserEmployeeuserRetrieveResponses[keyof UserEmployeeuserRetrieveResponses];
+
+export type UserEmployeeuserPartialUpdateData = {
+    body?: PatchedEmployeeUserRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/employeeuser/{id}/';
+};
+
+export type UserEmployeeuserPartialUpdateResponses = {
+    200: EmployeeUser;
+};
+
+export type UserEmployeeuserPartialUpdateResponse = UserEmployeeuserPartialUpdateResponses[keyof UserEmployeeuserPartialUpdateResponses];
+
+export type UserEngineerListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/user/engineer/';
+};
+
+export type UserEngineerListResponses = {
+    200: PaginatedEngineerList;
+};
+
+export type UserEngineerListResponse = UserEngineerListResponses[keyof UserEngineerListResponses];
+
+export type UserEngineerCreateData = {
+    body: EngineerRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/user/engineer/';
+};
+
+export type UserEngineerCreateResponses = {
+    201: Engineer;
+};
+
+export type UserEngineerCreateResponse = UserEngineerCreateResponses[keyof UserEngineerCreateResponses];
+
+export type UserEngineerEventTypeListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/user/engineer-event-type/';
+};
+
+export type UserEngineerEventTypeListResponses = {
+    200: PaginatedEngineerEventTypeList;
+};
+
+export type UserEngineerEventTypeListResponse = UserEngineerEventTypeListResponses[keyof UserEngineerEventTypeListResponses];
+
+export type UserEngineerEventTypeCreateData = {
+    body: EngineerEventTypeRequest;
+    path?: never;
+    query?: never;
+    url: '/api/user/engineer-event-type/';
+};
+
+export type UserEngineerEventTypeCreateResponses = {
+    201: EngineerEventType;
+};
+
+export type UserEngineerEventTypeCreateResponse = UserEngineerEventTypeCreateResponses[keyof UserEngineerEventTypeCreateResponses];
+
+export type UserEngineerEventTypeDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this engineer event type.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineer-event-type/{id}/';
+};
+
+export type UserEngineerEventTypeDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserEngineerEventTypeDestroyResponse = UserEngineerEventTypeDestroyResponses[keyof UserEngineerEventTypeDestroyResponses];
+
+export type UserEngineerEventTypeRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this engineer event type.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineer-event-type/{id}/';
+};
+
+export type UserEngineerEventTypeRetrieveResponses = {
+    200: EngineerEventType;
+};
+
+export type UserEngineerEventTypeRetrieveResponse = UserEngineerEventTypeRetrieveResponses[keyof UserEngineerEventTypeRetrieveResponses];
+
+export type UserEngineerEventTypePartialUpdateData = {
+    body?: PatchedEngineerEventTypeRequest;
+    path: {
+        /**
+         * A unique integer value identifying this engineer event type.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineer-event-type/{id}/';
+};
+
+export type UserEngineerEventTypePartialUpdateResponses = {
+    200: EngineerEventType;
+};
+
+export type UserEngineerEventTypePartialUpdateResponse = UserEngineerEventTypePartialUpdateResponses[keyof UserEngineerEventTypePartialUpdateResponses];
+
+export type UserEngineerEventTypeStatsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        engineer?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        year?: number;
+    };
+    url: '/api/user/engineer-event-type/stats/';
+};
+
+export type UserEngineerEventTypeStatsListResponses = {
+    200: Array<EngineerEventType>;
+};
+
+export type UserEngineerEventTypeStatsListResponse = UserEngineerEventTypeStatsListResponses[keyof UserEngineerEventTypeStatsListResponses];
+
+export type UserEngineerExportXlsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/user/engineer-export-xls/';
+};
+
+export type UserEngineerExportXlsRetrieveResponses = {
+    200: Blob | File;
+};
+
+export type UserEngineerExportXlsRetrieveResponse = UserEngineerExportXlsRetrieveResponses[keyof UserEngineerExportXlsRetrieveResponses];
+
+export type UserEngineerDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineer/{id}/';
+};
+
+export type UserEngineerDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserEngineerDestroyResponse = UserEngineerDestroyResponses[keyof UserEngineerDestroyResponses];
+
+export type UserEngineerRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineer/{id}/';
+};
+
+export type UserEngineerRetrieveResponses = {
+    200: Engineer;
+};
+
+export type UserEngineerRetrieveResponse = UserEngineerRetrieveResponses[keyof UserEngineerRetrieveResponses];
+
+export type UserEngineerPartialUpdateData = {
+    body?: PatchedEngineerRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineer/{id}/';
+};
+
+export type UserEngineerPartialUpdateResponses = {
+    200: Engineer;
+};
+
+export type UserEngineerPartialUpdateResponse = UserEngineerPartialUpdateResponses[keyof UserEngineerPartialUpdateResponses];
+
+export type UserEngineerInfoRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineer/{id}/info/';
+};
+
+export type UserEngineerInfoRetrieveResponses = {
+    200: Engineer;
+};
+
+export type UserEngineerInfoRetrieveResponse = UserEngineerInfoRetrieveResponses[keyof UserEngineerInfoRetrieveResponses];
+
+export type UserEngineerStoreLonLatCreateData = {
+    body: EngineerRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineer/{id}/store_lon_lat/';
+};
+
+export type UserEngineerStoreLonLatCreateResponses = {
+    200: ResultResponse;
+};
+
+export type UserEngineerStoreLonLatCreateResponse = UserEngineerStoreLonLatCreateResponses[keyof UserEngineerStoreLonLatCreateResponses];
+
+export type UserEngineerDeviceRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/user/engineer/device/';
+};
+
+export type UserEngineerDeviceRetrieveResponses = {
+    200: EngineerDeviceResponse;
+};
+
+export type UserEngineerDeviceRetrieveResponse = UserEngineerDeviceRetrieveResponses[keyof UserEngineerDeviceRetrieveResponses];
+
+export type UserEngineerGetLocationsListData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/user/engineer/get_locations/';
+};
+
+export type UserEngineerGetLocationsListResponses = {
+    200: Array<EngineerLocation>;
+};
+
+export type UserEngineerGetLocationsListResponse = UserEngineerGetLocationsListResponses[keyof UserEngineerGetLocationsListResponses];
+
+export type UserEngineerListForSelectListData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/user/engineer/list-for-select/';
+};
+
+export type UserEngineerListForSelectListResponses = {
+    200: Array<EngineerForSelect>;
+};
+
+export type UserEngineerListForSelectListResponse = UserEngineerListForSelectListResponses[keyof UserEngineerListForSelectListResponses];
+
+export type UserEngineereventListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        engineer?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+    };
+    url: '/api/user/engineerevent/';
+};
+
+export type UserEngineereventListResponses = {
+    200: PaginatedEngineerEventList;
+};
+
+export type UserEngineereventListResponse = UserEngineereventListResponses[keyof UserEngineereventListResponses];
+
+export type UserEngineereventCreateData = {
+    body: EngineerEventRequest;
+    path?: never;
+    query?: never;
+    url: '/api/user/engineerevent/';
+};
+
+export type UserEngineereventCreateResponses = {
+    201: number;
+};
+
+export type UserEngineereventCreateResponse = UserEngineereventCreateResponses[keyof UserEngineereventCreateResponses];
+
+export type UserEngineereventUpdateRetrieveData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineerevent-update/{id}/';
+};
+
+export type UserEngineereventUpdateRetrieveResponses = {
+    200: EngineerEvent;
+};
+
+export type UserEngineereventUpdateRetrieveResponse = UserEngineereventUpdateRetrieveResponses[keyof UserEngineereventUpdateRetrieveResponses];
+
+export type UserEngineereventUpdatePartialUpdateData = {
+    body?: PatchedEngineerEventAttachOrderRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineerevent-update/{id}/';
+};
+
+export type UserEngineereventUpdatePartialUpdateResponses = {
+    200: ResultResponse;
+};
+
+export type UserEngineereventUpdatePartialUpdateResponse = UserEngineereventUpdatePartialUpdateResponses[keyof UserEngineereventUpdatePartialUpdateResponses];
+
+export type UserEngineereventDestroyData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineerevent/{id}/';
+};
+
+export type UserEngineereventDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserEngineereventDestroyResponse = UserEngineereventDestroyResponses[keyof UserEngineereventDestroyResponses];
+
+export type UserEngineereventCreateOrderCreateData = {
+    body?: EngineerEventCreateOrderRequestRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/engineerevent/{id}/create-order/';
+};
+
+export type UserEngineereventCreateOrderCreateErrors = {
+    400: EngineerEventCreateOrderError;
+    404: NotFoundResponse;
+};
+
+export type UserEngineereventCreateOrderCreateError = UserEngineereventCreateOrderCreateErrors[keyof UserEngineereventCreateOrderCreateErrors];
+
+export type UserEngineereventCreateOrderCreateResponses = {
+    201: EngineerEventCreateOrderResponse;
+};
+
+export type UserEngineereventCreateOrderCreateResponse = UserEngineereventCreateOrderCreateResponses[keyof UserEngineereventCreateOrderCreateResponses];
+
+export type UserEventsExportXlsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/user/events-export-xls/';
+};
+
+export type UserEventsExportXlsRetrieveResponses = {
+    200: Blob | File;
+};
+
+export type UserEventsExportXlsRetrieveResponse = UserEventsExportXlsRetrieveResponses[keyof UserEventsExportXlsRetrieveResponses];
+
+export type UserPlanninguserListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/user/planninguser/';
+};
+
+export type UserPlanninguserListResponses = {
+    200: PaginatedPlanningUserList;
+};
+
+export type UserPlanninguserListResponse = UserPlanninguserListResponses[keyof UserPlanninguserListResponses];
+
+export type UserPlanninguserCreateData = {
+    body: PlanningUserRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/user/planninguser/';
+};
+
+export type UserPlanninguserCreateResponses = {
+    201: PlanningUser;
+};
+
+export type UserPlanninguserCreateResponse = UserPlanninguserCreateResponses[keyof UserPlanninguserCreateResponses];
+
+export type UserPlanninguserDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/planninguser/{id}/';
+};
+
+export type UserPlanninguserDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserPlanninguserDestroyResponse = UserPlanninguserDestroyResponses[keyof UserPlanninguserDestroyResponses];
+
+export type UserPlanninguserRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/planninguser/{id}/';
+};
+
+export type UserPlanninguserRetrieveResponses = {
+    200: PlanningUser;
+};
+
+export type UserPlanninguserRetrieveResponse = UserPlanninguserRetrieveResponses[keyof UserPlanninguserRetrieveResponses];
+
+export type UserPlanninguserPartialUpdateData = {
+    body?: PatchedPlanningUserRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/planninguser/{id}/';
+};
+
+export type UserPlanninguserPartialUpdateResponses = {
+    200: PlanningUser;
+};
+
+export type UserPlanninguserPartialUpdateResponse = UserPlanninguserPartialUpdateResponses[keyof UserPlanninguserPartialUpdateResponses];
+
+export type UserSalesuserListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/user/salesuser/';
+};
+
+export type UserSalesuserListResponses = {
+    200: PaginatedSalesUserList;
+};
+
+export type UserSalesuserListResponse = UserSalesuserListResponses[keyof UserSalesuserListResponses];
+
+export type UserSalesuserCreateData = {
+    body: SalesUserRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/user/salesuser/';
+};
+
+export type UserSalesuserCreateResponses = {
+    201: SalesUser;
+};
+
+export type UserSalesuserCreateResponse = UserSalesuserCreateResponses[keyof UserSalesuserCreateResponses];
+
+export type UserSalesuserDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/salesuser/{id}/';
+};
+
+export type UserSalesuserDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserSalesuserDestroyResponse = UserSalesuserDestroyResponses[keyof UserSalesuserDestroyResponses];
+
+export type UserSalesuserRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/salesuser/{id}/';
+};
+
+export type UserSalesuserRetrieveResponses = {
+    200: SalesUser;
+};
+
+export type UserSalesuserRetrieveResponse = UserSalesuserRetrieveResponses[keyof UserSalesuserRetrieveResponses];
+
+export type UserSalesuserPartialUpdateData = {
+    body?: PatchedSalesUserRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/salesuser/{id}/';
+};
+
+export type UserSalesuserPartialUpdateResponses = {
+    200: SalesUser;
+};
+
+export type UserSalesuserPartialUpdateResponse = UserSalesuserPartialUpdateResponses[keyof UserSalesuserPartialUpdateResponses];
+
+export type UserSalesusercustomerListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        user?: number;
+    };
+    url: '/api/user/salesusercustomer/';
+};
+
+export type UserSalesusercustomerListResponses = {
+    200: PaginatedSalesUserCustomerExpandedList;
+};
+
+export type UserSalesusercustomerListResponse = UserSalesusercustomerListResponses[keyof UserSalesusercustomerListResponses];
+
+export type UserSalesusercustomerCreateData = {
+    body: SalesUserCustomerRequest;
+    path?: never;
+    query?: never;
+    url: '/api/user/salesusercustomer/';
+};
+
+export type UserSalesusercustomerCreateResponses = {
+    201: SalesUserCustomer;
+};
+
+export type UserSalesusercustomerCreateResponse = UserSalesusercustomerCreateResponses[keyof UserSalesusercustomerCreateResponses];
+
+export type UserSalesusercustomerDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this sales user customer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/salesusercustomer/{id}/';
+};
+
+export type UserSalesusercustomerDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserSalesusercustomerDestroyResponse = UserSalesusercustomerDestroyResponses[keyof UserSalesusercustomerDestroyResponses];
+
+export type UserSalesusercustomerRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this sales user customer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/salesusercustomer/{id}/';
+};
+
+export type UserSalesusercustomerRetrieveResponses = {
+    200: SalesUserCustomer;
+};
+
+export type UserSalesusercustomerRetrieveResponse = UserSalesusercustomerRetrieveResponses[keyof UserSalesusercustomerRetrieveResponses];
+
+export type UserSalesusercustomerPartialUpdateData = {
+    body?: PatchedSalesUserCustomerRequest;
+    path: {
+        /**
+         * A unique integer value identifying this sales user customer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/salesusercustomer/{id}/';
+};
+
+export type UserSalesusercustomerPartialUpdateResponses = {
+    200: SalesUserCustomer;
+};
+
+export type UserSalesusercustomerPartialUpdateResponse = UserSalesusercustomerPartialUpdateResponses[keyof UserSalesusercustomerPartialUpdateResponses];
+
+export type UserSalesusercustomerMyListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/user/salesusercustomer/my/';
+};
+
+export type UserSalesusercustomerMyListResponses = {
+    200: PaginatedSalesUserCustomerExpandedList;
+};
+
+export type UserSalesusercustomerMyListResponse = UserSalesusercustomerMyListResponses[keyof UserSalesusercustomerMyListResponses];
+
+export type UserSalesusercustomerMyCreateData = {
+    body: SalesUserMyCustomerRequest;
+    path?: never;
+    query?: never;
+    url: '/api/user/salesusercustomer/my/';
+};
+
+export type UserSalesusercustomerMyCreateResponses = {
+    201: SalesUserMyCustomer;
+};
+
+export type UserSalesusercustomerMyCreateResponse = UserSalesusercustomerMyCreateResponses[keyof UserSalesusercustomerMyCreateResponses];
+
+export type UserSalesusercustomerMyDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this sales user customer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/salesusercustomer/my/{id}/';
+};
+
+export type UserSalesusercustomerMyDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserSalesusercustomerMyDestroyResponse = UserSalesusercustomerMyDestroyResponses[keyof UserSalesusercustomerMyDestroyResponses];
+
+export type UserSalesusercustomerMyRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this sales user customer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/salesusercustomer/my/{id}/';
+};
+
+export type UserSalesusercustomerMyRetrieveResponses = {
+    200: SalesUserCustomerExpanded;
+};
+
+export type UserSalesusercustomerMyRetrieveResponse = UserSalesusercustomerMyRetrieveResponses[keyof UserSalesusercustomerMyRetrieveResponses];
+
+export type UserSalesusercustomerMyPartialUpdateData = {
+    body?: PatchedSalesUserCustomerExpandedRequest;
+    path: {
+        /**
+         * A unique integer value identifying this sales user customer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/salesusercustomer/my/{id}/';
+};
+
+export type UserSalesusercustomerMyPartialUpdateErrors = {
+    /**
+     * No response body
+     */
+    400: unknown;
+};
+
+export type UserStreamInfoRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/user/stream-info/';
+};
+
+export type UserStreamInfoRetrieveResponses = {
+    200: StreamInfoResponse;
+};
+
+export type UserStreamInfoRetrieveResponse = UserStreamInfoRetrieveResponses[keyof UserStreamInfoRetrieveResponses];
+
+export type UserStreamPrivateChannelCreateCreateData = {
+    body: CreatePrivateChannelRequestRequest;
+    path?: never;
+    query?: never;
+    url: '/api/user/stream-private-channel-create/';
+};
+
+export type UserStreamPrivateChannelCreateCreateResponses = {
+    200: ChannelCreatedResponse;
+};
+
+export type UserStreamPrivateChannelCreateCreateResponse = UserStreamPrivateChannelCreateCreateResponses[keyof UserStreamPrivateChannelCreateCreateResponses];
+
+export type UserStudentExportXlsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/user/student-export-xls/';
+};
+
+export type UserStudentExportXlsRetrieveResponses = {
+    200: Blob | File;
+};
+
+export type UserStudentExportXlsRetrieveResponse = UserStudentExportXlsRetrieveResponses[keyof UserStudentExportXlsRetrieveResponses];
+
+export type UserStudentuserListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/user/studentuser/';
+};
+
+export type UserStudentuserListResponses = {
+    200: PaginatedStudentUserList;
+};
+
+export type UserStudentuserListResponse = UserStudentuserListResponses[keyof UserStudentuserListResponses];
+
+export type UserStudentuserCreateData = {
+    body: StudentUserWriteRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/user/studentuser/';
+};
+
+export type UserStudentuserCreateResponses = {
+    201: StudentUser;
+};
+
+export type UserStudentuserCreateResponse = UserStudentuserCreateResponses[keyof UserStudentuserCreateResponses];
+
+export type UserStudentuserDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/studentuser/{id}/';
+};
+
+export type UserStudentuserDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserStudentuserDestroyResponse = UserStudentuserDestroyResponses[keyof UserStudentuserDestroyResponses];
+
+export type UserStudentuserRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/studentuser/{id}/';
+};
+
+export type UserStudentuserRetrieveResponses = {
+    200: StudentUser;
+};
+
+export type UserStudentuserRetrieveResponse = UserStudentuserRetrieveResponses[keyof UserStudentuserRetrieveResponses];
+
+export type UserStudentuserPartialUpdateData = {
+    body?: PatchedStudentUserWriteRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this user.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/studentuser/{id}/';
+};
+
+export type UserStudentuserPartialUpdateResponses = {
+    200: StudentUser;
+};
+
+export type UserStudentuserPartialUpdateResponse = UserStudentuserPartialUpdateResponses[keyof UserStudentuserPartialUpdateResponses];
+
+export type UserUserDeviceTokenCreateData = {
+    body: DeviceTokenRequestRequest;
+    path?: never;
+    query?: never;
+    url: '/api/user/user-device-token/';
+};
+
+export type UserUserDeviceTokenCreateResponses = {
+    200: DeviceTokenCreated;
+};
+
+export type UserUserDeviceTokenCreateResponse = UserUserDeviceTokenCreateResponses[keyof UserUserDeviceTokenCreateResponses];
+
+export type UserUserInfoMeRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/user/user-info-me/';
+};
+
+export type UserUserInfoMeRetrieveResponses = {
+    200: UserInfoResponse;
+};
+
+export type UserUserInfoMeRetrieveResponse = UserUserInfoMeRetrieveResponses[keyof UserUserInfoMeRetrieveResponses];
+
+export type UserUserInfoRetrieveData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/user-info/{id}/';
+};
+
+export type UserUserInfoRetrieveResponses = {
+    200: UserInfoDetailResponse;
+};
+
+export type UserUserInfoRetrieveResponse = UserUserInfoRetrieveResponses[keyof UserUserInfoRetrieveResponses];
+
+export type UserUserListListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Case-insensitive substring match on username, first name or last name.
+         */
+        q?: string;
+        /**
+         * Only users carrying this user-type submodel.
+         */
+        user_type?: 'sales_user' | 'planning_user' | 'customer_user' | 'engineer' | 'student_user' | 'api_user' | 'employee_user';
+    };
+    url: '/api/user/user-list/';
+};
+
+export type UserUserListListResponses = {
+    200: Array<UserSelectRow>;
+};
+
+export type UserUserListListResponse = UserUserListListResponses[keyof UserUserListListResponses];
+
+export type UserUserSettingsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/user/user-settings/';
+};
+
+export type UserUserSettingsRetrieveResponses = {
+    200: AppUserSettings;
+};
+
+export type UserUserSettingsRetrieveResponse = UserUserSettingsRetrieveResponses[keyof UserUserSettingsRetrieveResponses];
+
+export type UserUserSettingsPartialUpdateData = {
+    body?: PatchedAppUserSettingsRequest;
+    path?: never;
+    query?: never;
+    url: '/api/user/user-settings/';
+};
+
+export type UserUserSettingsPartialUpdateResponses = {
+    200: AppUserSettings;
+};
+
+export type UserUserSettingsPartialUpdateResponse = UserUserSettingsPartialUpdateResponses[keyof UserUserSettingsPartialUpdateResponses];
+
+export type UserUserDeleteMeDestroyData = {
+    body?: never;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/user/user/delete-me/{id}/';
+};
+
+export type UserUserDeleteMeDestroyErrors = {
+    403: ForbiddenResponse;
+};
+
+export type UserUserDeleteMeDestroyError = UserUserDeleteMeDestroyErrors[keyof UserUserDeleteMeDestroyErrors];
+
+export type UserUserDeleteMeDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type UserUserDeleteMeDestroyResponse = UserUserDeleteMeDestroyResponses[keyof UserUserDeleteMeDestroyResponses];
+
+export type UserUsersStudentProfileRetrieveData = {
+    body?: never;
+    path: {
+        uuid: string;
+    };
+    query?: never;
+    url: '/api/user/users/student/profile/{uuid}/';
+};
+
+export type UserUsersStudentProfileRetrieveResponses = {
+    200: StudentUserUserPublic;
+};
+
+export type UserUsersStudentProfileRetrieveResponse = UserUsersStudentProfileRetrieveResponses[keyof UserUsersStudentProfileRetrieveResponses];
+
+export type UserUsersStudentProfileMeRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/user/users/student/profile/me/';
+};
+
+export type UserUsersStudentProfileMeRetrieveResponses = {
+    200: StudentUser;
+};
+
+export type UserUsersStudentProfileMeRetrieveResponse = UserUsersStudentProfileMeRetrieveResponses[keyof UserUsersStudentProfileMeRetrieveResponses];
+
+export type UserUsersStudentProfileMePartialUpdateData = {
+    body?: PatchedStudentUserWriteRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/user/users/student/profile/me/';
+};
+
+export type UserUsersStudentProfileMePartialUpdateResponses = {
+    200: StudentUser;
+};
+
+export type UserUsersStudentProfileMePartialUpdateResponse = UserUsersStudentProfileMePartialUpdateResponses[keyof UserUsersStudentProfileMePartialUpdateResponses];
+
+export type UserUsersStudentRegisterFetchUserCreateData = {
+    body: WordPressUserFetchRequestRequest;
+    path?: never;
+    query?: never;
+    url: '/api/user/users/student/register/fetch-user/';
+};
+
+export type UserUsersStudentRegisterFetchUserCreateResponses = {
+    /**
+     * Whatever WordPress keeps for this user.
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type UserUsersStudentRegisterFetchUserCreateResponse = UserUsersStudentRegisterFetchUserCreateResponses[keyof UserUsersStudentRegisterFetchUserCreateResponses];
+
+export type WorkforceLeaveTypeListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/workforce/leave-type/';
+};
+
+export type WorkforceLeaveTypeListResponses = {
+    200: PaginatedLeaveTypeList;
+};
+
+export type WorkforceLeaveTypeListResponse = WorkforceLeaveTypeListResponses[keyof WorkforceLeaveTypeListResponses];
+
+export type WorkforceLeaveTypeCreateData = {
+    body: LeaveTypeRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/leave-type/';
+};
+
+export type WorkforceLeaveTypeCreateResponses = {
+    201: LeaveType;
+};
+
+export type WorkforceLeaveTypeCreateResponse = WorkforceLeaveTypeCreateResponses[keyof WorkforceLeaveTypeCreateResponses];
+
+export type WorkforceLeaveTypeDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this leave type.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/leave-type/{id}/';
+};
+
+export type WorkforceLeaveTypeDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type WorkforceLeaveTypeDestroyResponse = WorkforceLeaveTypeDestroyResponses[keyof WorkforceLeaveTypeDestroyResponses];
+
+export type WorkforceLeaveTypeRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this leave type.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/leave-type/{id}/';
+};
+
+export type WorkforceLeaveTypeRetrieveResponses = {
+    200: LeaveType;
+};
+
+export type WorkforceLeaveTypeRetrieveResponse = WorkforceLeaveTypeRetrieveResponses[keyof WorkforceLeaveTypeRetrieveResponses];
+
+export type WorkforceLeaveTypePartialUpdateData = {
+    body?: PatchedLeaveTypeRequest;
+    path: {
+        /**
+         * A unique integer value identifying this leave type.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/leave-type/{id}/';
+};
+
+export type WorkforceLeaveTypePartialUpdateResponses = {
+    200: LeaveType;
+};
+
+export type WorkforceLeaveTypePartialUpdateResponse = WorkforceLeaveTypePartialUpdateResponses[keyof WorkforceLeaveTypePartialUpdateResponses];
+
+export type WorkforceLeaveTypeListForSelectListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/workforce/leave-type/list_for_select/';
+};
+
+export type WorkforceLeaveTypeListForSelectListResponses = {
+    200: Array<LeaveType>;
+};
+
+export type WorkforceLeaveTypeListForSelectListResponse = WorkforceLeaveTypeListForSelectListResponses[keyof WorkforceLeaveTypeListForSelectListResponses];
+
+export type WorkforceProjectListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        name?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/workforce/project/';
+};
+
+export type WorkforceProjectListResponses = {
+    200: PaginatedProjectList;
+};
+
+export type WorkforceProjectListResponse = WorkforceProjectListResponses[keyof WorkforceProjectListResponses];
+
+export type WorkforceProjectCreateData = {
+    body: ProjectRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/project/';
+};
+
+export type WorkforceProjectCreateResponses = {
+    201: Project;
+};
+
+export type WorkforceProjectCreateResponse = WorkforceProjectCreateResponses[keyof WorkforceProjectCreateResponses];
+
+export type WorkforceProjectDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this project.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/project/{id}/';
+};
+
+export type WorkforceProjectDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type WorkforceProjectDestroyResponse = WorkforceProjectDestroyResponses[keyof WorkforceProjectDestroyResponses];
+
+export type WorkforceProjectRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this project.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/project/{id}/';
+};
+
+export type WorkforceProjectRetrieveResponses = {
+    200: Project;
+};
+
+export type WorkforceProjectRetrieveResponse = WorkforceProjectRetrieveResponses[keyof WorkforceProjectRetrieveResponses];
+
+export type WorkforceProjectPartialUpdateData = {
+    body?: PatchedProjectRequest;
+    path: {
+        /**
+         * A unique integer value identifying this project.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/project/{id}/';
+};
+
+export type WorkforceProjectPartialUpdateResponses = {
+    200: Project;
+};
+
+export type WorkforceProjectPartialUpdateResponse = WorkforceProjectPartialUpdateResponses[keyof WorkforceProjectPartialUpdateResponses];
+
+export type WorkforceProjectListForSelectListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        name?: string;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/workforce/project/list_for_select/';
+};
+
+export type WorkforceProjectListForSelectListResponses = {
+    200: Array<Project>;
+};
+
+export type WorkforceProjectListForSelectListResponse = WorkforceProjectListForSelectListResponses[keyof WorkforceProjectListForSelectListResponses];
+
+export type WorkforceTimeRegistrationRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Window shown: week (default), month or year.
+         */
+        mode?: string;
+        /**
+         * Calendar month (1-12) the window is computed for. Honoured for month.
+         */
+        month?: number;
+        /**
+         * Anchor date (YYYY-MM-DD); the window is computed from it. Honoured for week and month, ignored for year.
+         */
+        start_date?: string;
+        /**
+         * User id the totals are computed for. Planning/staff only; everyone else always sees their own rows.
+         */
+        user?: number;
+        /**
+         * Calendar year the window is computed for. Honoured for month and year.
+         */
+        year?: number;
+    };
+    url: '/api/workforce/time-registration/';
+};
+
+export type WorkforceTimeRegistrationRetrieveResponses = {
+    200: TimeRegistrationListResponse;
+};
+
+export type WorkforceTimeRegistrationRetrieveResponse = WorkforceTimeRegistrationRetrieveResponses[keyof WorkforceTimeRegistrationRetrieveResponses];
+
+export type WorkforceTimeRegistrationTimeCorrectionPartialUpdateData = {
+    body?: PatchedTimeCorrectionRequest;
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/time-registration/time-correction/{id}/';
+};
+
+export type WorkforceTimeRegistrationTimeCorrectionPartialUpdateResponses = {
+    200: ResultResponse;
+};
+
+export type WorkforceTimeRegistrationTimeCorrectionPartialUpdateResponse = WorkforceTimeRegistrationTimeCorrectionPartialUpdateResponses[keyof WorkforceTimeRegistrationTimeCorrectionPartialUpdateResponses];
+
+export type WorkforceTimeRegistrationTopUsersForCustomerRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Only rows for this customer id.
+         */
+        customer?: number;
+    };
+    url: '/api/workforce/time-registration/top-users-for-customer/';
+};
+
+export type WorkforceTimeRegistrationTopUsersForCustomerRetrieveResponses = {
+    200: TopUsersForCustomerResponse;
+};
+
+export type WorkforceTimeRegistrationTopUsersForCustomerRetrieveResponse = WorkforceTimeRegistrationTopUsersForCustomerRetrieveResponses[keyof WorkforceTimeRegistrationTopUsersForCustomerRetrieveResponses];
+
+export type WorkforceUserLeaveHoursListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/workforce/user-leave-hours/';
+};
+
+export type WorkforceUserLeaveHoursListResponses = {
+    200: PaginatedUserLeaveHoursList;
+};
+
+export type WorkforceUserLeaveHoursListResponse = WorkforceUserLeaveHoursListResponses[keyof WorkforceUserLeaveHoursListResponses];
+
+export type WorkforceUserLeaveHoursCreateData = {
+    body?: UserLeaveHoursNoPlanningRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-leave-hours/';
+};
+
+export type WorkforceUserLeaveHoursCreateResponses = {
+    201: UserLeaveHours;
+};
+
+export type WorkforceUserLeaveHoursCreateResponse = WorkforceUserLeaveHoursCreateResponses[keyof WorkforceUserLeaveHoursCreateResponses];
+
+export type WorkforceUserLeaveHoursDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user leave hours.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-leave-hours/{id}/';
+};
+
+export type WorkforceUserLeaveHoursDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type WorkforceUserLeaveHoursDestroyResponse = WorkforceUserLeaveHoursDestroyResponses[keyof WorkforceUserLeaveHoursDestroyResponses];
+
+export type WorkforceUserLeaveHoursRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user leave hours.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-leave-hours/{id}/';
+};
+
+export type WorkforceUserLeaveHoursRetrieveResponses = {
+    200: UserLeaveHours;
+};
+
+export type WorkforceUserLeaveHoursRetrieveResponse = WorkforceUserLeaveHoursRetrieveResponses[keyof WorkforceUserLeaveHoursRetrieveResponses];
+
+export type WorkforceUserLeaveHoursPartialUpdateData = {
+    body?: PatchedUserLeaveHoursNoPlanningRequest;
+    path: {
+        /**
+         * A unique integer value identifying this user leave hours.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-leave-hours/{id}/';
+};
+
+export type WorkforceUserLeaveHoursPartialUpdateResponses = {
+    200: UserLeaveHours;
+};
+
+export type WorkforceUserLeaveHoursPartialUpdateResponse = WorkforceUserLeaveHoursPartialUpdateResponses[keyof WorkforceUserLeaveHoursPartialUpdateResponses];
+
+export type WorkforceUserLeaveHoursAdminListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/workforce/user-leave-hours/admin/';
+};
+
+export type WorkforceUserLeaveHoursAdminListResponses = {
+    200: PaginatedUserLeaveHoursList;
+};
+
+export type WorkforceUserLeaveHoursAdminListResponse = WorkforceUserLeaveHoursAdminListResponses[keyof WorkforceUserLeaveHoursAdminListResponses];
+
+export type WorkforceUserLeaveHoursAdminCreateData = {
+    body?: UserLeaveHoursPlanningRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-leave-hours/admin/';
+};
+
+export type WorkforceUserLeaveHoursAdminCreateResponses = {
+    201: UserLeaveHours;
+};
+
+export type WorkforceUserLeaveHoursAdminCreateResponse = WorkforceUserLeaveHoursAdminCreateResponses[keyof WorkforceUserLeaveHoursAdminCreateResponses];
+
+export type WorkforceUserLeaveHoursAdminDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user leave hours.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-leave-hours/admin/{id}/';
+};
+
+export type WorkforceUserLeaveHoursAdminDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type WorkforceUserLeaveHoursAdminDestroyResponse = WorkforceUserLeaveHoursAdminDestroyResponses[keyof WorkforceUserLeaveHoursAdminDestroyResponses];
+
+export type WorkforceUserLeaveHoursAdminRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user leave hours.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-leave-hours/admin/{id}/';
+};
+
+export type WorkforceUserLeaveHoursAdminRetrieveResponses = {
+    200: UserLeaveHours;
+};
+
+export type WorkforceUserLeaveHoursAdminRetrieveResponse = WorkforceUserLeaveHoursAdminRetrieveResponses[keyof WorkforceUserLeaveHoursAdminRetrieveResponses];
+
+export type WorkforceUserLeaveHoursAdminPartialUpdateData = {
+    body?: PatchedUserLeaveHoursPlanningRequest;
+    path: {
+        /**
+         * A unique integer value identifying this user leave hours.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-leave-hours/admin/{id}/';
+};
+
+export type WorkforceUserLeaveHoursAdminPartialUpdateResponses = {
+    200: UserLeaveHours;
+};
+
+export type WorkforceUserLeaveHoursAdminPartialUpdateResponse = WorkforceUserLeaveHoursAdminPartialUpdateResponses[keyof WorkforceUserLeaveHoursAdminPartialUpdateResponses];
+
+export type WorkforceUserLeaveHoursAdminSetAcceptedCreateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user leave hours.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-leave-hours/admin/{id}/set_accepted/';
+};
+
+export type WorkforceUserLeaveHoursAdminSetAcceptedCreateResponses = {
+    200: ResultResponse;
+};
+
+export type WorkforceUserLeaveHoursAdminSetAcceptedCreateResponse = WorkforceUserLeaveHoursAdminSetAcceptedCreateResponses[keyof WorkforceUserLeaveHoursAdminSetAcceptedCreateResponses];
+
+export type WorkforceUserLeaveHoursAdminSetRejectedCreateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user leave hours.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-leave-hours/admin/{id}/set_rejected/';
+};
+
+export type WorkforceUserLeaveHoursAdminSetRejectedCreateResponses = {
+    200: ResultResponse;
+};
+
+export type WorkforceUserLeaveHoursAdminSetRejectedCreateResponse = WorkforceUserLeaveHoursAdminSetRejectedCreateResponses[keyof WorkforceUserLeaveHoursAdminSetRejectedCreateResponses];
+
+export type WorkforceUserLeaveHoursAdminAllNotAcceptedListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/workforce/user-leave-hours/admin/all_not_accepted/';
+};
+
+export type WorkforceUserLeaveHoursAdminAllNotAcceptedListResponses = {
+    200: PaginatedUserLeaveHoursList;
+};
+
+export type WorkforceUserLeaveHoursAdminAllNotAcceptedListResponse = WorkforceUserLeaveHoursAdminAllNotAcceptedListResponses[keyof WorkforceUserLeaveHoursAdminAllNotAcceptedListResponses];
+
+export type WorkforceUserLeaveHoursAdminAllNotAcceptedCountRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-leave-hours/admin/all_not_accepted_count/';
+};
+
+export type WorkforceUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses = {
+    200: CountResponse;
+};
+
+export type WorkforceUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponse = WorkforceUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses[keyof WorkforceUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponses];
+
+export type WorkforceUserLeaveHoursAdminGetTotalsCreateData = {
+    body?: UserLeaveHoursNoPlanningRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-leave-hours/admin/get_totals/';
+};
+
+export type WorkforceUserLeaveHoursAdminGetTotalsCreateResponses = {
+    200: LeaveHoursTotals;
+};
+
+export type WorkforceUserLeaveHoursAdminGetTotalsCreateResponse = WorkforceUserLeaveHoursAdminGetTotalsCreateResponses[keyof WorkforceUserLeaveHoursAdminGetTotalsCreateResponses];
+
+export type WorkforceUserLeaveHoursAllNotAcceptedListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/workforce/user-leave-hours/all_not_accepted/';
+};
+
+export type WorkforceUserLeaveHoursAllNotAcceptedListResponses = {
+    200: PaginatedUserLeaveHoursList;
+};
+
+export type WorkforceUserLeaveHoursAllNotAcceptedListResponse = WorkforceUserLeaveHoursAllNotAcceptedListResponses[keyof WorkforceUserLeaveHoursAllNotAcceptedListResponses];
+
+export type WorkforceUserLeaveHoursAllNotAcceptedCountRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-leave-hours/all_not_accepted_count/';
+};
+
+export type WorkforceUserLeaveHoursAllNotAcceptedCountRetrieveResponses = {
+    200: CountResponse;
+};
+
+export type WorkforceUserLeaveHoursAllNotAcceptedCountRetrieveResponse = WorkforceUserLeaveHoursAllNotAcceptedCountRetrieveResponses[keyof WorkforceUserLeaveHoursAllNotAcceptedCountRetrieveResponses];
+
+export type WorkforceUserLeaveHoursGetTotalsCreateData = {
+    body?: UserLeaveHoursNoPlanningRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-leave-hours/get_totals/';
+};
+
+export type WorkforceUserLeaveHoursGetTotalsCreateResponses = {
+    200: LeaveHoursTotals;
+};
+
+export type WorkforceUserLeaveHoursGetTotalsCreateResponse = WorkforceUserLeaveHoursGetTotalsCreateResponses[keyof WorkforceUserLeaveHoursGetTotalsCreateResponses];
+
+export type WorkforceUserSickLeaveListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/workforce/user-sick-leave/';
+};
+
+export type WorkforceUserSickLeaveListResponses = {
+    200: PaginatedUserSickLeaveList;
+};
+
+export type WorkforceUserSickLeaveListResponse = WorkforceUserSickLeaveListResponses[keyof WorkforceUserSickLeaveListResponses];
+
+export type WorkforceUserSickLeaveCreateData = {
+    body: UserSickLeaveRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-sick-leave/';
+};
+
+export type WorkforceUserSickLeaveCreateResponses = {
+    201: UserSickLeave;
+};
+
+export type WorkforceUserSickLeaveCreateResponse = WorkforceUserSickLeaveCreateResponses[keyof WorkforceUserSickLeaveCreateResponses];
+
+export type WorkforceUserSickLeaveDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user sick leave.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-sick-leave/{id}/';
+};
+
+export type WorkforceUserSickLeaveDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type WorkforceUserSickLeaveDestroyResponse = WorkforceUserSickLeaveDestroyResponses[keyof WorkforceUserSickLeaveDestroyResponses];
+
+export type WorkforceUserSickLeaveRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user sick leave.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-sick-leave/{id}/';
+};
+
+export type WorkforceUserSickLeaveRetrieveResponses = {
+    200: UserSickLeave;
+};
+
+export type WorkforceUserSickLeaveRetrieveResponse = WorkforceUserSickLeaveRetrieveResponses[keyof WorkforceUserSickLeaveRetrieveResponses];
+
+export type WorkforceUserSickLeavePartialUpdateData = {
+    body?: PatchedUserSickLeaveRequest;
+    path: {
+        /**
+         * A unique integer value identifying this user sick leave.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-sick-leave/{id}/';
+};
+
+export type WorkforceUserSickLeavePartialUpdateResponses = {
+    200: UserSickLeave;
+};
+
+export type WorkforceUserSickLeavePartialUpdateResponse = WorkforceUserSickLeavePartialUpdateResponses[keyof WorkforceUserSickLeavePartialUpdateResponses];
+
+export type WorkforceUserSickLeaveAdminListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        user?: number;
+    };
+    url: '/api/workforce/user-sick-leave/admin/';
+};
+
+export type WorkforceUserSickLeaveAdminListResponses = {
+    200: PaginatedUserSickLeaveList;
+};
+
+export type WorkforceUserSickLeaveAdminListResponse = WorkforceUserSickLeaveAdminListResponses[keyof WorkforceUserSickLeaveAdminListResponses];
+
+export type WorkforceUserSickLeaveAdminCreateData = {
+    body: UserSickLeaveRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-sick-leave/admin/';
+};
+
+export type WorkforceUserSickLeaveAdminCreateResponses = {
+    201: UserSickLeave;
+};
+
+export type WorkforceUserSickLeaveAdminCreateResponse = WorkforceUserSickLeaveAdminCreateResponses[keyof WorkforceUserSickLeaveAdminCreateResponses];
+
+export type WorkforceUserSickLeaveAdminDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user sick leave.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-sick-leave/admin/{id}/';
+};
+
+export type WorkforceUserSickLeaveAdminDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type WorkforceUserSickLeaveAdminDestroyResponse = WorkforceUserSickLeaveAdminDestroyResponses[keyof WorkforceUserSickLeaveAdminDestroyResponses];
+
+export type WorkforceUserSickLeaveAdminRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user sick leave.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-sick-leave/admin/{id}/';
+};
+
+export type WorkforceUserSickLeaveAdminRetrieveResponses = {
+    200: UserSickLeave;
+};
+
+export type WorkforceUserSickLeaveAdminRetrieveResponse = WorkforceUserSickLeaveAdminRetrieveResponses[keyof WorkforceUserSickLeaveAdminRetrieveResponses];
+
+export type WorkforceUserSickLeaveAdminPartialUpdateData = {
+    body?: PatchedUserSickLeaveRequest;
+    path: {
+        /**
+         * A unique integer value identifying this user sick leave.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-sick-leave/admin/{id}/';
+};
+
+export type WorkforceUserSickLeaveAdminPartialUpdateResponses = {
+    200: UserSickLeave;
+};
+
+export type WorkforceUserSickLeaveAdminPartialUpdateResponse = WorkforceUserSickLeaveAdminPartialUpdateResponses[keyof WorkforceUserSickLeaveAdminPartialUpdateResponses];
+
+export type WorkforceUserSickLeaveAdminEndSickCreateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user sick leave.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-sick-leave/admin/{id}/end_sick/';
+};
+
+export type WorkforceUserSickLeaveAdminEndSickCreateResponses = {
+    200: ResultResponse;
+};
+
+export type WorkforceUserSickLeaveAdminEndSickCreateResponse = WorkforceUserSickLeaveAdminEndSickCreateResponses[keyof WorkforceUserSickLeaveAdminEndSickCreateResponses];
+
+export type WorkforceUserSickLeaveAdminSetConfirmedCreateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user sick leave.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-sick-leave/admin/{id}/set_confirmed/';
+};
+
+export type WorkforceUserSickLeaveAdminSetConfirmedCreateResponses = {
+    200: ResultResponse;
+};
+
+export type WorkforceUserSickLeaveAdminSetConfirmedCreateResponse = WorkforceUserSickLeaveAdminSetConfirmedCreateResponses[keyof WorkforceUserSickLeaveAdminSetConfirmedCreateResponses];
+
+export type WorkforceUserSickLeaveAdminAllSickListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        user?: number;
+    };
+    url: '/api/workforce/user-sick-leave/admin/all_sick/';
+};
+
+export type WorkforceUserSickLeaveAdminAllSickListResponses = {
+    200: PaginatedUserSickLeaveList;
+};
+
+export type WorkforceUserSickLeaveAdminAllSickListResponse = WorkforceUserSickLeaveAdminAllSickListResponses[keyof WorkforceUserSickLeaveAdminAllSickListResponses];
+
+export type WorkforceUserSickLeaveAdminAllSickCountRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-sick-leave/admin/all_sick_count/';
+};
+
+export type WorkforceUserSickLeaveAdminAllSickCountRetrieveResponses = {
+    200: CountResponse;
+};
+
+export type WorkforceUserSickLeaveAdminAllSickCountRetrieveResponse = WorkforceUserSickLeaveAdminAllSickCountRetrieveResponses[keyof WorkforceUserSickLeaveAdminAllSickCountRetrieveResponses];
+
+export type WorkforceUserSickLeaveAdminAllUnconfirmedListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        user?: number;
+    };
+    url: '/api/workforce/user-sick-leave/admin/all_unconfirmed/';
+};
+
+export type WorkforceUserSickLeaveAdminAllUnconfirmedListResponses = {
+    200: PaginatedUserSickLeaveList;
+};
+
+export type WorkforceUserSickLeaveAdminAllUnconfirmedListResponse = WorkforceUserSickLeaveAdminAllUnconfirmedListResponses[keyof WorkforceUserSickLeaveAdminAllUnconfirmedListResponses];
+
+export type WorkforceUserSickLeaveAdminAllUnconfirmedCountRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-sick-leave/admin/all_unconfirmed_count/';
+};
+
+export type WorkforceUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses = {
+    200: CountResponse;
+};
+
+export type WorkforceUserSickLeaveAdminAllUnconfirmedCountRetrieveResponse = WorkforceUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses[keyof WorkforceUserSickLeaveAdminAllUnconfirmedCountRetrieveResponses];
+
+export type WorkforceUserSickLeaveEndSickCreateData = {
+    body: UserSickLeaveRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-sick-leave/end_sick/';
+};
+
+export type WorkforceUserSickLeaveEndSickCreateResponses = {
+    200: ResultResponse;
+};
+
+export type WorkforceUserSickLeaveEndSickCreateResponse = WorkforceUserSickLeaveEndSickCreateResponses[keyof WorkforceUserSickLeaveEndSickCreateResponses];
+
+export type WorkforceUserWorkhoursListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+        /**
+         * First day of the week shown (YYYY-MM-DD); defaults to today.
+         */
+        start_date?: string;
+        user?: number;
+    };
+    url: '/api/workforce/user-workhours/';
+};
+
+export type WorkforceUserWorkhoursListResponses = {
+    200: PaginatedUserWorkHoursList;
+};
+
+export type WorkforceUserWorkhoursListResponse = WorkforceUserWorkhoursListResponses[keyof WorkforceUserWorkhoursListResponses];
+
+export type WorkforceUserWorkhoursCreateData = {
+    body?: UserWorkHoursRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-workhours/';
+};
+
+export type WorkforceUserWorkhoursCreateResponses = {
+    201: UserWorkHours;
+};
+
+export type WorkforceUserWorkhoursCreateResponse = WorkforceUserWorkhoursCreateResponses[keyof WorkforceUserWorkhoursCreateResponses];
+
+export type WorkforceUserWorkhoursDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user work hours.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-workhours/{id}/';
+};
+
+export type WorkforceUserWorkhoursDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type WorkforceUserWorkhoursDestroyResponse = WorkforceUserWorkhoursDestroyResponses[keyof WorkforceUserWorkhoursDestroyResponses];
+
+export type WorkforceUserWorkhoursRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this user work hours.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-workhours/{id}/';
+};
+
+export type WorkforceUserWorkhoursRetrieveResponses = {
+    200: UserWorkHours;
+};
+
+export type WorkforceUserWorkhoursRetrieveResponse = WorkforceUserWorkhoursRetrieveResponses[keyof WorkforceUserWorkhoursRetrieveResponses];
+
+export type WorkforceUserWorkhoursPartialUpdateData = {
+    body?: PatchedUserWorkHoursRequest;
+    path: {
+        /**
+         * A unique integer value identifying this user work hours.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workforce/user-workhours/{id}/';
+};
+
+export type WorkforceUserWorkhoursPartialUpdateResponses = {
+    200: UserWorkHours;
+};
+
+export type WorkforceUserWorkhoursPartialUpdateResponse = WorkforceUserWorkhoursPartialUpdateResponses[keyof WorkforceUserWorkhoursPartialUpdateResponses];
+
+export type WorkforceUserWorkhoursListTotalsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/workforce/user-workhours/list_totals/';
+};
+
+export type WorkforceUserWorkhoursListTotalsRetrieveResponses = {
+    200: UserWorkHoursListTotalsResponse;
+};
+
+export type WorkforceUserWorkhoursListTotalsRetrieveResponse = WorkforceUserWorkhoursListTotalsRetrieveResponses[keyof WorkforceUserWorkhoursListTotalsRetrieveResponses];
