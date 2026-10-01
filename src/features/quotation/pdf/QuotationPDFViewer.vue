@@ -68,9 +68,7 @@
 
 <script setup lang="ts">
 import { decodePdfError, downloadBlob, type PdfBlobError } from '@/features/shared'
-
-/** What the viewer reads off a quotation: the list, view and form records all carry it. */
-export type ViewerQuotation = Pick<Api.Quotation, 'id' | 'quotation_id' | 'preliminary' | 'definitive_pdf_filename'>
+import type { ViewerQuotation } from './viewer-quotation'
 
 const props = withDefaults(defineProps<{
   quotation: ViewerQuotation
