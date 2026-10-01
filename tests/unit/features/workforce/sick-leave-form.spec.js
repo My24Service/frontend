@@ -4,6 +4,7 @@ import { vUserSelectRow, vUserSickLeave } from '@/api/valibot.gen'
 import { SickLeaveForm } from '@/features/workforce'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { datePickerStub, pick } from '../../support/date-picker-stub.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
@@ -18,12 +19,6 @@ const multiselectStub = {
   props: ['options', 'modelValue'],
   emits: ['select', 'search-change'],
   template: '<div class="multiselect-stub" />',
-}
-
-const datePickerStub = {
-  props: ['modelValue'],
-  emits: ['update:modelValue'],
-  template: '<div class="datepicker-stub" />',
 }
 
 function sickLeave(overrides = {}) {
@@ -97,6 +92,19 @@ describe('SickLeaveForm create', () => {
     ])
     expect(bodies()).toContain('Leave has been created')
     expect(routerGo()).toHaveBeenCalled()
+  })
+
+  test('posts the day that was picked', async () => {
+    const wrapper = mountSick()
+    await settle()
+
+    await pickUser(wrapper)
+    pick(wrapper.findComponent(datePickerStub), new Date(2026, 2, 10, 12))
+    await submit(wrapper)
+    await settle()
+
+    const post = api.requests().find((request) => request.method === 'post')
+    expect(post.body).toEqual({user: 7, start_date: '2026-03-10'})
   })
 
   test('a submit without a user is refused', async () => {

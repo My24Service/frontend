@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import moment from 'moment'
-import { format } from 'date-fns'
 import { vLeaveHoursTotals, vLeaveType, vUserLeaveHours, vUserSelectRow } from '@/api/valibot.gen'
 import { LeaveForm } from '@/features/workforce'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { datePickerStub, pick } from '../../support/date-picker-stub.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
@@ -21,21 +21,6 @@ const multiselectStub = {
   props: ['options', 'modelValue'],
   emits: ['select', 'search-change'],
   template: '<div class="multiselect-stub" />',
-}
-
-const datePickerStub = {
-  props: ['modelValue', 'modelType'],
-  emits: ['update:modelValue'],
-  template: '<div class="datepicker-stub" />',
-}
-
-/**
- * A pick as the real `@vuepic/vue-datepicker` emits it: the Date itself, unless
- * `model-type` asks for that format instead.
- */
-function pick(picker, date) {
-  const {modelType} = picker.props()
-  picker.vm.$emit('update:modelValue', modelType ? format(date, modelType) : date)
 }
 
 function leaveType(overrides = {}) {
