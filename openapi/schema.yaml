@@ -6934,6 +6934,74 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/invoice/invoice-line/invoice/{invoice_id}/:
+    post:
+      operationId: invoice_invoice_line_invoice_create
+      description: Replace the lines of one invoice
+      parameters:
+      - in: path
+        name: invoice_id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - invoice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/InvoiceLineRowRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/InvoiceLineRowRequest'
+          multipart/form-data:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/InvoiceLineRowRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvoiceLine'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
   /api/invoice/invoice-status/:
     post:
       operationId: invoice_invoice_status_create
@@ -27631,6 +27699,43 @@ components:
       required:
       - amount
       - invoice
+    InvoiceLineRowRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        description:
+          type: string
+          nullable: true
+          maxLength: 255
+        amount:
+          type: string
+          minLength: 1
+          maxLength: 150
+        vat_type:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vat:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        vat_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        price_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_currency:
+          $ref: '#/components/schemas/CurrencyEnum'
+      required:
+      - amount
     InvoicePreliminaryResponse:
       type: object
       description: |-

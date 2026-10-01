@@ -4,7 +4,7 @@ import { HttpResponse } from 'msw'
 import { InvoiceLinePanel } from '@/features/invoice'
 import { vInvoiceLine, vPaginatedInvoiceLineList } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
-import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'
+import { installApiSeam, settle } from '../support/api-seam/index.js'
 import { mountForm } from '../support/form-harness.js'
 
 const api = installApiSeam()
@@ -52,20 +52,31 @@ test('renders fetched lines and reads the invoice-scoped list', async () => {
   expect(requests('get')[0].query).toEqual({ invoice: '42' })
 })
 
-test('manual entry saves decimal money and repeated save does not duplicate it', async () => {
-  api.post(base, ({ body }) => row(body))
+// The panel saves its lines as ONE replace-set - `POST invoice-line/invoice/{id}/`
+// with every line - rather than a create, update or delete per line, so a
+// failure leaves the stored set as it was instead of half written.
+const replace = '/api/invoice/invoice-line/invoice/{invoice_id}/'
+const stored = ({ body }) => body.map((line, index) => row({ ...line, id: line.id ?? 80 + index }))
+const perLineWrites = () => api.requests().filter(request => request.method !== 'get' && request.path.startsWith(base) && !request.path.startsWith(base + 'invoice/'))
+
+test('manual entry saves decimal money in one request, and a save with nothing changed sends nothing', async () => {
+  api.post(replace, stored)
   const wrapper = await mount()
   await add(wrapper)
   await save(wrapper)
   expect(wrapper.get('output').text()).toBe('Saved')
-  expect(requests('post')[0].body).toMatchObject({ invoice: 42, description: 'Labour', amount: '2', price: '10.00', total: '20.00', vat: '4.20' })
+  expect(requests('post')).toHaveLength(1)
+  expect(requests('post')[0].path).toBe('/api/invoice/invoice-line/invoice/42/')
+  expect(requests('post')[0].body).toEqual([expect.objectContaining({ description: 'Labour', amount: '2', price: '10.00', total: '20.00', vat: '4.20', price_currency: 'EUR' })])
+  expect(requests('post')[0].body[0]).not.toHaveProperty('id')
   await save(wrapper)
   expect(requests('post')).toHaveLength(1)
+  expect(perLineWrites()).toEqual([])
 })
 
-test('partial create failure retains the saved ID and retries only the unsaved line', async () => {
+test('a refused save writes nothing, so the retry sends the whole set again', async () => {
   let attempts = 0
-  api.post(base, ({ body }) => ++attempts === 2 ? HttpResponse.json({ detail: 'Unavailable' }, { status: 503 }) : row({ ...body, id: 70 + attempts }))
+  api.post(replace, (request) => ++attempts === 1 ? HttpResponse.json({ detail: 'Unavailable' }, { status: 503 }) : stored(request))
   const wrapper = await mount()
   await add(wrapper, 'First')
   await add(wrapper, 'Second')
@@ -73,18 +84,22 @@ test('partial create failure retains the saved ID and retries only the unsaved l
   expect(wrapper.get('output').text()).toBe('Failed')
   await save(wrapper)
   expect(wrapper.get('output').text()).toBe('Saved')
-  expect(requests('post').map(request => request.body.description)).toEqual(['First', 'Second', 'Second'])
+  expect(requests('post').map(request => request.body.map(line => [line.id, line.description]))).toEqual([
+    [[undefined, 'First'], [undefined, 'Second']],
+    [[undefined, 'First'], [undefined, 'Second']],
+  ])
 })
 
-test('removing a saved manual line persists a delete and never repeats it', async () => {
-  api.post(base, ({ body }) => row(body))
-  api.delete(detail, noContent())
+test('a saved line keeps the id the answer gave it, and a removed one is left out of the next set', async () => {
+  api.post(replace, stored)
   const wrapper = await mount()
-  await add(wrapper)
+  await add(wrapper, 'First')
+  await add(wrapper, 'Second')
   await save(wrapper)
   await wrapper.get('[aria-label="Remove invoice line"]').trigger('click')
   await save(wrapper)
   await save(wrapper)
-  expect(requests('delete')).toHaveLength(1)
-  expect(requests('delete')[0].path).toBe('/api/invoice/invoice-line/71/')
+  expect(requests('post')).toHaveLength(2)
+  expect(requests('post')[1].body.map(line => [line.id, line.description])).toEqual([[81, 'Second']])
+  expect(perLineWrites()).toEqual([])
 })

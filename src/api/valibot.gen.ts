@@ -1214,7 +1214,7 @@ export const vCsrfTokenResponse = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
- * Nested in: MaintenanceEquipmentRowRequest, MaterialCreate, MaterialCreateRequest, OrderCostRowRequest, QuotationCostRowRequest, QuotationLineRowRequest
+ * Nested in: InvoiceLineRowRequest, MaintenanceEquipmentRowRequest, MaterialCreate, MaterialCreateRequest, OrderCostRowRequest, QuotationCostRowRequest, +1 more
  */
 /**
  * * `USD` - USD
@@ -2431,6 +2431,7 @@ export const vFilterConditionRequest = v.object({
  *   POST /api/inventory/material/
  *   POST /api/inventory/stock-location/
  *   POST /api/inventory/supplier/
+ *   POST /api/invoice/invoice-line/invoice/{invoice_id}/
  *   POST /api/order/cost/order/{order_id}/{cost_type}/
  *   POST /api/order/order/
  *   POST /api/order/orderline/
@@ -2944,6 +2945,7 @@ export const vInvoiceInfo = v.object({
  *   GET /api/invoice/invoice-line/{id}/
  *   PATCH /api/invoice/invoice-line/{id}/
  *   POST /api/invoice/invoice-line/
+ *   POST /api/invoice/invoice-line/invoice/{invoice_id}/
  *
  * Nested in: InvoiceView, PaginatedInvoiceLineList
  */
@@ -2974,6 +2976,24 @@ export const vInvoiceLineRequest = v.object({
     vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/invoice/invoice-line/invoice/{invoice_id}/
+ */
+export const vInvoiceLineRowRequest = v.object({
+    id: v.optional(v.pipe(v.number(), v.integer())),
+    description: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    amount: v.pipe(v.string(), v.minLength(1), v.maxLength(150)),
+    vat_type: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    vat_currency: v.optional(vCurrencyEnum),
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    price_currency: v.optional(vCurrencyEnum),
+    total: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    total_currency: v.optional(vCurrencyEnum)
 });
 
 /**
@@ -4234,6 +4254,7 @@ export const vNewCustomerId = v.object({
  *   PATCH /api/customer/customer/{id}/
  *   PATCH /api/order/order/{id}/
  *   POST /api/customer/maintenance-contract/{id}/with-equipment/
+ *   POST /api/invoice/invoice-line/invoice/{invoice_id}/
  *   POST /api/order/cost/order/{order_id}/{cost_type}/
  *   POST /api/quotation/cost/quotation/{quotation_id}/{cost_type}/
  *   POST /api/quotation/quotation-line/chapter/{chapter_id}/
@@ -11484,6 +11505,7 @@ export const vUnassignTripRequestRequest = v.object({
  *   POST /api/inventory/material/
  *   POST /api/inventory/stock-location/
  *   POST /api/inventory/supplier/
+ *   POST /api/invoice/invoice-line/invoice/{invoice_id}/
  *   POST /api/order/cost/order/{order_id}/{cost_type}/
  *   POST /api/order/order/
  *   POST /api/order/orderline/
@@ -19372,6 +19394,14 @@ export const vInvoiceInvoiceLinePartialUpdatePath = v.object({
 });
 
 export const vInvoiceInvoiceLinePartialUpdateResponse = vInvoiceLine;
+
+export const vInvoiceInvoiceLineInvoiceCreateBody = v.array(vInvoiceLineRowRequest);
+
+export const vInvoiceInvoiceLineInvoiceCreatePath = v.object({
+    invoice_id: v.pipe(v.string(), v.regex(/^\d+$/))
+});
+
+export const vInvoiceInvoiceLineInvoiceCreateResponse = v.array(vInvoiceLine);
 
 export const vInvoiceInvoiceStatusCreateBody = vInvoiceStatusRequest;
 

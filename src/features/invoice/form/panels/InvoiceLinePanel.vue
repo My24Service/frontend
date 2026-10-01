@@ -143,14 +143,13 @@ const { mainStore, toast: create, queryClient } = useCommon()
 const currency = mainStore.requiredDefaultCurrency
 const defaultVat = String(mainStore.requiredInvoiceDefaultVat)
 const lines = ref<LineRow[]>([])
-const deletedIds = ref<number[]>([])
+// Stored lines removed since the last save: the next save must send the set.
+const removedSinceSave = ref(false)
 const saving = ref(false)
 const editorVersion = ref(0)
 let nextKey = 0
 const savedBodies = new Map<number, string>()
-const createLine = useMutation(Api.InvoiceInvoiceLine.create.mutation())
-const updateLine = useMutation(Api.InvoiceInvoiceLine.update.mutation())
-const deleteLine = useMutation(Api.InvoiceInvoiceLine.destroy.mutation())
+const replaceLines = useMutation(Api.InvoiceInvoiceLineInvoice.create.mutation())
 const linesQuery = useQuery(() => ({
   ...Api.InvoiceInvoiceLine.list.options({ query: { invoice: Number(props.invoicePk) } }),
   enabled: Boolean(props.invoicePk),
@@ -165,20 +164,28 @@ const editTotals = computed(() => editPrices.value.total_dinero)
 const editVat = computed(() => editPrices.value.vat_dinero)
 const hasTotalsLine = computed(() => lines.value.some(line => line.price_text === '*'))
 
-function bodyFor(line: LineRow, invoice: number): Api.InvoiceLineRequest {
+/**
+ * One line of the replace-set. A stored line keeps its id, which is what makes
+ * it an update; the invoice travels in the url. Each amount carries its
+ * currency, or the server stores it under the column's default (EUR).
+ */
+function rowFor(line: LineRow): Api.InvoiceLineRowRequest {
   return {
-    invoice,
+    ...(line.id === undefined ? {} : { id: line.id }),
     description: line.description,
     amount: String(line.amount),
     price: line.price,
     vat_type: line.vat_type,
     total: line.total,
     vat: line.vat,
+    ...(line.price_currency ? { price_currency: line.price_currency as Api.CurrencyEnum } : {}),
+    ...(line.vat_currency ? { vat_currency: line.vat_currency as Api.CurrencyEnum } : {}),
+    ...(line.total_currency ? { total_currency: line.total_currency as Api.CurrencyEnum } : {}),
   }
 }
 function hasChanges() {
-  return deletedIds.value.length > 0 || lines.value.some((line) => {
-    return line.id === undefined || savedBodies.get(line.id) !== JSON.stringify(bodyFor(line, line.invoice ?? Number(props.invoicePk)))
+  return removedSinceSave.value || lines.value.some((line) => {
+    return line.id === undefined || savedBodies.get(line.id) !== JSON.stringify(rowFor(line))
   })
 }
 watch(linesQuery.data, data => {
@@ -186,7 +193,7 @@ watch(linesQuery.data, data => {
   savedBodies.clear()
   lines.value = data.results.map(record => {
     const row: LineRow = { ...record, ...hydrateInvoicePrices(record), localKey: nextKey++, price_text: formatMoney(toDinero(record.price, record.price_currency)) }
-    savedBodies.set(record.id, JSON.stringify(bodyFor(row, record.invoice)))
+    savedBodies.set(record.id, JSON.stringify(rowFor(row)))
     return row
   })
   publishTotals()
@@ -232,7 +239,7 @@ function removeLine(localKey: number) {
   if (isLoading.value) return
   const row = lines.value.find(line => line.localKey === localKey)
   if (!row) return
-  if (row.id !== undefined) deletedIds.value.push(row.id)
+  if (row.id !== undefined) removedSinceSave.value = true
   lines.value = lines.value.filter(line => line.localKey !== localKey)
   publishTotals()
   emit('invoiceLineDeleted')
@@ -244,31 +251,28 @@ function removeInvoiceLines(type: string) {
   }
 }
 
-// Successful writes are acknowledged immediately so a later failure can be retried
-// without recreating lines or repeating completed deletions.
+/**
+ * Write the lines as one replace-set: lines with an id update, new ones are
+ * created, stored lines left out are deleted - in one server transaction, so a
+ * failure leaves the stored set untouched and a retry simply sends it again.
+ * Nothing is sent when nothing changed.
+ */
 async function saveCollection(invoiceId = Number(props.invoicePk)) {
   if (saving.value) throw new Error('Invoice lines are already being saved')
   if (!invoiceId || linesQuery.isLoading.value || linesQuery.isError.value) throw new Error('Invoice lines are not ready to save')
+  if (!hasChanges()) return
   saving.value = true
   try {
-    while (deletedIds.value.length) {
-      const id = deletedIds.value[0]
-      await deleteLine.mutateAsync({ path: { id } })
-      deletedIds.value.shift()
-      savedBodies.delete(id)
-    }
-    for (const row of lines.value) {
-      const body = bodyFor(row, invoiceId)
-      const serialized = JSON.stringify(body)
-      if (row.id === undefined) {
-        const record = await createLine.mutateAsync({ body })
-        row.id = record.id
-        row.invoice = record.invoice
-      } else if (savedBodies.get(row.id) !== serialized) {
-        await updateLine.mutateAsync({ path: { id: row.id }, body })
-      }
-      savedBodies.set(row.id, serialized)
-    }
+    const stored = await replaceLines.mutateAsync({ path: { invoice_id: String(invoiceId) }, body: lines.value.map(rowFor) })
+    // The answer is the stored set, in the order it was sent.
+    savedBodies.clear()
+    stored.forEach((record, index) => {
+      const row = lines.value[index]
+      row.id = record.id
+      row.invoice = record.invoice
+      savedBodies.set(record.id, JSON.stringify(rowFor(row)))
+    })
+    removedSinceSave.value = false
     await queryClient.invalidateQueries({ queryKey: Api.InvoiceInvoiceLine.list.options({ query: { invoice: invoiceId } }).queryKey, refetchType: 'none' })
     publishTotals()
   } finally {

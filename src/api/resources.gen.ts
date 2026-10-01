@@ -303,6 +303,7 @@ import {
   invoiceInvoiceGeneratePreviewPdfCreateMutation,
   invoiceInvoiceLineCreateMutation,
   invoiceInvoiceLineDestroyMutation,
+  invoiceInvoiceLineInvoiceCreateMutation,
   invoiceInvoiceLineListOptions,
   invoiceInvoiceLineListQueryKey,
   invoiceInvoiceLinePartialUpdateMutation,
@@ -1002,6 +1003,7 @@ import {
   vInvoiceInvoiceAutocompleteListQuery,
   vInvoiceInvoiceCreateBody,
   vInvoiceInvoiceLineCreateBody,
+  vInvoiceInvoiceLineInvoiceCreateBody,
   vInvoiceInvoiceLineListQuery,
   vInvoiceInvoiceLinePartialUpdateBody,
   vInvoiceInvoiceListQuery,
@@ -3132,6 +3134,22 @@ export declare namespace InvoiceInvoiceLine {
   export type UpdateInput = InferInput<typeof vInvoiceInvoiceLinePartialUpdateBody>
   /** The `update` body, as the schema parses it. */
   export type UpdateOutput = InferOutput<typeof vInvoiceInvoiceLinePartialUpdateBody>
+}
+
+/** `api/invoice/invoice-line/invoice` */
+export const InvoiceInvoiceLineInvoice = /*#__PURE__*/ resource({
+  path: 'api/invoice/invoice-line/invoice',
+  kind: 'collection',
+  id: 'number',
+  create: {mutation: invoiceInvoiceLineInvoiceCreateMutation, body: vInvoiceInvoiceLineInvoiceCreateBody},
+  reads: [],
+})
+
+export declare namespace InvoiceInvoiceLineInvoice {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoiceInvoiceLineInvoiceCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoiceInvoiceLineInvoiceCreateBody>
 }
 
 /** `api/invoice/invoice/preliminary` */

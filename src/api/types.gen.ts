@@ -2549,6 +2549,19 @@ export type InvoiceLineRequest = {
     total?: string;
 };
 
+export type InvoiceLineRowRequest = {
+    id?: number;
+    description?: string | null;
+    amount: string;
+    vat_type?: string;
+    vat?: string;
+    vat_currency?: CurrencyEnum;
+    price?: string;
+    price_currency?: CurrencyEnum;
+    total?: string;
+    total_currency?: CurrencyEnum;
+};
+
 /**
  * the row GET invoice/invoice/preliminary/ serves one invoice as.
  *
@@ -17813,6 +17826,35 @@ export type InvoiceInvoiceLinePartialUpdateResponses = {
 };
 
 export type InvoiceInvoiceLinePartialUpdateResponse = InvoiceInvoiceLinePartialUpdateResponses[keyof InvoiceInvoiceLinePartialUpdateResponses];
+
+export type InvoiceInvoiceLineInvoiceCreateData = {
+    body: Array<InvoiceLineRowRequest>;
+    path: {
+        invoice_id: string;
+    };
+    query?: never;
+    url: '/api/invoice/invoice-line/invoice/{invoice_id}/';
+};
+
+export type InvoiceInvoiceLineInvoiceCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type InvoiceInvoiceLineInvoiceCreateError = InvoiceInvoiceLineInvoiceCreateErrors[keyof InvoiceInvoiceLineInvoiceCreateErrors];
+
+export type InvoiceInvoiceLineInvoiceCreateResponses = {
+    200: Array<InvoiceLine>;
+};
+
+export type InvoiceInvoiceLineInvoiceCreateResponse = InvoiceInvoiceLineInvoiceCreateResponses[keyof InvoiceInvoiceLineInvoiceCreateResponses];
 
 export type InvoiceInvoiceStatusCreateData = {
     body: InvoiceStatusRequest;
