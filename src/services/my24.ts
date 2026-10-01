@@ -1,12 +1,10 @@
-import type { AxiosResponse } from 'axios'
 import type {
   GetInitialDataResponse,
   LanguageVarsResponse,
   UserInfoResponse,
 } from '@/api/types.gen'
 import type { MainMemberInfo } from '@/stores/main'
-import client, {normalClient} from "@/services/api";
-import setInterceptors from '@/services/auth/clientDriver'
+import client from "@/services/api";
 
 /**
  * The get-initial-data answer as the main store consumes it. `memberInfo`
@@ -76,35 +74,6 @@ class My24 {
     if (!results) return null;
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
-  }
-
-  downloadItem(url: string, name: string, callback?: () => void, requestMethod = 'get'): void {
-    const headers: { responseType: 'blob' } = { responseType: 'blob' }
-    let blobClient: Promise<AxiosResponse<Blob>>;
-
-    if (requestMethod === 'post') {
-      setInterceptors(normalClient)
-      blobClient = normalClient.post<Blob>(url, {}, headers)
-    } else {
-      blobClient = normalClient.get<Blob>(url, headers)
-    }
-
-    blobClient
-      .then((response) => {
-        const blob = new Blob([response.data], { type: response.data.type });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = name;
-        link.click();
-        URL.revokeObjectURL(link.href);
-        link.remove()
-      })
-      .catch(console.error)
-      .finally(function () {
-        if (callback) {
-          callback()
-        }
-      });
   }
 
   status2color(statuscodes: StatuscodeLike[], status: string | StatuscodeLike | null | undefined, text_color = false): string {

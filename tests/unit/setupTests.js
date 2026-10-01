@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, expect, vi } from 'vitest'
 import { config, disableAutoUnmount, enableAutoUnmount } from '@vue/test-utils'
 
 import { client as generatedClient } from '@/api/client.gen'
-import legacyClient, { normalClient } from '@/services/api'
+import legacyClient from '@/services/api'
 import { inputDelays } from '@/services/input-delays'
 
 import { toastCreate } from './support/toast.js'
@@ -109,7 +109,7 @@ globalThis.$trans = (text) => text
 // Keyed by instance, first sight wins: an isolated spec file has fresh clients,
 // and a shared worker sees each one first while it is still untouched.
 const realAdapters = (globalThis.__my24RealAdapters ??= new WeakMap())
-const httpClients = [generatedClient.instance, legacyClient, normalClient]
+const httpClients = [generatedClient.instance, legacyClient]
 for (const client of httpClients) {
   if (!realAdapters.has(client)) realAdapters.set(client, client.defaults.adapter)
 }
