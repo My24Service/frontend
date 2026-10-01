@@ -15,10 +15,9 @@ import { stubSocket } from '../support/sockets.js'
  * `onMounted` registers a handler on each one and connects it, but `onUnmounted`
  * used to tear down only the member-new-data socket it creates for itself - the
  * two module singletons (`userSocket`, `memberSocket`) kept the unmounted
- * component's handler, and with it its closures, alive. Removing the handler
- * alone is not enough either: `BaseSocket._onMessageMethod` calls
- * `onmessageHandler` without checking it, so the socket has to be closed in the
- * same breath, which is what `TheNavLoggedIn.doLogout` already does.
+ * component's handler, and with it its closures, alive. Each socket is closed
+ * in the same breath, so it stops reconnecting for a listener that is gone -
+ * which is what `TheNavLoggedIn.doLogout` already does.
  */
 
 // One recorder per socket. The member-new-data socket is constructed by the
