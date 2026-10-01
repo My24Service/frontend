@@ -219,11 +219,11 @@ export function parseLeave(values: LeaveFormValues, context: WriteContext) {
 /**
  * The body of the totals probe: the window alone.
  *
- * The endpoint validates with the no-planning body and overwrites `user` with
- * the requesting user, so the picker's value has no business on this request -
- * which is also why an unpicked leave type is left out rather than sent as the
- * empty string the legacy screen posted (a body its own schema rejects; the
- * ledger records it).
+ * The endpoint validates with the no-planning body and ignores a `user` in it:
+ * the user the totals are for rides as the `?user=` query param instead, so
+ * the picker's value has no business on this body. An unpicked leave type is
+ * left out rather than sent as the empty string the legacy screen posted (a
+ * body its own schema rejects; the ledger records it).
  */
 export function leaveProbeBody(values: LeaveFormValues) {
   const body = windowBody(values)

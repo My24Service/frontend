@@ -4,6 +4,9 @@
     <p class="text-muted small">
       {{ $trans('With a date field, this action does not run when the status is set. Instead it runs once, on the first morning the date falls in this window, for every record that has had this status at any time.') }}
     </p>
+    <p class="text-muted small">
+      {{ $trans('The number of days counts from today to the date: positive while the date is ahead, negative once it has passed. "Start date <= 14" runs once the start date is two weeks away or less; "Definitive date <= -14" once the definitive date is 14 or more days ago.') }}
+    </p>
     <b-row>
       <b-col cols="4" role="group">
         <BFormGroup label-size="sm" :label="$trans('field')" label-for="action_num_days_model_field">

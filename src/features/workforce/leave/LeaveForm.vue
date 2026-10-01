@@ -330,15 +330,20 @@ const probing = ref(false)
 
 /**
  * Ask the endpoint what the window adds up to and print its answer. Fired on
- * mount and whenever the window changes - the legacy probe fired from a date
- * widget's `input` event and from the two time inputs, so a changed whole-day
- * flag or a newly picked leave type left the number stale.
+ * mount and whenever the window or the user changes - the legacy probe fired
+ * from a date widget's `input` event and from the two time inputs, so a changed
+ * whole-day flag or a newly picked leave type left the number stale.
+ *
+ * The picked user rides as `?user=`: without it the endpoint previews the
+ * requesting planner's own contract hours. Before a pick there is no one else
+ * to ask about.
  */
 async function probeTotals(): Promise<void> {
   probing.value = true
   try {
     const {data, error} = await workforceUserLeaveHoursAdminGetTotalsCreate({
       body: leaveProbeBody(values.value),
+      query: values.value.user === null ? undefined : {user: values.value.user},
     })
     if (error || !data) throw new Error('leave totals probe failed')
     const totals = data.result
@@ -353,6 +358,7 @@ async function probeTotals(): Promise<void> {
 
 watch(
   () => [
+    values.value.user,
     values.value.start_date,
     values.value.end_date,
     values.value.start_date_is_whole_day,

@@ -80,6 +80,13 @@ describe('parseAction', () => {
     expect(body).toMatchObject({ num_days: 14, num_days_operator: '<=', num_days_model_field: 'start_date' })
   })
 
+  test('carries a negative number of days, a window after the date', () => {
+    const values = { ...valid, num_days: '-14', num_days_operator: '<=', num_days_model_field: 'definitive_date' }
+
+    expect(validateAction(values)).toEqual({})
+    expect(parseAction(values, { isCreate: true, statuscodePk: '3' })).toMatchObject({ num_days: -14 })
+  })
+
   test('without a date field sends no days either', () => {
     const body = parseAction(
       { ...valid, num_days: '14', num_days_model_field: '' },

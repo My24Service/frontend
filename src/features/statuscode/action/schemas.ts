@@ -18,6 +18,8 @@ export type ActionCondition = NonNullable<WireValues['json_conditions']>[number]
  * when its statuscode is set; the backend's daily task runs it once for every
  * record that has the statuscode anywhere in its history and whose date is in
  * the window ("`start_date` `<=` 14": a reminder two weeks before the job).
+ * The days count from today to the date, so a negative number is a window
+ * after it ("`definitive_date` `<=` -14": 14 or more days ago).
  * The date fields the backend accepts, per code type; other types have none.
  */
 export const DATE_TRIGGER_FIELDS: Partial<Record<CodeType, readonly string[]>> = {

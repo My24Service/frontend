@@ -121,12 +121,25 @@ describe('LeaveForm create', () => {
         },
       },
       {method: 'get', path: '/api/user/user-list/', query: {q: 'jansen'}},
+      // Picking a user re-probes for that user: the totals come from their
+      // contract hours, not the planner's.
+      {
+        method: 'post',
+        path: resource + 'get_totals/',
+        query: {user: '7'},
+        body: {
+          start_date: TODAY,
+          end_date: TODAY,
+          start_date_is_whole_day: true,
+          end_date_is_whole_day: true,
+        },
+      },
       // Picking a leave type re-probes: the legacy probe never did, so its
       // number stayed stale until a date or a time was touched.
       {
         method: 'post',
         path: resource + 'get_totals/',
-        query: {},
+        query: {user: '7'},
         body: {
           start_date: TODAY,
           end_date: TODAY,
@@ -231,11 +244,11 @@ describe('LeaveForm edit', () => {
         },
       },
       {method: 'get', path: resource + '5/', query: {}},
-      // The record's own window, once it lands.
+      // The record's own window, for the record's user, once it lands.
       {
         method: 'post',
         path: resource + 'get_totals/',
-        query: {},
+        query: {user: '7'},
         body: {
           start_date: '2026-02-01',
           end_date: '2026-02-02',
