@@ -183,6 +183,69 @@ function scanGeneratedClient(ops, identifiers) {
   return used
 }
 
+/**
+ * The generated resources (`src/api/resources.gen.ts`): each names its verbs
+ * and extras by the SDK wrapper they call, e.g.
+ * `create: {mutation: invoiceInvoiceLineCreateMutation, ...}`.
+ * @returns {Map<string, {verbs: Map<string, string[]>, extras: Map<string, string[]>}>}
+ */
+function loadResources() {
+  const text = readFileSync(join(SRC, 'api/resources.gen.ts'), 'utf8')
+  const resources = new Map()
+  for (const m of text.matchAll(/export const (\w+) = \/\*#__PURE__\*\/ resource\(\{([\s\S]*?)\n\}\)/g)) {
+    const [, name, body] = m
+    const verbs = new Map()
+    const extras = new Map()
+    const extrasBlock = body.match(/\n {2}extras: \{([\s\S]*?)\n {2}\},/)
+    const fns = (s) => [...s.matchAll(/\b(?:options|mutation|queryKey):\s*(\w+)/g)].map((f) => f[1])
+    if (extrasBlock) {
+      for (const e of extrasBlock[1].matchAll(/^\s{4}(\w+): \{([^}]*)\}/gm)) extras.set(e[1], fns(e[2]))
+    }
+    const rest = extrasBlock ? body.replace(extrasBlock[0], '') : body
+    for (const v of rest.matchAll(/^\s{2}(\w+): \{([^}]*)\}/gm)) {
+      const found = fns(v[2])
+      if (found.length) verbs.set(v[1], found)
+    }
+    resources.set(name, { verbs, extras })
+  }
+  return resources
+}
+
+/**
+ * Calls through the `Api` namespace: `Api.X.verb` and `Api.X.extras.name`
+ * credit that operation; a bare `Api.X` (a resource handed to the form or
+ * table kit, which picks its verbs) credits every operation of the resource -
+ * an over-approximation, like the mobile scan's.
+ */
+function scanResources(ops, webFiles) {
+  const resources = loadResources()
+  const byWrapper = new Map()
+  for (const [key, op] of ops) {
+    if (op.operationId) for (const s of WRAPPER_SUFFIXES) byWrapper.set(op.operationId + s, key)
+  }
+  const used = new Map()
+  const credit = (fnNames, label) => {
+    for (const fn of fnNames) {
+      const key = byWrapper.get(fn)
+      if (key) used.set(key, [...new Set([...(used.get(key) ?? []), label])])
+    }
+  }
+  for (const f of webFiles) {
+    const text = readFileSync(f, 'utf8')
+    for (const m of text.matchAll(/\bApi\.(\w+)(?:\.(\w+)(?:\.(\w+))?)?/g)) {
+      const [, name, member, extra] = m
+      const resource = resources.get(name)
+      if (!resource) continue
+      if (member === 'extras' && extra) credit(resource.extras.get(extra) ?? [], `api:${name}.extras.${extra}`)
+      else if (member && resource.verbs.has(member)) credit(resource.verbs.get(member), `api:${name}.${member}`)
+      else if (!member || !['extras', 'invalidate', 'reads', 'path'].includes(member)) {
+        credit([...resource.verbs.values(), ...resource.extras.values()].flat(), `api:${name}`)
+      }
+    }
+  }
+  return used
+}
+
 // ---------------------------------------------------------------------------
 // Web: legacy service classes under src/models
 // ---------------------------------------------------------------------------
@@ -476,13 +539,14 @@ function main() {
   const webFiles = webSourceFiles()
   const identifiers = collectIdentifiers(webFiles)
   const sdkUsed = scanGeneratedClient(ops, identifiers)
+  const resourceUsed = scanResources(ops, webFiles)
   const { used: legacyUsed, report: legacyReport } = scanLegacyServices(ops, webFiles)
   const { used: rawUsed, outside } = scanRawLiterals(ops, webFiles)
   const mobile = loadMobilePaths(args)
   const mobileUsed = matchMobile(ops, mobile.paths)
 
   const callers = new Map()
-  for (const m of [sdkUsed, legacyUsed, rawUsed, mobileUsed]) {
+  for (const m of [sdkUsed, resourceUsed, legacyUsed, rawUsed, mobileUsed]) {
     for (const [k, v] of m) callers.set(k, [...new Set([...(callers.get(k) ?? []), ...v])])
   }
 
