@@ -441,54 +441,55 @@ export default {
       await this.loadData()
       loader.hide()
     },
+    /** Each settings update answers with the piece of the config it changed. */
+    mergeSettings(fragment) {
+      this.settings.json_data = {...this.settings.json_data, ...fragment}
+    },
     async updateInvoiceDocumentTemplateSetting(item) {
       let loader = this.loading.show();
-      // TODO use response and lose the loadData()
-      await this.service.updateInvoiceDocumentTemplateSetting(item.id, item.name)
-      loader.hide()
-      await this.loadData()
+      try {
+        this.mergeSettings(await this.service.updateInvoiceDocumentTemplateSetting(item.id, item.name))
+      } finally {
+        loader.hide()
+      }
     },
     async updateDepartmentSetting(item) {
       let loader = this.loading.show();
-      // TODO use response and lose the loadData()
-      await this.service.updateDepartmentSetting(item.id, item.name)
-      loader.hide()
+      try {
+        this.mergeSettings(await this.service.updateDepartmentSetting(item.id, item.name))
+      } finally {
+        loader.hide()
+      }
     },
     async updateHoursProduct(item) {
       let loader = this.loading.show();
       try {
-        if (this.hoursProductTypeIsWork) {
-          const workHoursSettings = await this.service.updateWorkHoursProduct(item.id, item.name)
-          this.settings.json_data = {
-            ...this.settings.json_data,
-            ...workHoursSettings
-          }
-        } else {
-          const travelHoursSettings = await this.service.updateTravelHoursProduct(item.id, item.name)
-          this.settings.json_data = {
-            ...this.settings.json_data,
-            ...travelHoursSettings
-          }
-        }
-        loader.hide()
+        this.mergeSettings(this.hoursProductTypeIsWork
+          ? await this.service.updateWorkHoursProduct(item.id, item.name)
+          : await this.service.updateTravelHoursProduct(item.id, item.name))
       } catch (e) {
         console.error('update hours error', e)
+      } finally {
         loader.hide()
       }
     },
     async updateEnabled() {
       let loader = this.loading.show();
-      // TODO use response to update settings and lose the loadData()
-      await this.service.updateEnabled(this.settings.api_enabled)
-      loader.hide()
-      await this.loadData()
+      try {
+        // Not part of json_data: the flag sits on the config itself.
+        const {api_enabled} = await this.service.updateEnabled(this.settings.api_enabled)
+        this.settings.api_enabled = api_enabled
+      } finally {
+        loader.hide()
+      }
     },
     async updateProductCategory() {
       let loader = this.loading.show()
-      // TODO use response and lose the loadData()
-      await this.service.updateProductCategory(this.settings.json_data.product_category_uuid)
-      loader.hide()
-      await this.loadData()
+      try {
+        this.mergeSettings(await this.service.updateProductCategory(this.settings.json_data.product_category_uuid))
+      } finally {
+        loader.hide()
+      }
     },
     async resetTaxRates() {
       let loader = this.loading.show();
