@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import api from '@/services/api'
-import BaseSocket, { forgetSocketRooms } from '@/services/websocket/BaseSocket.js'
+import BaseSocket from '@/services/websocket/BaseSocket.js'
+import { forgetSocketRooms } from '@/services/websocket/rooms'
 
 // The room request goes through the shared legacy client; spied per test
 // below rather than mocking the module, so this spec shares a worker.

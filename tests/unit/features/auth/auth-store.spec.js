@@ -8,7 +8,7 @@ import {
 } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
 import axios from '@/services/api'
-import BaseSocket, { forgetSocketRooms } from '@/services/websocket/BaseSocket.js'
+import { forgetSocketRooms, getRoom } from '@/services/websocket/rooms'
 
 /**
  * Behaviour characterisation for the session lifecycle.
@@ -123,16 +123,15 @@ describe('auth store logout', () => {
     // The room cache is module state; start from an empty one.
     forgetSocketRooms()
     const roomRequest = vi.spyOn(axios, 'get').mockResolvedValue({ data: { room: 'room-jan' } })
-    const socket = new BaseSocket()
 
-    await socket._getRoom('/get-user-room/')
-    await socket._getRoom('/get-user-room/')
+    await getRoom('/get-user-room/')
+    await getRoom('/get-user-room/')
     expect(roomRequest).toHaveBeenCalledTimes(1)
 
     useAuthStore().logout()
 
     // The next user's socket asks for its own room instead of reusing this one.
-    await socket._getRoom('/get-user-room/')
+    await getRoom('/get-user-room/')
     expect(roomRequest).toHaveBeenCalledTimes(2)
   })
 })

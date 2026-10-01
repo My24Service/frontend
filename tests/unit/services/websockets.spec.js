@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import api from '@/services/api'
-import { forgetSocketRooms } from '@/services/websocket/BaseSocket.js'
+import { forgetSocketRooms } from '@/services/websocket/rooms'
 import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 import memberSocket from '@/services/websocket/MemberSocket'
 import userSocket from '@/services/websocket/UserSocket'

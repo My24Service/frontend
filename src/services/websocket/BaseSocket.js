@@ -1,24 +1,10 @@
 import axios from '@/services/api'
+import { getRoom } from '@/services/websocket/rooms'
 
 let BASE_URL = document.location.host
 
 if (document.location.port !== '') {
   BASE_URL = BASE_URL.replace('3000', '8000')
-}
-
-/**
- * The rooms asked for this session, by endpoint.
- *
- * A room is the secret a channel is addressed by, and the user room belongs to
- * one user, so the cache lives in memory and is dropped on logout
- * (`forgetSocketRooms`). It used to live in localStorage under a key naming only
- * the endpoint, which handed the next user on the browser the previous one's
- * room.
- */
-const rooms = new Map()
-
-export function forgetSocketRooms() {
-  rooms.clear()
 }
 
 class BaseSocket {
@@ -63,25 +49,8 @@ class BaseSocket {
     this.socket = null
   }
 
-  async _getRoom(url) {
-    if (rooms.has(url)) {
-      return rooms.get(url)
-    }
-
-    const response = await axios.get(url)
-    if (response) {
-      const result = response.data
-      if (this.debug) {
-        console.log(`${this.name}: got room from backend: ${result.room}`)
-      }
-      if (result.room) {
-        rooms.set(url, result.room)
-      }
-
-      return result.room
-    } else {
-      console.log(`no valid response for ${url}`)
-    }
+  _getRoom(url) {
+    return getRoom(url)
   }
 
   _getMemberRoom() {
