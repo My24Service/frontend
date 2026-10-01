@@ -1,25 +1,9 @@
-import BaseSocket from '@/services/websocket/BaseSocket.js'
-
+import { RoomSocket, anyMessage } from '@/services/websocket/RoomSocket'
 
 // notifications to user
-class UserSocket extends BaseSocket {
-  name = 'UserSocket'
-  room: string | null = null
-  socket: WebSocket | null = null
-  onmessageHandler: ((data: unknown) => void) | null = null
-
-  async init() {
-    const room: unknown = await this._getRoom('/get-user-room/')
-    this.room = typeof room === 'string' ? room : null
-    if (this.debug) {
-      console.log(`${this.name}: received room: ${this.room}`)
-    }
-  }
-
-  _getWsUrl() {
-    return `${this.protocol}://${this.host}/ws/notifications-user/${this.room}/`
-  }
-
-}
-
-export default new UserSocket()
+export default new RoomSocket({
+  name: 'UserSocket',
+  roomUrl: '/get-user-room/',
+  channel: 'notifications-user',
+  readMessage: anyMessage,
+})

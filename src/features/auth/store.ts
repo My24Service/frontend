@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 
 import { jwtTokenCreate, jwtTokenRefreshCreate } from '@/api/sdk.gen'
 
-import { forgetSocketRooms } from '@/services/websocket/BaseSocket.js'
+import { forgetSocketRooms } from '@/services/websocket/rooms'
 
 import { useAuthToken } from './token'
 
