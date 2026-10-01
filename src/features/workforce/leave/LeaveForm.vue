@@ -125,6 +125,7 @@
               <VueDatePicker
                 id="start_date"
                 v-model="values.start_date"
+                model-type="yyyy-MM-dd"
                 :placeholder="$trans('Select date')"
                 :locale="nl"
                 auto-apply
@@ -172,6 +173,7 @@
               <VueDatePicker
                 id="end_date"
                 v-model="values.end_date"
+                model-type="yyyy-MM-dd"
                 :placeholder="$trans('Select date')"
                 :locale="nl"
                 auto-apply

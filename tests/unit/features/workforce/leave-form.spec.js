@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import moment from 'moment'
+import { format } from 'date-fns'
 import { vLeaveHoursTotals, vLeaveType, vUserLeaveHours, vUserSelectRow } from '@/api/valibot.gen'
 import { LeaveForm } from '@/features/workforce'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
@@ -23,9 +24,18 @@ const multiselectStub = {
 }
 
 const datePickerStub = {
-  props: ['modelValue'],
+  props: ['modelValue', 'modelType'],
   emits: ['update:modelValue'],
   template: '<div class="datepicker-stub" />',
+}
+
+/**
+ * A pick as the real `@vuepic/vue-datepicker` emits it: the Date itself, unless
+ * `model-type` asks for that format instead.
+ */
+function pick(picker, date) {
+  const {modelType} = picker.props()
+  picker.vm.$emit('update:modelValue', modelType ? format(date, modelType) : date)
 }
 
 function leaveType(overrides = {}) {
@@ -215,8 +225,8 @@ describe('LeaveForm create', () => {
     await pickUser(wrapper)
     await wrapper.get('#leave_type').setValue('3')
     const [start, end] = wrapper.findAllComponents(datePickerStub)
-    start.vm.$emit('update:modelValue', '2026-03-10')
-    end.vm.$emit('update:modelValue', '2026-03-09')
+    pick(start, new Date(2026, 2, 10, 12))
+    pick(end, new Date(2026, 2, 9, 12))
     await submit(wrapper)
     await settle()
 
@@ -231,8 +241,8 @@ describe('LeaveForm create', () => {
     await pickUser(wrapper)
     await wrapper.get('#leave_type').setValue('3')
     const [start, end] = wrapper.findAllComponents(datePickerStub)
-    start.vm.$emit('update:modelValue', '2026-03-10')
-    end.vm.$emit('update:modelValue', '2026-03-10')
+    pick(start, new Date(2026, 2, 10, 12))
+    pick(end, new Date(2026, 2, 10, 12))
     await submit(wrapper)
     await settle()
 
