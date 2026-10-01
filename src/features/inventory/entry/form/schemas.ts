@@ -35,6 +35,15 @@ export type EntryValues = Omit<
   stock_location_name: string
 }
 
+/**
+ * A staged row of a create: an entry the row check let through, so it has its
+ * product and its date. The editor composing one holds `EntryValues`.
+ */
+export type EntryRow = Omit<EntryValues, 'purchase_order_material' | 'entry_date'> & {
+  purchase_order_material: number
+  entry_date: Date
+}
+
 export type EntryFieldErrors = FieldErrors<keyof EntryValues>
 
 /** A blank entry, dated today: no product, no amount and no location yet. */
@@ -77,11 +86,12 @@ export function entryFromRecord(record: Api.InventoryPurchaseorderEntry.Record):
 }
 
 /** One staged entry per ordered material: the whole ordered amount, dated today. */
-export function entryForMaterial(material: Api.PurchaseOrderMaterial, purchaseOrder: number): EntryValues {
+export function entryForMaterial(material: Api.PurchaseOrderMaterial, purchaseOrder: number): EntryRow {
   return {
     ...emptyEntry(),
     purchase_order: purchaseOrder,
     purchase_order_material: material.id,
+    entry_date: new Date(),
     material_name: material.material_view.name ?? '',
     unit: material.material_view.unit ?? '',
     ordered_amount: material.amount ?? 0,
@@ -137,7 +147,7 @@ export function entryErrors(values: EntryValues): EntryFieldErrors {
  * The bulk endpoint's body: a bare list, one object per staged row, in one
  * atomic request. Only the keys the request declares are sent.
  */
-export function parseEntryRows(rows: readonly EntryValues[]) {
+export function parseEntryRows(rows: readonly EntryRow[]) {
   return v.parse(Api.InventoryPurchaseorderEntryBulk.create.body, rows.map(shaped))
 }
 

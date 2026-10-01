@@ -4,8 +4,20 @@ import {
   entryErrors,
   entryForMaterial,
   parseEntryRows,
+  type EntryRow,
   type EntryValues,
 } from './schemas'
+
+/**
+ * A draft the editor let through, as a staged row. `addRow` and `commitEdit`
+ * commit only a valid draft, and a valid draft has its product and its date;
+ * a throw here is a bug in that check, not a row to leave out.
+ */
+function committed(draft: EntryValues): EntryRow {
+  const {purchase_order_material: product, entry_date: date} = draft
+  if (product === null || date === null) throw new Error('An entry needs a product and a date before it is staged')
+  return {...draft, purchase_order_material: product, entry_date: date}
+}
 
 /**
  * The create form's staged entries. Receiving a purchase order means booking
@@ -37,18 +49,17 @@ export function useEntryRows(stockLocations: () => readonly Api.StockLocation[])
   const locationName = (id: number | null) => stockLocations().find((location) => location.id === id)?.name ?? ''
 
   /** A row as it lands: on the default location, once one is chosen. */
-  function located(entry: EntryValues): EntryValues {
+  function located<T extends EntryValues>(entry: T): T {
     const id = defaultLocation.value
     return id === null ? entry : {...entry, stock_location: id, stock_location_name: locationName(id)}
   }
 
   // The set and the row being composed ---------------------------------------
 
-  // `useStagedRows` replays rows that carry an `id`; entries ride the bulk
-  // body instead and have none, so the slot satisfies the constraint
-  // structurally without growing one.
-  const staged = useStagedRows<EntryValues & {id?: number}>(
+  // The rows ride the bulk body, so the kit's `replay` and `deletedIds` go unused.
+  const staged = useStagedRows(
     () => located({...emptyEntry(), purchase_order: selectedOrder.value?.id ?? null}),
+    committed,
   )
   const {rows, rowEdit: draft, editingIndex, isEditing} = staged
 
