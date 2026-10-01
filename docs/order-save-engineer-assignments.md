@@ -1,6 +1,7 @@
 # Order save: engineer assignments in one request
 
-Status: proposed, not started. Written 2026-09-23 so a later session can pick
+Status: proposed, not started. Written 2026-09-23, checked against the code
+2026-10-01 so a later session can pick
 it up cold. Paths are relative to each repo: `frontend/` (this repo) and
 `my24service/` (the Django backend, `../my24service`).
 
@@ -41,13 +42,16 @@ Assigning is not only a row write. Side effects fire *immediately*, not on
 commit:
 
 - `my24service/source/apps/user/models.py:48` `assign_order` calls
-  `order.set_status(...)` (`apps/order/models/order.py:165`,
+  `order.set_status(...)` (`apps/order/models/order.py:169`,
   `apps/core/models.py:331`), whose `save()` calls `execute_ttsa()` right away
   (`apps/core/models.py:289`) - the statuscode engine: mails, ICS invites,
   transaction logging.
 - `apps/mobile/views.py:44` `AssignUserView` sends a websocket notification
   per order (`notify_user`) and a `dispatch` new-data message.
-- There is no `transaction.on_commit` anywhere in the backend.
+- Only the order's own update actions wait for the commit (since `c5ea655a`,
+  `Order.save()` and `OrderLine.save()` enqueue them via
+  `transaction.on_commit`). Status side effects and the assign notifications
+  above still do not.
 
 So wrapping these in `transaction.atomic` does not make them atomic: a rollback
 after the fact leaves mails sent and engineers notified about an assignment
@@ -56,7 +60,7 @@ that no longer exists. Today's separate requests are clumsy but truthful.
 The proposal:
 
 1. **Backend**: a replace-set endpoint for an order's engineers, shaped like
-   `CostViewset.replace_for_quotation` (`apps/quotation/views.py:452`,
+   `CostViewset.replace_for_quotation` (`apps/quotation/views.py:458`,
    `CostReplaceSetSerializer` in `apps/quotation/serializers.py`): the body is
    the full list of user ids; absent users are unassigned, new ones assigned.
    - **Validate everything before writing anything.** The realistic refusal is
@@ -70,7 +74,7 @@ The proposal:
      already mirrors `AssignUserView` for one order.
    - Regenerate the schema (see memory / `docs/typescript-codegen.md` in the
      backend: `generate_schema --include-internal --tenant riedel`, then
-     `npm run codegen` here).
+     `pnpm run codegen` here).
 2. **Frontend**: `use-engineer-assignment.ts` `replay` becomes one mutation;
    the per-engineer loop and its partial-failure bookkeeping go. The
    `UnassignRefused` handling in `OrderForm.vue` (`reasonOf`) maps onto the 400.
@@ -79,7 +83,8 @@ The proposal:
 ### Later, only if wanted: fold engineers into the order save
 
 That is safe only once status side effects wait for the commit, i.e.
-`execute_ttsa()` and the websocket sends go through `transaction.on_commit`.
+`execute_ttsa()` and the websocket sends go through `transaction.on_commit`
+the way the order update actions already do.
 That touches the whole statuscode engine (every `set_status` caller), not this
 form, so it is its own decision and its own change.
 
