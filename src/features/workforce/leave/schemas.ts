@@ -182,12 +182,17 @@ function shaped(values: LeaveFormValues): Record<string, unknown> {
 }
 
 /**
- * The schema's verdict, plus the one rule it cannot hold.
+ * The schema's verdict, plus the two rules it cannot hold.
  *
  * A clock is validated by the form, not by the schema: the wire carries
  * `start_date_hours`/`start_date_minutes`, so the shape drops a time text it
  * cannot read and the parse never sees the mistake. A half-typed time on a day
  * that is not whole is refused here instead of silently riding as "no time".
+ *
+ * The backend refuses an end date before the start date with a 400; the form
+ * says so on the field first. Both dates are ISO by then (the schema checked),
+ * so they compare as text. One day is a valid window, whatever its clock says -
+ * the backend compares the dates alone too.
  */
 export function validateLeave(values: LeaveFormValues): LeaveFieldErrors {
   const errors: LeaveFieldErrors = fieldErrors(
@@ -199,6 +204,9 @@ export function validateLeave(values: LeaveFormValues): LeaveFieldErrors {
   }
   if (!values.end_date_is_whole_day && !isClockTime(values.end_time)) {
     errors.end_time = FIELD_MESSAGES.end_time()
+  }
+  if (!errors.start_date && !errors.end_date && values.end_date < values.start_date) {
+    errors.end_date = $trans('The end date cannot lie before start date')
   }
 
   return errors

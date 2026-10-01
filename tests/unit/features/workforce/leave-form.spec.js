@@ -208,6 +208,38 @@ describe('LeaveForm create', () => {
     expect(wrapper.text()).toContain('Please enter a valid start time HH:mm')
   })
 
+  test('an end date before the start date blocks the submit', async () => {
+    const wrapper = mountLeave()
+    await settle()
+
+    await pickUser(wrapper)
+    await wrapper.get('#leave_type').setValue('3')
+    const [start, end] = wrapper.findAllComponents(datePickerStub)
+    start.vm.$emit('update:modelValue', '2026-03-10')
+    end.vm.$emit('update:modelValue', '2026-03-09')
+    await submit(wrapper)
+    await settle()
+
+    expect(api.requests().filter((request) => request.method === 'post' && request.path === resource)).toHaveLength(0)
+    expect(wrapper.text()).toContain('The end date cannot lie before start date')
+  })
+
+  test('a leave that starts and ends on one day is accepted', async () => {
+    const wrapper = mountLeave()
+    await settle()
+
+    await pickUser(wrapper)
+    await wrapper.get('#leave_type').setValue('3')
+    const [start, end] = wrapper.findAllComponents(datePickerStub)
+    start.vm.$emit('update:modelValue', '2026-03-10')
+    end.vm.$emit('update:modelValue', '2026-03-10')
+    await submit(wrapper)
+    await settle()
+
+    const post = api.requests().find((request) => request.method === 'post' && request.path === resource)
+    expect(post.body).toMatchObject({start_date: '2026-03-10', end_date: '2026-03-10'})
+  })
+
   test('a failed create tells the user', async () => {
     api.post(resource, serverError)
     const wrapper = mountLeave()
