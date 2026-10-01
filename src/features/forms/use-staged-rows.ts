@@ -5,21 +5,23 @@ export interface StagedRows<TRow extends {id?: number}, TDraft = TRow> {
   rowEdit: Ref<TDraft>
   editingIndex: Ref<number | null>
   isEditing: ComputedRef<boolean>
+  // Function-typed properties rather than methods: they are closures with no
+  // `this`, and callers destructure them.
   /** Replace the staged set with the record's rows (a load or a discard). */
-  seed(loaded: TRow[]): void
-  add(): void
-  edit(index: number): void
-  commitEdit(): void
-  cancelEdit(): void
-  remove(index: number): void
-  replay(
+  seed: (loaded: TRow[]) => void
+  add: () => void
+  edit: (index: number) => void
+  commitEdit: () => void
+  cancelEdit: () => void
+  remove: (index: number) => void
+  replay: (
     parentId: number,
     writes: {
       create: (row: TRow, parentId: number) => Promise<{id?: number} | void>
       update: (id: number, row: TRow, parentId: number) => Promise<unknown>
       destroy: (id: number) => Promise<unknown>
     },
-  ): Promise<void>
+  ) => Promise<void>
 }
 
 /**
