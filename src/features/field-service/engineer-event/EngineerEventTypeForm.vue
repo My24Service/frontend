@@ -124,7 +124,7 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: Api.CompanyEngineerEventType,
+  resource: Api.UserEngineerEventType,
   empty: emptyEngineerEventType,
   fromRecord: engineerEventTypeFromRecord,
   contract: engineerEventTypeWrite,

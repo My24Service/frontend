@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-sick-leave-modal',
         confirmText: $trans('Are you sure you want to delete this sick leave?'),
-        resource: Api.CompanyUserSickLeaveAdmin,
+        resource: Api.WorkforceUserSickLeaveAdmin,
         deletedDetail: $trans('Sick leave has been deleted'),
         deleteError: $trans('Error deleting sick leave'),
       }"
@@ -38,7 +38,7 @@ import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable,
 import SubNav from '../SubNav.vue'
 
 /**
- * The tenant's sick leave, the admin list `/api/company/user-sick-leave/admin/`.
+ * The tenant's sick leave, the admin list `/api/workforce/user-sick-leave/admin/`.
  *
  * Two defects go with the port. The legacy delete action threw: its
  * `showDeleteModal()` read a bare `id` it was never passed (the template handed
@@ -89,7 +89,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'sick-leave-table',
   columns,
   enableSorting: false,
-  resource: Api.CompanyUserSickLeaveAdmin,
+  resource: Api.WorkforceUserSickLeaveAdmin,
   urlSync: true,
   loadError: $trans('Error loading sick leave request'),
 })

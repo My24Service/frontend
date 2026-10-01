@@ -25,7 +25,7 @@ import { fieldServiceRoutes } from '../../support/field-service-routes.js'
  */
 const api = installApiSeam()
 
-const ENDPOINT = '/api/company/engineer-event-type/'
+const ENDPOINT = '/api/user/engineer-event-type/'
 const STATUSCODE = fixtureFor(vStatuscode, {id: 3, statuscode: 'Done'})
 
 function type(overrides = {}) {

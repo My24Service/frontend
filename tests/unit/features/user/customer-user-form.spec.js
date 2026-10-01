@@ -55,11 +55,11 @@ beforeEach(() => {
   // The username probe asks the generated op, so its request lands on the
   // strict seam like every other read: answer it available here.
   api.get('/api/company/username-exists/', { available: true })
-  api.get('/api/company/customeruser/', { count: 0, next: null, previous: null, results: [] })
-  api.get('/api/company/customeruser/{id}/', RECORD)
+  api.get('/api/user/customeruser/', { count: 0, next: null, previous: null, results: [] })
+  api.get('/api/user/customeruser/{id}/', RECORD)
   api.get('/api/customer/customer/autocomplete/', AUTOCOMPLETE)
-  api.post('/api/company/customeruser/', RECORD)
-  api.patch('/api/company/customeruser/{id}/', RECORD)
+  api.post('/api/user/customeruser/', RECORD)
+  api.patch('/api/user/customeruser/{id}/', RECORD)
 })
 
 const multiselectStub = {
@@ -218,7 +218,7 @@ describe('CustomerUserForm, creating a customer user', () => {
   })
 
   test('tells the user when the create fails, and stays on the form', async () => {
-    api.post('/api/company/customeruser/', serverError)
+    api.post('/api/user/customeruser/', serverError)
     const wrapper = await mountCustomerForm()
 
     await fillCreate(wrapper)
@@ -233,7 +233,7 @@ describe('CustomerUserForm, editing a customer user', () => {
   test('opens on the record it was given, with the customer line', async () => {
     // The edit read carries customer_details; the form renders the display
     // line from it without a second request.
-    api.get('/api/company/customeruser/{id}/', fixtureFor(vCustomerUser, {
+    api.get('/api/user/customeruser/{id}/', fixtureFor(vCustomerUser, {
       id: 31,
       username: 'cust-jan',
       first_name: 'Jan',
@@ -284,7 +284,7 @@ describe('CustomerUserForm, editing a customer user', () => {
   })
 
   test('tells the user when the record cannot be fetched', async () => {
-    api.get('/api/company/customeruser/{id}/', serverError)
+    api.get('/api/user/customeruser/{id}/', serverError)
 
     await mountCustomerForm({ pk: 31 })
 
@@ -292,7 +292,7 @@ describe('CustomerUserForm, editing a customer user', () => {
   })
 
   test('tells the user when the update fails, and stays on the form', async () => {
-    api.patch('/api/company/customeruser/{id}/', serverError)
+    api.patch('/api/user/customeruser/{id}/', serverError)
     const wrapper = await mountCustomerForm({ pk: 31 })
 
     await wrapper.get('#customeruser_first_name').setValue('Jonathan')

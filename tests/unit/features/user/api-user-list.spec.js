@@ -84,9 +84,9 @@ function resetUrl() {
 
 beforeEach(() => {
   resetUrl()
-  api.get('/api/company/apiuser/', apiPage())
-  api.post('/api/company/apiuser/{id}/revoke/', { success: true })
-  api.delete('/api/company/apiuser/{id}/', noContent)
+  api.get('/api/user/apiuser/', apiPage())
+  api.post('/api/user/apiuser/{id}/revoke/', { success: true })
+  api.delete('/api/user/apiuser/{id}/', noContent)
 })
 
 afterEach(() => {
@@ -114,7 +114,7 @@ describe('ApiUserList, wire contract', () => {
     await mountApiUserList()
 
     expect(api.requests().at(-1)).toMatchObject({
-      path: '/api/company/apiuser/',
+      path: '/api/user/apiuser/',
       query: { page: '1', page_size: '20' },
     })
   })
@@ -221,7 +221,7 @@ describe('ApiUserList token lifecycle', () => {
 
     const revoked = api.requests().filter((sent) => sent.method === 'post')
     expect(revoked).toHaveLength(1)
-    expect(revoked[0]).toMatchObject({ path: '/api/company/apiuser/41/revoke/' })
+    expect(revoked[0]).toMatchObject({ path: '/api/user/apiuser/41/revoke/' })
     expect(toasts().map((toast) => toast.body)).toContain('API key has been revoked')
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)
@@ -237,7 +237,7 @@ describe('ApiUserList token lifecycle', () => {
   })
 
   test('tells the user when the revoke fails', async () => {
-    api.post('/api/company/apiuser/{id}/revoke/', serverError)
+    api.post('/api/user/apiuser/{id}/revoke/', serverError)
     const wrapper = await mountApiUserList()
 
     await revokeButtons(wrapper)[0].trigger('click')
@@ -308,14 +308,14 @@ describe('ApiUserList URL mirroring', () => {
 
 describe('ApiUserList loading, empty and error states', () => {
   test('says so when the backend returned nothing', async () => {
-    api.get('/api/company/apiuser/', paginated([]))
+    api.get('/api/user/apiuser/', paginated([]))
     const wrapper = await mountApiUserList()
 
     expect(wrapper.text()).toContain('No API users found')
   })
 
   test('tells the user when the list cannot be loaded', async () => {
-    api.get('/api/company/apiuser/', serverError)
+    api.get('/api/user/apiuser/', serverError)
 
     await mountApiUserList()
 
@@ -333,7 +333,7 @@ describe('ApiUserList delete', () => {
     await settle()
 
     const deleteSent = api.requests().find((sent) => sent.method === 'delete')
-    expect(deleteSent).toMatchObject({ path: '/api/company/apiuser/41/' })
+    expect(deleteSent).toMatchObject({ path: '/api/user/apiuser/41/' })
     expect(toasts().map((toast) => toast.body)).toContain('API user has been deleted')
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)

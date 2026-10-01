@@ -140,7 +140,7 @@ tenant's contract carries `company:connector-gripp` (or the user is a
 superuser), through `my24.hasAccessToModule` — the legacy list carried the
 option unconditionally *and* pushed it a second time when the check passed.
 The partner picker for the copy action loads through the generated
-`companyPartnerList` query, order type only.
+`partnerPartnerList` query, order type only.
 
 A condition is staged only when its three parts are filled:
 `vActionConditionRequest` requires each part non-blank, so a half-typed

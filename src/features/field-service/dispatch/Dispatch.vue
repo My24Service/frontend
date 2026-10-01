@@ -660,7 +660,7 @@ async function getEngineers(query: string) {
 
   try {
     engineers.value = await queryClient.fetchQuery(
-      Api.CompanyUserList.list.options({query: {q: query, user_type: 'engineer'}}))
+      Api.UserUserList.list.options({query: {q: query, user_type: 'engineer'}}))
     searchingEngineers.value = false
   } catch (error) {
     console.log('Error fetching engineers', error)

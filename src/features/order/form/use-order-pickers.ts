@@ -181,7 +181,7 @@ export function useEquipmentPickers(
  */
 export function useEngineerOptions(enabled: () => boolean) {
   const query = useQuery(() => ({
-    ...Api.CompanyEngineerListForSelect.list.options(),
+    ...Api.UserEngineerListForSelect.list.options(),
     enabled: enabled(),
   }))
   const engineers = computed(() => query.data.value ?? [])
@@ -192,7 +192,7 @@ export function useEngineerOptions(enabled: () => boolean) {
 /** The sales users whose e-mail goes on the order's extra recipients. */
 export function useSalesUserOptions(enabled: () => boolean) {
   const salesUsers = useSearch(
-    (q) => Api.CompanySalesuser.list.options({query: {q}}),
+    (q) => Api.UserSalesuser.list.options({query: {q}}),
     enabled,
     $trans('Error fetching sales users'),
     (page) => page.results ?? [],

@@ -304,7 +304,7 @@ const {
   StudentUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: Api.CompanyStudentuser,
+  resource: Api.UserStudentuser,
   empty: emptyStudentUser,
   fromRecord: studentUserFromRecord,
   validate: validateStudentUserForm,

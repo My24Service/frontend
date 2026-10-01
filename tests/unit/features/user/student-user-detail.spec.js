@@ -28,7 +28,7 @@ import { userRoutes } from '../../support/user-routes.js'
 
 const api = installApiSeam()
 
-const DETAIL = '/api/company/studentuser/{id}/'
+const DETAIL = '/api/user/studentuser/{id}/'
 
 const RECORD = fixtureFor(vStudentUser, {
   id: 41,
@@ -82,7 +82,7 @@ describe('StudentUserDetail', () => {
     await mountDetail()
 
     expect(api.requests()).toEqual([
-      { method: 'get', path: '/api/company/studentuser/41/', query: {}, body: undefined },
+      { method: 'get', path: '/api/user/studentuser/41/', query: {}, body: undefined },
     ])
   })
 

@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-customer-user-modal',
         confirmText: $trans('Are you sure you want to delete this customer user?'),
-        resource: Api.CompanyCustomeruser,
+        resource: Api.UserCustomeruser,
         deletedDetail: $trans('Customer user has been deleted'),
         deleteError: $trans('Error deleting customer user'),
       }"
@@ -84,7 +84,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<CustomerUserRow>({
   key: 'customer-user-table',
   columns,
-  resource: Api.CompanyCustomeruser,
+  resource: Api.UserCustomeruser,
   urlSync: true,
   loadError: $trans('Error loading customer users'),
 })

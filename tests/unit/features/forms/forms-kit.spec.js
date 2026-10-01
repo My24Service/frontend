@@ -4,10 +4,10 @@ import { mount } from '@vue/test-utils'
 import * as v from 'valibot'
 
 import {
-  companySalesuserCreateMutation,
-  companySalesuserListQueryKey,
-  companySalesuserPartialUpdateMutation,
-  companySalesuserRetrieveOptions,
+  userSalesuserCreateMutation,
+  userSalesuserListQueryKey,
+  userSalesuserPartialUpdateMutation,
+  userSalesuserRetrieveOptions,
   memberMemberMySettingsPartialUpdateMutation,
   memberMemberMySettingsRetrieveOptions,
   memberMemberMySettingsRetrieveQueryKey,
@@ -69,10 +69,10 @@ const TestForm = defineComponent({
   setup(props) {
     const form = useResourceForm({
       pk: () => props.pk,
-      retrieve: (id) => companySalesuserRetrieveOptions({ path: { id } }),
-      create: companySalesuserCreateMutation(),
-      update: companySalesuserPartialUpdateMutation(),
-      invalidate: (qc) => qc.invalidateQueries({ queryKey: companySalesuserListQueryKey() }),
+      retrieve: (id) => userSalesuserRetrieveOptions({ path: { id } }),
+      create: userSalesuserCreateMutation(),
+      update: userSalesuserPartialUpdateMutation(),
+      invalidate: (qc) => qc.invalidateQueries({ queryKey: userSalesuserListQueryKey() }),
       empty: () => ({ username: '', first_name: '' }),
       fromRecord: (record) => ({
         username: record.username,
@@ -114,9 +114,9 @@ async function submit(wrapper) {
 }
 
 beforeEach(() => {
-  api.get('/api/company/salesuser/{id}/', RECORD)
-  api.post('/api/company/salesuser/', RECORD)
-  api.patch('/api/company/salesuser/{id}/', RECORD)
+  api.get('/api/user/salesuser/{id}/', RECORD)
+  api.post('/api/user/salesuser/', RECORD)
+  api.patch('/api/user/salesuser/{id}/', RECORD)
 })
 
 describe('useRoutePk, the create/edit split', () => {
@@ -219,7 +219,7 @@ describe('useResourceForm, creating', () => {
   })
 
   test('tells the user when the create fails, and stays on the form', async () => {
-    api.post('/api/company/salesuser/', serverError)
+    api.post('/api/user/salesuser/', serverError)
     const wrapper = await mountTestForm()
 
     await wrapper.get('#test_username').setValue('jan')
@@ -279,7 +279,7 @@ describe('useResourceForm, creating', () => {
     expect(api.requests().filter((sent) => sent.method === 'post')).toHaveLength(1)
     const patch = api.requests().filter((sent) => sent.method === 'patch')
     expect(patch).toHaveLength(1)
-    expect(patch[0].path).toBe('/api/company/salesuser/11/')
+    expect(patch[0].path).toBe('/api/user/salesuser/11/')
     expect(toasts().map((toast) => toast.body)).toContain('Test has been updated')
     expect(routerGo()).toHaveBeenCalledWith(-1)
   })
@@ -306,7 +306,7 @@ describe('useResourceForm, what submitForm answers', () => {
   })
 
   test('false when the write fails', async () => {
-    api.post('/api/company/salesuser/', serverError)
+    api.post('/api/user/salesuser/', serverError)
     const wrapper = await mountTestForm()
     await wrapper.get('#test_username').setValue('jan')
 
@@ -392,14 +392,14 @@ describe('useResourceForm, a body that validation let through and parse refuses'
       setup() {
         return useResourceForm({
           pk: () => null,
-          retrieve: (id) => companySalesuserRetrieveOptions({ path: { id } }),
-          create: companySalesuserCreateMutation(),
-          update: companySalesuserPartialUpdateMutation(),
-          invalidate: (qc) => qc.invalidateQueries({ queryKey: companySalesuserListQueryKey() }),
+          retrieve: (id) => userSalesuserRetrieveOptions({ path: { id } }),
+          create: userSalesuserCreateMutation(),
+          update: userSalesuserPartialUpdateMutation(),
+          invalidate: (qc) => qc.invalidateQueries({ queryKey: userSalesuserListQueryKey() }),
           empty: () => ({ username: 'jan', first_name: '' }),
           fromRecord: (record) => record,
           contract: writeContract(
-            { path: '/api/company/salesuser/', create: { body: strictBody } },
+            { path: '/api/user/salesuser/', create: { body: strictBody } },
             {
               validateWith: v.object({ username: v.string(), first_name: v.string() }),
               labels: { first_name: () => 'Given name' },
@@ -504,10 +504,10 @@ describe('useResourceForm, the write context', () => {
       setup(props) {
         const form = useResourceForm({
           pk: () => props.pk,
-          retrieve: (id) => companySalesuserRetrieveOptions({ path: { id } }),
-          create: companySalesuserCreateMutation(),
-          update: companySalesuserPartialUpdateMutation(),
-          invalidate: (qc) => qc.invalidateQueries({ queryKey: companySalesuserListQueryKey() }),
+          retrieve: (id) => userSalesuserRetrieveOptions({ path: { id } }),
+          create: userSalesuserCreateMutation(),
+          update: userSalesuserPartialUpdateMutation(),
+          invalidate: (qc) => qc.invalidateQueries({ queryKey: userSalesuserListQueryKey() }),
           empty: () => ({ username: '', first_name: '' }),
           fromRecord: (record) => ({
             username: record.username,

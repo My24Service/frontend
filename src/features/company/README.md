@@ -199,8 +199,8 @@ Collected so nobody "fixes" these by accident.
 
 ### Partners
 
-- `/api/company/partner/` is a read-only list (its create raises) plus `q` (searching the customer and member names) and `ordering` (`partner__name`, `created`), paged at 20. `IsPlanningUser`.
-- `/api/company/partner-request/sent|received/` answer the tenant's own rows plus `q` (searching `status` and both member names) and `ordering` (`status`, `created`, `from_member__name`, `to_member__name`), paged at 20. `accept`/`reject` are bodiless PATCH actions answering `{success}`.
+- `/api/partner/partner/` is a read-only list (its create raises) plus `q` (searching the customer and member names) and `ordering` (`partner__name`, `created`), paged at 20. `IsPlanningUser`.
+- `/api/partner/partner-request/sent|received/` answer the tenant's own rows plus `q` (searching `status` and both member names) and `ordering` (`status`, `created`, `from_member__name`, `to_member__name`), paged at 20. `accept`/`reject` are bodiless PATCH actions answering `{success}`.
 - The member picker reads `member/.../get_for_partner_select/` narrowed server-side per keystroke - the one generated call the legacy screen already made.
 - The partner-flow prohibition (`apps/order/models/order.py:495-598`, `order_line.py`, `apps/statuscode/ttsa_order.py`) is untouched by this slice: the screens talk to the company viewsets, and no backend file outside `apps/company` and `apps/order/filters.py` was edited.
 
@@ -214,7 +214,7 @@ Collected so nobody "fixes" these by accident.
 
 ### Imports
 
-- `/api/company/import/` is full CRUD plus `q` (searching `name`), paged at 20. No `ordering`. `IsPlanningUser`.
+- `/api/importing/import/` is full CRUD plus `q` (searching `name`), paged at 20. No `ordering`. `IsPlanningUser`.
 - The `mapping` and `result_inserts` request fields are optional again: the create form cannot supply the wizard's state, and the model defaults cover an absent key. The schema had overstated them as required.
 - `preview/` answers one sheet per model kind with the rows the run would write; `do/` answers the same shape after writing it. `get_lookup_fields/` names the dedupe columns per kind; `get_allowed_extensions/` lists what the picker accepts.
 - Both mounts emit one route-name family per stem; the screens switch on the stem the routers supply, and `from_settings` plays no role on them.

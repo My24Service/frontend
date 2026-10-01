@@ -106,7 +106,7 @@ function buttonByText(wrapper, text) {
 }
 
 beforeEach(() => {
-  api.get('/api/company/partner/', PARTNERS)
+  api.get('/api/partner/partner/', PARTNERS)
   api.get('/api/customer/customer/', DETAIL())
   api.get('/api/customer/customer/{id}/', DETAIL())
   api.get('/api/customer/customer/check_customer_id_handling/', { customer_id: null, created: false })
@@ -119,9 +119,10 @@ describe('CustomerForm, create', () => {
   test('fetches the partner list and the id handling before anything else', async () => {
     await mountCustomerForm()
 
-    expect(api.requests().map((request) => request.path)).toEqual([
-      '/api/company/partner/',
+    // The two reads go out together, so the order they land in is not theirs.
+    expect(api.requests().map((request) => request.path).sort()).toEqual([
       '/api/customer/customer/check_customer_id_handling/',
+      '/api/partner/partner/',
     ])
   })
 
@@ -133,7 +134,7 @@ describe('CustomerForm, create', () => {
   test('asks for every partner, not just the first page', async () => {
     await mountCustomerForm()
 
-    const partners = api.requests().find((request) => request.path === '/api/company/partner/')
+    const partners = api.requests().find((request) => request.path === '/api/partner/partner/')
 
     expect(partners.query).toEqual({ page: '1', page_size: '1000' })
   })
@@ -225,7 +226,7 @@ describe('CustomerForm, edit', () => {
     await mountCustomerForm({ pk: '5' })
 
     expect(api.requests().map((request) => request.path)).toEqual([
-      '/api/company/partner/',
+      '/api/partner/partner/',
       '/api/customer/customer/5/',
       '/api/customer/document/',
     ])
@@ -300,18 +301,18 @@ describe('CustomerForm, edit', () => {
   })
 
   test('choosing a branch partner fetches its branches', async () => {
-    api.get('/api/company/partner/{id}/branches/', { branches: [BRANCH()] })
+    api.get('/api/partner/partner/{id}/branches/', { branches: [BRANCH()] })
 
     const wrapper = await mountCustomerForm({ pk: '5' })
     await wrapper.get('#customer_branch_partners').setValue('7')
     await settle()
 
-    expect(api.requests().map((request) => request.path)).toContain('/api/company/partner/7/branches/')
+    expect(api.requests().map((request) => request.path)).toContain('/api/partner/partner/7/branches/')
   })
 
   test('synchronize orders copies the customer orders and refetches the branches', async () => {
-    api.get('/api/company/partner/{id}/branches/', { branches: [BRANCH()] })
-    api.post('/api/company/partner/{id}/copy_customer_orders/', { num_copied: 3 })
+    api.get('/api/partner/partner/{id}/branches/', { branches: [BRANCH()] })
+    api.post('/api/partner/partner/{id}/copy_customer_orders/', { num_copied: 3 })
 
     const wrapper = await mountCustomerForm({ pk: '5' })
     await wrapper.get('#customer_branch_partners').setValue('7')
@@ -322,7 +323,7 @@ describe('CustomerForm, edit', () => {
     expect(api.requests().filter((request) => request.method === 'post')).toEqual([
       {
         method: 'post',
-        path: '/api/company/partner/7/copy_customer_orders/',
+        path: '/api/partner/partner/7/copy_customer_orders/',
         query: {},
         body: { customer_id: 5 },
       },
@@ -331,8 +332,8 @@ describe('CustomerForm, edit', () => {
   })
 
   test('create-branch asks, posts, and refetches the branches', async () => {
-    api.get('/api/company/partner/{id}/branches/', { branches: [BRANCH()] })
-    api.post('/api/company/partner/{id}/branch_create_from_customer/', { branch: fixtureFor(vBranch, { ...BRANCH(), id: 61 }) })
+    api.get('/api/partner/partner/{id}/branches/', { branches: [BRANCH()] })
+    api.post('/api/partner/partner/{id}/branch_create_from_customer/', { branch: fixtureFor(vBranch, { ...BRANCH(), id: 61 }) })
     vi.stubGlobal('confirm', vi.fn(() => true))
 
     const wrapper = await mountCustomerForm({ pk: '5' })
@@ -344,7 +345,7 @@ describe('CustomerForm, edit', () => {
     expect(api.requests().filter((request) => request.method === 'post')).toEqual([
       {
         method: 'post',
-        path: '/api/company/partner/7/branch_create_from_customer/',
+        path: '/api/partner/partner/7/branch_create_from_customer/',
         query: {},
         body: { customer_id: 5 },
       },

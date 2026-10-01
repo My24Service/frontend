@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-leave-modal',
         confirmText: $trans('Are you sure you want to delete this leave?'),
-        resource: Api.CompanyUserLeaveHoursAdmin,
+        resource: Api.WorkforceUserLeaveHoursAdmin,
         deletedDetail: $trans('Leave has been deleted'),
         deleteError: $trans('Error deleting leave'),
       }"
@@ -40,7 +40,7 @@ import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable,
 import SubNav from '../SubNav.vue'
 
 /**
- * Every leave in the tenant, the admin list `/api/company/user-leave-hours/admin/`.
+ * Every leave in the tenant, the admin list `/api/workforce/user-leave-hours/admin/`.
  *
  * The legacy screen's columns, its add and edit routes, its delete modal id and
  * its toast copy are unchanged. What the kit brings is the header, the search
@@ -94,7 +94,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'leave-table',
   columns,
   enableSorting: false,
-  resource: Api.CompanyUserLeaveHoursAdmin,
+  resource: Api.WorkforceUserLeaveHoursAdmin,
   urlSync: true,
   loadError: $trans('Error loading leave requests'),
 })

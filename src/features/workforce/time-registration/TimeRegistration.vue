@@ -213,7 +213,7 @@ import moment, {
   type Moment,
 } from 'moment'
 
-import { companyTimeRegistrationRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+import { workforceTimeRegistrationRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
 import SubNav from '../SubNav.vue'
 import { invalidateTimeRegistration } from './invalidation'
@@ -274,7 +274,7 @@ const isPlanning = computed(() => authStore.isPlanning)
 
 // reads -------------------------------------------------------------------
 
-const registration = useQuery(() => companyTimeRegistrationRetrieveOptions({
+const registration = useQuery(() => workforceTimeRegistrationRetrieveOptions({
   query: timeWindowQuery({
     mode: mode.value,
     anchor: anchor.value.format('YYYY-MM-DD'),
@@ -398,7 +398,7 @@ const correctionText = computed(() => {
 })
 
 const correctionMutation = useMutation({
-  ...Api.CompanyTimeRegistrationTimeCorrection.update.mutation(),
+  ...Api.WorkforceTimeRegistrationTimeCorrection.update.mutation(),
   onSuccess: () => invalidateTimeRegistration(queryClient),
 })
 

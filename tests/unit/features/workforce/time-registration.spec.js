@@ -9,7 +9,7 @@ import { serverError } from '../../support/list-harness.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
 
 const api = installApiSeam()
-const endpoint = '/api/company/time-registration/'
+const endpoint = '/api/workforce/time-registration/'
 const TENANT = {memberInfo: {companycode: 'acme'}}
 
 // The screen localises moment to the tenant language as it sets up (nl under

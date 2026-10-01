@@ -22,7 +22,7 @@ import { modal } from '../../support/modal.js'
  */
 const api = installApiSeam()
 
-const ENDPOINT = '/api/company/engineer-event-type/'
+const ENDPOINT = '/api/user/engineer-event-type/'
 
 function tenantOf(companycode) {
   return {

@@ -142,7 +142,7 @@ const {
   ApiUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: Api.CompanyApiuser,
+  resource: Api.UserApiuser,
   empty: emptyApiUser,
   fromRecord: apiUserFromRecord,
   validate: validateApiUserForm,

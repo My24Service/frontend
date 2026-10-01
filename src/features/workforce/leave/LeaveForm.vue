@@ -235,7 +235,7 @@ import moment from 'moment'
 import { nl } from 'date-fns/locale'
 import VueMultiselect from 'vue-multiselect'
 
-import { companyUserLeaveHoursAdminGetTotalsCreate } from '@/api/sdk.gen'
+import { workforceUserLeaveHoursAdminGetTotalsCreate } from '@/api/sdk.gen'
 
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {
@@ -275,7 +275,7 @@ void toast
 const today = moment().format('YYYY-MM-DD')
 const now = moment().format('HH:mm')
 
-const leaveTypesQuery = useQuery(() => Api.CompanyLeaveType.list.options({
+const leaveTypesQuery = useQuery(() => Api.WorkforceLeaveType.list.options({
   query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
 }))
 useQueryErrorToast(leaveTypesQuery.error, $trans('Error loading leave types'))
@@ -285,7 +285,7 @@ const {term, options, loading: searching} = useUserSearch()
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: Api.CompanyUserLeaveHoursAdmin,
+  resource: Api.WorkforceUserLeaveHoursAdmin,
   empty: () => emptyLeave(today, now),
   fromRecord: leaveFromRecord,
   validate: validateLeave,
@@ -337,7 +337,7 @@ const probing = ref(false)
 async function probeTotals(): Promise<void> {
   probing.value = true
   try {
-    const {data, error} = await companyUserLeaveHoursAdminGetTotalsCreate({
+    const {data, error} = await workforceUserLeaveHoursAdminGetTotalsCreate({
       body: leaveProbeBody(values.value),
     })
     if (error || !data) throw new Error('leave totals probe failed')

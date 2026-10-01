@@ -93,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { companyImportGetAllowedExtensionsRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+import { importingImportGetAllowedExtensionsRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 
 import {
   useQueryErrorToast,
@@ -131,7 +131,7 @@ const isCreateRoute = props.pk == null
 
 const form = useResourceForm({
   pk: () => props.pk ?? null,
-  resource: Api.CompanyImport,
+  resource: Api.ImportingImport,
   empty: emptyImport,
   fromRecord: importFromRecord,
   contract: importWrite,
@@ -167,7 +167,7 @@ const savedId = ref<number | null>(null)
 
 const hasResults = computed(() => Object.keys(record.value?.result_inserts ?? {}).length > 0)
 
-const allowedExtensionsQuery = useQuery(companyImportGetAllowedExtensionsRetrieveOptions())
+const allowedExtensionsQuery = useQuery(importingImportGetAllowedExtensionsRetrieveOptions())
 useQueryErrorToast(allowedExtensionsQuery.error, $trans('Error loading import'))
 const allowedExtensions = computed<string[]>(() => allowedExtensionsQuery.data.value ?? [])
 

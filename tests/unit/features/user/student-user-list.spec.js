@@ -93,9 +93,9 @@ function resetUrl() {
 
 beforeEach(() => {
   resetUrl()
-  api.get('/api/company/studentuser/', studentPage())
-  api.patch('/api/company/studentuser/{id}/', RECORD)
-  api.delete('/api/company/studentuser/{id}/', noContent)
+  api.get('/api/user/studentuser/', studentPage())
+  api.patch('/api/user/studentuser/{id}/', RECORD)
+  api.delete('/api/user/studentuser/{id}/', noContent)
 })
 
 /** Mount the converted list. */
@@ -115,7 +115,7 @@ describe('StudentUserList, wire contract', () => {
     await mountStudentList()
 
     expect(api.requests().at(-1)).toMatchObject({
-      path: '/api/company/studentuser/',
+      path: '/api/user/studentuser/',
       query: { page: '1', page_size: '20' },
     })
   })
@@ -221,14 +221,14 @@ describe('StudentUserList URL mirroring', () => {
 
 describe('StudentUserList loading, empty and error states', () => {
   test('says so when the backend returned nothing', async () => {
-    api.get('/api/company/studentuser/', paginated([]))
+    api.get('/api/user/studentuser/', paginated([]))
     const wrapper = await mountStudentList()
 
     expect(wrapper.text()).toContain('No student users found')
   })
 
   test('tells the user when the list cannot be loaded', async () => {
-    api.get('/api/company/studentuser/', serverError)
+    api.get('/api/user/studentuser/', serverError)
 
     await mountStudentList()
 
@@ -247,7 +247,7 @@ describe('StudentUserList active toggle', () => {
     // and absent keys leave stored values untouched.
     const patches = api.requests().filter((sent) => sent.method === 'patch')
     expect(patches).toHaveLength(1)
-    expect(patches[0]).toMatchObject({ path: '/api/company/studentuser/41/' })
+    expect(patches[0]).toMatchObject({ path: '/api/user/studentuser/41/' })
     expect(patches[0].body).toEqual({
       is_active: false,
     })
@@ -263,12 +263,12 @@ describe('StudentUserList active toggle', () => {
 
     const patches = api.requests().filter((sent) => sent.method === 'patch')
     expect(patches).toHaveLength(1)
-    expect(patches[0]).toMatchObject({ path: '/api/company/studentuser/42/' })
+    expect(patches[0]).toMatchObject({ path: '/api/user/studentuser/42/' })
     expect(patches[0].body.is_active).toBe(true)
   })
 
   test('a failed toggle tells the user', async () => {
-    api.patch('/api/company/studentuser/{id}/', serverError)
+    api.patch('/api/user/studentuser/{id}/', serverError)
     const wrapper = await mountStudentList()
 
     await wrapper.get('button[title="Set inactive"]').trigger('click')
@@ -288,7 +288,7 @@ describe('StudentUserList delete', () => {
     await settle()
 
     const deleteSent = api.requests().find((sent) => sent.method === 'delete')
-    expect(deleteSent).toMatchObject({ path: '/api/company/studentuser/41/' })
+    expect(deleteSent).toMatchObject({ path: '/api/user/studentuser/41/' })
     expect(toasts().map((toast) => toast.body)).toContain('Student user has been deleted')
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)

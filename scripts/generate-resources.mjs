@@ -26,7 +26,7 @@
  * what their verb says and are dropped:
  *
  * - an operation whose path continues past a `{param}` (`/api/order/order/{id}/assign_me/`,
- *   `/api/company/partner-request/{id}/accept/`) is a verb on a record that
+ *   `/api/partner/partner-request/{id}/accept/`) is a verb on a record that
  *   already exists, whatever its method - and its prefix would name a resource
  *   (`order_order_assign_me`) that does not exist;
  * - a `retrieve`-only prefix (`company_import_required`) is a read endpoint,
@@ -518,7 +518,7 @@ for (const prefix of [...groups.keys()].sort()) {
 }
 
 // The record-level verbs, each hung on the resource whose path its own path
-// sits under - the longest such path, so `/api/company/salesusercustomer/my/`
+// sits under - the longest such path, so `/api/user/salesusercustomer/my/`
 // joins `salesusercustomer` and not `company`. Ownership by path, not by name:
 // the operationId prefix would put `companyPartnerRequestAccept` on
 // `partnerRequest` by luck of spelling, and the path is what the server
@@ -541,7 +541,7 @@ for (const extra of extras) {
   const { resource } = own
   const camel = toCase(extra.id, 'camelCase')
   // The name is the operationId with the owner's own id prefix removed, so
-  // `companyApiuserRevokeCreate` on `Api.CompanyApiuser` is
+  // `userApiuserRevokeCreate` on `Api.UserApiuser` is
   // `extras.revokeCreate` and not a name that could collide with a sibling
   // resource's. The comparison is in camelCase because a raw operationId is
   // snake_case (`company_apiuser_revoke_create`) and would never match the

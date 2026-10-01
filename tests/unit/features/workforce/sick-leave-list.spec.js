@@ -12,7 +12,7 @@ import { modal } from '../../support/modal.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
 
 const api = installApiSeam()
-const resource = '/api/company/user-sick-leave/admin/'
+const resource = '/api/workforce/user-sick-leave/admin/'
 const endpoint = resource
 
 function sickLeave(overrides = {}) {

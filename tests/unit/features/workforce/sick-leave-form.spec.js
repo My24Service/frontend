@@ -9,7 +9,7 @@ import { serverError } from '../../support/list-harness.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
 
 const api = installApiSeam()
-const endpoint = '/api/company/user-sick-leave/admin/'
+const endpoint = '/api/workforce/user-sick-leave/admin/'
 
 // The form seeds the start date from `moment()` at mount.
 const TODAY = moment().format('YYYY-MM-DD')
@@ -48,7 +48,7 @@ const bodies = () => toasts().map((toast) => toast.body)
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/')
-  api.get('/api/company/user-list/', () => [
+  api.get('/api/user/user-list/', () => [
     fixtureFor(vUserSelectRow, {id: 7, name: 'Jan Jansen', email: 'jan@example.com'}),
   ])
   api.get(endpoint + '{id}/', sickLeave())
@@ -87,7 +87,7 @@ describe('SickLeaveForm create', () => {
     await settle()
 
     expect(api.requests()).toEqual([
-      {method: 'get', path: '/api/company/user-list/', query: {q: 'jansen'}},
+      {method: 'get', path: '/api/user/user-list/', query: {q: 'jansen'}},
       {
         method: 'post',
         path: endpoint,

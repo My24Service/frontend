@@ -8,7 +8,7 @@ import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
 const api = installApiSeam()
-const endpoint = '/api/company/import/'
+const endpoint = '/api/importing/import/'
 
 const routes = [
   { name: 'company-import-list', path: '/company/import', component: { template: '<div />' } },

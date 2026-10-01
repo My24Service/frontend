@@ -127,7 +127,7 @@ useQueryErrorToast(pickerQuery.error, $trans('Error fetching members'))
 const members = computed(() => pickerQuery.data.value ?? [])
 const isSearching = computed(() => pickerQuery.isFetching.value)
 
-const createMutation = useMutation(Api.CompanyPartnerRequest.create.mutation())
+const createMutation = useMutation(Api.PartnerPartnerRequest.create.mutation())
 const buttonDisabled = computed(() => saving.value || createMutation.isPending.value)
 
 function memberLabel(member: Api.PartnerSelect): string {
@@ -157,7 +157,7 @@ async function submitForm() {
       return
     }
     infoToast(toast, $trans('Created'), $trans('Partner request has been sent'))
-    await Api.CompanyPartnerRequestSent.invalidate(queryClient)
+    await Api.PartnerPartnerRequestSent.invalidate(queryClient)
     router.go(-1)
   } finally {
     saving.value = false

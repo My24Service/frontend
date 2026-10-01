@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-event-type-modal',
         confirmText: $trans('Are you sure you want to delete this event type?'),
-        resource: Api.CompanyEngineerEventType,
+        resource: Api.UserEngineerEventType,
         deletedDetail: $trans('Event type has been deleted'),
         deleteError: $trans('Error deleting event type'),
       }"
@@ -85,7 +85,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'engineer-event-type-table',
   columns,
   enableSorting: false,
-  resource: Api.CompanyEngineerEventType,
+  resource: Api.UserEngineerEventType,
   urlSync: true,
   loadError: $trans('Error loading event types'),
 })

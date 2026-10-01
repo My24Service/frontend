@@ -189,7 +189,7 @@ describe('the order form on a temps tenant', () => {
   })
 
   test('a maintenance tenant still gets the full form', async () => {
-    api.get('/api/company/engineer/list-for-select/', [])
+    api.get('/api/user/engineer/list-for-select/', [])
     const wrapper = await mountTempsForm({ main: { getMemberType: 'maintenance', getFlavour: 'maintenance' } })
 
     expect(wrapper.find('#required_users').exists()).toBe(false)

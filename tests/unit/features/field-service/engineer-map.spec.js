@@ -22,7 +22,7 @@ import { mountForm } from '../../support/form-harness.js'
  */
 const api = installApiSeam()
 
-const ENDPOINT = '/api/company/engineer/get_locations/'
+const ENDPOINT = '/api/user/engineer/get_locations/'
 
 // Every mount attaches a window listener; leaving one behind would fire inside
 // the next test and make the counts meaningless.

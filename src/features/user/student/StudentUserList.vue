@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-student-user-modal',
         confirmText: $trans('Are you sure you want to delete this student user?'),
-        resource: Api.CompanyStudentuser,
+        resource: Api.UserStudentuser,
         deletedDetail: $trans('Student user has been deleted'),
         deleteError: $trans('Error deleting student user'),
       }"
@@ -49,9 +49,9 @@ const { toast: create, queryClient } = useCommon()
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 const activeMutation = useMutation({
-  ...Api.CompanyStudentuser.update.mutation(),
+  ...Api.UserStudentuser.update.mutation(),
   onSuccess: async () => {
-    await queryClient.invalidateQueries({queryKey: Api.CompanyStudentuser.list.queryKey()})
+    await queryClient.invalidateQueries({queryKey: Api.UserStudentuser.list.queryKey()})
   },
   onError: (_error, variables) => {
     errorToast(create, variables.body?.is_active
@@ -121,7 +121,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<StudentUserRow>({
   key: 'student-user-table',
   columns,
-  resource: Api.CompanyStudentuser,
+  resource: Api.UserStudentuser,
   urlSync: true,
   loadError: $trans('Error loading student users'),
 })

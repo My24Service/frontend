@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-partner-modal',
         confirmText: $trans('Are you sure you want to delete this partner relation?'),
-        resource: Api.CompanyPartner,
+        resource: Api.PartnerPartner,
         deletedDetail: $trans('partner has been deleted'),
         deleteError: $trans('Error deleting partner'),
       }"
@@ -85,7 +85,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<PartnerRow>({
   key: 'partner-table',
   columns,
-  resource: Api.CompanyPartner,
+  resource: Api.PartnerPartner,
   urlSync: true,
   loadError: $trans('Error loading partners'),
 })

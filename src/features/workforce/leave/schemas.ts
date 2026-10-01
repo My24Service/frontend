@@ -273,8 +273,8 @@ export const LEAVE_TYPE_MESSAGES = {
  * PATCHed it back, which carried `id`, `created` and `modified` - the parse
  * drops what the endpoint does not declare.
  */
-export const leaveTypeWrite = writeContract(Api.CompanyLeaveType, {
-  validateWith: Api.CompanyLeaveType.create.body,
+export const leaveTypeWrite = writeContract(Api.WorkforceLeaveType, {
+  validateWith: Api.WorkforceLeaveType.create.body,
   labels: LEAVE_TYPE_LABELS,
   messages: LEAVE_TYPE_MESSAGES,
 })

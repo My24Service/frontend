@@ -84,7 +84,7 @@ beforeEach(() => {
   api.post(ASSIGNED_ORDER, () => fixtureFor(vAssignedOrderCreate))
   api.post(SPLIT, () => [fixtureFor(vAssignedOrder)])
   api.get(ORDER, () => fixtureFor(vOrderDetail, {id: 12, order_id: '2026-0012'}))
-  api.get('/api/company/engineer/get_locations/', () => [fixtureFor(vEngineerLocation)])
+  api.get('/api/user/engineer/get_locations/', () => [fixtureFor(vEngineerLocation)])
 })
 
 afterEach(() => {

@@ -92,7 +92,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'unconfirmed-sick-leave-table',
   columns,
   enableSorting: false,
-  resource: Api.CompanyUserSickLeaveAdminAllUnconfirmed,
+  resource: Api.WorkforceUserSickLeaveAdminAllUnconfirmed,
   urlSync: true,
   loadError: $trans('Error loading unconfirmed sick leave request'),
 })
@@ -106,10 +106,10 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
 const {confirm: showConfirmModal, handleOk: handleConfirmOk} = useConfirmedAction({
   modalRefName: 'confirm-leave-modal',
   mutationOptions: () => ({
-    ...Api.CompanyUserSickLeaveAdmin.extras.setConfirmedCreate.mutation(),
+    ...Api.WorkforceUserSickLeaveAdmin.extras.setConfirmedCreate.mutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Accepted'), $trans('Leave as been marked as confirmed'))
-      await Api.CompanyUserSickLeaveAdmin.invalidate(queryClient)
+      await Api.WorkforceUserSickLeaveAdmin.invalidate(queryClient)
     },
     onError: () => errorToast(toast, $trans('Error confirming sick leave')),
   }),

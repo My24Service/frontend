@@ -8,7 +8,7 @@ import { serverError } from '../../support/list-harness.js'
 
 const api = installApiSeam()
 
-const CREATE_PATH = '/api/company/partner-request/'
+const CREATE_PATH = '/api/partner/partner-request/'
 
 const MEMBERS = [
   fixtureFor(vPartnerSelect, { id: 11, name: 'Acme BV', city: 'Utrecht' }),

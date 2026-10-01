@@ -138,7 +138,7 @@ function employeeUserFromRecord(record: Api.EmployeeUser): EmployeeUserFormValue
 
 const form = useUserForm<EmployeeUserFormValues, Api.EmployeeUser, v.InferOutput<typeof schemas.vEmployeeUserRequestWritable>, EmployeeUserFieldErrors>({
   pk: () => props.pk,
-  resource: Api.CompanyEmployeeuser,
+  resource: Api.UserEmployeeuser,
   empty: emptyEmployeeUser,
   fromRecord: employeeUserFromRecord,
   validate: validateEmployeeUserForm,

@@ -285,7 +285,7 @@ function engineerUserFromRecord(record: Api.Engineer): EngineerUserFormValues {
 
 const form = useUserForm<EngineerUserFormValues, Api.Engineer, v.InferOutput<typeof schemas.vEngineerRequestWritable>, EngineerUserFieldErrors>({
   pk: () => props.pk,
-  resource: Api.CompanyEngineer,
+  resource: Api.UserEngineer,
   empty: emptyEngineerUser,
   fromRecord: engineerUserFromRecord,
   validate: validateEngineerUserForm,

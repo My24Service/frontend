@@ -26,8 +26,8 @@ const api = installApiSeam()
 
 beforeEach(() => {
   resetUrl()
-  api.get('/api/company/planninguser/', planningPage())
-  api.delete('/api/company/planninguser/{id}/', noContent)
+  api.get('/api/user/planninguser/', planningPage())
+  api.delete('/api/user/planninguser/{id}/', noContent)
 })
 
 afterEach(() => {
@@ -94,7 +94,7 @@ describe('PlanningUserList, wire contract', () => {
     await mountPlanningList()
 
     expect(api.requests().at(-1)).toMatchObject({
-      path: '/api/company/planninguser/',
+      path: '/api/user/planninguser/',
       query: { page: '1', page_size: '20' },
     })
   })
@@ -212,14 +212,14 @@ describe('PlanningUserList URL mirroring', () => {
 
 describe('PlanningUserList loading, empty and error states', () => {
   test('says so when the backend returned nothing', async () => {
-    api.get('/api/company/planninguser/', paginated([]))
+    api.get('/api/user/planninguser/', paginated([]))
     const wrapper = await mountPlanningList()
 
     expect(wrapper.text()).toContain('No planning users found')
   })
 
   test('tells the user when the list cannot be loaded', async () => {
-    api.get('/api/company/planninguser/', serverError)
+    api.get('/api/user/planninguser/', serverError)
 
     await mountPlanningList()
 
@@ -237,7 +237,7 @@ describe('PlanningUserList delete', () => {
     await settle()
 
     const deleteSent = api.requests().find((sent) => sent.method === 'delete')
-    expect(deleteSent).toMatchObject({ path: '/api/company/planninguser/21/' })
+    expect(deleteSent).toMatchObject({ path: '/api/user/planninguser/21/' })
     expect(toasts().map((toast) => toast.body)).toContain('planning user has been deleted')
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)

@@ -9,7 +9,7 @@ import { modal } from '../../support/modal.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
 
 const api = installApiSeam()
-const resource = '/api/company/user-leave-hours/admin/'
+const resource = '/api/workforce/user-leave-hours/admin/'
 const endpoint = resource + 'all_not_accepted/'
 
 function leaveRequest(overrides = {}) {

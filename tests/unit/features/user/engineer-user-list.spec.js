@@ -81,8 +81,8 @@ function resetUrl() {
 
 beforeEach(() => {
   resetUrl()
-  api.get('/api/company/engineer/', engineerPage())
-  api.delete('/api/company/engineer/{id}/', noContent)
+  api.get('/api/user/engineer/', engineerPage())
+  api.delete('/api/user/engineer/{id}/', noContent)
 })
 
 /** Mount the converted list. */
@@ -102,7 +102,7 @@ describe('EngineerUserList, wire contract', () => {
     await mountEngineerList()
 
     expect(api.requests().at(-1)).toMatchObject({
-      path: '/api/company/engineer/',
+      path: '/api/user/engineer/',
       query: { page: '1', page_size: '20' },
     })
   })
@@ -206,14 +206,14 @@ describe('EngineerUserList URL mirroring', () => {
 
 describe('EngineerUserList loading, empty and error states', () => {
   test('says so when the backend returned nothing', async () => {
-    api.get('/api/company/engineer/', paginated([]))
+    api.get('/api/user/engineer/', paginated([]))
     const wrapper = await mountEngineerList()
 
     expect(wrapper.text()).toContain('No engineers found')
   })
 
   test('tells the user when the list cannot be loaded', async () => {
-    api.get('/api/company/engineer/', serverError)
+    api.get('/api/user/engineer/', serverError)
 
     await mountEngineerList()
 
@@ -231,7 +231,7 @@ describe('EngineerUserList delete', () => {
     await settle()
 
     const deleteSent = api.requests().find((sent) => sent.method === 'delete')
-    expect(deleteSent).toMatchObject({ path: '/api/company/engineer/41/' })
+    expect(deleteSent).toMatchObject({ path: '/api/user/engineer/41/' })
     expect(toasts().map((toast) => toast.body)).toContain('Engineer has been deleted')
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)

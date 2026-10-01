@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-leave-modal',
         confirmText: $trans('Are you sure you want to delete this leave type?'),
-        resource: Api.CompanyLeaveType,
+        resource: Api.WorkforceLeaveType,
         deletedDetail: $trans('Leave type has been deleted'),
         deleteError: $trans('Error deleting leave type'),
       }"
@@ -129,7 +129,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'leave-type-table',
   columns,
   enableSorting: false,
-  resource: Api.CompanyLeaveType,
+  resource: Api.WorkforceLeaveType,
   urlSync: true,
   loadError: $trans('Error loading leave types'),
 })
@@ -139,7 +139,7 @@ const editingId = ref<number | null>(null)
 
 const {values, errors, submitClicked, isLoading: saving, submitForm, reset} = useResourceForm({
   pk: () => editingId.value,
-  resource: Api.CompanyLeaveType,
+  resource: Api.WorkforceLeaveType,
   empty: emptyLeaveType,
   fromRecord: leaveTypeFromRecord,
   contract: leaveTypeWrite,

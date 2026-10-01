@@ -40,12 +40,12 @@ const socket = {handlers: {}, removed: []}
  *  - the row's delete is back. The legacy action threw before it opened
  *    anything (`showDeleteModal` reached for `delete-event-type-modal` while
  *    this template's modal was `delete-event-modal`), and the endpoint had no
- *    detail route to call either. `/api/company/engineerevent/{id}/` (DELETE)
+ *    detail route to call either. `/api/user/engineerevent/{id}/` (DELETE)
  *    exists now, and the shell's `deleteModal` owns the confirmation.
  */
 const api = installApiSeam()
 
-const ENDPOINT = '/api/company/engineerevent/'
+const ENDPOINT = '/api/user/engineerevent/'
 
 /**
  * The tenant the pills row reads.
@@ -92,8 +92,8 @@ beforeEach(() => {
   })
   api.get(ENDPOINT, () => paginated([row()], {count: 1}))
   // The attach-order modal reads the engineer the event belongs to as it opens.
-  api.get('/api/company/engineer/{id}/', () => fixtureFor(vEngineer, {id: 5}))
-  api.delete('/api/company/engineerevent/{id}/', noContent)
+  api.get('/api/user/engineer/{id}/', () => fixtureFor(vEngineer, {id: 5}))
+  api.delete('/api/user/engineerevent/{id}/', noContent)
 })
 
 afterEach(() => {
@@ -162,14 +162,14 @@ describe('EngineerEventList', () => {
     // outside `/api/`, where nothing serves the export: what came back was
     // saved as events.xlsx whatever it was.
     const saved = captureDownloads()
-    api.get('/api/company/events-export-xls/', xlsxResponse)
+    api.get('/api/user/events-export-xls/', xlsxResponse)
     vi.stubGlobal('confirm', () => true)
     const wrapper = await mountList()
 
     await wrapper.vm.downloadList()
     await settle()
 
-    expect(api.requests().filter((request) => request.path === '/api/company/events-export-xls/')).toHaveLength(1)
+    expect(api.requests().filter((request) => request.path === '/api/user/events-export-xls/')).toHaveLength(1)
     expect(saved).toEqual(['events.xlsx'])
     vi.unstubAllGlobals()
     vi.restoreAllMocks()
@@ -190,7 +190,7 @@ describe('EngineerEventList', () => {
     await settle()
 
     expect(api.requests().find((request) => request.method === 'delete').path)
-      .toBe('/api/company/engineerevent/11/')
+      .toBe('/api/user/engineerevent/11/')
     expect(reads()).toHaveLength(2)
     expect(toasts().map((toast) => toast.body)).toContain('Event has been deleted')
   })
@@ -204,7 +204,7 @@ describe('EngineerEventList', () => {
     await settle()
 
     expect(document.getElementById('attach-order-modal')).not.toBe(null)
-    expect(api.requests().at(-1)).toMatchObject({method: 'get', path: '/api/company/engineer/5/'})
+    expect(api.requests().at(-1)).toMatchObject({method: 'get', path: '/api/user/engineer/5/'})
   })
 
   test('a websocket message reloads the list', async () => {

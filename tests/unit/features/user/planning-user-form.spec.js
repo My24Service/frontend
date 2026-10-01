@@ -40,10 +40,10 @@ beforeEach(() => {
   // The username probe asks the generated op, so its request lands on the
   // strict seam like every other read: answer it available here.
   api.get('/api/company/username-exists/', { available: true })
-  api.get('/api/company/planninguser/', { count: 0, next: null, previous: null, results: [] })
-  api.get('/api/company/planninguser/{id}/', RECORD)
-  api.post('/api/company/planninguser/', RECORD)
-  api.patch('/api/company/planninguser/{id}/', RECORD)
+  api.get('/api/user/planninguser/', { count: 0, next: null, previous: null, results: [] })
+  api.get('/api/user/planninguser/{id}/', RECORD)
+  api.post('/api/user/planninguser/', RECORD)
+  api.patch('/api/user/planninguser/{id}/', RECORD)
 })
 
 async function mountPlanningForm(props = {}) {
@@ -144,7 +144,7 @@ describe('PlanningUserForm, creating a planning user', () => {
   })
 
   test('tells the user when the create fails, and stays on the form', async () => {
-    api.post('/api/company/planninguser/', serverError)
+    api.post('/api/user/planninguser/', serverError)
     const wrapper = await mountPlanningForm()
 
     await fillCreate(wrapper)
@@ -196,7 +196,7 @@ describe('PlanningUserForm, editing a planning user', () => {
   })
 
   test('tells the user when the record cannot be fetched', async () => {
-    api.get('/api/company/planninguser/{id}/', serverError)
+    api.get('/api/user/planninguser/{id}/', serverError)
 
     await mountPlanningForm({ pk: 21 })
 
@@ -204,7 +204,7 @@ describe('PlanningUserForm, editing a planning user', () => {
   })
 
   test('tells the user when the update fails, and stays on the form', async () => {
-    api.patch('/api/company/planninguser/{id}/', serverError)
+    api.patch('/api/user/planninguser/{id}/', serverError)
     const wrapper = await mountPlanningForm({ pk: 21 })
 
     await wrapper.get('#planninguser_first_name').setValue('Jonathan')

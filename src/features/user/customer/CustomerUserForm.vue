@@ -161,7 +161,7 @@ const {
   CustomerUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: Api.CompanyCustomeruser,
+  resource: Api.UserCustomeruser,
   empty: emptyCustomerUser,
   fromRecord: customerUserFromRecord,
   validate: validateCustomerUserForm,

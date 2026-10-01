@@ -8,7 +8,7 @@ import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
 const api = installApiSeam()
-const endpoint = '/api/company/partner/'
+const endpoint = '/api/partner/partner/'
 
 const routes = [
   { name: 'partner-request-add', path: '/company/partners/requests/form', component: { template: '<div />' } },

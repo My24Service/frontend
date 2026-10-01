@@ -76,8 +76,8 @@ function shaped(values: EngineerEventTypeFormValues): Record<string, unknown> {
  * `event_type` is required; the edit then sends the same three keys as a
  * PATCH, which declares them all.
  */
-export const engineerEventTypeWrite = writeContract(Api.CompanyEngineerEventType, {
-  validateWith: Api.CompanyEngineerEventType.create.body,
+export const engineerEventTypeWrite = writeContract(Api.UserEngineerEventType, {
+  validateWith: Api.UserEngineerEventType.create.body,
   shape: shaped,
   labels: FIELD_LABELS,
   messages: FIELD_MESSAGES,

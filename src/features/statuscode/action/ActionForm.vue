@@ -292,7 +292,7 @@ const actionTypes = computed(() => actionTypesFor(props.codeType, {hasGripp: has
 // partners, for the order type's copy action --------------------------------
 
 const partnersQuery = useQuery(() => ({
-  ...Api.CompanyPartner.list.options({query: {page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
+  ...Api.PartnerPartner.list.options({query: {page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
   enabled: props.codeType === 'order',
 }))
 

@@ -65,7 +65,7 @@ function shaped(values: ImportFormValues) {
  * the name is optional but not blank, and this form always sends it, so a
  * blank one is refused either way.
  */
-export const importWrite = writeContract(Api.CompanyImport, {
+export const importWrite = writeContract(Api.ImportingImport, {
   shape: shaped,
   labels: FIELD_LABELS,
   messages: FIELD_MESSAGES,

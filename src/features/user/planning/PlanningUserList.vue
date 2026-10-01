@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-planning-user-modal',
         confirmText: $trans('Are you sure you want to delete this planning user?'),
-        resource: Api.CompanyPlanninguser,
+        resource: Api.UserPlanninguser,
         deletedDetail: $trans('planning user has been deleted'),
         deleteError: $trans('Error deleting planning user'),
       }"
@@ -79,7 +79,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<PlanningUserRow>({
   key: 'planning-user-table',
   columns,
-  resource: Api.CompanyPlanninguser,
+  resource: Api.UserPlanninguser,
   urlSync: true,
   loadError: $trans('Error loading planning users'),
 })

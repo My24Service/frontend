@@ -52,7 +52,7 @@ beforeEach(() => {
   api.post('/api/statuscode/action/', ACTION)
   api.patch('/api/statuscode/action/{id}/', ACTION)
   api.delete('/api/statuscode/action/{id}/', noContent)
-  api.get('/api/company/partner/', partnerPage())
+  api.get('/api/partner/partner/', partnerPage())
 })
 
 async function mountActionForm({ codeType = 'quotation', fromSettings = false, pk = null, statuscodePk = null, auth = {}, main = {} } = {}) {
@@ -170,7 +170,7 @@ describe('ActionForm, the action types per code type', () => {
 
     expect(typeOptions(wrapper)).toEqual(['email', 'email_assigned', 'copy', 'status', 'email_workorders', 'send_sms', 'send_fcm'])
     expect(api.requests()).toEqual([
-      { method: 'get', path: '/api/company/partner/', query: { page_size: '1000' } },
+      { method: 'get', path: '/api/partner/partner/', query: { page_size: '1000' } },
     ])
   })
 

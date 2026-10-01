@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-engineer-user-modal',
         confirmText: $trans('Are you sure you want to delete this engineer?'),
-        resource: Api.CompanyEngineer,
+        resource: Api.UserEngineer,
         deletedDetail: $trans('Engineer has been deleted'),
         deleteError: $trans('Error deleting engineer'),
       }"
@@ -80,7 +80,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<EngineerUserRow>({
   key: 'engineer-user-table',
   columns,
-  resource: Api.CompanyEngineer,
+  resource: Api.UserEngineer,
   urlSync: true,
   loadError: $trans('Error loading engineers'),
 })

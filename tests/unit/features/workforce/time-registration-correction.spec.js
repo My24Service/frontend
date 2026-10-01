@@ -10,8 +10,8 @@ import { modal } from '../../support/modal.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
 
 const api = installApiSeam()
-const endpoint = '/api/company/time-registration/'
-const correction = '/api/company/time-registration/time-correction/{id}/'
+const endpoint = '/api/workforce/time-registration/'
+const correction = '/api/workforce/time-registration/time-correction/{id}/'
 const TENANT = {memberInfo: {companycode: 'acme'}}
 
 moment.locale('nl')
@@ -121,7 +121,7 @@ describe('TimeRegistration correction', () => {
     expect(patches()).toEqual([
       {
         method: 'patch',
-        path: '/api/company/time-registration/time-correction/12/',
+        path: '/api/workforce/time-registration/time-correction/12/',
         query: {},
         body: {
           source: 'company',

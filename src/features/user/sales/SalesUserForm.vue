@@ -102,7 +102,7 @@ const {
   SalesUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: Api.CompanySalesuser,
+  resource: Api.UserSalesuser,
   empty: () => ({...emptySalesUser()}),
   fromRecord: salesUserFromRecord,
   validate: validateSalesUserForm,

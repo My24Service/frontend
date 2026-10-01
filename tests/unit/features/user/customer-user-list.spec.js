@@ -93,8 +93,8 @@ function resetUrl() {
 
 beforeEach(() => {
   resetUrl()
-  api.get('/api/company/customeruser/', customerPage())
-  api.delete('/api/company/customeruser/{id}/', noContent)
+  api.get('/api/user/customeruser/', customerPage())
+  api.delete('/api/user/customeruser/{id}/', noContent)
 })
 
 /** Mount the converted list. */
@@ -114,7 +114,7 @@ describe('CustomerUserList, wire contract', () => {
     await mountCustomerList()
 
     expect(api.requests().at(-1)).toMatchObject({
-      path: '/api/company/customeruser/',
+      path: '/api/user/customeruser/',
       query: { page: '1', page_size: '20' },
     })
   })
@@ -223,14 +223,14 @@ describe('CustomerUserList URL mirroring', () => {
 
 describe('CustomerUserList loading, empty and error states', () => {
   test('says so when the backend returned nothing', async () => {
-    api.get('/api/company/customeruser/', paginated([]))
+    api.get('/api/user/customeruser/', paginated([]))
     const wrapper = await mountCustomerList()
 
     expect(wrapper.text()).toContain('No customer users found')
   })
 
   test('tells the user when the list cannot be loaded', async () => {
-    api.get('/api/company/customeruser/', serverError)
+    api.get('/api/user/customeruser/', serverError)
 
     await mountCustomerList()
 
@@ -248,7 +248,7 @@ describe('CustomerUserList delete', () => {
     await settle()
 
     const deleteSent = api.requests().find((sent) => sent.method === 'delete')
-    expect(deleteSent).toMatchObject({ path: '/api/company/customeruser/31/' })
+    expect(deleteSent).toMatchObject({ path: '/api/user/customeruser/31/' })
     expect(toasts().map((toast) => toast.body)).toContain('Customer user has been deleted')
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)

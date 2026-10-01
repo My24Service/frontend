@@ -34,8 +34,8 @@
       :delete-modal="{
         modalId: 'delete-received-partner-request-modal',
         confirmText: $trans('Are you sure you want to delete this partner request?'),
-        resource: Api.CompanyPartnerRequest,
-        invalidate: (queryClient) => Api.CompanyPartnerRequestReceived.invalidate(queryClient),
+        resource: Api.PartnerPartnerRequest,
+        invalidate: (queryClient) => Api.PartnerPartnerRequestReceived.invalidate(queryClient),
         deletedDetail: $trans('Partner request has been deleted'),
         deleteError: $trans('Error deleting partner request'),
       }"
@@ -131,7 +131,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<RequestRow>({
   key: 'partner-requests-received-table',
   columns,
-  resource: Api.CompanyPartnerRequestReceived,
+  resource: Api.PartnerPartnerRequestReceived,
   urlSync: true,
   loadError: $trans('Error loading partner requests received'),
 })
@@ -139,11 +139,11 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
 const { confirm: showAcceptModal, handleOk: handleAcceptOk } = useConfirmedAction({
   modalRefName: 'acceptModal',
   mutationOptions: () => ({
-    ...Api.CompanyPartnerRequest.extras.acceptPartialUpdate.mutation(),
+    ...Api.PartnerPartnerRequest.extras.acceptPartialUpdate.mutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Accepted'), $trans('Partner request has been accepted'))
-      await Api.CompanyPartnerRequestReceived.invalidate(queryClient)
-      await Api.CompanyPartner.invalidate(queryClient)
+      await Api.PartnerPartnerRequestReceived.invalidate(queryClient)
+      await Api.PartnerPartner.invalidate(queryClient)
     },
     onError: () => {
       errorToast(toast, $trans('Error accepting partner request'))
@@ -154,10 +154,10 @@ const { confirm: showAcceptModal, handleOk: handleAcceptOk } = useConfirmedActio
 const { confirm: showRejectModal, handleOk: handleRejectOk } = useConfirmedAction({
   modalRefName: 'rejectModal',
   mutationOptions: () => ({
-    ...Api.CompanyPartnerRequest.extras.rejectPartialUpdate.mutation(),
+    ...Api.PartnerPartnerRequest.extras.rejectPartialUpdate.mutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Rejected'), $trans('Partner request has been rejected'))
-      await Api.CompanyPartnerRequestReceived.invalidate(queryClient)
+      await Api.PartnerPartnerRequestReceived.invalidate(queryClient)
     },
     onError: () => {
       errorToast(toast, $trans('Error rejecting partner request'))

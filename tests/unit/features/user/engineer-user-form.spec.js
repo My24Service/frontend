@@ -56,12 +56,12 @@ beforeEach(() => {
   // The username probe asks the generated op, so its request lands on the
   // strict seam like every other read: answer it available here.
   api.get('/api/company/username-exists/', { available: true })
-  api.get('/api/company/engineer/', { count: 0, next: null, previous: null, results: [] })
-  api.get('/api/company/engineer/{id}/', RECORD)
+  api.get('/api/user/engineer/', { count: 0, next: null, previous: null, results: [] })
+  api.get('/api/user/engineer/{id}/', RECORD)
   api.get('/api/inventory/stock-location/', paginated(LOCATIONS))
-  api.post('/api/company/engineer/', RECORD)
+  api.post('/api/user/engineer/', RECORD)
   api.post('/api/inventory/stock-location/', NEW_LOCATION)
-  api.patch('/api/company/engineer/{id}/', RECORD)
+  api.patch('/api/user/engineer/{id}/', RECORD)
 })
 
 async function mountEngineerForm(props = {}) {
@@ -112,7 +112,7 @@ function refused(wrapper, text) {
 }
 
 function engineerPosts() {
-  return api.requests().filter((sent) => sent.method === 'post' && sent.path === '/api/company/engineer/')
+  return api.requests().filter((sent) => sent.method === 'post' && sent.path === '/api/user/engineer/')
 }
 
 describe('EngineerUserForm, creating an engineer', () => {
@@ -210,7 +210,7 @@ describe('EngineerUserForm, creating an engineer', () => {
   })
 
   test('tells the user when the create fails, and stays on the form', async () => {
-    api.post('/api/company/engineer/', serverError)
+    api.post('/api/user/engineer/', serverError)
     const wrapper = await mountEngineerForm()
 
     await fillCreate(wrapper)
@@ -291,7 +291,7 @@ describe('EngineerUserForm, editing an engineer', () => {
   })
 
   test('tells the user when the record cannot be fetched', async () => {
-    api.get('/api/company/engineer/{id}/', serverError)
+    api.get('/api/user/engineer/{id}/', serverError)
 
     await mountEngineerForm({ pk: 41 })
 
@@ -299,7 +299,7 @@ describe('EngineerUserForm, editing an engineer', () => {
   })
 
   test('tells the user when the update fails, and stays on the form', async () => {
-    api.patch('/api/company/engineer/{id}/', serverError)
+    api.patch('/api/user/engineer/{id}/', serverError)
     const wrapper = await mountEngineerForm({ pk: 41 })
 
     await wrapper.get('#engineer_first_name').setValue('Jonathan')

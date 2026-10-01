@@ -97,7 +97,7 @@ const { toast: create, queryClient } = useCommon()
 // rather than rejecting it, so this is the most one response can carry.
 
 const partnersQuery = useQuery(
-  Api.CompanyPartner.list.options({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
+  Api.PartnerPartner.list.options({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
 )
 
 const branchPartners = computed(() => {
@@ -116,7 +116,7 @@ const branchPartners = computed(() => {
 const hasBranchPartners = computed(() => branchPartners.value.length > 1)
 
 const branchesQuery = useQuery(() => ({
-  ...Api.CompanyPartner.extras.branchesRetrieve.options({path: {id: values.value.branch_partner as number}}),
+  ...Api.PartnerPartner.extras.branchesRetrieve.options({path: {id: values.value.branch_partner as number}}),
 
   enabled: values.value.branch_partner != null,
 }))
@@ -142,14 +142,14 @@ watch(
 
 function invalidateBranches() {
   return queryClient.invalidateQueries({
-    queryKey: Api.CompanyPartner.extras.branchesRetrieve.queryKey(
+    queryKey: Api.PartnerPartner.extras.branchesRetrieve.queryKey(
       {path: {id: values.value.branch_partner as number}},
     ),
   })
 }
 
 const copyOrdersMutation = useMutation({
-  ...Api.CompanyPartner.extras.copyCustomerOrdersCreate.mutation(),
+  ...Api.PartnerPartner.extras.copyCustomerOrdersCreate.mutation(),
   onSuccess: async () => {
     infoToast(create, $trans('Synced'), $trans('Orders synced'))
     await invalidateBranches()
@@ -176,7 +176,7 @@ async function syncOrders() {
 }
 
 const createBranchMutation = useMutation({
-  ...Api.CompanyPartner.extras.branchCreateFromCustomerCreate.mutation(),
+  ...Api.PartnerPartner.extras.branchCreateFromCustomerCreate.mutation(),
   onSuccess: async (result) => {
 
     values.value.branch_id = result.branch.id

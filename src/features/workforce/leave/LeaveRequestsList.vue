@@ -108,7 +108,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'leave-request-table',
   columns,
   enableSorting: false,
-  resource: Api.CompanyUserLeaveHoursAdminAllNotAccepted,
+  resource: Api.WorkforceUserLeaveHoursAdminAllNotAccepted,
   urlSync: true,
   loadError: $trans('Error loading leave requests'),
 })
@@ -122,10 +122,10 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
 const {confirm: showAcceptModal, handleOk: handleAcceptOk} = useConfirmedAction({
   modalRefName: 'accept-leave-modal',
   mutationOptions: () => ({
-    ...Api.CompanyUserLeaveHoursAdmin.extras.setAcceptedCreate.mutation(),
+    ...Api.WorkforceUserLeaveHoursAdmin.extras.setAcceptedCreate.mutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Accepted'), $trans('Leave as been accepted'))
-      await Api.CompanyUserLeaveHoursAdmin.invalidate(queryClient)
+      await Api.WorkforceUserLeaveHoursAdmin.invalidate(queryClient)
     },
     onError: () => errorToast(toast, $trans('Error accepting leave')),
   }),
@@ -134,10 +134,10 @@ const {confirm: showAcceptModal, handleOk: handleAcceptOk} = useConfirmedAction(
 const {confirm: showRejectModal, handleOk: handleRejectOk} = useConfirmedAction({
   modalRefName: 'reject-leave-modal',
   mutationOptions: () => ({
-    ...Api.CompanyUserLeaveHoursAdmin.extras.setRejectedCreate.mutation(),
+    ...Api.WorkforceUserLeaveHoursAdmin.extras.setRejectedCreate.mutation(),
     onSuccess: async () => {
       infoToast(toast, $trans('Rejected'), $trans('Leave as been rejected'))
-      await Api.CompanyUserLeaveHoursAdmin.invalidate(queryClient)
+      await Api.WorkforceUserLeaveHoursAdmin.invalidate(queryClient)
     },
     onError: () => errorToast(toast, $trans('Error rejecting leave')),
   }),

@@ -78,7 +78,7 @@ import { invalidateDispatchBoard } from '../invalidation'
  * The "Attach order" modal the events list mounts: pick the customer whose
  * address the order is for, and the modal creates the order, assigns it to the
  * engineer the event belongs to, and writes the assignment onto the event —
- * in **one** request (`companyEngineereventCreateOrderCreate`).
+ * in **one** request (`userEngineereventCreateOrderCreate`).
  *
  * It used to be three, in sequence: the order create (`orderOrderCreate`), the
  * assign through `useOrderAssignment` (the Shim `src/models/mobile/Assign.js`
@@ -160,7 +160,7 @@ const {term, options: customers, select: selectCustomer} = useOwnerPicker(
 
 // The one write -------------------------------------------------------------
 
-const createOrder = useMutation({...Api.CompanyEngineerevent.extras.createOrderCreate.mutation()})
+const createOrder = useMutation({...Api.UserEngineerevent.extras.createOrderCreate.mutation()})
 
 /**
  * The body of the order this modal means: what it filled, today's dates, and
@@ -198,7 +198,7 @@ function orderBody(values: OrderValues) {
  * Open the modal for one event and its engineer.
  *
  * The engineer is read through the generated query rather than held: the row
- * carries the engineer's *user* id, and `/api/company/engineer/{id}/` is the
+ * carries the engineer's *user* id, and `/api/user/engineer/{id}/` is the
  * `auth_models.User` viewset (my24service `apps/user/views.py:590`).
  *
  * It is the modal's open-time step, not part of the write: the endpoint below
@@ -209,7 +209,7 @@ function orderBody(values: OrderValues) {
 async function show(eventId_: number, engineerUserId: number) {
   eventId.value = eventId_
   engineer.value = await queryClient.fetchQuery(
-    Api.CompanyEngineer.retrieve.options({path: {id: engineerUserId}}),
+    Api.UserEngineer.retrieve.options({path: {id: engineerUserId}}),
   )
   modalRef.value?.show()
 }
@@ -249,7 +249,7 @@ async function submitForm() {
     // the board goes stale here exactly as it did while the assign was a
     // request of its own; the events list redraws the row with its order.
     await invalidateDispatchBoard(queryClient)
-    await Api.CompanyEngineerevent.invalidate(queryClient)
+    await Api.UserEngineerevent.invalidate(queryClient)
 
     order.value = emptyOrder()
     isLoading.value = false

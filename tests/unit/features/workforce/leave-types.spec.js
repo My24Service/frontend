@@ -9,7 +9,7 @@ import { modal } from '../../support/modal.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
 
 const api = installApiSeam()
-const endpoint = '/api/company/leave-type/'
+const endpoint = '/api/workforce/leave-type/'
 const modalId = 'add-edit-leave-type-modal'
 
 function leaveType(overrides = {}) {

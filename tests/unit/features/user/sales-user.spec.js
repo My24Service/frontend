@@ -85,11 +85,11 @@ beforeEach(() => {
   // The username probe asks the generated op, so its request lands on the
   // strict seam like every other read: answer it available here.
   api.get('/api/company/username-exists/', { available: true })
-  api.get('/api/company/salesuser/', salesPage())
-  api.get('/api/company/salesuser/{id}/', RECORD)
-  api.post('/api/company/salesuser/', RECORD)
-  api.patch('/api/company/salesuser/{id}/', RECORD)
-  api.delete('/api/company/salesuser/{id}/', noContent)
+  api.get('/api/user/salesuser/', salesPage())
+  api.get('/api/user/salesuser/{id}/', RECORD)
+  api.post('/api/user/salesuser/', RECORD)
+  api.patch('/api/user/salesuser/{id}/', RECORD)
+  api.delete('/api/user/salesuser/{id}/', noContent)
 })
 
 describe('SalesUserList, wire contract', () => {
@@ -97,7 +97,7 @@ describe('SalesUserList, wire contract', () => {
     await mountSalesList()
 
     expect(api.requests().at(-1)).toMatchObject({
-      path: '/api/company/salesuser/',
+      path: '/api/user/salesuser/',
       query: { page: '1', page_size: '20' },
     })
   })
@@ -195,14 +195,14 @@ describe('SalesUserList URL mirroring', () => {
 
 describe('SalesUserList loading, empty and error states', () => {
   test('says so when the backend returned nothing', async () => {
-    api.get('/api/company/salesuser/', paginated([]))
+    api.get('/api/user/salesuser/', paginated([]))
     const wrapper = await mountSalesList()
 
     expect(wrapper.text()).toContain('No sales users found')
   })
 
   test('tells the user when the list cannot be loaded', async () => {
-    api.get('/api/company/salesuser/', serverError)
+    api.get('/api/user/salesuser/', serverError)
 
     await mountSalesList()
 
@@ -220,7 +220,7 @@ describe('SalesUserList delete', () => {
     await settle()
 
     const deleteSent = api.requests().find((sent) => sent.method === 'delete')
-    expect(deleteSent).toMatchObject({ path: '/api/company/salesuser/11/' })
+    expect(deleteSent).toMatchObject({ path: '/api/user/salesuser/11/' })
     expect(toasts().map((toast) => toast.body)).toContain('Sales user has been deleted')
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)
@@ -336,7 +336,7 @@ describe('SalesUserForm, creating a sales user', () => {
   })
 
   test('tells the user when the create fails, and stays on the form', async () => {
-    api.post('/api/company/salesuser/', serverError)
+    api.post('/api/user/salesuser/', serverError)
     const wrapper = await mountSalesForm()
 
     await fillCreate(wrapper)
@@ -389,7 +389,7 @@ describe('SalesUserForm, editing a sales user', () => {
   })
 
   test('tells the user when the record cannot be fetched', async () => {
-    api.get('/api/company/salesuser/{id}/', serverError)
+    api.get('/api/user/salesuser/{id}/', serverError)
 
     await mountSalesForm({ pk: 11 })
 
@@ -397,7 +397,7 @@ describe('SalesUserForm, editing a sales user', () => {
   })
 
   test('tells the user when the update fails, and stays on the form', async () => {
-    api.patch('/api/company/salesuser/{id}/', serverError)
+    api.patch('/api/user/salesuser/{id}/', serverError)
     const wrapper = await mountSalesForm({ pk: 11 })
 
     await wrapper.get('#salesuser_first_name').setValue('Jonathan')

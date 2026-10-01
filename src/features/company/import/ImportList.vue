@@ -25,7 +25,7 @@
       :delete-modal="{
         modalId: 'delete-company-import-modal',
         confirmText: $trans('Are you sure you want to delete this import?'),
-        resource: Api.CompanyImport,
+        resource: Api.ImportingImport,
         deletedDetail: $trans('Import has been deleted'),
         deleteError: $trans('Error deleting import'),
       }"
@@ -142,12 +142,12 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
   // `ordering` - the headers stay non-sortable rather than rendering controls
   // nothing honours.
   enableSorting: false,
-  resource: Api.CompanyImport,
+  resource: Api.ImportingImport,
   urlSync: true,
   loadError: $trans('Error loading imports'),
 })
 
-const revertMutation = useMutation(Api.CompanyImport.extras.revertCreate.mutation())
+const revertMutation = useMutation(Api.ImportingImport.extras.revertCreate.mutation())
 
 function showRevertModal(id: number) {
   revertPk.value = id
@@ -163,7 +163,7 @@ async function revertImport() {
   try {
     await revertMutation.mutateAsync({ path: { id: revertPk.value } })
     infoToast(toast, $trans('Reverted'), $trans('Import has been reverted'))
-    await Api.CompanyImport.invalidate(queryClient)
+    await Api.ImportingImport.invalidate(queryClient)
     revertModal.value?.hide()
   } catch {
     errorToast(toast, $trans('Error reverting import'))

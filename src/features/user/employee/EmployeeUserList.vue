@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-employee-user-modal',
         confirmText: $trans('Are you sure you want to delete this employee?'),
-        resource: Api.CompanyEmployeeuser,
+        resource: Api.UserEmployeeuser,
         deletedDetail: $trans('Employee has been deleted'),
         deleteError: $trans('Error deleting employee'),
       }"
@@ -81,7 +81,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<EmployeeUserRow>({
   key: 'employee-user-table',
   columns,
-  resource: Api.CompanyEmployeeuser,
+  resource: Api.UserEmployeeuser,
   urlSync: true,
   loadError: $trans('Error loading employees'),
 })

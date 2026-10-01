@@ -102,7 +102,7 @@ const map = shallowRef<HereMap | null>(null)
 const markerGroup = shallowRef<HereMarkerGroup | null>(null)
 const ui = shallowRef<HereUi | null>(null)
 
-const locationsQuery = useQuery(() => ({...Api.CompanyEngineerGetLocations.list.options()}))
+const locationsQuery = useQuery(() => ({...Api.UserEngineerGetLocations.list.options()}))
 
 const locations = computed<Api.EngineerLocation[]>(() => locationsQuery.data.value ?? [])
 

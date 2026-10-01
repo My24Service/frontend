@@ -16,7 +16,7 @@ import {
  * form does not carry the field and the parse never sends it.
  */
 export type SickLeaveFormValues =
-  Pick<Api.CompanyUserSickLeaveAdmin.CreateInput, 'start_date'>
+  Pick<Api.WorkforceUserSickLeaveAdmin.CreateInput, 'start_date'>
   & {
     // a picker that is empty rather than absent until chosen
     user: number | null
@@ -55,7 +55,7 @@ export const FIELD_MESSAGES = {
 } as const satisfies FieldMessages<keyof SickLeaveFieldErrors>
 
 /** `user` is already declared required; the date is optional on the wire. */
-const vSickLeaveBody = v.required(Api.CompanyUserSickLeaveAdmin.create.body, ['start_date'])
+const vSickLeaveBody = v.required(Api.WorkforceUserSickLeaveAdmin.create.body, ['start_date'])
 
 /**
  * Validation reads the strengthened copy above - the ledger's rule: `user` is
@@ -66,7 +66,7 @@ const vSickLeaveBody = v.required(Api.CompanyUserSickLeaveAdmin.create.body, ['s
  * PATCHed the whole loaded record back, `user_full_name`, `created_by` and the
  * status fields included.
  */
-export const sickLeaveWrite = writeContract(Api.CompanyUserSickLeaveAdmin, {
+export const sickLeaveWrite = writeContract(Api.WorkforceUserSickLeaveAdmin, {
   validateWith: vSickLeaveBody,
   labels: FIELD_LABELS,
   messages: FIELD_MESSAGES,

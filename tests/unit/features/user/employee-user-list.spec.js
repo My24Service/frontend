@@ -26,8 +26,8 @@ const api = installApiSeam()
 
 beforeEach(() => {
   resetUrl()
-  api.get('/api/company/employeeuser/', employeePage())
-  api.delete('/api/company/employeeuser/{id}/', noContent)
+  api.get('/api/user/employeeuser/', employeePage())
+  api.delete('/api/user/employeeuser/{id}/', noContent)
 })
 
 afterEach(() => {
@@ -94,7 +94,7 @@ describe('EmployeeUserList, wire contract', () => {
     await mountEmployeeList()
 
     expect(api.requests().at(-1)).toMatchObject({
-      path: '/api/company/employeeuser/',
+      path: '/api/user/employeeuser/',
       query: { page: '1', page_size: '20' },
     })
   })
@@ -212,14 +212,14 @@ describe('EmployeeUserList URL mirroring', () => {
 
 describe('EmployeeUserList loading, empty and error states', () => {
   test('says so when the backend returned nothing', async () => {
-    api.get('/api/company/employeeuser/', paginated([]))
+    api.get('/api/user/employeeuser/', paginated([]))
     const wrapper = await mountEmployeeList()
 
     expect(wrapper.text()).toContain('No employees found')
   })
 
   test('tells the user when the list cannot be loaded', async () => {
-    api.get('/api/company/employeeuser/', serverError)
+    api.get('/api/user/employeeuser/', serverError)
 
     await mountEmployeeList()
 
@@ -237,7 +237,7 @@ describe('EmployeeUserList delete', () => {
     await settle()
 
     const deleteSent = api.requests().find((sent) => sent.method === 'delete')
-    expect(deleteSent).toMatchObject({ path: '/api/company/employeeuser/31/' })
+    expect(deleteSent).toMatchObject({ path: '/api/user/employeeuser/31/' })
     expect(toasts().map((toast) => toast.body)).toContain('Employee has been deleted')
     const listFetches = api.requests().filter((sent) => sent.method === 'get')
     expect(listFetches.length).toBeGreaterThan(1)

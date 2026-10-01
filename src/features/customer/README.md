@@ -122,7 +122,7 @@ whole collection in one request instead of the API's first page of 20:
 
 | Screen | Read | `page_size` |
 |---|---|---|
-| Form | `/api/company/partner/` (the branch-partner select) | 1000 |
+| Form | `/api/partner/partner/` (the branch-partner select) | 1000 |
 | Documents panel | `/api/customer/document/` | 1000 |
 | Contract form | `/api/customer/maintenance-equipment/` (the staged rows) | 1000 |
 | Contract view | `/api/customer/maintenance-equipment/` | 1000 |

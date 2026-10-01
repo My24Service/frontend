@@ -433,10 +433,31 @@ function loadMobilePaths(args) {
   return { paths: expandMobile(snap), source: `snapshot ${relative(ROOT, MOBILE_SNAPSHOT)} (${snap.generatedAt})` }
 }
 
+/**
+ * The apps split out of company, in the order the backend's MovedPathMiddleware
+ * tries them: a request for `/api/company/<rest>` that company does not answer
+ * is served by the first of these that answers `/api/<app>/<rest>`. The mobile
+ * apps still call the old paths, so their callers are credited the same way.
+ */
+const MOVED_FROM_COMPANY = ['user', 'workforce', 'partner', 'importing']
+
 function matchMobile(ops, paths) {
   const used = new Map()
+  const hits = (p) => [...ops].filter(([, op]) => matches('ANY', p, op))
   for (const p of paths) {
-    for (const [key, op] of ops) if (matches('ANY', p, op)) used.set(key, [...(used.get(key) ?? []), `flutter:${p}`])
+    let found = hits(p)
+    let label = `flutter:${p}`
+    if (!found.length && p.startsWith('/company/')) {
+      for (const app of MOVED_FROM_COMPANY) {
+        const moved = `/${app}/${p.slice('/company/'.length)}`
+        found = hits(moved)
+        if (found.length) {
+          label = `flutter:${p} (served at ${moved})`
+          break
+        }
+      }
+    }
+    for (const [key] of found) used.set(key, [...(used.get(key) ?? []), label])
   }
   return used
 }

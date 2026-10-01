@@ -25,7 +25,7 @@
       :delete-modal="{
         modalId: 'delete-api-user-modal',
         confirmText: $trans('Are you sure you want to delete this API user?'),
-        resource: Api.CompanyApiuser,
+        resource: Api.UserApiuser,
         deletedDetail: $trans('API user has been deleted'),
         deleteError: $trans('Error deleting API user'),
       }"
@@ -145,7 +145,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ApiUserRow>({
   key: 'api-user-table',
   columns,
-  resource: Api.CompanyApiuser,
+  resource: Api.UserApiuser,
   urlSync: true,
   loadError: $trans('Error loading API users'),
 })
@@ -156,10 +156,10 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
 const {confirm: showRevokeModal, handleOk: handleRevokeOk} = useConfirmedAction({
   modalRefName: 'revokeModal',
   mutationOptions: () => ({
-    ...Api.CompanyApiuser.extras.revokeCreate.mutation(),
+    ...Api.UserApiuser.extras.revokeCreate.mutation(),
     onSuccess: async () => {
       infoToast(create, $trans('Revoked'), $trans('API key has been revoked'))
-      await queryClient.invalidateQueries({queryKey: Api.CompanyApiuser.list.queryKey()})
+      await queryClient.invalidateQueries({queryKey: Api.UserApiuser.list.queryKey()})
     },
     onError: () => {
       errorToast(create, $trans('Error revoking API key'))

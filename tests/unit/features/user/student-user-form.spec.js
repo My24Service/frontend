@@ -61,10 +61,10 @@ beforeEach(() => {
   // The username probe asks the generated op, so its request lands on the
   // strict seam like every other read: answer it available here.
   api.get('/api/company/username-exists/', { available: true })
-  api.get('/api/company/studentuser/', { count: 0, next: null, previous: null, results: [] })
-  api.get('/api/company/studentuser/{id}/', RECORD)
-  api.post('/api/company/studentuser/', RECORD)
-  api.patch('/api/company/studentuser/{id}/', RECORD)
+  api.get('/api/user/studentuser/', { count: 0, next: null, previous: null, results: [] })
+  api.get('/api/user/studentuser/{id}/', RECORD)
+  api.post('/api/user/studentuser/', RECORD)
+  api.patch('/api/user/studentuser/{id}/', RECORD)
 })
 
 async function mountStudentForm(props = {}) {
@@ -209,7 +209,7 @@ describe('StudentUserForm, creating a student user', () => {
   })
 
   test('tells the user when the create fails, and stays on the form', async () => {
-    api.post('/api/company/studentuser/', serverError)
+    api.post('/api/user/studentuser/', serverError)
     const wrapper = await mountStudentForm()
 
     await fillCreate(wrapper)
@@ -267,7 +267,7 @@ describe('StudentUserForm, editing a student user', () => {
   })
 
   test('tells the user when the record cannot be fetched', async () => {
-    api.get('/api/company/studentuser/{id}/', serverError)
+    api.get('/api/user/studentuser/{id}/', serverError)
 
     await mountStudentForm({ pk: 41 })
 
@@ -275,7 +275,7 @@ describe('StudentUserForm, editing a student user', () => {
   })
 
   test('tells the user when the update fails, and stays on the form', async () => {
-    api.patch('/api/company/studentuser/{id}/', serverError)
+    api.patch('/api/user/studentuser/{id}/', serverError)
     const wrapper = await mountStudentForm({ pk: 41 })
 
     await wrapper.get('#studentuser_first_name').setValue('Jonathan')

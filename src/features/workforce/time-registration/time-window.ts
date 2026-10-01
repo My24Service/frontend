@@ -21,8 +21,8 @@ export function timeWindowQuery({
   /** The anchor date, YYYY-MM-DD. */
   anchor: string
   userId?: string | number | null
-}): Api.CompanyTimeRegistrationRetrieveData['query'] {
-  const query: NonNullable<Api.CompanyTimeRegistrationRetrieveData['query']> = {
+}): Api.WorkforceTimeRegistrationRetrieveData['query'] {
+  const query: NonNullable<Api.WorkforceTimeRegistrationRetrieveData['query']> = {
     mode,
     start_date: anchor,
   }

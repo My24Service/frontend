@@ -100,7 +100,7 @@ const {
   PlanningUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: Api.CompanyPlanninguser,
+  resource: Api.UserPlanninguser,
   empty: () => ({...emptyPlanningUser()}),
   fromRecord: planningUserFromRecord,
   validate: validatePlanningUserForm,

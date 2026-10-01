@@ -93,7 +93,7 @@ const props = defineProps<{
 
 const { router } = useCommon()
 
-const detailQuery = useQuery(() => Api.CompanyStudentuser.retrieve.options({path: {id: Number(props.pk)}}))
+const detailQuery = useQuery(() => Api.UserStudentuser.retrieve.options({path: {id: Number(props.pk)}}))
 
 useQueryErrorToast(detailQuery.error, $trans('Error loading studentuser'))
 

@@ -146,7 +146,7 @@ const {term, options, loading: searching} = useUserSearch()
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: Api.CompanyUserSickLeaveAdmin,
+  resource: Api.WorkforceUserSickLeaveAdmin,
   empty: () => emptySickLeave(today),
   fromRecord: sickLeaveFromRecord,
   contract: sickLeaveWrite,

@@ -9,7 +9,7 @@ import { modal } from '../../support/modal.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
 
 const api = installApiSeam()
-const endpoint = '/api/company/user-leave-hours/admin/'
+const endpoint = '/api/workforce/user-leave-hours/admin/'
 
 function leave(overrides = {}) {
   return fixtureFor(vUserLeaveHours, {

@@ -244,8 +244,8 @@ the routes verbatim.
 | Workorder | A failed read toasts | The legacy `created()` had no catch; the page stayed blank |
 | Form | Blank optional strings and unpicked ids are absent from the body, not `''`/`null` | The parse output is the body |
 | Form | `service_number` is gone | No serializer ever accepted it; what was typed there was discarded on submit |
-| Form | The engineer picker is the whole select list (`/company/engineer/list-for-select/`), narrowed client-side | One read instead of one per keystroke; the list is short |
-| Form | Sales users come from `/company/salesuser/?q=` | The sales-user resource, rather than the generic user list filtered by type |
+| Form | The engineer picker is the whole select list (`/user/engineer/list-for-select/`), narrowed client-side | One read instead of one per keystroke; the list is short |
+| Form | Sales users come from `/user/salesuser/?q=` | The sales-user resource, rather than the generic user list filtered by type |
 | Form | Documents replay on edit too, with the save | The legacy replayed them on create only and left an edit's panel to its own Save button |
 | Form | A time is sent as `HH:mm:00` | The serializer declares `HH:mm:ss`; the inputs take `HH:mm` |
 | Form | A refused unassign names the engineer in the toast and aborts the save | The legacy toasted and still navigated away |

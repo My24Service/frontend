@@ -16,8 +16,8 @@
       :delete-modal="{
         modalId: 'delete-partner-request-modal',
         confirmText: $trans('Are you sure you want to delete this partner request?'),
-        resource: Api.CompanyPartnerRequest,
-        invalidate: (queryClient) => Api.CompanyPartnerRequestSent.invalidate(queryClient),
+        resource: Api.PartnerPartnerRequest,
+        invalidate: (queryClient) => Api.PartnerPartnerRequestSent.invalidate(queryClient),
         deletedDetail: $trans('Partner request has been deleted'),
         deleteError: $trans('Error deleting partner request'),
       }"
@@ -76,7 +76,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<RequestRow>({
   key: 'partner-requests-sent-table',
   columns,
-  resource: Api.CompanyPartnerRequestSent,
+  resource: Api.PartnerPartnerRequestSent,
   urlSync: true,
   loadError: $trans('Error loading partner requests sent'),
 })
