@@ -465,6 +465,8 @@ import {
   mobileTripStatuscodeRetrieveQueryKey,
   mobileTripTripAvailabilityDetailRetrieveOptions,
   mobileTripTripAvailabilityDetailRetrieveQueryKey,
+  mobileTripTripAvailabilityListOptions,
+  mobileTripTripAvailabilityListQueryKey,
   mobileUnassignUserCreateMutation,
   mobileUnassignUserTripCreateMutation,
   mobileUserOrderAvailabilityCreateMutation,
@@ -498,6 +500,8 @@ import {
   orderDocumentRetrieveQueryKey,
   orderFilterCreateMutation,
   orderFilterDestroyMutation,
+  orderFilterGetBaseFilterOptionsListOptions,
+  orderFilterGetBaseFilterOptionsListQueryKey,
   orderFilterGetExamplesListOptions,
   orderFilterGetExamplesListQueryKey,
   orderFilterListOptions,
@@ -559,6 +563,8 @@ import {
   orderOrderSalesOrdersListQueryKey,
   orderOrderSetOrderAcceptedCreateMutation,
   orderOrderSetOrderRejectedCreateMutation,
+  orderOrderlineAssignedOrderListOptions,
+  orderOrderlineAssignedOrderListQueryKey,
   orderOrderlineCreateMutation,
   orderOrderlineDestroyMutation,
   orderOrderlineLatestWorkordersListOptions,
@@ -1039,15 +1045,12 @@ import {
   vMobileAssignUserCreateBody,
   vMobileAssignUserTripCreateBody,
   vMobileAssignedorderCreateBody,
-  vMobileAssignedorderCreateExtraOrderCreateBody,
   vMobileAssignedorderDetailChangeDatePartialUpdateBody,
   vMobileAssignedorderFinishedListListQuery,
   vMobileAssignedorderListAppListQuery,
   vMobileAssignedorderListQuery,
-  vMobileAssignedorderNoWorkorderFinishedCreateBody,
   vMobileAssignedorderPartialUpdateBody,
   vMobileAssignedorderReportStatuscodeCreateBody,
-  vMobileAssignedorderReportWorkordersSignedCreateBody,
   vMobileAssignedorderSplitCreateBody,
   vMobileAssignedorderWorkorderCreateBody,
   vMobileAssignedorderWorkorderListQuery,
@@ -1076,6 +1079,7 @@ import {
   vMobileTripStatuscodeCreateBody,
   vMobileTripStatuscodeListQuery,
   vMobileTripStatuscodePartialUpdateBody,
+  vMobileTripTripAvailabilityListQuery,
   vMobileUnassignUserCreateBody,
   vMobileUnassignUserTripCreateBody,
   vMobileUserOrderAvailabilityCreateBody,
@@ -1386,6 +1390,7 @@ import type {
   MobileTripStatuscodeAutocompleteListResponse,
   MobileTripStatuscodeListResponse,
   MobileTripStatuscodeRetrieveResponse,
+  MobileTripTripAvailabilityListResponse,
   MobileUserOrderAvailabilityListResponse,
   MobileUserOrderAvailabilityRetrieveResponse,
   MobileUserTripAvailabilityListResponse,
@@ -1394,6 +1399,7 @@ import type {
   OrderCostRetrieveResponse,
   OrderDocumentListResponse,
   OrderDocumentRetrieveResponse,
+  OrderFilterGetBaseFilterOptionsListResponse,
   OrderFilterGetExamplesListResponse,
   OrderFilterListResponse,
   OrderFilterRetrieveResponse,
@@ -1417,6 +1423,7 @@ import type {
   OrderOrderPastListResponse,
   OrderOrderRetrieveResponse,
   OrderOrderSalesOrdersListResponse,
+  OrderOrderlineAssignedOrderListResponse,
   OrderOrderlineLatestWorkordersListResponse,
   OrderOrderlineListResponse,
   OrderOrderlineOrderListResponse,
@@ -2333,7 +2340,8 @@ export const EquipmentEquipmentState = /*#__PURE__*/ resource({
   kind: 'collection',
   id: 'number',
   list: {options: equipmentEquipmentStateListOptions, queryKey: equipmentEquipmentStateListQueryKey},
-  filters: [],
+  filters: ['equipment'] satisfies (keyof EquipmentEquipmentState.ListQuery)[],
+  filterTypes: {equipment: 'integer'},
   create: {mutation: equipmentEquipmentStateCreateMutation, body: vEquipmentEquipmentStateCreateBody},
   reads: ['equipmentEquipmentStateList'],
 })
@@ -3599,7 +3607,7 @@ export const MobileAssignedorder = /*#__PURE__*/ resource({
   destroy: {mutation: mobileAssignedorderDestroyMutation},
   extras: {
     /** `/api/mobile/assignedorder/{id}/create_extra_order/` */
-    createExtraOrderCreate: {mutation: mobileAssignedorderCreateExtraOrderCreateMutation, body: vMobileAssignedorderCreateExtraOrderCreateBody},
+    createExtraOrderCreate: {mutation: mobileAssignedorderCreateExtraOrderCreateMutation},
     /** `/api/mobile/assignedorder/{id}/detail_change_date/` */
     detailChangeDatePartialUpdate: {mutation: mobileAssignedorderDetailChangeDatePartialUpdateMutation, body: vMobileAssignedorderDetailChangeDatePartialUpdateBody},
     /** `/api/mobile/assignedorder/{id}/detail_device/` */
@@ -3607,11 +3615,11 @@ export const MobileAssignedorder = /*#__PURE__*/ resource({
     /** `/api/mobile/assignedorder/{id}/get_workorder_sign_details/` */
     getWorkorderSignDetailsRetrieve: {options: mobileAssignedorderGetWorkorderSignDetailsRetrieveOptions, queryKey: mobileAssignedorderGetWorkorderSignDetailsRetrieveQueryKey},
     /** `/api/mobile/assignedorder/{id}/no_workorder_finished/` */
-    noWorkorderFinishedCreate: {mutation: mobileAssignedorderNoWorkorderFinishedCreateMutation, body: vMobileAssignedorderNoWorkorderFinishedCreateBody},
+    noWorkorderFinishedCreate: {mutation: mobileAssignedorderNoWorkorderFinishedCreateMutation},
     /** `/api/mobile/assignedorder/{id}/report_statuscode/` */
     reportStatuscodeCreate: {mutation: mobileAssignedorderReportStatuscodeCreateMutation, body: vMobileAssignedorderReportStatuscodeCreateBody},
     /** `/api/mobile/assignedorder/{id}/report_workorders_signed/` */
-    reportWorkordersSignedCreate: {mutation: mobileAssignedorderReportWorkordersSignedCreateMutation, body: vMobileAssignedorderReportWorkordersSignedCreateBody},
+    reportWorkordersSignedCreate: {mutation: mobileAssignedorderReportWorkordersSignedCreateMutation},
   },
   reads: ['mobileAssignedorderDetailDeviceRetrieve', 'mobileAssignedorderFinishedListList', 'mobileAssignedorderGetWorkorderSignDetailsRetrieve', 'mobileAssignedorderList', 'mobileAssignedorderListAppList', 'mobileAssignedorderListDeviceAppRetrieve', 'mobileAssignedorderListDeviceRetrieve', 'mobileAssignedorderListTimesheetTotalsRetrieve', 'mobileAssignedorderRetrieve'],
 })
@@ -3860,7 +3868,7 @@ export const MobileTrip = /*#__PURE__*/ resource({
     /** `/api/mobile/trip/{id}/trip_availability_detail/` */
     tripAvailabilityDetailRetrieve: {options: mobileTripTripAvailabilityDetailRetrieveOptions, queryKey: mobileTripTripAvailabilityDetailRetrieveQueryKey},
   },
-  reads: ['mobileTripList', 'mobileTripRetrieve', 'mobileTripTripAvailabilityDetailRetrieve', 'mobileTripTripAvailabilityRetrieve'],
+  reads: ['mobileTripList', 'mobileTripRetrieve', 'mobileTripTripAvailabilityDetailRetrieve', 'mobileTripTripAvailabilityList'],
 })
 
 export declare namespace MobileTrip {
@@ -3988,6 +3996,23 @@ export declare namespace MobileTripStatuscodeAutocomplete {
   export type ListResponse = MobileTripStatuscodeAutocompleteListResponse
   /** The `list` query parameters. */
   export type ListQuery = InferInput<typeof vMobileTripStatuscodeAutocompleteListQuery>
+}
+
+/** `api/mobile/trip/trip_availability` */
+export const MobileTripTripAvailability = /*#__PURE__*/ resource({
+  path: 'api/mobile/trip/trip_availability',
+  kind: 'collection',
+  id: 'number',
+  list: {options: mobileTripTripAvailabilityListOptions, queryKey: mobileTripTripAvailabilityListQueryKey},
+  filters: [],
+  reads: ['mobileTripTripAvailabilityList'],
+})
+
+export declare namespace MobileTripTripAvailability {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripTripAvailabilityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripTripAvailabilityListQuery>
 }
 
 /** `api/mobile/unassign-user` */
@@ -4163,7 +4188,7 @@ export const OrderFilter = /*#__PURE__*/ resource({
   create: {mutation: orderFilterCreateMutation, body: vOrderFilterCreateBody},
   update: {mutation: orderFilterPartialUpdateMutation, body: vOrderFilterPartialUpdateBody},
   destroy: {mutation: orderFilterDestroyMutation},
-  reads: ['orderFilterGetBaseFilterOptionsRetrieve', 'orderFilterGetExamplesList', 'orderFilterGetFieldsRetrieve', 'orderFilterGetNonTextFieldTypesRetrieve', 'orderFilterGetOperatorsRetrieve', 'orderFilterGetStatusFieldsRetrieve', 'orderFilterGetStatusesRetrieve', 'orderFilterList', 'orderFilterRetrieve', 'orderFilterSimpleListList'],
+  reads: ['orderFilterGetBaseFilterOptionsList', 'orderFilterGetExamplesList', 'orderFilterGetFieldsRetrieve', 'orderFilterGetNonTextFieldTypesRetrieve', 'orderFilterGetOperatorsRetrieve', 'orderFilterGetStatusFieldsRetrieve', 'orderFilterGetStatusesRetrieve', 'orderFilterList', 'orderFilterRetrieve', 'orderFilterSimpleListList'],
 })
 
 export declare namespace OrderFilter {
@@ -4181,6 +4206,20 @@ export declare namespace OrderFilter {
   export type UpdateInput = InferInput<typeof vOrderFilterPartialUpdateBody>
   /** The `update` body, as the schema parses it. */
   export type UpdateOutput = InferOutput<typeof vOrderFilterPartialUpdateBody>
+}
+
+/** `api/order/filter/get_base_filter_options` */
+export const OrderFilterGetBaseFilterOptions = /*#__PURE__*/ resource({
+  path: 'api/order/filter/get_base_filter_options',
+  kind: 'collection',
+  id: 'number',
+  list: {options: orderFilterGetBaseFilterOptionsListOptions, queryKey: orderFilterGetBaseFilterOptionsListQueryKey},
+  reads: ['orderFilterGetBaseFilterOptionsList'],
+})
+
+export declare namespace OrderFilterGetBaseFilterOptions {
+  /** What `list` answers with. */
+  export type ListResponse = OrderFilterGetBaseFilterOptionsListResponse
 }
 
 /** `api/order/filter/get_examples` */
@@ -4576,7 +4615,7 @@ export const OrderOrderline = /*#__PURE__*/ resource({
   create: {mutation: orderOrderlineCreateMutation, body: vOrderOrderlineCreateBody},
   update: {mutation: orderOrderlinePartialUpdateMutation, body: vOrderOrderlinePartialUpdateBody},
   destroy: {mutation: orderOrderlineDestroyMutation},
-  reads: ['orderOrderlineAssignedOrderRetrieve', 'orderOrderlineLatestWorkordersList', 'orderOrderlineList', 'orderOrderlineOrderList', 'orderOrderlineRetrieve'],
+  reads: ['orderOrderlineAssignedOrderList', 'orderOrderlineLatestWorkordersList', 'orderOrderlineList', 'orderOrderlineOrderList', 'orderOrderlineRetrieve'],
 })
 
 export declare namespace OrderOrderline {
@@ -4594,6 +4633,20 @@ export declare namespace OrderOrderline {
   export type UpdateInput = InferInput<typeof vOrderOrderlinePartialUpdateBody>
   /** The `update` body, as the schema parses it. */
   export type UpdateOutput = InferOutput<typeof vOrderOrderlinePartialUpdateBody>
+}
+
+/** `api/order/orderline/assigned_order` */
+export const OrderOrderlineAssignedOrder = /*#__PURE__*/ resource({
+  path: 'api/order/orderline/assigned_order',
+  kind: 'collection',
+  id: 'number',
+  list: {options: orderOrderlineAssignedOrderListOptions, queryKey: orderOrderlineAssignedOrderListQueryKey},
+  reads: ['orderOrderlineAssignedOrderList'],
+})
+
+export declare namespace OrderOrderlineAssignedOrder {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderlineAssignedOrderListResponse
 }
 
 /** `api/order/orderline/latest_workorders` */

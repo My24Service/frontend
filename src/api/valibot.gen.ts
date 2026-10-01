@@ -546,10 +546,7 @@ export const vAssignedOrderReportedCodeRowRequest = v.object({
 /**
  * @endpoints
  * Request body:
- *   POST /api/mobile/assignedorder/{id}/create_extra_order/
- *   POST /api/mobile/assignedorder/{id}/no_workorder_finished/
  *   POST /api/mobile/assignedorder/{id}/report_statuscode/
- *   POST /api/mobile/assignedorder/{id}/report_workorders_signed/
  */
 export const vAssignedOrderRequest = v.object({
     engineer: v.nullish(v.pipe(v.number(), v.integer())),
@@ -594,9 +591,6 @@ export const vAssignedOrderUserDataRow = v.object({
  *   GET /api/mobile/assignedorder/{id}/
  *   PATCH /api/mobile/assignedorder/{id}/
  *   POST /api/mobile/assignedorder/split/
- *   POST /api/mobile/assignedorder/{id}/create_extra_order/
- *   POST /api/mobile/assignedorder/{id}/no_workorder_finished/
- *   POST /api/mobile/assignedorder/{id}/report_workorders_signed/
  *
  * Nested in: PaginatedAssignedOrderList
  */
@@ -1158,6 +1152,19 @@ export const vCountResponse = v.object({
 /**
  * @endpoints
  * Response:
+ *   POST /api/mobile/assignedorder/{id}/create_extra_order/
+ */
+/**
+ * {result, new_assigned_order} answered by create_extra_order().
+ */
+export const vCreateExtraOrderResponse = v.object({
+    result: v.boolean(),
+    new_assigned_order: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * @endpoints
+ * Response:
  *   POST /api/teamleader/tl-product-create-link/
  */
 /**
@@ -1167,6 +1174,25 @@ export const vCreateLinkResponse = v.object({
     is_ok: v.boolean(),
     material: v.pipe(v.number(), v.integer()),
     error: v.optional(v.string())
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/order/order/{id}/create_pdf_background/
+ */
+export const vCreatePdfBackgroundRequestRequest = v.object({
+    assignedorder_pk: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/order/order/{id}/create_pdf_background/
+ */
+export const vCreatePdfBackgroundResponse = v.object({
+    result: v.boolean(),
+    status: v.pipe(v.number(), v.integer())
 });
 
 /**
@@ -3618,6 +3644,20 @@ export const vMaterialCreateRequest = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderLineMaterial
+ */
+export const vMaterialMinimal = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    show_name: v.nullable(v.pipe(v.string(), v.readonly())),
+    name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    name_short: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+});
+
+/**
+ * @endpoints
  * Response:
  *   GET /api/inventory/material/total_sales_per_customer/
  */
@@ -4599,7 +4639,8 @@ export const vOrderFilterFields = v.object({
 
 /**
  * @endpoints
- * Not used directly by an endpoint.
+ * Response:
+ *   GET /api/order/filter/get_base_filter_options/
  *
  * Nested in: OrderFilterOperators
  */
@@ -4718,7 +4759,6 @@ export const vOrderLineCreateUpdateRequest = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/order/orderline/assigned_order/{assigned_order_id}/
  *   GET /api/order/orderline/{id}/
  *   PATCH /api/order/orderline/{id}/
  *
@@ -4742,6 +4782,20 @@ export const vOrderLineDetail = v.object({
     maintenance_contract: v.nullish(v.pipe(v.number(), v.integer())),
     equipment: v.nullish(v.pipe(v.number(), v.integer())),
     equipment_location: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/order/orderline/assigned_order/{assigned_order_id}/
+ */
+export const vOrderLineMaterial = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    order: v.pipe(v.number(), v.integer()),
+    product: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    location: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    material: v.nullable(vMaterialMinimal)
 });
 
 /**
@@ -5443,7 +5497,6 @@ export const vOrderMinimalSerializerCounts = v.object({
  * @endpoints
  * Request body:
  *   POST /api/order/order/{id}/assign_me/
- *   POST /api/order/order/{id}/create_pdf_background/
  *   POST /api/order/order/{id}/recreate_pdf_background/
  */
 /**
@@ -8511,7 +8564,7 @@ export const vPurchaseOrderMaterial = v.object({
     material_name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     material_view: vMaterial,
     purchase_order: v.nullish(v.pipe(v.number(), v.integer())),
-    purchase_order_view: vPurchaseOrderView,
+    purchase_order_view: v.nullable(vPurchaseOrderView),
     amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
     remarks: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     modified: v.pipe(v.string(), v.readonly()),
@@ -8667,9 +8720,6 @@ export const vActionRequest = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/order/filter/get_base_filter_options/
- *   GET /api/order/filter/get_non_text_field_types/
- *   GET /api/order/filter/get_status_fields/
  *   GET /api/order/filter/{id}/
  *   PATCH /api/order/filter/{id}/
  *   POST /api/order/filter/
@@ -9425,7 +9475,9 @@ export const vResetPasswordRequest = v.object({
  *   PATCH /api/workforce/time-registration/time-correction/{id}/
  *   POST /api/invoice/invoice/{id}/make_definitive/
  *   POST /api/invoice/invoice/{id}/recreate_pdf/
+ *   POST /api/mobile/assignedorder/{id}/no_workorder_finished/
  *   POST /api/mobile/assignedorder/{id}/report_statuscode/
+ *   POST /api/mobile/assignedorder/{id}/report_workorders_signed/
  *   POST /api/order/order/{id}/recreate_pdf/
  *   POST /api/order/order/{id}/set_order_rejected/
  *   POST /api/quotation/quotation/{id}/make_definitive/
@@ -11227,7 +11279,6 @@ export const vTripStatus = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/mobile/trip/trip_availability/
  *   GET /api/mobile/trip/{id}/
  *   PATCH /api/mobile/trip/{id}/
  *   POST /api/mobile/trip/
@@ -11284,6 +11335,7 @@ export const vTrip = v.object({
  * @endpoints
  * Response:
  *   GET /api/mobile/trip/
+ *   GET /api/mobile/trip/trip_availability/
  */
 export const vPaginatedTripList = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
@@ -11344,8 +11396,6 @@ export const vPatchedTripStatuscodeActionRequest = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/mobile/trip-statuscode-action/operators/
- *   GET /api/mobile/trip-statuscode-action/statusoptions/
  *   GET /api/mobile/trip-statuscode-action/{id}/
  *   PATCH /api/mobile/trip-statuscode-action/{id}/
  *   POST /api/mobile/trip-statuscode-action/
@@ -12497,7 +12547,6 @@ export const vWorkorderUrlPartner = v.object({
  *   GET /api/order/order/maintenance_orders_events/
  *   GET /api/order/order/user_filter_count/
  *   GET /api/order/workorder-data/{id}/
- *   POST /api/order/order/{id}/create_pdf_background/
  *   POST /api/order/order/{id}/recreate_pdf_background/
  *
  * Nested in: CustomerDashboardOrders, DetailDeviceResponse, GetWorkorderSignDetailsResponse, PaginatedOrderList
@@ -14278,6 +14327,18 @@ export const vMaterialCreateWritable = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: OrderLineMaterial
+ */
+export const vMaterialMinimalWritable = v.object({
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    name: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    name_short: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+});
+
+/**
+ * @endpoints
  * No endpoint takes this as a request body; the read const is used instead.
  *
  * Nested in: GetWorkorderSignDetailsResponse, InvoiceView, PaginatedMemberList
@@ -15079,6 +15140,17 @@ export const vOrderLineDetailWritable = v.object({
     maintenance_contract: v.nullish(v.pipe(v.number(), v.integer())),
     equipment: v.nullish(v.pipe(v.number(), v.integer())),
     equipment_location: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ */
+export const vOrderLineMaterialWritable = v.object({
+    order: v.pipe(v.number(), v.integer()),
+    product: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    location: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    amount: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647)))
 });
 
 /**
@@ -18471,7 +18543,9 @@ export const vEquipmentEquipmentExportQrRetrieveQuery = v.object({
 export const vEquipmentEquipmentExportQrRetrieveResponse = v.string();
 
 export const vEquipmentEquipmentStateListQuery = v.object({
-    page: v.optional(v.pipe(v.number(), v.integer()))
+    equipment: v.optional(v.pipe(v.number(), v.integer())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    q: v.optional(v.string())
 });
 
 export const vEquipmentEquipmentStateListResponse = vPaginatedEquipmentStateList;
@@ -19924,13 +19998,11 @@ export const vMobileAssignedorderPartialUpdatePath = v.object({
 
 export const vMobileAssignedorderPartialUpdateResponse = vAssignedOrder;
 
-export const vMobileAssignedorderCreateExtraOrderCreateBody = vAssignedOrderRequest;
-
 export const vMobileAssignedorderCreateExtraOrderCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vMobileAssignedorderCreateExtraOrderCreateResponse = vAssignedOrder;
+export const vMobileAssignedorderCreateExtraOrderCreateResponse = vCreateExtraOrderResponse;
 
 export const vMobileAssignedorderDetailChangeDatePartialUpdateBody = vPatchedAssignedOrderDatesRequest;
 
@@ -19952,13 +20024,11 @@ export const vMobileAssignedorderGetWorkorderSignDetailsRetrievePath = v.object(
 
 export const vMobileAssignedorderGetWorkorderSignDetailsRetrieveResponse = vGetWorkorderSignDetailsResponse;
 
-export const vMobileAssignedorderNoWorkorderFinishedCreateBody = vAssignedOrderRequest;
-
 export const vMobileAssignedorderNoWorkorderFinishedCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vMobileAssignedorderNoWorkorderFinishedCreateResponse = vAssignedOrder;
+export const vMobileAssignedorderNoWorkorderFinishedCreateResponse = vResultResponse;
 
 export const vMobileAssignedorderReportStatuscodeCreateBody = vAssignedOrderRequest;
 
@@ -19968,13 +20038,11 @@ export const vMobileAssignedorderReportStatuscodeCreatePath = v.object({
 
 export const vMobileAssignedorderReportStatuscodeCreateResponse = vResultResponse;
 
-export const vMobileAssignedorderReportWorkordersSignedCreateBody = vAssignedOrderRequest;
-
 export const vMobileAssignedorderReportWorkordersSignedCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vMobileAssignedorderReportWorkordersSignedCreateResponse = vAssignedOrder;
+export const vMobileAssignedorderReportWorkordersSignedCreateResponse = vResultResponse;
 
 export const vMobileAssignedorderFinishedListListQuery = v.object({
     engineer: v.optional(v.pipe(v.number(), v.integer())),
@@ -20240,9 +20308,9 @@ export const vMobileTripStatuscodeActionPartialUpdatePath = v.object({
 
 export const vMobileTripStatuscodeActionPartialUpdateResponse = vTripStatuscodeAction;
 
-export const vMobileTripStatuscodeActionOperatorsRetrieveResponse = vTripStatuscodeAction;
+export const vMobileTripStatuscodeActionOperatorsRetrieveResponse = v.array(v.string());
 
-export const vMobileTripStatuscodeActionStatusoptionsRetrieveResponse = vTripStatuscodeAction;
+export const vMobileTripStatuscodeActionStatusoptionsRetrieveResponse = v.record(v.string(), v.string());
 
 export const vMobileTripStatuscodeDestroyPath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -20302,7 +20370,13 @@ export const vMobileTripTripAvailabilityDetailRetrievePath = v.object({
 
 export const vMobileTripTripAvailabilityDetailRetrieveResponse = vTripAvailabilityDetailResponse;
 
-export const vMobileTripTripAvailabilityRetrieveResponse = vTrip;
+export const vMobileTripTripAvailabilityListQuery = v.object({
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
+    q: v.optional(v.string())
+});
+
+export const vMobileTripTripAvailabilityListResponse = vPaginatedTripList;
 
 export const vMobileUnassignUserTripCreateBody = vUnassignTripRequestRequest;
 
@@ -20533,7 +20607,7 @@ export const vOrderFilterPartialUpdatePath = v.object({
 
 export const vOrderFilterPartialUpdateResponse = vOrderFilter;
 
-export const vOrderFilterGetBaseFilterOptionsRetrieveResponse = vOrderFilter;
+export const vOrderFilterGetBaseFilterOptionsListResponse = v.array(vOrderFilterOperator);
 
 export const vOrderFilterGetExamplesListQuery = v.object({
     q: v.optional(v.string())
@@ -20543,11 +20617,11 @@ export const vOrderFilterGetExamplesListResponse = v.array(vOrderFilterExample);
 
 export const vOrderFilterGetFieldsRetrieveResponse = vOrderFilterFields;
 
-export const vOrderFilterGetNonTextFieldTypesRetrieveResponse = vOrderFilter;
+export const vOrderFilterGetNonTextFieldTypesRetrieveResponse = v.record(v.string(), v.string());
 
 export const vOrderFilterGetOperatorsRetrieveResponse = vOrderFilterOperators;
 
-export const vOrderFilterGetStatusFieldsRetrieveResponse = vOrderFilter;
+export const vOrderFilterGetStatusFieldsRetrieveResponse = v.array(v.string());
 
 export const vOrderFilterGetStatusesRetrieveResponse = v.array(v.string());
 
@@ -20734,13 +20808,13 @@ export const vOrderOrderAssignMeCreatePath = v.object({
 
 export const vOrderOrderAssignMeCreateResponse = vAssignResultResponse;
 
-export const vOrderOrderCreatePdfBackgroundCreateBody = vOrderRequest;
+export const vOrderOrderCreatePdfBackgroundCreateBody = vCreatePdfBackgroundRequestRequest;
 
 export const vOrderOrderCreatePdfBackgroundCreatePath = v.object({
     id: v.pipe(v.number(), v.integer())
 });
 
-export const vOrderOrderCreatePdfBackgroundCreateResponse = vOrder;
+export const vOrderOrderCreatePdfBackgroundCreateResponse = vCreatePdfBackgroundResponse;
 
 export const vOrderOrderOrderAvailabilityDetailRetrievePath = v.object({
     id: v.pipe(v.number(), v.integer())
@@ -21549,11 +21623,11 @@ export const vOrderOrderlinePartialUpdatePath = v.object({
 
 export const vOrderOrderlinePartialUpdateResponse = vOrderLineDetail;
 
-export const vOrderOrderlineAssignedOrderRetrievePath = v.object({
+export const vOrderOrderlineAssignedOrderListPath = v.object({
     assigned_order_id: v.pipe(v.string(), v.regex(/^\d+$/))
 });
 
-export const vOrderOrderlineAssignedOrderRetrieveResponse = vOrderLineDetail;
+export const vOrderOrderlineAssignedOrderListResponse = v.array(vOrderLineMaterial);
 
 export const vOrderOrderlineLatestWorkordersListQuery = v.object({
     building: v.optional(v.pipe(v.number(), v.integer())),
@@ -23147,6 +23221,10 @@ export const vWorkforceUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponse = 
 
 export const vWorkforceUserLeaveHoursAdminGetTotalsCreateBody = vUserLeaveHoursNoPlanningRequest;
 
+export const vWorkforceUserLeaveHoursAdminGetTotalsCreateQuery = v.object({
+    user: v.optional(v.pipe(v.number(), v.integer()))
+});
+
 export const vWorkforceUserLeaveHoursAdminGetTotalsCreateResponse = vLeaveHoursTotals;
 
 export const vWorkforceUserLeaveHoursAllNotAcceptedListQuery = v.object({
@@ -23160,6 +23238,10 @@ export const vWorkforceUserLeaveHoursAllNotAcceptedListResponse = vPaginatedUser
 export const vWorkforceUserLeaveHoursAllNotAcceptedCountRetrieveResponse = vCountResponse;
 
 export const vWorkforceUserLeaveHoursGetTotalsCreateBody = vUserLeaveHoursNoPlanningRequest;
+
+export const vWorkforceUserLeaveHoursGetTotalsCreateQuery = v.object({
+    user: v.optional(v.pipe(v.number(), v.integer()))
+});
 
 export const vWorkforceUserLeaveHoursGetTotalsCreateResponse = vLeaveHoursTotals;
 

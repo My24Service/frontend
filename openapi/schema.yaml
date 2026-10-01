@@ -258,8 +258,6 @@ paths:
             schema:
               $ref: '#/components/schemas/ChangePasswordRequestRequest'
         required: true
-      security:
-      - {}
       responses:
         '200':
           description: No response body
@@ -3035,12 +3033,22 @@ paths:
     get:
       operationId: equipment_equipment_state_list
       parameters:
+      - in: query
+        name: equipment
+        schema:
+          type: integer
       - name: page
         required: false
         in: query
         description: A page number within the paginated result set.
         schema:
           type: integer
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - equipment
       responses:
@@ -8923,24 +8931,12 @@ paths:
         required: true
       tags:
       - mobile
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AssignedOrderRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AssignedOrderRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AssignedOrderRequest'
-        required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrder'
+                $ref: '#/components/schemas/CreateExtraOrderResponse'
           description: ''
   /api/mobile/assignedorder/{id}/detail_change_date/:
     patch:
@@ -9026,24 +9022,12 @@ paths:
         required: true
       tags:
       - mobile
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AssignedOrderRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AssignedOrderRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AssignedOrderRequest'
-        required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrder'
+                $ref: '#/components/schemas/ResultResponse'
           description: ''
   /api/mobile/assignedorder/{id}/report_statuscode/:
     post:
@@ -9090,24 +9074,12 @@ paths:
         required: true
       tags:
       - mobile
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AssignedOrderRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AssignedOrderRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AssignedOrderRequest'
-        required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssignedOrder'
+                $ref: '#/components/schemas/ResultResponse'
           description: ''
   /api/mobile/assignedorder/finished_list/:
     get:
@@ -10150,7 +10122,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TripStatuscodeAction'
+                type: array
+                items:
+                  type: string
           description: ''
   /api/mobile/trip-statuscode-action/statusoptions/:
     get:
@@ -10163,7 +10137,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TripStatuscodeAction'
+                type: object
+                additionalProperties:
+                  type: string
           description: ''
   /api/mobile/trip-statuscode/{id}/:
     get:
@@ -10339,8 +10315,30 @@ paths:
           description: ''
   /api/mobile/trip/trip_availability/:
     get:
-      operationId: mobile_trip_trip_availability_retrieve
+      operationId: mobile_trip_trip_availability_list
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       tags:
       - mobile
       responses:
@@ -10348,7 +10346,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Trip'
+                $ref: '#/components/schemas/PaginatedTripList'
           description: ''
   /api/mobile/unassign-user-trip/{id}/:
     post:
@@ -11173,7 +11171,7 @@ paths:
           description: No response body
   /api/order/filter/get_base_filter_options/:
     get:
-      operationId: order_filter_get_base_filter_options_retrieve
+      operationId: order_filter_get_base_filter_options_list
       description: Viewset that supports all normal viewset functionality.
       tags:
       - order
@@ -11182,7 +11180,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderFilter'
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderFilterOperator'
           description: ''
   /api/order/filter/get_examples/:
     get:
@@ -11230,7 +11230,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderFilter'
+                type: object
+                additionalProperties:
+                  type: string
           description: ''
   /api/order/filter/get_operators/:
     get:
@@ -11256,7 +11258,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderFilter'
+                type: array
+                items:
+                  type: string
           description: ''
   /api/order/filter/get_statuses/:
     get:
@@ -12018,20 +12022,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OrderRequest'
+              $ref: '#/components/schemas/CreatePdfBackgroundRequestRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/OrderRequest'
+              $ref: '#/components/schemas/CreatePdfBackgroundRequestRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/OrderRequest'
+              $ref: '#/components/schemas/CreatePdfBackgroundRequestRequest'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                $ref: '#/components/schemas/CreatePdfBackgroundResponse'
           description: ''
   /api/order/order/{id}/order_availability_detail/:
     get:
@@ -15267,7 +15271,7 @@ paths:
           description: ''
   /api/order/orderline/assigned_order/{assigned_order_id}/:
     get:
-      operationId: order_orderline_assigned_order_retrieve
+      operationId: order_orderline_assigned_order_list
       description: Viewset that supports all normal viewset functionality.
       parameters:
       - in: path
@@ -15283,7 +15287,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrderLineDetail'
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderLineMaterial'
           description: ''
   /api/order/orderline/latest_workorders/:
     get:
@@ -19472,10 +19478,11 @@ paths:
       description: |-
         Atomic replacement for the order-create + assign-user + attach-to-event
         sequence `EngineerEventOrderForm.vue` used to do as three separate
-        requests. A failure at any step (order validation, assignment, or the
-        `handle_event` statuscode/measurement side effects) rolls the whole
-        thing back, so a retry after a failure cannot leave an orphan order
-        behind.
+        requests. A failure at any step (order validation, status, assignment,
+        attaching to the event) rolls the whole thing back, so a retry after a
+        failure cannot leave an orphan order behind. The `handle_event`
+        statuscode/measurement side effects are a background task enqueued once
+        that has committed.
 
         The request body is the order-create body
         (`order_create_serializer_for_tenant`, plus `notify_user`); this view
@@ -21184,6 +21191,13 @@ paths:
     post:
       operationId: workforce_user_leave_hours_admin_get_totals_create
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: user
+        schema:
+          type: integer
+        description: User the leave is previewed for. Planning/staff only; everyone
+          else always previews their own leave.
       tags:
       - workforce
       requestBody:
@@ -21256,6 +21270,13 @@ paths:
     post:
       operationId: workforce_user_leave_hours_get_totals_create
       description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: user
+        schema:
+          type: integer
+        description: User the leave is previewed for. Planning/staff only; everyone
+          else always previews their own leave.
       tags:
       - workforce
       requestBody:
@@ -24086,6 +24107,17 @@ components:
           $ref: '#/components/schemas/OrderTypesByPeriodData'
       required:
       - counts_year_order_type_stats
+    CreateExtraOrderResponse:
+      type: object
+      description: '{result, new_assigned_order} answered by create_extra_order().'
+      properties:
+        result:
+          type: boolean
+        new_assigned_order:
+          type: integer
+      required:
+      - new_assigned_order
+      - result
     CreateLinkResponse:
       type: object
       description: The dict TeamleaderProductCreateLink returns.
@@ -24099,6 +24131,23 @@ components:
       required:
       - is_ok
       - material
+    CreatePdfBackgroundRequestRequest:
+      type: object
+      properties:
+        assignedorder_pk:
+          type: integer
+      required:
+      - assignedorder_pk
+    CreatePdfBackgroundResponse:
+      type: object
+      properties:
+        result:
+          type: boolean
+        status:
+          type: integer
+      required:
+      - result
+      - status
     CreatePrivateChannelRequestRequest:
       type: object
       description: The body CreateStreamPrivateChannel reads.
@@ -29077,6 +29126,31 @@ components:
           nullable: true
       required:
       - name
+    MaterialMinimal:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        identifier:
+          type: string
+          nullable: true
+          maxLength: 255
+        show_name:
+          type: string
+          nullable: true
+          readOnly: true
+        name:
+          type: string
+          nullable: true
+          maxLength: 255
+        name_short:
+          type: string
+          nullable: true
+          maxLength: 255
+      required:
+      - id
+      - show_name
     MaterialStatsTable:
       type: object
       properties:
@@ -32704,6 +32778,35 @@ components:
           nullable: true
       required:
       - id
+      - order
+    OrderLineMaterial:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        order:
+          type: integer
+        product:
+          type: string
+          nullable: true
+          maxLength: 255
+        location:
+          type: string
+          nullable: true
+          maxLength: 255
+        amount:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        material:
+          allOf:
+          - $ref: '#/components/schemas/MaterialMinimal'
+          nullable: true
+          readOnly: true
+      required:
+      - id
+      - material
       - order
     OrderLineNested:
       type: object
@@ -39654,6 +39757,7 @@ components:
         purchase_order_view:
           allOf:
           - $ref: '#/components/schemas/PurchaseOrderView'
+          nullable: true
           readOnly: true
         amount:
           type: integer

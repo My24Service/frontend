@@ -984,12 +984,29 @@ export type CountsYearOrderTypeStatsResponse = {
 };
 
 /**
+ * {result, new_assigned_order} answered by create_extra_order().
+ */
+export type CreateExtraOrderResponse = {
+    result: boolean;
+    new_assigned_order: number;
+};
+
+/**
  * The dict TeamleaderProductCreateLink returns.
  */
 export type CreateLinkResponse = {
     is_ok: boolean;
     material: number;
     error?: string;
+};
+
+export type CreatePdfBackgroundRequestRequest = {
+    assignedorder_pk: number;
+};
+
+export type CreatePdfBackgroundResponse = {
+    result: boolean;
+    status: number;
 };
 
 /**
@@ -3080,6 +3097,14 @@ export type MaterialCreateRequest = {
     image?: string | null;
 };
 
+export type MaterialMinimal = {
+    readonly id: number;
+    identifier?: string | null;
+    readonly show_name: string | null;
+    name?: string | null;
+    name_short?: string | null;
+};
+
 export type MaterialStatsTable = {
     readonly id: number;
     name?: string | null;
@@ -4474,6 +4499,15 @@ export type OrderLineDetail = {
     maintenance_contract?: number | null;
     equipment?: number | null;
     equipment_location?: number | null;
+};
+
+export type OrderLineMaterial = {
+    readonly id: number;
+    order: number;
+    product?: string | null;
+    location?: string | null;
+    amount?: number;
+    material: MaterialMinimal | null;
 };
 
 /**
@@ -7140,7 +7174,7 @@ export type PurchaseOrderMaterial = {
     material_name?: string | null;
     material_view: Material;
     purchase_order?: number | null;
-    purchase_order_view: PurchaseOrderView;
+    purchase_order_view: PurchaseOrderView | null;
     amount?: number;
     remarks?: string | null;
     /**
@@ -10645,6 +10679,12 @@ export type MaterialCreateWritable = {
     image?: string | null;
 };
 
+export type MaterialMinimalWritable = {
+    identifier?: string | null;
+    name?: string | null;
+    name_short?: string | null;
+};
+
 export type MaterialStatsTableWritable = {
     name?: string | null;
     supplier: SupplierWritable;
@@ -11216,6 +11256,13 @@ export type OrderLineDetailWritable = {
     maintenance_contract?: number | null;
     equipment?: number | null;
     equipment_location?: number | null;
+};
+
+export type OrderLineMaterialWritable = {
+    order: number;
+    product?: string | null;
+    location?: string | null;
+    amount?: number;
 };
 
 /**
@@ -15105,10 +15152,15 @@ export type EquipmentEquipmentStateListData = {
     body?: never;
     path?: never;
     query?: {
+        equipment?: number;
         /**
          * A page number within the paginated result set.
          */
         page?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
     };
     url: '/api/equipment/equipment-state/';
 };
@@ -19250,7 +19302,7 @@ export type MobileAssignedorderPartialUpdateResponses = {
 export type MobileAssignedorderPartialUpdateResponse = MobileAssignedorderPartialUpdateResponses[keyof MobileAssignedorderPartialUpdateResponses];
 
 export type MobileAssignedorderCreateExtraOrderCreateData = {
-    body: AssignedOrderRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this assigned order.
@@ -19262,7 +19314,7 @@ export type MobileAssignedorderCreateExtraOrderCreateData = {
 };
 
 export type MobileAssignedorderCreateExtraOrderCreateResponses = {
-    200: AssignedOrder;
+    200: CreateExtraOrderResponse;
 };
 
 export type MobileAssignedorderCreateExtraOrderCreateResponse = MobileAssignedorderCreateExtraOrderCreateResponses[keyof MobileAssignedorderCreateExtraOrderCreateResponses];
@@ -19322,7 +19374,7 @@ export type MobileAssignedorderGetWorkorderSignDetailsRetrieveResponses = {
 export type MobileAssignedorderGetWorkorderSignDetailsRetrieveResponse = MobileAssignedorderGetWorkorderSignDetailsRetrieveResponses[keyof MobileAssignedorderGetWorkorderSignDetailsRetrieveResponses];
 
 export type MobileAssignedorderNoWorkorderFinishedCreateData = {
-    body: AssignedOrderRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this assigned order.
@@ -19334,7 +19386,7 @@ export type MobileAssignedorderNoWorkorderFinishedCreateData = {
 };
 
 export type MobileAssignedorderNoWorkorderFinishedCreateResponses = {
-    200: AssignedOrder;
+    200: ResultResponse;
 };
 
 export type MobileAssignedorderNoWorkorderFinishedCreateResponse = MobileAssignedorderNoWorkorderFinishedCreateResponses[keyof MobileAssignedorderNoWorkorderFinishedCreateResponses];
@@ -19358,7 +19410,7 @@ export type MobileAssignedorderReportStatuscodeCreateResponses = {
 export type MobileAssignedorderReportStatuscodeCreateResponse = MobileAssignedorderReportStatuscodeCreateResponses[keyof MobileAssignedorderReportStatuscodeCreateResponses];
 
 export type MobileAssignedorderReportWorkordersSignedCreateData = {
-    body: AssignedOrderRequest;
+    body?: never;
     path: {
         /**
          * A unique integer value identifying this assigned order.
@@ -19370,7 +19422,7 @@ export type MobileAssignedorderReportWorkordersSignedCreateData = {
 };
 
 export type MobileAssignedorderReportWorkordersSignedCreateResponses = {
-    200: AssignedOrder;
+    200: ResultResponse;
 };
 
 export type MobileAssignedorderReportWorkordersSignedCreateResponse = MobileAssignedorderReportWorkordersSignedCreateResponses[keyof MobileAssignedorderReportWorkordersSignedCreateResponses];
@@ -20148,7 +20200,7 @@ export type MobileTripStatuscodeActionOperatorsRetrieveData = {
 };
 
 export type MobileTripStatuscodeActionOperatorsRetrieveResponses = {
-    200: TripStatuscodeAction;
+    200: Array<string>;
 };
 
 export type MobileTripStatuscodeActionOperatorsRetrieveResponse = MobileTripStatuscodeActionOperatorsRetrieveResponses[keyof MobileTripStatuscodeActionOperatorsRetrieveResponses];
@@ -20161,7 +20213,9 @@ export type MobileTripStatuscodeActionStatusoptionsRetrieveData = {
 };
 
 export type MobileTripStatuscodeActionStatusoptionsRetrieveResponses = {
-    200: TripStatuscodeAction;
+    200: {
+        [key: string]: string;
+    };
 };
 
 export type MobileTripStatuscodeActionStatusoptionsRetrieveResponse = MobileTripStatuscodeActionStatusoptionsRetrieveResponses[keyof MobileTripStatuscodeActionStatusoptionsRetrieveResponses];
@@ -20316,18 +20370,31 @@ export type MobileTripTripAvailabilityDetailRetrieveResponses = {
 
 export type MobileTripTripAvailabilityDetailRetrieveResponse = MobileTripTripAvailabilityDetailRetrieveResponses[keyof MobileTripTripAvailabilityDetailRetrieveResponses];
 
-export type MobileTripTripAvailabilityRetrieveData = {
+export type MobileTripTripAvailabilityListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
     url: '/api/mobile/trip/trip_availability/';
 };
 
-export type MobileTripTripAvailabilityRetrieveResponses = {
-    200: Trip;
+export type MobileTripTripAvailabilityListResponses = {
+    200: PaginatedTripList;
 };
 
-export type MobileTripTripAvailabilityRetrieveResponse = MobileTripTripAvailabilityRetrieveResponses[keyof MobileTripTripAvailabilityRetrieveResponses];
+export type MobileTripTripAvailabilityListResponse = MobileTripTripAvailabilityListResponses[keyof MobileTripTripAvailabilityListResponses];
 
 export type MobileUnassignUserTripCreateData = {
     body: UnassignTripRequestRequest;
@@ -20903,18 +20970,18 @@ export type OrderFilterPartialUpdateResponses = {
 
 export type OrderFilterPartialUpdateResponse = OrderFilterPartialUpdateResponses[keyof OrderFilterPartialUpdateResponses];
 
-export type OrderFilterGetBaseFilterOptionsRetrieveData = {
+export type OrderFilterGetBaseFilterOptionsListData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/api/order/filter/get_base_filter_options/';
 };
 
-export type OrderFilterGetBaseFilterOptionsRetrieveResponses = {
-    200: OrderFilter;
+export type OrderFilterGetBaseFilterOptionsListResponses = {
+    200: Array<OrderFilterOperator>;
 };
 
-export type OrderFilterGetBaseFilterOptionsRetrieveResponse = OrderFilterGetBaseFilterOptionsRetrieveResponses[keyof OrderFilterGetBaseFilterOptionsRetrieveResponses];
+export type OrderFilterGetBaseFilterOptionsListResponse = OrderFilterGetBaseFilterOptionsListResponses[keyof OrderFilterGetBaseFilterOptionsListResponses];
 
 export type OrderFilterGetExamplesListData = {
     body?: never;
@@ -20955,7 +21022,9 @@ export type OrderFilterGetNonTextFieldTypesRetrieveData = {
 };
 
 export type OrderFilterGetNonTextFieldTypesRetrieveResponses = {
-    200: OrderFilter;
+    200: {
+        [key: string]: string;
+    };
 };
 
 export type OrderFilterGetNonTextFieldTypesRetrieveResponse = OrderFilterGetNonTextFieldTypesRetrieveResponses[keyof OrderFilterGetNonTextFieldTypesRetrieveResponses];
@@ -20981,7 +21050,7 @@ export type OrderFilterGetStatusFieldsRetrieveData = {
 };
 
 export type OrderFilterGetStatusFieldsRetrieveResponses = {
-    200: OrderFilter;
+    200: Array<string>;
 };
 
 export type OrderFilterGetStatusFieldsRetrieveResponse = OrderFilterGetStatusFieldsRetrieveResponses[keyof OrderFilterGetStatusFieldsRetrieveResponses];
@@ -21385,7 +21454,7 @@ export type OrderOrderAssignMeCreateResponses = {
 export type OrderOrderAssignMeCreateResponse = OrderOrderAssignMeCreateResponses[keyof OrderOrderAssignMeCreateResponses];
 
 export type OrderOrderCreatePdfBackgroundCreateData = {
-    body: OrderRequest;
+    body: CreatePdfBackgroundRequestRequest;
     path: {
         /**
          * A unique integer value identifying this order.
@@ -21397,7 +21466,7 @@ export type OrderOrderCreatePdfBackgroundCreateData = {
 };
 
 export type OrderOrderCreatePdfBackgroundCreateResponses = {
-    200: Order;
+    200: CreatePdfBackgroundResponse;
 };
 
 export type OrderOrderCreatePdfBackgroundCreateResponse = OrderOrderCreatePdfBackgroundCreateResponses[keyof OrderOrderCreatePdfBackgroundCreateResponses];
@@ -23020,7 +23089,7 @@ export type OrderOrderlinePartialUpdateResponses = {
 
 export type OrderOrderlinePartialUpdateResponse = OrderOrderlinePartialUpdateResponses[keyof OrderOrderlinePartialUpdateResponses];
 
-export type OrderOrderlineAssignedOrderRetrieveData = {
+export type OrderOrderlineAssignedOrderListData = {
     body?: never;
     path: {
         assigned_order_id: string;
@@ -23029,11 +23098,11 @@ export type OrderOrderlineAssignedOrderRetrieveData = {
     url: '/api/order/orderline/assigned_order/{assigned_order_id}/';
 };
 
-export type OrderOrderlineAssignedOrderRetrieveResponses = {
-    200: OrderLineDetail;
+export type OrderOrderlineAssignedOrderListResponses = {
+    200: Array<OrderLineMaterial>;
 };
 
-export type OrderOrderlineAssignedOrderRetrieveResponse = OrderOrderlineAssignedOrderRetrieveResponses[keyof OrderOrderlineAssignedOrderRetrieveResponses];
+export type OrderOrderlineAssignedOrderListResponse = OrderOrderlineAssignedOrderListResponses[keyof OrderOrderlineAssignedOrderListResponses];
 
 export type OrderOrderlineLatestWorkordersListData = {
     body?: never;
@@ -27342,7 +27411,12 @@ export type WorkforceUserLeaveHoursAdminAllNotAcceptedCountRetrieveResponse = Wo
 export type WorkforceUserLeaveHoursAdminGetTotalsCreateData = {
     body?: UserLeaveHoursNoPlanningRequest;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * User the leave is previewed for. Planning/staff only; everyone else always previews their own leave.
+         */
+        user?: number;
+    };
     url: '/api/workforce/user-leave-hours/admin/get_totals/';
 };
 
@@ -27394,7 +27468,12 @@ export type WorkforceUserLeaveHoursAllNotAcceptedCountRetrieveResponse = Workfor
 export type WorkforceUserLeaveHoursGetTotalsCreateData = {
     body?: UserLeaveHoursNoPlanningRequest;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * User the leave is previewed for. Planning/staff only; everyone else always previews their own leave.
+         */
+        user?: number;
+    };
     url: '/api/workforce/user-leave-hours/get_totals/';
 };
 
