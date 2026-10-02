@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, expect, inject, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, expect, vi } from 'vitest'
 import { config, disableAutoUnmount, enableAutoUnmount } from '@vue/test-utils'
 
 import { client as generatedClient } from '@/api/client.gen'
@@ -166,16 +166,21 @@ if (!storageWorks) {
   )
 }
 
-// Stryker's initial test run (`npm run test:mutation`) gets a much longer test
-// timeout. Stryker aborts the whole mutation run when a single test fails
-// there, and it starts that run while its typescript checkers are still
-// compiling the project, on one vitest thread over instrumented code - a test
-// that takes 0.2s on its own has been seen to hit the 5s default. Only the
-// dry run: in a mutant run a test that hangs should still fail fast (the
-// mutant counts as killed) rather than wait out Stryker's own timeout.
-// `mode` is provided by Stryker's vitest runner; `vi.setConfig` here applies
-// to this spec file and is reset by vitest after it.
-if (process.env.STRYKER_MUTATOR_WORKER !== undefined && inject('mode') === 'dry-run') {
+// Under Stryker (`npm run test:mutation`) a test gets a minute, not 5s. The
+// machine is loaded - typescript checkers compiling, several test runners, one
+// vitest thread each over instrumented code - and a test that takes 0.2s on its
+// own has been seen to hit the 5s default.
+//
+// In the initial test run that aborts the whole mutation run. In a mutant run
+// it is worse: a vitest timeout is a failed test, so Stryker reports the
+// mutant as Killed. Re-run with a long timeout, 18 of 72 such "kills" in
+// src/features turned out to survive. With a minute, a mutant that really hangs
+// the code is caught by Stryker's own timeout instead (timeoutMS in
+// stryker.config.json) and reported as Timeout - slower, since the runner is
+// restarted, but not a false kill.
+//
+// `vi.setConfig` here applies to this spec file and is reset by vitest after it.
+if (process.env.STRYKER_MUTATOR_WORKER !== undefined) {
   vi.setConfig({ testTimeout: 60_000, hookTimeout: 60_000 })
 }
 
