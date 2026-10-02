@@ -72,12 +72,12 @@ beforeEach(() => {
 })
 
 /**
- * The legacy screen waits a full second between the click and the request;
- * poll on real time so the same spec runs against both versions.
+ * Counts settle rounds rather than wall-clock time, so a loaded machine (a
+ * mutation run) cannot fail it. It used to poll on real time for the legacy
+ * screen, which waited a full second before sending; this form does not.
  */
-async function until(condition, { timeoutMs = 2500 } = {}) {
-  const deadline = Date.now() + timeoutMs
-  while (Date.now() < deadline) {
+async function until(condition, { attempts = 200 } = {}) {
+  for (let i = 0; i < attempts; i++) {
     if (condition()) return
     await settle()
   }
