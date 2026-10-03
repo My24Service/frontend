@@ -2,9 +2,8 @@
   <div class="panel col-1-3">
     <h3>
       <span><strong>{{ order.order_type }}</strong> <br><small>
-        <router-link :to="{name: 'customer-view', params: {pk: order.customer_relation ?? 0}}">
-          {{ order.order_name }}
-        </router-link>
+        <router-link v-if="ownerLink" :to="ownerLink">{{ order.order_name }}</router-link>
+        <template v-else>{{ order.order_name }}</template>
       </small></span>
     </h3>
     <dl>
@@ -144,6 +143,22 @@ const props = defineProps<{
 const emit = defineEmits<{'show-workorder': []}>()
 
 const {isCustomer, isPlanning, hasBranches} = useOrderViewer()
+
+/**
+ * Where the order name leads: its owner. A tenant has either branches or
+ * customers, so a branch tenant's order carries a branch and no customer.
+ * Only planning has the branch screens; a branch employee gets the bare name.
+ */
+const ownerLink = computed(() => {
+  if (hasBranches.value) {
+    return isPlanning.value && props.order.branch
+      ? {name: 'company-branch-view' as const, params: {pk: props.order.branch}}
+      : null
+  }
+  return props.order.customer_relation
+    ? {name: 'customer-view' as const, params: {pk: props.order.customer_relation}}
+    : null
+})
 
 // The org-order extras exist on the pk detail only; the public (uuid)
 // detail does not carry them.

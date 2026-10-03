@@ -26,6 +26,7 @@ export const orderRoutes = [
   { path: '/mobile/dispatch/:assignModeProp?', name: 'mobile-dispatch', component: blank },
 
   { path: '/customers/customers/:pk', name: 'customer-view', component: blank },
+  { path: '/company/branches/:pk', name: 'company-branch-view', component: blank },
   { path: '/invoices/create/:uuid', name: 'invoice-create', component: blank },
   { path: '/invoices/edit/:pk/:uuid', name: 'invoice-edit', component: blank },
   { path: '/invoices/view/:uuid', name: 'invoice-view', component: blank },
