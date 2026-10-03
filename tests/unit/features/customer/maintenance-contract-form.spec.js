@@ -37,7 +37,7 @@ import { customerRoutes } from '../../support/customer-routes.js'
 
 const api = installApiSeam()
 
-const MAIN = { getMemberHasBranches: true, getDefaultCurrency: 'EUR', getCountries: [] }
+const MAIN = { getMemberHasBranches: false, getDefaultCurrency: 'EUR', getCountries: [] }
 const AUTH = { isPlanning: true, isAdmin: false }
 
 const CONTRACT_ITEM = itemSchemaOf(vPaginatedMaintenanceContractList)
@@ -396,8 +396,10 @@ describe('MaintenanceContractForm, create', () => {
     ])
   })
 
-  test('refuses to quick-create equipment without a branch-capable tenant', async () => {
-    const wrapper = await mountContractForm({}, { ...MAIN_GETTERS, getMemberHasBranches: false })
+  // Maintenance contracts belong to customers, which only a tenant without
+  // branches has; a branch tenant is the one to refuse.
+  test('refuses to quick-create equipment in a branch tenant', async () => {
+    const wrapper = await mountContractForm({}, { ...MAIN_GETTERS, getMemberHasBranches: true })
     await selectCustomer(wrapper)
     await settle()
 
