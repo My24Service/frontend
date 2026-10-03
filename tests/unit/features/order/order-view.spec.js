@@ -173,6 +173,42 @@ describe('OrderView by pk', () => {
   })
 })
 
+// A tenant has either branches or customers: a branch tenant's orders carry a
+// branch and no customer, so the name links to whichever owner the order has.
+describe('OrderView, the order name', () => {
+  const nameLinks = (wrapper) => wrapper.findAll('a').filter((link) => link.text() === 'Acme BV')
+  const nameLink = (wrapper) => nameLinks(wrapper)[0]
+
+  test('links to the customer in a tenant without branches', async () => {
+    const wrapper = await mountView({ auth: { isPlanning: true } })
+
+    expect(nameLink(wrapper).attributes('href')).toBe('/customers/customers/5')
+  })
+
+  test('links to the branch in a branch tenant', async () => {
+    api.get('/api/order/order/{id}/', DETAIL({ customer_relation: null, branch: 3 }))
+    const wrapper = await mountView({ auth: { isPlanning: true }, main: { getMemberHasBranches: true } })
+
+    expect(nameLink(wrapper).attributes('href')).toBe('/company/branches/3')
+  })
+
+  test('is plain text for a branch employee, who has no branch screens', async () => {
+    api.get('/api/order/order/{id}/', DETAIL({ customer_relation: null, branch: 3 }))
+    const wrapper = await mountView({ main: { getMemberHasBranches: true } })
+
+    expect(nameLinks(wrapper)).toHaveLength(0)
+    expect(wrapper.text()).toContain('Acme BV')
+  })
+
+  test('is plain text for an order without a customer', async () => {
+    api.get('/api/order/order/{id}/', DETAIL({ customer_relation: null }))
+    const wrapper = await mountView({ auth: { isPlanning: true } })
+
+    expect(nameLinks(wrapper)).toHaveLength(0)
+    expect(wrapper.text()).toContain('Acme BV')
+  })
+})
+
 describe('OrderView by uuid', () => {
   test('reads the one detail by uuid; the edit link carries the id', async () => {
     const wrapper = await mountView({ props: { uuid: UUID } })

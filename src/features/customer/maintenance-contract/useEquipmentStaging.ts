@@ -182,7 +182,9 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   const quickCreateEquipment = useMutation({...Api.EquipmentEquipmentCreateQuick.create.mutation()})
 
   async function submitCreateEquipment() {
-    if (!mainStore.getMemberHasBranches) {
+    // Maintenance contracts and their customers only exist in a tenant without
+    // branches; a branch tenant's quick-create takes a branch, not a customer.
+    if (mainStore.getMemberHasBranches) {
       errorToast(create, $trans('Not creating equipment from branch environment'))
       return
     }
