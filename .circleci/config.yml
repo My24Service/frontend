@@ -43,6 +43,13 @@ jobs:
       - checkout
       - install-deps
       - run:
+          # vue-tsc and the type-aware lint read auto-imports.gen.d.ts and
+          # components.gen.d.ts, which are gitignored. unplugin-auto-import and
+          # unplugin-vue-components write them only while Vite transforms the
+          # source, so a build is what produces them (about 30s).
+          name: Generate auto-import and component types
+          command: pnpm run build
+      - run:
           name: Type-check
           command: pnpm run typecheck
       - run:
