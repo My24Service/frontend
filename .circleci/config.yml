@@ -62,10 +62,11 @@ jobs:
               equal: [main, << pipeline.git.branch >>]
           steps:
             - run:
-                name: Skip lint when the last commit message has [skip lint]
+                # Subject line only, so a message body can mention the token.
+                name: Skip lint when the last commit's subject has [skip lint]
                 command: |
-                  if git log -1 --format=%B | grep -qF '[skip lint]'; then
-                    echo "Found [skip lint] in the last commit message; skipping lint."
+                  if git log -1 --format=%s | grep -qF '[skip lint]'; then
+                    echo "Found [skip lint] in the last commit's subject; skipping lint."
                     circleci-agent step halt
                   fi
             - restore_cache:
