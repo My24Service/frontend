@@ -1,7 +1,7 @@
 version: "2.1"
 
-jobs:
-  test:
+executors:
+  node:
     working_directory: ~/circleci-frontend
     docker:
       - image: cimg/node:22.16
@@ -11,8 +11,10 @@ jobs:
       # pnpm's install script needs for `pnpm setup`. The profile it writes
       # is never reloaded in CI; PATH is handled via $BASH_ENV below.
       SHELL: /bin/bash
+
+commands:
+  install-deps:
     steps:
-      - checkout
       - restore_cache:
           name: Restore pnpm Package Cache
           keys:
@@ -31,6 +33,29 @@ jobs:
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - .pnpm-store
+
+jobs:
+  check:
+    executor: node
+    # scripts/lint.mjs runs node with an 8 GB heap ceiling; medium has 4 GB.
+    resource_class: large
+    steps:
+      - checkout
+      - install-deps
+      - run:
+          name: Type-check
+          command: pnpm run typecheck
+      - run:
+          # No .eslintcache restore: the cache keys on file mtimes, which a
+          # fresh checkout resets, and a stale entry can hide an error caused
+          # by a changed imported type. A full run takes several minutes.
+          name: Lint
+          command: pnpm run lint
+  test:
+    executor: node
+    steps:
+      - checkout
+      - install-deps
       - run:
           name: Run test suite
           # Defined in .circleci/test-suites.yml. It still shards within the
@@ -81,18 +106,24 @@ workflows:
   version: 2
   test-and-build:
     jobs:
+      - check:
+          filters:
+            branches:
+              only: [develop, main]
       - test:
           filters:
             branches:
               only: [develop, main]
       - build-push-main:
           requires:
+            - check
             - test
           filters:
             branches:
               only: main
       - build-push-develop:
           requires:
+            - check
             - test
           filters:
             branches:
