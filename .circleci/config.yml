@@ -52,12 +52,38 @@ jobs:
       - run:
           name: Type-check
           command: pnpm run typecheck
+      # Lint, steps below. Everywhere but main it reuses the lint results of
+      # earlier CI runs and re-lints only files whose content changed. A cached
+      # result can miss an error caused by a type changed in an imported file,
+      # so main restores nothing and lints everything (about 16 minutes).
+      - when:
+          condition:
+            not:
+              equal: [main, << pipeline.git.branch >>]
+          steps:
+            - run:
+                name: Skip lint when the last commit message has [skip lint]
+                command: |
+                  if git log -1 --format=%B | grep -qF '[skip lint]'; then
+                    echo "Found [skip lint] in the last commit message; skipping lint."
+                    circleci-agent step halt
+                  fi
+            - restore_cache:
+                name: Restore ESLint cache
+                keys:
+                  - eslint-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "eslint.config.js" }}-{{ .Branch }}-
+                  - eslint-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "eslint.config.js" }}-
       - run:
-          # No .eslintcache restore: the cache keys on file mtimes, which a
-          # fresh checkout resets, and a stale entry can hide an error caused
-          # by a changed imported type. A full run takes several minutes.
           name: Lint
           command: pnpm run lint
+      - save_cache:
+          name: Save ESLint cache
+          # Also after a failed lint: the results of the files that passed
+          # are still valid, and files with errors are re-reported from it.
+          when: always
+          key: eslint-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "eslint.config.js" }}-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - node_modules/.cache/.eslintcache
   test:
     executor: node
     steps:

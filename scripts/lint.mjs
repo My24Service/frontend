@@ -7,8 +7,8 @@
  * reads as a hang. This drives the same config through ESLint's Node API
  * file by file: a status line shows where it is, each problem is printed the
  * moment its file is done, and the usual stylish report follows at the end.
- * It shares `.eslintcache` with the plain `eslint --cache` command, so a
- * warm run still takes seconds.
+ * Results are cached in `node_modules/.cache/.eslintcache`, keyed on file
+ * content, so a warm run still takes seconds. CI restores the same file.
  *
  * As a safety net for memory, eslint-plugin-typed-vue's caches are reset
  * when the heap fills up. (Its 0.2.0 release kept a TypeScript program per
@@ -42,7 +42,9 @@ const resetPluginCache = await import('eslint-plugin-typed-vue')
   .then((plugin) => plugin.resetCache)
   .catch(() => () => {})
 
-const eslint = new ESLint({ cache: true, cacheLocation: 'node_modules/.cache/.eslintcache', fix })
+// Content hashes, not mtimes, decide what is stale, so a cache restored onto a
+// fresh checkout (CI) still hits for every unchanged file.
+const eslint = new ESLint({ cache: true, cacheLocation: 'node_modules/.cache/.eslintcache', cacheStrategy: 'content', fix })
 
 /** A directory's own files first, then its subdirectories, so each directory's files run together. */
 function walk(path, found) {
