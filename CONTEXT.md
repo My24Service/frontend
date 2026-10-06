@@ -15,6 +15,10 @@ Member's own users never see another Member.
 Not to be confused with **Tenant Profile**, which is one Member seen from the
 inside.
 
+A Member has **Branches** or **Customers**, never both. A Member with Branches
+(e.g. `riedel`) has no Customers, so code and tests that combine the two
+describe a tenant that cannot exist.
+
 ## Tenant Profile
 
 The currently signed-in Member's own record, as the rest of the application

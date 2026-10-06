@@ -113,11 +113,9 @@ the earlier research agent.
 ```
 npx vitest run                       # ~90s+, never run with a 30s timeout
 npx vue-tsc --noEmit                 # ~2min
-NODE_OPTIONS=--max-old-space-size=8192 npx eslint <files>   # per-file; the
-                                                      whole-repo `npx eslint src`
-                                                      OOMs on this machine
-npm run lint                         # scripts/lint.mjs, one file at a time,
-                                      # but it exceeds 10min wall clock
+pnpm run lint -- <files>             # scripts/lint.mjs, one file at a time, cached;
+                                      # the only lint entry point (direct eslint OOMs)
+pnpm run lint                        # whole src: 6-10min on a cold cache
 npm run lint:i18n
 npm run test:mutation -- --mutate 'src/features/quotation/**/*.ts'
 ```

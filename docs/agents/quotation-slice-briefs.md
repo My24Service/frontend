@@ -23,8 +23,8 @@ Shared ground rules for every brief:
 - Harness: `tests/unit/support/form-harness.js` (`mountForm`, `mountListView`,
   `toasts`, the `bootstrap-vue-next` toast mock), `tests/unit/support/api-seam/index.js`
   (`installApiSeam`, strict schema-validated stubs).
-- Verify: specs green, `NODE_OPTIONS=--max-old-space-size=8192 npx eslint <your files>` clean,
-  `npx vue-tsc --noEmit` with no errors in your files.
+- Verify: specs green, `pnpm run lint -- <your files>` clean,
+  `pnpm run typecheck` with no errors in your files.
 
 ---
 
