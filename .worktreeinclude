@@ -1,0 +1,19 @@
+# Gitignored files a new worktree needs, copied from the main worktree by
+# `git worktreeinclude apply` (Zed's create_worktree task) and by Claude Code
+# when it creates a worktree. Gitignore syntax.
+#
+# node_modules is not listed: pnpm builds it from symlinks, and copy tools
+# skip symlinks. Run `pnpm install --frozen-lockfile` instead.
+
+.env
+.env.local
+.env.*.local
+
+components.gen.d.ts
+auto-imports.gen.d.ts
+
+.mcp.json
+.claude/settings.local.json
+.codex/
+.cursor/
+.vscode/

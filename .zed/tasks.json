@@ -16,7 +16,7 @@
 [
   {
     "label": "Set up new worktree",
-    "command": "node scripts/setup-worktree.mjs",
+    "command": "git worktreeinclude apply && pnpm install --frozen-lockfile",
     "cwd": "$ZED_WORKTREE_ROOT",
     "hooks": ["create_worktree"],
     "reveal": "no_focus",
