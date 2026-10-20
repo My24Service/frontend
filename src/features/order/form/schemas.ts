@@ -1,16 +1,5 @@
 import * as v from 'valibot'
 
-import type { EngineerInfoLine, EngineerInfoLineNested, OrderDetail, OrderLine, OrderLineNested, OrderLineNestedRequest } from '@/api/types.gen'
-import {
-  vEngineerInfoLineNestedRequest,
-  vOrderCreateBranchEmployeeRequest,
-  vOrderCreateBranchRequest,
-  vOrderCreateCustomerRelationRequest,
-  vOrderCreateCustomerRequest,
-  vOrderLineNestedRequest,
-  vPatchedOrderUpdateCustomerRequest,
-  vPatchedOrderUpdateRequest,
-} from '@/api/valibot.gen'
 import {
   fieldErrors,
   requiredMessage,
@@ -20,6 +9,7 @@ import {
   type FieldLabels,
   toApiDate,
   completeTime,
+  nextWorkingDay,
 } from '@/features/forms'
 /**
  * Who is filling the order form. The backend has one create serializer per
@@ -80,16 +70,16 @@ function createSchemaOf<T extends v.ObjectEntries>(component: v.ObjectSchema<T, 
   })
 }
 
-export const orderCreateBranchSchema = createSchemaOf(vOrderCreateBranchRequest)
-export const orderCreateCustomerRelationSchema = createSchemaOf(vOrderCreateCustomerRelationRequest)
-export const orderCreateCustomerSchema = createSchemaOf(vOrderCreateCustomerRequest)
-export const orderCreateBranchEmployeeSchema = createSchemaOf(vOrderCreateBranchEmployeeRequest)
+export const orderCreateBranchSchema = createSchemaOf(schemas.vOrderCreateBranchRequest)
+export const orderCreateCustomerRelationSchema = createSchemaOf(schemas.vOrderCreateCustomerRelationRequest)
+export const orderCreateCustomerSchema = createSchemaOf(schemas.vOrderCreateCustomerRequest)
+export const orderCreateBranchEmployeeSchema = createSchemaOf(schemas.vOrderCreateBranchEmployeeRequest)
 
 // The contract has no PUT, so the update bodies are the `Patched` PATCH
 // components. They declare the same fields, with the same optionality, as the
 // PUT components did.
-export const orderUpdateSchema = createSchemaOf(vPatchedOrderUpdateRequest)
-export const orderUpdateCustomerSchema = createSchemaOf(vPatchedOrderUpdateCustomerRequest)
+export const orderUpdateSchema = createSchemaOf(schemas.vPatchedOrderUpdateRequest)
+export const orderUpdateCustomerSchema = createSchemaOf(schemas.vPatchedOrderUpdateCustomerRequest)
 
 export function orderCreateSchemaFor({role, hasBranches}: FormVariant) {
   switch (role) {
@@ -120,7 +110,7 @@ export type OrderBody = OrderCreateBody | OrderUpdateBody
  * the schema redeclares the date, time and type entries in the form's
  * spellings, and deriving from a redeclaration does not see through it.
  */
-type OrderCreateInput = v.InferInput<typeof vOrderCreateBranchRequest>
+type OrderCreateInput = v.InferInput<typeof schemas.vOrderCreateBranchRequest>
 
 type OrderContactFields =
   | 'customer_id' | 'order_name'
@@ -172,19 +162,6 @@ export type OrderFormValues =
     order_email_extra: string[]
   }
 
-/**
- * The default start/end date: the next working day, computed per call so a
- * session left open past midnight does not keep handing out yesterday's
- * tomorrow.
- */
-export function nextWorkingDay(from: Date = new Date()): Date {
-  const date = new Date(from)
-  date.setDate(date.getDate() + 1)
-  if (date.getDay() === 0) date.setDate(date.getDate() + 1)
-  else if (date.getDay() === 6) date.setDate(date.getDate() + 2)
-  return date
-}
-
 export function emptyOrder(): OrderFormValues {
   return {
     customer_id: '',
@@ -232,7 +209,7 @@ function timeOf(value: string | null | undefined): string {
   return value.length >= 5 ? value.slice(0, 5) : value
 }
 
-export function orderFromRecord(record: OrderDetail): OrderFormValues {
+export function orderFromRecord(record: Api.OrderDetail): OrderFormValues {
   return {
     customer_id: record.customer_id ?? '',
     customer_reference: record.customer_reference ?? '',
@@ -293,7 +270,7 @@ export const FIELD_LABELS = {
   end_date: () => $trans('End date'),
   start_time: () => $trans('Start time'),
   end_time: () => $trans('End time'),
-} satisfies FieldLabels<Exclude<keyof OrderFieldErrors, 'orderlines'>>
+} as const satisfies FieldLabels<Exclude<keyof OrderFieldErrors, 'orderlines'>>
 
 /**
  * The pickers are chosen rather than typed, which the schema cannot tell
@@ -306,7 +283,7 @@ export const FIELD_MESSAGES = {
   order_type: () => selectMessage(FIELD_LABELS.order_type()),
   start_time: () => $trans('Please enter a valid start time HH:mm'),
   end_time: () => $trans('Please enter a valid end time HH:mm'),
-} satisfies FieldMessages<Exclude<keyof OrderFieldErrors, 'orderlines'>>
+} as const satisfies FieldMessages<Exclude<keyof OrderFieldErrors, 'orderlines'>>
 
 /**
  * The address fields the legacy forms required beyond what the serializers
@@ -339,7 +316,7 @@ export function validateOrderForm(
   context: {isCreate: boolean},
 ): OrderFieldErrors {
   const schema = context.isCreate ? orderCreateSchemaFor(variant) : orderUpdateSchemaFor(variant)
-  const errors = fieldErrors<keyof OrderFieldErrors>(schema, wireValues(values, context), FIELD_MESSAGES, FIELD_LABELS)
+  const errors: OrderFieldErrors = fieldErrors(schema, wireValues(values, context), FIELD_MESSAGES, FIELD_LABELS)
 
   if (variant.role !== 'customer') {
     for (const field of ADDRESS_REQUIRED) {
@@ -391,7 +368,7 @@ export function parseOrderBody(
 
 /** One row of the order body's `orderlines`; `id` names the stored row to update. */
 export const orderlineSchema = v.object({
-  ...vOrderLineNestedRequest.entries,
+  ...schemas.vOrderLineNestedRequest.entries,
 })
 
 /**
@@ -414,7 +391,7 @@ export function emptyOrderline(): OrderlineRow {
   return {product: '', location: '', remarks: '', equipment: null, equipment_location: null}
 }
 
-export function orderlineFromRecord(record: OrderLine | OrderLineNested): OrderlineRow {
+export function orderlineFromRecord(record: Api.OrderLine | Api.OrderLineNested): OrderlineRow {
   return {
     id: record.id,
     product: record.product ?? '',
@@ -431,7 +408,7 @@ export function isOrderlineComplete(row: OrderlineRow): boolean {
   return row.product.trim() !== '' && row.location.trim() !== ''
 }
 
-export function parseOrderlineBody(row: OrderlineRow): OrderLineNestedRequest {
+export function parseOrderlineBody(row: OrderlineRow): Api.OrderLineNestedRequest {
   return v.parse(orderlineSchema, {
     ...(row.id != null ? {id: row.id} : {}),
     product: row.product,
@@ -448,7 +425,7 @@ export function parseOrderlineBody(row: OrderlineRow): OrderLineNestedRequest {
 
 /** One row of the order body's `infolines`; `id` names the stored row to update. */
 export const infolineSchema = v.object({
-  ...vEngineerInfoLineNestedRequest.entries,
+  ...schemas.vEngineerInfoLineNestedRequest.entries,
   info: v.pipe(v.string(), v.minLength(1)),
 })
 
@@ -459,7 +436,7 @@ export type InfolineRow = Pick<v.InferInput<typeof infolineSchema>, 'id'> & {
   info: string
 }
 
-export function infolineFromRecord(record: EngineerInfoLine | EngineerInfoLineNested): InfolineRow {
+export function infolineFromRecord(record: Api.EngineerInfoLine | Api.EngineerInfoLineNested): InfolineRow {
   return {id: record.id, info: record.info ?? ''}
 }
 

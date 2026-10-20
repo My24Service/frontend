@@ -1,9 +1,9 @@
 import { RouterLink } from 'vue-router'
-import type { PaginatedBuildingList } from '@/api/types.gen'
+
 import { createActionColumn, createAppColumnHelper, type ListRow } from '@/features/table'
 import { useOwnerFilter } from '../use-owner-filter'
 
-export type BuildingRow = ListRow<PaginatedBuildingList>
+export type BuildingRow = ListRow<Api.PaginatedBuildingList>
 
 export interface BuildingColumnOptions {
   /** Neither a branch employee nor a customer: those two roles see no owner column. */

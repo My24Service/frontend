@@ -1,4 +1,4 @@
-import { beforeEach, vi } from 'vitest'
+import { vi } from 'vitest'
 import { mount, shallowMount } from '@vue/test-utils'
 import { createTestingPinia } from '@pinia/testing'
 import { createMemoryHistory, createRouter } from 'vue-router'
@@ -15,106 +15,16 @@ import { queryClientOptions } from '@/services/query-client'
 import { useAuthStore } from '@/features/auth/store'
 import { useMainStore } from '@/stores/main'
 
+import { toastCreate } from './toast.js'
+
 // Shared harness for the form-view specs. The traps it exists to encode are
 // documented at each call site below - read them before writing a new form spec,
 // because most of them produce a *passing* test that measures nothing rather
 // than a visible failure.
 
-/**
- * The spy behind useToast().create.
- *
- * The bootstrap-vue-next mock itself has to stay in each spec file: vi.mock is
- * hoisted and scoped per module. Point it here so every spec shares one spy:
- *
- *   vi.mock('bootstrap-vue-next', async (importOriginal) => {
- *     const { toastCreate } = await import('../../support/form-harness.js')
- *     return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
- *   })
- *
- * Spread the original module - do not replace it wholesale. The auto-import
- * resolver rewrites <b-form-input> & friends into named imports from
- * bootstrap-vue-next, so a bare `{ useToast }` factory leaves every one of them
- * undefined and every template ref pointing at one of them null.
- */
-export const toastCreate = vi.fn()
-
-// Cleared between tests, here rather than in each spec. The spy is one
-// module-level object shared by every test in a file, so without this a spec
-// asserting that the user was told something can pass on a toast raised two
-// tests ago - and one asserting the user was told *nothing* can never pass at
-// all once any earlier test raised one.
-beforeEach(() => toastCreate.mockClear())
-
-/**
- * Baseline behaviour for a fake axios client that replaces the `@/services/api`
- * module itself.
- *
- * `installFakeClients` below works by assigning onto model *singletons*, which
- * is no help when the component does `new OrderService()` in its own setup -
- * that instance takes its `axios` from the `@/services/api` module at
- * construction time, so mocking the module is the only seam that reaches it.
- *
- * The mock's client must be created with `vi.hoisted` **in the spec**, not
- * imported from here:
- *
- *   const fakeHttp = vi.hoisted(() => ({
- *     get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
- *   }))
- *   vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
- *
- * An `async` factory that imports this file instead deadlocks the run - vitest
- * is resolving `@/services/api`, this module's own imports reach it again
- * through `@/mixins/common`, and nothing ever finishes loading. The symptom is
- * a suite that hangs with no output at all rather than an error.
- *
- * Then `resetFakeHttp(fakeHttp, routes)` in beforeEach: the CSRF token
- * resolves, every other GET resolves to `routes[url]` if listed and to `[]`
- * otherwise, and writes succeed.
- */
-export function resetFakeHttp(fakeHttp, routes = {}) {
-  fakeHttp.get.mockReset()
-  fakeHttp.post.mockReset()
-  fakeHttp.patch.mockReset()
-  fakeHttp.delete.mockReset()
-
-  fakeHttp.get.mockImplementation((url) => {
-    if (url === '/get-csrf-token/') {
-      return Promise.resolve({ data: { token: 'csrf-token' } })
-    }
-    // Route keys omit the query string, but autocomplete calls now carry
-    // `?q=...` (the generated client serializes `opts.query`). Match on the
-    // path so a fixture keyed on `/api/.../autocomplete/` serves every query.
-    const path = String(url).split('?')[0]
-    if (path in routes) {
-      // A fresh copy per call. The forms write back onto the object they were
-      // given (`order.orderlines = processedOrderlines`), so handing out the
-      // same fixture twice lets one test mangle the next one's data - a
-      // failure that looks like a bug in the component under test.
-      return Promise.resolve({ data: structuredClone(routes[path]) })
-    }
-    return Promise.resolve({ data: [] })
-  })
-  fakeHttp.post.mockResolvedValue({ data: { id: 100 } })
-  fakeHttp.patch.mockResolvedValue({ data: {} })
-  fakeHttp.delete.mockResolvedValue({ data: {} })
-
-  return fakeHttp
-}
-
-/** URLs passed to a given verb on a client, in call order. */
-export function urlsOf(fakeHttp, verb) {
-  return fakeHttp[verb].mock.calls.map(([url]) => url)
-}
-
-// The SDK (`@/api/client.gen`) mock lives in ./api-client-mock.js, NOT here:
-// a spec's `vi.mock('@/api/client.gen', async () => await import(...))` factory
-// runs while the spec is still importing, so it may only await a module that
-// loads on its own - and this one does not. This module's own imports are the
-// app graph (@/mixins/common -> @/services/my24 -> @/services/api, the auth
-// store, @/stores/main), which is the very graph the `@/services/api`
-// factories above replace; a factory that waits on a module being evaluated
-// hangs with no output rather than failing. `apiClientMock` must stay in a
-// dependency-free module; see the comment there.
+// The spy behind useToast().create. setupTests.js mocks bootstrap-vue-next for
+// every spec and clears the spy before every test; see support/toast.js.
+export { toastCreate } from './toast.js'
 
 /**
  * The query plugin, as main.ts installs it, with one override.
@@ -154,53 +64,7 @@ export function createTestQueryClient() {
   return new QueryClient(queryPluginOptions.queryClientConfig)
 }
 
-
-const realClients = new Map()
-let http = null
 let routerGoSpy = null
-
-/**
- * Point a set of model singletons at a fake axios client and return it.
- *
- * BaseModel holds `axios` as an *instance* field, so assigning onto the model is
- * a complete seam - no vi.mock hoisting to reason about, and the real model code
- * (preInsert/preUpdate date formatting and the like) stays in the picture. The
- * models are module-level singletons shared with the component under test, so
- * the real clients are saved here and must be put back by restoreClients().
- *
- * `defaultGet` is what any GET other than the CSRF token resolves to. It differs
- * per form: autocomplete endpoints return a bare array, list() reads
- * response.data.results.
- */
-export function installFakeClients(models, { defaultGet = { data: [] } } = {}) {
-  http = {
-    get: vi.fn((url) => {
-      if (url === '/get-csrf-token/') {
-        return Promise.resolve({ data: { token: 'csrf-token' } })
-      }
-      return Promise.resolve(defaultGet)
-    }),
-    post: vi.fn(() => Promise.resolve({ data: { id: 100 } })),
-    patch: vi.fn(() => Promise.resolve({ data: {} })),
-    delete: vi.fn(() => Promise.resolve({ data: {} })),
-  }
-
-  for (const model of models) {
-    realClients.set(model, model.axios)
-    model.axios = http
-  }
-
-  return http
-}
-
-/** Put the real axios clients back. Call from afterEach. */
-export function restoreClients() {
-  for (const [model, client] of realClients.entries()) {
-    model.axios = client
-  }
-  realClients.clear()
-  http = null
-}
 
 /**
  * Mount a form view with the plugins the app installs.
@@ -325,11 +189,6 @@ export async function mountListView(component, options = {}) {
 /** The router.go spy for the most recently mounted form. */
 export function routerGo() {
   return routerGoSpy
-}
-
-/** URLs passed to a given verb, in call order. */
-export function urls(verb) {
-  return http[verb].mock.calls.map(([url]) => url)
 }
 
 /** Toast titles in call order. */

@@ -125,6 +125,7 @@
               <VueDatePicker
                 id="start_date"
                 v-model="values.start_date"
+                model-type="yyyy-MM-dd"
                 :placeholder="$trans('Select date')"
                 :locale="nl"
                 auto-apply
@@ -172,6 +173,7 @@
               <VueDatePicker
                 id="end_date"
                 v-model="values.end_date"
+                model-type="yyyy-MM-dd"
                 :placeholder="$trans('Select date')"
                 :locale="nl"
                 auto-apply
@@ -234,10 +236,9 @@
 import moment from 'moment'
 import { nl } from 'date-fns/locale'
 import VueMultiselect from 'vue-multiselect'
-import { companyLeaveTypeListOptions } from '@/api/@tanstack/vue-query.gen'
-import { companyUserLeaveHoursAdminGetTotalsCreate } from '@/api/sdk.gen'
-import type { UserSelectRow } from '@/api/types.gen'
-import { companyUserLeaveHoursAdmin } from '@/api/resources.gen'
+
+import { workforceUserLeaveHoursAdminGetTotalsCreate } from '@/api/sdk.gen'
+
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {
   useQueryErrorToast,
@@ -270,13 +271,13 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const {create: toast} = useToast()
+const { toast } = useCommon()
 void toast
 
 const today = moment().format('YYYY-MM-DD')
 const now = moment().format('HH:mm')
 
-const leaveTypesQuery = useQuery(() => companyLeaveTypeListOptions({
+const leaveTypesQuery = useQuery(() => Api.WorkforceLeaveType.list.options({
   query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
 }))
 useQueryErrorToast(leaveTypesQuery.error, $trans('Error loading leave types'))
@@ -286,7 +287,7 @@ const {term, options, loading: searching} = useUserSearch()
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: companyUserLeaveHoursAdmin,
+  resource: Api.WorkforceUserLeaveHoursAdmin,
   empty: () => emptyLeave(today, now),
   fromRecord: leaveFromRecord,
   validate: validateLeave,
@@ -311,7 +312,7 @@ watch(record, (data) => {
   if (data) userName.value = data.full_name
 }, {immediate: true})
 
-function userLabel(option: UserSelectRow): string {
+function userLabel(option: Api.UserSelectRow): string {
   return option.name
 }
 
@@ -319,7 +320,7 @@ function onSearch(value: string) {
   term.value = value
 }
 
-function selectUser(option: UserSelectRow) {
+function selectUser(option: Api.UserSelectRow) {
   values.value.user = option.id
   userName.value = option.name
 }
@@ -331,15 +332,20 @@ const probing = ref(false)
 
 /**
  * Ask the endpoint what the window adds up to and print its answer. Fired on
- * mount and whenever the window changes - the legacy probe fired from a date
- * widget's `input` event and from the two time inputs, so a changed whole-day
- * flag or a newly picked leave type left the number stale.
+ * mount and whenever the window or the user changes - the legacy probe fired
+ * from a date widget's `input` event and from the two time inputs, so a changed
+ * whole-day flag or a newly picked leave type left the number stale.
+ *
+ * The picked user rides as `?user=`: without it the endpoint previews the
+ * requesting planner's own contract hours. Before a pick there is no one else
+ * to ask about.
  */
 async function probeTotals(): Promise<void> {
   probing.value = true
   try {
-    const {data, error} = await companyUserLeaveHoursAdminGetTotalsCreate({
+    const {data, error} = await workforceUserLeaveHoursAdminGetTotalsCreate({
       body: leaveProbeBody(values.value),
+      query: values.value.user === null ? undefined : {user: values.value.user},
     })
     if (error || !data) throw new Error('leave totals probe failed')
     const totals = data.result
@@ -354,6 +360,7 @@ async function probeTotals(): Promise<void> {
 
 watch(
   () => [
+    values.value.user,
     values.value.start_date,
     values.value.end_date,
     values.value.start_date_is_whole_day,

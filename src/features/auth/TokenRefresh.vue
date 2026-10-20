@@ -11,7 +11,7 @@ import { useAuthToken } from './token'
 const INTERVAL_MINUTES = 15
 const EXPIRE_REFRESH_THRESHOLD_SEC = 60 * 60 * 12
 
-const authStore = useAuthStore()
+const { authStore } = useCommon()
 
 /**
  * The refresh cadence as a managed interval: it cleans itself up on unmount,
@@ -43,7 +43,19 @@ function parseJwt(token: string): { exp: number } {
       .join(''),
   )
 
-  return JSON.parse(jsonPayload)
+  // The token payload is `{exp}`, but `JSON.parse` answers `any`: a payload
+  // that is missing or misshapen reads as expired rather than crashing the
+  // refresh check below.
+  const payload: unknown = JSON.parse(jsonPayload)
+  if (
+    typeof payload === 'object' &&
+    payload !== null &&
+    'exp' in payload &&
+    typeof payload.exp === 'number'
+  ) {
+    return { exp: payload.exp }
+  }
+  return { exp: NaN }
 }
 
 async function checkToken() {

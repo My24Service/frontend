@@ -1,10 +1,8 @@
 import * as v from 'valibot'
 
-import type { EngineerEventType, EngineerEventTypeRequest } from '@/api/types.gen'
-import { vEngineerEventTypeRequest } from '@/api/valibot.gen'
 import {
   type FieldLabels,
-  fieldErrors,
+  writeContract,
   type FieldErrors,
   type FieldMessages,
 } from '@/features/forms'
@@ -17,13 +15,13 @@ import {
  * serializer is one this form does not offer yet.
  */
 export type EngineerEventTypeFormValues =
-  Omit<v.InferInput<typeof vEngineerEventTypeRequest>, 'measure_last_event_type' | 'statuscode'>
+  Omit<v.InferInput<typeof schemas.vEngineerEventTypeRequest>, 'measure_last_event_type' | 'statuscode'>
   & {
     measure_last_event_type: string
     statuscode: number | null
   }
 
-export type EngineerEventTypeFieldErrors = FieldErrors<keyof EngineerEventTypeFormValues & string>
+export type EngineerEventTypeFieldErrors = FieldErrors<keyof EngineerEventTypeFormValues>
 
 export function emptyEngineerEventType(): EngineerEventTypeFormValues {
   return {event_type: '', measure_last_event_type: '', statuscode: null}
@@ -35,7 +33,7 @@ export function emptyEngineerEventType(): EngineerEventTypeFormValues {
  * three counts, which the legacy screen carried back onto the wire and the
  * parse now drops.
  */
-export function engineerEventTypeFromRecord(record: EngineerEventType): EngineerEventTypeFormValues {
+export function engineerEventTypeFromRecord(record: Api.EngineerEventType): EngineerEventTypeFormValues {
   return {
     event_type: record.event_type,
     measure_last_event_type: record.measure_last_event_type ?? '',
@@ -45,7 +43,7 @@ export function engineerEventTypeFromRecord(record: EngineerEventType): Engineer
 
 export const FIELD_LABELS = {
   event_type: () => $trans('Event type'),
-} satisfies FieldLabels<keyof EngineerEventTypeFormValues & string>
+} as const satisfies FieldLabels<keyof EngineerEventTypeFormValues>
 
 /**
  * The legacy screen's own line for the one required field. The derived
@@ -54,7 +52,7 @@ export const FIELD_LABELS = {
  */
 export const FIELD_MESSAGES = {
   event_type: () => $trans('Please enter a type'),
-} satisfies FieldMessages<keyof EngineerEventTypeFormValues & string>
+} as const satisfies FieldMessages<keyof EngineerEventTypeFormValues>
 
 /**
  * The wire body.
@@ -72,19 +70,15 @@ function shaped(values: EngineerEventTypeFormValues): Record<string, unknown> {
   }
 }
 
-export function validateEngineerEventType(values: EngineerEventTypeFormValues): EngineerEventTypeFieldErrors {
-  return fieldErrors(vEngineerEventTypeRequest, shaped(values), FIELD_MESSAGES, FIELD_LABELS)
-}
-
 /**
- * The body both writes send.
- *
- * Both parse the create component — the one that says what a whole event type
- * needs, and the one whose `event_type` is required. The PATCH body is a
- * superset of what PATCH requires: the two generated components declare the
- * same three keys, and the create is the stricter of the pair about the one
- * the form cannot save without.
+ * What the form checks and sends. Both writes validate against the create
+ * body - the one that says what a whole event type needs, and whose
+ * `event_type` is required; the edit then sends the same three keys as a
+ * PATCH, which declares them all.
  */
-export function parseEngineerEventType(values: EngineerEventTypeFormValues): EngineerEventTypeRequest {
-  return v.parse(vEngineerEventTypeRequest, shaped(values))
-}
+export const engineerEventTypeWrite = writeContract(Api.UserEngineerEventType, {
+  validateWith: Api.UserEngineerEventType.create.body,
+  shape: shaped,
+  labels: FIELD_LABELS,
+  messages: FIELD_MESSAGES,
+})

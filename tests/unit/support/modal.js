@@ -1,6 +1,3 @@
-import { afterEach } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
-
 /**
  * Driving a `b-modal` from a spec, through its DOM.
  *
@@ -14,13 +11,13 @@ import { enableAutoUnmount } from '@vue/test-utils'
  * this helper exists: everything below is ordinary DOM, driven with the events
  * a browser would send.
  *
- * `enableAutoUnmount` matters more here than usual. A teleported modal stays in
+ * setupTests.js enables auto-unmount for the whole suite, and it matters more
+ * here than usual. A teleported modal stays in
  * `document.body` after its test ends, so without it the next test's
  * `#search-modal` may be the previous test's — a spec that then "opens" a modal
  * and types into it is typing into a corpse, and its assertion about the
  * request that followed passes or fails for reasons unrelated to the screen.
  */
-enableAutoUnmount(afterEach)
 
 /** A handle on the teleported modal with this id. */
 export function modal(id) {

@@ -1,0 +1,85 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SupplierView > renders the legacy view's markup, but for the two fixes 1`] = `
+"<div class="app-page">
+  <header>
+    <div class="page-title">
+      <h3><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+          <path fill="currentColor" d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.37 2.37 0 0 1 9.875 8A2.37 2.37 0 0 1 8 7.083A2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976zm1.78 4.275a1.375 1.375 0 0 0 2.75 0a.5.5 0 0 1 1 0a1.375 1.375 0 0 0 2.75 0a.5.5 0 0 1 1 0a1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0a.5.5 0 0 1 1 0M1.5 8.5A.5.5 0 0 1 2 9v6h1v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5h6V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5M4 15h3v-5H4zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1zm3 0h-2v3h2z"></path>
+        </svg><span class="backlink">Suppliers</span> / ACME</h3>
+      <div class="flex-columns"><button class="btn btn-md btn-secondary btn btn-info" type="button">Back</button><a href="/inventory/suppliers/form/7" class="btn btn-primary">Edit supplier</a></div>
+    </div>
+  </header>
+  <div class="page-detail flex-columns">
+    <div class="panel col-1-3">
+      <h6>Supplier</h6>
+      <dl>
+        <dt>Identifier</dt>
+        <dd>S-7</dd>
+        <dt>Name</dt>
+        <dd>ACME</dd>
+        <dt>Address</dt>
+        <dd>Main 1</dd>
+        <dt>Country/Postal/city</dt>
+        <dd>NL- 1000AA Utrecht</dd>
+      </dl>
+      <dl>
+        <dt>Contact</dt>
+        <dd>Jan Jansen</dd>
+        <dt>Tel.</dt>
+        <dd>030-1234567</dd>
+        <dt>Mobile</dt>
+        <dd>06-12345678</dd>
+        <dt>Email</dt>
+        <dd><a class="px-1" href="mailto:orders@acme.test">orders@acme.test</a></dd>
+        <dt>Remarks</dt>
+        <dd>Pays late</dd>
+      </dl>
+    </div>
+    <div class="panel col-2-3">
+      <h6>Materials</h6>
+      <table class="table b-table" ariabusy="false">
+        <!---->
+        <thead class="">
+          <tr class="">
+            <th scope="col" class="">Name</th>
+            <th scope="col" class="">Unit</th>
+            <th scope="col" class="">Modified</th>
+          </tr>
+          <!---->
+        </thead>
+        <tbody class="">
+          <!---->
+          <tr class="">
+            <td class="">
+              <!---->Widget
+            </td>
+            <td class="">
+              <!---->pcs
+            </td>
+            <td class="">
+              <!---->03-01-2026
+            </td>
+          </tr>
+          <!---->
+          <tr class="">
+            <td class="">
+              <!---->Gadget
+            </td>
+            <td class="">
+              <!---->kg
+            </td>
+            <td class="">
+              <!---->03-01-2026
+            </td>
+          </tr>
+          <!---->
+          <!---->
+        </tbody>
+        <!---->
+        <!---->
+      </table>
+    </div>
+  </div>
+</div>"
+`;

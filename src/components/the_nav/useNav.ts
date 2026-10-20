@@ -11,9 +11,9 @@ import { memberMemberRequestedCountRetrieve } from '@/api/sdk.gen'
 // parts[parts.length] instead of parts[parts.length - 1]).
 export interface UseNav {
   route: RouteLocationNormalizedLoaded
-  isTopActive(section: string): boolean
-  isSubActive(names: string[]): boolean
-  isEquipmentTypeActive(type: string, groups?: string[]): boolean
+  isTopActive: (this: void, section: string) => boolean
+  isSubActive: (this: void, names: string[]) => boolean
+  isEquipmentTypeActive: (this: void, type: string, groups?: string[]) => boolean
 }
 
 export function useNav(): UseNav {
@@ -46,20 +46,25 @@ export function useNav(): UseNav {
 
 export interface UseRequestedCount {
   requestedCount: Ref<number>
-  loadRequestedCount(): Promise<void>
+  loadRequestedCount: (this: void) => Promise<void>
 }
 
 // The requested-members badge call, fetched once per nav mount when the user
 // may see it. Direct call into the generated client - #326 deleted the
 // hand-written Member service this used to ride on. throwOnError keeps the
 // call shape the call-shape specs pin: GET /api/member/member/requested_count/
-// with no query and no body.
+// with no query and no body. The callers fire it from setup without awaiting,
+// so a failure is caught here: the badge stays at its last count.
 export function useRequestedCount(): UseRequestedCount {
   const requestedCount = ref<number>(0)
 
   async function loadRequestedCount(): Promise<void> {
-    const { data } = await memberMemberRequestedCountRetrieve({ throwOnError: true })
-    requestedCount.value = data.count
+    try {
+      const { data } = await memberMemberRequestedCountRetrieve({ throwOnError: true })
+      requestedCount.value = data.count
+    } catch (error) {
+      console.error('error fetching requested member count', error)
+    }
   }
 
   return { requestedCount, loadRequestedCount }

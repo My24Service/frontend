@@ -2,7 +2,6 @@ import moment, {
   type Moment,
 } from 'moment'
 
-import type { TimeRegistrationListResponse, TimeRegistrationTotalsRow } from '@/api/types.gen'
 import { translateHoursField as totalsFieldLabel } from '@/features/field-service'
 
 /**
@@ -35,7 +34,7 @@ export interface TotalEntry {
  * whatever `totals_fields` names, so a row is read here as that union plus the
  * field map the walk indexes; a field a row does not carry reads as absent.
  */
-export type TotalsRow = TimeRegistrationTotalsRow & Record<string, TotalEntry>
+export type TotalsRow = Api.TimeRegistrationTotalsRow & Record<string, TotalEntry>
 
 /**
  * The response's totals rows, as that field map.
@@ -45,7 +44,7 @@ export type TotalsRow = TimeRegistrationTotalsRow & Record<string, TotalEntry>
  * whichever ones the window sums, so the union type cannot be indexed by the
  * name the caller holds.
  */
-function totalsRows(payload: TimeRegistrationListResponse): TotalsRow[] {
+function totalsRows(payload: Api.TimeRegistrationListResponse): TotalsRow[] {
   return payload.totals as TotalsRow[]
 }
 
@@ -127,7 +126,7 @@ function cellText(entries: TotalEntry[]): string {
 }
 
 /** One row per user, in the order the endpoint answered, cells per interval. */
-export function userRows(payload: TimeRegistrationListResponse): UserPivotRow[] {
+export function userRows(payload: Api.TimeRegistrationListResponse): UserPivotRow[] {
   const seen = new Set<number | null>()
   const rows: UserPivotRow[] = []
   const totals = totalsRows(payload)
@@ -162,7 +161,7 @@ export function userRows(payload: TimeRegistrationListResponse): UserPivotRow[] 
 }
 
 /** One row per totals field, cells per interval - the drill-down table. */
-export function detailRows(payload: TimeRegistrationListResponse): DetailPivotRow[] {
+export function detailRows(payload: Api.TimeRegistrationListResponse): DetailPivotRow[] {
   const rows: DetailPivotRow[] = []
   const totals = totalsRows(payload)
 

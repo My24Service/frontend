@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { companyBranchMy } from '@/api/resources.gen'
+import { CompanyBranchMy } from '@/api/resources.gen'
 import { writeContract } from '@/features/forms'
 
 import {
@@ -62,7 +62,7 @@ describe('the body a contract sends follows the context', () => {
   test('a singleton has one body, and both directions send it', () => {
     // `branch-my` is the caller's own branch: the API only patches it, so the
     // update body stands in for the create it does not have.
-    const contract = writeContract(companyBranchMy)
+    const contract = writeContract(CompanyBranchMy)
     expect(contract.parseCreate({name: 'HQ'})).toEqual({name: 'HQ'})
     expect(contract.parseUpdate({name: 'HQ'})).toEqual({name: 'HQ'})
   })

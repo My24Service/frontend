@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-maintenance-contract-modal',
         confirmText: $trans('Are you sure you want to delete this maintenance contract?'),
-        destroyMutation: customerMaintenanceContractDestroyMutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()}),
+        resource: Api.CustomerMaintenanceContract,
         deletedDetail: $trans('Maintenance contract has been deleted'),
         deleteError: $trans('Error deleting maintenance contract'),
       }"
@@ -37,43 +36,27 @@
 
 <script lang="ts" setup>
 import { RouterLink } from 'vue-router'
-import {
-  customerCustomerAutocompleteListOptions,
-  customerMaintenanceContractDestroyMutation,
-  customerMaintenanceContractListOptions,
-  customerMaintenanceContractListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { AddressAutocompleteRow, PaginatedMaintenanceContractList } from '@/api/types.gen'
-import { formatMoney, toDinero } from '@/services/money'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type FilterOption,
-  type ListRow,
-} from '@/features/table'
 
-type ContractRow = ListRow<PaginatedMaintenanceContractList>
+import { formatMoney, toDinero } from '@/services/money'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type FilterOption, type ListRow } from '@/features/table'
+
+type ContractRow = ListRow<Api.PaginatedMaintenanceContractList>
 
 /** An autocomplete row as a filter choice: its id on the wire, its name on the chip. */
-function customerOptions(rows: AddressAutocompleteRow[]): FilterOption[] {
+function customerOptions(rows: Api.AddressAutocompleteRow[]): FilterOption[] {
   return rows.map((row) => ({value: String(row.id), label: row.name ?? row.value}))
 }
 
-const queryClient = useQueryClient()
+const { mainStore, queryClient } = useCommon()
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated. Typed structurally because
 // ServerTable is generic over the row type.
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
-const mainStore = useMainStore()
-
 function dineroFor(row: ContractRow) {
   // sum_tariffs is required on the contract; the tenant default prices it.
-  return toDinero(row.sum_tariffs, mainStore.getDefaultCurrency)
+  return toDinero(row.sum_tariffs, mainStore.requiredDefaultCurrency)
 }
 
 const columnHelper = createAppColumnHelper<ContractRow>()
@@ -95,10 +78,10 @@ const columns = columnHelper.columns([
       label: $trans('Customer'),
       param: 'customer',
       loadOptions: (term) => queryClient
-        .fetchQuery(customerCustomerAutocompleteListOptions({query: {q: term}}))
+        .fetchQuery(Api.CustomerCustomerAutocomplete.list.options({query: {q: term}}))
         .then(customerOptions),
       resolveLabels: (ids) => queryClient
-        .fetchQuery(customerCustomerAutocompleteListOptions({query: {id: ids.join(',')}}))
+        .fetchQuery(Api.CustomerCustomerAutocomplete.list.options({query: {id: ids.join(',')}}))
         .then(customerOptions),
     }},
   }),
@@ -123,15 +106,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ContractRow>({
   key: 'maintenance-contract-table',
   columns,
-  listOptions: (query) => customerMaintenanceContractListOptions({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-      ...(query.remarks ? {remarks: String(query.remarks)} : {}),
-      ...(query.customer ? {customer: String(query.customer)} : {}),
-    },
-  }),
+  resource: Api.CustomerMaintenanceContract,
   urlSync: true,
   loadError: $trans('Error loading maintenance contracts'),
 })

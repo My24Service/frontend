@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-employee-user-modal',
         confirmText: $trans('Are you sure you want to delete this employee?'),
-        destroyMutation: companyEmployeeuserDestroyMutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyEmployeeuserListQueryKey()}),
+        resource: Api.UserEmployeeuser,
         deletedDetail: $trans('Employee has been deleted'),
         deleteError: $trans('Error deleting employee'),
       }"
@@ -36,20 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  companyEmployeeuserDestroyMutation,
-  companyEmployeeuserListOptions,
-  companyEmployeeuserListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedEmployeeUserList } from '@/api/types.gen'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 
 const props = withDefaults(defineProps<{
@@ -65,7 +51,7 @@ const props = withDefaults(defineProps<{
 const addRoute = computed(() => props.fromSettings ? 'settings-employee-add' : 'employee-add')
 const editRoute = computed(() => props.fromSettings ? 'settings-employee-edit' : 'employee-edit')
 
-type EmployeeUserRow = ListRow<PaginatedEmployeeUserList>
+type EmployeeUserRow = ListRow<Api.PaginatedEmployeeUserList>
 
 const columnHelper = createAppColumnHelper<EmployeeUserRow>()
 
@@ -95,11 +81,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<EmployeeUserRow>({
   key: 'employee-user-table',
   columns,
-  listOptions: (query) => companyEmployeeuserListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.UserEmployeeuser,
   urlSync: true,
   loadError: $trans('Error loading employees'),
 })

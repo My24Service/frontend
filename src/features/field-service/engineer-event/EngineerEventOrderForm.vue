@@ -70,14 +70,6 @@ import * as v from 'valibot'
 import moment from 'moment'
 import VueMultiselect from 'vue-multiselect'
 
-import {
-  companyEngineereventCreateOrderCreateMutation,
-  companyEngineerRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Engineer } from '@/api/types.gen'
-import { vEngineerEventCreateOrderRequestRequest } from '@/api/valibot.gen'
-import { companyEngineerevent } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
 import { addressLabel, useOwnerPicker } from '@/features/order'
 
 import { invalidateDispatchBoard } from '../invalidation'
@@ -86,7 +78,7 @@ import { invalidateDispatchBoard } from '../invalidation'
  * The "Attach order" modal the events list mounts: pick the customer whose
  * address the order is for, and the modal creates the order, assigns it to the
  * engineer the event belongs to, and writes the assignment onto the event —
- * in **one** request (`companyEngineereventCreateOrderCreate`).
+ * in **one** request (`userEngineereventCreateOrderCreate`).
  *
  * It used to be three, in sequence: the order create (`orderOrderCreate`), the
  * assign through `useOrderAssignment` (the Shim `src/models/mobile/Assign.js`
@@ -106,8 +98,7 @@ import { invalidateDispatchBoard } from '../invalidation'
  */
 const emit = defineEmits<{(event: 'assigned'): void}>()
 
-const queryClient = useQueryClient()
-const {create: toast} = useToast()
+const { toast, queryClient } = useCommon()
 
 const modalRef = useTemplateRef<{show: () => void; hide: () => void}>('attach-order-modal')
 
@@ -147,7 +138,7 @@ function emptyOrder(): OrderValues {
 }
 
 const eventId = ref<number | null>(null)
-const engineer = ref<Engineer | null>(null)
+const engineer = ref<Api.Engineer | null>(null)
 const order = ref<OrderValues>(emptyOrder())
 const isLoading = ref(false)
 
@@ -169,7 +160,7 @@ const {term, options: customers, select: selectCustomer} = useOwnerPicker(
 
 // The one write -------------------------------------------------------------
 
-const createOrder = useMutation({...companyEngineereventCreateOrderCreateMutation()})
+const createOrder = useMutation({...Api.UserEngineerevent.extras.createOrderCreate.mutation()})
 
 /**
  * The body of the order this modal means: what it filled, today's dates, and
@@ -183,7 +174,7 @@ const createOrder = useMutation({...companyEngineereventCreateOrderCreateMutatio
  */
 function orderBody(values: OrderValues) {
   const today = moment().format('YYYY-MM-DD')
-  return v.parse(vEngineerEventCreateOrderRequestRequest, {
+  return v.parse(schemas.vEngineerEventCreateOrderRequestRequest, {
     customer_relation: values.customer_relation,
     customer_id: values.customer_id,
     order_name: values.order_name,
@@ -207,7 +198,7 @@ function orderBody(values: OrderValues) {
  * Open the modal for one event and its engineer.
  *
  * The engineer is read through the generated query rather than held: the row
- * carries the engineer's *user* id, and `/api/company/engineer/{id}/` is the
+ * carries the engineer's *user* id, and `/api/user/engineer/{id}/` is the
  * `auth_models.User` viewset (my24service `apps/user/views.py:590`).
  *
  * It is the modal's open-time step, not part of the write: the endpoint below
@@ -218,7 +209,7 @@ function orderBody(values: OrderValues) {
 async function show(eventId_: number, engineerUserId: number) {
   eventId.value = eventId_
   engineer.value = await queryClient.fetchQuery(
-    companyEngineerRetrieveOptions({path: {id: engineerUserId}}),
+    Api.UserEngineer.retrieve.options({path: {id: engineerUserId}}),
   )
   modalRef.value?.show()
 }
@@ -258,7 +249,7 @@ async function submitForm() {
     // the board goes stale here exactly as it did while the assign was a
     // request of its own; the events list redraws the row with its order.
     await invalidateDispatchBoard(queryClient)
-    await invalidateReads(companyEngineerevent)(queryClient)
+    await Api.UserEngineerevent.invalidate(queryClient)
 
     order.value = emptyOrder()
     isLoading.value = false

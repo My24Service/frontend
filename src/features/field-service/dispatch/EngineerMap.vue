@@ -27,8 +27,6 @@
 </template>
 
 <script setup lang="ts">
-import { companyEngineerGetLocationsListOptions } from '@/api/@tanstack/vue-query.gen'
-import type { EngineerLocation } from '@/api/types.gen'
 /**
  * Where the engineers are, on a HERE map.
  *
@@ -104,12 +102,12 @@ const map = shallowRef<HereMap | null>(null)
 const markerGroup = shallowRef<HereMarkerGroup | null>(null)
 const ui = shallowRef<HereUi | null>(null)
 
-const locationsQuery = useQuery(() => ({...companyEngineerGetLocationsListOptions()}))
+const locationsQuery = useQuery(() => ({...Api.UserEngineerGetLocations.list.options()}))
 
-const locations = computed<EngineerLocation[]>(() => locationsQuery.data.value ?? [])
+const locations = computed<Api.EngineerLocation[]>(() => locationsQuery.data.value ?? [])
 
 function refresh() {
-  locationsQuery.refetch()
+  void locationsQuery.refetch()
 }
 
 /**

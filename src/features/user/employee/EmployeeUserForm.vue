@@ -1,6 +1,6 @@
 <template>
   <UserFormShell
-    :username="employeeUser.username"
+    :edited-username="employeeUser.username"
     :is-create="isCreate"
     :is-loading="isLoading"
     :button-disabled="buttonDisabled"
@@ -79,13 +79,6 @@ import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
 import {
-  companyBranchListOptions,
-  companyBranchMyRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import { companyEmployeeuser } from '@/api/resources.gen'
-import type { EmployeeUser } from '@/api/types.gen'
-import { vEmployeeUserRequestWritable } from '@/api/valibot.gen'
-import {
   emptyEmployeeUser,
   FIELD_MESSAGES,
   parseEmployeeUserForm,
@@ -102,8 +95,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const authStore = useAuthStore()
-const mainStore = useMainStore()
+const { authStore, mainStore } = useCommon()
 
 const isBranchEmployee = computed(() => authStore.isBranchEmployee)
 const hasBranches = computed(() => mainStore.getMemberHasBranches)
@@ -116,7 +108,7 @@ const showBranchSelect = computed(() => hasBranches.value && !isBranchEmployee.v
 // The legacy form listed the first page of branches for the picker; the
 // converted picker reads the same generated list query.
 const branchListQuery = useQuery(() => ({
-  ...companyBranchListOptions(),
+  ...Api.CompanyBranch.list.options(),
   enabled: showBranchSelect.value,
 }))
 
@@ -131,22 +123,22 @@ const branchOptions = computed(() => [
 // A branch employee may only file colleagues under their own branch: the
 // legacy form fetched it for display and pinned its id on submit.
 const myBranchQuery = useQuery(() => ({
-  ...companyBranchMyRetrieveOptions(),
+  ...Api.CompanyBranchMy.retrieve.options(),
   enabled: isBranchEmployee.value,
 }))
 
 const myBranchName = computed(() => myBranchQuery.data.value?.name ?? '')
 
-function employeeUserFromRecord(record: EmployeeUser): EmployeeUserFormValues {
+function employeeUserFromRecord(record: Api.EmployeeUser): EmployeeUserFormValues {
   return {
     ...filledFrom(emptyUserIdentity(), record),
     employee_user: filledFrom(emptyEmployeeUser().employee_user, record.employee_user),
   }
 }
 
-const form = useUserForm<EmployeeUserFormValues, EmployeeUser, v.InferOutput<typeof vEmployeeUserRequestWritable>, EmployeeUserFieldErrors>({
+const form = useUserForm<EmployeeUserFormValues, Api.EmployeeUser, v.InferOutput<typeof schemas.vEmployeeUserRequestWritable>, EmployeeUserFieldErrors>({
   pk: () => props.pk,
-  resource: companyEmployeeuser,
+  resource: Api.UserEmployeeuser,
   empty: emptyEmployeeUser,
   fromRecord: employeeUserFromRecord,
   validate: validateEmployeeUserForm,

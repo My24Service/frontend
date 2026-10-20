@@ -1,33 +1,22 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { EngineerEventList } from '@/features/field-service'
+import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { vEngineer, vEngineerEvent } from '@/api/valibot.gen'
 
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
-import { mountForm, toasts, toastCreate } from '../../support/form-harness.js'
+import { mountForm, toasts } from '../../support/form-harness.js'
+import { stubSocket } from '../../support/sockets.js'
 import { fieldServiceRoutes } from '../../support/field-service-routes.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 import { captureDownloads, xlsxResponse } from '../../support/downloads.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
-
 // The list subscribes to the member websocket while mounted; under test it must
 // neither fetch a room nor connect. The registered handler is kept so a test
 // can deliver the engineer-event message through it.
-const socket = vi.hoisted(() => ({handlers: {}, removed: []}))
-vi.mock('@/services/websocket/MemberNewDataSocket', () => ({
-  default: class {
-    async init() {}
-    setOnmessageHandler(fn) { socket.handlers.event = fn }
-    removeOnmessageHandler() { socket.removed.push('event') }
-    getSocket() {}
-    removeSocket() {}
-  },
-}))
+const socket = {handlers: {}, removed: []}
 
 /**
  * Characterisation of the engineer-event list, written against the LEGACY
@@ -51,12 +40,12 @@ vi.mock('@/services/websocket/MemberNewDataSocket', () => ({
  *  - the row's delete is back. The legacy action threw before it opened
  *    anything (`showDeleteModal` reached for `delete-event-type-modal` while
  *    this template's modal was `delete-event-modal`), and the endpoint had no
- *    detail route to call either. `/api/company/engineerevent/{id}/` (DELETE)
+ *    detail route to call either. `/api/user/engineerevent/{id}/` (DELETE)
  *    exists now, and the shell's `deleteModal` owns the confirmation.
  */
 const api = installApiSeam()
 
-const ENDPOINT = '/api/company/engineerevent/'
+const ENDPOINT = '/api/user/engineerevent/'
 
 /**
  * The tenant the pills row reads.
@@ -97,10 +86,14 @@ beforeEach(() => {
   window.history.replaceState(null, '', '/')
   socket.handlers = {}
   socket.removed = []
+  stubSocket(MemberNewDataSocket.prototype, {
+    setOnmessageHandler(fn) { socket.handlers.event = fn },
+    removeOnmessageHandler() { socket.removed.push('event') },
+  })
   api.get(ENDPOINT, () => paginated([row()], {count: 1}))
   // The attach-order modal reads the engineer the event belongs to as it opens.
-  api.get('/api/company/engineer/{id}/', () => fixtureFor(vEngineer, {id: 5}))
-  api.delete('/api/company/engineerevent/{id}/', noContent)
+  api.get('/api/user/engineer/{id}/', () => fixtureFor(vEngineer, {id: 5}))
+  api.delete('/api/user/engineerevent/{id}/', noContent)
 })
 
 afterEach(() => {
@@ -169,14 +162,14 @@ describe('EngineerEventList', () => {
     // outside `/api/`, where nothing serves the export: what came back was
     // saved as events.xlsx whatever it was.
     const saved = captureDownloads()
-    api.get('/api/company/events-export-xls/', xlsxResponse)
+    api.get('/api/user/events-export-xls/', xlsxResponse)
     vi.stubGlobal('confirm', () => true)
     const wrapper = await mountList()
 
     await wrapper.vm.downloadList()
     await settle()
 
-    expect(api.requests().filter((request) => request.path === '/api/company/events-export-xls/')).toHaveLength(1)
+    expect(api.requests().filter((request) => request.path === '/api/user/events-export-xls/')).toHaveLength(1)
     expect(saved).toEqual(['events.xlsx'])
     vi.unstubAllGlobals()
     vi.restoreAllMocks()
@@ -197,7 +190,7 @@ describe('EngineerEventList', () => {
     await settle()
 
     expect(api.requests().find((request) => request.method === 'delete').path)
-      .toBe('/api/company/engineerevent/11/')
+      .toBe('/api/user/engineerevent/11/')
     expect(reads()).toHaveLength(2)
     expect(toasts().map((toast) => toast.body)).toContain('Event has been deleted')
   })
@@ -211,7 +204,7 @@ describe('EngineerEventList', () => {
     await settle()
 
     expect(document.getElementById('attach-order-modal')).not.toBe(null)
-    expect(api.requests().at(-1)).toMatchObject({method: 'get', path: '/api/company/engineer/5/'})
+    expect(api.requests().at(-1)).toMatchObject({method: 'get', path: '/api/user/engineer/5/'})
   })
 
   test('a websocket message reloads the list', async () => {

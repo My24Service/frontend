@@ -6,14 +6,9 @@ import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: spy } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: spy }) }
-})
-
 const api = installApiSeam()
 
-const IMPORT_PATH = '/api/company/import/'
+const IMPORT_PATH = '/api/importing/import/'
 
 const IMPORT = fixtureFor(vImport, {
   id: 18,
@@ -55,10 +50,10 @@ async function chooseFile(wrapper, name = 'customers.xlsx') {
 }
 
 beforeEach(() => {
-  api.get('/api/company/import/{id}/', IMPORT)
-  api.get('/api/company/import/get_allowed_extensions/', ['xlsx', 'csv'])
+  api.get('/api/importing/import/{id}/', IMPORT)
+  api.get('/api/importing/import/get_allowed_extensions/', ['xlsx', 'csv'])
   api.post(IMPORT_PATH, ({ body }) => fixtureFor(vImport, { id: 19, ...body }))
-  api.patch('/api/company/import/{id}/', ({ body }) => fixtureFor(vImport, { id: 18, ...body }))
+  api.patch('/api/importing/import/{id}/', ({ body }) => fixtureFor(vImport, { id: 18, ...body }))
 })
 
 function mountImport(options = {}) {
@@ -101,7 +96,7 @@ describe('ImportForm create', () => {
 
     // The form reads the endpoint's accepted extensions on mount.
     expect(api.requests().filter((request) =>
-      request.method === 'get' && request.path === '/api/company/import/get_allowed_extensions/')).toHaveLength(1)
+      request.method === 'get' && request.path === '/api/importing/import/get_allowed_extensions/')).toHaveLength(1)
 
     const push = vi.spyOn(wrapper.vm.$router, 'push').mockResolvedValue()
     await wrapper.get('#import_name').setValue('customers 2026')

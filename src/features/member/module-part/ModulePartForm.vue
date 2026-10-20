@@ -76,9 +76,6 @@
 </template>
 
 <script lang="ts" setup>
-import { memberModuleListOptions } from '@/api/@tanstack/vue-query.gen'
-import { memberModulePart } from '@/api/resources.gen'
-import type { ModulePart } from '@/api/types.gen'
 import {
   useResourceForm,
   useQueryErrorToast,
@@ -86,8 +83,7 @@ import {
 import {
   emptyModulePart,
   PLACEHOLDERS,
-  parseModulePart,
-  validateModulePart,
+  modulePartWrite,
   type ModulePartFieldErrors,
   type ModulePartFormValues,
 } from './schemas'
@@ -109,9 +105,9 @@ const {
   buttonDisabled,
   submitForm,
   cancelForm,
-} = useResourceForm<ModulePartFormValues, ModulePart, ReturnType<typeof parseModulePart>, ModulePartFieldErrors>({
+} = useResourceForm<ModulePartFormValues, Api.ModulePart, ReturnType<typeof modulePartWrite.parse>, ModulePartFieldErrors>({
   pk: () => props.pk,
-  resource: memberModulePart,
+  resource: Api.MemberModulePart,
   invalidate: invalidateModulePartListQueries,
   empty: emptyModulePart,
   fromRecord: (record) => ({
@@ -119,8 +115,7 @@ const {
     module: record.module,
     is_always_selected: record.is_always_selected ?? false,
   }),
-  validate: validateModulePart,
-  parse: parseModulePart,
+  contract: modulePartWrite,
   copy: {
     fetchError: $trans('Error fetching module part'),
     created: $trans('Created'),
@@ -138,7 +133,7 @@ const {
 // rather than rejecting it, so this is the most one response can carry.
 
 const modulesQuery = useQuery(
-  memberModuleListOptions({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
+  Api.MemberModule.list.options({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
 )
 
 useQueryErrorToast(modulesQuery.error, $trans('Error loading modules'))

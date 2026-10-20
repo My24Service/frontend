@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { EmployeeUserForm } from '@/features/user'
 import { vBranch, vEmployeeUser } from '@/api/valibot.gen'
@@ -21,11 +21,6 @@ import { userRoutes } from '../../support/user-routes.js'
  * validation gates, the username probe, the toasts and the go-back
  * navigation.
  */
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const RECORD = fixtureFor(vEmployeeUser, {
   id: 31,
@@ -54,7 +49,6 @@ const BRANCHES = {
 const MY_BRANCH = fixtureFor(vBranch, { id: 7, name: 'Rotterdam', city: 'Rotterdam' })
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 
@@ -64,10 +58,10 @@ beforeEach(() => {
   // The username probe asks the generated op, so its request lands on the
   // strict seam like every other read: answer it available here.
   api.get('/api/company/username-exists/', { available: true })
-  api.get('/api/company/employeeuser/', { count: 0, next: null, previous: null, results: [] })
-  api.get('/api/company/employeeuser/{id}/', RECORD)
-  api.post('/api/company/employeeuser/', RECORD)
-  api.patch('/api/company/employeeuser/{id}/', RECORD)
+  api.get('/api/user/employeeuser/', { count: 0, next: null, previous: null, results: [] })
+  api.get('/api/user/employeeuser/{id}/', RECORD)
+  api.post('/api/user/employeeuser/', RECORD)
+  api.patch('/api/user/employeeuser/{id}/', RECORD)
   api.get('/api/company/branch/', BRANCHES)
   api.get('/api/company/branch-my/', MY_BRANCH)
 })
@@ -169,7 +163,7 @@ describe('EmployeeUserForm, creating an employee', () => {
   })
 
   test('tells the user when the create fails, and stays on the form', async () => {
-    api.post('/api/company/employeeuser/', serverError)
+    api.post('/api/user/employeeuser/', serverError)
     const wrapper = await mountEmployeeForm()
 
     await fillCreate(wrapper)
@@ -222,7 +216,7 @@ describe('EmployeeUserForm, editing an employee', () => {
   })
 
   test('tells the user when the record cannot be fetched', async () => {
-    api.get('/api/company/employeeuser/{id}/', serverError)
+    api.get('/api/user/employeeuser/{id}/', serverError)
 
     await mountEmployeeForm({ pk: 31 })
 
@@ -230,7 +224,7 @@ describe('EmployeeUserForm, editing an employee', () => {
   })
 
   test('tells the user when the update fails, and stays on the form', async () => {
-    api.patch('/api/company/employeeuser/{id}/', serverError)
+    api.patch('/api/user/employeeuser/{id}/', serverError)
     const wrapper = await mountEmployeeForm({ pk: 31 })
 
     await wrapper.get('#employee_first_name').setValue('Jonathan')

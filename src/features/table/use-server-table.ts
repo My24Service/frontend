@@ -1,5 +1,8 @@
 import { keepPreviousData } from '@tanstack/vue-query'
 import type {
+  QueryKey,
+} from '@tanstack/vue-query'
+import type {
   ColumnFiltersState,
   PaginationState,
   RowData,
@@ -7,16 +10,45 @@ import type {
   Updater,
 } from '@tanstack/vue-table'
 import type { AxiosError } from 'axios'
+
+import { tableFilterDelay } from '@/services/input-delays'
 import { useQueryErrorToast } from '@/features/forms'
 import { hook } from './table'
 import type { PagedEnvelope, ServerPagedListQuery } from './server-paged-list'
 import { useUrlQuerySync } from './url-query-sync'
 
+/** What a table needs of a generated resource: a list it can page. Any `Api.<Resource>` whose list is pageable is one. */
+export interface PageableResource {
+  listOptions(query: ServerPagedListQuery): ListQueryOptions
+}
+
+/**
+ * The shape every list-options factory returns, as far as this table is
+ * concerned: the generated `.options()` call's `queryKey`. Each endpoint's
+ * concrete options type differs (notably its `queryFn`, whose key tuple is
+ * mutable where `QueryKey` is readonly, so no single `queryFn` annotation
+ * accepts them all), and this composable never calls the function itself -
+ * it rides the spread below into `useQuery` untouched. Deliberately narrow:
+ * everything else on the factory object stays the factory's business.
+ */
+export interface ListQueryOptions {
+  queryKey: QueryKey
+}
+
+/**
+ * Where the rows come from: the resource, whose `listOptions` sends the page
+ * parameters and every column filter the table holds a value for - or, for a
+ * list that sends something else (a mode, a month, another endpoint per
+ * route), the options built by hand. One or the other.
+ */
+type ListSource =
+  | {resource: PageableResource; listOptions?: never}
+  | {resource?: never; listOptions: (query: ServerPagedListQuery) => ListQueryOptions}
+
 export type ServerTableOptions<TData extends RowData> = Omit<
   Parameters<typeof hook.useAppTable<TData>>[0],
   'data' | 'rowCount' | 'state' | 'onSortingChange' | 'onColumnFiltersChange' | 'onPaginationChange'
-> & {
-  listOptions: (query: ServerPagedListQuery) => unknown
+> & ListSource & {
 
   urlSync?: boolean
 
@@ -49,9 +81,8 @@ function sameFilterValues(a: ColumnFiltersState, b: ColumnFiltersState): boolean
 }
 
 export function useServerTable<TData extends RowData>(config: ServerTableOptions<TData>) {
-  const debounceMs = 300
-
-  const {listOptions, urlSync, loadError, pageSize = 20, getRowId, ...tableOptions} = config
+  const {resource, listOptions: explicitOptions, urlSync, loadError, pageSize = 20, getRowId, ...tableOptions} = config
+  const listOptions = resource ? (query: ServerPagedListQuery) => resource.listOptions(query) : explicitOptions
 
   const sorting = ref<SortingState>([])
   const columnFilters = ref<ColumnFiltersState>([])
@@ -85,7 +116,7 @@ export function useServerTable<TData extends RowData>(config: ServerTableOptions
       }
       if (resetPage) pagination.value = {...pagination.value, pageIndex: 0}
     },
-    { debounce: debounceMs, deep: true },
+    { debounce: tableFilterDelay, deep: true },
   )
 
   const wireQuery = computed<ServerPagedListQuery>(() => {
@@ -123,13 +154,9 @@ export function useServerTable<TData extends RowData>(config: ServerTableOptions
     )
   }
 
-  // The one seam where this composable touches the generated option types:
-  // each resource's factory returns a shape only it knows, and restating it
-  // here would reject exactly the objects this exists to accept. The cast is
-  // intentional: the factory return is genuinely unknown at this boundary.
-  //
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const listQuery = useQuery(() => ({...(listOptions(wireQuery.value) as any), placeholderData: keepPreviousData}))
+  // The options carry the generated queryKey/queryFn pair (see
+  // ListQueryOptions), so they spread into useQuery with no cast.
+  const listQuery = useQuery(() => ({...listOptions(wireQuery.value), placeholderData: keepPreviousData}))
 
   const isLoading = computed(() => listQuery.isLoading.value)
   const isFetching = computed(() => listQuery.isFetching.value)
@@ -140,7 +167,7 @@ export function useServerTable<TData extends RowData>(config: ServerTableOptions
   if (loadError) useQueryErrorToast(error, loadError)
 
   function refresh() {
-    listQuery.refetch()
+    void listQuery.refetch()
   }
 
   watch(count, (c) => {

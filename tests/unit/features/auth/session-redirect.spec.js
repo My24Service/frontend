@@ -1,6 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
-  enableAutoUnmount,
   mount,
 } from '@vue/test-utils'
 
@@ -11,6 +10,8 @@ import TheIndex from '@/components/TheIndex.vue'
 import componentMixin from '@/mixins/common'
 import { useAuthStore } from '@/features/auth'
 import { useMainStore } from '@/stores/main'
+
+import { installApiSeam } from '../../support/api-seam/index.js'
 
 /**
  * Behaviour characterisation for the post-login redirect
@@ -23,22 +24,9 @@ import { useMainStore } from '@/stores/main'
  * logic. These specs pin the ordering it must keep.
  */
 
-enableAutoUnmount(afterEach)
-
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
+// On the seam with nothing stubbed: the redirect reads only the stores, and a
+// request would fail the test.
+installApiSeam()
 
 /** Drain macrotasks so the watcher settles. */
 async function flush() {

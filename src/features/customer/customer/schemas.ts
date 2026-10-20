@@ -1,8 +1,6 @@
 import * as v from 'valibot'
 import { objectPick } from '@vueuse/core'
 
-import type { Customer } from '@/api/types.gen'
-import { vCustomerCreateRequest, vPatchedCustomerRequest } from '@/api/valibot.gen'
 import {
   normalizePhone,
   fieldsFromRecord,
@@ -18,22 +16,22 @@ const requiredCustomerId = <E extends {customer_id: v.NullishSchema<v.GenericSch
 
 export const customerFormSchema = v.required(
   v.object({
-    ...vPatchedCustomerRequest.entries,
-    customer_id: requiredCustomerId(vPatchedCustomerRequest.entries),
+    ...schemas.vPatchedCustomerRequest.entries,
+    customer_id: requiredCustomerId(schemas.vPatchedCustomerRequest.entries),
   }),
   ['name', 'address', 'postal', 'city', 'country_code'],
 )
 
 export const customerCreateSchema = v.object({
-  ...vCustomerCreateRequest.entries,
-  customer_id: requiredCustomerId(vCustomerCreateRequest.entries),
+  ...schemas.vCustomerCreateRequest.entries,
+  customer_id: requiredCustomerId(schemas.vCustomerCreateRequest.entries),
 })
 
 /** The read-only companions the panels display next to the form. */
 const DISPLAY_FIELDS = ['id', 'num_orders'] as const
 
-export type CustomerFormValues = v.InferInput<typeof vPatchedCustomerRequest> &
-  Partial<Pick<Customer, (typeof DISPLAY_FIELDS)[number]>>
+export type CustomerFormValues = v.InferInput<typeof schemas.vPatchedCustomerRequest> &
+  Partial<Pick<Api.Customer, (typeof DISPLAY_FIELDS)[number]>>
 
 export function emptyCustomer(): CustomerFormValues {
   return {
@@ -45,10 +43,10 @@ export function emptyCustomer(): CustomerFormValues {
   }
 }
 
-export function customerFromRecord(record: Customer): CustomerFormValues {
+export function customerFromRecord(record: Api.Customer): CustomerFormValues {
   return {
     ...emptyCustomer(),
-    ...fieldsFromRecord(vPatchedCustomerRequest, record),
+    ...fieldsFromRecord(schemas.vPatchedCustomerRequest, record),
     // The branch pickers treat null as a state of their own ("none"), not as
     // an absent value, so a record's null reaches them as null.
     branch_partner: record.branch_partner ?? null,
@@ -57,7 +55,7 @@ export function customerFromRecord(record: Customer): CustomerFormValues {
   }
 }
 
-export type CustomerFieldErrors = FieldErrors<keyof CustomerFormValues & string>
+export type CustomerFieldErrors = FieldErrors<keyof CustomerFormValues>
 
 export const FIELD_LABELS = {
   customer_id: () => $trans('Customer ID'),
@@ -66,13 +64,13 @@ export const FIELD_LABELS = {
   postal: () => $trans('Postal'),
   city: () => $trans('City'),
   country_code: () => $trans('Country'),
-} satisfies FieldLabels<keyof CustomerFormValues & string>
+} as const satisfies FieldLabels<keyof CustomerFormValues>
 
 /** The two phone fields: a format the rule's generic line would not explain. */
 export const FIELD_MESSAGES = {
   tel: () => $trans('Please provide a valid phone number'),
   mobile: () => $trans('Please provide a valid phone number'),
-} satisfies FieldMessages<keyof CustomerFormValues & string>
+} as const satisfies FieldMessages<keyof CustomerFormValues>
 
 /** The line under an untouched field: the required line, or the field's own copy. */
 export const PLACEHOLDERS = { ...requiredMessages(FIELD_LABELS), ...FIELD_MESSAGES }

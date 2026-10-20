@@ -130,16 +130,10 @@
 
 <script lang="ts" setup>
 import * as v from 'valibot'
-import {
-  orderDocumentCreateMutation,
-  orderDocumentDestroyMutation,
-  orderDocumentPartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { OrderDocument } from '@/api/types.gen'
-import { vOrderDocumentRequest, vPatchedOrderDocumentRequest } from '@/api/valibot.gen'
+
 import RowAction from '@/components/RowAction.vue'
 import { fileListOf, readAsDataUrl } from '@/features/shared'
-import { useStagedRows } from './use-staged-rows'
+import { useStagedRows } from '@/features/forms'
 
 /**
  * The order's documents, staged in the form and replayed with the order's
@@ -159,10 +153,10 @@ type DocumentRow = {
 }
 
 const props = defineProps<{
-  documents: OrderDocument[]
+  documents: Api.OrderDocument.Record[]
 }>()
 
-const {create} = useToast()
+const { toast: create } = useCommon()
 
 // The staging the orderlines and infolines share; this panel adds only the
 // file picking and the add/edit form the documents need.
@@ -182,7 +176,7 @@ const {
 const dirty = ref(false)
 const hasChanges = computed(() => dirty.value)
 
-function seedRows(documents: OrderDocument[]) {
+function seedRows(documents: Api.OrderDocument.Record[]) {
   seed(documents.map((record) => ({
     id: record.id,
     name: record.name ?? record.filename,
@@ -242,9 +236,9 @@ async function chooseReplacement(event: Event | {files?: FileList}) {
   rowEdit.value.file = await readAsDataUrl(files[0])
 }
 
-const createMutation = useMutation({...orderDocumentCreateMutation()})
-const updateMutation = useMutation({...orderDocumentPartialUpdateMutation()})
-const destroyMutation = useMutation({...orderDocumentDestroyMutation()})
+const createMutation = useMutation({...Api.OrderDocument.create.mutation()})
+const updateMutation = useMutation({...Api.OrderDocument.update.mutation()})
+const destroyMutation = useMutation({...Api.OrderDocument.destroy.mutation()})
 
 function bodyOf(row: DocumentRow, order: number) {
   return {
@@ -257,8 +251,8 @@ function bodyOf(row: DocumentRow, order: number) {
 
 async function replay(orderId: number) {
   const result = await replayRows(orderId, {
-    create: (row, parent) => createMutation.mutateAsync({body: v.parse(vOrderDocumentRequest, bodyOf(row, parent))}),
-    update: (id, row, parent) => updateMutation.mutateAsync({path: {id}, body: v.parse(vPatchedOrderDocumentRequest, bodyOf(row, parent))}),
+    create: (row, parent) => createMutation.mutateAsync({body: v.parse(schemas.vOrderDocumentRequest, bodyOf(row, parent))}),
+    update: (id, row, parent) => updateMutation.mutateAsync({path: {id}, body: v.parse(schemas.vPatchedOrderDocumentRequest, bodyOf(row, parent))}),
     destroy: (id) => destroyMutation.mutateAsync({path: {id}}),
   })
   // A failed replay throws past this line, so the flag stays raised and a

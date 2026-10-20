@@ -70,8 +70,6 @@
 </template>
 
 <script lang="ts" setup>
-import type { Statuscode } from '@/api/types.gen'
-import { companyEngineerEventType } from '@/api/resources.gen'
 import {
   useResourceForm,
   ValidatedForm,
@@ -82,8 +80,7 @@ import {
   FIELD_MESSAGES,
   emptyEngineerEventType,
   engineerEventTypeFromRecord,
-  parseEngineerEventType,
-  validateEngineerEventType,
+  engineerEventTypeWrite,
 } from './schemas'
 
 /**
@@ -101,7 +98,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const store = useMainStore()
+const { mainStore } = useCommon()
 
 /**
  * The tenant's statuscodes, as `get-initial-data` delivered them, with the
@@ -110,7 +107,7 @@ const store = useMainStore()
  */
 const statuscodeOptions = computed<{id: number | null; statuscode: string}[]>(() => [
   {id: null, statuscode: ''},
-  ...((store.getStatuscodes ?? []) as Statuscode[]).map((statuscode) => ({
+  ...((mainStore.getStatuscodes ?? [])).map((statuscode) => ({
     id: statuscode.id,
     statuscode: statuscode.statuscode,
   })),
@@ -127,11 +124,10 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: companyEngineerEventType,
+  resource: Api.UserEngineerEventType,
   empty: emptyEngineerEventType,
   fromRecord: engineerEventTypeFromRecord,
-  validate: validateEngineerEventType,
-  parse: parseEngineerEventType,
+  contract: engineerEventTypeWrite,
   copy: {
     fetchError: $trans('Error fetching event type'),
     created: $trans('Created'),

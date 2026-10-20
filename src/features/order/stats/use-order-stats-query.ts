@@ -1,4 +1,3 @@
-import type { Statuscode } from '@/api/types.gen'
 import {
   useQueryErrorToast,
   useQueryOf,
@@ -17,6 +16,6 @@ export function useOrderStatsQuery<TData, TOptions extends {queryKey: readonly u
   const orderType = ref('all')
   const query = useQueryOf<TData>(() => ({...optionsFor(orderType.value), enabled: true}))
   useQueryErrorToast(query.error, errorCopy)
-  const statuscodes = computed(() => (mainStore.getStatuscodes ?? []) as Statuscode[])
+  const statuscodes = computed(() => mainStore.getStatuscodes ?? [])
   return {orderType, query, statuscodes}
 }

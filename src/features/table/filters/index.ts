@@ -11,6 +11,7 @@ export {
   type FilterableColumn,
 } from './column-filter'
 export {
+  scalarText,
   joinArrayItems,
   splitArrayItems,
   parseNumberFilter,

@@ -246,12 +246,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Customer } from '@/api/types.gen'
-
 import {
   customerCustomerCheckCustomerIdHandlingRetrieveOptions,
 } from '@/api/@tanstack/vue-query.gen'
-import { customerCustomer } from '@/api/resources.gen'
+
 import { customerCustomerGetNewCustomerIdFromLatestRetrieve } from '@/api/sdk.gen'
 import CustomerFinancialsPanel from './CustomerFinancialsPanel.vue'
 import CustomerBranchPanel from './CustomerBranchPanel.vue'
@@ -273,7 +271,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 
 const {
   values: customer,
@@ -287,12 +285,12 @@ const {
   cancelForm,
 } = useResourceForm<
   CustomerFormValues,
-  Customer,
+  Api.Customer,
   ReturnType<typeof parseCustomerCreate> | ReturnType<typeof parseCustomerPatch>,
   CustomerFieldErrors
 >({
   pk: () => props.pk,
-  resource: customerCustomer,
+  resource: Api.CustomerCustomer,
   createVars: (body) => ({body}),
   empty: () => emptyCustomer(),
   fromRecord: (record) => customerFromRecord(record),

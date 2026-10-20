@@ -2,18 +2,26 @@ import type { QueryClient } from '@tanstack/vue-query'
 import type { AxiosError } from 'axios'
 import { useConfirmedAction } from './use-confirmed-action'
 
+/**
+ * What a list's delete needs of a generated resource: its destroy, and the
+ * reads a delete makes stale. Any `Api.<Resource>` with a destroy is one.
+ */
+export interface DeletableResource {
+  readonly destroy: Api.ResourceWrite
+  invalidate(queryClient: QueryClient): Promise<unknown>
+}
+
 export function useListDelete({
-  destroyMutation,
-  invalidateAfterDelete,
+  resource,
+  invalidate,
   copy,
 }: {
-  // `any` for the mutation's data/error/variables is intentional at this
-  // seam: the generated factory's response, error and variables types are per
-  // resource, and restating them here would reject exactly the factories this
-  // exists to accept.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  destroyMutation: () => UseMutationOptions<any, AxiosError<any>, any>
-  invalidateAfterDelete: (queryClient: QueryClient) => Promise<unknown> | void
+  resource: DeletableResource
+  /**
+   * Given when a delete stales more, or other, reads than the resource's own -
+   * a hand-written `invalidation.ts`. Defaults to `resource.invalidate`.
+   */
+  invalidate?: (queryClient: QueryClient) => Promise<unknown> | void
   /** Toast copy, translated at the call site like everywhere else in the Slice. */
   copy: {
     deletedDetail: string
@@ -28,10 +36,12 @@ export function useListDelete({
   const {confirm: showDeleteModal, handleOk: handleDeleteOk} = useConfirmedAction({
     modalRefName: 'deleteModal',
     mutationOptions: () => ({
-      ...destroyMutation(),
+      // `as` because `ResourceWrite` types the factory loosely enough to admit
+      // every resource's; the composable supplies its own callbacks anyway.
+      ...(resource.destroy.mutation() as UseMutationOptions<unknown, AxiosError, unknown>),
       onSuccess: async () => {
         infoToast(create, $trans('Deleted'), copy.deletedDetail)
-        await invalidateAfterDelete(queryClient)
+        await (invalidate ? invalidate(queryClient) : resource.invalidate(queryClient))
       },
       onError: () => {
         errorToast(create, copy.deleteError)

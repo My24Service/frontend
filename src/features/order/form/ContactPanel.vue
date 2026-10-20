@@ -203,7 +203,7 @@ const props = defineProps<{
 
 const order = defineModel<OrderFormValues>('order', {required: true})
 
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 const countries = computed(() => mainStore.getCountries ?? [])
 const showPicker = computed(() => props.role === 'planning' && (!props.hasBranches || !props.fromQuotation))
 

@@ -2,19 +2,19 @@ export {
   ModulePartList,
   ModulePartForm,
   emptyModulePart,
-  validateModulePart,
+  modulePartWrite,
 } from './module-part'
 export {
   ModuleList,
   ModuleForm,
   emptyModule,
-  validateModule,
+  moduleWrite,
 } from './module'
 export {
   ContractList,
   ContractForm,
   emptyContract,
-  validateContract,
+  contractWrite,
   pathsFromSelection,
   selectionFromPaths,
 } from './contract'
@@ -30,8 +30,7 @@ export {
 } from './member'
 export {
   SettingsForm,
-  parseSettings,
   settingsFromRecord,
-  validateSettings,
+  settingsWrite,
 } from './settings'
 export { invalidateModuleListQueries } from './invalidation'

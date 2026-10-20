@@ -81,9 +81,6 @@
 </template>
 
 <script lang="ts" setup>
-import { memberGetModuleDataListOptions } from '@/api/@tanstack/vue-query.gen'
-import { memberContract } from '@/api/resources.gen'
-import type { Contract, ContractCreateRequest } from '@/api/types.gen'
 import {
   useResourceForm,
   useQueryErrorToast,
@@ -91,8 +88,7 @@ import {
 import {
   emptyContract,
   PLACEHOLDERS,
-  parseContract,
-  validateContract,
+  contractWrite,
   type ContractFieldErrors,
 } from './schemas'
 import { pathsFromSelection, selectionFromPaths, type ModuleSelection } from './module-paths'
@@ -102,7 +98,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const moduleDataQuery = useQuery(memberGetModuleDataListOptions())
+const moduleDataQuery = useQuery(Api.MemberGetModuleData.list.options())
 
 useQueryErrorToast(moduleDataQuery.error, $trans('Error loading modules'))
 
@@ -111,6 +107,11 @@ useQueryErrorToast(moduleDataQuery.error, $trans('Error loading modules'))
 // the per-module tick sets only fold into `module_paths` at
 // validate/parse time, below.
 const selection = ref<ModuleSelection>({})
+
+/** The values as sent: the name, and the tick sets folded into `module_paths`. */
+function withPaths(values: Api.ContractCreateRequest): Api.ContractCreateRequest {
+  return {...emptyContract(), name: values.name, module_paths: pathsFromSelection(selection.value)}
+}
 
 const {
   values: contract,
@@ -122,23 +123,13 @@ const {
   submitForm,
   cancelForm,
   record,
-} = useResourceForm<ContractCreateRequest, Contract, ReturnType<typeof parseContract>, ContractFieldErrors>({
+} = useResourceForm<Api.ContractCreateRequest, Api.Contract, ReturnType<typeof contractWrite.parse>, ContractFieldErrors>({
   pk: () => props.pk,
-  resource: memberContract,
+  resource: Api.MemberContract,
   empty: emptyContract,
   fromRecord: (entry) => ({name: entry.name ?? '', module_paths: entry.module_paths ?? []}),
-  validate: (values) => {
-    const candidate = emptyContract()
-    candidate.name = values.name
-    candidate.module_paths = pathsFromSelection(selection.value)
-    return validateContract(candidate)
-  },
-  parse: (values) => {
-    const candidate = emptyContract()
-    candidate.name = values.name
-    candidate.module_paths = pathsFromSelection(selection.value)
-    return parseContract(candidate)
-  },
+  validate: (values, context) => contractWrite.validate(withPaths(values), context),
+  parse: (values, context) => contractWrite.parse(withPaths(values), context),
   copy: {
     fetchError: $trans('Error fetching contract'),
     created: $trans('Created'),

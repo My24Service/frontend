@@ -54,8 +54,20 @@
 </template>
 
 <script lang="ts" setup>
-import { VueDatePicker } from '@vuepic/vue-datepicker'
+import { VueDatePicker as DatePicker } from '@vuepic/vue-datepicker'
 import { nl } from 'date-fns/locale'
+import type { VNode } from 'vue'
+
+/**
+ * The datepicker, with the one slot this file fills typed as a property. The
+ * library declares its slots in method syntax (`trigger(props): any`), which
+ * the template's type-checked lint reads as an unbound method the moment a
+ * slot is filled; the props and events are the library's own.
+ */
+const VueDatePicker = DatePicker as unknown as new () => {
+  $props: InstanceType<typeof DatePicker>['$props']
+  $slots: {trigger?: () => VNode[]}
+}
 
 /**
  * One planning moment on the order: a date picker beside a free-typed

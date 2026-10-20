@@ -1,4 +1,3 @@
-import { vPlanningUserRequestWritable } from '@/api/valibot.gen'
 import {
   emptyUserIdentity,
   IDENTITY_FIELD_MESSAGES,
@@ -7,7 +6,7 @@ import {
   type UserFormValues,
 } from '../user-form'
 
-export type PlanningUserFormValues = UserFormValues<typeof vPlanningUserRequestWritable>
+export type PlanningUserFormValues = UserFormValues<typeof schemas.vPlanningUserRequestWritable>
 export type PlanningUserFieldErrors = UserFieldErrors
 
 export function emptyPlanningUser(): PlanningUserFormValues {
@@ -23,6 +22,6 @@ export function emptyPlanningUser(): PlanningUserFormValues {
 export const FIELD_MESSAGES = IDENTITY_FIELD_MESSAGES
 
 export const { validate: validatePlanningUserForm, parse: parsePlanningUserForm } = userFormContract({
-  schema: vPlanningUserRequestWritable,
+  schema: schemas.vPlanningUserRequestWritable,
   messages: FIELD_MESSAGES,
 })

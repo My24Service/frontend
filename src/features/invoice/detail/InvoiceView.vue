@@ -193,9 +193,7 @@ import { StatusesComponent } from '@/features/shared'
 import { InvoicePDFViewer } from '@/features/invoice/pdf'
 
 const props = defineProps<{ uuid: string }>()
-const route = useRoute()
-const router = useRouter()
-const mainStore = useMainStore()
+const { mainStore, route, router } = useCommon()
 const viewer = useTemplateRef<{ show: () => void }>('invoice-viewer')
 const detailQuery = useQuery(() => ({
   ...invoiceInvoiceDetailRetrieveOptions({
@@ -206,7 +204,7 @@ const detailQuery = useQuery(() => ({
 }))
 useQueryErrorToast(detailQuery.error, $trans('Error loading invoice'))
 const isLoading = detailQuery.isLoading
-const companyLogo = computed(() => mainStore.getMemberLogo)
+const companyLogo = computed(() => mainStore.getMemberLogo ?? undefined)
 const invoice = computed(() => {
   const record = detailQuery.data.value
   if (!record) return undefined
@@ -226,6 +224,6 @@ function showInvoiceDialog() {
   viewer.value?.show()
 }
 function sendInvoice() {
-  if (invoice.value) router.push({ name: 'invoice-send', query: { invoiceId: invoice.value.id } })
+  if (invoice.value) void router.push({ name: 'invoice-send', query: { invoiceId: invoice.value.id } })
 }
 </script>

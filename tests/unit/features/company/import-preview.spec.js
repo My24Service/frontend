@@ -7,15 +7,10 @@ import { mountForm, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: spy } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: spy }) }
-})
-
 const api = installApiSeam()
 
-const PREVIEW_PATH = '/api/company/import/18/preview/'
-const DO_PATH = '/api/company/import/18/do/'
+const PREVIEW_PATH = '/api/importing/import/18/preview/'
+const DO_PATH = '/api/importing/import/18/do/'
 
 function customerRow(overrides = {}) {
   return fixtureFor(vImportedRow, {
@@ -41,9 +36,9 @@ const PREVIEW = fixtureFor(vImportResult, {
 const bodies = () => toasts().map((toast) => toast.body)
 
 beforeEach(() => {
-  api.get('/api/company/import/{id}/preview/', PREVIEW)
-  api.get('/api/company/import/get_lookup_fields/', { customers: ['name', 'city'] })
-  api.post('/api/company/import/{id}/do/', () => fixtureFor(vImportResult, {
+  api.get('/api/importing/import/{id}/preview/', PREVIEW)
+  api.get('/api/importing/import/get_lookup_fields/', { customers: ['name', 'city'] })
+  api.post('/api/importing/import/{id}/do/', () => fixtureFor(vImportResult, {
     customers: { errors: [], import: [] },
   }))
 })
@@ -64,8 +59,8 @@ describe('ImportPreview', () => {
 
     // Both reads fire: the preview and the lookup fields behind its labels.
     const reads = api.requests().filter((request) => request.method === 'get').map((request) => request.path)
-    expect(reads).toContain('/api/company/import/18/preview/')
-    expect(reads).toContain('/api/company/import/get_lookup_fields/')
+    expect(reads).toContain('/api/importing/import/18/preview/')
+    expect(reads).toContain('/api/importing/import/get_lookup_fields/')
     const body = wrapper.text()
     expect(body).toContain('2 entries')
     expect(body).toContain('Acme BV')
@@ -93,7 +88,7 @@ describe('ImportPreview', () => {
   })
 
   test('a failed import keeps the preview and reports it', async () => {
-    api.post('/api/company/import/{id}/do/', serverError)
+    api.post('/api/importing/import/{id}/do/', serverError)
     const wrapper = mountPreview()
     await settle()
 
@@ -137,7 +132,7 @@ describe('ImportPreview', () => {
   })
 
   test('a failed preview read tells the user', async () => {
-    api.get('/api/company/import/{id}/preview/', serverError)
+    api.get('/api/importing/import/{id}/preview/', serverError)
     mountPreview()
     await settle()
 

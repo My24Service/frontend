@@ -1,4 +1,5 @@
 import BaseModel from '../base'
+import type { AutocompleteRow, CountPayload, ListPayload, StatsPayload } from '../base'
 import { formDefaults, nullableStr, int, str } from '../schema'
 import * as v from 'valibot'
 import { OrderCreateSchema, toApiDate } from './order-schemas'
@@ -215,7 +216,7 @@ class OrderService extends BaseModel {
   }
 
   search(query: string) {
-    return this.axios.get(`${this.url}autocomplete/?q=${query}`).then((response) => response.data)
+    return this.axios.get<AutocompleteRow[]>(`${this.url}autocomplete/?q=${query}`).then((response) => response.data)
   }
 
   /**
@@ -230,7 +231,7 @@ class OrderService extends BaseModel {
    * order-stats-urls.spec.js pins the exact URL of every one of them.
    */
   private async statsRequest(action: string, url: string) {
-    const response = await this.axios.get(url)
+    const response = await this.axios.get<StatsPayload>(url)
     return response && 'data' in response ? response.data[action] : {}
   }
 
@@ -334,13 +335,13 @@ class OrderService extends BaseModel {
    * BaseModel.list() does.
    */
   private async listFrom(url: string) {
-    const response = await this.axios.get(url)
+    const response = await this.axios.get<ListPayload>(url)
 
-    if ('count' in response.data) {
+    if (response.data.count !== undefined) {
       this.count = response.data.count
     }
 
-    if ('num_pages' in response.data) {
+    if (response.data.num_pages !== undefined) {
       this.numPages = response.data.num_pages
     }
 
@@ -379,7 +380,7 @@ class OrderService extends BaseModel {
 
   getUnacceptedCount() {
     return this.axios
-      .get(`${this.url}all_for_customer_not_accepted_count/`)
+      .get<CountPayload>(`${this.url}all_for_customer_not_accepted_count/`)
       .then((response) => response.data)
   }
 

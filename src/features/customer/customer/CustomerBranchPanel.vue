@@ -77,13 +77,6 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  companyPartnerBranchCreateFromCustomerCreateMutation,
-  companyPartnerBranchesRetrieveOptions,
-  companyPartnerBranchesRetrieveQueryKey,
-  companyPartnerCopyCustomerOrdersCreateMutation,
-  companyPartnerListOptions,
-} from '@/api/@tanstack/vue-query.gen'
 import type { CustomerFormValues } from './schemas'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
@@ -96,8 +89,7 @@ const props = defineProps<{
   customerId: number
 }>()
 
-const queryClient = useQueryClient()
-const {create} = useToast()
+const { toast: create, queryClient } = useCommon()
 
 // The partner dropdown must offer every partner, not the first page of them.
 // 1000 is the API's own ceiling: `My24Pagination.max_page_size` (my24service
@@ -105,7 +97,7 @@ const {create} = useToast()
 // rather than rejecting it, so this is the most one response can carry.
 
 const partnersQuery = useQuery(
-  companyPartnerListOptions({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
+  Api.PartnerPartner.list.options({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
 )
 
 const branchPartners = computed(() => {
@@ -124,7 +116,7 @@ const branchPartners = computed(() => {
 const hasBranchPartners = computed(() => branchPartners.value.length > 1)
 
 const branchesQuery = useQuery(() => ({
-  ...companyPartnerBranchesRetrieveOptions({path: {id: values.value.branch_partner as number}}),
+  ...Api.PartnerPartner.extras.branchesRetrieve.options({path: {id: values.value.branch_partner as number}}),
 
   enabled: values.value.branch_partner != null,
 }))
@@ -150,14 +142,14 @@ watch(
 
 function invalidateBranches() {
   return queryClient.invalidateQueries({
-    queryKey: companyPartnerBranchesRetrieveQueryKey(
+    queryKey: Api.PartnerPartner.extras.branchesRetrieve.queryKey(
       {path: {id: values.value.branch_partner as number}},
     ),
   })
 }
 
 const copyOrdersMutation = useMutation({
-  ...companyPartnerCopyCustomerOrdersCreateMutation(),
+  ...Api.PartnerPartner.extras.copyCustomerOrdersCreate.mutation(),
   onSuccess: async () => {
     infoToast(create, $trans('Synced'), $trans('Orders synced'))
     await invalidateBranches()
@@ -184,7 +176,7 @@ async function syncOrders() {
 }
 
 const createBranchMutation = useMutation({
-  ...companyPartnerBranchCreateFromCustomerCreateMutation(),
+  ...Api.PartnerPartner.extras.branchCreateFromCustomerCreate.mutation(),
   onSuccess: async (result) => {
 
     values.value.branch_id = result.branch.id

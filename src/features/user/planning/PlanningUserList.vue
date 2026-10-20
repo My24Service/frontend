@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-planning-user-modal',
         confirmText: $trans('Are you sure you want to delete this planning user?'),
-        destroyMutation: companyPlanninguserDestroyMutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyPlanninguserListQueryKey()}),
+        resource: Api.UserPlanninguser,
         deletedDetail: $trans('planning user has been deleted'),
         deleteError: $trans('Error deleting planning user'),
       }"
@@ -36,20 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  companyPlanninguserDestroyMutation,
-  companyPlanninguserListOptions,
-  companyPlanninguserListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedPlanningUserList } from '@/api/types.gen'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 
 const props = withDefaults(defineProps<{
@@ -65,7 +51,7 @@ const props = withDefaults(defineProps<{
 const addRoute = computed(() => props.fromSettings ? 'settings-planninguser-add' : 'planninguser-add')
 const editRoute = computed(() => props.fromSettings ? 'settings-planninguser-edit' : 'planninguser-edit')
 
-type PlanningUserRow = ListRow<PaginatedPlanningUserList>
+type PlanningUserRow = ListRow<Api.PaginatedPlanningUserList>
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated.
@@ -93,11 +79,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<PlanningUserRow>({
   key: 'planning-user-table',
   columns,
-  listOptions: (query) => companyPlanninguserListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.UserPlanninguser,
   urlSync: true,
   loadError: $trans('Error loading planning users'),
 })

@@ -1,4 +1,7 @@
 export { default as InvoiceForm } from './InvoiceForm.vue'
+// The cost machinery lives in `features/costing`, shared with the quotation
+// form; what this barrel re-exports is the invoice's view of it, so existing
+// importers (and specs) keep reading it from here.
 export {
   COST_TYPE,
   INVOICE_LINE_TYPE,
@@ -20,17 +23,20 @@ export {
   type InvoiceTotals,
   type CalculatedPrices,
   type InvoiceLineDraft,
-} from './calculations'
+} from '@/features/costing'
 export {
   provideCostPanelContext,
   useCostPanelContext,
   type CostPanelContext,
-} from './cost-panel-context'
+} from '@/features/costing'
 export {
   makeCostRow,
   useCostCollection,
   type CostRow,
-} from './use-cost-collection'
+  type CostCollectionSource,
+  type CollectionOptions,
+} from '@/features/costing'
+export { useOrderCostSource } from './order-cost-source'
 export { useMaterialPriceUpdates } from './use-material-prices'
 export {
   configuredHourlyRate,

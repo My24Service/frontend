@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-trip-modal',
         confirmText: $trans('Are you sure you want to delete this trip?'),
-        destroyMutation: mobileTripDestroyMutation,
-        invalidate: invalidateReads(mobileTrip),
+        resource: Api.MobileTrip,
         deletedDetail: $trans('Trip has been deleted'),
         deleteError: $trans('Error deleting trip'),
       }"
@@ -33,22 +32,8 @@
 </template>
 
 <script setup lang="ts">
-import {
-  mobileTripDestroyMutation,
-  mobileTripListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedTripList } from '@/api/types.gen'
-import { mobileTrip } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
-type TripRow = ListRow<PaginatedTripList>
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+type TripRow = ListRow<Api.PaginatedTripList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
@@ -73,11 +58,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   // sortable headers sorted the rows it already held. The kit's sort state is
   // therefore never forwarded, and the headers offer no sort.
   enableSorting: false,
-  listOptions: (query) => mobileTripListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.MobileTrip,
   urlSync: true,
   loadError: $trans('Error loading trips'),
 })

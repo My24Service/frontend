@@ -78,25 +78,23 @@
 </template>
 
 <script setup lang="ts">
-import type { ActivityUserTotal } from '@/api/types.gen'
-import HeaderCell from './Header.vue'
-import VAT from './VAT.vue'
-import CostCollectionShell from './CostCollectionShell.vue'
 import {
+  CostCollectionShell,
+  Header as HeaderCell,
+  VAT,
   makeCostRow,
   useCostCollection,
-  type CostRow,
-} from '../use-cost-collection'
-import { useCostPanelContext } from '../cost-panel-context'
-import {
+  useCostPanelContext,
   COST_TYPE,
   normalizeCostDuration,
+  type CostRow,
   type HoursCostType,
-} from '../calculations'
+} from '@/features/costing'
+import { useOrderCostSource } from '../order-cost-source'
 import type { TeamleaderHourlyRate } from '../use-teamleader-products'
 
 // The editor also accepts the older per-user duration aliases and partner metadata.
-type UserTotal = { -readonly [K in keyof ActivityUserTotal]: ActivityUserTotal[K] } & {
+type UserTotal = { -readonly [K in keyof Api.ActivityUserTotal]: Api.ActivityUserTotal[K] } & {
   is_partner?: boolean
   extra_work?: string | null
   extra_work_secs?: number | null
@@ -120,9 +118,9 @@ const props = withDefaults(defineProps<{
   teamleaderHours?: TeamleaderHourlyRate | null
 }>(), { type: null, hours_total: null, user_totals: null, teamleaderHours: null })
 const context = useCostPanelContext()
-const mainStore = useMainStore()
-const default_currency = mainStore.getDefaultCurrency
-const invoice_default_vat = mainStore.getInvoiceDefaultVat
+const { mainStore } = useCommon()
+const default_currency = mainStore.requiredDefaultCurrency
+const invoice_default_vat = mainStore.requiredInvoiceDefaultVat
 const totalHours = ref<string | null>(null)
 const costType = computed(() => {
   if (props.type == null) throw new Error('An hours cost type is required')
@@ -168,7 +166,7 @@ function buildRows() {
     return [makeCostRow({
       ...activity,
       cost_type: costType.value,
-      order: context.orderPk.value ?? undefined,
+      order: context.parentPk.value ?? undefined,
       user_id: Number(activity.user_id),
       user: activity.is_partner ? null : Number(activity.user_id),
       user_full_name: activity.is_partner ? activity.full_name : null,
@@ -184,6 +182,7 @@ const {
   createInvoiceLinesClicked, changeVatType, priceChanged, getFullname,
 } = useCostCollection({
   context,
+  source: useOrderCostSource(context.parentPk, () => costType.value),
   costType: () => costType.value,
   currency: () => default_currency,
   buildRows,

@@ -1,7 +1,5 @@
 import * as v from 'valibot'
 
-import type { Statuscode, StatuscodeRequest } from '@/api/types.gen'
-import { vStatuscodeRequest } from '@/api/valibot.gen'
 import {
   fieldsFromRecord,
   type FieldLabels,
@@ -13,7 +11,7 @@ import {
 import type { CodeType } from '../code-types'
 import { labelTextColor } from './palette'
 
-type WireValues = v.InferInput<typeof vStatuscodeRequest>
+type WireValues = v.InferInput<typeof schemas.vStatuscodeRequest>
 
 /**
  * A quotation's expiry condition: `num_days`, compared with
@@ -59,8 +57,8 @@ export function emptyStatuscode(): StatuscodeFormValues {
   }
 }
 
-export function statuscodeFromRecord(record: Statuscode): StatuscodeFormValues {
-  const fields = fieldsFromRecord(vStatuscodeRequest, record)
+export function statuscodeFromRecord(record: Api.Statuscode): StatuscodeFormValues {
+  const fields = fieldsFromRecord(schemas.vStatuscodeRequest, record)
   return {
     ...emptyStatuscode(),
     statuscode: fields.statuscode ?? '',
@@ -75,19 +73,19 @@ export function statuscodeFromRecord(record: Statuscode): StatuscodeFormValues {
 }
 
 /** The form's validator: the generated request schema with the code type left to the screen. */
-const statuscodeFormSchema = v.omit(vStatuscodeRequest, ['code_type'])
+const statuscodeFormSchema = v.omit(schemas.vStatuscodeRequest, ['code_type'])
 
-export type StatuscodeFieldErrors = FieldErrors<keyof StatuscodeFormValues & string>
+export type StatuscodeFieldErrors = FieldErrors<keyof StatuscodeFormValues>
 
 /** The colour is picked from a palette, so its empty line asks to select. */
 export const FIELD_MESSAGES = {
   color: () => selectMessage($trans('Label color')),
-} satisfies FieldMessages<keyof StatuscodeFormValues & string>
+} as const satisfies FieldMessages<keyof StatuscodeFormValues>
 
 export const FIELD_LABELS = {
   statuscode: () => $trans('Statuscode'),
   num_days: () => $trans('Number of days'),
-} satisfies FieldLabels<keyof StatuscodeFormValues & string>
+} as const satisfies FieldLabels<keyof StatuscodeFormValues>
 
 /** A blank text field goes out as null, so an edit can clear it. */
 function blankToNull(value: string | null | undefined): string | null {
@@ -125,10 +123,10 @@ export function validateStatuscode(values: StatuscodeFormValues): StatuscodeFiel
  * The body for `codeType`. Only the types in `DATE_TRIGGER_TYPES` carry the
  * date trigger; every other type leaves those three fields off the wire.
  */
-export function parseStatuscode(values: StatuscodeFormValues, codeType: CodeType): StatuscodeRequest {
+export function parseStatuscode(values: StatuscodeFormValues, codeType: CodeType): Api.StatuscodeRequest {
   const wire: Record<string, unknown> = {...toWire(values), code_type: codeType}
   if (!hasDateTrigger(codeType)) {
     for (const field of DATE_TRIGGER_FIELDS) delete wire[field]
   }
-  return v.parse(vStatuscodeRequest, wire)
+  return v.parse(schemas.vStatuscodeRequest, wire)
 }

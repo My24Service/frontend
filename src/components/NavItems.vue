@@ -312,7 +312,7 @@ const isDefaultFamily = computed<boolean>(() => mainStore.getProductFamily === '
 // The showMembers (isAdmin) guard around the count call predates the
 // collapse and is pinned by the nav-items call-shape spec.
 if (authStore.isAdmin) {
-  loadRequestedCount()
+  void loadRequestedCount()
 }
 
 const navLists = {

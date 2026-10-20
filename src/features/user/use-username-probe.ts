@@ -4,7 +4,7 @@ import {
   type UseAvailabilityProbeReturn,
 } from '@/features/forms'
 
-import { USERNAME_PROBE_DEBOUNCE_MS } from './user-form'
+import { typingDelay } from '@/services/input-delays'
 
 export function useUsernameProbe(
   /** Live read of the username field. */
@@ -12,7 +12,7 @@ export function useUsernameProbe(
   /** The username of the record under edit; an unchanged name owes no verdict. */
   originalUsername: Ref<string | null>,
   /** Injectable for specs; production uses the ticketed delay. */
-  { debounceMs = USERNAME_PROBE_DEBOUNCE_MS }: { debounceMs?: number } = {},
+  { debounceMs = typingDelay }: { debounceMs?: MaybeRefOrGetter<number> } = {},
 ): UseUsernameProbeReturn {
   return useAvailabilityProbe({
     read: username,

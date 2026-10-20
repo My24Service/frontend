@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 import { HttpResponse } from 'msw'
 import VueMultiselect from 'vue-multiselect'
 
@@ -13,11 +13,6 @@ import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts } from '../../support/form-harness.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const {toastCreate} = await import('../../support/form-harness.js')
-  return {...(await importOriginal()), useToast: () => ({create: toastCreate})}
-})
-
 /**
  * The attach-order modal: the whole request list it can send, as a literal —
  * read the engineer the event belongs to, search a customer, and create the
@@ -27,7 +22,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * posted the order, assigned it to the engineer, and attached the assignment
  * to the event, in that order; a failure after the first left an order behind
  * that the retry duplicated. `POST
- * /api/company/engineerevent/{id}/create-order/` does all three in one
+ * /api/user/engineerevent/{id}/create-order/` does all three in one
  * transaction, so the write list is a single POST — and the failure test below
  * says what a retry costs: one order, not two.
  *
@@ -38,9 +33,9 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
 
 const api = installApiSeam()
 
-const ENGINEER = '/api/company/engineer/{id}/'
+const ENGINEER = '/api/user/engineer/{id}/'
 const AUTOCOMPLETE = '/api/customer/customer/autocomplete/'
-const CREATE_ORDER = '/api/company/engineerevent/{id}/create-order/'
+const CREATE_ORDER = '/api/user/engineerevent/{id}/create-order/'
 
 /**
  * A `b-modal` that renders its slot and answers `ok`: a real one teleports
@@ -125,7 +120,7 @@ describe('EngineerEventOrderForm', () => {
     await settle()
 
     expect(reads()).toEqual([
-      {method: 'get', path: '/api/company/engineer/5/', query: {}},
+      {method: 'get', path: '/api/user/engineer/5/', query: {}},
     ])
     expect(wrapper.text()).toContain('Search existing address')
   })
@@ -134,8 +129,7 @@ describe('EngineerEventOrderForm', () => {
     const wrapper = mountModal()
 
     wrapper.findComponent(VueMultiselect).vm.$emit('search-change', 'acme')
-    // 500 ms, the modal's own debounce.
-    await new Promise((resolve) => setTimeout(resolve, 700))
+    // The modal's own debounce, zero in specs.
     await settle()
 
     expect(reads()).toEqual([
@@ -149,7 +143,6 @@ describe('EngineerEventOrderForm', () => {
 
     wrapper.findComponent(VueMultiselect).vm.$emit('search-change', 'acme')
     wrapper.findComponent(VueMultiselect).vm.$emit('search-change', '')
-    await new Promise((resolve) => setTimeout(resolve, 700))
     await settle()
 
     expect(reads()).toEqual([])
@@ -175,12 +168,12 @@ describe('EngineerEventOrderForm', () => {
     // The whole wire, not only the write: the create the modal used to make
     // (`POST /api/order/order/`), the assign after it
     // (`POST /api/mobile/assign-user/5/`) and the attach after that
-    // (`PATCH /api/company/engineerevent-update/42/`) are all gone, and one
+    // (`PATCH /api/user/engineerevent-update/42/`) are all gone, and one
     // request carries the three.
     const shapes = api.requests()
     expect(shapes.map(({method, path, query}) => ({method, path, query}))).toEqual([
-      {method: 'get', path: '/api/company/engineer/5/', query: {}},
-      {method: 'post', path: '/api/company/engineerevent/42/create-order/', query: {}},
+      {method: 'get', path: '/api/user/engineer/5/', query: {}},
+      {method: 'post', path: '/api/user/engineerevent/42/create-order/', query: {}},
     ])
 
     expect(shapes[1].body).toEqual({
@@ -251,8 +244,8 @@ describe('EngineerEventOrderForm', () => {
     await settle()
 
     expect(writes().map(({method, path}) => ({method, path}))).toEqual([
-      {method: 'post', path: '/api/company/engineerevent/42/create-order/'},
-      {method: 'post', path: '/api/company/engineerevent/42/create-order/'},
+      {method: 'post', path: '/api/user/engineerevent/42/create-order/'},
+      {method: 'post', path: '/api/user/engineerevent/42/create-order/'},
     ])
     expect(wrapper.emitted('assigned')).toHaveLength(1)
     // The one failure was reported once, and the retry that landed said
@@ -277,7 +270,7 @@ describe('EngineerEventOrderForm', () => {
     await wrapper.get('.modal-ok').trigger('click')
     await settle()
 
-    const create = writes().find((request) => request.path === '/api/company/engineerevent/42/create-order/')
+    const create = writes().find((request) => request.path === '/api/user/engineerevent/42/create-order/')
     expect(create.body.order_reference).toBe(null)
   })
 })

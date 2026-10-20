@@ -11,6 +11,18 @@ const UNSAFE_METHODS = new Set(['post', 'put', 'patch', 'delete'])
 let csrfToken: string | null = null
 let installed = false
 
+/**
+ * The CSRF token answer: `{token}`, read defensively off the wire rather
+ * than off the untyped response body.
+ */
+function readCsrfToken(data: unknown): string | null {
+  if (typeof data !== 'object' || data === null || !('token' in data)) {
+    return null
+  }
+  const token: unknown = data.token
+  return typeof token === 'string' ? token : null
+}
+
 /** Drop the cached token (after a logout, or between tests). */
 export function resetCsrfToken() {
   csrfToken = null
@@ -44,7 +56,7 @@ async function withCsrfToken(
   if (csrfToken === null) {
     // A GET, so it takes the early return above rather than recursing.
     const response = await client.instance.get('/api/get-csrf-token/')
-    csrfToken = response.data.token
+    csrfToken = readCsrfToken(response.data)
   }
 
   config.headers['X-CSRFToken'] = csrfToken

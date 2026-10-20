@@ -1,10 +1,6 @@
 import { RouterLink } from 'vue-router'
-import {
-  companyBranchAutocompleteListOptions,
-  customerCustomerAutocompleteListOptions,
-  orderFilterGetStatusesRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { AddressAutocompleteRow, PaginatedOrderList, Statuscode } from '@/api/types.gen'
+import { orderFilterGetStatusesRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+
 import RowAction from '@/components/RowAction.vue'
 import IBiClock from '~icons/bi/clock'
 import { useQueryErrorToast } from '@/features/forms'
@@ -15,7 +11,7 @@ import {
 } from '@/features/order/temps'
 import OrderStatusCell from './OrderStatusCell.vue'
 
-export type OrderRow = ListRow<PaginatedOrderList>
+export type OrderRow = ListRow<Api.PaginatedOrderList>
 
 /** What the columns need from the screen: which actions to offer and what they do. */
 export interface OrderColumnActions {
@@ -44,7 +40,7 @@ function options(values: string[]): FilterOption[] {
 }
 
 /** An autocomplete row as a filter choice: its id on the wire, its name on the chip. */
-function ownerOptions(rows: AddressAutocompleteRow[]): FilterOption[] {
+function ownerOptions(rows: Api.AddressAutocompleteRow[]): FilterOption[] {
   return rows.map((row) => ({value: String(row.id), label: row.name ?? row.value}))
 }
 
@@ -62,7 +58,7 @@ export function useOrderColumns(actions: OrderColumnActions) {
   const mainStore = useMainStore()
   const queryClient = useQueryClient()
 
-  const statuscodes = computed<Statuscode[]>(() => mainStore.getStatuscodes ?? [])
+  const statuscodes = computed<Api.Statuscode[]>(() => mainStore.getStatuscodes ?? [])
   const orderTypes = computed<string[]>(() => mainStore.getOrderTypes ?? [])
   const includeReference = computed<boolean>(() => !!mainStore.getOrderListMustIncludeReference)
   const hasBranches = computed<boolean>(() => Boolean(mainStore.getMemberHasBranches))
@@ -75,10 +71,10 @@ export function useOrderColumns(actions: OrderColumnActions) {
         label: $trans('Branch'),
         param: 'branch',
         loadOptions: (term) => queryClient
-          .fetchQuery(companyBranchAutocompleteListOptions({query: {q: term}}))
+          .fetchQuery(Api.CompanyBranchAutocomplete.list.options({query: {q: term}}))
           .then(ownerOptions),
         resolveLabels: (ids) => queryClient
-          .fetchQuery(companyBranchAutocompleteListOptions({query: {id: ids.join(',')}}))
+          .fetchQuery(Api.CompanyBranchAutocomplete.list.options({query: {id: ids.join(',')}}))
           .then(ownerOptions),
       }
     }
@@ -87,10 +83,10 @@ export function useOrderColumns(actions: OrderColumnActions) {
       label: $trans('Customer'),
       param: 'customer_relation',
       loadOptions: (term) => queryClient
-        .fetchQuery(customerCustomerAutocompleteListOptions({query: {q: term}}))
+        .fetchQuery(Api.CustomerCustomerAutocomplete.list.options({query: {q: term}}))
         .then(ownerOptions),
       resolveLabels: (ids) => queryClient
-        .fetchQuery(customerCustomerAutocompleteListOptions({query: {id: ids.join(',')}}))
+        .fetchQuery(Api.CustomerCustomerAutocomplete.list.options({query: {id: ids.join(',')}}))
         .then(ownerOptions),
     }
   }

@@ -1,5 +1,3 @@
-import { companyBudget } from '@/api/resources.gen'
-import type { Budget } from '@/api/types.gen'
 import {
   type FieldErrors,
   type FieldLabels,
@@ -15,7 +13,7 @@ export interface BudgetModalValues {
   amount: string
 }
 
-export type BudgetModalErrors = FieldErrors<keyof BudgetModalValues & string>
+export type BudgetModalErrors = FieldErrors<keyof BudgetModalValues>
 
 /** A budget as the modal is opened for a create: this year, zero amount. */
 export function emptyBudget(): BudgetModalValues {
@@ -23,14 +21,14 @@ export function emptyBudget(): BudgetModalValues {
 }
 
 /** The stored record as modal values. */
-export function budgetModalFromRecord(record: Budget): BudgetModalValues {
+export function budgetModalFromRecord(record: Api.Budget): BudgetModalValues {
   return { year: String(record.year), amount: record.amount ?? '' }
 }
 
 export const FIELD_LABELS = {
   year: () => $trans('Year'),
   amount: () => $trans('Amount'),
-} satisfies FieldLabels<keyof BudgetModalValues & string>
+} as const satisfies FieldLabels<keyof BudgetModalValues>
 
 /**
  * The wire-shaped body: the year as a number, the amount only when filled.
@@ -50,8 +48,8 @@ function shaped(values: BudgetModalValues) {
  * whatever DRF coerced. Both writes validate the generated body instead - the
  * create body, since the form fills in a whole budget either way.
  */
-export const budgetWrite = writeContract(companyBudget, {
-  validateWith: companyBudget.create.body,
+export const budgetWrite = writeContract(Api.CompanyBudget, {
+  validateWith: Api.CompanyBudget.create.body,
   shape: shaped,
   labels: FIELD_LABELS,
 })

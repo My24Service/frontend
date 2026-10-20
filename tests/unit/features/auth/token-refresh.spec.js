@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import {
   TokenRefresh,
@@ -20,8 +19,6 @@ import { mountForm } from '../../support/form-harness.js'
  * is faked here: the store's refreshToken action is stubbed by the harness,
  * and these specs assert whether the component reached for it.
  */
-
-enableAutoUnmount(afterEach)
 
 /** A JWT-shaped token the component can parse, expiring at `exp`. */
 function jwt(exp) {

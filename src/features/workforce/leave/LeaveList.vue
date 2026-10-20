@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-leave-modal',
         confirmText: $trans('Are you sure you want to delete this leave?'),
-        destroyMutation: companyUserLeaveHoursAdminDestroyMutation,
-        invalidate: invalidateReads(companyUserLeaveHoursAdmin),
+        resource: Api.WorkforceUserLeaveHoursAdmin,
         deletedDetail: $trans('Leave has been deleted'),
         deleteError: $trans('Error deleting leave'),
       }"
@@ -36,18 +35,12 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import {
-  companyUserLeaveHoursAdminDestroyMutation,
-  companyUserLeaveHoursAdminListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedUserLeaveHoursList } from '@/api/types.gen'
-import { companyUserLeaveHoursAdmin } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
-import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
 /**
- * Every leave in the tenant, the admin list `/api/company/user-leave-hours/admin/`.
+ * Every leave in the tenant, the admin list `/api/workforce/user-leave-hours/admin/`.
  *
  * The legacy screen's columns, its add and edit routes, its delete modal id and
  * its toast copy are unchanged. What the kit brings is the header, the search
@@ -55,7 +48,7 @@ import SubNav from '../SubNav.vue'
  * `ordering`, so no column is sortable rather than rendering a control nothing
  * honours.
  */
-type LeaveRow = ListRow<PaginatedUserLeaveHoursList>
+type LeaveRow = ListRow<Api.PaginatedUserLeaveHoursList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const helper = createAppColumnHelper<LeaveRow>()
@@ -101,11 +94,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'leave-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => companyUserLeaveHoursAdminListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.WorkforceUserLeaveHoursAdmin,
   urlSync: true,
   loadError: $trans('Error loading leave requests'),
 })

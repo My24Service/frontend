@@ -215,11 +215,9 @@
 </template>
 
 <script setup lang="ts">
-import { companyBranch, companyBranchMy } from '@/api/resources.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import {
   ImageUploadField,
-  invalidateReads,
   useResourceForm,
 } from '@/features/forms'
 import {
@@ -252,10 +250,10 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const mainStore = useMainStore()
+const { authStore, mainStore } = useCommon()
 // A branch employee is pinned to their own branch: every visit to this form
 // is an edit of it, exactly as the legacy screen's `isCreate` read it.
-const isMyBranch = computed(() => useAuthStore().isBranchEmployee)
+const isMyBranch = computed(() => authStore.isBranchEmployee)
 
 const countries = computed(() => mainStore.getCountries)
 
@@ -273,8 +271,7 @@ const branchCopy = {
 const branchConfig = {
   empty: emptyBranch,
   fromRecord: branchFromRecord,
-  validate: branchWrite.validate,
-  parse: branchWrite.parse,
+  contract: branchWrite,
   copy: branchCopy,
 }
 
@@ -285,12 +282,12 @@ const form = useResourceForm(isMyBranch.value
     // the kit's edit path. Neither the retrieve nor the update reads the id
     // it produces, and there is no create.
     pk: () => 'my',
-    resource: companyBranchMy,
+    resource: Api.CompanyBranchMy,
     // The record is also a row of the branch list, which lives under another
     // path than `branch-my` - so its reads are named on top of the default.
     invalidate: async (queryClient) => {
-      await invalidateReads(companyBranchMy)(queryClient)
-      await invalidateReads(companyBranch)(queryClient)
+      await Api.CompanyBranchMy.invalidate(queryClient)
+      await Api.CompanyBranch.invalidate(queryClient)
     },
     // A save stays on the form, where the legacy screen reloaded it: the
     // invalidation above refetches the record behind the values.
@@ -299,7 +296,7 @@ const form = useResourceForm(isMyBranch.value
   : {
     ...branchConfig,
     pk: () => props.pk,
-    resource: companyBranch,
+    resource: Api.CompanyBranch,
   })
 
 const { values, errors, submitClicked, isCreate, isLoading, buttonDisabled, record } = form

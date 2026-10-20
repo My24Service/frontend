@@ -45,14 +45,11 @@ type LoginFieldErrors = FieldErrors<'username' | 'password'>
 const FIELD_LABELS = {
   username: () => $trans('Username'),
   password: () => $trans('Password'),
-} satisfies FieldLabels<'username' | 'password'>
+} as const satisfies FieldLabels<'username' | 'password'>
 
 const $loading = useLoading()
 
-const authStore = useAuthStore()
-const mainStore = useMainStore()
-const { create } = useToast()
-const router = useRouter()
+const { authStore, mainStore, router, toast: create } = useCommon()
 
 const credentials = ref<LoginFormValues>({ username: '', password: '' })
 const errors = ref<LoginFieldErrors>({})
@@ -60,7 +57,7 @@ const submitClicked = ref(false)
 const isSubmitting = ref(false)
 
 function forgotPassword() {
-  router.push({ name: 'reset-password' })
+  void router.push({ name: 'reset-password' })
 }
 
 const usernameFilled = computed(() => credentials.value.username.trim() !== '')

@@ -25,8 +25,7 @@
       :delete-modal="{
         modalId: 'delete-api-user-modal',
         confirmText: $trans('Are you sure you want to delete this API user?'),
-        destroyMutation: companyApiuserDestroyMutation,
-        invalidate: (qc) => qc.invalidateQueries({queryKey: companyApiuserListQueryKey()}),
+        resource: Api.UserApiuser,
         deletedDetail: $trans('API user has been deleted'),
         deleteError: $trans('Error deleting API user'),
       }"
@@ -49,28 +48,11 @@
 import { RouterLink } from 'vue-router'
 import { addDays, format } from 'date-fns'
 
-import {
-  companyApiuserDestroyMutation,
-  companyApiuserListOptions,
-  companyApiuserListQueryKey,
-  companyApiuserRevokeCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedApiUserList } from '@/api/types.gen'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useConfirmedAction,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useConfirmedAction, useServerTable, type ListRow } from '@/features/table'
 
-const authStore = useAuthStore()
-const queryClient = useQueryClient()
-const {create} = useToast()
+const { authStore, toast: create, queryClient } = useCommon()
 
-type ApiUserRow = ListRow<PaginatedApiUserList>
+type ApiUserRow = ListRow<Api.PaginatedApiUserList>
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated.
@@ -163,11 +145,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ApiUserRow>({
   key: 'api-user-table',
   columns,
-  listOptions: (query) => companyApiuserListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.UserApiuser,
   urlSync: true,
   loadError: $trans('Error loading API users'),
 })
@@ -178,10 +156,10 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
 const {confirm: showRevokeModal, handleOk: handleRevokeOk} = useConfirmedAction({
   modalRefName: 'revokeModal',
   mutationOptions: () => ({
-    ...companyApiuserRevokeCreateMutation(),
+    ...Api.UserApiuser.extras.revokeCreate.mutation(),
     onSuccess: async () => {
       infoToast(create, $trans('Revoked'), $trans('API key has been revoked'))
-      await queryClient.invalidateQueries({queryKey: companyApiuserListQueryKey()})
+      await queryClient.invalidateQueries({queryKey: Api.UserApiuser.list.queryKey()})
     },
     onError: () => {
       errorToast(create, $trans('Error revoking API key'))

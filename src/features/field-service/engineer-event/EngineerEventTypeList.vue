@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-event-type-modal',
         confirmText: $trans('Are you sure you want to delete this event type?'),
-        destroyMutation: companyEngineerEventTypeDestroyMutation,
-        invalidate: invalidateReads(companyEngineerEventType),
+        resource: Api.UserEngineerEventType,
         deletedDetail: $trans('Event type has been deleted'),
         deleteError: $trans('Error deleting event type'),
       }"
@@ -34,21 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  companyEngineerEventTypeDestroyMutation,
-  companyEngineerEventTypeListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedEngineerEventTypeList } from '@/api/types.gen'
-import { companyEngineerEventType } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 
 import EngineerPills from './EngineerPills.vue'
 
@@ -62,7 +47,7 @@ import EngineerPills from './EngineerPills.vue'
  * on five columns, but `EngineerEventTypeViewset` declares no `ordering`
  * allow-list, so the sort only ever reordered the rows a page already held.
  */
-type EventTypeRow = ListRow<PaginatedEngineerEventTypeList>
+type EventTypeRow = ListRow<Api.PaginatedEngineerEventTypeList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
@@ -100,11 +85,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'engineer-event-type-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => companyEngineerEventTypeListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.UserEngineerEventType,
   urlSync: true,
   loadError: $trans('Error loading event types'),
 })

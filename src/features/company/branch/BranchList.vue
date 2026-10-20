@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-branch-modal',
         confirmText: $trans('Are you sure you want to delete this branch?'),
-        destroyMutation: companyBranchDestroyMutation,
-        invalidate: invalidateReads(companyBranch),
+        resource: Api.CompanyBranch,
         deletedDetail: $trans('Branch has been deleted'),
         deleteError: $trans('Error deleting branch'),
       }"
@@ -37,14 +36,7 @@
 import { hLink } from '@/components/render'
 import { RouterLink } from 'vue-router'
 import IBiEnvelope from '~icons/bi/envelope'
-import {
-  companyBranchDestroyMutation,
-  companyBranchListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedBranchList } from '@/api/types.gen'
-import { companyBranch } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
-import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable } from '@/features/table'
 /**
  * The branch list, mounted by the company router and the settings layout.
  * The mount is a boolean rather than a route stem: both mounts answer the
@@ -59,7 +51,7 @@ const props = withDefaults(defineProps<{
   from_settings: false,
 })
 
-type BranchRow = ListRow<PaginatedBranchList>
+type BranchRow = Api.CompanyBranch.Record
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
@@ -120,11 +112,7 @@ const columns = helper.columns([
 const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } = useServerTable<BranchRow>({
   key: 'branch-table',
   columns,
-  listOptions: (query) => companyBranchListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.CompanyBranch,
   urlSync: true,
   loadError: $trans('Error loading branches'),
 })

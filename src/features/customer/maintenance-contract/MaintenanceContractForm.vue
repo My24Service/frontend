@@ -121,18 +121,9 @@
 <script lang="ts" setup>
 import VueMultiselect from 'vue-multiselect'
 
-import {
-  customerCustomerAutocompleteListOptions,
-  customerCustomerRetrieveOptions,
-  customerMaintenanceContractListQueryKey,
-  customerMaintenanceContractRetrieveOptions,
-  customerMaintenanceContractWithEquipmentCreateMutation,
-  customerMaintenanceContractWithEquipmentUpdateMutation,
-  customerMaintenanceEquipmentListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Customer, MaintenanceContract, MaintenanceContractWithEquipmentRequestRequest, MaintenanceContractWithEquipmentResponse } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
 import { formatMoney } from '@/services/money'
+import { typingDelay } from '@/services/input-delays'
 import { useResourceForm } from '@/features/forms'
 import StagedEquipmentPanel from './StagedEquipmentPanel.vue'
 import { useEquipmentStaging } from './useEquipmentStaging'
@@ -161,22 +152,22 @@ const {
   cancelForm,
 } = useResourceForm<
   MaintenanceContractFormValues,
-  MaintenanceContract,
-  MaintenanceContractWithEquipmentRequestRequest,
+  Api.MaintenanceContract,
+  Api.MaintenanceContractWithEquipmentRequestRequest,
   ContractFieldErrors
 >({
   pk: () => props.pk,
-  retrieve: (id) => customerMaintenanceContractRetrieveOptions({path: {id}}),
+  retrieve: (id) => Api.CustomerMaintenanceContract.retrieve.options({path: {id}}),
   // One request writes the contract and its whole equipment set, in the
   // backend's one transaction. The pair differs only in the verb's address: an
   // update POSTs to `/with-equipment/` as a create does, because this codebase
   // disables PUT and keeps the pair on one verb (see my24service
   // `apps/customer/mixins/maintenance_contract_with_equipment.py`).
-  create: customerMaintenanceContractWithEquipmentCreateMutation(),
-  update: customerMaintenanceContractWithEquipmentUpdateMutation(),
+  create: Api.CustomerMaintenanceContractWithEquipment.create.mutation(),
+  update: Api.CustomerMaintenanceContract.extras.withEquipmentUpdate.mutation(),
   invalidate: async (qc) => {
-    await qc.invalidateQueries({queryKey: customerMaintenanceContractListQueryKey()})
-    await qc.invalidateQueries({queryKey: customerMaintenanceEquipmentListQueryKey()})
+    await qc.invalidateQueries({queryKey: Api.CustomerMaintenanceContract.list.queryKey()})
+    await qc.invalidateQueries({queryKey: Api.CustomerMaintenanceEquipment.list.queryKey()})
   },
   empty: () => emptyContract(),
   fromRecord: (record) => contractFromRecord(record),
@@ -185,12 +176,12 @@ const {
     ...staging.stagedErrors(),
   }),
   parse: (values) => parseContractWithEquipmentBody(values, staging.equipmentBody()),
-  onSaved: async (result) => {
+  onSaved: (result) => {
     // The response is the contract detail plus the stored equipment rows, ids
     // and all — which is what makes a second save address the rows the first
     // one wrote instead of creating them again.
     staging.adoptStoredRows(
-      (result as MaintenanceContractWithEquipmentResponse).equipment,
+      (result as Api.MaintenanceContractWithEquipmentResponse).equipment,
     )
   },
   copy: {
@@ -204,7 +195,7 @@ const {
   },
 })
 
-const customerRecord = ref<Partial<Customer>>({})
+const customerRecord = ref<Partial<Api.Customer>>({})
 
 /**
  * The staged equipment set, owned here rather than read through the panel:
@@ -220,7 +211,7 @@ const staging = useEquipmentStaging({
 
 const customerId = computed(() => contract.value.customer)
 const customerQuery = useQuery(() => ({
-  ...customerCustomerRetrieveOptions({
+  ...Api.CustomerCustomer.retrieve.options({
     path: {id: customerId.value as number},
   }),
   enabled: !isCreate.value && customerId.value !== null,
@@ -236,10 +227,10 @@ watch(
 )
 
 const customerSearchTerm = ref('')
-const customerQueryTerm = refDebounced(customerSearchTerm, 500)
+const customerQueryTerm = refDebounced(customerSearchTerm, typingDelay)
 
 const customerSearchQuery = useQuery(() => ({
-  ...customerCustomerAutocompleteListOptions({query: {q: customerQueryTerm.value}}),
+  ...Api.CustomerCustomerAutocomplete.list.options({query: {q: customerQueryTerm.value}}),
   enabled: customerQueryTerm.value.length > 0,
 }))
 const customerOptions = computed(() => customerSearchQuery.data.value ?? [])
@@ -258,7 +249,7 @@ function selectCustomer(option: {id: number; name: string; address?: string; cit
     country_code: option.country_code,
     tel: option.tel,
   }
-  nextTick(() => contractName.value?.focus())
+  void nextTick(() => contractName.value?.focus())
 }
 
 /** The sum of the staged rows, which the equipment set owns. */

@@ -250,17 +250,13 @@
 
 <script setup lang="ts">
 import VueMultiselect from 'vue-multiselect'
-import {
-  companyTemplatePreviewTemplatePdfCreateMutation,
-  invoiceInvoiceAutocompleteListOptions,
-  quotationQuotationAutocompleteListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import { companyTemplate } from '@/api/resources.gen'
+
 import {
   useQueryErrorToast,
   useResourceForm,
 } from '@/features/forms'
 import { chosenFile, fileNameOf, readAsDataUrl } from '@/features/shared'
+import { typingDelay } from '@/services/input-delays'
 import {
   emptyTemplate,
   templateFromRecord,
@@ -288,8 +284,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const { create: toast } = useToast()
-const router = useRouter()
+const { router, toast } = useCommon()
 
 /** The view/edit switch on the `:pk` route. A create is always a form. */
 const isEdit = ref(false)
@@ -304,15 +299,14 @@ const templateTypes = [
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: companyTemplate,
+  resource: Api.CompanyTemplate,
   empty: emptyTemplate,
   fromRecord: templateFromRecord,
-  validate: templateWrite.validate,
-  parse: templateWrite.parse,
+  contract: templateWrite,
   // A create save goes back; an edit save stays on the screen, where the
   // invalidation refetches the record behind the values - the legacy screen
   // reloaded it the same way.
-  afterSave: async () => {
+  afterSave: () => {
     if (isCreateRoute) router.go(-1)
     else isEdit.value = false
   },
@@ -338,7 +332,7 @@ const previewBlob = ref<Blob | null>(null)
 const previewUrl = useObjectUrl(previewBlob)
 const previewResult = ref<{ uuid: string, label: string } | null>(null)
 const previewTerm = ref('')
-const previewDebounced = refDebounced(previewTerm, 500)
+const previewDebounced = refDebounced(previewTerm, typingDelay)
 
 /**
  * Stage the picked file as a data URL for the body. The record's own file
@@ -364,11 +358,11 @@ function cancelForm() {
 const previewType = computed(() => record.value?.template_type)
 
 const invoicePreviewQuery = useQuery(() => ({
-  ...invoiceInvoiceAutocompleteListOptions({ query: { q: previewDebounced.value } }),
+  ...Api.InvoiceInvoiceAutocomplete.list.options({ query: { q: previewDebounced.value } }),
   enabled: previewType.value === 'invoice' && previewDebounced.value.length > 0,
 }))
 const quotationPreviewQuery = useQuery(() => ({
-  ...quotationQuotationAutocompleteListOptions({ query: { q: previewDebounced.value } }),
+  ...Api.QuotationQuotationAutocomplete.list.options({ query: { q: previewDebounced.value } }),
   enabled: previewType.value === 'quotation' && previewDebounced.value.length > 0,
 }))
 useQueryErrorToast(invoicePreviewQuery.error, $trans('Error fetching results'))
@@ -389,7 +383,7 @@ function previewLabel(option: { label: string }): string {
   return option.label
 }
 
-const previewMutation = useMutation(companyTemplatePreviewTemplatePdfCreateMutation())
+const previewMutation = useMutation(Api.CompanyTemplatePreviewTemplatePdf.create.mutation())
 
 async function previewPdf() {
   if (previewResult.value == null || props.pk == null || loadingPdf.value) return

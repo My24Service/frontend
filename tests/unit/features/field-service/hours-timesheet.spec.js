@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 import { nextTick } from 'vue'
 import moment from 'moment/min/moment-with-locales'
 
@@ -27,11 +27,6 @@ import { serverError } from '../../support/list-harness.js'
 const api = installApiSeam()
 
 const ENDPOINT = '/api/mobile/assignedorder/list_timesheet_totals/'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
 
 // The recipe the screens link to and navigate through.
 const routes = [

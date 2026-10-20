@@ -1,7 +1,10 @@
-import { type QueryClient } from '@tanstack/vue-query'
-import type { ActionResource, CollectionResource, Resource, SingletonResource } from '@/api/resources.gen'
+import { type QueryClient, type UseMutationOptions } from '@tanstack/vue-query'
+import * as v from 'valibot'
+
 import { useRoutePk } from './use-route-pk'
 import { useQueryErrorToast } from './use-query-error-toast'
+import type { FieldLabels } from './validated-form-context'
+import { issueErrors, type FieldMessages } from './validation'
 
 /**
  * Which write a form is about to make, and the id it addresses.
@@ -15,24 +18,6 @@ import { useQueryErrorToast } from './use-query-error-toast'
 export type WriteContext = {isCreate: true; id: null} | {isCreate: false; id: number}
 
 /**
- * Refresh every read a write to `resource` made stale: its list, its detail,
- * and the filtered views and counts under its path - `resource.reads`, which
- * the generator collected from the schema. hey-api keys each query
- * `[{_id, baseURL, ...}]` and tanstack matches a filter partially, so `[{_id}]`
- * reaches every page, filter and id of that read.
- *
- * Returns the `(queryClient) => Promise` shape a delete modal or
- * `useResourceForm` takes, so a screen writes `invalidate:
- * invalidateReads(companyBranch)`. A read that is stale for a reason the
- * schema cannot state - another resource's list - is still a hand-written
- * `invalidation.ts` helper, composed with this one.
- */
-export function invalidateReads(resource: Pick<Resource, 'reads'>) {
-  return (queryClient: QueryClient) =>
-    Promise.all(resource.reads.map((_id) => queryClient.invalidateQueries({queryKey: [{_id}]})))
-}
-
-/**
  * What `useResourceForm` needs of a generated resource (`@/api/resources.gen`):
  * one with a record, read and updated. An `action` has no record and is not
  * a member, so passing one is a type error rather than a form that cannot
@@ -40,11 +25,32 @@ export function invalidateReads(resource: Pick<Resource, 'reads'>) {
  * builds both. Each member keeps its own `retrieve` - by id in the path, or
  * with no arguments for a singleton.
  */
-type WithRecord<R extends Exclude<Resource, ActionResource>> = R & Required<Pick<R, 'retrieve' | 'update'>>
+type WithRecord<R extends Exclude<Api.Resource, Api.ActionResource>> = R & Required<Pick<R, 'retrieve' | 'update'>>
+
+/**
+ * `retrieveOptions` re-typed to the shape a form can actually meet.
+ *
+ * The generic `Resource` declares it `(...args: never[]) => object`, the only
+ * signature that admits every resource's real one: a singleton's takes no id,
+ * a collection's a `number` or a `string`. Intersecting a narrow signature with
+ * that one does not work - the parameter becomes the *intersection* `never &
+ * TId`, i.e. `never` - so the loose member is omitted and the narrow one
+ * declared afresh. A form knows which kind it has, because it already narrows
+ * on `kind` and `id`; this is that narrowing, written once.
+ */
+interface FormCalls<R extends Exclude<Api.Resource, Api.ActionResource>> {
+  retrieveOptions(...args: R extends Api.SingletonResource
+    ? []
+    : [id: R extends Api.CollectionResource<infer TId> ? TId : never]): object
+}
+
+type Formable<R extends Exclude<Api.Resource, Api.ActionResource>> =
+  Omit<WithRecord<R>, 'retrieveOptions'> & FormCalls<R>
+
 export type FormResource =
-  | WithRecord<CollectionResource<number>>
-  | WithRecord<CollectionResource<string>>
-  | WithRecord<SingletonResource>
+  | Formable<Api.CollectionResource<number>>
+  | Formable<Api.CollectionResource<string>>
+  | Formable<Api.SingletonResource>
 
 /**
  * Where a form's reads and writes come from: the generated resource, or the
@@ -59,7 +65,7 @@ export type ResourceFormWiring =
     create?: never
     update?: never
     /**
-     * Defaults to `invalidateReads(resource)`. Given when a write stales more
+     * Defaults to `resource.invalidate`. Given when a write stales more
      * than the resource's own reads - the branch form's `branch-my` variant
      * also refreshes the branch list.
      */
@@ -102,6 +108,31 @@ export type ResourceFormWiring =
     invalidate: (queryClient: QueryClient) => Promise<unknown>
   }
 
+/**
+ * How a form checks and shapes what it sends: a write contract
+ * (`writeContract(...)` in the form's `schemas.ts`), or the two functions
+ * written out when the form has a rule no schema states. One or the other.
+ */
+export type FormValidation<TValues, TBody, TErrors> =
+  | {
+    // `NoInfer`: the values type is the form's (`empty`, `fromRecord`), not
+    // the contract's - a contract with no `shape` takes `unknown`.
+    contract: {
+      validate(values: NoInfer<TValues>, context: WriteContext): TErrors
+      parse(values: NoInfer<TValues>, context: WriteContext): TBody
+      /** The contract's copy, which names the fields a failed `parse` refuses. */
+      labels?: FieldLabels
+      messages?: FieldMessages
+    }
+    validate?: never
+    parse?: never
+  }
+  | {
+    contract?: never
+    validate: (values: TValues, context: WriteContext) => TErrors | Promise<TErrors>
+    parse: (values: TValues, context: WriteContext) => TBody
+  }
+
 /** What `submitForm` accepts: `stay` keeps the user on the form after a successful write. */
 export interface SubmitOptions {
   stay?: boolean
@@ -142,7 +173,11 @@ export interface ResourceFormCopy {
  * an update sends, the way `createVars` does for a create, and `create` is
  * left out.
  */
-export function useResourceForm<TValues extends object, TRecord, TBody, TErrors extends object>(config: ResourceFormWiring & {
+export function useResourceForm<TValues extends object, TRecord, TBody, TErrors extends object>(config: ResourceFormWiring & FormValidation<TValues, TBody, TErrors> & {
+  /**
+   * The record being edited, or null to create one. A routed form passes its
+   * `:pk` prop; a modal passes the row it was opened for.
+   */
   pk: () => string | number | null
   /** The variables the create mutation wants, built from the parsed body. Defaults to `{body}`. */
   createVars?: (body: TBody, context: WriteContext) => Record<string, unknown>
@@ -156,15 +191,13 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   updateVars?: (body: TBody, context: WriteContext) => Record<string, unknown>
   empty: () => TValues
   fromRecord: (record: TRecord) => TValues
-  validate: (values: TValues, context: WriteContext) => TErrors | Promise<TErrors>
   /**
    * Work that belongs to the same save: rows staged in the form that can only
    * be written once the record has an id. Runs after the write and before the
    * success toast, so a failure here reports as a failed save and the form
    * keeps the user on it.
    */
-  onSaved?: (result: unknown, context: WriteContext) => Promise<void>
-  parse: (values: TValues, context: WriteContext) => TBody
+  onSaved?: (result: unknown, context: WriteContext) => void | Promise<void>
   copy: ResourceFormCopy
   /**
    * Maps a write failure to the toast body. Defaults to the identity (the
@@ -175,8 +208,8 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
   reasonOf?: (error: unknown, fallback: string) => string
   /**
    * Where a successful save goes. Defaults to `router.go(-1)`; the Order
-   * form's "Submit and open dispatch" is the adopter, going forward to the
-   * dispatch screen instead of back to the list.
+   * form's "Submit and open dispatch" goes forward to the dispatch screen
+   * instead, and a modal form closes its modal.
    */
   afterSave?: () => void | Promise<void>
 }) {
@@ -186,22 +219,45 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
 
   const { isCreate, id } = useRoutePk(config.pk)
 
-  // wiring ----------------------------------------------------------------
+  const { validate, parse } = config.contract
+    ? {
+      validate: (values: TValues, context: WriteContext) => config.contract.validate(values, context),
+      parse: (values: TValues, context: WriteContext) => config.contract.parse(values, context),
+    }
+    : config
 
+  // wiring ----------------------------------------------------------------
+  //
+  // Every one of these asks the resource rather than its parts: `retrieveOptions`
+  // already knows whether the id belongs in the path and whether it is an
+  // integer or a name, and `invalidate` already walks the resource's own
+  // `reads`. What is left for this composable to know is the one thing a
+  // resource cannot state - how a *generic* form body becomes this endpoint's
+  // variables, which is `updateVars` below.
   const { resource } = config
+  // One narrowing per line, because a union of function types takes the
+  // *intersection* of its parameters: passing `string | number` to
+  // `(id: string) | (id: number)` is a `never`. `kind` and then `id` are the
+  // two discriminants, and each names one member.
   const retrieve = resource
     ? (id: number) => {
-      if (resource.kind === 'singleton') return resource.retrieve.options()
+      if (resource.kind === 'singleton') return resource.retrieveOptions()
       return resource.id === 'string'
-        ? resource.retrieve.options({path: {id: String(id)}})
-        : resource.retrieve.options({path: {id}})
+        ? resource.retrieveOptions(String(id))
+        : resource.retrieveOptions(id)
     }
     : config.retrieve
-  const createOptions = resource ? (resource.kind === 'collection' ? resource.create?.mutation() : undefined) : config.create
+  const createOptions = resource
+    ? resource.kind === 'collection' ? resource.create?.mutation() : undefined
+    : config.create
   const updateOptions = resource ? resource.update.mutation() : config.update
   const updateVars = config.updateVars
     ?? (resource?.kind === 'singleton' ? (body: TBody) => ({body}) : undefined)
-  const invalidate = config.resource ? config.invalidate ?? invalidateReads(config.resource) : config.invalidate
+  const invalidate = config.invalidate
+    ?? (resource ? (client: QueryClient) => resource.invalidate(client) : undefined)
+  if (!invalidate) {
+    throw new Error('useResourceForm: a form needs a resource or an explicit `invalidate`')
+  }
 
   /**
    * The id a create wrote, once its write landed. A record that exists must not
@@ -291,9 +347,7 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
 
   const createMutation = useMutation({
     ...(createOptions ?? {
-      mutationFn: async () => {
-        throw new Error('useResourceForm: this form has no `create` mutation, but was asked to create')
-      },
+      mutationFn: () => Promise.reject(new Error('useResourceForm: this form has no `create` mutation, but was asked to create')),
     }),
     onSuccess: async (result: unknown) => {
       // Read the context before recording the id: this first call's `onSaved`
@@ -360,16 +414,28 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
     try {
       submitClicked.value = true
 
-      const found = await config.validate(values.value, writeContext.value)
+      const found = await validate(values.value, writeContext.value)
       errors.value = found
       if (Object.keys(found).length > 0) return false
 
+      const context = writeContext.value
       // The parsed output is the body — typed by the request schema and
       // stripped of anything it does not declare.
-      const body = config.parse(values.value, writeContext.value)
+      let body: TBody
+      try {
+        body = parse(values.value, context)
+      } catch (error) {
+        // Validation passed and the body still refused: the form checks
+        // something other than what it sends. Say so on the field it names
+        // and in the save's error toast, rather than rejecting with nothing
+        // on screen. Anything else is a bug in the form and keeps throwing.
+        if (!v.isValiError(error)) throw error
+        errors.value = issueErrors(error.issues, config.contract?.messages, config.contract?.labels) as TErrors
+        errorToast(toast, context.isCreate ? config.copy.createError : config.copy.updateError)
+        return false
+      }
 
       try {
-        const context = writeContext.value
         if (context.isCreate) {
           await createMutation.mutateAsync(
             (config.createVars ?? ((b: TBody) => ({ body: b })))(body, context))
@@ -393,6 +459,21 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
     router.go(-1)
   }
 
+  /**
+   * Back to the state a fresh open shows: the record's values when editing
+   * one, the empty values otherwise, with no errors and nothing pending. A
+   * modal form calls this each time it opens, because - unlike a routed form -
+   * the same instance serves one create or edit after another, and a cached
+   * record reopened for the same id would otherwise keep the last edit's
+   * unsaved values.
+   */
+  function reset(): void {
+    createdId.value = null
+    values.value = !isCreate.value && record.value !== undefined ? config.fromRecord(record.value) : config.empty()
+    errors.value = {} as TErrors
+    submitClicked.value = false
+  }
+
   return {
     isCreate,
     id,
@@ -408,5 +489,6 @@ export function useResourceForm<TValues extends object, TRecord, TBody, TErrors 
     updateMutation,
     submitForm,
     cancelForm,
+    reset,
   }
 }

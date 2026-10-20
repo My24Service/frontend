@@ -234,9 +234,6 @@
 </template>
 
 <script lang="ts" setup>
-import { vEquipmentQrTypeEnum, vMemberTypeEnum } from '@/api/valibot.gen'
-import { memberContractListOptions } from '@/api/@tanstack/vue-query.gen'
-import { memberMember } from '@/api/resources.gen'
 import MemberLogoFields from './MemberLogoFields.vue'
 import {
   ValidatedForm,
@@ -265,8 +262,7 @@ const props = withDefaults(defineProps<{
   isRequest: false,
 })
 
-const authStore = useAuthStore()
-const mainStore = useMainStore()
+const { authStore, mainStore } = useCommon()
 
 const {isCreate} = useRoutePk(() => props.pk)
 
@@ -276,7 +272,7 @@ const {isCreate} = useRoutePk(() => props.pk)
 // rather than rejecting it, so this is the most one response can carry.
 
 const contractsQuery = useQuery(
-  memberContractListOptions({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
+  Api.MemberContract.list.options({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
 )
 
 useQueryErrorToast(contractsQuery.error, $trans('Error loading contracts'))
@@ -317,7 +313,7 @@ const {
   record,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: memberMember,
+  resource: Api.MemberMember,
   empty: emptyMember,
   fromRecord: memberFromRecord,
   validate: async (values) => {
@@ -388,9 +384,9 @@ watch(
 )
 
 const countries = computed(() => mainStore.getCountries)
-const memberTypes = vMemberTypeEnum.options.map((value) => ({value, text: value}))
+const memberTypes = schemas.vMemberTypeEnum.options.map((value) => ({value, text: value}))
 const EQUIPMENT_QR_LABELS = {none: 'none', my24service: 'My24Service', shltr: 'SHLTR'}
-const equipmentQrTypes = vEquipmentQrTypeEnum.options.map((value) => ({
+const equipmentQrTypes = schemas.vEquipmentQrTypeEnum.options.map((value) => ({
   value,
   text: $trans(EQUIPMENT_QR_LABELS[value] ?? value),
 }))

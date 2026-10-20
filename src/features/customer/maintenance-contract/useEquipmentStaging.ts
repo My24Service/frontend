@@ -1,10 +1,5 @@
-import {
-  customerMaintenanceEquipmentListOptions,
-  equipmentEquipmentAutocompleteListOptions,
-  equipmentEquipmentCreateQuickCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { MaintenanceEquipment, MaintenanceEquipmentRowRequest } from '@/api/types.gen'
 import { toDinero } from '@/services/money'
+import { typingDelay } from '@/services/input-delays'
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import {
   emptyEquipmentRow,
@@ -31,7 +26,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   const mainStore = useMainStore()
   const {create} = useToast()
 
-  const defaultCurrency = () => mainStore.getDefaultCurrency
+  const defaultCurrency = () => mainStore.requiredDefaultCurrency
 
   // The staged set ---------------------------------------------------------
 
@@ -44,7 +39,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
    * lands in the server's one transaction. No write is made from here: the save
    * belongs to the form, which is the only party that knows the contract.
    */
-  function equipmentBody(): MaintenanceEquipmentRowRequest[] {
+  function equipmentBody(): Api.MaintenanceEquipmentRowRequest[] {
     return parseEquipmentSetBody(rows.value)
   }
 
@@ -55,7 +50,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
    * a second copy of every one of them. This is the same adoption the read
    * below does with the rows the contract already has.
    */
-  function adoptStoredRows(records: readonly MaintenanceEquipment[]) {
+  function adoptStoredRows(records: readonly Api.MaintenanceEquipment[]) {
     rows.value = records.map((row) => equipmentRowFromRecord(row, defaultCurrency()))
   }
 
@@ -69,7 +64,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   // rather than rejecting it.
 
   const equipmentQuery = useQuery(() => ({
-    ...customerMaintenanceEquipmentListOptions({
+    ...Api.CustomerMaintenanceEquipment.list.options({
       query: {contract: options.contractId(), page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
     }),
     enabled: !options.isCreate(),
@@ -87,10 +82,10 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   // The picker -------------------------------------------------------------
 
   const searchTerm = ref('')
-  const searchQueryTerm = refDebounced(searchTerm, 500)
+  const searchQueryTerm = refDebounced(searchTerm, typingDelay)
 
   const searchQuery = useQuery(() => ({
-    ...equipmentEquipmentAutocompleteListOptions({
+    ...Api.EquipmentEquipmentAutocomplete.list.options({
       query: {q: searchQueryTerm.value, customer: options.customerId() as number},
     }),
     enabled: options.customerId() !== undefined && searchQueryTerm.value.length > 0,
@@ -122,7 +117,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
 
     rowEdit.value.equipment = option.id
     rowEdit.value.equipment_name = option.name
-    nextTick(() => timesPerYear.value?.focus())
+    void nextTick(() => timesPerYear.value?.focus())
   }
 
   function addEquipment() {
@@ -184,10 +179,12 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
   // The quick-create modal -------------------------------------------------
 
   const newEquipmentName = ref('')
-  const quickCreateEquipment = useMutation({...equipmentEquipmentCreateQuickCreateMutation()})
+  const quickCreateEquipment = useMutation({...Api.EquipmentEquipmentCreateQuick.create.mutation()})
 
   async function submitCreateEquipment() {
-    if (!mainStore.getMemberHasBranches) {
+    // Maintenance contracts and their customers only exist in a tenant without
+    // branches; a branch tenant's quick-create takes a branch, not a customer.
+    if (mainStore.getMemberHasBranches) {
       errorToast(create, $trans('Not creating equipment from branch environment'))
       return
     }
@@ -207,7 +204,7 @@ export function useEquipmentStaging(options: EquipmentStagingOptions) {
       rowEdit.value.equipment = response.id
       rowEdit.value.equipment_name = response.name
       newEquipmentModal.value?.hide()
-      nextTick(() => timesPerYear.value?.focus())
+      void nextTick(() => timesPerYear.value?.focus())
     } catch {
       errorToast(create, $trans('Error adding equipment'))
     }

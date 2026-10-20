@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-module-part-modal',
         confirmText: $trans('Are you sure you want to delete this module part?'),
-        destroyMutation: memberModulePartDestroyMutation,
+        resource: Api.MemberModulePart,
         invalidate: (queryClient) => invalidateModulePartListQueries(queryClient),
         deletedDetail: $trans('Module part has been deleted'),
         deleteError: $trans('Error deleting module part'),
@@ -36,31 +36,18 @@
 
 <script lang="ts" setup>
 import IBiCheckSquare from '~icons/bi/check-square'
-import {
-  memberModuleListOptions,
-  memberModulePartDestroyMutation,
-  memberModulePartListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedModulePartList } from '@/api/types.gen'
-import { invalidateModulePartListQueries } from '../invalidation'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type FilterOption,
-  type ListRow,
-} from '@/features/table'
 
-type ModulePartRow = ListRow<PaginatedModulePartList>
+import { invalidateModulePartListQueries } from '../invalidation'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type FilterOption, type ListRow } from '@/features/table'
+
+type ModulePartRow = ListRow<Api.PaginatedModulePartList>
 
 /** A module list row as a filter choice: its id on the wire, its name on the chip. */
 function moduleOptions(rows: {id: number, name: string}[]): FilterOption[] {
   return rows.map((row) => ({value: String(row.id), label: row.name}))
 }
 
-const queryClient = useQueryClient()
+const { queryClient } = useCommon()
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated. Typed structurally because
@@ -83,10 +70,10 @@ const columns = columnHelper.columns([
       label: $trans('Module'),
       param: 'module',
       loadOptions: (term) => queryClient
-        .fetchQuery(memberModuleListOptions({query: {q: term}}))
+        .fetchQuery(Api.MemberModule.list.options({query: {q: term}}))
         .then((page) => moduleOptions(page.results ?? [])),
       resolveLabels: (ids) => queryClient
-        .fetchQuery(memberModuleListOptions({query: {id: ids.join(',')}}))
+        .fetchQuery(Api.MemberModule.list.options({query: {id: ids.join(',')}}))
         .then((page) => moduleOptions(page.results ?? [])),
     }},
   }),
@@ -110,14 +97,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ModulePartRow>({
   key: 'module-part-table',
   columns,
-  listOptions: (query) => memberModulePartListOptions({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-      ...(query.module ? {module: String(query.module)} : {}),
-    },
-  }),
+  resource: Api.MemberModulePart,
   urlSync: true,
   loadError: $trans('Error loading module parts'),
 })

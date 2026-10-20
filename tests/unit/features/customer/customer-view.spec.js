@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { CustomerView } from '@/features/customer'
 import {
@@ -18,13 +17,6 @@ import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { createTestQueryClient, mountForm, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { customerRoutes } from '../../support/customer-routes.js'
-
-enableAutoUnmount(afterEach)
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 

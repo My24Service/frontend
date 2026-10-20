@@ -1,5 +1,3 @@
-import type { AssignedUserInfo } from '@/api/types.gen'
-
 /** A user as the board, the picker and the search modal identify one. */
 export interface AssignedUser {
   user_id: number
@@ -16,7 +14,7 @@ export interface AssignedUser {
  * the only thing it could reach is a path parameter that must be a number.
  */
 export function assignedUsersOf(
-  orders: readonly {assigned_user_info: readonly AssignedUserInfo[]}[],
+  orders: readonly {assigned_user_info: readonly Api.AssignedUserInfo[]}[],
 ): AssignedUser[] {
   const users: AssignedUser[] = []
 

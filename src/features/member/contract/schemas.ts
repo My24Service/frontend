@@ -1,9 +1,5 @@
-import * as v from 'valibot'
-
-import type { ContractCreateRequest } from '@/api/types.gen'
-import { vMemberContractCreateBody } from '@/api/valibot.gen'
 import {
-  fieldErrors,
+  writeContract,
   requiredMessages,
   type FieldErrors,
   type FieldLabels,
@@ -14,24 +10,22 @@ import { formDefaults } from '@/models/schema'
  * field the schema cannot decide: the entry is optional, so its inferred blank
  * is `0`, and a create has no opinion about it rather than an opinion of zero.
  */
-export function emptyContract(): ContractCreateRequest {
-  return formDefaults(vMemberContractCreateBody, {max_users: undefined})
+export function emptyContract(): Api.ContractCreateRequest {
+  return formDefaults(Api.MemberContract.create.body, {max_users: undefined})
 }
 
-export type ContractFieldErrors = FieldErrors<keyof ContractCreateRequest & string>
+export type ContractFieldErrors = FieldErrors<keyof Api.ContractCreateRequest>
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   module_paths: () => $trans('Module parts'),
-} satisfies FieldLabels<keyof ContractCreateRequest & string>
+} as const satisfies FieldLabels<keyof Api.ContractCreateRequest>
 
 /** The line under an untouched field: the same required line the validation shows. */
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)
 
-export function validateContract(values: ContractCreateRequest): ContractFieldErrors {
-  return fieldErrors(vMemberContractCreateBody, values, {}, FIELD_LABELS)
-}
-
-export function parseContract(values: ContractCreateRequest): ContractCreateRequest {
-  return v.parse(vMemberContractCreateBody, values)
-}
+/** What the form checks and sends: the whole contract, on a create and an edit alike. */
+export const contractWrite = writeContract(Api.MemberContract, {
+  validateWith: Api.MemberContract.create.body,
+  labels: FIELD_LABELS,
+})

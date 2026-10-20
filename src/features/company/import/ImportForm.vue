@@ -93,8 +93,8 @@
 </template>
 
 <script setup lang="ts">
-import { companyImportGetAllowedExtensionsRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import { companyImport } from '@/api/resources.gen'
+import { importingImportGetAllowedExtensionsRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+
 import {
   useQueryErrorToast,
   useResourceForm,
@@ -124,21 +124,20 @@ const props = defineProps<{
   route_prefix: string
 }>()
 
-const router = useRouter()
+const { router } = useCommon()
 
 /** The route decides the write once, at setup: no pk, a create. */
 const isCreateRoute = props.pk == null
 
 const form = useResourceForm({
   pk: () => props.pk ?? null,
-  resource: companyImport,
+  resource: Api.ImportingImport,
   empty: emptyImport,
   fromRecord: importFromRecord,
-  validate: importWrite.validate,
-  parse: importWrite.parse,
+  contract: importWrite,
   // The write's id rides out through `onSaved`: a create only knows it
   // afterwards, and the ride after the save needs it for the preview.
-  onSaved: async (result, context) => {
+  onSaved: (result, context) => {
     if (context.isCreate) savedId.value = (result as { id: number }).id
   },
   afterSave: async () => {
@@ -168,7 +167,7 @@ const savedId = ref<number | null>(null)
 
 const hasResults = computed(() => Object.keys(record.value?.result_inserts ?? {}).length > 0)
 
-const allowedExtensionsQuery = useQuery(companyImportGetAllowedExtensionsRetrieveOptions())
+const allowedExtensionsQuery = useQuery(importingImportGetAllowedExtensionsRetrieveOptions())
 useQueryErrorToast(allowedExtensionsQuery.error, $trans('Error loading import'))
 const allowedExtensions = computed<string[]>(() => allowedExtensionsQuery.data.value ?? [])
 

@@ -1,9 +1,12 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import OrderTypesPie from '@/components/OrderTypesPie.vue'
 
-import { mountForm, resetFakeHttp } from '../support/form-harness.js'
-import { requestShapes } from '../support/request-recorder.js'
+import { vOrderOrderOrderTypesStatsRetrieveResponse } from '@/api/valibot.gen'
+
+import { fixtureFor } from '../helpers/schema-fixture.js'
+import { installApiSeam, settle } from '../support/api-seam/index.js'
+import { mountForm } from '../support/form-harness.js'
 
 // Call-shape characterisation for the migrated stats call in OrderTypesPie.
 //
@@ -18,33 +21,20 @@ import { requestShapes } from '../support/request-recorder.js'
 // Number() normalizes a numeric or string pk; the wire query is a string
 // either way. Body: none.
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
+const api = installApiSeam()
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp, {
-    '/order/order/order_types_stats/': { order_types_stats: { order_types: {} } },
-  })
+  api.get('/api/order/order/order_types_stats/', fixtureFor(vOrderOrderOrderTypesStatsRetrieveResponse))
 })
+
+const gets = () => api.requests().filter((request) => request.method === 'get')
 
 describe('OrderTypesPie', () => {
   test('loads unfiltered order-type stats when given no pk', async () => {
     mountForm(OrderTypesPie)
-    await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalledTimes(1))
+    await settle()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+    expect(gets()).toEqual([
       {
         method: 'get',
         path: '/api/order/order/order_types_stats/',
@@ -56,9 +46,9 @@ describe('OrderTypesPie', () => {
 
   test('filters by equipment when given equipmentPk', async () => {
     mountForm(OrderTypesPie, { props: { equipmentPk: 5 } })
-    await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalledTimes(1))
+    await settle()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+    expect(gets()).toEqual([
       {
         method: 'get',
         path: '/api/order/order/order_types_stats/',
@@ -70,9 +60,9 @@ describe('OrderTypesPie', () => {
 
   test('filters by location when given a string locationPk, Number()-ed on the way in', async () => {
     mountForm(OrderTypesPie, { props: { locationPk: '7' } })
-    await vi.waitFor(() => expect(fakeHttp.get).toHaveBeenCalledTimes(1))
+    await settle()
 
-    expect(requestShapes(fakeHttp, { method: 'get' })).toEqual([
+    expect(gets()).toEqual([
       {
         method: 'get',
         path: '/api/order/order/order_types_stats/',

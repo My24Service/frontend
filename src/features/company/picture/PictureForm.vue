@@ -67,7 +67,6 @@
 </template>
 
 <script setup lang="ts">
-import { companyPicture } from '@/api/resources.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import {
   ImageUploadField,
@@ -98,11 +97,10 @@ const props = withDefaults(defineProps<{
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: companyPicture,
+  resource: Api.CompanyPicture,
   empty: emptyPicture,
   fromRecord: pictureFromRecord,
-  validate: pictureWrite.validate,
-  parse: pictureWrite.parse,
+  contract: pictureWrite,
   copy: {
     fetchError: $trans('Error fetching picture'),
     created: $trans('Created'),

@@ -169,7 +169,13 @@ import { useVuelidate } from '@vuelidate/core'
 import { required } from '@vuelidate/validators'
 import { useLoading } from 'vue-loading-overlay'
 
-import { TeamleaderService } from '@/models/company/Teamleader'
+import {
+  TeamleaderService,
+  type TeamleaderProductDetail,
+  type TeamleaderProductSummary,
+} from '@/models/company/Teamleader'
+import type { TaxRate } from '@/api/types.gen'
+
 interface ChooserMaterial {
   id: number
   name?: string | null
@@ -177,31 +183,6 @@ interface ChooserMaterial {
   description?: string | null
   price_purchase_ex: string
   price_selling_ex: string
-}
-
-interface TaxRateResponse {
-  uuid: string
-  rate: string
-  description: string
-}
-
-interface TeamleaderProductSummary {
-  id: string
-  name: string
-  code: string
-  description: string
-}
-
-interface TeamleaderProductDetail {
-  name: string
-  code: string
-  description: string
-  product_category_detail: { name: string }
-  purchase_price: { amount: string; currency: string } | null
-  selling_price: { amount: string; currency: string } | null
-  tax_detail: { rate: string }
-  added_at: string
-  updated_at: string
 }
 
 interface TeamleaderProductDraft {
@@ -304,19 +285,19 @@ function onRowClicked(item: TeamleaderProductSummary) {
 
 async function newTeamleaderProduct() {
   await service.configDetail()
-  const response = await service.fetchTaxRates()
-  taxRates.value = response.results.map((rate: TaxRateResponse) => {
+  const rates = (await service.fetchTaxRates()).results ?? []
+  taxRates.value = rates.map((rate: TaxRate) => {
     return {
       value: rate.uuid,
       text: `${rate.description} (${rate.rate})`
     }
   })
-  const defaultRate = response.results.find((rate: TaxRateResponse) => rate.rate === '0.21')
+  const defaultRate = rates.find((rate: TaxRate) => rate.rate === '0.21')
   product.value = {
     name: props.material?.name ?? '',
     code: props.material?.identifier ?? null,
     description: props.material?.description ?? null,
-    tax_rate_id: defaultRate.uuid,
+    tax_rate_id: defaultRate?.uuid ?? '',
     purchase_price: props.material?.price_purchase_ex ?? '',
     selling_price: props.material?.price_selling_ex ?? '',
     material: props.material?.id ?? 0,
@@ -325,6 +306,9 @@ async function newTeamleaderProduct() {
 }
 
 async function createLinkProduct() {
+  // The create button only renders in form mode, over a draft.
+  if (!product.value || !('tax_rate_id' in product.value)) return
+
   // New products are priced in the tenant default, like every other price
   // the client sends without an explicit currency choice.
   const currency = mainStore.getDefaultCurrency
@@ -336,12 +320,12 @@ async function createLinkProduct() {
 
   try {
     const response = await service.createLinkProduct(createData)
-    if (!response['is_ok']) {
+    if (!response.is_ok) {
       errorToast(create, 'Fout aanmaken van het product in Teamleader')
       return
     }
 
-    const materialId = response['material']
+    const materialId = response.material
     emit('product-created-linked', materialId)
   } catch (error) {
     console.error('error in create/link', error)
@@ -369,7 +353,7 @@ async function show() {
 }
 
 function hide() {
-  modal.value?.hide()
+  void modal.value?.hide()
 }
 
 defineExpose({

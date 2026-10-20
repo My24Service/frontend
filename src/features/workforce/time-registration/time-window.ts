@@ -1,4 +1,3 @@
-import type { CompanyTimeRegistrationRetrieveData } from '@/api/types.gen'
 import type { WindowMode } from './pivot'
 
 /**
@@ -22,8 +21,8 @@ export function timeWindowQuery({
   /** The anchor date, YYYY-MM-DD. */
   anchor: string
   userId?: string | number | null
-}): CompanyTimeRegistrationRetrieveData['query'] {
-  const query: NonNullable<CompanyTimeRegistrationRetrieveData['query']> = {
+}): Api.WorkforceTimeRegistrationRetrieveData['query'] {
+  const query: NonNullable<Api.WorkforceTimeRegistrationRetrieveData['query']> = {
     mode,
     start_date: anchor,
   }

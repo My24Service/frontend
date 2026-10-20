@@ -1,21 +1,19 @@
 import * as v from 'valibot'
 
-import type { MemberSettings, PatchedMemberSettingsRequest } from '@/api/types.gen'
-import { vPatchedMemberSettingsRequest } from '@/api/valibot.gen'
 import {
   type FieldLabels,
-  fieldErrors,
   humanizeKey,
   requiredMessage,
   type FieldErrors,
   type FieldMessages,
+  writeContract,
 } from '@/features/forms'
 /**
  * The typed tenant settings, as the settings screen edits them: every key
  * of the generated `MemberSettings`, grouped. The two lists ride the form
  * as comma-separated text; the integers as the text a number input holds.
  */
-export type SettingKey = keyof MemberSettings & string
+export type SettingKey = Extract<keyof Api.MemberSettings, string>
 
 export const LIST_KEYS = ['countries', 'order_types'] as const satisfies readonly SettingKey[]
 export const TEXT_KEYS = ['date_format', 'default_currency'] as const satisfies readonly SettingKey[]
@@ -78,7 +76,7 @@ export function emptySettings(): SettingsFormValues {
   return values as SettingsFormValues
 }
 
-export function settingsFromRecord(record: MemberSettings): SettingsFormValues {
+export function settingsFromRecord(record: Api.MemberSettings): SettingsFormValues {
   const values = emptySettings()
   for (const key of LIST_KEYS) values[key] = (record[key] ?? []).join(', ')
   for (const key of TEXT_KEYS) values[key] = record[key] ?? ''
@@ -137,7 +135,7 @@ function toWire(values: SettingsFormValues): Record<string, unknown> {
 
 /** The generated request schema, with the lists and texts required non-empty on top. */
 const settingsFormSchema = v.object({
-  ...vPatchedMemberSettingsRequest.entries,
+  ...schemas.vPatchedMemberSettingsRequest.entries,
   countries: v.pipe(v.array(v.pipe(v.string(), v.minLength(1), v.maxLength(2))), v.minLength(1)),
   order_types: v.pipe(v.array(v.pipe(v.string(), v.minLength(1))), v.minLength(1)),
   date_format: v.pipe(v.string(), v.minLength(1), v.maxLength(50)),
@@ -145,10 +143,10 @@ const settingsFormSchema = v.object({
   ...Object.fromEntries(DECIMAL_KEYS.map((key) => [key, v.pipe(v.string(), v.regex(/^-?\d{1,8}(?:\.\d{1,2})?$/))])),
 })
 
-export function validateSettings(values: SettingsFormValues): SettingsFieldErrors {
-  return fieldErrors(settingsFormSchema, toWire(values), FIELD_MESSAGES, FIELD_LABELS)
-}
-
-export function parseSettings(values: SettingsFormValues): PatchedMemberSettingsRequest {
-  return v.parse(vPatchedMemberSettingsRequest, toWire(values))
-}
+/** What the form checks (the stricter schema above) and sends (the patch body). */
+export const settingsWrite = writeContract(Api.MemberMemberMySettings, {
+  validateWith: settingsFormSchema,
+  shape: toWire,
+  labels: FIELD_LABELS,
+  messages: FIELD_MESSAGES,
+})

@@ -43,9 +43,9 @@ export function ownedRecordSchemas<TValues extends OwnedValues>(schemas: {
   customer: v.GenericSchema
   /** The generated `vPatched*Request`, which declares both owner keys. */
   patch: v.GenericSchema
-  labels: FieldLabels<keyof TValues & string>
+  labels: FieldLabels<keyof TValues>
 }) {
-  type Field = keyof TValues & string
+  type Field = keyof TValues
 
   /** The variant this tenant uses on a create; the patch body on an edit. */
   function schemaFor(context: WriteContext, kind: OwnerKind): v.GenericSchema {
@@ -55,8 +55,8 @@ export function ownedRecordSchemas<TValues extends OwnedValues>(schemas: {
 
   return {
     /** The generated entries' own issues under the caller's labels, plus the owner rule. */
-    validate(values: TValues, context: WriteContext, owner: OwnerRule): FieldErrors<Field> {
-      const errors = fieldErrors<Field>(schemaFor(context, owner.kind), values, {}, schemas.labels)
+    validate: (values: TValues, context: WriteContext, owner: OwnerRule): FieldErrors<Field> => {
+      const errors: FieldErrors<Field> = fieldErrors(schemaFor(context, owner.kind), values, {}, schemas.labels)
 
       if (context.isCreate && owner.responsible && values[owner.kind] == null) {
         errors[owner.kind] = selectMessage(owner.kind === 'branch' ? $trans('Branch') : $trans('Customer'))
@@ -75,7 +75,7 @@ export function ownedRecordSchemas<TValues extends OwnedValues>(schemas: {
      * which declares both owner keys - the form round-trips the record rather
      * than diffing it, as the legacy screens did.
      */
-    parse(values: TValues, context: WriteContext, kind: OwnerKind): unknown {
+    parse: (values: TValues, context: WriteContext, kind: OwnerKind): unknown => {
       return v.parse(schemaFor(context, kind), values)
     },
   }

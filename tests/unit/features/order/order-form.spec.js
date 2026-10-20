@@ -1,11 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { HttpResponse } from 'msw'
 
-import {
-  OrderForm,
-  nextWorkingDay,
-} from '@/features/order'
-import { toApiDate } from '@/features/forms'
+import { OrderForm } from '@/features/order'
+import { nextWorkingDay, toApiDate } from '@/features/forms'
 import {
   vAssignOrdersResponse,
   vAssignResultResponse,
@@ -22,13 +19,9 @@ import {
 
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { useRealInputDelays } from '../../support/input-delays.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { orderRoutes } from '../../support/order-routes.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 
@@ -191,7 +184,6 @@ async function clickButton(wrapper, text) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 600))
   await settle()
 }
 
@@ -208,7 +200,7 @@ async function stageOrderline(wrapper, { product = 'Boiler', location = 'Cellar'
 }
 
 beforeEach(() => {
-  api.get('/api/company/engineer/list-for-select/', [
+  api.get('/api/user/engineer/list-for-select/', [
     fixtureFor(vEngineerForSelect, { user_id: 9, full_name: 'Piet' }),
     fixtureFor(vEngineerForSelect, { user_id: 10, full_name: 'Klaas' }),
   ])
@@ -232,18 +224,20 @@ describe('OrderForm, planning create (no branches)', () => {
     await mountOrderForm()
 
     expect(api.requests()).toEqual([
-      { method: 'get', path: '/api/company/engineer/list-for-select/', query: {}, body: undefined },
+      { method: 'get', path: '/api/user/engineer/list-for-select/', query: {}, body: undefined },
     ])
   })
 
   test('searches customers by query, debounced half a second', async () => {
+    useRealInputDelays()
     const wrapper = await mountOrderForm()
 
     await multiselect(wrapper, 'order-owner-search').vm.$emit('search-change', 'acme')
     await settle()
     expect(api.requests().map((r) => r.path)).not.toContain('/api/customer/customer/autocomplete/')
 
-    await pastDebounce()
+    await new Promise((resolve) => setTimeout(resolve, 600))
+    await settle()
 
     expect(api.requests().at(-1)).toEqual({
       method: 'get', path: '/api/customer/customer/autocomplete/', query: { q: 'acme' }, body: undefined,
@@ -415,7 +409,7 @@ describe('OrderForm, planning edit', () => {
     const wrapper = await mountOrderForm({ props: { pk: '42' } })
 
     expect(api.requests().map((r) => r.path)).toEqual([
-      '/api/company/engineer/list-for-select/',
+      '/api/user/engineer/list-for-select/',
       '/api/order/order/42/',
     ])
     expect(wrapper.get('#order_name').element.value).toBe('Acme BV')
@@ -636,11 +630,12 @@ describe('OrderForm, planning create from a quotation', () => {
     const wrapper = await mountOrderForm({ props: { fromQuotation: true, quotationId: '5' } })
     await settle()
 
-    expect(api.requests().map((r) => r.path)).toEqual([
-      '/api/company/engineer/list-for-select/',
+    // The engineer list and the seed go out together; their order is not fixed.
+    expect(api.requests().map((r) => r.path).sort()).toEqual([
       '/api/order/order/new/',
+      '/api/user/engineer/list-for-select/',
     ])
-    expect(api.requests().at(-1).query).toEqual({ from_quotation: '5' })
+    expect(api.requests().find((r) => r.path === '/api/order/order/new/').query).toEqual({ from_quotation: '5' })
     expect(wrapper.get('#order_name').element.value).toBe('Acme BV')
     expect(wrapper.get('#order_reference').element.value).toBe('Q-5')
 
@@ -672,11 +667,12 @@ describe('OrderForm, planning create for a maintenance contract', () => {
     })
     await settle()
 
-    expect(api.requests().map((r) => r.path)).toEqual([
-      '/api/company/engineer/list-for-select/',
+    // The engineer list and the seed go out together; their order is not fixed.
+    expect(api.requests().map((r) => r.path).sort()).toEqual([
       '/api/order/order/new/',
+      '/api/user/engineer/list-for-select/',
     ])
-    expect(api.requests().at(-1).query).toEqual({ maintenance_customer: '7', equipment: '11' })
+    expect(api.requests().find((r) => r.path === '/api/order/order/new/').query).toEqual({ maintenance_customer: '7', equipment: '11' })
     expect(wrapper.get('#order_name').element.value).toBe('Acme BV')
     expect(wrapper.find('.order-lines').text()).toContain('Boiler')
 

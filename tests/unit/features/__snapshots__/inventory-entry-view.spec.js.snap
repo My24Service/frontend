@@ -1,0 +1,47 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PurchaseOrderEntryView > renders the entry 1`] = `
+"<div class="b-overlay-wrap position-relative">
+  <div class="app-detail">
+    <h3>Entry</h3>
+    <div class="row">
+      <div class="col-6">
+        <table class="table b-table">
+          <tr class="">
+            <td class=""><strong>Order ID:</strong></td>
+            <td class="">PO-1</td>
+          </tr>
+          <tr class="">
+            <td class=""><strong>Supplier:</strong></td>
+            <td class="">ACME</td>
+          </tr>
+          <tr class="">
+            <td class=""><strong>Product:</strong></td>
+            <td class="">Widget</td>
+          </tr>
+        </table>
+      </div>
+      <div class="col-6">
+        <table class="table b-table">
+          <tr class="">
+            <td class=""><strong>Amount:</strong></td>
+            <td class="">3</td>
+          </tr>
+          <tr class="">
+            <td class=""><strong>Entry date:</strong></td>
+            <td class="">04/03/2026</td>
+          </tr>
+          <tr class="">
+            <td class=""><strong>Moved to location:</strong></td>
+            <td class="">Warehouse</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <footer class="modal-footer"><button class="btn btn-md btn-primary btn btn-info" type="button">Back</button><a href="/inventory/entries/form/42" class="btn btn-primary">Edit</a></footer>
+  </div>
+  <transition-stub name="fade" enteractiveclass="fade showing" entertoclass="show" leaveactiveclass="fade showing" leavetoclass="showing" enterfromclass="showing" leavefromclass="" appear="false" persisted="false" css="true">
+    <!---->
+  </transition-stub>
+</div>"
+`;

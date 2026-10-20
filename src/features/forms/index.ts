@@ -2,7 +2,15 @@ export { default as ApiResult } from './ApiResult.vue'
 export { default as ImageUploadField } from './ImageUploadField.vue'
 export { default as ValidatedForm } from './ValidatedForm.vue'
 export { default as ValidatedFormField } from './ValidatedFormField.vue'
-export { toApiDate } from './dates'
+export { nextWorkingDay, toApiDate } from './dates'
+export { default as EmailRecipientsField } from './EmailRecipientsField.vue'
+export {
+  SEND_FIELD_LABELS,
+  SEND_FIELD_MESSAGES,
+  sendableRecipients,
+  sendableSubject,
+  tagValidator,
+} from './email-recipients'
 export {
   PASSWORD_MESSAGES,
   passwordErrors,
@@ -10,6 +18,7 @@ export {
 } from './password-rules'
 export { normalizePhone } from './phone'
 export { fieldsFromRecord } from './record-fields'
+export { useStagedRows } from './use-staged-rows'
 export { completeTime, truncateTime } from './time-strings'
 export {
   useAvailabilityProbe,
@@ -27,7 +36,6 @@ export {
   type QueryOptionsLike,
 } from './use-query-of'
 export {
-  invalidateReads,
   useResourceForm,
   type WriteContext,
   type FormResource,
@@ -53,6 +61,7 @@ export {
   ruleMessage,
   requiredOrMaxLength,
   fieldErrors,
+  issueErrors,
   type FieldMessage,
   type FieldMessageTree,
   type FieldMessages,

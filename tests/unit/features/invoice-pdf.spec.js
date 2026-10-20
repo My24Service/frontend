@@ -5,9 +5,8 @@ import { InvoicePDFViewer } from '@/features/invoice'
 import { vInvoice } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
-import { mountForm, toastCreate, toasts } from '../support/form-harness.js'
+import { mountForm, toasts } from '../support/form-harness.js'
 
-vi.mock('bootstrap-vue-next', async (original) => ({...(await original()), useToast: () => ({create: toastCreate})}))
 const api = installApiSeam()
 const base = '/api/invoice/invoice/{id}/'
 const uuid = '00000000-0000-4000-8000-000000000021'

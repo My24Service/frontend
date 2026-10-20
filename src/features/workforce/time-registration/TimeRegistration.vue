@@ -212,11 +212,8 @@
 import moment, {
   type Moment,
 } from 'moment'
-import type { TimeRegistrationLeaveRow, TimeRegistrationWorkhourRow } from '@/api/types.gen'
-import {
-  companyTimeRegistrationRetrieveOptions,
-  companyTimeRegistrationTimeCorrectionPartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
+
+import { workforceTimeRegistrationRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
 import SubNav from '../SubNav.vue'
 import { invalidateTimeRegistration } from './invalidation'
@@ -257,12 +254,7 @@ const MODES: {value: WindowMode; label: () => string}[] = [
   {value: 'year', label: () => $trans('Per year')},
 ]
 
-const route = useRoute()
-const router = useRouter()
-const queryClient = useQueryClient()
-const mainStore = useMainStore()
-const authStore = useAuthStore()
-const {create: toast} = useToast()
+const { authStore, mainStore, route, router, toast, queryClient } = useCommon()
 
 const lang: string = mainStore.getCurrentLanguage || 'nl'
 const monday = lang === 'en' ? 1 : 0
@@ -282,7 +274,7 @@ const isPlanning = computed(() => authStore.isPlanning)
 
 // reads -------------------------------------------------------------------
 
-const registration = useQuery(() => companyTimeRegistrationRetrieveOptions({
+const registration = useQuery(() => workforceTimeRegistrationRetrieveOptions({
   query: timeWindowQuery({
     mode: mode.value,
     anchor: anchor.value.format('YYYY-MM-DD'),
@@ -297,8 +289,8 @@ const payload = registration.data
 const fullName = computed(() => payload.value?.full_name ?? null)
 const dateList = computed(() => payload.value?.date_list ?? [])
 const listTitle = computed(() => (payload.value ? totalsTitle(payload.value.totals_fields) : null))
-const workhourData = computed<TimeRegistrationWorkhourRow[]>(() => (isDetail.value ? payload.value?.workhour_data ?? [] : []))
-const leaveData = computed<TimeRegistrationLeaveRow[]>(() => (isDetail.value ? payload.value?.leave_data ?? [] : []))
+const workhourData = computed<Api.TimeRegistrationWorkhourRow[]>(() => (isDetail.value ? payload.value?.workhour_data ?? [] : []))
+const leaveData = computed<Api.TimeRegistrationLeaveRow[]>(() => (isDetail.value ? payload.value?.leave_data ?? [] : []))
 const listRows = computed(() => (!payload.value || isDetail.value ? [] : userRows(payload.value)))
 const detailRows = computed(() => (!payload.value || !isDetail.value ? [] : buildDetailRows(payload.value)))
 const dataFields = computed(() => dateColumns(dateList.value, mode.value).map((column) => column.key))
@@ -383,7 +375,8 @@ function step(direction: number) {
 /** Whether a month or a year window drills down into the next mode along. */
 const drillMode = computed<WindowMode>(() => (mode.value === 'year' ? 'month' : 'week'))
 
-function cellSlot(field: string): string {
+/** The BTable cell slot of a column; typed as BTable names them, so the slot's `data` is typed too. */
+function cellSlot(field: string): `cell(${string})` {
   return `cell(${field})`
 }
 
@@ -396,7 +389,7 @@ function drillLink(userId: string | number, index: number) {
 // the correction ----------------------------------------------------------
 
 const correctionModal = useTemplateRef<{show: () => void}>('time-correction-modal')
-const entry = ref<TimeRegistrationWorkhourRow | null>(null)
+const entry = ref<Api.TimeRegistrationWorkhourRow | null>(null)
 const correctionInput = ref('')
 const correction = computed(() => parseCorrection(correctionInput.value))
 const correctionText = computed(() => {
@@ -405,11 +398,11 @@ const correctionText = computed(() => {
 })
 
 const correctionMutation = useMutation({
-  ...companyTimeRegistrationTimeCorrectionPartialUpdateMutation(),
+  ...Api.WorkforceTimeRegistrationTimeCorrection.update.mutation(),
   onSuccess: () => invalidateTimeRegistration(queryClient),
 })
 
-function editCorrection(row: TimeRegistrationWorkhourRow) {
+function editCorrection(row: Api.TimeRegistrationWorkhourRow) {
   entry.value = row
   correctionInput.value = row.work_correction?.trim() ? row.work_correction : '0'
   correctionModal.value?.show()

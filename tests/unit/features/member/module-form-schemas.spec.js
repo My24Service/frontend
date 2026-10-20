@@ -3,7 +3,7 @@ import * as v from 'valibot'
 
 import { vMemberModuleCreateBody } from '@/api/valibot.gen'
 
-import { emptyModule, validateModule } from '@/features/member'
+import { emptyModule, moduleWrite } from '@/features/member'
 
 const valid = { name: 'orders' }
 
@@ -36,21 +36,21 @@ describe('emptyModule', () => {
   })
 
   test('the default is not yet submittable', () => {
-    expect(validateModule(emptyModule())).toEqual({ name: 'Please enter a name' })
+    expect(moduleWrite.validate(emptyModule(), { isCreate: true })).toEqual({ name: 'Please enter a name' })
   })
 })
 
-describe('validateModule', () => {
+describe('moduleWrite.validate', () => {
   test('passes a good payload with no messages', () => {
-    expect(validateModule(valid)).toEqual({})
+    expect(moduleWrite.validate(valid, { isCreate: true })).toEqual({})
   })
 
   test('blames the name field for a blank name', () => {
-    expect(validateModule({ name: '' })).toEqual({ name: 'Please enter a name' })
+    expect(moduleWrite.validate({ name: '' }, { isCreate: true })).toEqual({ name: 'Please enter a name' })
   })
 
   test('blames the name field for an over-long name', () => {
-    expect(validateModule({ name: 'a'.repeat(256) })).toEqual({
+    expect(moduleWrite.validate({ name: 'a'.repeat(256) }, { isCreate: true })).toEqual({
       name: 'Please use at most 255 characters',
     })
   })

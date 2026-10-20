@@ -11,7 +11,6 @@ import { mountForm, toastCreate } from '../support/form-harness.js'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { vProduct, vTaxRate, vPaginatedTaxRateList, vConfig, vInvoiceDataResponse, vProductList, vCustomer, vMaterial, vAssignedOrderMaterialTotals, vActivityUserTotal, vEngineer, vOrderCost, vPaginatedOrderCostList } from '@/api/valibot.gen'
 
-vi.mock('bootstrap-vue-next', async original => ({ ...(await original()), useToast: () => ({ create: toastCreate }) }))
 const api = installApiSeam()
 const orderUuid = '00000000-0000-4000-8000-00000000000a'
 const main = {

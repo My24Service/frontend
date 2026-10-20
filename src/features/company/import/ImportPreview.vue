@@ -93,14 +93,9 @@
 </template>
 
 <script setup lang="ts">
+import { importingImportGetLookupFieldsRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
+
 import {
-  companyImportDoCreateMutation,
-  companyImportGetLookupFieldsRetrieveOptions,
-  companyImportPreviewRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import { companyImport } from '@/api/resources.gen'
-import {
-  invalidateReads,
   useQueryErrorToast,
 } from '@/features/forms'
 import type { PreviewRow } from './schemas'
@@ -119,18 +114,16 @@ const props = defineProps<{
   route_prefix: string
 }>()
 
-const router = useRouter()
-const queryClient = useQueryClient()
-const { create: toast } = useToast()
-const hasBranches = useMainStore().getMemberHasBranches
+const { mainStore, router, toast, queryClient } = useCommon()
+const hasBranches = mainStore.getMemberHasBranches
 
 const importModal = useTemplateRef<{show: () => void, hide: () => void}>('importModal')
 const isDoing = ref(false)
 
 const id = computed(() => Number(props.pk))
 
-const previewQuery = useQuery(companyImportPreviewRetrieveOptions({ path: { id: id.value } }))
-const lookupQuery = useQuery(companyImportGetLookupFieldsRetrieveOptions())
+const previewQuery = useQuery(Api.ImportingImport.extras.previewRetrieve.options({ path: { id: id.value } }))
+const lookupQuery = useQuery(importingImportGetLookupFieldsRetrieveOptions())
 useQueryErrorToast(previewQuery.error, $trans('Error loading import preview'))
 useQueryErrorToast(lookupQuery.error, $trans('Error loading import preview'))
 
@@ -234,7 +227,7 @@ function fieldsFor(key: SheetKey) {
   }
 }
 
-const doMutation = useMutation(companyImportDoCreateMutation())
+const doMutation = useMutation(Api.ImportingImport.extras.doCreate.mutation())
 
 /**
  * The import confirmation, as a modal rather than the legacy blocking
@@ -251,7 +244,7 @@ async function importAll() {
   try {
     await doMutation.mutateAsync({ path: { id: id.value } })
     infoToast(toast, $trans('Imported'), $trans('Data has been imported'))
-    await invalidateReads(companyImport)(queryClient)
+    await Api.ImportingImport.invalidate(queryClient)
     importModal.value?.hide()
     await router.push(toRoute(`${props.route_prefix}-list` as RouteName))
   } catch {

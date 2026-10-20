@@ -42,7 +42,7 @@ const { requestedCount, loadRequestedCount } = useRequestedCount()
 // Requested badge (no role guard around the call itself; the routes are
 // staff-meta guarded).
 if (props.section === 'members') {
-  loadRequestedCount()
+  void loadRequestedCount()
 }
 
 const sectionItems = computed<SubNavItem[]>(() =>

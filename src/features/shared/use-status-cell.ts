@@ -1,5 +1,3 @@
-import type { Statuscode } from '@/api/types.gen'
-
 /** The row fields a status cell reads. Both the invoice and the order rows carry these. */
 export interface StatusRow {
   id: number
@@ -23,9 +21,9 @@ export interface StatusRow {
  */
 export function useStatusCell(config: {
   row: () => StatusRow
-  statuscodes: () => Statuscode[]
+  statuscodes: () => Api.Statuscode[]
   /** Codes the picker offers but refuses: the invoice's automatic ones. */
-  isDisabledOption?: (code: Statuscode) => boolean
+  isDisabledOption?: (code: Api.Statuscode) => boolean
   /** Posts the chosen status. */
   write: (status: string) => Promise<unknown>
   keepOptimisticOnSuccess?: boolean

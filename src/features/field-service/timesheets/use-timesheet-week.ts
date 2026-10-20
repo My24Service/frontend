@@ -1,7 +1,7 @@
 import moment from 'moment/min/moment-with-locales'
 
 import {mobileAssignedorderListTimesheetTotalsRetrieveOptions} from '@/api/@tanstack/vue-query.gen'
-import type {ListTimesheetTotalsResponse} from '@/api/types.gen'
+
 /**
  * The week's totals for the two Timesheet screens, and the materials booked
  * against that week.
@@ -17,7 +17,7 @@ import type {ListTimesheetTotalsResponse} from '@/api/types.gen'
  * `user_id`, which arrives as text while the endpoint's type is an integer.
  */
 export interface TimesheetChildHandle {
-  processData: (payload: ListTimesheetTotalsResponse) => void
+  processData: (payload: Api.ListTimesheetTotalsResponse) => void
 }
 
 export function useTimesheetWeek(
@@ -74,7 +74,7 @@ export function useTimesheetWeek(
    * only. The grid behaves the same way, because the child keeps whatever
    * `processData` was last given.
    */
-  const materials = ref<ListTimesheetTotalsResponse['materials']>([])
+  const materials = ref<Api.ListTimesheetTotalsResponse['materials']>([])
 
   // A watcher rather than the request's own continuation, because either of the
   // two facts it needs can arrive second: the payload (which vue-query hands

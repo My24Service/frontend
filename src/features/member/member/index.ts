@@ -8,7 +8,6 @@ export {
   MEMBER_LOGO_REQUIRED_MESSAGE,
   LOGO_UPLOAD_EXTENSIONS,
   FIELD_LABELS,
-  COMPANYCODE_DEBOUNCE_MS,
   validateMemberForm,
   parseMemberForm,
   type MemberFieldErrors,

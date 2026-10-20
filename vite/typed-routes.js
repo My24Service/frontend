@@ -2,7 +2,10 @@
 // plugin's generated route-map.d.ts types our route names and params without
 // switching to file-based routing. Runtime routing never reads this tree.
 import path from 'node:path'
+import AutoImport from 'unplugin-auto-import/vite'
 import { runnerImport } from 'vite'
+
+import { autoImportEntries } from '../auto-imports.config.js'
 
 // Keep in step with the spreads in src/router/index.js.
 const ROUTE_MODULES = [
@@ -89,7 +92,10 @@ async function insertModules(root, projectRoot, problems) {
       configFile: false,
       root: projectRoot,
       logLevel: 'warn',
-      plugins: [stubComponents],
+      // The route files reach feature modules that use auto-imported names
+      // (`Api`, `schemas`) at load time, so the runner needs the app's
+      // auto-imports too; without them the build fails with `Api is not defined`.
+      plugins: [stubComponents, AutoImport({ imports: autoImportEntries, dts: false })],
       resolve: {
         extensions: ['.ts', '.js', '.json', '.vue'],
         alias: { '@': path.join(projectRoot, 'src') },

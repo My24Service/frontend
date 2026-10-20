@@ -28,7 +28,7 @@ export interface NavCtx {
   readonly isBranchEmployee: boolean
   readonly hasBranches: boolean
   readonly flavour: string
-  readonly memberType: string
+  readonly memberType: string | undefined
 }
 
 export interface SubNavItem {

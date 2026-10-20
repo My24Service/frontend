@@ -91,11 +91,6 @@
 </template>
 
 <script setup lang="ts">
-import {
-  companyBudgetCostsRetrieveOptions,
-  companyBudgetExpectedCostsRetrieveOptions,
-  companyBudgetRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
 import { PieChart } from '@/features/shared'
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoneyEuropean as formatDinero, toDinero } from '@/services/money'
@@ -115,22 +110,21 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const mainStore = useMainStore()
-const currency = computed(() => mainStore.getDefaultCurrency)
+const { mainStore, router } = useCommon()
+const currency = computed<string>(() => mainStore.requiredDefaultCurrency)
 
 const id = computed(() => (props.pk == null ? null : Number(props.pk)))
 
 const detailQuery = useQuery(() => ({
-  ...companyBudgetRetrieveOptions({ path: { id: id.value ?? 0 } }),
+  ...Api.CompanyBudget.retrieve.options({ path: { id: id.value ?? 0 } }),
   enabled: id.value != null,
 }))
 const costsQuery = useQuery(() => ({
-  ...companyBudgetCostsRetrieveOptions({ path: { id: id.value ?? 0 } }),
+  ...Api.CompanyBudget.extras.costsRetrieve.options({ path: { id: id.value ?? 0 } }),
   enabled: id.value != null,
 }))
 const expectedQuery = useQuery(() => ({
-  ...companyBudgetExpectedCostsRetrieveOptions({ path: { id: id.value ?? 0 } }),
+  ...Api.CompanyBudget.extras.expectedCostsRetrieve.options({ path: { id: id.value ?? 0 } }),
   enabled: id.value != null,
 }))
 useQueryErrorToast(detailQuery.error, $trans('Error fetching budget'))

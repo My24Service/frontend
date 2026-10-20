@@ -1,9 +1,3 @@
-import {
-  equipmentEquipmentCreateQrCreateMutation,
-  equipmentEquipmentRetrieveQueryKey,
-  equipmentLocationCreateQrCreateMutation,
-  equipmentLocationRetrieveQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
 import { useFileDownload } from '../use-file-download'
 /**
  * The sliver of a detail record the QR block reads: the display name, the
@@ -35,14 +29,14 @@ interface QrResource {
 }
 
 const EQUIPMENT_QR: QrResource = {
-  create: equipmentEquipmentCreateQrCreateMutation,
-  queryKey: (id) => equipmentEquipmentRetrieveQueryKey({path: {id}}),
+  create: Api.EquipmentEquipment.extras.createQrCreate.mutation,
+  queryKey: (id) => Api.EquipmentEquipment.retrieve.queryKey({path: {id}}),
   filename: (record) => `${record.name} ${record.uuid}.png`,
 }
 
 const LOCATION_QR: QrResource = {
-  create: equipmentLocationCreateQrCreateMutation,
-  queryKey: (id) => equipmentLocationRetrieveQueryKey({path: {id}}),
+  create: Api.EquipmentLocation.extras.createQrCreate.mutation,
+  queryKey: (id) => Api.EquipmentLocation.retrieve.queryKey({path: {id}}),
   // The location serializer exposes no uuid, so the file is named from the
   // name alone - the legacy screen interpolated an undefined there.
   filename: (record) => `${record.name}.png`,
@@ -82,11 +76,15 @@ export function useQrCode({kind, id, record}: {
 
   async function recreateQr() {
     try {
-      const result = await recreateQrMutation.mutateAsync({path: {id}})
+      const result: unknown = await recreateQrMutation.mutateAsync({path: {id}})
       // Written into the detail cache rather than a local copy, so the QR
       // block and anything else reading the record stay one source.
-      queryClient.setQueryData(resource.queryKey(id), (previous) =>
-        previous ? {...previous, ...result} : previous)
+      queryClient.setQueryData(resource.queryKey(id), (previous: QrRecord | undefined) => {
+        if (!previous || typeof result !== 'object' || result === null) {
+          return previous
+        }
+        return {...previous, ...result}
+      })
     } catch {
       errorToast(create, $trans('Error recreating QR code'))
     }

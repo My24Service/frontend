@@ -1,13 +1,21 @@
 import type { RowData } from '@tanstack/vue-table'
 
-import type { MinimalMember } from '@/api/types.gen'
 import type { createAppColumnHelper } from '@/features/table'
 type AnyColumnHelper<TData extends RowData> = ReturnType<typeof createAppColumnHelper<TData>>
 
 /** The member views a partner row can nest. */
 type PartnerMemberViewKey = 'partner_view' | 'to_member_view' | 'from_member_view'
 
-type RowWithMemberView<K extends PartnerMemberViewKey> = { [P in K]: MinimalMember }
+type RowWithMemberView<K extends PartnerMemberViewKey> = { [P in K]: Api.MinimalMember }
+
+/**
+ * The member view a row nests under `key`. Read through this rather than
+ * `row[key]` on the column's row type: that type is intersected with
+ * `RowData` (`Record<string, any>`), so indexing it answers `any`.
+ */
+function memberView<K extends PartnerMemberViewKey>(row: RowWithMemberView<K>, key: K): Api.MinimalMember {
+  return row[key]
+}
 
 /**
  * The member columns every partner list shows: the name and the three
@@ -27,7 +35,7 @@ export function partnerColumns<
   const nameId = `${viewKey.replace(/_view$/, '')}__name`
 
   return {
-    name: columnHelper.accessor((row: TData) => row[viewKey].name, {
+    name: columnHelper.accessor((row: TData) => memberView(row, viewKey).name, {
       id: nameId,
       header: $trans('Name'),
     }),
@@ -35,19 +43,19 @@ export function partnerColumns<
       id: 'companycode',
       header: $trans('Company code'),
       enableSorting: false,
-      cell: ({ row }) => row.original[viewKey].companycode,
+      cell: ({ row }) => memberView(row.original, viewKey).companycode,
     }),
     city: columnHelper.display({
       id: 'city',
       header: $trans('City'),
       enableSorting: false,
-      cell: ({ row }) => row.original[viewKey].city,
+      cell: ({ row }) => memberView(row.original, viewKey).city,
     }),
     email: columnHelper.display({
       id: 'email',
       header: $trans('Email'),
       enableSorting: false,
-      cell: ({ row }) => row.original[viewKey].email,
+      cell: ({ row }) => memberView(row.original, viewKey).email,
     }),
   }
 }

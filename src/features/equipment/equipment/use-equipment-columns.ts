@@ -1,16 +1,16 @@
 import { RouterLink } from 'vue-router'
-import type { EquipmentTypeEnum, PaginatedEquipmentList } from '@/api/types.gen'
+
 import RowAction from '@/components/RowAction.vue'
 import { createAppColumnHelper, type ListRow } from '@/features/table'
 import { useOwnerFilter } from '../use-owner-filter'
 
-export type EquipmentRow = ListRow<PaginatedEquipmentList>
+export type EquipmentRow = ListRow<Api.PaginatedEquipmentList>
 
 export interface EquipmentColumnOptions {
   /** The route name stem this mount answers to (`equipment-equipment`, `settings-equipment`, ...). */
-  routePrefix: string
+  routePrefix: 'customers-equipment' | 'equipment-equipment' | 'settings-equipment'
   /** The equipment type the address asked for; the router's path carries it. */
-  type: EquipmentTypeEnum
+  type: Api.EquipmentTypeEnum
   /** Mounted by the settings layout, which adds the icons column. */
   fromSettings: boolean
   /** Neither a branch employee nor a customer: those two roles see neither the owner nor the brand column. */
@@ -109,9 +109,9 @@ export function useEquipmentColumns(options: EquipmentColumnOptions) {
           method: () => options.onAddState(row.original.id),
         }),
         h(RowAction, {icon: 'edit',
-          router_name: (hasBranches.value
+          router_name: hasBranches.value
             ? `${options.routePrefix}-edit-${options.type}`
-            : `${options.routePrefix}-edit`) as RouteName,
+            : `${options.routePrefix}-edit`,
           router_params: {pk: row.original.id},
           title: $trans('Edit'),
         }),

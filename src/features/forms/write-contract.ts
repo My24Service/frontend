@@ -42,8 +42,8 @@ export interface WriteContractOptions<TField extends string, TValues> {
  * A form's write contract: the generated bodies it writes through, and the
  * `validate`/`parse` pair `useResourceForm` wants.
  *
- *     export const branchWrite = writeContract(companyBranch, {
- *       validateWith: companyBranch.create.body,
+ *     export const branchWrite = writeContract(CompanyBranch, {
+ *       validateWith: CompanyBranch.create.body,
  *       shape: shaped,
  *       labels: FIELD_LABELS,
  *     })
@@ -82,8 +82,12 @@ export function writeContract<
 
   return {
     resource,
+    // Handed on so `useResourceForm` names a field a failed `parse` refuses
+    // the way `validate` would have.
+    labels,
+    messages,
     validate(values: TValues, context: Pick<WriteContext, 'isCreate'>): FieldErrors<TField> {
-      return fieldErrors<TField>(validateWith ?? schemaFor(context), shape(values), messages, labels)
+      return fieldErrors(validateWith ?? schemaFor(context), shape(values), messages, labels)
     },
     parse(
       values: TValues,

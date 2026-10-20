@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-contract-modal',
         confirmText: $trans('Are you sure you want to delete this contract?'),
-        destroyMutation: memberContractDestroyMutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberContractListQueryKey()}),
+        resource: Api.MemberContract,
         deletedDetail: $trans('Contract has been deleted'),
         deleteError: $trans('Error deleting contract'),
       }"
@@ -35,22 +34,9 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  memberContractDestroyMutation,
-  memberContractListOptions,
-  memberContractListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedContractList } from '@/api/types.gen'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 
-type ContractRow = ListRow<PaginatedContractList>
+type ContractRow = ListRow<Api.PaginatedContractList>
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated. Typed structurally because
@@ -79,13 +65,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ContractRow>({
   key: 'contract-table',
   columns,
-  listOptions: (query) => memberContractListOptions({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-    },
-  }),
+  resource: Api.MemberContract,
   urlSync: true,
   loadError: $trans('Error loading contracts'),
 })

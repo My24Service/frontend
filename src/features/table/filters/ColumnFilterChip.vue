@@ -134,7 +134,7 @@ function closeByKey() {
 // the menu that added the chip is still closing and takes the focus back.
 function onShown() {
   closedByKey.value = false
-  nextTick(() => editorRef.value?.focus())
+  void nextTick(() => editorRef.value?.focus())
 }
 
 function onHidden() {
@@ -147,7 +147,7 @@ watch(open, (isOpen) => {
 })
 
 onMounted(() => {
-  if (props.autoOpen) nextTick(() => { open.value = true })
+  if (props.autoOpen) void nextTick(() => { open.value = true })
 })
 </script>
 

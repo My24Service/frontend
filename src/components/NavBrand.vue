@@ -11,7 +11,7 @@
   >
     <img
       class="memberLogo"
-      :src="memberInfo.companylogo"
+      :src="memberInfo.companylogo ?? undefined"
       :alt="memberInfo.name"
     >
   </BNavbarBrand>
@@ -24,7 +24,7 @@
     <img
       v-if="memberInfo && memberInfo.companylogo"
       class="tw:h-9 tw:w-auto tw:max-w-full tw:object-contain tw:object-left"
-      :src="memberInfo.companylogo"
+      :src="memberInfo.companylogo ?? undefined"
       :alt="memberInfo.name"
     >
     <template v-else-if="memberInfo">
@@ -43,7 +43,7 @@
 <script setup lang="ts">
 export interface MemberInfo {
   name: string
-  companylogo?: string
+  companylogo?: string | null
 }
 
 const props = withDefaults(defineProps<{

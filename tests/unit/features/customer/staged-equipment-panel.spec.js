@@ -9,16 +9,12 @@ import { vPaginatedMaintenanceEquipmentList } from '@/api/valibot.gen'
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
+import { useRealInputDelays } from '../../support/input-delays.js'
 import { mountForm, toasts } from '../../support/form-harness.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 
-const MAIN = { getMemberHasBranches: true, getDefaultCurrency: 'EUR' }
+const MAIN = { getMemberHasBranches: false, getDefaultCurrency: 'EUR' }
 const AUTH = { isPlanning: true, isAdmin: false }
 
 const EQUIPMENT_ITEM = itemSchemaOf(vPaginatedMaintenanceEquipmentList)
@@ -180,6 +176,7 @@ describe('StagedEquipmentPanel, the staged rows', () => {
 
 describe('StagedEquipmentPanel, the picker', () => {
   test('searches the customer\'s equipment, debounced half a second', async () => {
+    useRealInputDelays()
     const wrapper = await mountPanel()
 
     await picker(wrapper).vm.$emit('search-change', 'pump')
@@ -251,10 +248,12 @@ describe('StagedEquipmentPanel, the picker', () => {
     ])
   })
 
-  test('refuses to quick-create equipment without a branch-capable tenant', async () => {
+  // Maintenance contracts belong to customers, which only a tenant without
+  // branches has; a branch tenant is the one to refuse.
+  test('refuses to quick-create equipment in a branch tenant', async () => {
     const wrapper = await mountPanel({
       props: { isCreate: true, contractId: Number.NaN },
-      main: { ...MAIN, getMemberHasBranches: false },
+      main: { ...MAIN, getMemberHasBranches: true },
     })
 
     await wrapper.get('#maintenance_equipment_new_equipment').setValue('Pump B')

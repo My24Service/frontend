@@ -14,6 +14,9 @@ import {vOrderCost, vOrderCostWritable} from '@/api/valibot.gen'
 // sending unauthenticated, CSRF-less requests.
 
 let adapter
+// The client is one object for the whole worker; its own transport goes back
+// after every test, or every later spec's requests land in this spy.
+const realAdapter = client.instance.defaults.adapter
 
 beforeEach(() => {
   // Logged in through the one token source, not by writing localStorage behind
@@ -45,6 +48,7 @@ afterEach(() => {
   // Log out the same way, for the same reason: clearing the ref is what ends
   // the session, and the entry behind it follows.
   useAuthToken().value = null
+  client.instance.defaults.adapter = realAdapter
 })
 
 const sent = () => adapter.mock.calls.map(([config]) => config)

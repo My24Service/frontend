@@ -1,10 +1,9 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import {
   SettingsForm,
-  parseSettings,
   settingsFromRecord,
-  validateSettings,
+  settingsWrite,
 } from '@/features/member'
 import { vMemberSettings } from '@/api/valibot.gen'
 
@@ -18,11 +17,6 @@ import { memberRoutes } from '../../support/member-routes.js'
  * /api/member/member/my_settings/. Seams: the typed read into the form, the
  * lists as comma text, what the form refuses, and the patch on the wire.
  */
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 
@@ -100,7 +94,7 @@ describe('settings schemas', () => {
   })
 
   test('parseSettings puts the typed body on the wire', () => {
-    const body = parseSettings({ ...settingsFromRecord(SETTINGS), countries: 'nl , de', order_id: '20000', invoice_default_hourly_rate: '12,5' })
+    const body = settingsWrite.parse({ ...settingsFromRecord(SETTINGS), countries: 'nl , de', order_id: '20000', invoice_default_hourly_rate: '12,5' }, { isCreate: false })
     expect(body.countries).toEqual(['nl', 'de'])
     expect(body.order_id).toBe(20000)
     expect(body.invoice_default_hourly_rate).toBe('12.5')
@@ -108,7 +102,7 @@ describe('settings schemas', () => {
   })
 
   test('validateSettings refuses a non-integer counter, a bad amount and an empty list', () => {
-    const errors = validateSettings({ ...settingsFromRecord(SETTINGS), order_id: '12a', invoice_default_vat: '2.5', quotation_default_hourly_rate: 'abc', countries: '' })
+    const errors = settingsWrite.validate({ ...settingsFromRecord(SETTINGS), order_id: '12a', invoice_default_vat: '2.5', quotation_default_hourly_rate: 'abc', countries: '' }, { isCreate: true })
     expect(errors.order_id).toBe('Please enter a number')
     expect(errors.invoice_default_vat).toBe('Please enter a whole number')
     expect(errors.quotation_default_hourly_rate).toBe('Please enter an amount, like 12.50')

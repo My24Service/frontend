@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-member-modal',
         confirmText: $trans('Are you sure you want to delete this member?'),
-        destroyMutation: memberMemberDestroyMutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: memberMemberListQueryKey()}),
+        resource: Api.MemberMember,
         deletedDetail: $trans('Member has been deleted'),
         deleteError: $trans('Error deleting member'),
       }"
@@ -44,13 +43,7 @@
 
 <script lang="ts" setup>
 import { RouterLink } from 'vue-router'
-import {
-  memberMemberDestroyMutation,
-  memberMemberListOptions,
-  memberMemberListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import { vMemberTypeEnum } from '@/api/valibot.gen'
-import type { PaginatedMemberList } from '@/api/types.gen'
+
 import {
   ServerTable,
   baseListParams,
@@ -67,7 +60,7 @@ const props = withDefaults(defineProps<{
   variant: 'active',
 })
 
-const authStore = useAuthStore()
+const { authStore } = useCommon()
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated. Typed structurally because
@@ -94,15 +87,15 @@ const VARIANT_DEFINITIONS = {
 const variantDefinition = computed(() => VARIANT_DEFINITIONS[props.variant] ?? VARIANT_DEFINITIONS.active)
 const variantLabel = computed(() => variantDefinition.value.label())
 
-type MemberRow = ListRow<PaginatedMemberList>
+type MemberRow = ListRow<Api.PaginatedMemberList>
 
 /** The member type the query carries, when it is one the enum names. */
 function memberTypeParam(value: unknown) {
-  return vMemberTypeEnum.options.find((option) => option === value)
+  return schemas.vMemberTypeEnum.options.find((option) => option === value)
 }
 
 /** The member types the endpoint's filter takes, from the generated enum. */
-const memberTypeOptions: FilterOption[] = vMemberTypeEnum.options.map((value) => ({value, label: value}))
+const memberTypeOptions: FilterOption[] = schemas.vMemberTypeEnum.options.map((value) => ({value, label: value}))
 
 const columnHelper = createAppColumnHelper<MemberRow>()
 
@@ -164,7 +157,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<MemberRow>({
   key: 'member-table',
   columns,
-  listOptions: (query) => memberMemberListOptions({
+  listOptions: (query) => Api.MemberMember.list.options({
     query: {
       ...variantDefinition.value.filters(),
       ...baseListParams(query),

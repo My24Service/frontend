@@ -1,5 +1,3 @@
-import { companyBranch } from '@/api/resources.gen'
-import type { Branch } from '@/api/types.gen'
 import {
   type FieldErrors,
   type FieldLabels,
@@ -27,7 +25,7 @@ export interface BranchFormValues {
   image: string | null
 }
 
-export type BranchFieldErrors = FieldErrors<keyof BranchFormValues & string>
+export type BranchFieldErrors = FieldErrors<keyof BranchFormValues>
 
 /**
  * A branch as the form is filled in from scratch: every field of the request
@@ -41,11 +39,11 @@ export type BranchFieldErrors = FieldErrors<keyof BranchFormValues & string>
  * assertion.
  */
 export function emptyBranch(): BranchFormValues {
-  return formDefaults(companyBranch.create.body, {country_code: 'NL', image: null})
+  return formDefaults(Api.CompanyBranch.create.body, {country_code: 'NL', image: null})
 }
 
 /** The fetched record as form values: the ten fields this form owns. */
-export function branchFromRecord(record: Branch): BranchFormValues {
+export function branchFromRecord(record: Api.Branch): BranchFormValues {
   return {
     name: record.name,
     address: record.address,
@@ -68,7 +66,7 @@ export const FIELD_LABELS = {
   address: () => $trans('Address'),
   postal: () => $trans('Postal'),
   city: () => $trans('City'),
-} satisfies FieldLabels<keyof BranchFormValues & string>
+} as const satisfies FieldLabels<keyof BranchFormValues>
 
 /**
  * The wire-shaped body: blank optionals ride as absent keys, not nulls or
@@ -95,8 +93,8 @@ function shaped(values: BranchFormValues) {
  * patch body it sends is a superset of what PATCH requires, so nothing is
  * added on top of the generated schema.
  */
-export const branchWrite = writeContract(companyBranch, {
-  validateWith: companyBranch.create.body,
+export const branchWrite = writeContract(Api.CompanyBranch, {
+  validateWith: Api.CompanyBranch.create.body,
   shape: shaped,
   labels: FIELD_LABELS,
 })

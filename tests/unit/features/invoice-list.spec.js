@@ -1,17 +1,13 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { RouterView } from 'vue-router'
 import { invoiceInvoiceDetailRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { InvoiceList } from '@/features/invoice'
 import { vInvoice, vInvoicePreliminaryResponse, vInvoiceStatus, vStatuscode } from '@/api/valibot.gen'
 import { fixtureFor, paginated } from '../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../support/api-seam/index.js'
-import { mountListView, createTestQueryClient, toastCreate, toasts } from '../support/form-harness.js'
+import { mountListView, createTestQueryClient, toasts } from '../support/form-harness.js'
 import { serverError } from '../support/list-harness.js'
 import { modal } from '../support/modal.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
 
 const api = installApiSeam()
 const base = '/api/invoice/invoice/'
@@ -79,7 +75,6 @@ const listRequests = () => api.requests().filter((request) => request.method ===
 const bodies = () => toasts().map((toast) => toast.body)
 async function search(wrapper, value) {
   await wrapper.get('input[aria-label="Search invoices"]').setValue(value)
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 

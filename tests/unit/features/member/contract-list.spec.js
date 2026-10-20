@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { ContractList } from '@/features/member'
 import { vPaginatedContractList } from '@/api/valibot.gen'
@@ -9,11 +9,6 @@ import { installApiSeam, noContent, settle } from '../../support/api-seam/index.
 import { toasts } from '../../support/form-harness.js'
 import { mountList, rowTexts, serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 
@@ -37,7 +32,6 @@ function contractPage({ count = 30 } = {}) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 
@@ -225,8 +219,8 @@ describe('ContractList column filters', () => {
 
     await addFilter(wrapper, 'Name')
     await editorInput(wrapper, 'name').setValue('Support')
-    // The kit commits the search and the filters on a 300 ms debounce.
-    await new Promise((resolve) => setTimeout(resolve, 350))
+    // The kit commits the search and the filters through its debounce, which
+    // setupTests.js sets to zero.
     await settle()
 
     expect(api.requests().at(-1).query).toMatchObject({name: 'Support'})

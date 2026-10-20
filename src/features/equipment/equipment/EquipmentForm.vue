@@ -273,7 +273,7 @@
               auto-apply
               arrow-navigation
               :formats="{ input: 'dd/MM/yyyy' }"
-              @update:model-value="applyDate('installation_date', $event)"
+              @update:model-value="(value: Date | null) => applyDate('installation_date', value)"
             />
           </BFormGroup>
 
@@ -291,7 +291,7 @@
               auto-apply
               arrow-navigation
               :formats="{ input: 'dd/MM/yyyy' }"
-              @update:model-value="applyDate('production_date', $event)"
+              @update:model-value="(value: Date | null) => applyDate('production_date', value)"
             />
           </BFormGroup>
 
@@ -344,8 +344,7 @@
 <script setup lang="ts">
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import { nl } from 'date-fns/locale'
-import { equipmentLocationListForSelectListOptions } from '@/api/@tanstack/vue-query.gen'
-import { equipmentEquipment } from '@/api/resources.gen'
+
 import { EQUIPMENT_TYPES } from '@/constants'
 import {
   useQueryErrorToast,
@@ -389,9 +388,9 @@ const {wireKind, chooses} = useOwnerContext()
 // exactly the one whose type select has two values to choose between.
 const hasBranches = computed(() => wireKind.value === 'branch')
 
+const { mainStore } = useCommon()
 /** What a new equipment's price is quoted in, as the legacy model took it. */
-const mainStore = useMainStore()
-const defaultCurrency = computed(() => mainStore.getDefaultCurrency)
+const defaultCurrency = computed(() => mainStore.requiredDefaultCurrency)
 
 const nameInput = useTemplateRef<{focus?: () => void}>('name')
 /** The document panel, which only a create has to hand an id to. */
@@ -399,7 +398,7 @@ const documents = useTemplateRef<{parentCreated: (pk: number) => Promise<unknown
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: equipmentEquipment,
+  resource: Api.EquipmentEquipment,
   empty: () => emptyEquipment(defaultCurrency.value),
   fromRecord: equipmentFromRecord,
   validate: (values, context) => validateEquipment(values, context, {
@@ -459,7 +458,7 @@ const locationOwnerId = computed<number | null>(() => (chooses.value ? ownerId.v
 const locationsQuery = useQuery(() => {
   const ownerId = locationOwnerId.value
   return {
-    ...equipmentLocationListForSelectListOptions(ownerId == null
+    ...Api.EquipmentLocationListForSelect.list.options(ownerId == null
       ? {}
       : {query: wireKind.value === 'branch' ? {branch: ownerId} : {customer: ownerId}}),
     enabled: !chooses.value || ownerId != null,

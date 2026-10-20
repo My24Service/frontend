@@ -69,7 +69,7 @@ import { IDENTITY_FIELD_LABELS } from './user-form'
  *
  * A field's id is the panel's `idPrefix` and the field's name — apiuser_email.
  */
-export interface UserIdentityPanelValues {
+export type UserIdentityPanelValues = {
   username: string
   password1: string
   password2: string

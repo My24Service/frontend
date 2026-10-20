@@ -1,11 +1,13 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { jwtTokenCreate } from '@/api/sdk.gen'
 import { LoginForm, useAuthStore } from '@/features/auth'
 
-import { mountForm, resetFakeHttp, toastCreate, toasts } from '../../support/form-harness.js'
-import { requestShapes } from '../../support/request-recorder.js'
+import { vJwtTokenCreateResponse } from '@/api/valibot.gen'
+
+import { fixtureFor } from '../../helpers/schema-fixture.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm, toastCreate, toasts } from '../../support/form-harness.js'
 
 /**
  * Behaviour characterisation for the login form
@@ -17,35 +19,13 @@ import { requestShapes } from '../../support/request-recorder.js'
  * nowhere. Forgot-password routes into the account slice.
  */
 
-enableAutoUnmount(afterEach)
+const api = installApiSeam()
 
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
-
-vi.mock('vue-loading-overlay', () => ({
-  useLoading: () => ({ show: () => ({ hide: vi.fn() }) }),
-}))
+const TOKEN = () => fixtureFor(vJwtTokenCreateResponse, { token: 'jwt-abc' })
 
 /** Drain macrotasks so the SDK promise chain settles. */
 async function flush() {
-  for (let i = 0; i < 10; i++) await new Promise((resolve) => setTimeout(resolve, 0))
+  for (let i = 0; i < 2; i++) await settle()
 }
 
 async function until(condition, { attempts = 200 } = {}) {
@@ -61,11 +41,10 @@ const MAIN = {
 }
 
 function posts() {
-  return requestShapes(fakeHttp, { method: 'post' })
+  return api.requests().filter((request) => request.method === 'post')
 }
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp)
   toastCreate.mockClear()
   MAIN.getInitialData.mockClear()
 })
@@ -95,7 +74,7 @@ describe('LoginForm', () => {
   })
 
   test('a submit posts credentials and then runs the bootstrap', async () => {
-    fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
+    api.post('/api/jwt-token/', TOKEN())
     const wrapper = await mountLogin()
     // The harness stubs store actions. Unstub login so the wire shape is the
     // store's, not the stub's. The bootstrap stays stubbed: the ordering is
@@ -183,7 +162,7 @@ describe('LoginForm', () => {
   })
 
   test('a failed bootstrap tells the user', async () => {
-    fakeHttp.post.mockResolvedValueOnce({ data: { token: 'jwt-abc' } })
+    api.post('/api/jwt-token/', TOKEN())
     const wrapper = await mountLogin()
     useAuthStore().login.mockImplementation(async (username, password) => {
       // The store's own call: the generated operation, so the recorded wire
@@ -211,7 +190,10 @@ describe('LoginForm', () => {
     const gate = new Promise((resolve) => {
       release = resolve
     })
-    fakeHttp.post.mockImplementationOnce(() => gate)
+    api.post('/api/jwt-token/', async () => {
+      await gate
+      return TOKEN()
+    })
     const wrapper = await mountLogin()
     useAuthStore().login.mockImplementation(async (username, password) => {
       // The store's own call: the generated operation, so the recorded wire
@@ -227,7 +209,7 @@ describe('LoginForm', () => {
     await wrapper.get('#login_password').setValue('secret')
     await wrapper.get('form').trigger('submit')
     await wrapper.get('form').trigger('submit')
-    release({ data: { token: 'jwt-abc' } })
+    release()
     await until(() => MAIN.getInitialData.mock.calls.length > 0)
 
     expect(posts()).toHaveLength(1)

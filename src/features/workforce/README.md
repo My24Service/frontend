@@ -38,7 +38,7 @@ level rather than in either one:
 
 - `SubNav.vue` - the pills are this Slice's chrome, not any one entity's.
 - `use-user-search.ts` - the "type to search a user" picker the leave form and
-  the sick-leave form both carry. `/api/company/user-list/` is tenant-wide, and
+  the sick-leave form both carry. `/api/user/user-list/` is tenant-wide, and
   `features/user/` is another slice's to change; when that slice exports a
   picker of its own, this file moves there.
 
@@ -57,7 +57,7 @@ spec that touches the network runs through the strict API seam.
 
 ### The one direct operation, and why
 
-`leave/LeaveForm.vue` calls `companyUserLeaveHoursAdminGetTotalsCreate` from
+`leave/LeaveForm.vue` calls `workforceUserLeaveHoursAdminGetTotalsCreate` from
 `@/api/sdk.gen` rather than through a query: it is a **POST probe**, and a
 request whose answer is a preview of *unsaved* form state has no query key to
 cache a POST under, so it would be a query option pretending to be one. The
@@ -143,16 +143,16 @@ Both of this Slice's backend asks — the `year` parameter and this hand-built
 response — were answered in `My24Service/my24service#399`, with the
 field-service Slice's asks.
 
-- `GET /api/company/time-registration/` takes `mode` (week/month/year),
+- `GET /api/workforce/time-registration/` takes `mode` (week/month/year),
   `month`, `start_date`, `user` and `year` — no pagination — and answers a
   **hand-built dict**: `{full_name, totals_fields, date_list, intervals,
   totals}`, plus `workhour_data` and `leave_data` on a user window. The
   view's `@extend_schema` declares both halves now, the parameters and the dict
   as `TimeRegistrationListResponse`, which is why the operation is named
-  `companyTimeRegistrationRetrieve` rather than `...List` (it answers one
+  `workforceTimeRegistrationRetrieve` rather than `...List` (it answers one
   object, not a page) and why the two time-registration specs build their stubs
   from that component and go through the strict seam.
-- `PATCH /api/company/time-registration/time-correction/{id}/` takes
+- `PATCH /api/workforce/time-registration/time-correction/{id}/` takes
   `{source, work_correction, work_correction_by_user, notify_engineer}` and
   answers `{result}`. `work_correction` is a duration string; the screen's
   "minutes or hh:mm" is read into one.
@@ -161,8 +161,8 @@ field-service Slice's asks.
 
 ### Leave
 
-- `/api/company/user-leave-hours/admin/` is the planning viewset: full CRUD,
-  `q` over the user, paged at 20. `/api/company/user-leave-hours/` is the
+- `/api/workforce/user-leave-hours/admin/` is the planning viewset: full CRUD,
+  `q` over the user, paged at 20. `/api/workforce/user-leave-hours/` is the
   no-planning twin a user reaches their own leave through - no screen here
   mounts it.
 - `admin/all_not_accepted/` answers `is_accepted=False AND is_rejected=False`;
@@ -173,14 +173,14 @@ field-service Slice's asks.
   `user` with the requesting user.
 - The response carries `start_date_iso`/`end_date_iso` beside the
   tenant-formatted pair; the form reads the ISO twins.
-- `/api/company/leave-type/` is full CRUD plus `q`, paged at 20, no
+- `/api/workforce/leave-type/` is full CRUD plus `q`, paged at 20, no
   `ordering`. `list_for_select/` is a different endpoint with a side effect -
   it **creates** the default types when the tenant has none - which is why the
   form's picker reads the plain list, as the legacy screen did.
 
 ### Sick leave
 
-- `/api/company/user-sick-leave/admin/` is the planning viewset, paged at 20,
+- `/api/workforce/user-sick-leave/admin/` is the planning viewset, paged at 20,
   with `user` as a filter and `q` over the username. `admin/all_unconfirmed/`
   is the queue this Slice's confirmation screen shows; `admin/all_sick/` is the
   same rows seen from the other side.
@@ -192,7 +192,7 @@ field-service Slice's asks.
 
 ### The people picker
 
-- `GET /api/company/user-list/?q=` answers a bare array of
+- `GET /api/user/user-list/?q=` answers a bare array of
   `{id, name, email, submodel_id}` (not a page), matching `q` case-insensitively
   against the username and both names. `user_type` narrows it to one submodel.
 
@@ -200,7 +200,7 @@ field-service Slice's asks.
 
 | Screens | Future home | Why not here |
 | --- | --- | --- |
-| `views/mobile/{TimeSheet,TimeSheetDetail,UserHoursData,UserHoursDataDetail,TimeInput}.vue`, `useUserHoursPivot.ts` | field-service slice | They read `/api/mobile/assignedorder/list_timesheet_totals/` (assigned orders), which is the mobile API - not the same thing as this Slice's time registration, which reads `/api/company/time-registration/*`. Migrated separately, at the same time as this slice |
+| `views/mobile/{TimeSheet,TimeSheetDetail,UserHoursData,UserHoursDataDetail,TimeInput}.vue`, `useUserHoursPivot.ts` | field-service slice | They read `/api/mobile/assignedorder/list_timesheet_totals/` (assigned orders), which is the mobile API - not the same thing as this Slice's time registration, which reads `/api/workforce/time-registration/*`. Migrated separately, at the same time as this slice |
 | the teamleader and Gripp screens (`views/company/Teamleader*.vue`, `views/company/teamleader/`, `views/company/ConnectorGrippSettings.vue`) | deferred | Unfinished integrations: the screens and their endpoints stay as they are |
 | the statuscode slice's `leave_hours`/`sick_leave`/`work_hours` code types | statuscode slice | That slice's own; untouched |
 

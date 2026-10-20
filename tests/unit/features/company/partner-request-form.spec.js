@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 import { vPartnerRequest, vPartnerSelect } from '@/api/valibot.gen'
 import { PartnerRequestsSentForm } from '@/features/company'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
@@ -6,14 +6,9 @@ import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: spy } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: spy }) }
-})
-
 const api = installApiSeam()
 
-const CREATE_PATH = '/api/company/partner-request/'
+const CREATE_PATH = '/api/partner/partner-request/'
 
 const MEMBERS = [
   fixtureFor(vPartnerSelect, { id: 11, name: 'Acme BV', city: 'Utrecht' }),

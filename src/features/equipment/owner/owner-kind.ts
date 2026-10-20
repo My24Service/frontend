@@ -8,18 +8,18 @@ export type OwnerKind = 'customer' | 'branch'
  * keeps both, because which one applies is a property of the tenant rather
  * than of the field; the parse resolves the union and drops the other slot.
  */
-export interface OwnedValues {
+export type OwnedValues = {
   customer: number | null
   branch: number | null
 }
 
 /** The two owner foreign keys an owned record carries, as the API reads them. */
-export interface OwnedRecord {
+export type OwnedRecord = {
   customer?: number | null
   branch?: number | null
 }
 
-export interface OwnerContext {
+export type OwnerContext = {
   /**
    * The foreign key this tenant's request variant carries.
    *

@@ -1,9 +1,5 @@
-import * as v from 'valibot'
-
-import { vPatchedMemberRequest } from '@/api/valibot.gen'
-import type { Member } from '@/api/types.gen'
 import {
-  fieldErrors,
+  writeContract,
   type FieldErrors,
   type FieldLabels,
 } from '@/features/forms'
@@ -33,7 +29,7 @@ export interface InfoFormValues {
   companylogo_workorder: string | null
 }
 
-export type InfoFormErrors = FieldErrors<keyof InfoFormValues & string>
+export type InfoFormErrors = FieldErrors<keyof InfoFormValues>
 
 /** The blank form state the kit starts from, before the record arrives. */
 export function emptyInfo(): InfoFormValues {
@@ -57,7 +53,7 @@ export function emptyInfo(): InfoFormValues {
 }
 
 /** The fetched record as form values: the fields this screen owns. */
-export function infoFromRecord(record: Member): InfoFormValues {
+export function infoFromRecord(record: Api.Member): InfoFormValues {
   return {
     name: record.name,
     chamber_of_commerce: record.chamber_of_commerce ?? null,
@@ -88,7 +84,7 @@ export const FIELD_LABELS = {
   contacts: () => $trans('Contacts'),
   info: () => $trans('Info'),
   activities: () => $trans('Activities'),
-} satisfies FieldLabels<keyof InfoFormValues & string>
+} as const satisfies FieldLabels<keyof InfoFormValues>
 
 /**
  * The wire-shaped body: the staged logos ride only when files were picked -
@@ -116,21 +112,14 @@ function shaped(values: InfoFormValues) {
 }
 
 /**
- * The patch body leaves every field optional, and every one of the ten the
- * legacy screen required is non-blank once present. The shaped body always
- * carries all ten, so a blank one is refused without a rule of this file's
- * own.
+ * What the form checks and sends: the patch body, which leaves every field
+ * optional. Every one of the ten the legacy screen required is non-blank once
+ * present, and the shaped body always carries all ten, so a blank one is
+ * refused without a rule of this file's own. Parsing strips what the endpoint
+ * does not declare - the record's readonly companions the legacy screen sent
+ * along ride no more, and DRF ignored them either way.
  */
-export function validateInfo(values: InfoFormValues): InfoFormErrors {
-  return fieldErrors(vPatchedMemberRequest, shaped(values), {}, FIELD_LABELS)
-}
-
-/**
- * The body to send, as the generated patch component resolves it: the form's
- * fields, stripped of anything the endpoint does not declare - the record's
- * readonly companions the legacy screen sent along ride no more, and DRF
- * ignored them either way.
- */
-export function parseInfo(values: InfoFormValues) {
-  return v.parse(vPatchedMemberRequest, shaped(values))
-}
+export const infoWrite = writeContract(Api.MemberMemberMe, {
+  shape: shaped,
+  labels: FIELD_LABELS,
+})

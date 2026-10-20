@@ -1,6 +1,5 @@
 import { format } from 'date-fns'
 
-import { vApiUserRequestWritable } from '@/api/valibot.gen'
 import {
   requiredMessages,
   type FieldErrors,
@@ -37,7 +36,7 @@ export const FIELD_MESSAGES = {
     // "Valid from" is no noun the rule's line could name; a date is asked for.
     expire_start_dt: () => $trans('Please enter a date'),
   },
-} satisfies FieldMessages
+} as const satisfies FieldMessages
 
 // The request nests the token's own fields, so their labels are keyed by
 // the path `fieldErrors` reports them under — `api_user.name` — and the
@@ -47,7 +46,7 @@ export const FIELD_LABELS = {
   'api_user.name': () => $trans('Name'),
   'api_user.expire_start_dt': () => $trans('Valid from'),
   'api_user.expire_in_days': () => $trans('Expire in days'),
-} satisfies FieldLabels
+} as const satisfies FieldLabels
 
 /** The line under an untouched token field: the same required line the validation shows. */
 export const PLACEHOLDERS = { ...requiredMessages(FIELD_LABELS), 'api_user.expire_start_dt': FIELD_MESSAGES.api_user.expire_start_dt }
@@ -73,9 +72,9 @@ function payloadOf(values: ApiUserFormValues) {
 // values shape; the request nests the token's fields, so their errors key by
 // that path — `api_user.name`.
 export const { validate: validateApiUserForm, parse: parseApiUserForm } = userFormContract<
-  typeof vApiUserRequestWritable, ApiUserFormValues, 'api_user.name' | 'api_user.expire_start_dt' | 'api_user.expire_in_days'
+  typeof schemas.vApiUserRequestWritable, ApiUserFormValues, 'api_user.name' | 'api_user.expire_start_dt' | 'api_user.expire_in_days'
 >({
-  schema: vApiUserRequestWritable,
+  schema: schemas.vApiUserRequestWritable,
   messages: FIELD_MESSAGES,
   labels: FIELD_LABELS,
   payloadOf,

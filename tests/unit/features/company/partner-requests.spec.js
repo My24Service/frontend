@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { vMinimalMember, vPartnerRequest } from '@/api/valibot.gen'
 import {
   PartnerRequestsSentList,
@@ -6,18 +6,14 @@ import {
 } from '@/features/company'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
-import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
+import { mountListView, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({ create: toastCreate }),
-}))
-
 const api = installApiSeam()
 
-const SENT_PATH = '/api/company/partner-request/sent/'
-const RECEIVED_PATH = '/api/company/partner-request/received/'
+const SENT_PATH = '/api/partner/partner-request/sent/'
+const RECEIVED_PATH = '/api/partner/partner-request/received/'
 
 const routes = [
   { name: 'partner-request-add', path: '/company/partners/requests/form', component: { template: '<div />' } },
@@ -72,11 +68,11 @@ beforeEach(() => {
   window.history.replaceState(null, '', '/')
   api.get(SENT_PATH, () => paginated([sentRequest()]))
   api.get(RECEIVED_PATH, () => paginated([receivedRequest()]))
-  api.delete('/api/company/partner-request/{id}/', noContent)
-  api.patch('/api/company/partner-request/{id}/accept/', { success: true })
-  api.patch('/api/company/partner-request/{id}/reject/', { success: true })
+  api.delete('/api/partner/partner-request/{id}/', noContent)
+  api.patch('/api/partner/partner-request/{id}/accept/', { success: true })
+  api.patch('/api/partner/partner-request/{id}/reject/', { success: true })
   // Accepting births the relation, so the partners list refetches too.
-  api.get('/api/company/partner/', () => paginated([]))
+  api.get('/api/partner/partner/', () => paginated([]))
 })
 afterEach(() => window.history.replaceState(null, '', '/'))
 
@@ -105,7 +101,6 @@ describe('PartnerRequestsSentList', () => {
     await settle()
 
     await wrapper.get('input[aria-label="Search partner requests"]').setValue('acme')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     const sent = api.requests().filter((request) => request.method === 'get' && request.path === SENT_PATH)
@@ -122,7 +117,7 @@ describe('PartnerRequestsSentList', () => {
     await settle()
 
     expect(api.requests().find((request) => request.method === 'delete').path)
-      .toBe('/api/company/partner-request/31/')
+      .toBe('/api/partner/partner-request/31/')
     expect(bodies()).toContain('Partner request has been deleted')
   })
 })
@@ -147,7 +142,7 @@ describe('PartnerRequestsReceivedList', () => {
     await settle()
 
     const patch = api.requests().find((request) => request.method === 'patch')
-    expect(patch.path).toBe('/api/company/partner-request/32/accept/')
+    expect(patch.path).toBe('/api/partner/partner-request/32/accept/')
     expect(bodies()).toContain('Partner request has been accepted')
     // The relation is born, so the partners list is marked stale too. It is
     // not mounted here, so nothing refetches on the wire; the received list
@@ -167,7 +162,7 @@ describe('PartnerRequestsReceivedList', () => {
 
     const patch = api.requests().filter((request) => request.method === 'patch')
     expect(patch).toHaveLength(1)
-    expect(patch[0].path).toBe('/api/company/partner-request/32/reject/')
+    expect(patch[0].path).toBe('/api/partner/partner-request/32/reject/')
     expect(bodies()).toContain('Partner request has been rejected')
   })
 

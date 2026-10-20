@@ -5,7 +5,7 @@ import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
 
 import {
   emptyModulePart,
-  validateModulePart,
+  modulePartWrite,
 } from '@/features/member'
 
 const valid = { name: 'dashboard', module: 7, is_always_selected: false }
@@ -47,38 +47,38 @@ describe('emptyModulePart', () => {
   })
 
   test('defaults are not yet submittable', () => {
-    expect(validateModulePart(emptyModulePart())).toEqual({
+    expect(modulePartWrite.validate(emptyModulePart(), { isCreate: true })).toEqual({
       name: 'Please enter a name',
       module: 'Please select a module',
     })
   })
 })
 
-describe('validateModulePart', () => {
+describe('modulePartWrite.validate', () => {
   test('passes a good payload with no messages', () => {
-    expect(validateModulePart(valid)).toEqual({})
+    expect(modulePartWrite.validate(valid, { isCreate: true })).toEqual({})
   })
 
   test('blames the name field for a blank name', () => {
-    expect(validateModulePart({ ...valid, name: '' })).toEqual({
+    expect(modulePartWrite.validate({ ...valid, name: '' }, { isCreate: true })).toEqual({
       name: 'Please enter a name',
     })
   })
 
   test('blames the name field for an over-long name', () => {
-    expect(validateModulePart({ ...valid, name: 'a'.repeat(256) })).toEqual({
+    expect(modulePartWrite.validate({ ...valid, name: 'a'.repeat(256) }, { isCreate: true })).toEqual({
       name: 'Please use at most 255 characters',
     })
   })
 
   test('blames the module field when no module is chosen', () => {
-    expect(validateModulePart({ ...valid, module: null })).toEqual({
+    expect(modulePartWrite.validate({ ...valid, module: null }, { isCreate: true })).toEqual({
       module: 'Please select a module',
     })
   })
 
   test('reports both broken fields at once', () => {
-    expect(validateModulePart({ name: '', module: null, is_always_selected: false })).toEqual({
+    expect(modulePartWrite.validate({ name: '', module: null, is_always_selected: false }, { isCreate: true })).toEqual({
       name: 'Please enter a name',
       module: 'Please select a module',
     })

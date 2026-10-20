@@ -11,7 +11,7 @@ export interface UseAvailabilityProbeConfig {
   /** The availability fetch; resolves true when the value is free. */
   check: (value: string) => Promise<boolean>
   /** Injectable for specs; production uses the ticketed half-second. */
-  debounceMs: number
+  debounceMs: MaybeRefOrGetter<number>
 }
 
 export interface UseAvailabilityProbeReturn {

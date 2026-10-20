@@ -1,7 +1,7 @@
 version: "2.1"
 
-jobs:
-  test:
+executors:
+  node:
     working_directory: ~/circleci-frontend
     docker:
       - image: cimg/node:22.16
@@ -11,8 +11,10 @@ jobs:
       # pnpm's install script needs for `pnpm setup`. The profile it writes
       # is never reloaded in CI; PATH is handled via $BASH_ENV below.
       SHELL: /bin/bash
+
+commands:
+  install-deps:
     steps:
-      - checkout
       - restore_cache:
           name: Restore pnpm Package Cache
           keys:
@@ -31,9 +33,68 @@ jobs:
           key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - .pnpm-store
+
+jobs:
+  check:
+    executor: node
+    # scripts/lint.mjs runs node with an 8 GB heap ceiling; medium has 4 GB.
+    resource_class: large
+    steps:
+      - checkout
+      - install-deps
+      - run:
+          # vue-tsc and the type-aware lint read auto-imports.gen.d.ts and
+          # components.gen.d.ts, which are gitignored. unplugin-auto-import and
+          # unplugin-vue-components write them only while Vite transforms the
+          # source, so a build is what produces them (about 30s).
+          name: Generate auto-import and component types
+          command: pnpm run build
+      - run:
+          name: Type-check
+          command: pnpm run typecheck
+      # Lint, steps below. Everywhere but main it reuses the lint results of
+      # earlier CI runs and re-lints only files whose content changed. A cached
+      # result can miss an error caused by a type changed in an imported file,
+      # so main restores nothing and lints everything (about 16 minutes).
+      - when:
+          condition:
+            not:
+              equal: [main, << pipeline.git.branch >>]
+          steps:
+            - run:
+                # Subject line only, so a message body can mention the token.
+                name: Skip lint when the last commit's subject has [skip lint]
+                command: |
+                  if git log -1 --format=%s | grep -qF '[skip lint]'; then
+                    echo "Found [skip lint] in the last commit's subject; skipping lint."
+                    circleci-agent step halt
+                  fi
+            - restore_cache:
+                name: Restore ESLint cache
+                keys:
+                  - eslint-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "eslint.config.js" }}-{{ .Branch }}-
+                  - eslint-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "eslint.config.js" }}-
+      - run:
+          name: Lint
+          command: pnpm run lint
+      - save_cache:
+          name: Save ESLint cache
+          # Also after a failed lint: the results of the files that passed
+          # are still valid, and files with errors are re-reported from it.
+          when: always
+          key: eslint-v1-{{ checksum "pnpm-lock.yaml" }}-{{ checksum "eslint.config.js" }}-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - node_modules/.cache/.eslintcache
+  test:
+    executor: node
+    steps:
+      - checkout
+      - install-deps
       - run:
           name: Run test suite
-          command: pnpm test
+          # Defined in .circleci/test-suites.yml. It still shards within the
+          # container (scripts/vitest-shards.mjs), otherwise it runs OOM.
+          command: circleci testsuite run "unit tests"
       - run:
           # Contract usage gate (block A). Warns only for now: it exits 0 and
           # lists operations no client calls. Switches to a failure in block A
@@ -79,20 +140,24 @@ workflows:
   version: 2
   test-and-build:
     jobs:
-      # Deliberately unfiltered. Combined with the project-level
-      # "Only build pull requests" setting, this runs the suite on every PR
-      # and on the default branch, and nowhere else. CircleCI branch filters
-      # cannot see a PR's target branch, so this is the only way to cover
-      # PRs into develop/main.
-      - test
+      - check:
+          filters:
+            branches:
+              only: [develop, main]
+      - test:
+          filters:
+            branches:
+              only: [develop, main]
       - build-push-main:
           requires:
+            - check
             - test
           filters:
             branches:
               only: main
       - build-push-develop:
           requires:
+            - check
             - test
           filters:
             branches:

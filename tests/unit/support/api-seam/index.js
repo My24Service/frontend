@@ -41,9 +41,8 @@ import { CSRF_PATH, decodeBody, entryFor, queryOf } from './normalize.js'
  * through. Strictness is self-limiting: where a parameter is legitimate, the
  * schema gains it, and the schema becomes more truthful as a result.
  *
- * Migration is incremental. Existing specs keep their client fakes and come
- * across as their own Slice is converted; `support/api-client-mock.js` and
- * `support/request-recorder.js` die when the last one does.
+ * Every spec that talks to the backend is on this seam; the client fakes it
+ * replaced are gone.
  *
  * Usage:
  *

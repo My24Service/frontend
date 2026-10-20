@@ -76,20 +76,20 @@
 </template>
 
 <script setup lang="ts">
-import type { AssignedOrderMaterialTotals, Material, ProductList } from '@/api/types.gen'
-import HeaderCell from './Header.vue'
-import VAT from './VAT.vue'
-import CostCollectionShell from './CostCollectionShell.vue'
 import {
+  CostCollectionShell,
+  Header as HeaderCell,
+  VAT,
   makeCostRow,
   useCostCollection,
+  useCostPanelContext,
+  COST_TYPE,
   type CostRow,
-} from '../use-cost-collection'
-import { useCostPanelContext } from '../cost-panel-context'
+} from '@/features/costing'
 import { PIXEL_URL } from '@/constants'
-import { COST_TYPE } from '../calculations'
+import { useOrderCostSource } from '../order-cost-source'
 
-type UsedMaterial = AssignedOrderMaterialTotals & {
+type UsedMaterial = Api.AssignedOrderMaterialTotals & {
   user_id?: number | string
   is_partner?: boolean
   full_name?: string
@@ -104,15 +104,15 @@ type UsedMaterial = AssignedOrderMaterialTotals & {
  * `useCostPanelContext`.
  */
 const props = withDefaults(defineProps<{
-  material_models?: Material[] | null
+  material_models?: Api.Material[] | null
   used_materials?: UsedMaterial[] | null
   /** The linked Teamleader products, or null off a Teamleader tenant. */
-  teamleaderProducts?: ProductList[] | null
+  teamleaderProducts?: Api.ProductList[] | null
 }>(), { material_models: null, used_materials: null, teamleaderProducts: null })
 const context = useCostPanelContext()
-const mainStore = useMainStore()
-const default_currency = mainStore.getDefaultCurrency
-const invoice_default_vat = mainStore.getInvoiceDefaultVat
+const { mainStore } = useCommon()
+const default_currency = mainStore.requiredDefaultCurrency
+const invoice_default_vat = mainStore.requiredInvoiceDefaultVat
 const costType = COST_TYPE.USED_MATERIALS
 function getTlProduct(materialId: number | null | undefined) {
   return props.teamleaderProducts?.find(product => product.material.id === materialId)
@@ -133,6 +133,7 @@ const {
   createInvoiceLinesClicked, changeVatType, priceChanged, setPrice, loadData,
 } = useCostCollection({
   context,
+  source: useOrderCostSource(context.parentPk, () => costType),
   costType: () => costType,
   currency: () => default_currency,
   buildRows: () => materialRows.value.map(material => {
@@ -142,7 +143,7 @@ const {
       name: material.name ?? undefined,
       identifier: material.identifier ?? undefined,
       cost_type: costType,
-      order: context.orderPk.value ?? undefined,
+      order: context.parentPk.value ?? undefined,
       material: id,
       material_id: id,
       amount_decimal: material.amount,

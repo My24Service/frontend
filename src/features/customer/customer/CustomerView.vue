@@ -260,13 +260,6 @@
 </template>
 
 <script lang="ts" setup>
-import type { Customer, MaintenanceContract } from '@/api/types.gen'
-import {
-  customerCustomerDashboardRetrieveOptions,
-  customerMaintenanceContractListOptions,
-  equipmentEquipmentListOptions,
-  equipmentLocationListOptions,
-} from '@/api/@tanstack/vue-query.gen'
 import { formatMoney, toDinero } from '@/services/money'
 import CustomerCard from '../CustomerCard.vue'
 import { useQueryErrorToast } from '@/features/forms'
@@ -278,7 +271,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
+const { authStore, mainStore, router } = useCommon()
 
 const customerId = computed(() => Number(props.pk))
 
@@ -290,13 +283,11 @@ const PER_PAGE = 20
 // my24service `source/apps/core/rest.py:236`), which DRF clamps a larger value
 // down to rather than rejecting it.
 
-const authStore = useAuthStore()
-const mainStore = useMainStore()
 const isCustomer = computed(() => authStore.isCustomer)
 
-function formatContractValue(contract: MaintenanceContract): string {
+function formatContractValue(contract: Api.MaintenanceContract): string {
   // sum_tariffs is required on the contract; the tenant default prices it.
-  return formatMoney(toDinero(contract.sum_tariffs, mainStore.getDefaultCurrency))
+  return formatMoney(toDinero(contract.sum_tariffs, mainStore.requiredDefaultCurrency))
 }
 
 const ordersPage = ref(1)
@@ -306,7 +297,7 @@ const insightsOpened = ref(false)
 // blocks the insights tab charts; the contracts, locations and equipment
 // tabs keep their own whole-collection reads.
 const dashboardQuery = useQuery(() => ({
-  ...customerCustomerDashboardRetrieveOptions({
+  ...Api.CustomerCustomer.extras.dashboardRetrieve.options({
     path: {id: customerId.value},
     query: {orders_page: ordersPage.value},
   }),
@@ -322,7 +313,7 @@ function goToOrdersPage(page: number | string) {
 }
 
 const maintenanceContractsQuery = useQuery(() => ({
-  ...customerMaintenanceContractListOptions({
+  ...Api.CustomerMaintenanceContract.list.options({
     query: {
       page: 1,
       page_size: WHOLE_COLLECTION_PAGE_SIZE,
@@ -339,10 +330,10 @@ const contractRows = computed(() => maintenanceContracts.value)
 const locationRows = computed(() => locations.value)
 const equipmentRows = computed(() => equipment.value)
 
-const customer = computed<Customer>(() => dashboardQuery.data.value?.customer ?? ({} as Customer))
+const customer = computed<Api.Customer>(() => dashboardQuery.data.value?.customer ?? ({} as Api.Customer))
 
 const locationsQuery = useQuery(() => ({
-  ...equipmentLocationListOptions({
+  ...Api.EquipmentLocation.list.options({
     query: {
       page: 1,
       page_size: WHOLE_COLLECTION_PAGE_SIZE,
@@ -353,7 +344,7 @@ const locationsQuery = useQuery(() => ({
 const locations = computed(() => locationsQuery.data.value?.results ?? [])
 
 const equipmentQuery = useQuery(() => ({
-  ...equipmentEquipmentListOptions({
+  ...Api.EquipmentEquipment.list.options({
     query: {
       page: 1,
       page_size: WHOLE_COLLECTION_PAGE_SIZE,

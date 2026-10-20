@@ -1,18 +1,14 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { vMinimalMember, vPartnerDetail } from '@/api/valibot.gen'
 import { PartnerList } from '@/features/company'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
-import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
+import { mountListView, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({ create: toastCreate }),
-}))
-
 const api = installApiSeam()
-const endpoint = '/api/company/partner/'
+const endpoint = '/api/partner/partner/'
 
 const routes = [
   { name: 'partner-request-add', path: '/company/partners/requests/form', component: { template: '<div />' } },
@@ -91,7 +87,6 @@ describe('PartnerList', () => {
     await settle()
 
     await wrapper.get('input[aria-label="Search partners"]').setValue('acme')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({ q: 'acme', page: '1' })

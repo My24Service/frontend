@@ -25,8 +25,7 @@
       :delete-modal="{
         modalId: 'delete-company-import-modal',
         confirmText: $trans('Are you sure you want to delete this import?'),
-        destroyMutation: companyImportDestroyMutation,
-        invalidate: invalidateReads(companyImport),
+        resource: Api.ImportingImport,
         deletedDetail: $trans('Import has been deleted'),
         deleteError: $trans('Error deleting import'),
       }"
@@ -47,17 +46,10 @@ import { hLink } from '@/components/render'
 import { Fragment } from 'vue'
 import { RouterLink } from 'vue-router'
 import IBiArrowCounterclockwise from '~icons/bi/arrow-counterclockwise'
-import {
-  companyImportDestroyMutation,
-  companyImportListOptions,
-  companyImportRevertCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedImportList } from '@/api/types.gen'
-import { companyImport } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+
 import RowAction from '@/components/RowAction.vue'
 import { fileNameOf } from '@/features/shared'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 /**
  * The import list, mounted by the company router and the settings layout.
  * The mount answers one route stem (`company-import`, `settings-company-import`),
@@ -67,15 +59,14 @@ import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, typ
  * nothing, edit and delete) or executed (counts: revert). The conditions are
  * the legacy screen's, including its quirk: an empty result reads as pending.
  */
-type ImportRow = ListRow<PaginatedImportList>
+type ImportRow = ListRow<Api.PaginatedImportList>
 
 const props = defineProps<{
   /** The route name stem this mount answers to. Supplied by the routers. */
   route_prefix: string
 }>()
 
-const queryClient = useQueryClient()
-const { create: toast } = useToast()
+const { toast, queryClient } = useCommon()
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const revertModal = useTemplateRef<{show: () => void, hide: () => void}>('revertModal')
@@ -151,16 +142,12 @@ const { table, searchDraft, pagination, count, isLoading, isFetching, refresh } 
   // `ordering` - the headers stay non-sortable rather than rendering controls
   // nothing honours.
   enableSorting: false,
-  listOptions: (query) => companyImportListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.ImportingImport,
   urlSync: true,
   loadError: $trans('Error loading imports'),
 })
 
-const revertMutation = useMutation(companyImportRevertCreateMutation())
+const revertMutation = useMutation(Api.ImportingImport.extras.revertCreate.mutation())
 
 function showRevertModal(id: number) {
   revertPk.value = id
@@ -176,7 +163,7 @@ async function revertImport() {
   try {
     await revertMutation.mutateAsync({ path: { id: revertPk.value } })
     infoToast(toast, $trans('Reverted'), $trans('Import has been reverted'))
-    await invalidateReads(companyImport)(queryClient)
+    await Api.ImportingImport.invalidate(queryClient)
     revertModal.value?.hide()
   } catch {
     errorToast(toast, $trans('Error reverting import'))

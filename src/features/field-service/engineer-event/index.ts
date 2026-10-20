@@ -8,8 +8,7 @@ export {
   engineerEventTypeFromRecord,
   FIELD_LABELS,
   FIELD_MESSAGES,
-  validateEngineerEventType,
-  parseEngineerEventType,
+  engineerEventTypeWrite,
   type EngineerEventTypeFormValues,
   type EngineerEventTypeFieldErrors,
 } from './schemas'

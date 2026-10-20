@@ -42,7 +42,7 @@ import PillsNav, {useCompanyUserPills} from '@/components/PillsNav.vue'
  *    the two that are not the list. The active entry is the route's name, the
  *    way `PillsNav` settled the same question.
  */
-const route = useRoute()
+const { route } = useCommon()
 const userPills = useCompanyUserPills()
 
 const items: {name: RouteName; label: () => string}[] = [

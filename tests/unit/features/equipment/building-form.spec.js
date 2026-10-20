@@ -6,11 +6,6 @@ import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: spy } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({create: spy}) }
-})
-
 const api = installApiSeam()
 
 const BRANCH_AUTOCOMPLETE = [
@@ -38,7 +33,6 @@ const bodies = () => toasts().map((toast) => toast.body)
 const writes = () => api.requests().filter((request) => ['post', 'patch'].includes(request.method))
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 550))
   await settle()
 }
 

@@ -1,13 +1,11 @@
-import { afterEach, describe, expect, test } from 'vitest'
+import { describe, expect, test } from 'vitest'
 import { defineComponent, reactive } from 'vue'
-import { enableAutoUnmount, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 
 import {
   ValidatedForm,
   ValidatedFormField,
 } from '@/features/forms'
-
-enableAutoUnmount(afterEach)
 
 /**
  * The shared `BFormGroup + input + feedback` field the forms repeat. Every

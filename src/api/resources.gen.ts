@@ -10,8 +10,18 @@
 // references. Reads carry `{options, queryKey}`; writes carry `{mutation}`
 // and, where the endpoint takes a body, its valibot schema as `body`;
 // `reads` names every query under the resource's path, for invalidation.
-import type { UseMutationOptions } from '@tanstack/vue-query'
-import type { GenericSchema } from 'valibot'
+//
+// Each resource also declares a namespace of its own types - the record a
+// read answers with, the query parameters a list takes, the body a write
+// takes and parses - so `Api.<resource>.Record` sits beside
+// `Api.<resource>.retrieve` under one name.
+//
+// Each is built by `resource()` (./resource-runtime.gen.ts), which puts the
+// bindings on the object and the few methods that derive something from them
+// - `listOptions`, `retrieveOptions`, `invalidate` - on a shared prototype.
+import type { InferInput, InferOutput } from 'valibot'
+
+import { resource } from './resource-runtime.gen'
 
 import {
   accountsChangePasswordCreateMutation,
@@ -31,16 +41,11 @@ import {
   companyActivityPartialUpdateMutation,
   companyActivityRetrieveOptions,
   companyActivityRetrieveQueryKey,
-  companyApiuserCreateMutation,
-  companyApiuserDestroyMutation,
-  companyApiuserListOptions,
-  companyApiuserListQueryKey,
-  companyApiuserPartialUpdateMutation,
-  companyApiuserRetrieveOptions,
-  companyApiuserRetrieveQueryKey,
   companyBranchAutocompleteListOptions,
   companyBranchAutocompleteListQueryKey,
   companyBranchCreateMutation,
+  companyBranchDashboardRetrieveOptions,
+  companyBranchDashboardRetrieveQueryKey,
   companyBranchDestroyMutation,
   companyBranchListOptions,
   companyBranchListQueryKey,
@@ -50,90 +55,18 @@ import {
   companyBranchPartialUpdateMutation,
   companyBranchRetrieveOptions,
   companyBranchRetrieveQueryKey,
+  companyBudgetCostsRetrieveOptions,
+  companyBudgetCostsRetrieveQueryKey,
   companyBudgetCreateMutation,
   companyBudgetDestroyMutation,
+  companyBudgetExpectedCostsRetrieveOptions,
+  companyBudgetExpectedCostsRetrieveQueryKey,
   companyBudgetListOptions,
   companyBudgetListQueryKey,
   companyBudgetPartialUpdateMutation,
   companyBudgetRetrieveOptions,
   companyBudgetRetrieveQueryKey,
-  companyCustomeruserCreateMutation,
-  companyCustomeruserDestroyMutation,
-  companyCustomeruserListOptions,
-  companyCustomeruserListQueryKey,
-  companyCustomeruserPartialUpdateMutation,
-  companyCustomeruserRetrieveOptions,
-  companyCustomeruserRetrieveQueryKey,
-  companyEmployeeuserCreateMutation,
-  companyEmployeeuserDestroyMutation,
-  companyEmployeeuserListOptions,
-  companyEmployeeuserListQueryKey,
-  companyEmployeeuserPartialUpdateMutation,
-  companyEmployeeuserRetrieveOptions,
-  companyEmployeeuserRetrieveQueryKey,
-  companyEngineerCreateMutation,
-  companyEngineerDestroyMutation,
-  companyEngineerEventTypeCreateMutation,
-  companyEngineerEventTypeDestroyMutation,
-  companyEngineerEventTypeListOptions,
-  companyEngineerEventTypeListQueryKey,
-  companyEngineerEventTypePartialUpdateMutation,
-  companyEngineerEventTypeRetrieveOptions,
-  companyEngineerEventTypeRetrieveQueryKey,
-  companyEngineerEventTypeStatsListOptions,
-  companyEngineerEventTypeStatsListQueryKey,
-  companyEngineerGetLocationsListOptions,
-  companyEngineerGetLocationsListQueryKey,
-  companyEngineerListForSelectListOptions,
-  companyEngineerListForSelectListQueryKey,
-  companyEngineerListOptions,
-  companyEngineerListQueryKey,
-  companyEngineerPartialUpdateMutation,
-  companyEngineerRetrieveOptions,
-  companyEngineerRetrieveQueryKey,
-  companyEngineereventCreateMutation,
-  companyEngineereventDestroyMutation,
-  companyEngineereventListOptions,
-  companyEngineereventListQueryKey,
-  companyEngineereventUpdatePartialUpdateMutation,
-  companyEngineereventUpdateRetrieveOptions,
-  companyEngineereventUpdateRetrieveQueryKey,
   companyIbanCheckCreateMutation,
-  companyImportCreateMutation,
-  companyImportDestroyMutation,
-  companyImportListOptions,
-  companyImportListQueryKey,
-  companyImportPartialUpdateMutation,
-  companyImportRetrieveOptions,
-  companyImportRetrieveQueryKey,
-  companyLeaveTypeCreateMutation,
-  companyLeaveTypeDestroyMutation,
-  companyLeaveTypeListForSelectListOptions,
-  companyLeaveTypeListForSelectListQueryKey,
-  companyLeaveTypeListOptions,
-  companyLeaveTypeListQueryKey,
-  companyLeaveTypePartialUpdateMutation,
-  companyLeaveTypeRetrieveOptions,
-  companyLeaveTypeRetrieveQueryKey,
-  companyPartnerCreateMutation,
-  companyPartnerDestroyMutation,
-  companyPartnerListOptions,
-  companyPartnerListQueryKey,
-  companyPartnerPartialUpdateMutation,
-  companyPartnerRequestCreateMutation,
-  companyPartnerRequestDestroyMutation,
-  companyPartnerRequestListOptions,
-  companyPartnerRequestListQueryKey,
-  companyPartnerRequestPartialUpdateMutation,
-  companyPartnerRequestReceivedListOptions,
-  companyPartnerRequestReceivedListQueryKey,
-  companyPartnerRequestRetrieveOptions,
-  companyPartnerRequestRetrieveQueryKey,
-  companyPartnerRequestSentCreateMutation,
-  companyPartnerRequestSentListOptions,
-  companyPartnerRequestSentListQueryKey,
-  companyPartnerRetrieveOptions,
-  companyPartnerRetrieveQueryKey,
   companyPictureCreateMutation,
   companyPictureDestroyMutation,
   companyPictureListOptions,
@@ -141,53 +74,8 @@ import {
   companyPicturePartialUpdateMutation,
   companyPictureRetrieveOptions,
   companyPictureRetrieveQueryKey,
-  companyPlanninguserCreateMutation,
-  companyPlanninguserDestroyMutation,
-  companyPlanninguserListOptions,
-  companyPlanninguserListQueryKey,
-  companyPlanninguserPartialUpdateMutation,
-  companyPlanninguserRetrieveOptions,
-  companyPlanninguserRetrieveQueryKey,
-  companyProjectCreateMutation,
-  companyProjectDestroyMutation,
-  companyProjectListForSelectListOptions,
-  companyProjectListForSelectListQueryKey,
-  companyProjectListOptions,
-  companyProjectListQueryKey,
-  companyProjectPartialUpdateMutation,
-  companyProjectRetrieveOptions,
-  companyProjectRetrieveQueryKey,
   companyPublicPicturesListOptions,
   companyPublicPicturesListQueryKey,
-  companySalesuserCreateMutation,
-  companySalesuserDestroyMutation,
-  companySalesuserListOptions,
-  companySalesuserListQueryKey,
-  companySalesuserPartialUpdateMutation,
-  companySalesuserRetrieveOptions,
-  companySalesuserRetrieveQueryKey,
-  companySalesusercustomerCreateMutation,
-  companySalesusercustomerDestroyMutation,
-  companySalesusercustomerListOptions,
-  companySalesusercustomerListQueryKey,
-  companySalesusercustomerMyCreateMutation,
-  companySalesusercustomerMyDestroyMutation,
-  companySalesusercustomerMyListOptions,
-  companySalesusercustomerMyListQueryKey,
-  companySalesusercustomerMyPartialUpdateMutation,
-  companySalesusercustomerMyRetrieveOptions,
-  companySalesusercustomerMyRetrieveQueryKey,
-  companySalesusercustomerPartialUpdateMutation,
-  companySalesusercustomerRetrieveOptions,
-  companySalesusercustomerRetrieveQueryKey,
-  companyStreamPrivateChannelCreateCreateMutation,
-  companyStudentuserCreateMutation,
-  companyStudentuserDestroyMutation,
-  companyStudentuserListOptions,
-  companyStudentuserListQueryKey,
-  companyStudentuserPartialUpdateMutation,
-  companyStudentuserRetrieveOptions,
-  companyStudentuserRetrieveQueryKey,
   companyTemplateCreateMutation,
   companyTemplateDestroyMutation,
   companyTemplateListOptions,
@@ -196,63 +84,6 @@ import {
   companyTemplatePreviewTemplatePdfCreateMutation,
   companyTemplateRetrieveOptions,
   companyTemplateRetrieveQueryKey,
-  companyTimeRegistrationTimeCorrectionPartialUpdateMutation,
-  companyUserDeviceTokenCreateMutation,
-  companyUserLeaveHoursAdminAllNotAcceptedListOptions,
-  companyUserLeaveHoursAdminAllNotAcceptedListQueryKey,
-  companyUserLeaveHoursAdminCreateMutation,
-  companyUserLeaveHoursAdminDestroyMutation,
-  companyUserLeaveHoursAdminGetTotalsCreateMutation,
-  companyUserLeaveHoursAdminListOptions,
-  companyUserLeaveHoursAdminListQueryKey,
-  companyUserLeaveHoursAdminPartialUpdateMutation,
-  companyUserLeaveHoursAdminRetrieveOptions,
-  companyUserLeaveHoursAdminRetrieveQueryKey,
-  companyUserLeaveHoursAllNotAcceptedListOptions,
-  companyUserLeaveHoursAllNotAcceptedListQueryKey,
-  companyUserLeaveHoursCreateMutation,
-  companyUserLeaveHoursDestroyMutation,
-  companyUserLeaveHoursGetTotalsCreateMutation,
-  companyUserLeaveHoursListOptions,
-  companyUserLeaveHoursListQueryKey,
-  companyUserLeaveHoursPartialUpdateMutation,
-  companyUserLeaveHoursRetrieveOptions,
-  companyUserLeaveHoursRetrieveQueryKey,
-  companyUserListListOptions,
-  companyUserListListQueryKey,
-  companyUserSettingsPartialUpdateMutation,
-  companyUserSettingsRetrieveOptions,
-  companyUserSettingsRetrieveQueryKey,
-  companyUserSickLeaveAdminAllSickListOptions,
-  companyUserSickLeaveAdminAllSickListQueryKey,
-  companyUserSickLeaveAdminAllUnconfirmedListOptions,
-  companyUserSickLeaveAdminAllUnconfirmedListQueryKey,
-  companyUserSickLeaveAdminCreateMutation,
-  companyUserSickLeaveAdminDestroyMutation,
-  companyUserSickLeaveAdminListOptions,
-  companyUserSickLeaveAdminListQueryKey,
-  companyUserSickLeaveAdminPartialUpdateMutation,
-  companyUserSickLeaveAdminRetrieveOptions,
-  companyUserSickLeaveAdminRetrieveQueryKey,
-  companyUserSickLeaveCreateMutation,
-  companyUserSickLeaveDestroyMutation,
-  companyUserSickLeaveEndSickCreateMutation,
-  companyUserSickLeaveListOptions,
-  companyUserSickLeaveListQueryKey,
-  companyUserSickLeavePartialUpdateMutation,
-  companyUserSickLeaveRetrieveOptions,
-  companyUserSickLeaveRetrieveQueryKey,
-  companyUserWorkhoursCreateMutation,
-  companyUserWorkhoursDestroyMutation,
-  companyUserWorkhoursListOptions,
-  companyUserWorkhoursListQueryKey,
-  companyUserWorkhoursPartialUpdateMutation,
-  companyUserWorkhoursRetrieveOptions,
-  companyUserWorkhoursRetrieveQueryKey,
-  companyUsersStudentProfileMePartialUpdateMutation,
-  companyUsersStudentProfileMeRetrieveOptions,
-  companyUsersStudentProfileMeRetrieveQueryKey,
-  companyUsersStudentRegisterFetchUserCreateMutation,
   companyUsersVerifyRecaptchaCreateMutation,
   connectorGrippSettingsPartialUpdateMutation,
   connectorGrippSettingsRetrieveOptions,
@@ -260,6 +91,10 @@ import {
   customerCustomerAutocompleteListOptions,
   customerCustomerAutocompleteListQueryKey,
   customerCustomerCreateMutation,
+  customerCustomerCustomDetailRetrieveOptions,
+  customerCustomerCustomDetailRetrieveQueryKey,
+  customerCustomerDashboardRetrieveOptions,
+  customerCustomerDashboardRetrieveQueryKey,
   customerCustomerDestroyMutation,
   customerCustomerListOptions,
   customerCustomerListQueryKey,
@@ -284,6 +119,7 @@ import {
   customerMaintenanceContractRetrieveOptions,
   customerMaintenanceContractRetrieveQueryKey,
   customerMaintenanceContractWithEquipmentCreateMutation,
+  customerMaintenanceContractWithEquipmentUpdateMutation,
   customerMaintenanceEquipmentCreateMutation,
   customerMaintenanceEquipmentDestroyMutation,
   customerMaintenanceEquipmentListOptions,
@@ -294,6 +130,8 @@ import {
   equipmentBuildingAutocompleteListOptions,
   equipmentBuildingAutocompleteListQueryKey,
   equipmentBuildingCreateMutation,
+  equipmentBuildingDashboardRetrieveOptions,
+  equipmentBuildingDashboardRetrieveQueryKey,
   equipmentBuildingDestroyMutation,
   equipmentBuildingListForSelectListOptions,
   equipmentBuildingListForSelectListQueryKey,
@@ -305,7 +143,10 @@ import {
   equipmentEquipmentAutocompleteListOptions,
   equipmentEquipmentAutocompleteListQueryKey,
   equipmentEquipmentCreateMutation,
+  equipmentEquipmentCreateQrCreateMutation,
   equipmentEquipmentCreateQuickCreateMutation,
+  equipmentEquipmentDashboardRetrieveOptions,
+  equipmentEquipmentDashboardRetrieveQueryKey,
   equipmentEquipmentDestroyMutation,
   equipmentEquipmentDocumentCreateMutation,
   equipmentEquipmentDocumentDestroyMutation,
@@ -322,10 +163,15 @@ import {
   equipmentEquipmentStateCreateMutation,
   equipmentEquipmentStateListOptions,
   equipmentEquipmentStateListQueryKey,
+  equipmentEquipmentUuidRetrieveOptions,
+  equipmentEquipmentUuidRetrieveQueryKey,
   equipmentLocationAutocompleteListOptions,
   equipmentLocationAutocompleteListQueryKey,
   equipmentLocationCreateMutation,
+  equipmentLocationCreateQrCreateMutation,
   equipmentLocationCreateQuickCreateMutation,
+  equipmentLocationDashboardRetrieveOptions,
+  equipmentLocationDashboardRetrieveQueryKey,
   equipmentLocationDestroyMutation,
   equipmentLocationDocumentCreateMutation,
   equipmentLocationDocumentDestroyMutation,
@@ -341,6 +187,19 @@ import {
   equipmentLocationPartialUpdateMutation,
   equipmentLocationRetrieveOptions,
   equipmentLocationRetrieveQueryKey,
+  equipmentLocationUuidRetrieveOptions,
+  equipmentLocationUuidRetrieveQueryKey,
+  importingImportCreateMutation,
+  importingImportDestroyMutation,
+  importingImportDoCreateMutation,
+  importingImportListOptions,
+  importingImportListQueryKey,
+  importingImportPartialUpdateMutation,
+  importingImportPreviewRetrieveOptions,
+  importingImportPreviewRetrieveQueryKey,
+  importingImportRetrieveOptions,
+  importingImportRetrieveQueryKey,
+  importingImportRevertCreateMutation,
   inventoryInventoryLocationsForMaterialListOptions,
   inventoryInventoryLocationsForMaterialListQueryKey,
   inventoryInventoryLocationsListOptions,
@@ -355,6 +214,7 @@ import {
   inventoryMaterialDestroyMutation,
   inventoryMaterialListOptions,
   inventoryMaterialListQueryKey,
+  inventoryMaterialMoveCreateMutation,
   inventoryMaterialPartialUpdateMutation,
   inventoryMaterialRetrieveOptions,
   inventoryMaterialRetrieveQueryKey,
@@ -388,6 +248,7 @@ import {
   inventoryPurchaseorderStatusRetrieveOptions,
   inventoryPurchaseorderStatusRetrieveQueryKey,
   inventoryPurchaseorderWithMaterialsCreateMutation,
+  inventoryPurchaseorderWithMaterialsPartialUpdateMutation,
   inventoryStockLocationCreateMutation,
   inventoryStockLocationDestroyMutation,
   inventoryStockLocationListOptions,
@@ -415,6 +276,7 @@ import {
   inventorySupplierReservationRetrieveOptions,
   inventorySupplierReservationRetrieveQueryKey,
   inventorySupplierReservationWithMaterialsCreateMutation,
+  inventorySupplierReservationWithMaterialsPartialUpdateMutation,
   inventorySupplierReservationmaterialCreateMutation,
   inventorySupplierReservationmaterialDestroyMutation,
   inventorySupplierReservationmaterialListOptions,
@@ -437,8 +299,11 @@ import {
   invoiceInvoiceAutocompleteListQueryKey,
   invoiceInvoiceCreateMutation,
   invoiceInvoiceDestroyMutation,
+  invoiceInvoiceDownloadPdfCreateMutation,
+  invoiceInvoiceGeneratePreviewPdfCreateMutation,
   invoiceInvoiceLineCreateMutation,
   invoiceInvoiceLineDestroyMutation,
+  invoiceInvoiceLineInvoiceCreateMutation,
   invoiceInvoiceLineListOptions,
   invoiceInvoiceLineListQueryKey,
   invoiceInvoiceLinePartialUpdateMutation,
@@ -446,9 +311,11 @@ import {
   invoiceInvoiceLineRetrieveQueryKey,
   invoiceInvoiceListOptions,
   invoiceInvoiceListQueryKey,
+  invoiceInvoiceMakeDefinitiveCreateMutation,
   invoiceInvoicePartialUpdateMutation,
   invoiceInvoicePreliminaryListOptions,
   invoiceInvoicePreliminaryListQueryKey,
+  invoiceInvoiceRecreatePdfCreateMutation,
   invoiceInvoiceRetrieveOptions,
   invoiceInvoiceRetrieveQueryKey,
   invoiceInvoiceSentListOptions,
@@ -513,15 +380,24 @@ import {
   mobileAssignMeCreateMutation,
   mobileAssignUserCreateMutation,
   mobileAssignUserTripCreateMutation,
+  mobileAssignedorderCreateExtraOrderCreateMutation,
   mobileAssignedorderCreateMutation,
   mobileAssignedorderDestroyMutation,
+  mobileAssignedorderDetailChangeDatePartialUpdateMutation,
+  mobileAssignedorderDetailDeviceRetrieveOptions,
+  mobileAssignedorderDetailDeviceRetrieveQueryKey,
   mobileAssignedorderFinishedListListOptions,
   mobileAssignedorderFinishedListListQueryKey,
+  mobileAssignedorderGetWorkorderSignDetailsRetrieveOptions,
+  mobileAssignedorderGetWorkorderSignDetailsRetrieveQueryKey,
   mobileAssignedorderListAppListOptions,
   mobileAssignedorderListAppListQueryKey,
   mobileAssignedorderListOptions,
   mobileAssignedorderListQueryKey,
+  mobileAssignedorderNoWorkorderFinishedCreateMutation,
   mobileAssignedorderPartialUpdateMutation,
+  mobileAssignedorderReportStatuscodeCreateMutation,
+  mobileAssignedorderReportWorkordersSignedCreateMutation,
   mobileAssignedorderRetrieveOptions,
   mobileAssignedorderRetrieveQueryKey,
   mobileAssignedorderSplitCreateMutation,
@@ -587,6 +463,10 @@ import {
   mobileTripStatuscodePartialUpdateMutation,
   mobileTripStatuscodeRetrieveOptions,
   mobileTripStatuscodeRetrieveQueryKey,
+  mobileTripTripAvailabilityDetailRetrieveOptions,
+  mobileTripTripAvailabilityDetailRetrieveQueryKey,
+  mobileTripTripAvailabilityListOptions,
+  mobileTripTripAvailabilityListQueryKey,
   mobileUnassignUserCreateMutation,
   mobileUnassignUserTripCreateMutation,
   mobileUserOrderAvailabilityCreateMutation,
@@ -607,6 +487,7 @@ import {
   orderCostDestroyMutation,
   orderCostListOptions,
   orderCostListQueryKey,
+  orderCostOrderCreateMutation,
   orderCostPartialUpdateMutation,
   orderCostRetrieveOptions,
   orderCostRetrieveQueryKey,
@@ -619,6 +500,8 @@ import {
   orderDocumentRetrieveQueryKey,
   orderFilterCreateMutation,
   orderFilterDestroyMutation,
+  orderFilterGetBaseFilterOptionsListOptions,
+  orderFilterGetBaseFilterOptionsListQueryKey,
   orderFilterGetExamplesListOptions,
   orderFilterGetExamplesListQueryKey,
   orderFilterListOptions,
@@ -641,11 +524,13 @@ import {
   orderOrderAllForCustomerV2ListQueryKey,
   orderOrderAllForEquipmentLocationListOptions,
   orderOrderAllForEquipmentLocationListQueryKey,
+  orderOrderAssignMeCreateMutation,
   orderOrderAssignableListOptions,
   orderOrderAssignableListQueryKey,
   orderOrderAutocompleteListOptions,
   orderOrderAutocompleteListQueryKey,
   orderOrderCreateMutation,
+  orderOrderCreatePdfBackgroundCreateMutation,
   orderOrderDestroyMutation,
   orderOrderDispatchListAllListOptions,
   orderOrderDispatchListAllListQueryKey,
@@ -663,15 +548,23 @@ import {
   orderOrderMaintenanceOrdersListQueryKey,
   orderOrderMonthEventsListOptions,
   orderOrderMonthEventsListQueryKey,
+  orderOrderOrderAvailabilityDetailRetrieveOptions,
+  orderOrderOrderAvailabilityDetailRetrieveQueryKey,
   orderOrderOrderAvailabilityListOptions,
   orderOrderOrderAvailabilityListQueryKey,
   orderOrderPartialUpdateMutation,
   orderOrderPastListOptions,
   orderOrderPastListQueryKey,
+  orderOrderRecreatePdfBackgroundCreateMutation,
+  orderOrderRecreatePdfCreateMutation,
   orderOrderRetrieveOptions,
   orderOrderRetrieveQueryKey,
   orderOrderSalesOrdersListOptions,
   orderOrderSalesOrdersListQueryKey,
+  orderOrderSetOrderAcceptedCreateMutation,
+  orderOrderSetOrderRejectedCreateMutation,
+  orderOrderlineAssignedOrderListOptions,
+  orderOrderlineAssignedOrderListQueryKey,
   orderOrderlineCreateMutation,
   orderOrderlineDestroyMutation,
   orderOrderlineLatestWorkordersListOptions,
@@ -686,6 +579,31 @@ import {
   orderStatusCreateMutation,
   orderStatusesListOptions,
   orderStatusesListQueryKey,
+  partnerPartnerBranchCreateFromCustomerCreateMutation,
+  partnerPartnerBranchesRetrieveOptions,
+  partnerPartnerBranchesRetrieveQueryKey,
+  partnerPartnerCopyCustomerOrdersCreateMutation,
+  partnerPartnerCreateMutation,
+  partnerPartnerDestroyMutation,
+  partnerPartnerListOptions,
+  partnerPartnerListQueryKey,
+  partnerPartnerPartialUpdateMutation,
+  partnerPartnerRequestAcceptPartialUpdateMutation,
+  partnerPartnerRequestCreateMutation,
+  partnerPartnerRequestDestroyMutation,
+  partnerPartnerRequestListOptions,
+  partnerPartnerRequestListQueryKey,
+  partnerPartnerRequestPartialUpdateMutation,
+  partnerPartnerRequestReceivedListOptions,
+  partnerPartnerRequestReceivedListQueryKey,
+  partnerPartnerRequestRejectPartialUpdateMutation,
+  partnerPartnerRequestRetrieveOptions,
+  partnerPartnerRequestRetrieveQueryKey,
+  partnerPartnerRequestSentCreateMutation,
+  partnerPartnerRequestSentListOptions,
+  partnerPartnerRequestSentListQueryKey,
+  partnerPartnerRetrieveOptions,
+  partnerPartnerRetrieveQueryKey,
   quotationChapterCreateMutation,
   quotationChapterDestroyMutation,
   quotationChapterListOptions,
@@ -698,6 +616,7 @@ import {
   quotationCostListOptions,
   quotationCostListQueryKey,
   quotationCostPartialUpdateMutation,
+  quotationCostQuotationCreateMutation,
   quotationCostRetrieveOptions,
   quotationCostRetrieveQueryKey,
   quotationDocumentCreateMutation,
@@ -718,6 +637,11 @@ import {
   quotationQuotationAutocompleteListQueryKey,
   quotationQuotationCreateMutation,
   quotationQuotationDestroyMutation,
+  quotationQuotationDownloadDefinitivePdfCreateMutation,
+  quotationQuotationGenerateDefinitivePdfCreateMutation,
+  quotationQuotationGeneratePreviewPdfCreateMutation,
+  quotationQuotationGetMaterialsForAppListOptions,
+  quotationQuotationGetMaterialsForAppListQueryKey,
   quotationQuotationImageCreateMutation,
   quotationQuotationImageDestroyMutation,
   quotationQuotationImageListOptions,
@@ -742,6 +666,7 @@ import {
   quotationQuotationLineRetrieveQueryKey,
   quotationQuotationListOptions,
   quotationQuotationListQueryKey,
+  quotationQuotationMakeDefinitiveCreateMutation,
   quotationQuotationNotAcceptedListOptions,
   quotationQuotationNotAcceptedListQueryKey,
   quotationQuotationPartialUpdateMutation,
@@ -789,6 +714,175 @@ import {
   teamleaderUpdateInvoiceDocumentTemplatePartialUpdateMutation,
   teamleaderUpdateProductCategoryPartialUpdateMutation,
   teamleaderWorkHoursProductPartialUpdateMutation,
+  userApiuserCreateMutation,
+  userApiuserDestroyMutation,
+  userApiuserListOptions,
+  userApiuserListQueryKey,
+  userApiuserPartialUpdateMutation,
+  userApiuserRenewTokenCreateMutation,
+  userApiuserRetrieveOptions,
+  userApiuserRetrieveQueryKey,
+  userApiuserRevokeCreateMutation,
+  userCustomeruserCreateMutation,
+  userCustomeruserDestroyMutation,
+  userCustomeruserListOptions,
+  userCustomeruserListQueryKey,
+  userCustomeruserPartialUpdateMutation,
+  userCustomeruserRetrieveOptions,
+  userCustomeruserRetrieveQueryKey,
+  userEmployeeuserCreateMutation,
+  userEmployeeuserDestroyMutation,
+  userEmployeeuserListOptions,
+  userEmployeeuserListQueryKey,
+  userEmployeeuserPartialUpdateMutation,
+  userEmployeeuserRetrieveOptions,
+  userEmployeeuserRetrieveQueryKey,
+  userEngineerCreateMutation,
+  userEngineerDestroyMutation,
+  userEngineerEventTypeCreateMutation,
+  userEngineerEventTypeDestroyMutation,
+  userEngineerEventTypeListOptions,
+  userEngineerEventTypeListQueryKey,
+  userEngineerEventTypePartialUpdateMutation,
+  userEngineerEventTypeRetrieveOptions,
+  userEngineerEventTypeRetrieveQueryKey,
+  userEngineerEventTypeStatsListOptions,
+  userEngineerEventTypeStatsListQueryKey,
+  userEngineerGetLocationsListOptions,
+  userEngineerGetLocationsListQueryKey,
+  userEngineerInfoRetrieveOptions,
+  userEngineerInfoRetrieveQueryKey,
+  userEngineerListForSelectListOptions,
+  userEngineerListForSelectListQueryKey,
+  userEngineerListOptions,
+  userEngineerListQueryKey,
+  userEngineerPartialUpdateMutation,
+  userEngineerRetrieveOptions,
+  userEngineerRetrieveQueryKey,
+  userEngineerStoreLonLatCreateMutation,
+  userEngineereventCreateMutation,
+  userEngineereventCreateOrderCreateMutation,
+  userEngineereventDestroyMutation,
+  userEngineereventListOptions,
+  userEngineereventListQueryKey,
+  userEngineereventUpdatePartialUpdateMutation,
+  userEngineereventUpdateRetrieveOptions,
+  userEngineereventUpdateRetrieveQueryKey,
+  userPlanninguserCreateMutation,
+  userPlanninguserDestroyMutation,
+  userPlanninguserListOptions,
+  userPlanninguserListQueryKey,
+  userPlanninguserPartialUpdateMutation,
+  userPlanninguserRetrieveOptions,
+  userPlanninguserRetrieveQueryKey,
+  userSalesuserCreateMutation,
+  userSalesuserDestroyMutation,
+  userSalesuserListOptions,
+  userSalesuserListQueryKey,
+  userSalesuserPartialUpdateMutation,
+  userSalesuserRetrieveOptions,
+  userSalesuserRetrieveQueryKey,
+  userSalesusercustomerCreateMutation,
+  userSalesusercustomerDestroyMutation,
+  userSalesusercustomerListOptions,
+  userSalesusercustomerListQueryKey,
+  userSalesusercustomerMyCreateMutation,
+  userSalesusercustomerMyDestroyMutation,
+  userSalesusercustomerMyListOptions,
+  userSalesusercustomerMyListQueryKey,
+  userSalesusercustomerMyPartialUpdateMutation,
+  userSalesusercustomerMyRetrieveOptions,
+  userSalesusercustomerMyRetrieveQueryKey,
+  userSalesusercustomerPartialUpdateMutation,
+  userSalesusercustomerRetrieveOptions,
+  userSalesusercustomerRetrieveQueryKey,
+  userStreamPrivateChannelCreateCreateMutation,
+  userStudentuserCreateMutation,
+  userStudentuserDestroyMutation,
+  userStudentuserListOptions,
+  userStudentuserListQueryKey,
+  userStudentuserPartialUpdateMutation,
+  userStudentuserRetrieveOptions,
+  userStudentuserRetrieveQueryKey,
+  userUserDeviceTokenCreateMutation,
+  userUserListListOptions,
+  userUserListListQueryKey,
+  userUserSettingsPartialUpdateMutation,
+  userUserSettingsRetrieveOptions,
+  userUserSettingsRetrieveQueryKey,
+  userUsersStudentProfileMePartialUpdateMutation,
+  userUsersStudentProfileMeRetrieveOptions,
+  userUsersStudentProfileMeRetrieveQueryKey,
+  userUsersStudentRegisterFetchUserCreateMutation,
+  workforceLeaveTypeCreateMutation,
+  workforceLeaveTypeDestroyMutation,
+  workforceLeaveTypeListForSelectListOptions,
+  workforceLeaveTypeListForSelectListQueryKey,
+  workforceLeaveTypeListOptions,
+  workforceLeaveTypeListQueryKey,
+  workforceLeaveTypePartialUpdateMutation,
+  workforceLeaveTypeRetrieveOptions,
+  workforceLeaveTypeRetrieveQueryKey,
+  workforceProjectCreateMutation,
+  workforceProjectDestroyMutation,
+  workforceProjectListForSelectListOptions,
+  workforceProjectListForSelectListQueryKey,
+  workforceProjectListOptions,
+  workforceProjectListQueryKey,
+  workforceProjectPartialUpdateMutation,
+  workforceProjectRetrieveOptions,
+  workforceProjectRetrieveQueryKey,
+  workforceTimeRegistrationTimeCorrectionPartialUpdateMutation,
+  workforceUserLeaveHoursAdminAllNotAcceptedListOptions,
+  workforceUserLeaveHoursAdminAllNotAcceptedListQueryKey,
+  workforceUserLeaveHoursAdminCreateMutation,
+  workforceUserLeaveHoursAdminDestroyMutation,
+  workforceUserLeaveHoursAdminGetTotalsCreateMutation,
+  workforceUserLeaveHoursAdminListOptions,
+  workforceUserLeaveHoursAdminListQueryKey,
+  workforceUserLeaveHoursAdminPartialUpdateMutation,
+  workforceUserLeaveHoursAdminRetrieveOptions,
+  workforceUserLeaveHoursAdminRetrieveQueryKey,
+  workforceUserLeaveHoursAdminSetAcceptedCreateMutation,
+  workforceUserLeaveHoursAdminSetRejectedCreateMutation,
+  workforceUserLeaveHoursAllNotAcceptedListOptions,
+  workforceUserLeaveHoursAllNotAcceptedListQueryKey,
+  workforceUserLeaveHoursCreateMutation,
+  workforceUserLeaveHoursDestroyMutation,
+  workforceUserLeaveHoursGetTotalsCreateMutation,
+  workforceUserLeaveHoursListOptions,
+  workforceUserLeaveHoursListQueryKey,
+  workforceUserLeaveHoursPartialUpdateMutation,
+  workforceUserLeaveHoursRetrieveOptions,
+  workforceUserLeaveHoursRetrieveQueryKey,
+  workforceUserSickLeaveAdminAllSickListOptions,
+  workforceUserSickLeaveAdminAllSickListQueryKey,
+  workforceUserSickLeaveAdminAllUnconfirmedListOptions,
+  workforceUserSickLeaveAdminAllUnconfirmedListQueryKey,
+  workforceUserSickLeaveAdminCreateMutation,
+  workforceUserSickLeaveAdminDestroyMutation,
+  workforceUserSickLeaveAdminEndSickCreateMutation,
+  workforceUserSickLeaveAdminListOptions,
+  workforceUserSickLeaveAdminListQueryKey,
+  workforceUserSickLeaveAdminPartialUpdateMutation,
+  workforceUserSickLeaveAdminRetrieveOptions,
+  workforceUserSickLeaveAdminRetrieveQueryKey,
+  workforceUserSickLeaveAdminSetConfirmedCreateMutation,
+  workforceUserSickLeaveCreateMutation,
+  workforceUserSickLeaveDestroyMutation,
+  workforceUserSickLeaveEndSickCreateMutation,
+  workforceUserSickLeaveListOptions,
+  workforceUserSickLeaveListQueryKey,
+  workforceUserSickLeavePartialUpdateMutation,
+  workforceUserSickLeaveRetrieveOptions,
+  workforceUserSickLeaveRetrieveQueryKey,
+  workforceUserWorkhoursCreateMutation,
+  workforceUserWorkhoursDestroyMutation,
+  workforceUserWorkhoursListOptions,
+  workforceUserWorkhoursListQueryKey,
+  workforceUserWorkhoursPartialUpdateMutation,
+  workforceUserWorkhoursRetrieveOptions,
+  workforceUserWorkhoursRetrieveQueryKey,
 } from './@tanstack/vue-query.gen'
 import {
   vAccountsChangePasswordCreateBody,
@@ -802,2465 +896,5541 @@ import {
   vAccountsVerifyRegistrationCreateBody,
   vChangePasswordCreateBody,
   vCompanyActivityCreateBody,
+  vCompanyActivityListQuery,
   vCompanyActivityPartialUpdateBody,
-  vCompanyApiuserCreateBody,
-  vCompanyApiuserPartialUpdateBody,
+  vCompanyBranchAutocompleteListQuery,
   vCompanyBranchCreateBody,
+  vCompanyBranchListQuery,
   vCompanyBranchMyPartialUpdateBody,
   vCompanyBranchPartialUpdateBody,
   vCompanyBudgetCreateBody,
+  vCompanyBudgetListQuery,
   vCompanyBudgetPartialUpdateBody,
-  vCompanyCustomeruserCreateBody,
-  vCompanyCustomeruserPartialUpdateBody,
-  vCompanyEmployeeuserCreateBody,
-  vCompanyEmployeeuserPartialUpdateBody,
-  vCompanyEngineerCreateBody,
-  vCompanyEngineerEventTypeCreateBody,
-  vCompanyEngineerEventTypePartialUpdateBody,
-  vCompanyEngineerPartialUpdateBody,
-  vCompanyEngineereventCreateBody,
-  vCompanyEngineereventUpdatePartialUpdateBody,
   vCompanyIbanCheckCreateBody,
-  vCompanyImportCreateBody,
-  vCompanyImportPartialUpdateBody,
-  vCompanyLeaveTypeCreateBody,
-  vCompanyLeaveTypePartialUpdateBody,
-  vCompanyPartnerCreateBody,
-  vCompanyPartnerPartialUpdateBody,
-  vCompanyPartnerRequestCreateBody,
-  vCompanyPartnerRequestPartialUpdateBody,
-  vCompanyPartnerRequestSentCreateBody,
   vCompanyPictureCreateBody,
+  vCompanyPictureListQuery,
   vCompanyPicturePartialUpdateBody,
-  vCompanyPlanninguserCreateBody,
-  vCompanyPlanninguserPartialUpdateBody,
-  vCompanyProjectCreateBody,
-  vCompanyProjectPartialUpdateBody,
-  vCompanySalesuserCreateBody,
-  vCompanySalesuserPartialUpdateBody,
-  vCompanySalesusercustomerCreateBody,
-  vCompanySalesusercustomerMyCreateBody,
-  vCompanySalesusercustomerMyPartialUpdateBody,
-  vCompanySalesusercustomerPartialUpdateBody,
-  vCompanyStreamPrivateChannelCreateCreateBody,
-  vCompanyStudentuserCreateBody,
-  vCompanyStudentuserPartialUpdateBody,
+  vCompanyPublicPicturesListQuery,
   vCompanyTemplateCreateBody,
+  vCompanyTemplateListQuery,
   vCompanyTemplatePartialUpdateBody,
   vCompanyTemplatePreviewTemplatePdfCreateBody,
-  vCompanyTimeRegistrationTimeCorrectionPartialUpdateBody,
-  vCompanyUserDeviceTokenCreateBody,
-  vCompanyUserLeaveHoursAdminCreateBody,
-  vCompanyUserLeaveHoursAdminGetTotalsCreateBody,
-  vCompanyUserLeaveHoursAdminPartialUpdateBody,
-  vCompanyUserLeaveHoursCreateBody,
-  vCompanyUserLeaveHoursGetTotalsCreateBody,
-  vCompanyUserLeaveHoursPartialUpdateBody,
-  vCompanyUserSettingsPartialUpdateBody,
-  vCompanyUserSickLeaveAdminCreateBody,
-  vCompanyUserSickLeaveAdminPartialUpdateBody,
-  vCompanyUserSickLeaveCreateBody,
-  vCompanyUserSickLeaveEndSickCreateBody,
-  vCompanyUserSickLeavePartialUpdateBody,
-  vCompanyUserWorkhoursCreateBody,
-  vCompanyUserWorkhoursPartialUpdateBody,
-  vCompanyUsersStudentProfileMePartialUpdateBody,
-  vCompanyUsersStudentRegisterFetchUserCreateBody,
   vCompanyUsersVerifyRecaptchaCreateBody,
   vConnectorGrippSettingsPartialUpdateBody,
+  vCustomerCustomerAutocompleteListQuery,
   vCustomerCustomerCreateBody,
+  vCustomerCustomerListQuery,
   vCustomerCustomerMyPartialUpdateBody,
   vCustomerCustomerPartialUpdateBody,
   vCustomerDocumentCreateBody,
+  vCustomerDocumentListQuery,
   vCustomerDocumentPartialUpdateBody,
   vCustomerMaintenanceContractCreateBody,
+  vCustomerMaintenanceContractListQuery,
   vCustomerMaintenanceContractPartialUpdateBody,
   vCustomerMaintenanceContractWithEquipmentCreateBody,
+  vCustomerMaintenanceContractWithEquipmentUpdateBody,
   vCustomerMaintenanceEquipmentCreateBody,
+  vCustomerMaintenanceEquipmentListQuery,
   vCustomerMaintenanceEquipmentPartialUpdateBody,
+  vEquipmentBuildingAutocompleteListQuery,
   vEquipmentBuildingCreateBody,
+  vEquipmentBuildingListForSelectListQuery,
+  vEquipmentBuildingListQuery,
   vEquipmentBuildingPartialUpdateBody,
+  vEquipmentEquipmentAutocompleteListQuery,
   vEquipmentEquipmentCreateBody,
   vEquipmentEquipmentCreateQuickCreateBody,
   vEquipmentEquipmentDocumentCreateBody,
+  vEquipmentEquipmentDocumentListQuery,
   vEquipmentEquipmentDocumentPartialUpdateBody,
+  vEquipmentEquipmentListQuery,
   vEquipmentEquipmentPartialUpdateBody,
   vEquipmentEquipmentStateCreateBody,
+  vEquipmentEquipmentStateListQuery,
+  vEquipmentLocationAutocompleteListQuery,
   vEquipmentLocationCreateBody,
   vEquipmentLocationCreateQuickCreateBody,
   vEquipmentLocationDocumentCreateBody,
+  vEquipmentLocationDocumentListQuery,
   vEquipmentLocationDocumentPartialUpdateBody,
+  vEquipmentLocationListForSelectListQuery,
+  vEquipmentLocationListQuery,
   vEquipmentLocationPartialUpdateBody,
+  vImportingImportCreateBody,
+  vImportingImportListQuery,
+  vImportingImportPartialUpdateBody,
+  vInventoryInventoryLocationsForMaterialListQuery,
+  vInventoryInventoryLocationsListQuery,
+  vInventoryInventoryMaterialsForLocationListQuery,
+  vInventoryInventoryMaterialsListQuery,
+  vInventoryMaterialAutocompleteListQuery,
   vInventoryMaterialCreateBody,
+  vInventoryMaterialListQuery,
+  vInventoryMaterialMoveCreateBody,
   vInventoryMaterialPartialUpdateBody,
   vInventoryPurchaseorderCreateBody,
   vInventoryPurchaseorderEntryBulkCreateBody,
   vInventoryPurchaseorderEntryCreateBody,
+  vInventoryPurchaseorderEntryListQuery,
   vInventoryPurchaseorderEntryPartialUpdateBody,
+  vInventoryPurchaseorderListQuery,
   vInventoryPurchaseorderMaterialCreateBody,
+  vInventoryPurchaseorderMaterialListQuery,
   vInventoryPurchaseorderMaterialPartialUpdateBody,
   vInventoryPurchaseorderPartialUpdateBody,
   vInventoryPurchaseorderStatusCreateBody,
+  vInventoryPurchaseorderStatusListQuery,
   vInventoryPurchaseorderStatusPartialUpdateBody,
   vInventoryPurchaseorderWithMaterialsCreateBody,
+  vInventoryPurchaseorderWithMaterialsPartialUpdateBody,
   vInventoryStockLocationCreateBody,
+  vInventoryStockLocationListQuery,
   vInventoryStockLocationPartialUpdateBody,
   vInventoryStockmutationsimpleListCreateBody,
+  vInventoryStockmutationsimpleListListQuery,
+  vInventorySupplierAutocompleteListQuery,
   vInventorySupplierCreateBody,
+  vInventorySupplierListQuery,
   vInventorySupplierPartialUpdateBody,
+  vInventorySupplierReservationAutocompleteListQuery,
   vInventorySupplierReservationCreateBody,
+  vInventorySupplierReservationListQuery,
   vInventorySupplierReservationPartialUpdateBody,
   vInventorySupplierReservationWithMaterialsCreateBody,
+  vInventorySupplierReservationWithMaterialsPartialUpdateBody,
   vInventorySupplierReservationmaterialCreateBody,
+  vInventorySupplierReservationmaterialListQuery,
   vInventorySupplierReservationmaterialPartialUpdateBody,
   vInvoiceEmailCreateBody,
+  vInvoiceEmailGetDocumentsListQuery,
+  vInvoiceEmailListQuery,
   vInvoiceEmailPartialUpdateBody,
+  vInvoiceInvoiceAutocompleteListQuery,
   vInvoiceInvoiceCreateBody,
   vInvoiceInvoiceLineCreateBody,
+  vInvoiceInvoiceLineInvoiceCreateBody,
+  vInvoiceInvoiceLineListQuery,
   vInvoiceInvoiceLinePartialUpdateBody,
+  vInvoiceInvoiceListQuery,
   vInvoiceInvoicePartialUpdateBody,
+  vInvoiceInvoicePreliminaryListQuery,
+  vInvoiceInvoiceSentListQuery,
   vInvoiceInvoiceStatusCreateBody,
   vInvoicePurchaseCreateBody,
+  vInvoicePurchaseListQuery,
   vInvoicePurchasePartialUpdateBody,
+  vInvoicePurchaseYearListQuery,
   vJwtTokenCreateBody,
   vJwtTokenRefreshCreateBody,
   vLocationToAddressCreateBody,
   vMemberContractCreateBody,
+  vMemberContractListQuery,
   vMemberContractPartialUpdateBody,
+  vMemberListPublicBranchesListQuery,
+  vMemberListPublicListQuery,
   vMemberMemberCreateBody,
+  vMemberMemberGetForPartnerSelectListQuery,
+  vMemberMemberListQuery,
   vMemberMemberMePartialUpdateBody,
   vMemberMemberMySettingsPartialUpdateBody,
   vMemberMemberPartialUpdateBody,
   vMemberModuleCreateBody,
+  vMemberModuleListQuery,
   vMemberModulePartCreateBody,
+  vMemberModulePartListQuery,
   vMemberModulePartPartialUpdateBody,
   vMemberModulePartialUpdateBody,
   vMobileAssignMeCreateBody,
   vMobileAssignUserCreateBody,
   vMobileAssignUserTripCreateBody,
   vMobileAssignedorderCreateBody,
+  vMobileAssignedorderDetailChangeDatePartialUpdateBody,
+  vMobileAssignedorderFinishedListListQuery,
+  vMobileAssignedorderListAppListQuery,
+  vMobileAssignedorderListQuery,
   vMobileAssignedorderPartialUpdateBody,
+  vMobileAssignedorderReportStatuscodeCreateBody,
   vMobileAssignedorderSplitCreateBody,
   vMobileAssignedorderWorkorderCreateBody,
+  vMobileAssignedorderWorkorderListQuery,
   vMobileAssignedorderWorkorderPartialUpdateBody,
   vMobileAssignedorderactivityCreateBody,
+  vMobileAssignedorderactivityListQuery,
   vMobileAssignedorderactivityPartialUpdateBody,
   vMobileAssignedorderdocumentCreateBody,
+  vMobileAssignedorderdocumentListQuery,
   vMobileAssignedorderdocumentPartialUpdateBody,
   vMobileAssignedordermaterialCreateBody,
+  vMobileAssignedordermaterialListQuery,
+  vMobileAssignedordermaterialOrderlinesListQuery,
   vMobileAssignedordermaterialPartialUpdateBody,
+  vMobileAssignedordermaterialQuotationListQuery,
   vMobileTripCreateBody,
+  vMobileTripListQuery,
   vMobileTripOrderCreateBody,
+  vMobileTripOrderListQuery,
   vMobileTripOrderPartialUpdateBody,
   vMobileTripPartialUpdateBody,
   vMobileTripStatuscodeActionCreateBody,
+  vMobileTripStatuscodeActionListQuery,
   vMobileTripStatuscodeActionPartialUpdateBody,
+  vMobileTripStatuscodeAutocompleteListQuery,
   vMobileTripStatuscodeCreateBody,
+  vMobileTripStatuscodeListQuery,
   vMobileTripStatuscodePartialUpdateBody,
+  vMobileTripTripAvailabilityListQuery,
   vMobileUnassignUserCreateBody,
   vMobileUnassignUserTripCreateBody,
   vMobileUserOrderAvailabilityCreateBody,
+  vMobileUserOrderAvailabilityListQuery,
   vMobileUserOrderAvailabilityPartialUpdateBody,
   vMobileUserTripAvailabilityCreateBody,
+  vMobileUserTripAvailabilityListQuery,
   vMobileUserTripAvailabilityPartialUpdateBody,
   vOrderCostCreateBody,
+  vOrderCostListQuery,
+  vOrderCostOrderCreateBody,
   vOrderCostPartialUpdateBody,
   vOrderDocumentCreateBody,
+  vOrderDocumentListQuery,
   vOrderDocumentPartialUpdateBody,
   vOrderFilterCreateBody,
+  vOrderFilterGetExamplesListQuery,
+  vOrderFilterListQuery,
   vOrderFilterPartialUpdateBody,
+  vOrderFilterSimpleListListQuery,
   vOrderInfolineCreateBody,
+  vOrderInfolineListQuery,
   vOrderInfolinePartialUpdateBody,
+  vOrderOrderAllForCustomerNotAcceptedListQuery,
+  vOrderOrderAllForCustomerV2ListQuery,
+  vOrderOrderAllForEquipmentLocationListQuery,
+  vOrderOrderAssignMeCreateBody,
+  vOrderOrderAssignableListQuery,
+  vOrderOrderAutocompleteListQuery,
   vOrderOrderCreateBody,
+  vOrderOrderCreatePdfBackgroundCreateBody,
+  vOrderOrderDispatchListAllListQuery,
+  vOrderOrderDispatchListFinishedListQuery,
+  vOrderOrderDispatchListInprogressListQuery,
+  vOrderOrderDispatchListUnassignedListQuery,
+  vOrderOrderGetWithinRangeListQuery,
+  vOrderOrderListQuery,
+  vOrderOrderMaintenanceOrdersListQuery,
+  vOrderOrderMonthEventsListQuery,
+  vOrderOrderOrderAvailabilityListQuery,
   vOrderOrderPartialUpdateBody,
+  vOrderOrderPastListQuery,
+  vOrderOrderRecreatePdfBackgroundCreateBody,
+  vOrderOrderSalesOrdersListQuery,
   vOrderOrderlineCreateBody,
+  vOrderOrderlineLatestWorkordersListQuery,
+  vOrderOrderlineListQuery,
+  vOrderOrderlineOrderListQuery,
   vOrderOrderlinePartialUpdateBody,
   vOrderStatusCreateBody,
+  vOrderStatusesListQuery,
+  vPartnerPartnerBranchCreateFromCustomerCreateBody,
+  vPartnerPartnerCopyCustomerOrdersCreateBody,
+  vPartnerPartnerCreateBody,
+  vPartnerPartnerListQuery,
+  vPartnerPartnerPartialUpdateBody,
+  vPartnerPartnerRequestCreateBody,
+  vPartnerPartnerRequestListQuery,
+  vPartnerPartnerRequestPartialUpdateBody,
+  vPartnerPartnerRequestReceivedListQuery,
+  vPartnerPartnerRequestSentCreateBody,
+  vPartnerPartnerRequestSentListQuery,
   vQuotationChapterCreateBody,
+  vQuotationChapterListQuery,
   vQuotationChapterPartialUpdateBody,
   vQuotationCostCreateBody,
+  vQuotationCostListQuery,
   vQuotationCostPartialUpdateBody,
+  vQuotationCostQuotationCreateBody,
   vQuotationDocumentCreateBody,
+  vQuotationDocumentListQuery,
   vQuotationDocumentPartialUpdateBody,
   vQuotationOfferCreateBody,
+  vQuotationOfferListQuery,
   vQuotationOfferPartialUpdateBody,
+  vQuotationQuotationAutocompleteListQuery,
   vQuotationQuotationCreateBody,
   vQuotationQuotationImageCreateBody,
+  vQuotationQuotationImageListQuery,
   vQuotationQuotationImagePartialUpdateBody,
   vQuotationQuotationLineChapterCreateBody,
   vQuotationQuotationLineCreateBody,
   vQuotationQuotationLineImageCreateBody,
+  vQuotationQuotationLineImageListQuery,
   vQuotationQuotationLineImagePartialUpdateBody,
+  vQuotationQuotationLineListQuery,
   vQuotationQuotationLinePartialUpdateBody,
+  vQuotationQuotationListQuery,
+  vQuotationQuotationMakeDefinitiveCreateBody,
+  vQuotationQuotationNotAcceptedListQuery,
   vQuotationQuotationPartialUpdateBody,
+  vQuotationQuotationPreliminaryListQuery,
+  vQuotationQuotationSentListQuery,
   vQuotationStatusCreateBody,
   vSetLanguageCreateBody,
   vStatuscodeActionCreateBody,
+  vStatuscodeActionListQuery,
   vStatuscodeActionPartialUpdateBody,
+  vStatuscodeStatuscodeAutocompleteListQuery,
   vStatuscodeStatuscodeCreateBody,
+  vStatuscodeStatuscodeListQuery,
   vStatuscodeStatuscodePartialUpdateBody,
   vTeamleaderOauthCreateBody,
+  vTeamleaderProductCategoryListQuery,
+  vTeamleaderTaxRateListQuery,
   vTeamleaderTlProductCreateCreateBody,
   vTeamleaderTlProductCreateLinkCreateBody,
+  vTeamleaderTlProductListListQuery,
   vTeamleaderTravelHoursProductPartialUpdateBody,
   vTeamleaderUpdateDepartmentPartialUpdateBody,
   vTeamleaderUpdateEnabledPartialUpdateBody,
   vTeamleaderUpdateInvoiceDocumentTemplatePartialUpdateBody,
   vTeamleaderUpdateProductCategoryPartialUpdateBody,
   vTeamleaderWorkHoursProductPartialUpdateBody,
+  vUserApiuserCreateBody,
+  vUserApiuserListQuery,
+  vUserApiuserPartialUpdateBody,
+  vUserApiuserRenewTokenCreateBody,
+  vUserCustomeruserCreateBody,
+  vUserCustomeruserListQuery,
+  vUserCustomeruserPartialUpdateBody,
+  vUserEmployeeuserCreateBody,
+  vUserEmployeeuserListQuery,
+  vUserEmployeeuserPartialUpdateBody,
+  vUserEngineerCreateBody,
+  vUserEngineerEventTypeCreateBody,
+  vUserEngineerEventTypeListQuery,
+  vUserEngineerEventTypePartialUpdateBody,
+  vUserEngineerEventTypeStatsListQuery,
+  vUserEngineerListQuery,
+  vUserEngineerPartialUpdateBody,
+  vUserEngineerStoreLonLatCreateBody,
+  vUserEngineereventCreateBody,
+  vUserEngineereventCreateOrderCreateBody,
+  vUserEngineereventListQuery,
+  vUserEngineereventUpdatePartialUpdateBody,
+  vUserPlanninguserCreateBody,
+  vUserPlanninguserListQuery,
+  vUserPlanninguserPartialUpdateBody,
+  vUserSalesuserCreateBody,
+  vUserSalesuserListQuery,
+  vUserSalesuserPartialUpdateBody,
+  vUserSalesusercustomerCreateBody,
+  vUserSalesusercustomerListQuery,
+  vUserSalesusercustomerMyCreateBody,
+  vUserSalesusercustomerMyListQuery,
+  vUserSalesusercustomerMyPartialUpdateBody,
+  vUserSalesusercustomerPartialUpdateBody,
+  vUserStreamPrivateChannelCreateCreateBody,
+  vUserStudentuserCreateBody,
+  vUserStudentuserListQuery,
+  vUserStudentuserPartialUpdateBody,
+  vUserUserDeviceTokenCreateBody,
+  vUserUserListListQuery,
+  vUserUserSettingsPartialUpdateBody,
+  vUserUsersStudentProfileMePartialUpdateBody,
+  vUserUsersStudentRegisterFetchUserCreateBody,
+  vWorkforceLeaveTypeCreateBody,
+  vWorkforceLeaveTypeListForSelectListQuery,
+  vWorkforceLeaveTypeListQuery,
+  vWorkforceLeaveTypePartialUpdateBody,
+  vWorkforceProjectCreateBody,
+  vWorkforceProjectListForSelectListQuery,
+  vWorkforceProjectListQuery,
+  vWorkforceProjectPartialUpdateBody,
+  vWorkforceTimeRegistrationTimeCorrectionPartialUpdateBody,
+  vWorkforceUserLeaveHoursAdminAllNotAcceptedListQuery,
+  vWorkforceUserLeaveHoursAdminCreateBody,
+  vWorkforceUserLeaveHoursAdminGetTotalsCreateBody,
+  vWorkforceUserLeaveHoursAdminListQuery,
+  vWorkforceUserLeaveHoursAdminPartialUpdateBody,
+  vWorkforceUserLeaveHoursAllNotAcceptedListQuery,
+  vWorkforceUserLeaveHoursCreateBody,
+  vWorkforceUserLeaveHoursGetTotalsCreateBody,
+  vWorkforceUserLeaveHoursListQuery,
+  vWorkforceUserLeaveHoursPartialUpdateBody,
+  vWorkforceUserSickLeaveAdminAllSickListQuery,
+  vWorkforceUserSickLeaveAdminAllUnconfirmedListQuery,
+  vWorkforceUserSickLeaveAdminCreateBody,
+  vWorkforceUserSickLeaveAdminListQuery,
+  vWorkforceUserSickLeaveAdminPartialUpdateBody,
+  vWorkforceUserSickLeaveCreateBody,
+  vWorkforceUserSickLeaveEndSickCreateBody,
+  vWorkforceUserSickLeaveListQuery,
+  vWorkforceUserSickLeavePartialUpdateBody,
+  vWorkforceUserWorkhoursCreateBody,
+  vWorkforceUserWorkhoursListQuery,
+  vWorkforceUserWorkhoursPartialUpdateBody,
 } from './valibot.gen'
 
-/** A list, or a singleton's retrieve: its generated `*Options` and `*QueryKey` factories. */
-export interface ResourceRead {
-  readonly options: (...args: never[]) => object
-  readonly queryKey: (...args: never[]) => readonly unknown[]
-}
+import type {
+  CompanyActivityListResponse,
+  CompanyActivityRetrieveResponse,
+  CompanyBranchAutocompleteListResponse,
+  CompanyBranchListResponse,
+  CompanyBranchMyRetrieveResponse,
+  CompanyBranchRetrieveResponse,
+  CompanyBudgetListResponse,
+  CompanyBudgetRetrieveResponse,
+  CompanyPictureListResponse,
+  CompanyPictureRetrieveResponse,
+  CompanyPublicPicturesListResponse,
+  CompanyTemplateListResponse,
+  CompanyTemplateRetrieveResponse,
+  ConnectorGrippSettingsRetrieveResponse,
+  CustomerCustomerAutocompleteListResponse,
+  CustomerCustomerListResponse,
+  CustomerCustomerMyRetrieveResponse,
+  CustomerCustomerRetrieveResponse,
+  CustomerDocumentListResponse,
+  CustomerDocumentRetrieveResponse,
+  CustomerMaintenanceContractListResponse,
+  CustomerMaintenanceContractRetrieveResponse,
+  CustomerMaintenanceEquipmentListResponse,
+  CustomerMaintenanceEquipmentRetrieveResponse,
+  EquipmentBuildingAutocompleteListResponse,
+  EquipmentBuildingListForSelectListResponse,
+  EquipmentBuildingListResponse,
+  EquipmentBuildingRetrieveResponse,
+  EquipmentEquipmentAutocompleteListResponse,
+  EquipmentEquipmentDocumentListResponse,
+  EquipmentEquipmentDocumentRetrieveResponse,
+  EquipmentEquipmentListResponse,
+  EquipmentEquipmentRetrieveResponse,
+  EquipmentEquipmentStateListResponse,
+  EquipmentLocationAutocompleteListResponse,
+  EquipmentLocationDocumentListResponse,
+  EquipmentLocationDocumentRetrieveResponse,
+  EquipmentLocationListForSelectListResponse,
+  EquipmentLocationListResponse,
+  EquipmentLocationRetrieveResponse,
+  ImportingImportListResponse,
+  ImportingImportRetrieveResponse,
+  InventoryInventoryLocationsForMaterialListResponse,
+  InventoryInventoryLocationsListResponse,
+  InventoryInventoryMaterialsForLocationListResponse,
+  InventoryInventoryMaterialsListResponse,
+  InventoryMaterialAutocompleteListResponse,
+  InventoryMaterialListResponse,
+  InventoryMaterialRetrieveResponse,
+  InventoryPurchaseorderEntryListResponse,
+  InventoryPurchaseorderEntryRetrieveResponse,
+  InventoryPurchaseorderListResponse,
+  InventoryPurchaseorderMaterialListResponse,
+  InventoryPurchaseorderMaterialRetrieveResponse,
+  InventoryPurchaseorderRetrieveResponse,
+  InventoryPurchaseorderStatusListResponse,
+  InventoryPurchaseorderStatusRetrieveResponse,
+  InventoryStockLocationListResponse,
+  InventoryStockLocationRetrieveResponse,
+  InventoryStockmutationsimpleListListResponse,
+  InventorySupplierAutocompleteListResponse,
+  InventorySupplierListResponse,
+  InventorySupplierReservationAutocompleteListResponse,
+  InventorySupplierReservationListResponse,
+  InventorySupplierReservationRetrieveResponse,
+  InventorySupplierReservationmaterialListResponse,
+  InventorySupplierReservationmaterialRetrieveResponse,
+  InventorySupplierRetrieveResponse,
+  InvoiceEmailGetDocumentsListResponse,
+  InvoiceEmailListResponse,
+  InvoiceEmailRetrieveResponse,
+  InvoiceInvoiceAutocompleteListResponse,
+  InvoiceInvoiceLineListResponse,
+  InvoiceInvoiceLineRetrieveResponse,
+  InvoiceInvoiceListResponse,
+  InvoiceInvoicePreliminaryListResponse,
+  InvoiceInvoiceRetrieveResponse,
+  InvoiceInvoiceSentListResponse,
+  InvoicePurchaseListResponse,
+  InvoicePurchaseRetrieveResponse,
+  InvoicePurchaseYearListResponse,
+  MemberContractListResponse,
+  MemberContractRetrieveResponse,
+  MemberGetModuleDataListResponse,
+  MemberListPublicBranchesListResponse,
+  MemberListPublicListResponse,
+  MemberMemberGetExcludeMeListResponse,
+  MemberMemberGetForPartnerSelectListResponse,
+  MemberMemberListResponse,
+  MemberMemberMeRetrieveResponse,
+  MemberMemberMySettingsRetrieveResponse,
+  MemberMemberRetrieveResponse,
+  MemberModuleListResponse,
+  MemberModulePartListResponse,
+  MemberModulePartRetrieveResponse,
+  MemberModuleRetrieveResponse,
+  MobileAssignedorderFinishedListListResponse,
+  MobileAssignedorderListAppListResponse,
+  MobileAssignedorderListResponse,
+  MobileAssignedorderRetrieveResponse,
+  MobileAssignedorderWorkorderListResponse,
+  MobileAssignedorderWorkorderRetrieveResponse,
+  MobileAssignedorderactivityListResponse,
+  MobileAssignedorderactivityRetrieveResponse,
+  MobileAssignedorderdocumentListResponse,
+  MobileAssignedorderdocumentRetrieveResponse,
+  MobileAssignedordermaterialListResponse,
+  MobileAssignedordermaterialOrderlinesListResponse,
+  MobileAssignedordermaterialQuotationListResponse,
+  MobileAssignedordermaterialRetrieveResponse,
+  MobileTripListResponse,
+  MobileTripOrderListResponse,
+  MobileTripOrderRetrieveResponse,
+  MobileTripRetrieveResponse,
+  MobileTripStatuscodeActionListResponse,
+  MobileTripStatuscodeActionRetrieveResponse,
+  MobileTripStatuscodeAutocompleteListResponse,
+  MobileTripStatuscodeListResponse,
+  MobileTripStatuscodeRetrieveResponse,
+  MobileTripTripAvailabilityListResponse,
+  MobileUserOrderAvailabilityListResponse,
+  MobileUserOrderAvailabilityRetrieveResponse,
+  MobileUserTripAvailabilityListResponse,
+  MobileUserTripAvailabilityRetrieveResponse,
+  OrderCostListResponse,
+  OrderCostRetrieveResponse,
+  OrderDocumentListResponse,
+  OrderDocumentRetrieveResponse,
+  OrderFilterGetBaseFilterOptionsListResponse,
+  OrderFilterGetExamplesListResponse,
+  OrderFilterListResponse,
+  OrderFilterRetrieveResponse,
+  OrderFilterSimpleListListResponse,
+  OrderInfolineListResponse,
+  OrderInfolineRetrieveResponse,
+  OrderOrderAllForCustomerNotAcceptedListResponse,
+  OrderOrderAllForCustomerV2ListResponse,
+  OrderOrderAllForEquipmentLocationListResponse,
+  OrderOrderAssignableListResponse,
+  OrderOrderAutocompleteListResponse,
+  OrderOrderDispatchListAllListResponse,
+  OrderOrderDispatchListFinishedListResponse,
+  OrderOrderDispatchListInprogressListResponse,
+  OrderOrderDispatchListUnassignedListResponse,
+  OrderOrderGetWithinRangeListResponse,
+  OrderOrderListResponse,
+  OrderOrderMaintenanceOrdersListResponse,
+  OrderOrderMonthEventsListResponse,
+  OrderOrderOrderAvailabilityListResponse,
+  OrderOrderPastListResponse,
+  OrderOrderRetrieveResponse,
+  OrderOrderSalesOrdersListResponse,
+  OrderOrderlineAssignedOrderListResponse,
+  OrderOrderlineLatestWorkordersListResponse,
+  OrderOrderlineListResponse,
+  OrderOrderlineOrderListResponse,
+  OrderOrderlineRetrieveResponse,
+  OrderStatusesListResponse,
+  PartnerPartnerListResponse,
+  PartnerPartnerRequestListResponse,
+  PartnerPartnerRequestReceivedListResponse,
+  PartnerPartnerRequestRetrieveResponse,
+  PartnerPartnerRequestSentListResponse,
+  PartnerPartnerRetrieveResponse,
+  QuotationChapterListResponse,
+  QuotationChapterRetrieveResponse,
+  QuotationCostListResponse,
+  QuotationCostRetrieveResponse,
+  QuotationDocumentListResponse,
+  QuotationDocumentRetrieveResponse,
+  QuotationOfferListResponse,
+  QuotationOfferRetrieveResponse,
+  QuotationQuotationAutocompleteListResponse,
+  QuotationQuotationImageListResponse,
+  QuotationQuotationImageRetrieveResponse,
+  QuotationQuotationLineImageListResponse,
+  QuotationQuotationLineImageRetrieveResponse,
+  QuotationQuotationLineListResponse,
+  QuotationQuotationLineRetrieveResponse,
+  QuotationQuotationListResponse,
+  QuotationQuotationNotAcceptedListResponse,
+  QuotationQuotationPreliminaryListResponse,
+  QuotationQuotationRetrieveResponse,
+  QuotationQuotationSentListResponse,
+  StatuscodeActionListResponse,
+  StatuscodeActionRetrieveResponse,
+  StatuscodeStatuscodeAutocompleteListResponse,
+  StatuscodeStatuscodeListResponse,
+  StatuscodeStatuscodeRetrieveResponse,
+  TeamleaderProductCategoryListResponse,
+  TeamleaderTaxRateListResponse,
+  TeamleaderTlProductListListResponse,
+  UserApiuserListResponse,
+  UserApiuserRetrieveResponse,
+  UserCustomeruserListResponse,
+  UserCustomeruserRetrieveResponse,
+  UserEmployeeuserListResponse,
+  UserEmployeeuserRetrieveResponse,
+  UserEngineerEventTypeListResponse,
+  UserEngineerEventTypeRetrieveResponse,
+  UserEngineerEventTypeStatsListResponse,
+  UserEngineerGetLocationsListResponse,
+  UserEngineerListForSelectListResponse,
+  UserEngineerListResponse,
+  UserEngineerRetrieveResponse,
+  UserEngineereventListResponse,
+  UserEngineereventUpdateRetrieveResponse,
+  UserPlanninguserListResponse,
+  UserPlanninguserRetrieveResponse,
+  UserSalesuserListResponse,
+  UserSalesuserRetrieveResponse,
+  UserSalesusercustomerListResponse,
+  UserSalesusercustomerMyListResponse,
+  UserSalesusercustomerMyRetrieveResponse,
+  UserSalesusercustomerRetrieveResponse,
+  UserStudentuserListResponse,
+  UserStudentuserRetrieveResponse,
+  UserUserListListResponse,
+  UserUserSettingsRetrieveResponse,
+  UserUsersStudentProfileMeRetrieveResponse,
+  WorkforceLeaveTypeListForSelectListResponse,
+  WorkforceLeaveTypeListResponse,
+  WorkforceLeaveTypeRetrieveResponse,
+  WorkforceProjectListForSelectListResponse,
+  WorkforceProjectListResponse,
+  WorkforceProjectRetrieveResponse,
+  WorkforceUserLeaveHoursAdminAllNotAcceptedListResponse,
+  WorkforceUserLeaveHoursAdminListResponse,
+  WorkforceUserLeaveHoursAdminRetrieveResponse,
+  WorkforceUserLeaveHoursAllNotAcceptedListResponse,
+  WorkforceUserLeaveHoursListResponse,
+  WorkforceUserLeaveHoursRetrieveResponse,
+  WorkforceUserSickLeaveAdminAllSickListResponse,
+  WorkforceUserSickLeaveAdminAllUnconfirmedListResponse,
+  WorkforceUserSickLeaveAdminListResponse,
+  WorkforceUserSickLeaveAdminRetrieveResponse,
+  WorkforceUserSickLeaveListResponse,
+  WorkforceUserSickLeaveRetrieveResponse,
+  WorkforceUserWorkhoursListResponse,
+  WorkforceUserWorkhoursRetrieveResponse,
+} from './types.gen'
 
-/** A collection's retrieve: the options take the record's id in the path. */
-export interface ResourceRecordRead<TId extends number | string> extends ResourceRead {
-  readonly options: (options: {path: {id: TId}}) => object
-}
-
-/** A create, update, replace or destroy: its generated `*Mutation` factory and the body it takes. */
-export interface ResourceWrite {
-  // `any`, as in `useResourceForm`: UseMutationOptions is invariant in its
-  // response and error slots, so no single wider type admits every mutation.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  readonly mutation: (...args: never[]) => UseMutationOptions<any, any, any>
-  readonly body?: GenericSchema
-}
-
-interface ResourceBase {
-  readonly path: string
-  /**
-   * The hey-api query-key id (`[{_id}]`) of every list and retrieve under
-   * `path`: the reads a write to this resource makes stale.
-   */
-  readonly reads: readonly string[]
-}
+export type {
+  ActionResource,
+  CollectionResource,
+  Resource,
+  ResourceDefinition,
+  ResourceKind,
+  ResourceRead,
+  ResourceWrite,
+  SingletonResource,
+} from './resource-runtime.gen'
 
 /**
- * The shape every resource below satisfies, by how its record is addressed.
- * Which of the operations a resource has is its own type; the union says
- * which it *can* have, so the generator's classification is checked here.
+ * The model types a resource of the same name shadows, so the api-client
+ * barrel leaves them out of its types.gen re-export instead of colliding. Each
+ * is reachable under its resource instead, as `<Resource>.Record`.
  */
-export type Resource = CollectionResource<number> | CollectionResource<string> | SingletonResource | ActionResource
-
-/** Records addressed by id: the ordinary DRF viewset. */
-export interface CollectionResource<TId extends number | string> extends ResourceBase {
-  readonly kind: 'collection'
-  /**
-   * How the retrieve declares its `{id}`. DRF says integer nearly
-   * everywhere, string for a few (`order/order`), and hey-api types the
-   * options to match - so a caller narrows on this before building the path.
-   */
-  readonly id: TId extends number ? 'number' : 'string'
-  readonly list?: ResourceRead
-  readonly retrieve?: ResourceRecordRead<TId>
-  readonly create?: ResourceWrite
-  readonly update?: ResourceWrite
-  readonly replace?: ResourceWrite
-  readonly destroy?: ResourceWrite
-}
-
-/** The caller's own record (`member/me`, `branch-my`): read and updated without a path. */
-export interface SingletonResource extends ResourceBase {
-  readonly kind: 'singleton'
-  readonly retrieve?: ResourceRead
-  readonly update?: ResourceWrite
-}
-
-/** A pathless POST with no record behind it - a login, a bulk create. */
-export interface ActionResource extends ResourceBase {
-  readonly kind: 'action'
-  readonly create: ResourceWrite
-}
-
-export type ResourceKind = Resource['kind']
+export const shadowedModelTypes: readonly string[] = [
+  'ChangePassword',
+  'CustomerDocument',
+  'InvoiceEmail',
+  'MemberContract',
+  'OrderCost',
+  'OrderDocument',
+  'OrderFilter',
+  'OrderStatus',
+  'QuotationCost',
+  'QuotationDocument',
+  'QuotationStatus',
+]
 
 /** `api/accounts/change-password` */
-export const accountsChangePassword = {
+export const AccountsChangePassword = /*#__PURE__*/ resource({
   path: 'api/accounts/change-password',
   kind: 'action',
   create: {mutation: accountsChangePasswordCreateMutation, body: vAccountsChangePasswordCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace AccountsChangePassword {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsChangePasswordCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsChangePasswordCreateBody>
+}
 
 /** `api/accounts/login` */
-export const accountsLogin = {
+export const AccountsLogin = /*#__PURE__*/ resource({
   path: 'api/accounts/login',
   kind: 'action',
   create: {mutation: accountsLoginCreateMutation, body: vAccountsLoginCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace AccountsLogin {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsLoginCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsLoginCreateBody>
+}
 
 /** `api/accounts/logout` */
-export const accountsLogout = {
+export const AccountsLogout = /*#__PURE__*/ resource({
   path: 'api/accounts/logout',
   kind: 'action',
   create: {mutation: accountsLogoutCreateMutation, body: vAccountsLogoutCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace AccountsLogout {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsLogoutCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsLogoutCreateBody>
+}
 
 /** `api/accounts/register` */
-export const accountsRegister = {
+export const AccountsRegister = /*#__PURE__*/ resource({
   path: 'api/accounts/register',
   kind: 'action',
   create: {mutation: accountsRegisterCreateMutation, body: vAccountsRegisterCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace AccountsRegister {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsRegisterCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsRegisterCreateBody>
+}
 
 /** `api/accounts/register-email` */
-export const accountsRegisterEmail = {
+export const AccountsRegisterEmail = /*#__PURE__*/ resource({
   path: 'api/accounts/register-email',
   kind: 'action',
   create: {mutation: accountsRegisterEmailCreateMutation, body: vAccountsRegisterEmailCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace AccountsRegisterEmail {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsRegisterEmailCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsRegisterEmailCreateBody>
+}
 
 /** `api/accounts/reset-password` */
-export const accountsResetPassword = {
+export const AccountsResetPassword = /*#__PURE__*/ resource({
   path: 'api/accounts/reset-password',
   kind: 'action',
   create: {mutation: accountsResetPasswordCreateMutation, body: vAccountsResetPasswordCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace AccountsResetPassword {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsResetPasswordCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsResetPasswordCreateBody>
+}
 
 /** `api/accounts/send-reset-password-link` */
-export const accountsSendResetPasswordLink = {
+export const AccountsSendResetPasswordLink = /*#__PURE__*/ resource({
   path: 'api/accounts/send-reset-password-link',
   kind: 'action',
   create: {mutation: accountsSendResetPasswordLinkCreateMutation, body: vAccountsSendResetPasswordLinkCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace AccountsSendResetPasswordLink {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsSendResetPasswordLinkCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsSendResetPasswordLinkCreateBody>
+}
 
 /** `api/accounts/verify-email` */
-export const accountsVerifyEmail = {
+export const AccountsVerifyEmail = /*#__PURE__*/ resource({
   path: 'api/accounts/verify-email',
   kind: 'action',
   create: {mutation: accountsVerifyEmailCreateMutation, body: vAccountsVerifyEmailCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace AccountsVerifyEmail {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsVerifyEmailCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsVerifyEmailCreateBody>
+}
 
 /** `api/accounts/verify-registration` */
-export const accountsVerifyRegistration = {
+export const AccountsVerifyRegistration = /*#__PURE__*/ resource({
   path: 'api/accounts/verify-registration',
   kind: 'action',
   create: {mutation: accountsVerifyRegistrationCreateMutation, body: vAccountsVerifyRegistrationCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace AccountsVerifyRegistration {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vAccountsVerifyRegistrationCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vAccountsVerifyRegistrationCreateBody>
+}
 
 /** `api/change-password` */
-export const changePassword = {
+export const ChangePassword = /*#__PURE__*/ resource({
   path: 'api/change-password',
   kind: 'action',
   create: {mutation: changePasswordCreateMutation, body: vChangePasswordCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace ChangePassword {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vChangePasswordCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vChangePasswordCreateBody>
+}
 
 /** `api/company/activity` */
-export const companyActivity = {
+export const CompanyActivity = /*#__PURE__*/ resource({
   path: 'api/company/activity',
   kind: 'collection',
   id: 'number',
   list: {options: companyActivityListOptions, queryKey: companyActivityListQueryKey},
+  filters: [],
   retrieve: {options: companyActivityRetrieveOptions, queryKey: companyActivityRetrieveQueryKey},
   create: {mutation: companyActivityCreateMutation, body: vCompanyActivityCreateBody},
   update: {mutation: companyActivityPartialUpdateMutation, body: vCompanyActivityPartialUpdateBody},
   destroy: {mutation: companyActivityDestroyMutation},
   reads: ['companyActivityList', 'companyActivityRetrieve'],
-} as const satisfies Resource
+})
 
-/** `api/company/apiuser` */
-export const companyApiuser = {
-  path: 'api/company/apiuser',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyApiuserListOptions, queryKey: companyApiuserListQueryKey},
-  retrieve: {options: companyApiuserRetrieveOptions, queryKey: companyApiuserRetrieveQueryKey},
-  create: {mutation: companyApiuserCreateMutation, body: vCompanyApiuserCreateBody},
-  update: {mutation: companyApiuserPartialUpdateMutation, body: vCompanyApiuserPartialUpdateBody},
-  destroy: {mutation: companyApiuserDestroyMutation},
-  reads: ['companyApiuserDummyEndpointRetrieve', 'companyApiuserList', 'companyApiuserRetrieve'],
-} as const satisfies Resource
+export declare namespace CompanyActivity {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyActivityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyActivityListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyActivityRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyActivityCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyActivityCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyActivityPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyActivityPartialUpdateBody>
+}
 
 /** `api/company/branch` */
-export const companyBranch = {
+export const CompanyBranch = /*#__PURE__*/ resource({
   path: 'api/company/branch',
   kind: 'collection',
   id: 'number',
   list: {options: companyBranchListOptions, queryKey: companyBranchListQueryKey},
+  filters: [],
   retrieve: {options: companyBranchRetrieveOptions, queryKey: companyBranchRetrieveQueryKey},
   create: {mutation: companyBranchCreateMutation, body: vCompanyBranchCreateBody},
   update: {mutation: companyBranchPartialUpdateMutation, body: vCompanyBranchPartialUpdateBody},
   destroy: {mutation: companyBranchDestroyMutation},
+  extras: {
+    /** `/api/company/branch/{id}/dashboard/` */
+    dashboardRetrieve: {options: companyBranchDashboardRetrieveOptions, queryKey: companyBranchDashboardRetrieveQueryKey},
+  },
   reads: ['companyBranchAutocompleteList', 'companyBranchDashboardRetrieve', 'companyBranchFirstRetrieve', 'companyBranchList', 'companyBranchRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace CompanyBranch {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyBranchListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyBranchListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyBranchRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyBranchCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyBranchCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyBranchPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyBranchPartialUpdateBody>
+}
 
 /** `api/company/branch/autocomplete` */
-export const companyBranchAutocomplete = {
+export const CompanyBranchAutocomplete = /*#__PURE__*/ resource({
   path: 'api/company/branch/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: companyBranchAutocompleteListOptions, queryKey: companyBranchAutocompleteListQueryKey},
+  filters: ['id'] satisfies (keyof CompanyBranchAutocomplete.ListQuery)[],
   reads: ['companyBranchAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace CompanyBranchAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyBranchAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyBranchAutocompleteListQuery>
+}
 
 /** `api/company/branch-my` */
-export const companyBranchMy = {
+export const CompanyBranchMy = /*#__PURE__*/ resource({
   path: 'api/company/branch-my',
   kind: 'singleton',
   retrieve: {options: companyBranchMyRetrieveOptions, queryKey: companyBranchMyRetrieveQueryKey},
   update: {mutation: companyBranchMyPartialUpdateMutation, body: vCompanyBranchMyPartialUpdateBody},
   reads: ['companyBranchMyRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace CompanyBranchMy {
+  /** What `retrieve` answers with. */
+  export type Record = CompanyBranchMyRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyBranchMyPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyBranchMyPartialUpdateBody>
+}
 
 /** `api/company/budget` */
-export const companyBudget = {
+export const CompanyBudget = /*#__PURE__*/ resource({
   path: 'api/company/budget',
   kind: 'collection',
   id: 'number',
   list: {options: companyBudgetListOptions, queryKey: companyBudgetListQueryKey},
+  filters: [],
   retrieve: {options: companyBudgetRetrieveOptions, queryKey: companyBudgetRetrieveQueryKey},
   create: {mutation: companyBudgetCreateMutation, body: vCompanyBudgetCreateBody},
   update: {mutation: companyBudgetPartialUpdateMutation, body: vCompanyBudgetPartialUpdateBody},
   destroy: {mutation: companyBudgetDestroyMutation},
+  extras: {
+    /** `/api/company/budget/{id}/costs/` */
+    costsRetrieve: {options: companyBudgetCostsRetrieveOptions, queryKey: companyBudgetCostsRetrieveQueryKey},
+    /** `/api/company/budget/{id}/expected_costs/` */
+    expectedCostsRetrieve: {options: companyBudgetExpectedCostsRetrieveOptions, queryKey: companyBudgetExpectedCostsRetrieveQueryKey},
+  },
   reads: ['companyBudgetCostsRetrieve', 'companyBudgetExpectedCostsRetrieve', 'companyBudgetList', 'companyBudgetRetrieve'],
-} as const satisfies Resource
+})
 
-/** `api/company/customeruser` */
-export const companyCustomeruser = {
-  path: 'api/company/customeruser',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyCustomeruserListOptions, queryKey: companyCustomeruserListQueryKey},
-  retrieve: {options: companyCustomeruserRetrieveOptions, queryKey: companyCustomeruserRetrieveQueryKey},
-  create: {mutation: companyCustomeruserCreateMutation, body: vCompanyCustomeruserCreateBody},
-  update: {mutation: companyCustomeruserPartialUpdateMutation, body: vCompanyCustomeruserPartialUpdateBody},
-  destroy: {mutation: companyCustomeruserDestroyMutation},
-  reads: ['companyCustomeruserList', 'companyCustomeruserRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/employeeuser` */
-export const companyEmployeeuser = {
-  path: 'api/company/employeeuser',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyEmployeeuserListOptions, queryKey: companyEmployeeuserListQueryKey},
-  retrieve: {options: companyEmployeeuserRetrieveOptions, queryKey: companyEmployeeuserRetrieveQueryKey},
-  create: {mutation: companyEmployeeuserCreateMutation, body: vCompanyEmployeeuserCreateBody},
-  update: {mutation: companyEmployeeuserPartialUpdateMutation, body: vCompanyEmployeeuserPartialUpdateBody},
-  destroy: {mutation: companyEmployeeuserDestroyMutation},
-  reads: ['companyEmployeeuserList', 'companyEmployeeuserRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/engineer` */
-export const companyEngineer = {
-  path: 'api/company/engineer',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyEngineerListOptions, queryKey: companyEngineerListQueryKey},
-  retrieve: {options: companyEngineerRetrieveOptions, queryKey: companyEngineerRetrieveQueryKey},
-  create: {mutation: companyEngineerCreateMutation, body: vCompanyEngineerCreateBody},
-  update: {mutation: companyEngineerPartialUpdateMutation, body: vCompanyEngineerPartialUpdateBody},
-  destroy: {mutation: companyEngineerDestroyMutation},
-  reads: ['companyEngineerDeviceRetrieve', 'companyEngineerGetLocationsList', 'companyEngineerInfoRetrieve', 'companyEngineerList', 'companyEngineerListForSelectList', 'companyEngineerRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/engineer-event-type` */
-export const companyEngineerEventType = {
-  path: 'api/company/engineer-event-type',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyEngineerEventTypeListOptions, queryKey: companyEngineerEventTypeListQueryKey},
-  retrieve: {options: companyEngineerEventTypeRetrieveOptions, queryKey: companyEngineerEventTypeRetrieveQueryKey},
-  create: {mutation: companyEngineerEventTypeCreateMutation, body: vCompanyEngineerEventTypeCreateBody},
-  update: {mutation: companyEngineerEventTypePartialUpdateMutation, body: vCompanyEngineerEventTypePartialUpdateBody},
-  destroy: {mutation: companyEngineerEventTypeDestroyMutation},
-  reads: ['companyEngineerEventTypeList', 'companyEngineerEventTypeRetrieve', 'companyEngineerEventTypeStatsList'],
-} as const satisfies Resource
-
-/** `api/company/engineer-event-type/stats` */
-export const companyEngineerEventTypeStats = {
-  path: 'api/company/engineer-event-type/stats',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyEngineerEventTypeStatsListOptions, queryKey: companyEngineerEventTypeStatsListQueryKey},
-  reads: ['companyEngineerEventTypeStatsList'],
-} as const satisfies Resource
-
-/** `api/company/engineer/get_locations` */
-export const companyEngineerGetLocations = {
-  path: 'api/company/engineer/get_locations',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyEngineerGetLocationsListOptions, queryKey: companyEngineerGetLocationsListQueryKey},
-  reads: ['companyEngineerGetLocationsList'],
-} as const satisfies Resource
-
-/** `api/company/engineer/list-for-select` */
-export const companyEngineerListForSelect = {
-  path: 'api/company/engineer/list-for-select',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyEngineerListForSelectListOptions, queryKey: companyEngineerListForSelectListQueryKey},
-  reads: ['companyEngineerListForSelectList'],
-} as const satisfies Resource
-
-/** `api/company/engineerevent` */
-export const companyEngineerevent = {
-  path: 'api/company/engineerevent',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyEngineereventListOptions, queryKey: companyEngineereventListQueryKey},
-  create: {mutation: companyEngineereventCreateMutation, body: vCompanyEngineereventCreateBody},
-  destroy: {mutation: companyEngineereventDestroyMutation},
-  reads: ['companyEngineereventList'],
-} as const satisfies Resource
-
-/** `api/company/engineerevent-update` */
-export const companyEngineereventUpdate = {
-  path: 'api/company/engineerevent-update',
-  kind: 'collection',
-  id: 'number',
-  retrieve: {options: companyEngineereventUpdateRetrieveOptions, queryKey: companyEngineereventUpdateRetrieveQueryKey},
-  update: {mutation: companyEngineereventUpdatePartialUpdateMutation, body: vCompanyEngineereventUpdatePartialUpdateBody},
-  reads: ['companyEngineereventUpdateRetrieve'],
-} as const satisfies Resource
+export declare namespace CompanyBudget {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyBudgetListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyBudgetListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyBudgetRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyBudgetCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyBudgetCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyBudgetPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyBudgetPartialUpdateBody>
+}
 
 /** `api/company/iban-check` */
-export const companyIbanCheck = {
+export const CompanyIbanCheck = /*#__PURE__*/ resource({
   path: 'api/company/iban-check',
   kind: 'action',
   create: {mutation: companyIbanCheckCreateMutation, body: vCompanyIbanCheckCreateBody},
   reads: [],
-} as const satisfies Resource
+})
 
-/** `api/company/import` */
-export const companyImport = {
-  path: 'api/company/import',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyImportListOptions, queryKey: companyImportListQueryKey},
-  retrieve: {options: companyImportRetrieveOptions, queryKey: companyImportRetrieveQueryKey},
-  create: {mutation: companyImportCreateMutation, body: vCompanyImportCreateBody},
-  update: {mutation: companyImportPartialUpdateMutation, body: vCompanyImportPartialUpdateBody},
-  destroy: {mutation: companyImportDestroyMutation},
-  reads: ['companyImportGetAllowedExtensionsRetrieve', 'companyImportGetLookupFieldsRetrieve', 'companyImportList', 'companyImportPreviewRetrieve', 'companyImportRequiredRetrieve', 'companyImportRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/leave-type` */
-export const companyLeaveType = {
-  path: 'api/company/leave-type',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyLeaveTypeListOptions, queryKey: companyLeaveTypeListQueryKey},
-  retrieve: {options: companyLeaveTypeRetrieveOptions, queryKey: companyLeaveTypeRetrieveQueryKey},
-  create: {mutation: companyLeaveTypeCreateMutation, body: vCompanyLeaveTypeCreateBody},
-  update: {mutation: companyLeaveTypePartialUpdateMutation, body: vCompanyLeaveTypePartialUpdateBody},
-  destroy: {mutation: companyLeaveTypeDestroyMutation},
-  reads: ['companyLeaveTypeList', 'companyLeaveTypeListForSelectList', 'companyLeaveTypeRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/leave-type/list_for_select` */
-export const companyLeaveTypeListForSelect = {
-  path: 'api/company/leave-type/list_for_select',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyLeaveTypeListForSelectListOptions, queryKey: companyLeaveTypeListForSelectListQueryKey},
-  reads: ['companyLeaveTypeListForSelectList'],
-} as const satisfies Resource
-
-/** `api/company/partner` */
-export const companyPartner = {
-  path: 'api/company/partner',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyPartnerListOptions, queryKey: companyPartnerListQueryKey},
-  retrieve: {options: companyPartnerRetrieveOptions, queryKey: companyPartnerRetrieveQueryKey},
-  create: {mutation: companyPartnerCreateMutation, body: vCompanyPartnerCreateBody},
-  update: {mutation: companyPartnerPartialUpdateMutation, body: vCompanyPartnerPartialUpdateBody},
-  destroy: {mutation: companyPartnerDestroyMutation},
-  reads: ['companyPartnerBranchesRetrieve', 'companyPartnerList', 'companyPartnerRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/partner-request` */
-export const companyPartnerRequest = {
-  path: 'api/company/partner-request',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyPartnerRequestListOptions, queryKey: companyPartnerRequestListQueryKey},
-  retrieve: {options: companyPartnerRequestRetrieveOptions, queryKey: companyPartnerRequestRetrieveQueryKey},
-  create: {mutation: companyPartnerRequestCreateMutation, body: vCompanyPartnerRequestCreateBody},
-  update: {mutation: companyPartnerRequestPartialUpdateMutation, body: vCompanyPartnerRequestPartialUpdateBody},
-  destroy: {mutation: companyPartnerRequestDestroyMutation},
-  reads: ['companyPartnerRequestList', 'companyPartnerRequestReceivedList', 'companyPartnerRequestRetrieve', 'companyPartnerRequestSentList'],
-} as const satisfies Resource
-
-/** `api/company/partner-request/received` */
-export const companyPartnerRequestReceived = {
-  path: 'api/company/partner-request/received',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyPartnerRequestReceivedListOptions, queryKey: companyPartnerRequestReceivedListQueryKey},
-  reads: ['companyPartnerRequestReceivedList'],
-} as const satisfies Resource
-
-/** `api/company/partner-request/sent` */
-export const companyPartnerRequestSent = {
-  path: 'api/company/partner-request/sent',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyPartnerRequestSentListOptions, queryKey: companyPartnerRequestSentListQueryKey},
-  create: {mutation: companyPartnerRequestSentCreateMutation, body: vCompanyPartnerRequestSentCreateBody},
-  reads: ['companyPartnerRequestSentList'],
-} as const satisfies Resource
+export declare namespace CompanyIbanCheck {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyIbanCheckCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyIbanCheckCreateBody>
+}
 
 /** `api/company/picture` */
-export const companyPicture = {
+export const CompanyPicture = /*#__PURE__*/ resource({
   path: 'api/company/picture',
   kind: 'collection',
   id: 'number',
   list: {options: companyPictureListOptions, queryKey: companyPictureListQueryKey},
+  filters: [],
   retrieve: {options: companyPictureRetrieveOptions, queryKey: companyPictureRetrieveQueryKey},
   create: {mutation: companyPictureCreateMutation, body: vCompanyPictureCreateBody},
   update: {mutation: companyPicturePartialUpdateMutation, body: vCompanyPicturePartialUpdateBody},
   destroy: {mutation: companyPictureDestroyMutation},
   reads: ['companyPictureList', 'companyPictureRetrieve'],
-} as const satisfies Resource
+})
 
-/** `api/company/planninguser` */
-export const companyPlanninguser = {
-  path: 'api/company/planninguser',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyPlanninguserListOptions, queryKey: companyPlanninguserListQueryKey},
-  retrieve: {options: companyPlanninguserRetrieveOptions, queryKey: companyPlanninguserRetrieveQueryKey},
-  create: {mutation: companyPlanninguserCreateMutation, body: vCompanyPlanninguserCreateBody},
-  update: {mutation: companyPlanninguserPartialUpdateMutation, body: vCompanyPlanninguserPartialUpdateBody},
-  destroy: {mutation: companyPlanninguserDestroyMutation},
-  reads: ['companyPlanninguserList', 'companyPlanninguserRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/project` */
-export const companyProject = {
-  path: 'api/company/project',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyProjectListOptions, queryKey: companyProjectListQueryKey},
-  retrieve: {options: companyProjectRetrieveOptions, queryKey: companyProjectRetrieveQueryKey},
-  create: {mutation: companyProjectCreateMutation, body: vCompanyProjectCreateBody},
-  update: {mutation: companyProjectPartialUpdateMutation, body: vCompanyProjectPartialUpdateBody},
-  destroy: {mutation: companyProjectDestroyMutation},
-  reads: ['companyProjectList', 'companyProjectListForSelectList', 'companyProjectRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/project/list_for_select` */
-export const companyProjectListForSelect = {
-  path: 'api/company/project/list_for_select',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyProjectListForSelectListOptions, queryKey: companyProjectListForSelectListQueryKey},
-  reads: ['companyProjectListForSelectList'],
-} as const satisfies Resource
+export declare namespace CompanyPicture {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyPictureListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyPictureListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyPictureRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyPictureCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyPictureCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyPicturePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyPicturePartialUpdateBody>
+}
 
 /** `api/company/public-pictures` */
-export const companyPublicPictures = {
+export const CompanyPublicPictures = /*#__PURE__*/ resource({
   path: 'api/company/public-pictures',
   kind: 'collection',
   id: 'number',
   list: {options: companyPublicPicturesListOptions, queryKey: companyPublicPicturesListQueryKey},
+  filters: [],
   reads: ['companyPublicPicturesList'],
-} as const satisfies Resource
+})
 
-/** `api/company/salesuser` */
-export const companySalesuser = {
-  path: 'api/company/salesuser',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companySalesuserListOptions, queryKey: companySalesuserListQueryKey},
-  retrieve: {options: companySalesuserRetrieveOptions, queryKey: companySalesuserRetrieveQueryKey},
-  create: {mutation: companySalesuserCreateMutation, body: vCompanySalesuserCreateBody},
-  update: {mutation: companySalesuserPartialUpdateMutation, body: vCompanySalesuserPartialUpdateBody},
-  destroy: {mutation: companySalesuserDestroyMutation},
-  reads: ['companySalesuserList', 'companySalesuserRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/salesusercustomer` */
-export const companySalesusercustomer = {
-  path: 'api/company/salesusercustomer',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companySalesusercustomerListOptions, queryKey: companySalesusercustomerListQueryKey},
-  retrieve: {options: companySalesusercustomerRetrieveOptions, queryKey: companySalesusercustomerRetrieveQueryKey},
-  create: {mutation: companySalesusercustomerCreateMutation, body: vCompanySalesusercustomerCreateBody},
-  update: {mutation: companySalesusercustomerPartialUpdateMutation, body: vCompanySalesusercustomerPartialUpdateBody},
-  destroy: {mutation: companySalesusercustomerDestroyMutation},
-  reads: ['companySalesusercustomerList', 'companySalesusercustomerMyList', 'companySalesusercustomerMyRetrieve', 'companySalesusercustomerRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/salesusercustomer/my` */
-export const companySalesusercustomerMy = {
-  path: 'api/company/salesusercustomer/my',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companySalesusercustomerMyListOptions, queryKey: companySalesusercustomerMyListQueryKey},
-  retrieve: {options: companySalesusercustomerMyRetrieveOptions, queryKey: companySalesusercustomerMyRetrieveQueryKey},
-  create: {mutation: companySalesusercustomerMyCreateMutation, body: vCompanySalesusercustomerMyCreateBody},
-  update: {mutation: companySalesusercustomerMyPartialUpdateMutation, body: vCompanySalesusercustomerMyPartialUpdateBody},
-  destroy: {mutation: companySalesusercustomerMyDestroyMutation},
-  reads: ['companySalesusercustomerMyList', 'companySalesusercustomerMyRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/stream-private-channel-create` */
-export const companyStreamPrivateChannelCreate = {
-  path: 'api/company/stream-private-channel-create',
-  kind: 'action',
-  create: {mutation: companyStreamPrivateChannelCreateCreateMutation, body: vCompanyStreamPrivateChannelCreateCreateBody},
-  reads: [],
-} as const satisfies Resource
-
-/** `api/company/studentuser` */
-export const companyStudentuser = {
-  path: 'api/company/studentuser',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyStudentuserListOptions, queryKey: companyStudentuserListQueryKey},
-  retrieve: {options: companyStudentuserRetrieveOptions, queryKey: companyStudentuserRetrieveQueryKey},
-  create: {mutation: companyStudentuserCreateMutation, body: vCompanyStudentuserCreateBody},
-  update: {mutation: companyStudentuserPartialUpdateMutation, body: vCompanyStudentuserPartialUpdateBody},
-  destroy: {mutation: companyStudentuserDestroyMutation},
-  reads: ['companyStudentuserList', 'companyStudentuserRetrieve'],
-} as const satisfies Resource
+export declare namespace CompanyPublicPictures {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyPublicPicturesListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyPublicPicturesListQuery>
+}
 
 /** `api/company/template` */
-export const companyTemplate = {
+export const CompanyTemplate = /*#__PURE__*/ resource({
   path: 'api/company/template',
   kind: 'collection',
   id: 'number',
   list: {options: companyTemplateListOptions, queryKey: companyTemplateListQueryKey},
+  filters: ['name'] satisfies (keyof CompanyTemplate.ListQuery)[],
   retrieve: {options: companyTemplateRetrieveOptions, queryKey: companyTemplateRetrieveQueryKey},
   create: {mutation: companyTemplateCreateMutation, body: vCompanyTemplateCreateBody},
   update: {mutation: companyTemplatePartialUpdateMutation, body: vCompanyTemplatePartialUpdateBody},
   destroy: {mutation: companyTemplateDestroyMutation},
   reads: ['companyTemplateList', 'companyTemplateRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace CompanyTemplate {
+  /** What `list` answers with. */
+  export type ListResponse = CompanyTemplateListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCompanyTemplateListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CompanyTemplateRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyTemplateCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyTemplateCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCompanyTemplatePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCompanyTemplatePartialUpdateBody>
+}
 
 /** `api/company/template/preview_template_pdf` */
-export const companyTemplatePreviewTemplatePdf = {
+export const CompanyTemplatePreviewTemplatePdf = /*#__PURE__*/ resource({
   path: 'api/company/template/preview_template_pdf',
   kind: 'action',
   create: {mutation: companyTemplatePreviewTemplatePdfCreateMutation, body: vCompanyTemplatePreviewTemplatePdfCreateBody},
   reads: [],
-} as const satisfies Resource
+})
 
-/** `api/company/time-registration/time-correction` */
-export const companyTimeRegistrationTimeCorrection = {
-  path: 'api/company/time-registration/time-correction',
-  kind: 'collection',
-  id: 'number',
-  update: {mutation: companyTimeRegistrationTimeCorrectionPartialUpdateMutation, body: vCompanyTimeRegistrationTimeCorrectionPartialUpdateBody},
-  reads: [],
-} as const satisfies Resource
-
-/** `api/company/user-device-token` */
-export const companyUserDeviceToken = {
-  path: 'api/company/user-device-token',
-  kind: 'action',
-  create: {mutation: companyUserDeviceTokenCreateMutation, body: vCompanyUserDeviceTokenCreateBody},
-  reads: [],
-} as const satisfies Resource
-
-/** `api/company/user-leave-hours` */
-export const companyUserLeaveHours = {
-  path: 'api/company/user-leave-hours',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyUserLeaveHoursListOptions, queryKey: companyUserLeaveHoursListQueryKey},
-  retrieve: {options: companyUserLeaveHoursRetrieveOptions, queryKey: companyUserLeaveHoursRetrieveQueryKey},
-  create: {mutation: companyUserLeaveHoursCreateMutation, body: vCompanyUserLeaveHoursCreateBody},
-  update: {mutation: companyUserLeaveHoursPartialUpdateMutation, body: vCompanyUserLeaveHoursPartialUpdateBody},
-  destroy: {mutation: companyUserLeaveHoursDestroyMutation},
-  reads: ['companyUserLeaveHoursAdminAllNotAcceptedCountRetrieve', 'companyUserLeaveHoursAdminAllNotAcceptedList', 'companyUserLeaveHoursAdminList', 'companyUserLeaveHoursAdminRetrieve', 'companyUserLeaveHoursAllNotAcceptedCountRetrieve', 'companyUserLeaveHoursAllNotAcceptedList', 'companyUserLeaveHoursList', 'companyUserLeaveHoursRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/user-leave-hours/admin` */
-export const companyUserLeaveHoursAdmin = {
-  path: 'api/company/user-leave-hours/admin',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyUserLeaveHoursAdminListOptions, queryKey: companyUserLeaveHoursAdminListQueryKey},
-  retrieve: {options: companyUserLeaveHoursAdminRetrieveOptions, queryKey: companyUserLeaveHoursAdminRetrieveQueryKey},
-  create: {mutation: companyUserLeaveHoursAdminCreateMutation, body: vCompanyUserLeaveHoursAdminCreateBody},
-  update: {mutation: companyUserLeaveHoursAdminPartialUpdateMutation, body: vCompanyUserLeaveHoursAdminPartialUpdateBody},
-  destroy: {mutation: companyUserLeaveHoursAdminDestroyMutation},
-  reads: ['companyUserLeaveHoursAdminAllNotAcceptedCountRetrieve', 'companyUserLeaveHoursAdminAllNotAcceptedList', 'companyUserLeaveHoursAdminList', 'companyUserLeaveHoursAdminRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/user-leave-hours/admin/all_not_accepted` */
-export const companyUserLeaveHoursAdminAllNotAccepted = {
-  path: 'api/company/user-leave-hours/admin/all_not_accepted',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyUserLeaveHoursAdminAllNotAcceptedListOptions, queryKey: companyUserLeaveHoursAdminAllNotAcceptedListQueryKey},
-  reads: ['companyUserLeaveHoursAdminAllNotAcceptedList'],
-} as const satisfies Resource
-
-/** `api/company/user-leave-hours/admin/get_totals` */
-export const companyUserLeaveHoursAdminGetTotals = {
-  path: 'api/company/user-leave-hours/admin/get_totals',
-  kind: 'action',
-  create: {mutation: companyUserLeaveHoursAdminGetTotalsCreateMutation, body: vCompanyUserLeaveHoursAdminGetTotalsCreateBody},
-  reads: [],
-} as const satisfies Resource
-
-/** `api/company/user-leave-hours/all_not_accepted` */
-export const companyUserLeaveHoursAllNotAccepted = {
-  path: 'api/company/user-leave-hours/all_not_accepted',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyUserLeaveHoursAllNotAcceptedListOptions, queryKey: companyUserLeaveHoursAllNotAcceptedListQueryKey},
-  reads: ['companyUserLeaveHoursAllNotAcceptedList'],
-} as const satisfies Resource
-
-/** `api/company/user-leave-hours/get_totals` */
-export const companyUserLeaveHoursGetTotals = {
-  path: 'api/company/user-leave-hours/get_totals',
-  kind: 'action',
-  create: {mutation: companyUserLeaveHoursGetTotalsCreateMutation, body: vCompanyUserLeaveHoursGetTotalsCreateBody},
-  reads: [],
-} as const satisfies Resource
-
-/** `api/company/user-list` */
-export const companyUserList = {
-  path: 'api/company/user-list',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyUserListListOptions, queryKey: companyUserListListQueryKey},
-  reads: ['companyUserListList'],
-} as const satisfies Resource
-
-/** `api/company/user-settings` */
-export const companyUserSettings = {
-  path: 'api/company/user-settings',
-  kind: 'singleton',
-  retrieve: {options: companyUserSettingsRetrieveOptions, queryKey: companyUserSettingsRetrieveQueryKey},
-  update: {mutation: companyUserSettingsPartialUpdateMutation, body: vCompanyUserSettingsPartialUpdateBody},
-  reads: ['companyUserSettingsRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/user-sick-leave` */
-export const companyUserSickLeave = {
-  path: 'api/company/user-sick-leave',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyUserSickLeaveListOptions, queryKey: companyUserSickLeaveListQueryKey},
-  retrieve: {options: companyUserSickLeaveRetrieveOptions, queryKey: companyUserSickLeaveRetrieveQueryKey},
-  create: {mutation: companyUserSickLeaveCreateMutation, body: vCompanyUserSickLeaveCreateBody},
-  update: {mutation: companyUserSickLeavePartialUpdateMutation, body: vCompanyUserSickLeavePartialUpdateBody},
-  destroy: {mutation: companyUserSickLeaveDestroyMutation},
-  reads: ['companyUserSickLeaveAdminAllSickCountRetrieve', 'companyUserSickLeaveAdminAllSickList', 'companyUserSickLeaveAdminAllUnconfirmedCountRetrieve', 'companyUserSickLeaveAdminAllUnconfirmedList', 'companyUserSickLeaveAdminList', 'companyUserSickLeaveAdminRetrieve', 'companyUserSickLeaveList', 'companyUserSickLeaveRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/user-sick-leave/admin` */
-export const companyUserSickLeaveAdmin = {
-  path: 'api/company/user-sick-leave/admin',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyUserSickLeaveAdminListOptions, queryKey: companyUserSickLeaveAdminListQueryKey},
-  retrieve: {options: companyUserSickLeaveAdminRetrieveOptions, queryKey: companyUserSickLeaveAdminRetrieveQueryKey},
-  create: {mutation: companyUserSickLeaveAdminCreateMutation, body: vCompanyUserSickLeaveAdminCreateBody},
-  update: {mutation: companyUserSickLeaveAdminPartialUpdateMutation, body: vCompanyUserSickLeaveAdminPartialUpdateBody},
-  destroy: {mutation: companyUserSickLeaveAdminDestroyMutation},
-  reads: ['companyUserSickLeaveAdminAllSickCountRetrieve', 'companyUserSickLeaveAdminAllSickList', 'companyUserSickLeaveAdminAllUnconfirmedCountRetrieve', 'companyUserSickLeaveAdminAllUnconfirmedList', 'companyUserSickLeaveAdminList', 'companyUserSickLeaveAdminRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/user-sick-leave/admin/all_sick` */
-export const companyUserSickLeaveAdminAllSick = {
-  path: 'api/company/user-sick-leave/admin/all_sick',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyUserSickLeaveAdminAllSickListOptions, queryKey: companyUserSickLeaveAdminAllSickListQueryKey},
-  reads: ['companyUserSickLeaveAdminAllSickList'],
-} as const satisfies Resource
-
-/** `api/company/user-sick-leave/admin/all_unconfirmed` */
-export const companyUserSickLeaveAdminAllUnconfirmed = {
-  path: 'api/company/user-sick-leave/admin/all_unconfirmed',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyUserSickLeaveAdminAllUnconfirmedListOptions, queryKey: companyUserSickLeaveAdminAllUnconfirmedListQueryKey},
-  reads: ['companyUserSickLeaveAdminAllUnconfirmedList'],
-} as const satisfies Resource
-
-/** `api/company/user-sick-leave/end_sick` */
-export const companyUserSickLeaveEndSick = {
-  path: 'api/company/user-sick-leave/end_sick',
-  kind: 'action',
-  create: {mutation: companyUserSickLeaveEndSickCreateMutation, body: vCompanyUserSickLeaveEndSickCreateBody},
-  reads: [],
-} as const satisfies Resource
-
-/** `api/company/user-workhours` */
-export const companyUserWorkhours = {
-  path: 'api/company/user-workhours',
-  kind: 'collection',
-  id: 'number',
-  list: {options: companyUserWorkhoursListOptions, queryKey: companyUserWorkhoursListQueryKey},
-  retrieve: {options: companyUserWorkhoursRetrieveOptions, queryKey: companyUserWorkhoursRetrieveQueryKey},
-  create: {mutation: companyUserWorkhoursCreateMutation, body: vCompanyUserWorkhoursCreateBody},
-  update: {mutation: companyUserWorkhoursPartialUpdateMutation, body: vCompanyUserWorkhoursPartialUpdateBody},
-  destroy: {mutation: companyUserWorkhoursDestroyMutation},
-  reads: ['companyUserWorkhoursList', 'companyUserWorkhoursListTotalsRetrieve', 'companyUserWorkhoursRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/users/student/profile/me` */
-export const companyUsersStudentProfileMe = {
-  path: 'api/company/users/student/profile/me',
-  kind: 'singleton',
-  retrieve: {options: companyUsersStudentProfileMeRetrieveOptions, queryKey: companyUsersStudentProfileMeRetrieveQueryKey},
-  update: {mutation: companyUsersStudentProfileMePartialUpdateMutation, body: vCompanyUsersStudentProfileMePartialUpdateBody},
-  reads: ['companyUsersStudentProfileMeRetrieve'],
-} as const satisfies Resource
-
-/** `api/company/users/student/register/fetch-user` */
-export const companyUsersStudentRegisterFetchUser = {
-  path: 'api/company/users/student/register/fetch-user',
-  kind: 'action',
-  create: {mutation: companyUsersStudentRegisterFetchUserCreateMutation, body: vCompanyUsersStudentRegisterFetchUserCreateBody},
-  reads: [],
-} as const satisfies Resource
+export declare namespace CompanyTemplatePreviewTemplatePdf {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyTemplatePreviewTemplatePdfCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyTemplatePreviewTemplatePdfCreateBody>
+}
 
 /** `api/company/users/verify-recaptcha` */
-export const companyUsersVerifyRecaptcha = {
+export const CompanyUsersVerifyRecaptcha = /*#__PURE__*/ resource({
   path: 'api/company/users/verify-recaptcha',
   kind: 'action',
   create: {mutation: companyUsersVerifyRecaptchaCreateMutation, body: vCompanyUsersVerifyRecaptchaCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace CompanyUsersVerifyRecaptcha {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCompanyUsersVerifyRecaptchaCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCompanyUsersVerifyRecaptchaCreateBody>
+}
 
 /** `api/connector/gripp-settings` */
-export const connectorGrippSettings = {
+export const ConnectorGrippSettings = /*#__PURE__*/ resource({
   path: 'api/connector/gripp-settings',
   kind: 'singleton',
   retrieve: {options: connectorGrippSettingsRetrieveOptions, queryKey: connectorGrippSettingsRetrieveQueryKey},
   update: {mutation: connectorGrippSettingsPartialUpdateMutation, body: vConnectorGrippSettingsPartialUpdateBody},
   reads: ['connectorGrippSettingsRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace ConnectorGrippSettings {
+  /** What `retrieve` answers with. */
+  export type Record = ConnectorGrippSettingsRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vConnectorGrippSettingsPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vConnectorGrippSettingsPartialUpdateBody>
+}
 
 /** `api/customer/customer` */
-export const customerCustomer = {
+export const CustomerCustomer = /*#__PURE__*/ resource({
   path: 'api/customer/customer',
   kind: 'collection',
   id: 'number',
   list: {options: customerCustomerListOptions, queryKey: customerCustomerListQueryKey},
+  filters: ['city', 'contact', 'name', 'num_orders', 'remarks'] satisfies (keyof CustomerCustomer.ListQuery)[],
   retrieve: {options: customerCustomerRetrieveOptions, queryKey: customerCustomerRetrieveQueryKey},
   create: {mutation: customerCustomerCreateMutation, body: vCustomerCustomerCreateBody},
   update: {mutation: customerCustomerPartialUpdateMutation, body: vCustomerCustomerPartialUpdateBody},
   destroy: {mutation: customerCustomerDestroyMutation},
+  extras: {
+    /** `/api/customer/customer/{id}/custom_detail/` */
+    customDetailRetrieve: {options: customerCustomerCustomDetailRetrieveOptions, queryKey: customerCustomerCustomDetailRetrieveQueryKey},
+    /** `/api/customer/customer/{id}/dashboard/` */
+    dashboardRetrieve: {options: customerCustomerDashboardRetrieveOptions, queryKey: customerCustomerDashboardRetrieveQueryKey},
+  },
   reads: ['customerCustomerAutocompleteList', 'customerCustomerCheckCustomerIdHandlingRetrieve', 'customerCustomerCustomDetailRetrieve', 'customerCustomerDashboardRetrieve', 'customerCustomerGetNewCustomerIdFromLatestRetrieve', 'customerCustomerList', 'customerCustomerRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace CustomerCustomer {
+  /** What `list` answers with. */
+  export type ListResponse = CustomerCustomerListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCustomerCustomerListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CustomerCustomerRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCustomerCustomerCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCustomerCustomerCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCustomerCustomerPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCustomerCustomerPartialUpdateBody>
+}
 
 /** `api/customer/customer/autocomplete` */
-export const customerCustomerAutocomplete = {
+export const CustomerCustomerAutocomplete = /*#__PURE__*/ resource({
   path: 'api/customer/customer/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: customerCustomerAutocompleteListOptions, queryKey: customerCustomerAutocompleteListQueryKey},
+  filters: ['city', 'contact', 'customer_id', 'id', 'name', 'num_orders', 'remarks'] satisfies (keyof CustomerCustomerAutocomplete.ListQuery)[],
+  filterTypes: {customer_id: 'integer'},
   reads: ['customerCustomerAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace CustomerCustomerAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = CustomerCustomerAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCustomerCustomerAutocompleteListQuery>
+}
 
 /** `api/customer/customer-my` */
-export const customerCustomerMy = {
+export const CustomerCustomerMy = /*#__PURE__*/ resource({
   path: 'api/customer/customer-my',
   kind: 'singleton',
   retrieve: {options: customerCustomerMyRetrieveOptions, queryKey: customerCustomerMyRetrieveQueryKey},
   update: {mutation: customerCustomerMyPartialUpdateMutation, body: vCustomerCustomerMyPartialUpdateBody},
   reads: ['customerCustomerMyRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace CustomerCustomerMy {
+  /** What `retrieve` answers with. */
+  export type Record = CustomerCustomerMyRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCustomerCustomerMyPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCustomerCustomerMyPartialUpdateBody>
+}
 
 /** `api/customer/document` */
-export const customerDocument = {
+export const CustomerDocument = /*#__PURE__*/ resource({
   path: 'api/customer/document',
   kind: 'collection',
   id: 'number',
   list: {options: customerDocumentListOptions, queryKey: customerDocumentListQueryKey},
+  filters: ['customer'] satisfies (keyof CustomerDocument.ListQuery)[],
+  filterTypes: {customer: 'integer'},
   retrieve: {options: customerDocumentRetrieveOptions, queryKey: customerDocumentRetrieveQueryKey},
   create: {mutation: customerDocumentCreateMutation, body: vCustomerDocumentCreateBody},
   update: {mutation: customerDocumentPartialUpdateMutation, body: vCustomerDocumentPartialUpdateBody},
   destroy: {mutation: customerDocumentDestroyMutation},
   reads: ['customerDocumentList', 'customerDocumentRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace CustomerDocument {
+  /** What `list` answers with. */
+  export type ListResponse = CustomerDocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCustomerDocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CustomerDocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCustomerDocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCustomerDocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCustomerDocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCustomerDocumentPartialUpdateBody>
+}
 
 /** `api/customer/maintenance-contract` */
-export const customerMaintenanceContract = {
+export const CustomerMaintenanceContract = /*#__PURE__*/ resource({
   path: 'api/customer/maintenance-contract',
   kind: 'collection',
   id: 'number',
   list: {options: customerMaintenanceContractListOptions, queryKey: customerMaintenanceContractListQueryKey},
+  filters: ['customer', 'name', 'remarks'] satisfies (keyof CustomerMaintenanceContract.ListQuery)[],
   retrieve: {options: customerMaintenanceContractRetrieveOptions, queryKey: customerMaintenanceContractRetrieveQueryKey},
   create: {mutation: customerMaintenanceContractCreateMutation, body: vCustomerMaintenanceContractCreateBody},
   update: {mutation: customerMaintenanceContractPartialUpdateMutation, body: vCustomerMaintenanceContractPartialUpdateBody},
   destroy: {mutation: customerMaintenanceContractDestroyMutation},
+  extras: {
+    /** `/api/customer/maintenance-contract/{id}/with-equipment/` */
+    withEquipmentUpdate: {mutation: customerMaintenanceContractWithEquipmentUpdateMutation, body: vCustomerMaintenanceContractWithEquipmentUpdateBody},
+  },
   reads: ['customerMaintenanceContractList', 'customerMaintenanceContractRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace CustomerMaintenanceContract {
+  /** What `list` answers with. */
+  export type ListResponse = CustomerMaintenanceContractListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCustomerMaintenanceContractListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CustomerMaintenanceContractRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCustomerMaintenanceContractCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCustomerMaintenanceContractCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCustomerMaintenanceContractPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCustomerMaintenanceContractPartialUpdateBody>
+}
 
 /** `api/customer/maintenance-contract/with-equipment` */
-export const customerMaintenanceContractWithEquipment = {
+export const CustomerMaintenanceContractWithEquipment = /*#__PURE__*/ resource({
   path: 'api/customer/maintenance-contract/with-equipment',
   kind: 'action',
   create: {mutation: customerMaintenanceContractWithEquipmentCreateMutation, body: vCustomerMaintenanceContractWithEquipmentCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace CustomerMaintenanceContractWithEquipment {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCustomerMaintenanceContractWithEquipmentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCustomerMaintenanceContractWithEquipmentCreateBody>
+}
 
 /** `api/customer/maintenance-equipment` */
-export const customerMaintenanceEquipment = {
+export const CustomerMaintenanceEquipment = /*#__PURE__*/ resource({
   path: 'api/customer/maintenance-equipment',
   kind: 'collection',
   id: 'number',
   list: {options: customerMaintenanceEquipmentListOptions, queryKey: customerMaintenanceEquipmentListQueryKey},
+  filters: ['contract'] satisfies (keyof CustomerMaintenanceEquipment.ListQuery)[],
+  filterTypes: {contract: 'integer'},
   retrieve: {options: customerMaintenanceEquipmentRetrieveOptions, queryKey: customerMaintenanceEquipmentRetrieveQueryKey},
   create: {mutation: customerMaintenanceEquipmentCreateMutation, body: vCustomerMaintenanceEquipmentCreateBody},
   update: {mutation: customerMaintenanceEquipmentPartialUpdateMutation, body: vCustomerMaintenanceEquipmentPartialUpdateBody},
   destroy: {mutation: customerMaintenanceEquipmentDestroyMutation},
   reads: ['customerMaintenanceEquipmentList', 'customerMaintenanceEquipmentRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace CustomerMaintenanceEquipment {
+  /** What `list` answers with. */
+  export type ListResponse = CustomerMaintenanceEquipmentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vCustomerMaintenanceEquipmentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = CustomerMaintenanceEquipmentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vCustomerMaintenanceEquipmentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vCustomerMaintenanceEquipmentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vCustomerMaintenanceEquipmentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vCustomerMaintenanceEquipmentPartialUpdateBody>
+}
 
 /** `api/equipment/building` */
-export const equipmentBuilding = {
+export const EquipmentBuilding = /*#__PURE__*/ resource({
   path: 'api/equipment/building',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentBuildingListOptions, queryKey: equipmentBuildingListQueryKey},
+  filters: ['branch', 'created', 'customer', 'modified', 'name'] satisfies (keyof EquipmentBuilding.ListQuery)[],
   retrieve: {options: equipmentBuildingRetrieveOptions, queryKey: equipmentBuildingRetrieveQueryKey},
   create: {mutation: equipmentBuildingCreateMutation, body: vEquipmentBuildingCreateBody},
   update: {mutation: equipmentBuildingPartialUpdateMutation, body: vEquipmentBuildingPartialUpdateBody},
   destroy: {mutation: equipmentBuildingDestroyMutation},
+  extras: {
+    /** `/api/equipment/building/{id}/dashboard/` */
+    dashboardRetrieve: {options: equipmentBuildingDashboardRetrieveOptions, queryKey: equipmentBuildingDashboardRetrieveQueryKey},
+  },
   reads: ['equipmentBuildingAutocompleteList', 'equipmentBuildingDashboardRetrieve', 'equipmentBuildingList', 'equipmentBuildingListForSelectList', 'equipmentBuildingRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentBuilding {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentBuildingListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentBuildingListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = EquipmentBuildingRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentBuildingCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentBuildingCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vEquipmentBuildingPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vEquipmentBuildingPartialUpdateBody>
+}
 
 /** `api/equipment/building/autocomplete` */
-export const equipmentBuildingAutocomplete = {
+export const EquipmentBuildingAutocomplete = /*#__PURE__*/ resource({
   path: 'api/equipment/building/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentBuildingAutocompleteListOptions, queryKey: equipmentBuildingAutocompleteListQueryKey},
+  filters: ['branch', 'created', 'customer', 'modified', 'name'] satisfies (keyof EquipmentBuildingAutocomplete.ListQuery)[],
+  filterTypes: {branch: 'integer', customer: 'integer'},
   reads: ['equipmentBuildingAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentBuildingAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentBuildingAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentBuildingAutocompleteListQuery>
+}
 
 /** `api/equipment/building/list_for_select` */
-export const equipmentBuildingListForSelect = {
+export const EquipmentBuildingListForSelect = /*#__PURE__*/ resource({
   path: 'api/equipment/building/list_for_select',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentBuildingListForSelectListOptions, queryKey: equipmentBuildingListForSelectListQueryKey},
+  filters: ['branch', 'created', 'customer', 'modified', 'name'] satisfies (keyof EquipmentBuildingListForSelect.ListQuery)[],
   reads: ['equipmentBuildingListForSelectList'],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentBuildingListForSelect {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentBuildingListForSelectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentBuildingListForSelectListQuery>
+}
 
 /** `api/equipment/equipment` */
-export const equipmentEquipment = {
+export const EquipmentEquipment = /*#__PURE__*/ resource({
   path: 'api/equipment/equipment',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentEquipmentListOptions, queryKey: equipmentEquipmentListQueryKey},
+  filters: ['branch', 'brand', 'customer', 'description', 'identifier', 'location', 'name', 'num_orders', 'serialnumber', 'type'] satisfies (keyof EquipmentEquipment.ListQuery)[],
   retrieve: {options: equipmentEquipmentRetrieveOptions, queryKey: equipmentEquipmentRetrieveQueryKey},
   create: {mutation: equipmentEquipmentCreateMutation, body: vEquipmentEquipmentCreateBody},
   update: {mutation: equipmentEquipmentPartialUpdateMutation, body: vEquipmentEquipmentPartialUpdateBody},
   destroy: {mutation: equipmentEquipmentDestroyMutation},
+  extras: {
+    /** `/api/equipment/equipment/{id}/create_qr/` */
+    createQrCreate: {mutation: equipmentEquipmentCreateQrCreateMutation},
+    /** `/api/equipment/equipment/{id}/dashboard/` */
+    dashboardRetrieve: {options: equipmentEquipmentDashboardRetrieveOptions, queryKey: equipmentEquipmentDashboardRetrieveQueryKey},
+    /** `/api/equipment/equipment/{uuid}/uuid/` */
+    uuidRetrieve: {options: equipmentEquipmentUuidRetrieveOptions, queryKey: equipmentEquipmentUuidRetrieveQueryKey},
+  },
   reads: ['equipmentEquipmentAutocompleteList', 'equipmentEquipmentDashboardRetrieve', 'equipmentEquipmentList', 'equipmentEquipmentRetrieve', 'equipmentEquipmentUuidRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentEquipment {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentEquipmentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentEquipmentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = EquipmentEquipmentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentEquipmentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentEquipmentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vEquipmentEquipmentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vEquipmentEquipmentPartialUpdateBody>
+}
 
 /** `api/equipment/equipment/autocomplete` */
-export const equipmentEquipmentAutocomplete = {
+export const EquipmentEquipmentAutocomplete = /*#__PURE__*/ resource({
   path: 'api/equipment/equipment/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentEquipmentAutocompleteListOptions, queryKey: equipmentEquipmentAutocompleteListQueryKey},
+  filters: ['branch', 'brand', 'customer', 'description', 'identifier', 'location', 'name', 'num_orders', 'serialnumber', 'type'] satisfies (keyof EquipmentEquipmentAutocomplete.ListQuery)[],
+  filterTypes: {branch: 'integer', customer: 'integer'},
   reads: ['equipmentEquipmentAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentEquipmentAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentEquipmentAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentEquipmentAutocompleteListQuery>
+}
 
 /** `api/equipment/equipment/create_quick` */
-export const equipmentEquipmentCreateQuick = {
+export const EquipmentEquipmentCreateQuick = /*#__PURE__*/ resource({
   path: 'api/equipment/equipment/create_quick',
   kind: 'action',
   create: {mutation: equipmentEquipmentCreateQuickCreateMutation, body: vEquipmentEquipmentCreateQuickCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentEquipmentCreateQuick {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentEquipmentCreateQuickCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentEquipmentCreateQuickCreateBody>
+}
 
 /** `api/equipment/equipment-document` */
-export const equipmentEquipmentDocument = {
+export const EquipmentEquipmentDocument = /*#__PURE__*/ resource({
   path: 'api/equipment/equipment-document',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentEquipmentDocumentListOptions, queryKey: equipmentEquipmentDocumentListQueryKey},
+  filters: ['equipment', 'equipment__branch', 'type'] satisfies (keyof EquipmentEquipmentDocument.ListQuery)[],
+  filterTypes: {equipment: 'integer', equipment__branch: 'integer'},
   retrieve: {options: equipmentEquipmentDocumentRetrieveOptions, queryKey: equipmentEquipmentDocumentRetrieveQueryKey},
   create: {mutation: equipmentEquipmentDocumentCreateMutation, body: vEquipmentEquipmentDocumentCreateBody},
   update: {mutation: equipmentEquipmentDocumentPartialUpdateMutation, body: vEquipmentEquipmentDocumentPartialUpdateBody},
   destroy: {mutation: equipmentEquipmentDocumentDestroyMutation},
   reads: ['equipmentEquipmentDocumentList', 'equipmentEquipmentDocumentRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentEquipmentDocument {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentEquipmentDocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentEquipmentDocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = EquipmentEquipmentDocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentEquipmentDocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentEquipmentDocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vEquipmentEquipmentDocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vEquipmentEquipmentDocumentPartialUpdateBody>
+}
 
 /** `api/equipment/equipment-state` */
-export const equipmentEquipmentState = {
+export const EquipmentEquipmentState = /*#__PURE__*/ resource({
   path: 'api/equipment/equipment-state',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentEquipmentStateListOptions, queryKey: equipmentEquipmentStateListQueryKey},
+  filters: ['equipment'] satisfies (keyof EquipmentEquipmentState.ListQuery)[],
+  filterTypes: {equipment: 'integer'},
   create: {mutation: equipmentEquipmentStateCreateMutation, body: vEquipmentEquipmentStateCreateBody},
   reads: ['equipmentEquipmentStateList'],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentEquipmentState {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentEquipmentStateListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentEquipmentStateListQuery>
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentEquipmentStateCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentEquipmentStateCreateBody>
+}
 
 /** `api/equipment/location` */
-export const equipmentLocation = {
+export const EquipmentLocation = /*#__PURE__*/ resource({
   path: 'api/equipment/location',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentLocationListOptions, queryKey: equipmentLocationListQueryKey},
+  filters: ['branch', 'created', 'customer', 'modified', 'name'] satisfies (keyof EquipmentLocation.ListQuery)[],
   retrieve: {options: equipmentLocationRetrieveOptions, queryKey: equipmentLocationRetrieveQueryKey},
   create: {mutation: equipmentLocationCreateMutation, body: vEquipmentLocationCreateBody},
   update: {mutation: equipmentLocationPartialUpdateMutation, body: vEquipmentLocationPartialUpdateBody},
   destroy: {mutation: equipmentLocationDestroyMutation},
+  extras: {
+    /** `/api/equipment/location/{id}/create_qr/` */
+    createQrCreate: {mutation: equipmentLocationCreateQrCreateMutation},
+    /** `/api/equipment/location/{id}/dashboard/` */
+    dashboardRetrieve: {options: equipmentLocationDashboardRetrieveOptions, queryKey: equipmentLocationDashboardRetrieveQueryKey},
+    /** `/api/equipment/location/{uuid}/uuid/` */
+    uuidRetrieve: {options: equipmentLocationUuidRetrieveOptions, queryKey: equipmentLocationUuidRetrieveQueryKey},
+  },
   reads: ['equipmentLocationAutocompleteList', 'equipmentLocationDashboardRetrieve', 'equipmentLocationList', 'equipmentLocationListForSelectList', 'equipmentLocationRetrieve', 'equipmentLocationUuidRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentLocation {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentLocationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentLocationListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = EquipmentLocationRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentLocationCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentLocationCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vEquipmentLocationPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vEquipmentLocationPartialUpdateBody>
+}
 
 /** `api/equipment/location/autocomplete` */
-export const equipmentLocationAutocomplete = {
+export const EquipmentLocationAutocomplete = /*#__PURE__*/ resource({
   path: 'api/equipment/location/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentLocationAutocompleteListOptions, queryKey: equipmentLocationAutocompleteListQueryKey},
+  filters: ['branch', 'created', 'customer', 'modified', 'name'] satisfies (keyof EquipmentLocationAutocomplete.ListQuery)[],
+  filterTypes: {branch: 'integer', customer: 'integer'},
   reads: ['equipmentLocationAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentLocationAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentLocationAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentLocationAutocompleteListQuery>
+}
 
 /** `api/equipment/location/create_quick` */
-export const equipmentLocationCreateQuick = {
+export const EquipmentLocationCreateQuick = /*#__PURE__*/ resource({
   path: 'api/equipment/location/create_quick',
   kind: 'action',
   create: {mutation: equipmentLocationCreateQuickCreateMutation, body: vEquipmentLocationCreateQuickCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentLocationCreateQuick {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentLocationCreateQuickCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentLocationCreateQuickCreateBody>
+}
 
 /** `api/equipment/location-document` */
-export const equipmentLocationDocument = {
+export const EquipmentLocationDocument = /*#__PURE__*/ resource({
   path: 'api/equipment/location-document',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentLocationDocumentListOptions, queryKey: equipmentLocationDocumentListQueryKey},
+  filters: ['location'] satisfies (keyof EquipmentLocationDocument.ListQuery)[],
+  filterTypes: {location: 'integer'},
   retrieve: {options: equipmentLocationDocumentRetrieveOptions, queryKey: equipmentLocationDocumentRetrieveQueryKey},
   create: {mutation: equipmentLocationDocumentCreateMutation, body: vEquipmentLocationDocumentCreateBody},
   update: {mutation: equipmentLocationDocumentPartialUpdateMutation, body: vEquipmentLocationDocumentPartialUpdateBody},
   destroy: {mutation: equipmentLocationDocumentDestroyMutation},
   reads: ['equipmentLocationDocumentList', 'equipmentLocationDocumentRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentLocationDocument {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentLocationDocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentLocationDocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = EquipmentLocationDocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vEquipmentLocationDocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vEquipmentLocationDocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vEquipmentLocationDocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vEquipmentLocationDocumentPartialUpdateBody>
+}
 
 /** `api/equipment/location/list_for_select` */
-export const equipmentLocationListForSelect = {
+export const EquipmentLocationListForSelect = /*#__PURE__*/ resource({
   path: 'api/equipment/location/list_for_select',
   kind: 'collection',
   id: 'number',
   list: {options: equipmentLocationListForSelectListOptions, queryKey: equipmentLocationListForSelectListQueryKey},
+  filters: ['branch', 'created', 'customer', 'modified', 'name'] satisfies (keyof EquipmentLocationListForSelect.ListQuery)[],
+  filterTypes: {branch: 'integer', customer: 'integer'},
   reads: ['equipmentLocationListForSelectList'],
-} as const satisfies Resource
+})
+
+export declare namespace EquipmentLocationListForSelect {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentLocationListForSelectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentLocationListForSelectListQuery>
+}
+
+/** `api/importing/import` */
+export const ImportingImport = /*#__PURE__*/ resource({
+  path: 'api/importing/import',
+  kind: 'collection',
+  id: 'number',
+  list: {options: importingImportListOptions, queryKey: importingImportListQueryKey},
+  filters: [],
+  retrieve: {options: importingImportRetrieveOptions, queryKey: importingImportRetrieveQueryKey},
+  create: {mutation: importingImportCreateMutation, body: vImportingImportCreateBody},
+  update: {mutation: importingImportPartialUpdateMutation, body: vImportingImportPartialUpdateBody},
+  destroy: {mutation: importingImportDestroyMutation},
+  extras: {
+    /** `/api/importing/import/{id}/do/` */
+    doCreate: {mutation: importingImportDoCreateMutation},
+    /** `/api/importing/import/{id}/preview/` */
+    previewRetrieve: {options: importingImportPreviewRetrieveOptions, queryKey: importingImportPreviewRetrieveQueryKey},
+    /** `/api/importing/import/{id}/revert/` */
+    revertCreate: {mutation: importingImportRevertCreateMutation},
+  },
+  reads: ['importingImportGetAllowedExtensionsRetrieve', 'importingImportGetLookupFieldsRetrieve', 'importingImportList', 'importingImportPreviewRetrieve', 'importingImportRequiredRetrieve', 'importingImportRetrieve'],
+})
+
+export declare namespace ImportingImport {
+  /** What `list` answers with. */
+  export type ListResponse = ImportingImportListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vImportingImportListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = ImportingImportRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vImportingImportCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vImportingImportCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vImportingImportPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vImportingImportPartialUpdateBody>
+}
 
 /** `api/inventory/inventory-locations` */
-export const inventoryInventoryLocations = {
+export const InventoryInventoryLocations = /*#__PURE__*/ resource({
   path: 'api/inventory/inventory-locations',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryInventoryLocationsListOptions, queryKey: inventoryInventoryLocationsListQueryKey},
+  filters: [],
   reads: ['inventoryInventoryLocationsList'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryInventoryLocations {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryInventoryLocationsListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryInventoryLocationsListQuery>
+}
 
 /** `api/inventory/inventory-locations-for-material` */
-export const inventoryInventoryLocationsForMaterial = {
+export const InventoryInventoryLocationsForMaterial = /*#__PURE__*/ resource({
   path: 'api/inventory/inventory-locations-for-material',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryInventoryLocationsForMaterialListOptions, queryKey: inventoryInventoryLocationsForMaterialListQueryKey},
+  filters: ['material'] satisfies (keyof InventoryInventoryLocationsForMaterial.ListQuery)[],
+  filterTypes: {material: 'integer'},
   reads: ['inventoryInventoryLocationsForMaterialList'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryInventoryLocationsForMaterial {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryInventoryLocationsForMaterialListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryInventoryLocationsForMaterialListQuery>
+}
 
 /** `api/inventory/inventory-materials` */
-export const inventoryInventoryMaterials = {
+export const InventoryInventoryMaterials = /*#__PURE__*/ resource({
   path: 'api/inventory/inventory-materials',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryInventoryMaterialsListOptions, queryKey: inventoryInventoryMaterialsListQueryKey},
+  filters: [],
   reads: ['inventoryInventoryMaterialsList'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryInventoryMaterials {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryInventoryMaterialsListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryInventoryMaterialsListQuery>
+}
 
 /** `api/inventory/inventory-materials-for-location` */
-export const inventoryInventoryMaterialsForLocation = {
+export const InventoryInventoryMaterialsForLocation = /*#__PURE__*/ resource({
   path: 'api/inventory/inventory-materials-for-location',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryInventoryMaterialsForLocationListOptions, queryKey: inventoryInventoryMaterialsForLocationListQueryKey},
+  filters: ['location'] satisfies (keyof InventoryInventoryMaterialsForLocation.ListQuery)[],
+  filterTypes: {location: 'integer'},
   reads: ['inventoryInventoryMaterialsForLocationList'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryInventoryMaterialsForLocation {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryInventoryMaterialsForLocationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryInventoryMaterialsForLocationListQuery>
+}
 
 /** `api/inventory/material` */
-export const inventoryMaterial = {
+export const InventoryMaterial = /*#__PURE__*/ resource({
   path: 'api/inventory/material',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryMaterialListOptions, queryKey: inventoryMaterialListQueryKey},
+  filters: ['supplier_relation'] satisfies (keyof InventoryMaterial.ListQuery)[],
+  filterTypes: {supplier_relation: 'integer'},
   retrieve: {options: inventoryMaterialRetrieveOptions, queryKey: inventoryMaterialRetrieveQueryKey},
   create: {mutation: inventoryMaterialCreateMutation, body: vInventoryMaterialCreateBody},
   update: {mutation: inventoryMaterialPartialUpdateMutation, body: vInventoryMaterialPartialUpdateBody},
   destroy: {mutation: inventoryMaterialDestroyMutation},
+  extras: {
+    /** `/api/inventory/material/{id}/move/` */
+    moveCreate: {mutation: inventoryMaterialMoveCreateMutation, body: vInventoryMaterialMoveCreateBody},
+  },
   reads: ['inventoryMaterialAutocompleteList', 'inventoryMaterialList', 'inventoryMaterialRetrieve', 'inventoryMaterialStatsTableRetrieve', 'inventoryMaterialTotalSalesPerCustomerRetrieve', 'inventoryMaterialTotalSalesPerMaterialCustomerRetrieve', 'inventoryMaterialTotalSalesPerSupplierPerMaterialRetrieve', 'inventoryMaterialTotalSalesPerSupplierRetrieve', 'inventoryMaterialTotalSalesRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryMaterial {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryMaterialListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryMaterialListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryMaterialRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryMaterialCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryMaterialCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryMaterialPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryMaterialPartialUpdateBody>
+}
 
 /** `api/inventory/material/autocomplete` */
-export const inventoryMaterialAutocomplete = {
+export const InventoryMaterialAutocomplete = /*#__PURE__*/ resource({
   path: 'api/inventory/material/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryMaterialAutocompleteListOptions, queryKey: inventoryMaterialAutocompleteListQueryKey},
+  filters: ['supplier', 'supplier_relation', 'use_latest_year', 'year'] satisfies (keyof InventoryMaterialAutocomplete.ListQuery)[],
+  filterTypes: {supplier: 'integer', supplier_relation: 'integer', use_latest_year: 'boolean', year: 'integer'},
   reads: ['inventoryMaterialAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryMaterialAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryMaterialAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryMaterialAutocompleteListQuery>
+}
 
 /** `api/inventory/purchaseorder` */
-export const inventoryPurchaseorder = {
+export const InventoryPurchaseorder = /*#__PURE__*/ resource({
   path: 'api/inventory/purchaseorder',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryPurchaseorderListOptions, queryKey: inventoryPurchaseorderListQueryKey},
+  filters: [],
   retrieve: {options: inventoryPurchaseorderRetrieveOptions, queryKey: inventoryPurchaseorderRetrieveQueryKey},
   create: {mutation: inventoryPurchaseorderCreateMutation, body: vInventoryPurchaseorderCreateBody},
   update: {mutation: inventoryPurchaseorderPartialUpdateMutation, body: vInventoryPurchaseorderPartialUpdateBody},
   destroy: {mutation: inventoryPurchaseorderDestroyMutation},
+  extras: {
+    /** `/api/inventory/purchaseorder/{id}/with-materials/` */
+    withMaterialsPartialUpdate: {mutation: inventoryPurchaseorderWithMaterialsPartialUpdateMutation, body: vInventoryPurchaseorderWithMaterialsPartialUpdateBody},
+  },
   reads: ['inventoryPurchaseorderList', 'inventoryPurchaseorderRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryPurchaseorder {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryPurchaseorderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryPurchaseorderListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryPurchaseorderRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryPurchaseorderPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryPurchaseorderPartialUpdateBody>
+}
 
 /** `api/inventory/purchaseorder-entry` */
-export const inventoryPurchaseorderEntry = {
+export const InventoryPurchaseorderEntry = /*#__PURE__*/ resource({
   path: 'api/inventory/purchaseorder-entry',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryPurchaseorderEntryListOptions, queryKey: inventoryPurchaseorderEntryListQueryKey},
+  filters: ['purchase_order_material'] satisfies (keyof InventoryPurchaseorderEntry.ListQuery)[],
+  filterTypes: {purchase_order_material: 'integer'},
   retrieve: {options: inventoryPurchaseorderEntryRetrieveOptions, queryKey: inventoryPurchaseorderEntryRetrieveQueryKey},
   create: {mutation: inventoryPurchaseorderEntryCreateMutation, body: vInventoryPurchaseorderEntryCreateBody},
   update: {mutation: inventoryPurchaseorderEntryPartialUpdateMutation, body: vInventoryPurchaseorderEntryPartialUpdateBody},
   destroy: {mutation: inventoryPurchaseorderEntryDestroyMutation},
   reads: ['inventoryPurchaseorderEntryList', 'inventoryPurchaseorderEntryRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryPurchaseorderEntry {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryPurchaseorderEntryListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryPurchaseorderEntryListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryPurchaseorderEntryRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderEntryCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderEntryCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryPurchaseorderEntryPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryPurchaseorderEntryPartialUpdateBody>
+}
 
 /** `api/inventory/purchaseorder-entry/bulk` */
-export const inventoryPurchaseorderEntryBulk = {
+export const InventoryPurchaseorderEntryBulk = /*#__PURE__*/ resource({
   path: 'api/inventory/purchaseorder-entry/bulk',
   kind: 'action',
   create: {mutation: inventoryPurchaseorderEntryBulkCreateMutation, body: vInventoryPurchaseorderEntryBulkCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryPurchaseorderEntryBulk {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderEntryBulkCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderEntryBulkCreateBody>
+}
 
 /** `api/inventory/purchaseorder-material` */
-export const inventoryPurchaseorderMaterial = {
+export const InventoryPurchaseorderMaterial = /*#__PURE__*/ resource({
   path: 'api/inventory/purchaseorder-material',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryPurchaseorderMaterialListOptions, queryKey: inventoryPurchaseorderMaterialListQueryKey},
+  filters: ['purchase_order'] satisfies (keyof InventoryPurchaseorderMaterial.ListQuery)[],
+  filterTypes: {purchase_order: 'integer'},
   retrieve: {options: inventoryPurchaseorderMaterialRetrieveOptions, queryKey: inventoryPurchaseorderMaterialRetrieveQueryKey},
   create: {mutation: inventoryPurchaseorderMaterialCreateMutation, body: vInventoryPurchaseorderMaterialCreateBody},
   update: {mutation: inventoryPurchaseorderMaterialPartialUpdateMutation, body: vInventoryPurchaseorderMaterialPartialUpdateBody},
   destroy: {mutation: inventoryPurchaseorderMaterialDestroyMutation},
   reads: ['inventoryPurchaseorderMaterialList', 'inventoryPurchaseorderMaterialRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryPurchaseorderMaterial {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryPurchaseorderMaterialListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryPurchaseorderMaterialListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryPurchaseorderMaterialRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderMaterialCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderMaterialCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryPurchaseorderMaterialPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryPurchaseorderMaterialPartialUpdateBody>
+}
 
 /** `api/inventory/purchaseorder-status` */
-export const inventoryPurchaseorderStatus = {
+export const InventoryPurchaseorderStatus = /*#__PURE__*/ resource({
   path: 'api/inventory/purchaseorder-status',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryPurchaseorderStatusListOptions, queryKey: inventoryPurchaseorderStatusListQueryKey},
+  filters: ['purchase_order'] satisfies (keyof InventoryPurchaseorderStatus.ListQuery)[],
+  filterTypes: {purchase_order: 'integer'},
   retrieve: {options: inventoryPurchaseorderStatusRetrieveOptions, queryKey: inventoryPurchaseorderStatusRetrieveQueryKey},
   create: {mutation: inventoryPurchaseorderStatusCreateMutation, body: vInventoryPurchaseorderStatusCreateBody},
   update: {mutation: inventoryPurchaseorderStatusPartialUpdateMutation, body: vInventoryPurchaseorderStatusPartialUpdateBody},
   destroy: {mutation: inventoryPurchaseorderStatusDestroyMutation},
   reads: ['inventoryPurchaseorderStatusList', 'inventoryPurchaseorderStatusRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryPurchaseorderStatus {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryPurchaseorderStatusListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryPurchaseorderStatusListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryPurchaseorderStatusRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderStatusCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderStatusCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryPurchaseorderStatusPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryPurchaseorderStatusPartialUpdateBody>
+}
 
 /** `api/inventory/purchaseorder/with-materials` */
-export const inventoryPurchaseorderWithMaterials = {
+export const InventoryPurchaseorderWithMaterials = /*#__PURE__*/ resource({
   path: 'api/inventory/purchaseorder/with-materials',
   kind: 'action',
   create: {mutation: inventoryPurchaseorderWithMaterialsCreateMutation, body: vInventoryPurchaseorderWithMaterialsCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryPurchaseorderWithMaterials {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryPurchaseorderWithMaterialsCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryPurchaseorderWithMaterialsCreateBody>
+}
 
 /** `api/inventory/stock-location` */
-export const inventoryStockLocation = {
+export const InventoryStockLocation = /*#__PURE__*/ resource({
   path: 'api/inventory/stock-location',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryStockLocationListOptions, queryKey: inventoryStockLocationListQueryKey},
+  filters: [],
   retrieve: {options: inventoryStockLocationRetrieveOptions, queryKey: inventoryStockLocationRetrieveQueryKey},
   create: {mutation: inventoryStockLocationCreateMutation, body: vInventoryStockLocationCreateBody},
   update: {mutation: inventoryStockLocationPartialUpdateMutation, body: vInventoryStockLocationPartialUpdateBody},
   destroy: {mutation: inventoryStockLocationDestroyMutation},
   reads: ['inventoryStockLocationList', 'inventoryStockLocationRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryStockLocation {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryStockLocationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryStockLocationListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventoryStockLocationRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryStockLocationCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryStockLocationCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventoryStockLocationPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventoryStockLocationPartialUpdateBody>
+}
 
 /** `api/inventory/stockmutationsimple-list` */
-export const inventoryStockmutationsimpleList = {
+export const InventoryStockmutationsimpleList = /*#__PURE__*/ resource({
   path: 'api/inventory/stockmutationsimple-list',
   kind: 'collection',
   id: 'number',
   list: {options: inventoryStockmutationsimpleListListOptions, queryKey: inventoryStockmutationsimpleListListQueryKey},
+  filters: [],
   create: {mutation: inventoryStockmutationsimpleListCreateMutation, body: vInventoryStockmutationsimpleListCreateBody},
   reads: ['inventoryStockmutationsimpleListList'],
-} as const satisfies Resource
+})
+
+export declare namespace InventoryStockmutationsimpleList {
+  /** What `list` answers with. */
+  export type ListResponse = InventoryStockmutationsimpleListListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventoryStockmutationsimpleListListQuery>
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventoryStockmutationsimpleListCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventoryStockmutationsimpleListCreateBody>
+}
 
 /** `api/inventory/supplier` */
-export const inventorySupplier = {
+export const InventorySupplier = /*#__PURE__*/ resource({
   path: 'api/inventory/supplier',
   kind: 'collection',
   id: 'number',
   list: {options: inventorySupplierListOptions, queryKey: inventorySupplierListQueryKey},
+  filters: [],
   retrieve: {options: inventorySupplierRetrieveOptions, queryKey: inventorySupplierRetrieveQueryKey},
   create: {mutation: inventorySupplierCreateMutation, body: vInventorySupplierCreateBody},
   update: {mutation: inventorySupplierPartialUpdateMutation, body: vInventorySupplierPartialUpdateBody},
   destroy: {mutation: inventorySupplierDestroyMutation},
   reads: ['inventorySupplierAutocompleteList', 'inventorySupplierList', 'inventorySupplierRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace InventorySupplier {
+  /** What `list` answers with. */
+  export type ListResponse = InventorySupplierListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventorySupplierListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventorySupplierRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventorySupplierCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventorySupplierCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventorySupplierPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventorySupplierPartialUpdateBody>
+}
 
 /** `api/inventory/supplier/autocomplete` */
-export const inventorySupplierAutocomplete = {
+export const InventorySupplierAutocomplete = /*#__PURE__*/ resource({
   path: 'api/inventory/supplier/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: inventorySupplierAutocompleteListOptions, queryKey: inventorySupplierAutocompleteListQueryKey},
+  filters: [],
   reads: ['inventorySupplierAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace InventorySupplierAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = InventorySupplierAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventorySupplierAutocompleteListQuery>
+}
 
 /** `api/inventory/supplier-reservation` */
-export const inventorySupplierReservation = {
+export const InventorySupplierReservation = /*#__PURE__*/ resource({
   path: 'api/inventory/supplier-reservation',
   kind: 'collection',
   id: 'number',
   list: {options: inventorySupplierReservationListOptions, queryKey: inventorySupplierReservationListQueryKey},
+  filters: ['supplier'] satisfies (keyof InventorySupplierReservation.ListQuery)[],
+  filterTypes: {supplier: 'integer'},
   retrieve: {options: inventorySupplierReservationRetrieveOptions, queryKey: inventorySupplierReservationRetrieveQueryKey},
   create: {mutation: inventorySupplierReservationCreateMutation, body: vInventorySupplierReservationCreateBody},
   update: {mutation: inventorySupplierReservationPartialUpdateMutation, body: vInventorySupplierReservationPartialUpdateBody},
   destroy: {mutation: inventorySupplierReservationDestroyMutation},
+  extras: {
+    /** `/api/inventory/supplier-reservation/{id}/with-materials/` */
+    withMaterialsPartialUpdate: {mutation: inventorySupplierReservationWithMaterialsPartialUpdateMutation, body: vInventorySupplierReservationWithMaterialsPartialUpdateBody},
+  },
   reads: ['inventorySupplierReservationAutocompleteList', 'inventorySupplierReservationList', 'inventorySupplierReservationRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace InventorySupplierReservation {
+  /** What `list` answers with. */
+  export type ListResponse = InventorySupplierReservationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventorySupplierReservationListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventorySupplierReservationRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventorySupplierReservationCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventorySupplierReservationCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventorySupplierReservationPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventorySupplierReservationPartialUpdateBody>
+}
 
 /** `api/inventory/supplier-reservation/autocomplete` */
-export const inventorySupplierReservationAutocomplete = {
+export const InventorySupplierReservationAutocomplete = /*#__PURE__*/ resource({
   path: 'api/inventory/supplier-reservation/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: inventorySupplierReservationAutocompleteListOptions, queryKey: inventorySupplierReservationAutocompleteListQueryKey},
+  filters: ['supplier'] satisfies (keyof InventorySupplierReservationAutocomplete.ListQuery)[],
+  filterTypes: {supplier: 'integer'},
   reads: ['inventorySupplierReservationAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace InventorySupplierReservationAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = InventorySupplierReservationAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventorySupplierReservationAutocompleteListQuery>
+}
 
 /** `api/inventory/supplier-reservation/with-materials` */
-export const inventorySupplierReservationWithMaterials = {
+export const InventorySupplierReservationWithMaterials = /*#__PURE__*/ resource({
   path: 'api/inventory/supplier-reservation/with-materials',
   kind: 'action',
   create: {mutation: inventorySupplierReservationWithMaterialsCreateMutation, body: vInventorySupplierReservationWithMaterialsCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace InventorySupplierReservationWithMaterials {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventorySupplierReservationWithMaterialsCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventorySupplierReservationWithMaterialsCreateBody>
+}
 
 /** `api/inventory/supplier-reservationmaterial` */
-export const inventorySupplierReservationmaterial = {
+export const InventorySupplierReservationmaterial = /*#__PURE__*/ resource({
   path: 'api/inventory/supplier-reservationmaterial',
   kind: 'collection',
   id: 'number',
   list: {options: inventorySupplierReservationmaterialListOptions, queryKey: inventorySupplierReservationmaterialListQueryKey},
+  filters: ['material', 'reservation'] satisfies (keyof InventorySupplierReservationmaterial.ListQuery)[],
+  filterTypes: {material: 'integer', reservation: 'integer'},
   retrieve: {options: inventorySupplierReservationmaterialRetrieveOptions, queryKey: inventorySupplierReservationmaterialRetrieveQueryKey},
   create: {mutation: inventorySupplierReservationmaterialCreateMutation, body: vInventorySupplierReservationmaterialCreateBody},
   update: {mutation: inventorySupplierReservationmaterialPartialUpdateMutation, body: vInventorySupplierReservationmaterialPartialUpdateBody},
   destroy: {mutation: inventorySupplierReservationmaterialDestroyMutation},
   reads: ['inventorySupplierReservationmaterialList', 'inventorySupplierReservationmaterialRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace InventorySupplierReservationmaterial {
+  /** What `list` answers with. */
+  export type ListResponse = InventorySupplierReservationmaterialListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInventorySupplierReservationmaterialListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InventorySupplierReservationmaterialRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInventorySupplierReservationmaterialCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInventorySupplierReservationmaterialCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInventorySupplierReservationmaterialPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInventorySupplierReservationmaterialPartialUpdateBody>
+}
 
 /** `api/invoice/email` */
-export const invoiceEmail = {
+export const InvoiceEmail = /*#__PURE__*/ resource({
   path: 'api/invoice/email',
   kind: 'collection',
   id: 'number',
   list: {options: invoiceEmailListOptions, queryKey: invoiceEmailListQueryKey},
+  filters: [],
   retrieve: {options: invoiceEmailRetrieveOptions, queryKey: invoiceEmailRetrieveQueryKey},
   create: {mutation: invoiceEmailCreateMutation, body: vInvoiceEmailCreateBody},
   update: {mutation: invoiceEmailPartialUpdateMutation, body: vInvoiceEmailPartialUpdateBody},
   destroy: {mutation: invoiceEmailDestroyMutation},
   reads: ['invoiceEmailGetDocumentsList', 'invoiceEmailGetUnsentEmailRetrieve', 'invoiceEmailList', 'invoiceEmailRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace InvoiceEmail {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceEmailListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceEmailListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InvoiceEmailRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoiceEmailCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoiceEmailCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInvoiceEmailPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInvoiceEmailPartialUpdateBody>
+}
 
 /** `api/invoice/email/get_documents` */
-export const invoiceEmailGetDocuments = {
+export const InvoiceEmailGetDocuments = /*#__PURE__*/ resource({
   path: 'api/invoice/email/get_documents',
   kind: 'collection',
   id: 'number',
   list: {options: invoiceEmailGetDocumentsListOptions, queryKey: invoiceEmailGetDocumentsListQueryKey},
   reads: ['invoiceEmailGetDocumentsList'],
-} as const satisfies Resource
+})
+
+export declare namespace InvoiceEmailGetDocuments {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceEmailGetDocumentsListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceEmailGetDocumentsListQuery>
+}
 
 /** `api/invoice/invoice` */
-export const invoiceInvoice = {
+export const InvoiceInvoice = /*#__PURE__*/ resource({
   path: 'api/invoice/invoice',
   kind: 'collection',
   id: 'number',
   list: {options: invoiceInvoiceListOptions, queryKey: invoiceInvoiceListQueryKey},
+  filters: ['order'] satisfies (keyof InvoiceInvoice.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: invoiceInvoiceRetrieveOptions, queryKey: invoiceInvoiceRetrieveQueryKey},
   create: {mutation: invoiceInvoiceCreateMutation, body: vInvoiceInvoiceCreateBody},
   update: {mutation: invoiceInvoicePartialUpdateMutation, body: vInvoiceInvoicePartialUpdateBody},
   destroy: {mutation: invoiceInvoiceDestroyMutation},
+  extras: {
+    /** `/api/invoice/invoice/{id}/download_pdf/` */
+    downloadPdfCreate: {mutation: invoiceInvoiceDownloadPdfCreateMutation},
+    /** `/api/invoice/invoice/{id}/generate_preview_pdf/` */
+    generatePreviewPdfCreate: {mutation: invoiceInvoiceGeneratePreviewPdfCreateMutation},
+    /** `/api/invoice/invoice/{id}/make_definitive/` */
+    makeDefinitiveCreate: {mutation: invoiceInvoiceMakeDefinitiveCreateMutation},
+    /** `/api/invoice/invoice/{id}/recreate_pdf/` */
+    recreatePdfCreate: {mutation: invoiceInvoiceRecreatePdfCreateMutation},
+  },
   reads: ['invoiceInvoiceAutocompleteList', 'invoiceInvoiceDataRetrieve', 'invoiceInvoiceList', 'invoiceInvoicePreliminaryList', 'invoiceInvoiceRetrieve', 'invoiceInvoiceSentList'],
-} as const satisfies Resource
+})
+
+export declare namespace InvoiceInvoice {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceInvoiceListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceInvoiceListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InvoiceInvoiceRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoiceInvoiceCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoiceInvoiceCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInvoiceInvoicePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInvoiceInvoicePartialUpdateBody>
+}
 
 /** `api/invoice/invoice/autocomplete` */
-export const invoiceInvoiceAutocomplete = {
+export const InvoiceInvoiceAutocomplete = /*#__PURE__*/ resource({
   path: 'api/invoice/invoice/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: invoiceInvoiceAutocompleteListOptions, queryKey: invoiceInvoiceAutocompleteListQueryKey},
+  filters: ['order'] satisfies (keyof InvoiceInvoiceAutocomplete.ListQuery)[],
+  filterTypes: {order: 'integer'},
   reads: ['invoiceInvoiceAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace InvoiceInvoiceAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceInvoiceAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceInvoiceAutocompleteListQuery>
+}
 
 /** `api/invoice/invoice-line` */
-export const invoiceInvoiceLine = {
+export const InvoiceInvoiceLine = /*#__PURE__*/ resource({
   path: 'api/invoice/invoice-line',
   kind: 'collection',
   id: 'number',
   list: {options: invoiceInvoiceLineListOptions, queryKey: invoiceInvoiceLineListQueryKey},
+  filters: ['invoice'] satisfies (keyof InvoiceInvoiceLine.ListQuery)[],
+  filterTypes: {invoice: 'integer'},
   retrieve: {options: invoiceInvoiceLineRetrieveOptions, queryKey: invoiceInvoiceLineRetrieveQueryKey},
   create: {mutation: invoiceInvoiceLineCreateMutation, body: vInvoiceInvoiceLineCreateBody},
   update: {mutation: invoiceInvoiceLinePartialUpdateMutation, body: vInvoiceInvoiceLinePartialUpdateBody},
   destroy: {mutation: invoiceInvoiceLineDestroyMutation},
   reads: ['invoiceInvoiceLineList', 'invoiceInvoiceLineRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace InvoiceInvoiceLine {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceInvoiceLineListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceInvoiceLineListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InvoiceInvoiceLineRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoiceInvoiceLineCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoiceInvoiceLineCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInvoiceInvoiceLinePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInvoiceInvoiceLinePartialUpdateBody>
+}
+
+/** `api/invoice/invoice-line/invoice` */
+export const InvoiceInvoiceLineInvoice = /*#__PURE__*/ resource({
+  path: 'api/invoice/invoice-line/invoice',
+  kind: 'collection',
+  id: 'number',
+  create: {mutation: invoiceInvoiceLineInvoiceCreateMutation, body: vInvoiceInvoiceLineInvoiceCreateBody},
+  reads: [],
+})
+
+export declare namespace InvoiceInvoiceLineInvoice {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoiceInvoiceLineInvoiceCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoiceInvoiceLineInvoiceCreateBody>
+}
 
 /** `api/invoice/invoice/preliminary` */
-export const invoiceInvoicePreliminary = {
+export const InvoiceInvoicePreliminary = /*#__PURE__*/ resource({
   path: 'api/invoice/invoice/preliminary',
   kind: 'collection',
   id: 'number',
   list: {options: invoiceInvoicePreliminaryListOptions, queryKey: invoiceInvoicePreliminaryListQueryKey},
+  filters: ['order'] satisfies (keyof InvoiceInvoicePreliminary.ListQuery)[],
+  filterTypes: {order: 'integer'},
   reads: ['invoiceInvoicePreliminaryList'],
-} as const satisfies Resource
+})
+
+export declare namespace InvoiceInvoicePreliminary {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceInvoicePreliminaryListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceInvoicePreliminaryListQuery>
+}
 
 /** `api/invoice/invoice/sent` */
-export const invoiceInvoiceSent = {
+export const InvoiceInvoiceSent = /*#__PURE__*/ resource({
   path: 'api/invoice/invoice/sent',
   kind: 'collection',
   id: 'number',
   list: {options: invoiceInvoiceSentListOptions, queryKey: invoiceInvoiceSentListQueryKey},
+  filters: ['order'] satisfies (keyof InvoiceInvoiceSent.ListQuery)[],
+  filterTypes: {order: 'integer'},
   reads: ['invoiceInvoiceSentList'],
-} as const satisfies Resource
+})
+
+export declare namespace InvoiceInvoiceSent {
+  /** What `list` answers with. */
+  export type ListResponse = InvoiceInvoiceSentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoiceInvoiceSentListQuery>
+}
 
 /** `api/invoice/invoice-status` */
-export const invoiceInvoiceStatus = {
+export const InvoiceInvoiceStatus = /*#__PURE__*/ resource({
   path: 'api/invoice/invoice-status',
   kind: 'action',
   create: {mutation: invoiceInvoiceStatusCreateMutation, body: vInvoiceInvoiceStatusCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace InvoiceInvoiceStatus {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoiceInvoiceStatusCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoiceInvoiceStatusCreateBody>
+}
 
 /** `api/invoice/purchase` */
-export const invoicePurchase = {
+export const InvoicePurchase = /*#__PURE__*/ resource({
   path: 'api/invoice/purchase',
   kind: 'collection',
   id: 'number',
   list: {options: invoicePurchaseListOptions, queryKey: invoicePurchaseListQueryKey},
+  filters: ['order'] satisfies (keyof InvoicePurchase.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: invoicePurchaseRetrieveOptions, queryKey: invoicePurchaseRetrieveQueryKey},
   create: {mutation: invoicePurchaseCreateMutation, body: vInvoicePurchaseCreateBody},
   update: {mutation: invoicePurchasePartialUpdateMutation, body: vInvoicePurchasePartialUpdateBody},
   destroy: {mutation: invoicePurchaseDestroyMutation},
   reads: ['invoicePurchaseList', 'invoicePurchaseRetrieve', 'invoicePurchaseYearList'],
-} as const satisfies Resource
+})
+
+export declare namespace InvoicePurchase {
+  /** What `list` answers with. */
+  export type ListResponse = InvoicePurchaseListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoicePurchaseListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = InvoicePurchaseRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vInvoicePurchaseCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vInvoicePurchaseCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vInvoicePurchasePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vInvoicePurchasePartialUpdateBody>
+}
 
 /** `api/invoice/purchase/year` */
-export const invoicePurchaseYear = {
+export const InvoicePurchaseYear = /*#__PURE__*/ resource({
   path: 'api/invoice/purchase/year',
   kind: 'collection',
   id: 'number',
   list: {options: invoicePurchaseYearListOptions, queryKey: invoicePurchaseYearListQueryKey},
+  filters: ['order', 'year'] satisfies (keyof InvoicePurchaseYear.ListQuery)[],
+  filterTypes: {order: 'integer', year: 'integer'},
   reads: ['invoicePurchaseYearList'],
-} as const satisfies Resource
+})
+
+export declare namespace InvoicePurchaseYear {
+  /** What `list` answers with. */
+  export type ListResponse = InvoicePurchaseYearListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vInvoicePurchaseYearListQuery>
+}
 
 /** `api/jwt-token` */
-export const jwtToken = {
+export const JwtToken = /*#__PURE__*/ resource({
   path: 'api/jwt-token',
   kind: 'action',
   create: {mutation: jwtTokenCreateMutation, body: vJwtTokenCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace JwtToken {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vJwtTokenCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vJwtTokenCreateBody>
+}
 
 /** `api/jwt-token/refresh` */
-export const jwtTokenRefresh = {
+export const JwtTokenRefresh = /*#__PURE__*/ resource({
   path: 'api/jwt-token/refresh',
   kind: 'action',
   create: {mutation: jwtTokenRefreshCreateMutation, body: vJwtTokenRefreshCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace JwtTokenRefresh {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vJwtTokenRefreshCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vJwtTokenRefreshCreateBody>
+}
 
 /** `api/location-to-address` */
-export const locationToAddress = {
+export const LocationToAddress = /*#__PURE__*/ resource({
   path: 'api/location-to-address',
   kind: 'action',
   create: {mutation: locationToAddressCreateMutation, body: vLocationToAddressCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace LocationToAddress {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vLocationToAddressCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vLocationToAddressCreateBody>
+}
 
 /** `api/member/contract` */
-export const memberContract = {
+export const MemberContract = /*#__PURE__*/ resource({
   path: 'api/member/contract',
   kind: 'collection',
   id: 'number',
   list: {options: memberContractListOptions, queryKey: memberContractListQueryKey},
+  filters: ['name'] satisfies (keyof MemberContract.ListQuery)[],
   retrieve: {options: memberContractRetrieveOptions, queryKey: memberContractRetrieveQueryKey},
   create: {mutation: memberContractCreateMutation, body: vMemberContractCreateBody},
   update: {mutation: memberContractPartialUpdateMutation, body: vMemberContractPartialUpdateBody},
   destroy: {mutation: memberContractDestroyMutation},
   reads: ['memberContractList', 'memberContractRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MemberContract {
+  /** What `list` answers with. */
+  export type ListResponse = MemberContractListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberContractListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MemberContractRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMemberContractCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMemberContractCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberContractPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberContractPartialUpdateBody>
+}
 
 /** `api/member/get-module-data` */
-export const memberGetModuleData = {
+export const MemberGetModuleData = /*#__PURE__*/ resource({
   path: 'api/member/get-module-data',
   kind: 'collection',
   id: 'number',
   list: {options: memberGetModuleDataListOptions, queryKey: memberGetModuleDataListQueryKey},
   reads: ['memberGetModuleDataList'],
-} as const satisfies Resource
+})
+
+export declare namespace MemberGetModuleData {
+  /** What `list` answers with. */
+  export type ListResponse = MemberGetModuleDataListResponse
+}
 
 /** `api/member/list-public` */
-export const memberListPublic = {
+export const MemberListPublic = /*#__PURE__*/ resource({
   path: 'api/member/list-public',
   kind: 'collection',
   id: 'number',
   list: {options: memberListPublicListOptions, queryKey: memberListPublicListQueryKey},
+  filters: [],
   reads: ['memberListPublicList'],
-} as const satisfies Resource
+})
+
+export declare namespace MemberListPublic {
+  /** What `list` answers with. */
+  export type ListResponse = MemberListPublicListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberListPublicListQuery>
+}
 
 /** `api/member/list-public-branches` */
-export const memberListPublicBranches = {
+export const MemberListPublicBranches = /*#__PURE__*/ resource({
   path: 'api/member/list-public-branches',
   kind: 'collection',
   id: 'number',
   list: {options: memberListPublicBranchesListOptions, queryKey: memberListPublicBranchesListQueryKey},
+  filters: [],
   reads: ['memberListPublicBranchesList'],
-} as const satisfies Resource
+})
+
+export declare namespace MemberListPublicBranches {
+  /** What `list` answers with. */
+  export type ListResponse = MemberListPublicBranchesListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberListPublicBranchesListQuery>
+}
 
 /** `api/member/member` */
-export const memberMember = {
+export const MemberMember = /*#__PURE__*/ resource({
   path: 'api/member/member',
   kind: 'collection',
   id: 'number',
   list: {options: memberMemberListOptions, queryKey: memberMemberListQueryKey},
+  filters: ['city', 'companycode', 'is_deleted', 'is_requested', 'member_type'] satisfies (keyof MemberMember.ListQuery)[],
+  filterTypes: {is_deleted: 'boolean', is_requested: 'boolean'},
   retrieve: {options: memberMemberRetrieveOptions, queryKey: memberMemberRetrieveQueryKey},
   create: {mutation: memberMemberCreateMutation, body: vMemberMemberCreateBody},
   update: {mutation: memberMemberPartialUpdateMutation, body: vMemberMemberPartialUpdateBody},
   destroy: {mutation: memberMemberDestroyMutation},
   reads: ['memberMemberGetDashboardRetrieve', 'memberMemberGetExcludeMeList', 'memberMemberGetForPartnerSelectList', 'memberMemberGetMySettingsRetrieve', 'memberMemberGetOciUrlRetrieve', 'memberMemberList', 'memberMemberMeRetrieve', 'memberMemberMySettingsRetrieve', 'memberMemberOverviewStatsRetrieve', 'memberMemberRequestedCountRetrieve', 'memberMemberRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MemberMember {
+  /** What `list` answers with. */
+  export type ListResponse = MemberMemberListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberMemberListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MemberMemberRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMemberMemberCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMemberMemberCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberMemberPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberMemberPartialUpdateBody>
+}
 
 /** `api/member/member/get_exclude_me` */
-export const memberMemberGetExcludeMe = {
+export const MemberMemberGetExcludeMe = /*#__PURE__*/ resource({
   path: 'api/member/member/get_exclude_me',
   kind: 'collection',
   id: 'number',
   list: {options: memberMemberGetExcludeMeListOptions, queryKey: memberMemberGetExcludeMeListQueryKey},
   reads: ['memberMemberGetExcludeMeList'],
-} as const satisfies Resource
+})
+
+export declare namespace MemberMemberGetExcludeMe {
+  /** What `list` answers with. */
+  export type ListResponse = MemberMemberGetExcludeMeListResponse
+}
 
 /** `api/member/member/get_for_partner_select` */
-export const memberMemberGetForPartnerSelect = {
+export const MemberMemberGetForPartnerSelect = /*#__PURE__*/ resource({
   path: 'api/member/member/get_for_partner_select',
   kind: 'collection',
   id: 'number',
   list: {options: memberMemberGetForPartnerSelectListOptions, queryKey: memberMemberGetForPartnerSelectListQueryKey},
+  filters: [],
   reads: ['memberMemberGetForPartnerSelectList'],
-} as const satisfies Resource
+})
+
+export declare namespace MemberMemberGetForPartnerSelect {
+  /** What `list` answers with. */
+  export type ListResponse = MemberMemberGetForPartnerSelectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberMemberGetForPartnerSelectListQuery>
+}
 
 /** `api/member/member/me` */
-export const memberMemberMe = {
+export const MemberMemberMe = /*#__PURE__*/ resource({
   path: 'api/member/member/me',
   kind: 'singleton',
   retrieve: {options: memberMemberMeRetrieveOptions, queryKey: memberMemberMeRetrieveQueryKey},
   update: {mutation: memberMemberMePartialUpdateMutation, body: vMemberMemberMePartialUpdateBody},
   reads: ['memberMemberMeRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MemberMemberMe {
+  /** What `retrieve` answers with. */
+  export type Record = MemberMemberMeRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberMemberMePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberMemberMePartialUpdateBody>
+}
 
 /** `api/member/member/my_settings` */
-export const memberMemberMySettings = {
+export const MemberMemberMySettings = /*#__PURE__*/ resource({
   path: 'api/member/member/my_settings',
   kind: 'singleton',
   retrieve: {options: memberMemberMySettingsRetrieveOptions, queryKey: memberMemberMySettingsRetrieveQueryKey},
   update: {mutation: memberMemberMySettingsPartialUpdateMutation, body: vMemberMemberMySettingsPartialUpdateBody},
   reads: ['memberMemberMySettingsRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MemberMemberMySettings {
+  /** What `retrieve` answers with. */
+  export type Record = MemberMemberMySettingsRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberMemberMySettingsPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberMemberMySettingsPartialUpdateBody>
+}
 
 /** `api/member/module` */
-export const memberModule = {
+export const MemberModule = /*#__PURE__*/ resource({
   path: 'api/member/module',
   kind: 'collection',
   id: 'number',
   list: {options: memberModuleListOptions, queryKey: memberModuleListQueryKey},
+  filters: ['id', 'name'] satisfies (keyof MemberModule.ListQuery)[],
   retrieve: {options: memberModuleRetrieveOptions, queryKey: memberModuleRetrieveQueryKey},
   create: {mutation: memberModuleCreateMutation, body: vMemberModuleCreateBody},
   update: {mutation: memberModulePartialUpdateMutation, body: vMemberModulePartialUpdateBody},
   destroy: {mutation: memberModuleDestroyMutation},
   reads: ['memberModuleList', 'memberModuleRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MemberModule {
+  /** What `list` answers with. */
+  export type ListResponse = MemberModuleListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberModuleListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MemberModuleRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMemberModuleCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMemberModuleCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberModulePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberModulePartialUpdateBody>
+}
 
 /** `api/member/module-part` */
-export const memberModulePart = {
+export const MemberModulePart = /*#__PURE__*/ resource({
   path: 'api/member/module-part',
   kind: 'collection',
   id: 'number',
   list: {options: memberModulePartListOptions, queryKey: memberModulePartListQueryKey},
+  filters: ['module', 'name'] satisfies (keyof MemberModulePart.ListQuery)[],
   retrieve: {options: memberModulePartRetrieveOptions, queryKey: memberModulePartRetrieveQueryKey},
   create: {mutation: memberModulePartCreateMutation, body: vMemberModulePartCreateBody},
   update: {mutation: memberModulePartPartialUpdateMutation, body: vMemberModulePartPartialUpdateBody},
   destroy: {mutation: memberModulePartDestroyMutation},
   reads: ['memberModulePartList', 'memberModulePartRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MemberModulePart {
+  /** What `list` answers with. */
+  export type ListResponse = MemberModulePartListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMemberModulePartListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MemberModulePartRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMemberModulePartCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMemberModulePartCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMemberModulePartPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMemberModulePartPartialUpdateBody>
+}
 
 /** `api/mobile/assign-me` */
-export const mobileAssignMe = {
+export const MobileAssignMe = /*#__PURE__*/ resource({
   path: 'api/mobile/assign-me',
   kind: 'action',
   create: {mutation: mobileAssignMeCreateMutation, body: vMobileAssignMeCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignMe {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignMeCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignMeCreateBody>
+}
 
 /** `api/mobile/assign-user` */
-export const mobileAssignUser = {
+export const MobileAssignUser = /*#__PURE__*/ resource({
   path: 'api/mobile/assign-user',
   kind: 'collection',
   id: 'number',
   create: {mutation: mobileAssignUserCreateMutation, body: vMobileAssignUserCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignUser {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignUserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignUserCreateBody>
+}
 
 /** `api/mobile/assign-user-trip` */
-export const mobileAssignUserTrip = {
+export const MobileAssignUserTrip = /*#__PURE__*/ resource({
   path: 'api/mobile/assign-user-trip',
   kind: 'collection',
   id: 'number',
   create: {mutation: mobileAssignUserTripCreateMutation, body: vMobileAssignUserTripCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignUserTrip {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignUserTripCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignUserTripCreateBody>
+}
 
 /** `api/mobile/assignedorder` */
-export const mobileAssignedorder = {
+export const MobileAssignedorder = /*#__PURE__*/ resource({
   path: 'api/mobile/assignedorder',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedorderListOptions, queryKey: mobileAssignedorderListQueryKey},
+  filters: ['engineer', 'order', 'student_user'] satisfies (keyof MobileAssignedorder.ListQuery)[],
+  filterTypes: {engineer: 'integer', order: 'integer', student_user: 'integer'},
   retrieve: {options: mobileAssignedorderRetrieveOptions, queryKey: mobileAssignedorderRetrieveQueryKey},
   create: {mutation: mobileAssignedorderCreateMutation, body: vMobileAssignedorderCreateBody},
   update: {mutation: mobileAssignedorderPartialUpdateMutation, body: vMobileAssignedorderPartialUpdateBody},
   destroy: {mutation: mobileAssignedorderDestroyMutation},
+  extras: {
+    /** `/api/mobile/assignedorder/{id}/create_extra_order/` */
+    createExtraOrderCreate: {mutation: mobileAssignedorderCreateExtraOrderCreateMutation},
+    /** `/api/mobile/assignedorder/{id}/detail_change_date/` */
+    detailChangeDatePartialUpdate: {mutation: mobileAssignedorderDetailChangeDatePartialUpdateMutation, body: vMobileAssignedorderDetailChangeDatePartialUpdateBody},
+    /** `/api/mobile/assignedorder/{id}/detail_device/` */
+    detailDeviceRetrieve: {options: mobileAssignedorderDetailDeviceRetrieveOptions, queryKey: mobileAssignedorderDetailDeviceRetrieveQueryKey},
+    /** `/api/mobile/assignedorder/{id}/get_workorder_sign_details/` */
+    getWorkorderSignDetailsRetrieve: {options: mobileAssignedorderGetWorkorderSignDetailsRetrieveOptions, queryKey: mobileAssignedorderGetWorkorderSignDetailsRetrieveQueryKey},
+    /** `/api/mobile/assignedorder/{id}/no_workorder_finished/` */
+    noWorkorderFinishedCreate: {mutation: mobileAssignedorderNoWorkorderFinishedCreateMutation},
+    /** `/api/mobile/assignedorder/{id}/report_statuscode/` */
+    reportStatuscodeCreate: {mutation: mobileAssignedorderReportStatuscodeCreateMutation, body: vMobileAssignedorderReportStatuscodeCreateBody},
+    /** `/api/mobile/assignedorder/{id}/report_workorders_signed/` */
+    reportWorkordersSignedCreate: {mutation: mobileAssignedorderReportWorkordersSignedCreateMutation},
+  },
   reads: ['mobileAssignedorderDetailDeviceRetrieve', 'mobileAssignedorderFinishedListList', 'mobileAssignedorderGetWorkorderSignDetailsRetrieve', 'mobileAssignedorderList', 'mobileAssignedorderListAppList', 'mobileAssignedorderListDeviceAppRetrieve', 'mobileAssignedorderListDeviceRetrieve', 'mobileAssignedorderListTimesheetTotalsRetrieve', 'mobileAssignedorderRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignedorder {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileAssignedorderRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedorderCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedorderCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileAssignedorderPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileAssignedorderPartialUpdateBody>
+}
 
 /** `api/mobile/assignedorder/finished_list` */
-export const mobileAssignedorderFinishedList = {
+export const MobileAssignedorderFinishedList = /*#__PURE__*/ resource({
   path: 'api/mobile/assignedorder/finished_list',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedorderFinishedListListOptions, queryKey: mobileAssignedorderFinishedListListQueryKey},
+  filters: ['engineer', 'month', 'order', 'student_user', 'submodel_id', 'year'] satisfies (keyof MobileAssignedorderFinishedList.ListQuery)[],
+  filterTypes: {engineer: 'integer', month: 'integer', order: 'integer', student_user: 'integer', submodel_id: 'integer', year: 'integer'},
   reads: ['mobileAssignedorderFinishedListList'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignedorderFinishedList {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderFinishedListListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderFinishedListListQuery>
+}
 
 /** `api/mobile/assignedorder/list_app` */
-export const mobileAssignedorderListApp = {
+export const MobileAssignedorderListApp = /*#__PURE__*/ resource({
   path: 'api/mobile/assignedorder/list_app',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedorderListAppListOptions, queryKey: mobileAssignedorderListAppListQueryKey},
+  filters: ['engineer', 'order', 'student_user'] satisfies (keyof MobileAssignedorderListApp.ListQuery)[],
+  filterTypes: {engineer: 'integer', order: 'integer', student_user: 'integer'},
   reads: ['mobileAssignedorderListAppList'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignedorderListApp {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderListAppListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderListAppListQuery>
+}
 
 /** `api/mobile/assignedorder/split` */
-export const mobileAssignedorderSplit = {
+export const MobileAssignedorderSplit = /*#__PURE__*/ resource({
   path: 'api/mobile/assignedorder/split',
   kind: 'action',
   create: {mutation: mobileAssignedorderSplitCreateMutation, body: vMobileAssignedorderSplitCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignedorderSplit {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedorderSplitCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedorderSplitCreateBody>
+}
 
 /** `api/mobile/assignedorder-workorder` */
-export const mobileAssignedorderWorkorder = {
+export const MobileAssignedorderWorkorder = /*#__PURE__*/ resource({
   path: 'api/mobile/assignedorder-workorder',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedorderWorkorderListOptions, queryKey: mobileAssignedorderWorkorderListQueryKey},
+  filters: [],
   retrieve: {options: mobileAssignedorderWorkorderRetrieveOptions, queryKey: mobileAssignedorderWorkorderRetrieveQueryKey},
   create: {mutation: mobileAssignedorderWorkorderCreateMutation, body: vMobileAssignedorderWorkorderCreateBody},
   update: {mutation: mobileAssignedorderWorkorderPartialUpdateMutation, body: vMobileAssignedorderWorkorderPartialUpdateBody},
   destroy: {mutation: mobileAssignedorderWorkorderDestroyMutation},
   reads: ['mobileAssignedorderWorkorderList', 'mobileAssignedorderWorkorderRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignedorderWorkorder {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderWorkorderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderWorkorderListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileAssignedorderWorkorderRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedorderWorkorderCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedorderWorkorderCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileAssignedorderWorkorderPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileAssignedorderWorkorderPartialUpdateBody>
+}
 
 /** `api/mobile/assignedorderactivity` */
-export const mobileAssignedorderactivity = {
+export const MobileAssignedorderactivity = /*#__PURE__*/ resource({
   path: 'api/mobile/assignedorderactivity',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedorderactivityListOptions, queryKey: mobileAssignedorderactivityListQueryKey},
+  filters: ['assigned_order'] satisfies (keyof MobileAssignedorderactivity.ListQuery)[],
+  filterTypes: {assigned_order: 'integer'},
   retrieve: {options: mobileAssignedorderactivityRetrieveOptions, queryKey: mobileAssignedorderactivityRetrieveQueryKey},
   create: {mutation: mobileAssignedorderactivityCreateMutation, body: vMobileAssignedorderactivityCreateBody},
   update: {mutation: mobileAssignedorderactivityPartialUpdateMutation, body: vMobileAssignedorderactivityPartialUpdateBody},
   destroy: {mutation: mobileAssignedorderactivityDestroyMutation},
   reads: ['mobileAssignedorderactivityList', 'mobileAssignedorderactivityRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignedorderactivity {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderactivityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderactivityListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileAssignedorderactivityRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedorderactivityCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedorderactivityCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileAssignedorderactivityPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileAssignedorderactivityPartialUpdateBody>
+}
 
 /** `api/mobile/assignedorderdocument` */
-export const mobileAssignedorderdocument = {
+export const MobileAssignedorderdocument = /*#__PURE__*/ resource({
   path: 'api/mobile/assignedorderdocument',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedorderdocumentListOptions, queryKey: mobileAssignedorderdocumentListQueryKey},
+  filters: ['assigned_order'] satisfies (keyof MobileAssignedorderdocument.ListQuery)[],
+  filterTypes: {assigned_order: 'integer'},
   retrieve: {options: mobileAssignedorderdocumentRetrieveOptions, queryKey: mobileAssignedorderdocumentRetrieveQueryKey},
   create: {mutation: mobileAssignedorderdocumentCreateMutation, body: vMobileAssignedorderdocumentCreateBody},
   update: {mutation: mobileAssignedorderdocumentPartialUpdateMutation, body: vMobileAssignedorderdocumentPartialUpdateBody},
   destroy: {mutation: mobileAssignedorderdocumentDestroyMutation},
   reads: ['mobileAssignedorderdocumentList', 'mobileAssignedorderdocumentRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignedorderdocument {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedorderdocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedorderdocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileAssignedorderdocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedorderdocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedorderdocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileAssignedorderdocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileAssignedorderdocumentPartialUpdateBody>
+}
 
 /** `api/mobile/assignedordermaterial` */
-export const mobileAssignedordermaterial = {
+export const MobileAssignedordermaterial = /*#__PURE__*/ resource({
   path: 'api/mobile/assignedordermaterial',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedordermaterialListOptions, queryKey: mobileAssignedordermaterialListQueryKey},
+  filters: ['assigned_order'] satisfies (keyof MobileAssignedordermaterial.ListQuery)[],
+  filterTypes: {assigned_order: 'integer'},
   retrieve: {options: mobileAssignedordermaterialRetrieveOptions, queryKey: mobileAssignedordermaterialRetrieveQueryKey},
   create: {mutation: mobileAssignedordermaterialCreateMutation, body: vMobileAssignedordermaterialCreateBody},
   update: {mutation: mobileAssignedordermaterialPartialUpdateMutation, body: vMobileAssignedordermaterialPartialUpdateBody},
   destroy: {mutation: mobileAssignedordermaterialDestroyMutation},
   reads: ['mobileAssignedordermaterialList', 'mobileAssignedordermaterialOrderlinesList', 'mobileAssignedordermaterialQuotationList', 'mobileAssignedordermaterialRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignedordermaterial {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedordermaterialListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedordermaterialListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileAssignedordermaterialRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileAssignedordermaterialCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileAssignedordermaterialCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileAssignedordermaterialPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileAssignedordermaterialPartialUpdateBody>
+}
 
 /** `api/mobile/assignedordermaterial/orderlines` */
-export const mobileAssignedordermaterialOrderlines = {
+export const MobileAssignedordermaterialOrderlines = /*#__PURE__*/ resource({
   path: 'api/mobile/assignedordermaterial/orderlines',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedordermaterialOrderlinesListOptions, queryKey: mobileAssignedordermaterialOrderlinesListQueryKey},
+  filters: [],
   reads: ['mobileAssignedordermaterialOrderlinesList'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignedordermaterialOrderlines {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedordermaterialOrderlinesListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedordermaterialOrderlinesListQuery>
+}
 
 /** `api/mobile/assignedordermaterial/quotation` */
-export const mobileAssignedordermaterialQuotation = {
+export const MobileAssignedordermaterialQuotation = /*#__PURE__*/ resource({
   path: 'api/mobile/assignedordermaterial/quotation',
   kind: 'collection',
   id: 'number',
   list: {options: mobileAssignedordermaterialQuotationListOptions, queryKey: mobileAssignedordermaterialQuotationListQueryKey},
+  filters: [],
   reads: ['mobileAssignedordermaterialQuotationList'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileAssignedordermaterialQuotation {
+  /** What `list` answers with. */
+  export type ListResponse = MobileAssignedordermaterialQuotationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileAssignedordermaterialQuotationListQuery>
+}
 
 /** `api/mobile/trip` */
-export const mobileTrip = {
+export const MobileTrip = /*#__PURE__*/ resource({
   path: 'api/mobile/trip',
   kind: 'collection',
   id: 'number',
   list: {options: mobileTripListOptions, queryKey: mobileTripListQueryKey},
+  filters: [],
   retrieve: {options: mobileTripRetrieveOptions, queryKey: mobileTripRetrieveQueryKey},
   create: {mutation: mobileTripCreateMutation, body: vMobileTripCreateBody},
   update: {mutation: mobileTripPartialUpdateMutation, body: vMobileTripPartialUpdateBody},
   destroy: {mutation: mobileTripDestroyMutation},
-  reads: ['mobileTripList', 'mobileTripRetrieve', 'mobileTripTripAvailabilityDetailRetrieve', 'mobileTripTripAvailabilityRetrieve'],
-} as const satisfies Resource
+  extras: {
+    /** `/api/mobile/trip/{id}/trip_availability_detail/` */
+    tripAvailabilityDetailRetrieve: {options: mobileTripTripAvailabilityDetailRetrieveOptions, queryKey: mobileTripTripAvailabilityDetailRetrieveQueryKey},
+  },
+  reads: ['mobileTripList', 'mobileTripRetrieve', 'mobileTripTripAvailabilityDetailRetrieve', 'mobileTripTripAvailabilityList'],
+})
+
+export declare namespace MobileTrip {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileTripRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileTripCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileTripCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileTripPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileTripPartialUpdateBody>
+}
 
 /** `api/mobile/trip-order` */
-export const mobileTripOrder = {
+export const MobileTripOrder = /*#__PURE__*/ resource({
   path: 'api/mobile/trip-order',
   kind: 'collection',
   id: 'number',
   list: {options: mobileTripOrderListOptions, queryKey: mobileTripOrderListQueryKey},
+  filters: [],
   retrieve: {options: mobileTripOrderRetrieveOptions, queryKey: mobileTripOrderRetrieveQueryKey},
   create: {mutation: mobileTripOrderCreateMutation, body: vMobileTripOrderCreateBody},
   update: {mutation: mobileTripOrderPartialUpdateMutation, body: vMobileTripOrderPartialUpdateBody},
   destroy: {mutation: mobileTripOrderDestroyMutation},
   reads: ['mobileTripOrderList', 'mobileTripOrderRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileTripOrder {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripOrderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripOrderListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileTripOrderRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileTripOrderCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileTripOrderCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileTripOrderPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileTripOrderPartialUpdateBody>
+}
 
 /** `api/mobile/trip-statuscode` */
-export const mobileTripStatuscode = {
+export const MobileTripStatuscode = /*#__PURE__*/ resource({
   path: 'api/mobile/trip-statuscode',
   kind: 'collection',
   id: 'number',
   list: {options: mobileTripStatuscodeListOptions, queryKey: mobileTripStatuscodeListQueryKey},
+  filters: [],
   retrieve: {options: mobileTripStatuscodeRetrieveOptions, queryKey: mobileTripStatuscodeRetrieveQueryKey},
   create: {mutation: mobileTripStatuscodeCreateMutation, body: vMobileTripStatuscodeCreateBody},
   update: {mutation: mobileTripStatuscodePartialUpdateMutation, body: vMobileTripStatuscodePartialUpdateBody},
   destroy: {mutation: mobileTripStatuscodeDestroyMutation},
   reads: ['mobileTripStatuscodeAutocompleteList', 'mobileTripStatuscodeList', 'mobileTripStatuscodeRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileTripStatuscode {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripStatuscodeListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripStatuscodeListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileTripStatuscodeRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileTripStatuscodeCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileTripStatuscodeCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileTripStatuscodePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileTripStatuscodePartialUpdateBody>
+}
 
 /** `api/mobile/trip-statuscode-action` */
-export const mobileTripStatuscodeAction = {
+export const MobileTripStatuscodeAction = /*#__PURE__*/ resource({
   path: 'api/mobile/trip-statuscode-action',
   kind: 'collection',
   id: 'number',
   list: {options: mobileTripStatuscodeActionListOptions, queryKey: mobileTripStatuscodeActionListQueryKey},
+  filters: [],
   retrieve: {options: mobileTripStatuscodeActionRetrieveOptions, queryKey: mobileTripStatuscodeActionRetrieveQueryKey},
   create: {mutation: mobileTripStatuscodeActionCreateMutation, body: vMobileTripStatuscodeActionCreateBody},
   update: {mutation: mobileTripStatuscodeActionPartialUpdateMutation, body: vMobileTripStatuscodeActionPartialUpdateBody},
   destroy: {mutation: mobileTripStatuscodeActionDestroyMutation},
   reads: ['mobileTripStatuscodeActionList', 'mobileTripStatuscodeActionOperatorsRetrieve', 'mobileTripStatuscodeActionRetrieve', 'mobileTripStatuscodeActionStatusoptionsRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileTripStatuscodeAction {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripStatuscodeActionListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripStatuscodeActionListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileTripStatuscodeActionRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileTripStatuscodeActionCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileTripStatuscodeActionCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileTripStatuscodeActionPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileTripStatuscodeActionPartialUpdateBody>
+}
 
 /** `api/mobile/trip-statuscode/autocomplete` */
-export const mobileTripStatuscodeAutocomplete = {
+export const MobileTripStatuscodeAutocomplete = /*#__PURE__*/ resource({
   path: 'api/mobile/trip-statuscode/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: mobileTripStatuscodeAutocompleteListOptions, queryKey: mobileTripStatuscodeAutocompleteListQueryKey},
+  filters: [],
   reads: ['mobileTripStatuscodeAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileTripStatuscodeAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripStatuscodeAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripStatuscodeAutocompleteListQuery>
+}
+
+/** `api/mobile/trip/trip_availability` */
+export const MobileTripTripAvailability = /*#__PURE__*/ resource({
+  path: 'api/mobile/trip/trip_availability',
+  kind: 'collection',
+  id: 'number',
+  list: {options: mobileTripTripAvailabilityListOptions, queryKey: mobileTripTripAvailabilityListQueryKey},
+  filters: [],
+  reads: ['mobileTripTripAvailabilityList'],
+})
+
+export declare namespace MobileTripTripAvailability {
+  /** What `list` answers with. */
+  export type ListResponse = MobileTripTripAvailabilityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileTripTripAvailabilityListQuery>
+}
 
 /** `api/mobile/unassign-user` */
-export const mobileUnassignUser = {
+export const MobileUnassignUser = /*#__PURE__*/ resource({
   path: 'api/mobile/unassign-user',
   kind: 'collection',
   id: 'number',
   create: {mutation: mobileUnassignUserCreateMutation, body: vMobileUnassignUserCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace MobileUnassignUser {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileUnassignUserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileUnassignUserCreateBody>
+}
 
 /** `api/mobile/unassign-user-trip` */
-export const mobileUnassignUserTrip = {
+export const MobileUnassignUserTrip = /*#__PURE__*/ resource({
   path: 'api/mobile/unassign-user-trip',
   kind: 'collection',
   id: 'number',
   create: {mutation: mobileUnassignUserTripCreateMutation, body: vMobileUnassignUserTripCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace MobileUnassignUserTrip {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileUnassignUserTripCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileUnassignUserTripCreateBody>
+}
 
 /** `api/mobile/user-order-availability` */
-export const mobileUserOrderAvailability = {
+export const MobileUserOrderAvailability = /*#__PURE__*/ resource({
   path: 'api/mobile/user-order-availability',
   kind: 'collection',
   id: 'number',
   list: {options: mobileUserOrderAvailabilityListOptions, queryKey: mobileUserOrderAvailabilityListQueryKey},
+  filters: [],
   retrieve: {options: mobileUserOrderAvailabilityRetrieveOptions, queryKey: mobileUserOrderAvailabilityRetrieveQueryKey},
   create: {mutation: mobileUserOrderAvailabilityCreateMutation, body: vMobileUserOrderAvailabilityCreateBody},
   update: {mutation: mobileUserOrderAvailabilityPartialUpdateMutation, body: vMobileUserOrderAvailabilityPartialUpdateBody},
   destroy: {mutation: mobileUserOrderAvailabilityDestroyMutation},
   reads: ['mobileUserOrderAvailabilityList', 'mobileUserOrderAvailabilityRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileUserOrderAvailability {
+  /** What `list` answers with. */
+  export type ListResponse = MobileUserOrderAvailabilityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileUserOrderAvailabilityListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileUserOrderAvailabilityRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileUserOrderAvailabilityCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileUserOrderAvailabilityCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileUserOrderAvailabilityPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileUserOrderAvailabilityPartialUpdateBody>
+}
 
 /** `api/mobile/user-trip-availability` */
-export const mobileUserTripAvailability = {
+export const MobileUserTripAvailability = /*#__PURE__*/ resource({
   path: 'api/mobile/user-trip-availability',
   kind: 'collection',
   id: 'number',
   list: {options: mobileUserTripAvailabilityListOptions, queryKey: mobileUserTripAvailabilityListQueryKey},
+  filters: [],
   retrieve: {options: mobileUserTripAvailabilityRetrieveOptions, queryKey: mobileUserTripAvailabilityRetrieveQueryKey},
   create: {mutation: mobileUserTripAvailabilityCreateMutation, body: vMobileUserTripAvailabilityCreateBody},
   update: {mutation: mobileUserTripAvailabilityPartialUpdateMutation, body: vMobileUserTripAvailabilityPartialUpdateBody},
   destroy: {mutation: mobileUserTripAvailabilityDestroyMutation},
   reads: ['mobileUserTripAvailabilityList', 'mobileUserTripAvailabilityRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace MobileUserTripAvailability {
+  /** What `list` answers with. */
+  export type ListResponse = MobileUserTripAvailabilityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileUserTripAvailabilityListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileUserTripAvailabilityRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileUserTripAvailabilityCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileUserTripAvailabilityCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileUserTripAvailabilityPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileUserTripAvailabilityPartialUpdateBody>
+}
 
 /** `api/order/cost` */
-export const orderCost = {
+export const OrderCost = /*#__PURE__*/ resource({
   path: 'api/order/cost',
   kind: 'collection',
   id: 'number',
   list: {options: orderCostListOptions, queryKey: orderCostListQueryKey},
+  filters: ['cost_type', 'order'] satisfies (keyof OrderCost.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: orderCostRetrieveOptions, queryKey: orderCostRetrieveQueryKey},
   create: {mutation: orderCostCreateMutation, body: vOrderCostCreateBody},
   update: {mutation: orderCostPartialUpdateMutation, body: vOrderCostPartialUpdateBody},
   destroy: {mutation: orderCostDestroyMutation},
+  extras: {
+    /** `/api/order/cost/order/{order_id}/{cost_type}/` */
+    orderCreate: {mutation: orderCostOrderCreateMutation, body: vOrderCostOrderCreateBody},
+  },
   reads: ['orderCostList', 'orderCostRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderCost {
+  /** What `list` answers with. */
+  export type ListResponse = OrderCostListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderCostListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderCostRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderCostCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderCostCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderCostPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderCostPartialUpdateBody>
+}
 
 /** `api/order/document` */
-export const orderDocument = {
+export const OrderDocument = /*#__PURE__*/ resource({
   path: 'api/order/document',
   kind: 'collection',
   id: 'number',
   list: {options: orderDocumentListOptions, queryKey: orderDocumentListQueryKey},
+  filters: ['order'] satisfies (keyof OrderDocument.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: orderDocumentRetrieveOptions, queryKey: orderDocumentRetrieveQueryKey},
   create: {mutation: orderDocumentCreateMutation, body: vOrderDocumentCreateBody},
   update: {mutation: orderDocumentPartialUpdateMutation, body: vOrderDocumentPartialUpdateBody},
   destroy: {mutation: orderDocumentDestroyMutation},
   reads: ['orderDocumentList', 'orderDocumentRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderDocument {
+  /** What `list` answers with. */
+  export type ListResponse = OrderDocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderDocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderDocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderDocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderDocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderDocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderDocumentPartialUpdateBody>
+}
 
 /** `api/order/filter` */
-export const orderFilter = {
+export const OrderFilter = /*#__PURE__*/ resource({
   path: 'api/order/filter',
   kind: 'collection',
   id: 'number',
   list: {options: orderFilterListOptions, queryKey: orderFilterListQueryKey},
+  filters: [],
   retrieve: {options: orderFilterRetrieveOptions, queryKey: orderFilterRetrieveQueryKey},
   create: {mutation: orderFilterCreateMutation, body: vOrderFilterCreateBody},
   update: {mutation: orderFilterPartialUpdateMutation, body: vOrderFilterPartialUpdateBody},
   destroy: {mutation: orderFilterDestroyMutation},
-  reads: ['orderFilterGetBaseFilterOptionsRetrieve', 'orderFilterGetExamplesList', 'orderFilterGetFieldsRetrieve', 'orderFilterGetNonTextFieldTypesRetrieve', 'orderFilterGetOperatorsRetrieve', 'orderFilterGetStatusFieldsRetrieve', 'orderFilterGetStatusesRetrieve', 'orderFilterList', 'orderFilterRetrieve', 'orderFilterSimpleListList'],
-} as const satisfies Resource
+  reads: ['orderFilterGetBaseFilterOptionsList', 'orderFilterGetExamplesList', 'orderFilterGetFieldsRetrieve', 'orderFilterGetNonTextFieldTypesRetrieve', 'orderFilterGetOperatorsRetrieve', 'orderFilterGetStatusFieldsRetrieve', 'orderFilterGetStatusesRetrieve', 'orderFilterList', 'orderFilterRetrieve', 'orderFilterSimpleListList'],
+})
+
+export declare namespace OrderFilter {
+  /** What `list` answers with. */
+  export type ListResponse = OrderFilterListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderFilterListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderFilterRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderFilterCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderFilterCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderFilterPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderFilterPartialUpdateBody>
+}
+
+/** `api/order/filter/get_base_filter_options` */
+export const OrderFilterGetBaseFilterOptions = /*#__PURE__*/ resource({
+  path: 'api/order/filter/get_base_filter_options',
+  kind: 'collection',
+  id: 'number',
+  list: {options: orderFilterGetBaseFilterOptionsListOptions, queryKey: orderFilterGetBaseFilterOptionsListQueryKey},
+  reads: ['orderFilterGetBaseFilterOptionsList'],
+})
+
+export declare namespace OrderFilterGetBaseFilterOptions {
+  /** What `list` answers with. */
+  export type ListResponse = OrderFilterGetBaseFilterOptionsListResponse
+}
 
 /** `api/order/filter/get_examples` */
-export const orderFilterGetExamples = {
+export const OrderFilterGetExamples = /*#__PURE__*/ resource({
   path: 'api/order/filter/get_examples',
   kind: 'collection',
   id: 'number',
   list: {options: orderFilterGetExamplesListOptions, queryKey: orderFilterGetExamplesListQueryKey},
+  filters: [],
   reads: ['orderFilterGetExamplesList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderFilterGetExamples {
+  /** What `list` answers with. */
+  export type ListResponse = OrderFilterGetExamplesListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderFilterGetExamplesListQuery>
+}
 
 /** `api/order/filter/simple_list` */
-export const orderFilterSimpleList = {
+export const OrderFilterSimpleList = /*#__PURE__*/ resource({
   path: 'api/order/filter/simple_list',
   kind: 'collection',
   id: 'number',
   list: {options: orderFilterSimpleListListOptions, queryKey: orderFilterSimpleListListQueryKey},
+  filters: [],
   reads: ['orderFilterSimpleListList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderFilterSimpleList {
+  /** What `list` answers with. */
+  export type ListResponse = OrderFilterSimpleListListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderFilterSimpleListListQuery>
+}
 
 /** `api/order/infoline` */
-export const orderInfoline = {
+export const OrderInfoline = /*#__PURE__*/ resource({
   path: 'api/order/infoline',
   kind: 'collection',
   id: 'number',
   list: {options: orderInfolineListOptions, queryKey: orderInfolineListQueryKey},
+  filters: ['order'] satisfies (keyof OrderInfoline.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: orderInfolineRetrieveOptions, queryKey: orderInfolineRetrieveQueryKey},
   create: {mutation: orderInfolineCreateMutation, body: vOrderInfolineCreateBody},
   update: {mutation: orderInfolinePartialUpdateMutation, body: vOrderInfolinePartialUpdateBody},
   destroy: {mutation: orderInfolineDestroyMutation},
   reads: ['orderInfolineList', 'orderInfolineRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderInfoline {
+  /** What `list` answers with. */
+  export type ListResponse = OrderInfolineListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderInfolineListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderInfolineRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderInfolineCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderInfolineCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderInfolinePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderInfolinePartialUpdateBody>
+}
 
 /** `api/order/order` */
-export const orderOrder = {
+export const OrderOrder = /*#__PURE__*/ resource({
   path: 'api/order/order',
   kind: 'collection',
   id: 'string',
   list: {options: orderOrderListOptions, queryKey: orderOrderListQueryKey},
+  filters: ['assigned_count', 'branch', 'building', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'equipment', 'external_identifier', 'last_status', 'limit', 'location', 'mode', 'offset', 'order_address', 'order_by', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'orders', 'since', 'start_date', 'start_date__from', 'start_date__until', 'user_filter'] satisfies (keyof OrderOrder.ListQuery)[],
+  filterTypes: {building: 'integer', equipment: 'integer', limit: 'integer', location: 'integer', offset: 'integer', user_filter: 'integer'},
   retrieve: {options: orderOrderRetrieveOptions, queryKey: orderOrderRetrieveQueryKey},
   create: {mutation: orderOrderCreateMutation, body: vOrderOrderCreateBody},
   update: {mutation: orderOrderPartialUpdateMutation, body: vOrderOrderPartialUpdateBody},
   destroy: {mutation: orderOrderDestroyMutation},
+  extras: {
+    /** `/api/order/order/{id}/assign_me/` */
+    assignMeCreate: {mutation: orderOrderAssignMeCreateMutation, body: vOrderOrderAssignMeCreateBody},
+    /** `/api/order/order/{id}/create_pdf_background/` */
+    createPdfBackgroundCreate: {mutation: orderOrderCreatePdfBackgroundCreateMutation, body: vOrderOrderCreatePdfBackgroundCreateBody},
+    /** `/api/order/order/{id}/order_availability_detail/` */
+    orderAvailabilityDetailRetrieve: {options: orderOrderOrderAvailabilityDetailRetrieveOptions, queryKey: orderOrderOrderAvailabilityDetailRetrieveQueryKey},
+    /** `/api/order/order/{id}/recreate_pdf/` */
+    recreatePdfCreate: {mutation: orderOrderRecreatePdfCreateMutation},
+    /** `/api/order/order/{id}/recreate_pdf_background/` */
+    recreatePdfBackgroundCreate: {mutation: orderOrderRecreatePdfBackgroundCreateMutation, body: vOrderOrderRecreatePdfBackgroundCreateBody},
+    /** `/api/order/order/{id}/set_order_accepted/` */
+    setOrderAcceptedCreate: {mutation: orderOrderSetOrderAcceptedCreateMutation},
+    /** `/api/order/order/{id}/set_order_rejected/` */
+    setOrderRejectedCreate: {mutation: orderOrderSetOrderRejectedCreateMutation},
+  },
   reads: ['orderOrderAllForCustomerNotAcceptedCountRetrieve', 'orderOrderAllForCustomerNotAcceptedList', 'orderOrderAllForCustomerV2List', 'orderOrderAllForEquipmentLocationList', 'orderOrderAssignableList', 'orderOrderAutocompleteList', 'orderOrderCountsYearOrderTypeStatsRetrieve', 'orderOrderDispatchListAllList', 'orderOrderDispatchListFinishedList', 'orderOrderDispatchListInprogressList', 'orderOrderDispatchListUnassignedList', 'orderOrderGetTopXCustomersRetrieve', 'orderOrderGetWithinRangeList', 'orderOrderList', 'orderOrderMaintenanceOrdersEventsRetrieve', 'orderOrderMaintenanceOrdersList', 'orderOrderMonthEventsList', 'orderOrderMonthListRetrieve', 'orderOrderNewRetrieve', 'orderOrderOrderAvailabilityDetailRetrieve', 'orderOrderOrderAvailabilityList', 'orderOrderOrderCountsStatsRetrieve', 'orderOrderOrderTypesMonthStatsRetrieve', 'orderOrderOrderTypesRetrieve', 'orderOrderOrderTypesStatsRetrieve', 'orderOrderPastList', 'orderOrderRetrieve', 'orderOrderSalesOrdersList', 'orderOrderUserFilterCountRetrieve', 'orderOrderYearListRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrder {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderOrderRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderOrderCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderOrderCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderOrderPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderOrderPartialUpdateBody>
+}
 
 /** `api/order/order/all_for_customer_not_accepted` */
-export const orderOrderAllForCustomerNotAccepted = {
+export const OrderOrderAllForCustomerNotAccepted = /*#__PURE__*/ resource({
   path: 'api/order/order/all_for_customer_not_accepted',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderAllForCustomerNotAcceptedListOptions, queryKey: orderOrderAllForCustomerNotAcceptedListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderAllForCustomerNotAccepted.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderAllForCustomerNotAcceptedList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderAllForCustomerNotAccepted {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderAllForCustomerNotAcceptedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderAllForCustomerNotAcceptedListQuery>
+}
 
 /** `api/order/order/all_for_customer_v2` */
-export const orderOrderAllForCustomerV2 = {
+export const OrderOrderAllForCustomerV2 = /*#__PURE__*/ resource({
   path: 'api/order/order/all_for_customer_v2',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderAllForCustomerV2ListOptions, queryKey: orderOrderAllForCustomerV2ListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderAllForCustomerV2.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderAllForCustomerV2List'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderAllForCustomerV2 {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderAllForCustomerV2ListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderAllForCustomerV2ListQuery>
+}
 
 /** `api/order/order/all_for_equipment_location` */
-export const orderOrderAllForEquipmentLocation = {
+export const OrderOrderAllForEquipmentLocation = /*#__PURE__*/ resource({
   path: 'api/order/order/all_for_equipment_location',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderAllForEquipmentLocationListOptions, queryKey: orderOrderAllForEquipmentLocationListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'equipment', 'external_identifier', 'last_status', 'limit', 'location', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderAllForEquipmentLocation.ListQuery)[],
+  filterTypes: {equipment: 'integer', limit: 'integer', location: 'integer', offset: 'integer'},
   reads: ['orderOrderAllForEquipmentLocationList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderAllForEquipmentLocation {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderAllForEquipmentLocationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderAllForEquipmentLocationListQuery>
+}
 
 /** `api/order/order/assignable` */
-export const orderOrderAssignable = {
+export const OrderOrderAssignable = /*#__PURE__*/ resource({
   path: 'api/order/order/assignable',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderAssignableListOptions, queryKey: orderOrderAssignableListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderAssignable.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderAssignableList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderAssignable {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderAssignableListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderAssignableListQuery>
+}
 
 /** `api/order/order/autocomplete` */
-export const orderOrderAutocomplete = {
+export const OrderOrderAutocomplete = /*#__PURE__*/ resource({
   path: 'api/order/order/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderAutocompleteListOptions, queryKey: orderOrderAutocompleteListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderAutocomplete.ListQuery)[],
   reads: ['orderOrderAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderAutocompleteListQuery>
+}
 
 /** `api/order/order/dispatch_list_all` */
-export const orderOrderDispatchListAll = {
+export const OrderOrderDispatchListAll = /*#__PURE__*/ resource({
   path: 'api/order/order/dispatch_list_all',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderDispatchListAllListOptions, queryKey: orderOrderDispatchListAllListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderDispatchListAll.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderDispatchListAllList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderDispatchListAll {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderDispatchListAllListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderDispatchListAllListQuery>
+}
 
 /** `api/order/order/dispatch_list_finished` */
-export const orderOrderDispatchListFinished = {
+export const OrderOrderDispatchListFinished = /*#__PURE__*/ resource({
   path: 'api/order/order/dispatch_list_finished',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderDispatchListFinishedListOptions, queryKey: orderOrderDispatchListFinishedListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderDispatchListFinished.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderDispatchListFinishedList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderDispatchListFinished {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderDispatchListFinishedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderDispatchListFinishedListQuery>
+}
 
 /** `api/order/order/dispatch_list_inprogress` */
-export const orderOrderDispatchListInprogress = {
+export const OrderOrderDispatchListInprogress = /*#__PURE__*/ resource({
   path: 'api/order/order/dispatch_list_inprogress',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderDispatchListInprogressListOptions, queryKey: orderOrderDispatchListInprogressListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderDispatchListInprogress.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderDispatchListInprogressList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderDispatchListInprogress {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderDispatchListInprogressListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderDispatchListInprogressListQuery>
+}
 
 /** `api/order/order/dispatch_list_unassigned` */
-export const orderOrderDispatchListUnassigned = {
+export const OrderOrderDispatchListUnassigned = /*#__PURE__*/ resource({
   path: 'api/order/order/dispatch_list_unassigned',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderDispatchListUnassignedListOptions, queryKey: orderOrderDispatchListUnassignedListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderDispatchListUnassigned.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderDispatchListUnassignedList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderDispatchListUnassigned {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderDispatchListUnassignedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderDispatchListUnassignedListQuery>
+}
 
 /** `api/order/order/get_within_range` */
-export const orderOrderGetWithinRange = {
+export const OrderOrderGetWithinRange = /*#__PURE__*/ resource({
   path: 'api/order/order/get_within_range',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderGetWithinRangeListOptions, queryKey: orderOrderGetWithinRangeListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderGetWithinRange.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderGetWithinRangeList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderGetWithinRange {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderGetWithinRangeListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderGetWithinRangeListQuery>
+}
 
 /** `api/order/order/maintenance_orders` */
-export const orderOrderMaintenanceOrders = {
+export const OrderOrderMaintenanceOrders = /*#__PURE__*/ resource({
   path: 'api/order/order/maintenance_orders',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderMaintenanceOrdersListOptions, queryKey: orderOrderMaintenanceOrdersListQueryKey},
+  filters: ['assigned_count', 'branch', 'contract', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderMaintenanceOrders.ListQuery)[],
+  filterTypes: {contract: 'integer', limit: 'integer', offset: 'integer'},
   reads: ['orderOrderMaintenanceOrdersList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderMaintenanceOrders {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderMaintenanceOrdersListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderMaintenanceOrdersListQuery>
+}
 
 /** `api/order/order/month_events` */
-export const orderOrderMonthEvents = {
+export const OrderOrderMonthEvents = /*#__PURE__*/ resource({
   path: 'api/order/order/month_events',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderMonthEventsListOptions, queryKey: orderOrderMonthEventsListQueryKey},
   reads: ['orderOrderMonthEventsList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderMonthEvents {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderMonthEventsListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderMonthEventsListQuery>
+}
 
 /** `api/order/order/order_availability` */
-export const orderOrderOrderAvailability = {
+export const OrderOrderOrderAvailability = /*#__PURE__*/ resource({
   path: 'api/order/order/order_availability',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderOrderAvailabilityListOptions, queryKey: orderOrderOrderAvailabilityListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderOrderAvailability.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderOrderAvailabilityList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderOrderAvailability {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderOrderAvailabilityListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderOrderAvailabilityListQuery>
+}
 
 /** `api/order/order/past` */
-export const orderOrderPast = {
+export const OrderOrderPast = /*#__PURE__*/ resource({
   path: 'api/order/order/past',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderPastListOptions, queryKey: orderOrderPastListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until'] satisfies (keyof OrderOrderPast.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer'},
   reads: ['orderOrderPastList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderPast {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderPastListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderPastListQuery>
+}
 
 /** `api/order/order/sales_orders` */
-export const orderOrderSalesOrders = {
+export const OrderOrderSalesOrders = /*#__PURE__*/ resource({
   path: 'api/order/order/sales_orders',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderSalesOrdersListOptions, queryKey: orderOrderSalesOrdersListQueryKey},
+  filters: ['assigned_count', 'branch', 'customer_reference', 'customer_relation', 'end_date', 'end_date__from', 'end_date__until', 'external_identifier', 'last_status', 'limit', 'offset', 'order_address', 'order_city', 'order_id', 'order_name', 'order_reference', 'order_type', 'start_date', 'start_date__from', 'start_date__until', 'year'] satisfies (keyof OrderOrderSalesOrders.ListQuery)[],
+  filterTypes: {limit: 'integer', offset: 'integer', year: 'integer'},
   reads: ['orderOrderSalesOrdersList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderSalesOrders {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderSalesOrdersListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderSalesOrdersListQuery>
+}
 
 /** `api/order/orderline` */
-export const orderOrderline = {
+export const OrderOrderline = /*#__PURE__*/ resource({
   path: 'api/order/orderline',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderlineListOptions, queryKey: orderOrderlineListQueryKey},
+  filters: ['order'] satisfies (keyof OrderOrderline.ListQuery)[],
+  filterTypes: {order: 'integer'},
   retrieve: {options: orderOrderlineRetrieveOptions, queryKey: orderOrderlineRetrieveQueryKey},
   create: {mutation: orderOrderlineCreateMutation, body: vOrderOrderlineCreateBody},
   update: {mutation: orderOrderlinePartialUpdateMutation, body: vOrderOrderlinePartialUpdateBody},
   destroy: {mutation: orderOrderlineDestroyMutation},
-  reads: ['orderOrderlineAssignedOrderRetrieve', 'orderOrderlineLatestWorkordersList', 'orderOrderlineList', 'orderOrderlineOrderList', 'orderOrderlineRetrieve'],
-} as const satisfies Resource
+  reads: ['orderOrderlineAssignedOrderList', 'orderOrderlineLatestWorkordersList', 'orderOrderlineList', 'orderOrderlineOrderList', 'orderOrderlineRetrieve'],
+})
+
+export declare namespace OrderOrderline {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderlineListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderlineListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = OrderOrderlineRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderOrderlineCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderOrderlineCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vOrderOrderlinePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vOrderOrderlinePartialUpdateBody>
+}
+
+/** `api/order/orderline/assigned_order` */
+export const OrderOrderlineAssignedOrder = /*#__PURE__*/ resource({
+  path: 'api/order/orderline/assigned_order',
+  kind: 'collection',
+  id: 'number',
+  list: {options: orderOrderlineAssignedOrderListOptions, queryKey: orderOrderlineAssignedOrderListQueryKey},
+  reads: ['orderOrderlineAssignedOrderList'],
+})
+
+export declare namespace OrderOrderlineAssignedOrder {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderlineAssignedOrderListResponse
+}
 
 /** `api/order/orderline/latest_workorders` */
-export const orderOrderlineLatestWorkorders = {
+export const OrderOrderlineLatestWorkorders = /*#__PURE__*/ resource({
   path: 'api/order/orderline/latest_workorders',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderlineLatestWorkordersListOptions, queryKey: orderOrderlineLatestWorkordersListQueryKey},
+  filters: ['building', 'equipment', 'location', 'order'] satisfies (keyof OrderOrderlineLatestWorkorders.ListQuery)[],
+  filterTypes: {building: 'integer', equipment: 'integer', location: 'integer', order: 'integer'},
   reads: ['orderOrderlineLatestWorkordersList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderlineLatestWorkorders {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderlineLatestWorkordersListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderlineLatestWorkordersListQuery>
+}
 
 /** `api/order/orderline/order` */
-export const orderOrderlineOrder = {
+export const OrderOrderlineOrder = /*#__PURE__*/ resource({
   path: 'api/order/orderline/order',
   kind: 'collection',
   id: 'number',
   list: {options: orderOrderlineOrderListOptions, queryKey: orderOrderlineOrderListQueryKey},
   reads: ['orderOrderlineOrderList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderOrderlineOrder {
+  /** What `list` answers with. */
+  export type ListResponse = OrderOrderlineOrderListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderOrderlineOrderListQuery>
+}
 
 /** `api/order/status` */
-export const orderStatus = {
+export const OrderStatus = /*#__PURE__*/ resource({
   path: 'api/order/status',
   kind: 'action',
   create: {mutation: orderStatusCreateMutation, body: vOrderStatusCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace OrderStatus {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vOrderStatusCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vOrderStatusCreateBody>
+}
 
 /** `api/order/statuses` */
-export const orderStatuses = {
+export const OrderStatuses = /*#__PURE__*/ resource({
   path: 'api/order/statuses',
   kind: 'collection',
   id: 'number',
   list: {options: orderStatusesListOptions, queryKey: orderStatusesListQueryKey},
+  filters: [],
   reads: ['orderStatusesList'],
-} as const satisfies Resource
+})
+
+export declare namespace OrderStatuses {
+  /** What `list` answers with. */
+  export type ListResponse = OrderStatusesListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vOrderStatusesListQuery>
+}
+
+/** `api/partner/partner` */
+export const PartnerPartner = /*#__PURE__*/ resource({
+  path: 'api/partner/partner',
+  kind: 'collection',
+  id: 'number',
+  list: {options: partnerPartnerListOptions, queryKey: partnerPartnerListQueryKey},
+  filters: [],
+  retrieve: {options: partnerPartnerRetrieveOptions, queryKey: partnerPartnerRetrieveQueryKey},
+  create: {mutation: partnerPartnerCreateMutation, body: vPartnerPartnerCreateBody},
+  update: {mutation: partnerPartnerPartialUpdateMutation, body: vPartnerPartnerPartialUpdateBody},
+  destroy: {mutation: partnerPartnerDestroyMutation},
+  extras: {
+    /** `/api/partner/partner/{id}/branch_create_from_customer/` */
+    branchCreateFromCustomerCreate: {mutation: partnerPartnerBranchCreateFromCustomerCreateMutation, body: vPartnerPartnerBranchCreateFromCustomerCreateBody},
+    /** `/api/partner/partner/{id}/branches/` */
+    branchesRetrieve: {options: partnerPartnerBranchesRetrieveOptions, queryKey: partnerPartnerBranchesRetrieveQueryKey},
+    /** `/api/partner/partner/{id}/copy_customer_orders/` */
+    copyCustomerOrdersCreate: {mutation: partnerPartnerCopyCustomerOrdersCreateMutation, body: vPartnerPartnerCopyCustomerOrdersCreateBody},
+  },
+  reads: ['partnerPartnerBranchesRetrieve', 'partnerPartnerList', 'partnerPartnerRetrieve'],
+})
+
+export declare namespace PartnerPartner {
+  /** What `list` answers with. */
+  export type ListResponse = PartnerPartnerListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vPartnerPartnerListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = PartnerPartnerRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vPartnerPartnerCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vPartnerPartnerCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vPartnerPartnerPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vPartnerPartnerPartialUpdateBody>
+}
+
+/** `api/partner/partner-request` */
+export const PartnerPartnerRequest = /*#__PURE__*/ resource({
+  path: 'api/partner/partner-request',
+  kind: 'collection',
+  id: 'number',
+  list: {options: partnerPartnerRequestListOptions, queryKey: partnerPartnerRequestListQueryKey},
+  filters: [],
+  retrieve: {options: partnerPartnerRequestRetrieveOptions, queryKey: partnerPartnerRequestRetrieveQueryKey},
+  create: {mutation: partnerPartnerRequestCreateMutation, body: vPartnerPartnerRequestCreateBody},
+  update: {mutation: partnerPartnerRequestPartialUpdateMutation, body: vPartnerPartnerRequestPartialUpdateBody},
+  destroy: {mutation: partnerPartnerRequestDestroyMutation},
+  extras: {
+    /** `/api/partner/partner-request/{id}/accept/` */
+    acceptPartialUpdate: {mutation: partnerPartnerRequestAcceptPartialUpdateMutation},
+    /** `/api/partner/partner-request/{id}/reject/` */
+    rejectPartialUpdate: {mutation: partnerPartnerRequestRejectPartialUpdateMutation},
+  },
+  reads: ['partnerPartnerRequestList', 'partnerPartnerRequestReceivedList', 'partnerPartnerRequestRetrieve', 'partnerPartnerRequestSentList'],
+})
+
+export declare namespace PartnerPartnerRequest {
+  /** What `list` answers with. */
+  export type ListResponse = PartnerPartnerRequestListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vPartnerPartnerRequestListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = PartnerPartnerRequestRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vPartnerPartnerRequestCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vPartnerPartnerRequestCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vPartnerPartnerRequestPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vPartnerPartnerRequestPartialUpdateBody>
+}
+
+/** `api/partner/partner-request/received` */
+export const PartnerPartnerRequestReceived = /*#__PURE__*/ resource({
+  path: 'api/partner/partner-request/received',
+  kind: 'collection',
+  id: 'number',
+  list: {options: partnerPartnerRequestReceivedListOptions, queryKey: partnerPartnerRequestReceivedListQueryKey},
+  filters: [],
+  reads: ['partnerPartnerRequestReceivedList'],
+})
+
+export declare namespace PartnerPartnerRequestReceived {
+  /** What `list` answers with. */
+  export type ListResponse = PartnerPartnerRequestReceivedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vPartnerPartnerRequestReceivedListQuery>
+}
+
+/** `api/partner/partner-request/sent` */
+export const PartnerPartnerRequestSent = /*#__PURE__*/ resource({
+  path: 'api/partner/partner-request/sent',
+  kind: 'collection',
+  id: 'number',
+  list: {options: partnerPartnerRequestSentListOptions, queryKey: partnerPartnerRequestSentListQueryKey},
+  filters: [],
+  create: {mutation: partnerPartnerRequestSentCreateMutation, body: vPartnerPartnerRequestSentCreateBody},
+  reads: ['partnerPartnerRequestSentList'],
+})
+
+export declare namespace PartnerPartnerRequestSent {
+  /** What `list` answers with. */
+  export type ListResponse = PartnerPartnerRequestSentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vPartnerPartnerRequestSentListQuery>
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vPartnerPartnerRequestSentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vPartnerPartnerRequestSentCreateBody>
+}
 
 /** `api/quotation/chapter` */
-export const quotationChapter = {
+export const QuotationChapter = /*#__PURE__*/ resource({
   path: 'api/quotation/chapter',
   kind: 'collection',
   id: 'number',
   list: {options: quotationChapterListOptions, queryKey: quotationChapterListQueryKey},
+  filters: ['quotation'] satisfies (keyof QuotationChapter.ListQuery)[],
+  filterTypes: {quotation: 'integer'},
   retrieve: {options: quotationChapterRetrieveOptions, queryKey: quotationChapterRetrieveQueryKey},
   create: {mutation: quotationChapterCreateMutation, body: vQuotationChapterCreateBody},
   update: {mutation: quotationChapterPartialUpdateMutation, body: vQuotationChapterPartialUpdateBody},
   destroy: {mutation: quotationChapterDestroyMutation},
   reads: ['quotationChapterList', 'quotationChapterRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationChapter {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationChapterListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationChapterListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationChapterRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationChapterCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationChapterCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationChapterPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationChapterPartialUpdateBody>
+}
 
 /** `api/quotation/cost` */
-export const quotationCost = {
+export const QuotationCost = /*#__PURE__*/ resource({
   path: 'api/quotation/cost',
   kind: 'collection',
   id: 'number',
   list: {options: quotationCostListOptions, queryKey: quotationCostListQueryKey},
+  filters: ['chapter', 'cost_type', 'quotation'] satisfies (keyof QuotationCost.ListQuery)[],
+  filterTypes: {chapter: 'integer', quotation: 'integer'},
   retrieve: {options: quotationCostRetrieveOptions, queryKey: quotationCostRetrieveQueryKey},
   create: {mutation: quotationCostCreateMutation, body: vQuotationCostCreateBody},
   update: {mutation: quotationCostPartialUpdateMutation, body: vQuotationCostPartialUpdateBody},
   destroy: {mutation: quotationCostDestroyMutation},
+  extras: {
+    /** `/api/quotation/cost/quotation/{quotation_id}/{cost_type}/` */
+    quotationCreate: {mutation: quotationCostQuotationCreateMutation, body: vQuotationCostQuotationCreateBody},
+  },
   reads: ['quotationCostList', 'quotationCostRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationCost {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationCostListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationCostListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationCostRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationCostCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationCostCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationCostPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationCostPartialUpdateBody>
+}
 
 /** `api/quotation/document` */
-export const quotationDocument = {
+export const QuotationDocument = /*#__PURE__*/ resource({
   path: 'api/quotation/document',
   kind: 'collection',
   id: 'number',
   list: {options: quotationDocumentListOptions, queryKey: quotationDocumentListQueryKey},
+  filters: ['quotation'] satisfies (keyof QuotationDocument.ListQuery)[],
+  filterTypes: {quotation: 'integer'},
   retrieve: {options: quotationDocumentRetrieveOptions, queryKey: quotationDocumentRetrieveQueryKey},
   create: {mutation: quotationDocumentCreateMutation, body: vQuotationDocumentCreateBody},
   update: {mutation: quotationDocumentPartialUpdateMutation, body: vQuotationDocumentPartialUpdateBody},
   destroy: {mutation: quotationDocumentDestroyMutation},
   reads: ['quotationDocumentList', 'quotationDocumentRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationDocument {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationDocumentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationDocumentListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationDocumentRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationDocumentCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationDocumentCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationDocumentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationDocumentPartialUpdateBody>
+}
 
 /** `api/quotation/offer` */
-export const quotationOffer = {
+export const QuotationOffer = /*#__PURE__*/ resource({
   path: 'api/quotation/offer',
   kind: 'collection',
   id: 'number',
   list: {options: quotationOfferListOptions, queryKey: quotationOfferListQueryKey},
+  filters: [],
   retrieve: {options: quotationOfferRetrieveOptions, queryKey: quotationOfferRetrieveQueryKey},
   create: {mutation: quotationOfferCreateMutation, body: vQuotationOfferCreateBody},
   update: {mutation: quotationOfferPartialUpdateMutation, body: vQuotationOfferPartialUpdateBody},
   destroy: {mutation: quotationOfferDestroyMutation},
   reads: ['quotationOfferGetUnsentOfferRetrieve', 'quotationOfferList', 'quotationOfferRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationOffer {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationOfferListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationOfferListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationOfferRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationOfferCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationOfferCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationOfferPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationOfferPartialUpdateBody>
+}
 
 /** `api/quotation/quotation` */
-export const quotationQuotation = {
+export const QuotationQuotation = /*#__PURE__*/ resource({
   path: 'api/quotation/quotation',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationListOptions, queryKey: quotationQuotationListQueryKey},
+  filters: ['customer_relation'] satisfies (keyof QuotationQuotation.ListQuery)[],
+  filterTypes: {customer_relation: 'integer'},
   retrieve: {options: quotationQuotationRetrieveOptions, queryKey: quotationQuotationRetrieveQueryKey},
   create: {mutation: quotationQuotationCreateMutation, body: vQuotationQuotationCreateBody},
   update: {mutation: quotationQuotationPartialUpdateMutation, body: vQuotationQuotationPartialUpdateBody},
   destroy: {mutation: quotationQuotationDestroyMutation},
+  extras: {
+    /** `/api/quotation/quotation/{id}/download_definitive_pdf/` */
+    downloadDefinitivePdfCreate: {mutation: quotationQuotationDownloadDefinitivePdfCreateMutation},
+    /** `/api/quotation/quotation/{id}/generate_definitive_pdf/` */
+    generateDefinitivePdfCreate: {mutation: quotationQuotationGenerateDefinitivePdfCreateMutation},
+    /** `/api/quotation/quotation/{id}/generate_preview_pdf/` */
+    generatePreviewPdfCreate: {mutation: quotationQuotationGeneratePreviewPdfCreateMutation},
+    /** `/api/quotation/quotation/{id}/get_materials_for_app/` */
+    getMaterialsForAppList: {options: quotationQuotationGetMaterialsForAppListOptions, queryKey: quotationQuotationGetMaterialsForAppListQueryKey},
+    /** `/api/quotation/quotation/{id}/make_definitive/` */
+    makeDefinitiveCreate: {mutation: quotationQuotationMakeDefinitiveCreateMutation, body: vQuotationQuotationMakeDefinitiveCreateBody},
+  },
   reads: ['quotationQuotationAutocompleteList', 'quotationQuotationGetMaterialsForAppList', 'quotationQuotationList', 'quotationQuotationNotAcceptedList', 'quotationQuotationPreliminaryList', 'quotationQuotationRetrieve', 'quotationQuotationSentList'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationQuotation {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationQuotationRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationQuotationCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationQuotationCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationQuotationPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationQuotationPartialUpdateBody>
+}
 
 /** `api/quotation/quotation/autocomplete` */
-export const quotationQuotationAutocomplete = {
+export const QuotationQuotationAutocomplete = /*#__PURE__*/ resource({
   path: 'api/quotation/quotation/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationAutocompleteListOptions, queryKey: quotationQuotationAutocompleteListQueryKey},
+  filters: ['customer_relation'] satisfies (keyof QuotationQuotationAutocomplete.ListQuery)[],
+  filterTypes: {customer_relation: 'integer'},
   reads: ['quotationQuotationAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationQuotationAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationAutocompleteListQuery>
+}
 
 /** `api/quotation/quotation-image` */
-export const quotationQuotationImage = {
+export const QuotationQuotationImage = /*#__PURE__*/ resource({
   path: 'api/quotation/quotation-image',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationImageListOptions, queryKey: quotationQuotationImageListQueryKey},
+  filters: ['quotation'] satisfies (keyof QuotationQuotationImage.ListQuery)[],
+  filterTypes: {quotation: 'integer'},
   retrieve: {options: quotationQuotationImageRetrieveOptions, queryKey: quotationQuotationImageRetrieveQueryKey},
   create: {mutation: quotationQuotationImageCreateMutation, body: vQuotationQuotationImageCreateBody},
   update: {mutation: quotationQuotationImagePartialUpdateMutation, body: vQuotationQuotationImagePartialUpdateBody},
   destroy: {mutation: quotationQuotationImageDestroyMutation},
   reads: ['quotationQuotationImageList', 'quotationQuotationImageRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationQuotationImage {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationImageListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationImageListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationQuotationImageRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationQuotationImageCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationQuotationImageCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationQuotationImagePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationQuotationImagePartialUpdateBody>
+}
 
 /** `api/quotation/quotation-line` */
-export const quotationQuotationLine = {
+export const QuotationQuotationLine = /*#__PURE__*/ resource({
   path: 'api/quotation/quotation-line',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationLineListOptions, queryKey: quotationQuotationLineListQueryKey},
+  filters: ['chapter', 'quotation'] satisfies (keyof QuotationQuotationLine.ListQuery)[],
+  filterTypes: {chapter: 'integer', quotation: 'integer'},
   retrieve: {options: quotationQuotationLineRetrieveOptions, queryKey: quotationQuotationLineRetrieveQueryKey},
   create: {mutation: quotationQuotationLineCreateMutation, body: vQuotationQuotationLineCreateBody},
   update: {mutation: quotationQuotationLinePartialUpdateMutation, body: vQuotationQuotationLinePartialUpdateBody},
   destroy: {mutation: quotationQuotationLineDestroyMutation},
   reads: ['quotationQuotationLineList', 'quotationQuotationLineRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationQuotationLine {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationLineListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationLineListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationQuotationLineRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationQuotationLineCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationQuotationLineCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationQuotationLinePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationQuotationLinePartialUpdateBody>
+}
 
 /** `api/quotation/quotation-line/chapter` */
-export const quotationQuotationLineChapter = {
+export const QuotationQuotationLineChapter = /*#__PURE__*/ resource({
   path: 'api/quotation/quotation-line/chapter',
   kind: 'collection',
   id: 'number',
   create: {mutation: quotationQuotationLineChapterCreateMutation, body: vQuotationQuotationLineChapterCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationQuotationLineChapter {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationQuotationLineChapterCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationQuotationLineChapterCreateBody>
+}
 
 /** `api/quotation/quotation-line-image` */
-export const quotationQuotationLineImage = {
+export const QuotationQuotationLineImage = /*#__PURE__*/ resource({
   path: 'api/quotation/quotation-line-image',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationLineImageListOptions, queryKey: quotationQuotationLineImageListQueryKey},
+  filters: ['quotation_line'] satisfies (keyof QuotationQuotationLineImage.ListQuery)[],
+  filterTypes: {quotation_line: 'integer'},
   retrieve: {options: quotationQuotationLineImageRetrieveOptions, queryKey: quotationQuotationLineImageRetrieveQueryKey},
   create: {mutation: quotationQuotationLineImageCreateMutation, body: vQuotationQuotationLineImageCreateBody},
   update: {mutation: quotationQuotationLineImagePartialUpdateMutation, body: vQuotationQuotationLineImagePartialUpdateBody},
   destroy: {mutation: quotationQuotationLineImageDestroyMutation},
   reads: ['quotationQuotationLineImageList', 'quotationQuotationLineImageRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationQuotationLineImage {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationLineImageListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationLineImageListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = QuotationQuotationLineImageRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationQuotationLineImageCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationQuotationLineImageCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vQuotationQuotationLineImagePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vQuotationQuotationLineImagePartialUpdateBody>
+}
 
 /** `api/quotation/quotation/not_accepted` */
-export const quotationQuotationNotAccepted = {
+export const QuotationQuotationNotAccepted = /*#__PURE__*/ resource({
   path: 'api/quotation/quotation/not_accepted',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationNotAcceptedListOptions, queryKey: quotationQuotationNotAcceptedListQueryKey},
+  filters: ['customer_relation'] satisfies (keyof QuotationQuotationNotAccepted.ListQuery)[],
+  filterTypes: {customer_relation: 'integer'},
   reads: ['quotationQuotationNotAcceptedList'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationQuotationNotAccepted {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationNotAcceptedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationNotAcceptedListQuery>
+}
 
 /** `api/quotation/quotation/preliminary` */
-export const quotationQuotationPreliminary = {
+export const QuotationQuotationPreliminary = /*#__PURE__*/ resource({
   path: 'api/quotation/quotation/preliminary',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationPreliminaryListOptions, queryKey: quotationQuotationPreliminaryListQueryKey},
+  filters: ['customer_relation'] satisfies (keyof QuotationQuotationPreliminary.ListQuery)[],
+  filterTypes: {customer_relation: 'integer'},
   reads: ['quotationQuotationPreliminaryList'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationQuotationPreliminary {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationPreliminaryListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationPreliminaryListQuery>
+}
 
 /** `api/quotation/quotation/sent` */
-export const quotationQuotationSent = {
+export const QuotationQuotationSent = /*#__PURE__*/ resource({
   path: 'api/quotation/quotation/sent',
   kind: 'collection',
   id: 'number',
   list: {options: quotationQuotationSentListOptions, queryKey: quotationQuotationSentListQueryKey},
+  filters: ['customer_relation'] satisfies (keyof QuotationQuotationSent.ListQuery)[],
+  filterTypes: {customer_relation: 'integer'},
   reads: ['quotationQuotationSentList'],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationQuotationSent {
+  /** What `list` answers with. */
+  export type ListResponse = QuotationQuotationSentListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vQuotationQuotationSentListQuery>
+}
 
 /** `api/quotation/status` */
-export const quotationStatus = {
+export const QuotationStatus = /*#__PURE__*/ resource({
   path: 'api/quotation/status',
   kind: 'action',
   create: {mutation: quotationStatusCreateMutation, body: vQuotationStatusCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace QuotationStatus {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vQuotationStatusCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vQuotationStatusCreateBody>
+}
 
 /** `api/set-language` */
-export const setLanguage = {
+export const SetLanguage = /*#__PURE__*/ resource({
   path: 'api/set-language',
   kind: 'action',
   create: {mutation: setLanguageCreateMutation, body: vSetLanguageCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace SetLanguage {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vSetLanguageCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vSetLanguageCreateBody>
+}
 
 /** `api/statuscode/action` */
-export const statuscodeAction = {
+export const StatuscodeAction = /*#__PURE__*/ resource({
   path: 'api/statuscode/action',
   kind: 'collection',
   id: 'number',
   list: {options: statuscodeActionListOptions, queryKey: statuscodeActionListQueryKey},
+  filters: ['statuscode'] satisfies (keyof StatuscodeAction.ListQuery)[],
+  filterTypes: {statuscode: 'integer'},
   retrieve: {options: statuscodeActionRetrieveOptions, queryKey: statuscodeActionRetrieveQueryKey},
   create: {mutation: statuscodeActionCreateMutation, body: vStatuscodeActionCreateBody},
   update: {mutation: statuscodeActionPartialUpdateMutation, body: vStatuscodeActionPartialUpdateBody},
   destroy: {mutation: statuscodeActionDestroyMutation},
   reads: ['statuscodeActionList', 'statuscodeActionOperatorsRetrieve', 'statuscodeActionRetrieve', 'statuscodeActionStatusoptionsRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace StatuscodeAction {
+  /** What `list` answers with. */
+  export type ListResponse = StatuscodeActionListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vStatuscodeActionListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = StatuscodeActionRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vStatuscodeActionCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vStatuscodeActionCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vStatuscodeActionPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vStatuscodeActionPartialUpdateBody>
+}
 
 /** `api/statuscode/statuscode` */
-export const statuscodeStatuscode = {
+export const StatuscodeStatuscode = /*#__PURE__*/ resource({
   path: 'api/statuscode/statuscode',
   kind: 'collection',
   id: 'number',
   list: {options: statuscodeStatuscodeListOptions, queryKey: statuscodeStatuscodeListQueryKey},
+  filters: ['code_type', 'description', 'statuscode'] satisfies (keyof StatuscodeStatuscode.ListQuery)[],
   retrieve: {options: statuscodeStatuscodeRetrieveOptions, queryKey: statuscodeStatuscodeRetrieveQueryKey},
   create: {mutation: statuscodeStatuscodeCreateMutation, body: vStatuscodeStatuscodeCreateBody},
   update: {mutation: statuscodeStatuscodePartialUpdateMutation, body: vStatuscodeStatuscodePartialUpdateBody},
   destroy: {mutation: statuscodeStatuscodeDestroyMutation},
   reads: ['statuscodeStatuscodeAutocompleteList', 'statuscodeStatuscodeList', 'statuscodeStatuscodeRetrieve', 'statuscodeStatuscodeRolesRetrieve'],
-} as const satisfies Resource
+})
+
+export declare namespace StatuscodeStatuscode {
+  /** What `list` answers with. */
+  export type ListResponse = StatuscodeStatuscodeListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vStatuscodeStatuscodeListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = StatuscodeStatuscodeRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vStatuscodeStatuscodeCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vStatuscodeStatuscodeCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vStatuscodeStatuscodePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vStatuscodeStatuscodePartialUpdateBody>
+}
 
 /** `api/statuscode/statuscode/autocomplete` */
-export const statuscodeStatuscodeAutocomplete = {
+export const StatuscodeStatuscodeAutocomplete = /*#__PURE__*/ resource({
   path: 'api/statuscode/statuscode/autocomplete',
   kind: 'collection',
   id: 'number',
   list: {options: statuscodeStatuscodeAutocompleteListOptions, queryKey: statuscodeStatuscodeAutocompleteListQueryKey},
+  filters: ['code_type', 'description', 'statuscode'] satisfies (keyof StatuscodeStatuscodeAutocomplete.ListQuery)[],
   reads: ['statuscodeStatuscodeAutocompleteList'],
-} as const satisfies Resource
+})
+
+export declare namespace StatuscodeStatuscodeAutocomplete {
+  /** What `list` answers with. */
+  export type ListResponse = StatuscodeStatuscodeAutocompleteListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vStatuscodeStatuscodeAutocompleteListQuery>
+}
 
 /** `api/teamleader/authorize` */
-export const teamleaderAuthorize = {
+export const TeamleaderAuthorize = /*#__PURE__*/ resource({
   path: 'api/teamleader/authorize',
   kind: 'action',
   create: {mutation: teamleaderAuthorizeCreateMutation},
   reads: [],
-} as const satisfies Resource
+})
 
 /** `api/teamleader/check-tokens` */
-export const teamleaderCheckTokens = {
+export const TeamleaderCheckTokens = /*#__PURE__*/ resource({
   path: 'api/teamleader/check-tokens',
   kind: 'action',
   create: {mutation: teamleaderCheckTokensCreateMutation},
   reads: [],
-} as const satisfies Resource
+})
 
 /** `api/teamleader/empty-tokens` */
-export const teamleaderEmptyTokens = {
+export const TeamleaderEmptyTokens = /*#__PURE__*/ resource({
   path: 'api/teamleader/empty-tokens',
   kind: 'action',
   create: {mutation: teamleaderEmptyTokensCreateMutation},
   reads: [],
-} as const satisfies Resource
+})
 
 /** `api/teamleader/oauth` */
-export const teamleaderOauth = {
+export const TeamleaderOauth = /*#__PURE__*/ resource({
   path: 'api/teamleader/oauth',
   kind: 'action',
   create: {mutation: teamleaderOauthCreateMutation, body: vTeamleaderOauthCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderOauth {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vTeamleaderOauthCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vTeamleaderOauthCreateBody>
+}
 
 /** `api/teamleader/product-category` */
-export const teamleaderProductCategory = {
+export const TeamleaderProductCategory = /*#__PURE__*/ resource({
   path: 'api/teamleader/product-category',
   kind: 'collection',
   id: 'number',
   list: {options: teamleaderProductCategoryListOptions, queryKey: teamleaderProductCategoryListQueryKey},
+  filters: [],
   reads: ['teamleaderProductCategoryList'],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderProductCategory {
+  /** What `list` answers with. */
+  export type ListResponse = TeamleaderProductCategoryListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vTeamleaderProductCategoryListQuery>
+}
 
 /** `api/teamleader/product-category-reset` */
-export const teamleaderProductCategoryReset = {
+export const TeamleaderProductCategoryReset = /*#__PURE__*/ resource({
   path: 'api/teamleader/product-category-reset',
   kind: 'action',
   create: {mutation: teamleaderProductCategoryResetCreateMutation},
   reads: [],
-} as const satisfies Resource
+})
 
 /** `api/teamleader/tax-rate` */
-export const teamleaderTaxRate = {
+export const TeamleaderTaxRate = /*#__PURE__*/ resource({
   path: 'api/teamleader/tax-rate',
   kind: 'collection',
   id: 'number',
   list: {options: teamleaderTaxRateListOptions, queryKey: teamleaderTaxRateListQueryKey},
+  filters: [],
   reads: ['teamleaderTaxRateList'],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderTaxRate {
+  /** What `list` answers with. */
+  export type ListResponse = TeamleaderTaxRateListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vTeamleaderTaxRateListQuery>
+}
 
 /** `api/teamleader/tax-rate-reset` */
-export const teamleaderTaxRateReset = {
+export const TeamleaderTaxRateReset = /*#__PURE__*/ resource({
   path: 'api/teamleader/tax-rate-reset',
   kind: 'action',
   create: {mutation: teamleaderTaxRateResetCreateMutation},
   reads: [],
-} as const satisfies Resource
+})
 
 /** `api/teamleader/tl-product-create` */
-export const teamleaderTlProductCreate = {
+export const TeamleaderTlProductCreate = /*#__PURE__*/ resource({
   path: 'api/teamleader/tl-product-create',
   kind: 'action',
   create: {mutation: teamleaderTlProductCreateCreateMutation, body: vTeamleaderTlProductCreateCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderTlProductCreate {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vTeamleaderTlProductCreateCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vTeamleaderTlProductCreateCreateBody>
+}
 
 /** `api/teamleader/tl-product-create-link` */
-export const teamleaderTlProductCreateLink = {
+export const TeamleaderTlProductCreateLink = /*#__PURE__*/ resource({
   path: 'api/teamleader/tl-product-create-link',
   kind: 'action',
   create: {mutation: teamleaderTlProductCreateLinkCreateMutation, body: vTeamleaderTlProductCreateLinkCreateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderTlProductCreateLink {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vTeamleaderTlProductCreateLinkCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vTeamleaderTlProductCreateLinkCreateBody>
+}
 
 /** `api/teamleader/tl-product-list` */
-export const teamleaderTlProductList = {
+export const TeamleaderTlProductList = /*#__PURE__*/ resource({
   path: 'api/teamleader/tl-product-list',
   kind: 'collection',
   id: 'number',
   list: {options: teamleaderTlProductListListOptions, queryKey: teamleaderTlProductListListQueryKey},
+  filters: ['ids'] satisfies (keyof TeamleaderTlProductList.ListQuery)[],
   reads: ['teamleaderTlProductListList'],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderTlProductList {
+  /** What `list` answers with. */
+  export type ListResponse = TeamleaderTlProductListListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vTeamleaderTlProductListListQuery>
+}
 
 /** `api/teamleader/travel-hours-product` */
-export const teamleaderTravelHoursProduct = {
+export const TeamleaderTravelHoursProduct = /*#__PURE__*/ resource({
   path: 'api/teamleader/travel-hours-product',
   kind: 'singleton',
   update: {mutation: teamleaderTravelHoursProductPartialUpdateMutation, body: vTeamleaderTravelHoursProductPartialUpdateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderTravelHoursProduct {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderTravelHoursProductPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderTravelHoursProductPartialUpdateBody>
+}
 
 /** `api/teamleader/update-department` */
-export const teamleaderUpdateDepartment = {
+export const TeamleaderUpdateDepartment = /*#__PURE__*/ resource({
   path: 'api/teamleader/update-department',
   kind: 'singleton',
   update: {mutation: teamleaderUpdateDepartmentPartialUpdateMutation, body: vTeamleaderUpdateDepartmentPartialUpdateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderUpdateDepartment {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderUpdateDepartmentPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderUpdateDepartmentPartialUpdateBody>
+}
 
 /** `api/teamleader/update-enabled` */
-export const teamleaderUpdateEnabled = {
+export const TeamleaderUpdateEnabled = /*#__PURE__*/ resource({
   path: 'api/teamleader/update-enabled',
   kind: 'singleton',
   update: {mutation: teamleaderUpdateEnabledPartialUpdateMutation, body: vTeamleaderUpdateEnabledPartialUpdateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderUpdateEnabled {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderUpdateEnabledPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderUpdateEnabledPartialUpdateBody>
+}
 
 /** `api/teamleader/update-invoice-document-template` */
-export const teamleaderUpdateInvoiceDocumentTemplate = {
+export const TeamleaderUpdateInvoiceDocumentTemplate = /*#__PURE__*/ resource({
   path: 'api/teamleader/update-invoice-document-template',
   kind: 'singleton',
   update: {mutation: teamleaderUpdateInvoiceDocumentTemplatePartialUpdateMutation, body: vTeamleaderUpdateInvoiceDocumentTemplatePartialUpdateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderUpdateInvoiceDocumentTemplate {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderUpdateInvoiceDocumentTemplatePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderUpdateInvoiceDocumentTemplatePartialUpdateBody>
+}
 
 /** `api/teamleader/update-product-category` */
-export const teamleaderUpdateProductCategory = {
+export const TeamleaderUpdateProductCategory = /*#__PURE__*/ resource({
   path: 'api/teamleader/update-product-category',
   kind: 'singleton',
   update: {mutation: teamleaderUpdateProductCategoryPartialUpdateMutation, body: vTeamleaderUpdateProductCategoryPartialUpdateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderUpdateProductCategory {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderUpdateProductCategoryPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderUpdateProductCategoryPartialUpdateBody>
+}
 
 /** `api/teamleader/work-hours-product` */
-export const teamleaderWorkHoursProduct = {
+export const TeamleaderWorkHoursProduct = /*#__PURE__*/ resource({
   path: 'api/teamleader/work-hours-product',
   kind: 'singleton',
   update: {mutation: teamleaderWorkHoursProductPartialUpdateMutation, body: vTeamleaderWorkHoursProductPartialUpdateBody},
   reads: [],
-} as const satisfies Resource
+})
+
+export declare namespace TeamleaderWorkHoursProduct {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vTeamleaderWorkHoursProductPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vTeamleaderWorkHoursProductPartialUpdateBody>
+}
+
+/** `api/user/apiuser` */
+export const UserApiuser = /*#__PURE__*/ resource({
+  path: 'api/user/apiuser',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userApiuserListOptions, queryKey: userApiuserListQueryKey},
+  filters: [],
+  retrieve: {options: userApiuserRetrieveOptions, queryKey: userApiuserRetrieveQueryKey},
+  create: {mutation: userApiuserCreateMutation, body: vUserApiuserCreateBody},
+  update: {mutation: userApiuserPartialUpdateMutation, body: vUserApiuserPartialUpdateBody},
+  destroy: {mutation: userApiuserDestroyMutation},
+  extras: {
+    /** `/api/user/apiuser/{id}/renew_token/` */
+    renewTokenCreate: {mutation: userApiuserRenewTokenCreateMutation, body: vUserApiuserRenewTokenCreateBody},
+    /** `/api/user/apiuser/{id}/revoke/` */
+    revokeCreate: {mutation: userApiuserRevokeCreateMutation},
+  },
+  reads: ['userApiuserDummyEndpointRetrieve', 'userApiuserList', 'userApiuserRetrieve'],
+})
+
+export declare namespace UserApiuser {
+  /** What `list` answers with. */
+  export type ListResponse = UserApiuserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserApiuserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = UserApiuserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserApiuserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserApiuserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserApiuserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserApiuserPartialUpdateBody>
+}
+
+/** `api/user/customeruser` */
+export const UserCustomeruser = /*#__PURE__*/ resource({
+  path: 'api/user/customeruser',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userCustomeruserListOptions, queryKey: userCustomeruserListQueryKey},
+  filters: [],
+  retrieve: {options: userCustomeruserRetrieveOptions, queryKey: userCustomeruserRetrieveQueryKey},
+  create: {mutation: userCustomeruserCreateMutation, body: vUserCustomeruserCreateBody},
+  update: {mutation: userCustomeruserPartialUpdateMutation, body: vUserCustomeruserPartialUpdateBody},
+  destroy: {mutation: userCustomeruserDestroyMutation},
+  reads: ['userCustomeruserList', 'userCustomeruserRetrieve'],
+})
+
+export declare namespace UserCustomeruser {
+  /** What `list` answers with. */
+  export type ListResponse = UserCustomeruserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserCustomeruserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = UserCustomeruserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserCustomeruserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserCustomeruserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserCustomeruserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserCustomeruserPartialUpdateBody>
+}
+
+/** `api/user/employeeuser` */
+export const UserEmployeeuser = /*#__PURE__*/ resource({
+  path: 'api/user/employeeuser',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userEmployeeuserListOptions, queryKey: userEmployeeuserListQueryKey},
+  filters: [],
+  retrieve: {options: userEmployeeuserRetrieveOptions, queryKey: userEmployeeuserRetrieveQueryKey},
+  create: {mutation: userEmployeeuserCreateMutation, body: vUserEmployeeuserCreateBody},
+  update: {mutation: userEmployeeuserPartialUpdateMutation, body: vUserEmployeeuserPartialUpdateBody},
+  destroy: {mutation: userEmployeeuserDestroyMutation},
+  reads: ['userEmployeeuserList', 'userEmployeeuserRetrieve'],
+})
+
+export declare namespace UserEmployeeuser {
+  /** What `list` answers with. */
+  export type ListResponse = UserEmployeeuserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserEmployeeuserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = UserEmployeeuserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserEmployeeuserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserEmployeeuserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserEmployeeuserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserEmployeeuserPartialUpdateBody>
+}
+
+/** `api/user/engineer` */
+export const UserEngineer = /*#__PURE__*/ resource({
+  path: 'api/user/engineer',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userEngineerListOptions, queryKey: userEngineerListQueryKey},
+  filters: [],
+  retrieve: {options: userEngineerRetrieveOptions, queryKey: userEngineerRetrieveQueryKey},
+  create: {mutation: userEngineerCreateMutation, body: vUserEngineerCreateBody},
+  update: {mutation: userEngineerPartialUpdateMutation, body: vUserEngineerPartialUpdateBody},
+  destroy: {mutation: userEngineerDestroyMutation},
+  extras: {
+    /** `/api/user/engineer/{id}/info/` */
+    infoRetrieve: {options: userEngineerInfoRetrieveOptions, queryKey: userEngineerInfoRetrieveQueryKey},
+    /** `/api/user/engineer/{id}/store_lon_lat/` */
+    storeLonLatCreate: {mutation: userEngineerStoreLonLatCreateMutation, body: vUserEngineerStoreLonLatCreateBody},
+  },
+  reads: ['userEngineerDeviceRetrieve', 'userEngineerGetLocationsList', 'userEngineerInfoRetrieve', 'userEngineerList', 'userEngineerListForSelectList', 'userEngineerRetrieve'],
+})
+
+export declare namespace UserEngineer {
+  /** What `list` answers with. */
+  export type ListResponse = UserEngineerListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserEngineerListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = UserEngineerRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserEngineerCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserEngineerCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserEngineerPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserEngineerPartialUpdateBody>
+}
+
+/** `api/user/engineer-event-type` */
+export const UserEngineerEventType = /*#__PURE__*/ resource({
+  path: 'api/user/engineer-event-type',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userEngineerEventTypeListOptions, queryKey: userEngineerEventTypeListQueryKey},
+  filters: [],
+  retrieve: {options: userEngineerEventTypeRetrieveOptions, queryKey: userEngineerEventTypeRetrieveQueryKey},
+  create: {mutation: userEngineerEventTypeCreateMutation, body: vUserEngineerEventTypeCreateBody},
+  update: {mutation: userEngineerEventTypePartialUpdateMutation, body: vUserEngineerEventTypePartialUpdateBody},
+  destroy: {mutation: userEngineerEventTypeDestroyMutation},
+  reads: ['userEngineerEventTypeList', 'userEngineerEventTypeRetrieve', 'userEngineerEventTypeStatsList'],
+})
+
+export declare namespace UserEngineerEventType {
+  /** What `list` answers with. */
+  export type ListResponse = UserEngineerEventTypeListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserEngineerEventTypeListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = UserEngineerEventTypeRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserEngineerEventTypeCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserEngineerEventTypeCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserEngineerEventTypePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserEngineerEventTypePartialUpdateBody>
+}
+
+/** `api/user/engineer-event-type/stats` */
+export const UserEngineerEventTypeStats = /*#__PURE__*/ resource({
+  path: 'api/user/engineer-event-type/stats',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userEngineerEventTypeStatsListOptions, queryKey: userEngineerEventTypeStatsListQueryKey},
+  filters: ['engineer', 'year'] satisfies (keyof UserEngineerEventTypeStats.ListQuery)[],
+  filterTypes: {engineer: 'integer', year: 'integer'},
+  reads: ['userEngineerEventTypeStatsList'],
+})
+
+export declare namespace UserEngineerEventTypeStats {
+  /** What `list` answers with. */
+  export type ListResponse = UserEngineerEventTypeStatsListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserEngineerEventTypeStatsListQuery>
+}
+
+/** `api/user/engineer/get_locations` */
+export const UserEngineerGetLocations = /*#__PURE__*/ resource({
+  path: 'api/user/engineer/get_locations',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userEngineerGetLocationsListOptions, queryKey: userEngineerGetLocationsListQueryKey},
+  reads: ['userEngineerGetLocationsList'],
+})
+
+export declare namespace UserEngineerGetLocations {
+  /** What `list` answers with. */
+  export type ListResponse = UserEngineerGetLocationsListResponse
+}
+
+/** `api/user/engineer/list-for-select` */
+export const UserEngineerListForSelect = /*#__PURE__*/ resource({
+  path: 'api/user/engineer/list-for-select',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userEngineerListForSelectListOptions, queryKey: userEngineerListForSelectListQueryKey},
+  reads: ['userEngineerListForSelectList'],
+})
+
+export declare namespace UserEngineerListForSelect {
+  /** What `list` answers with. */
+  export type ListResponse = UserEngineerListForSelectListResponse
+}
+
+/** `api/user/engineerevent` */
+export const UserEngineerevent = /*#__PURE__*/ resource({
+  path: 'api/user/engineerevent',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userEngineereventListOptions, queryKey: userEngineereventListQueryKey},
+  filters: ['engineer'] satisfies (keyof UserEngineerevent.ListQuery)[],
+  filterTypes: {engineer: 'integer'},
+  create: {mutation: userEngineereventCreateMutation, body: vUserEngineereventCreateBody},
+  destroy: {mutation: userEngineereventDestroyMutation},
+  extras: {
+    /** `/api/user/engineerevent/{id}/create-order/` */
+    createOrderCreate: {mutation: userEngineereventCreateOrderCreateMutation, body: vUserEngineereventCreateOrderCreateBody},
+  },
+  reads: ['userEngineereventList'],
+})
+
+export declare namespace UserEngineerevent {
+  /** What `list` answers with. */
+  export type ListResponse = UserEngineereventListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserEngineereventListQuery>
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserEngineereventCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserEngineereventCreateBody>
+}
+
+/** `api/user/engineerevent-update` */
+export const UserEngineereventUpdate = /*#__PURE__*/ resource({
+  path: 'api/user/engineerevent-update',
+  kind: 'collection',
+  id: 'number',
+  retrieve: {options: userEngineereventUpdateRetrieveOptions, queryKey: userEngineereventUpdateRetrieveQueryKey},
+  update: {mutation: userEngineereventUpdatePartialUpdateMutation, body: vUserEngineereventUpdatePartialUpdateBody},
+  reads: ['userEngineereventUpdateRetrieve'],
+})
+
+export declare namespace UserEngineereventUpdate {
+  /** What `retrieve` answers with. */
+  export type Record = UserEngineereventUpdateRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserEngineereventUpdatePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserEngineereventUpdatePartialUpdateBody>
+}
+
+/** `api/user/planninguser` */
+export const UserPlanninguser = /*#__PURE__*/ resource({
+  path: 'api/user/planninguser',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userPlanninguserListOptions, queryKey: userPlanninguserListQueryKey},
+  filters: [],
+  retrieve: {options: userPlanninguserRetrieveOptions, queryKey: userPlanninguserRetrieveQueryKey},
+  create: {mutation: userPlanninguserCreateMutation, body: vUserPlanninguserCreateBody},
+  update: {mutation: userPlanninguserPartialUpdateMutation, body: vUserPlanninguserPartialUpdateBody},
+  destroy: {mutation: userPlanninguserDestroyMutation},
+  reads: ['userPlanninguserList', 'userPlanninguserRetrieve'],
+})
+
+export declare namespace UserPlanninguser {
+  /** What `list` answers with. */
+  export type ListResponse = UserPlanninguserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserPlanninguserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = UserPlanninguserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserPlanninguserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserPlanninguserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserPlanninguserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserPlanninguserPartialUpdateBody>
+}
+
+/** `api/user/salesuser` */
+export const UserSalesuser = /*#__PURE__*/ resource({
+  path: 'api/user/salesuser',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userSalesuserListOptions, queryKey: userSalesuserListQueryKey},
+  filters: [],
+  retrieve: {options: userSalesuserRetrieveOptions, queryKey: userSalesuserRetrieveQueryKey},
+  create: {mutation: userSalesuserCreateMutation, body: vUserSalesuserCreateBody},
+  update: {mutation: userSalesuserPartialUpdateMutation, body: vUserSalesuserPartialUpdateBody},
+  destroy: {mutation: userSalesuserDestroyMutation},
+  reads: ['userSalesuserList', 'userSalesuserRetrieve'],
+})
+
+export declare namespace UserSalesuser {
+  /** What `list` answers with. */
+  export type ListResponse = UserSalesuserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserSalesuserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = UserSalesuserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserSalesuserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserSalesuserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserSalesuserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserSalesuserPartialUpdateBody>
+}
+
+/** `api/user/salesusercustomer` */
+export const UserSalesusercustomer = /*#__PURE__*/ resource({
+  path: 'api/user/salesusercustomer',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userSalesusercustomerListOptions, queryKey: userSalesusercustomerListQueryKey},
+  filters: ['user'] satisfies (keyof UserSalesusercustomer.ListQuery)[],
+  filterTypes: {user: 'integer'},
+  retrieve: {options: userSalesusercustomerRetrieveOptions, queryKey: userSalesusercustomerRetrieveQueryKey},
+  create: {mutation: userSalesusercustomerCreateMutation, body: vUserSalesusercustomerCreateBody},
+  update: {mutation: userSalesusercustomerPartialUpdateMutation, body: vUserSalesusercustomerPartialUpdateBody},
+  destroy: {mutation: userSalesusercustomerDestroyMutation},
+  reads: ['userSalesusercustomerList', 'userSalesusercustomerMyList', 'userSalesusercustomerMyRetrieve', 'userSalesusercustomerRetrieve'],
+})
+
+export declare namespace UserSalesusercustomer {
+  /** What `list` answers with. */
+  export type ListResponse = UserSalesusercustomerListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserSalesusercustomerListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = UserSalesusercustomerRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserSalesusercustomerCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserSalesusercustomerCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserSalesusercustomerPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserSalesusercustomerPartialUpdateBody>
+}
+
+/** `api/user/salesusercustomer/my` */
+export const UserSalesusercustomerMy = /*#__PURE__*/ resource({
+  path: 'api/user/salesusercustomer/my',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userSalesusercustomerMyListOptions, queryKey: userSalesusercustomerMyListQueryKey},
+  filters: [],
+  retrieve: {options: userSalesusercustomerMyRetrieveOptions, queryKey: userSalesusercustomerMyRetrieveQueryKey},
+  create: {mutation: userSalesusercustomerMyCreateMutation, body: vUserSalesusercustomerMyCreateBody},
+  update: {mutation: userSalesusercustomerMyPartialUpdateMutation, body: vUserSalesusercustomerMyPartialUpdateBody},
+  destroy: {mutation: userSalesusercustomerMyDestroyMutation},
+  reads: ['userSalesusercustomerMyList', 'userSalesusercustomerMyRetrieve'],
+})
+
+export declare namespace UserSalesusercustomerMy {
+  /** What `list` answers with. */
+  export type ListResponse = UserSalesusercustomerMyListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserSalesusercustomerMyListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = UserSalesusercustomerMyRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserSalesusercustomerMyCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserSalesusercustomerMyCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserSalesusercustomerMyPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserSalesusercustomerMyPartialUpdateBody>
+}
+
+/** `api/user/stream-private-channel-create` */
+export const UserStreamPrivateChannelCreate = /*#__PURE__*/ resource({
+  path: 'api/user/stream-private-channel-create',
+  kind: 'action',
+  create: {mutation: userStreamPrivateChannelCreateCreateMutation, body: vUserStreamPrivateChannelCreateCreateBody},
+  reads: [],
+})
+
+export declare namespace UserStreamPrivateChannelCreate {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserStreamPrivateChannelCreateCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserStreamPrivateChannelCreateCreateBody>
+}
+
+/** `api/user/studentuser` */
+export const UserStudentuser = /*#__PURE__*/ resource({
+  path: 'api/user/studentuser',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userStudentuserListOptions, queryKey: userStudentuserListQueryKey},
+  filters: [],
+  retrieve: {options: userStudentuserRetrieveOptions, queryKey: userStudentuserRetrieveQueryKey},
+  create: {mutation: userStudentuserCreateMutation, body: vUserStudentuserCreateBody},
+  update: {mutation: userStudentuserPartialUpdateMutation, body: vUserStudentuserPartialUpdateBody},
+  destroy: {mutation: userStudentuserDestroyMutation},
+  reads: ['userStudentuserList', 'userStudentuserRetrieve'],
+})
+
+export declare namespace UserStudentuser {
+  /** What `list` answers with. */
+  export type ListResponse = UserStudentuserListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserStudentuserListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = UserStudentuserRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserStudentuserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserStudentuserCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserStudentuserPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserStudentuserPartialUpdateBody>
+}
+
+/** `api/user/user-device-token` */
+export const UserUserDeviceToken = /*#__PURE__*/ resource({
+  path: 'api/user/user-device-token',
+  kind: 'action',
+  create: {mutation: userUserDeviceTokenCreateMutation, body: vUserUserDeviceTokenCreateBody},
+  reads: [],
+})
+
+export declare namespace UserUserDeviceToken {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserUserDeviceTokenCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserUserDeviceTokenCreateBody>
+}
+
+/** `api/user/user-list` */
+export const UserUserList = /*#__PURE__*/ resource({
+  path: 'api/user/user-list',
+  kind: 'collection',
+  id: 'number',
+  list: {options: userUserListListOptions, queryKey: userUserListListQueryKey},
+  filters: ['user_type'] satisfies (keyof UserUserList.ListQuery)[],
+  reads: ['userUserListList'],
+})
+
+export declare namespace UserUserList {
+  /** What `list` answers with. */
+  export type ListResponse = UserUserListListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vUserUserListListQuery>
+}
+
+/** `api/user/user-settings` */
+export const UserUserSettings = /*#__PURE__*/ resource({
+  path: 'api/user/user-settings',
+  kind: 'singleton',
+  retrieve: {options: userUserSettingsRetrieveOptions, queryKey: userUserSettingsRetrieveQueryKey},
+  update: {mutation: userUserSettingsPartialUpdateMutation, body: vUserUserSettingsPartialUpdateBody},
+  reads: ['userUserSettingsRetrieve'],
+})
+
+export declare namespace UserUserSettings {
+  /** What `retrieve` answers with. */
+  export type Record = UserUserSettingsRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserUserSettingsPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserUserSettingsPartialUpdateBody>
+}
+
+/** `api/user/users/student/profile/me` */
+export const UserUsersStudentProfileMe = /*#__PURE__*/ resource({
+  path: 'api/user/users/student/profile/me',
+  kind: 'singleton',
+  retrieve: {options: userUsersStudentProfileMeRetrieveOptions, queryKey: userUsersStudentProfileMeRetrieveQueryKey},
+  update: {mutation: userUsersStudentProfileMePartialUpdateMutation, body: vUserUsersStudentProfileMePartialUpdateBody},
+  reads: ['userUsersStudentProfileMeRetrieve'],
+})
+
+export declare namespace UserUsersStudentProfileMe {
+  /** What `retrieve` answers with. */
+  export type Record = UserUsersStudentProfileMeRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vUserUsersStudentProfileMePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vUserUsersStudentProfileMePartialUpdateBody>
+}
+
+/** `api/user/users/student/register/fetch-user` */
+export const UserUsersStudentRegisterFetchUser = /*#__PURE__*/ resource({
+  path: 'api/user/users/student/register/fetch-user',
+  kind: 'action',
+  create: {mutation: userUsersStudentRegisterFetchUserCreateMutation, body: vUserUsersStudentRegisterFetchUserCreateBody},
+  reads: [],
+})
+
+export declare namespace UserUsersStudentRegisterFetchUser {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vUserUsersStudentRegisterFetchUserCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vUserUsersStudentRegisterFetchUserCreateBody>
+}
+
+/** `api/workforce/leave-type` */
+export const WorkforceLeaveType = /*#__PURE__*/ resource({
+  path: 'api/workforce/leave-type',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceLeaveTypeListOptions, queryKey: workforceLeaveTypeListQueryKey},
+  filters: [],
+  retrieve: {options: workforceLeaveTypeRetrieveOptions, queryKey: workforceLeaveTypeRetrieveQueryKey},
+  create: {mutation: workforceLeaveTypeCreateMutation, body: vWorkforceLeaveTypeCreateBody},
+  update: {mutation: workforceLeaveTypePartialUpdateMutation, body: vWorkforceLeaveTypePartialUpdateBody},
+  destroy: {mutation: workforceLeaveTypeDestroyMutation},
+  reads: ['workforceLeaveTypeList', 'workforceLeaveTypeListForSelectList', 'workforceLeaveTypeRetrieve'],
+})
+
+export declare namespace WorkforceLeaveType {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceLeaveTypeListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceLeaveTypeListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = WorkforceLeaveTypeRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vWorkforceLeaveTypeCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vWorkforceLeaveTypeCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vWorkforceLeaveTypePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vWorkforceLeaveTypePartialUpdateBody>
+}
+
+/** `api/workforce/leave-type/list_for_select` */
+export const WorkforceLeaveTypeListForSelect = /*#__PURE__*/ resource({
+  path: 'api/workforce/leave-type/list_for_select',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceLeaveTypeListForSelectListOptions, queryKey: workforceLeaveTypeListForSelectListQueryKey},
+  filters: [],
+  reads: ['workforceLeaveTypeListForSelectList'],
+})
+
+export declare namespace WorkforceLeaveTypeListForSelect {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceLeaveTypeListForSelectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceLeaveTypeListForSelectListQuery>
+}
+
+/** `api/workforce/project` */
+export const WorkforceProject = /*#__PURE__*/ resource({
+  path: 'api/workforce/project',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceProjectListOptions, queryKey: workforceProjectListQueryKey},
+  filters: ['name'] satisfies (keyof WorkforceProject.ListQuery)[],
+  retrieve: {options: workforceProjectRetrieveOptions, queryKey: workforceProjectRetrieveQueryKey},
+  create: {mutation: workforceProjectCreateMutation, body: vWorkforceProjectCreateBody},
+  update: {mutation: workforceProjectPartialUpdateMutation, body: vWorkforceProjectPartialUpdateBody},
+  destroy: {mutation: workforceProjectDestroyMutation},
+  reads: ['workforceProjectList', 'workforceProjectListForSelectList', 'workforceProjectRetrieve'],
+})
+
+export declare namespace WorkforceProject {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceProjectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceProjectListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = WorkforceProjectRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vWorkforceProjectCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vWorkforceProjectCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vWorkforceProjectPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vWorkforceProjectPartialUpdateBody>
+}
+
+/** `api/workforce/project/list_for_select` */
+export const WorkforceProjectListForSelect = /*#__PURE__*/ resource({
+  path: 'api/workforce/project/list_for_select',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceProjectListForSelectListOptions, queryKey: workforceProjectListForSelectListQueryKey},
+  filters: ['name'] satisfies (keyof WorkforceProjectListForSelect.ListQuery)[],
+  reads: ['workforceProjectListForSelectList'],
+})
+
+export declare namespace WorkforceProjectListForSelect {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceProjectListForSelectListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceProjectListForSelectListQuery>
+}
+
+/** `api/workforce/time-registration/time-correction` */
+export const WorkforceTimeRegistrationTimeCorrection = /*#__PURE__*/ resource({
+  path: 'api/workforce/time-registration/time-correction',
+  kind: 'collection',
+  id: 'number',
+  update: {mutation: workforceTimeRegistrationTimeCorrectionPartialUpdateMutation, body: vWorkforceTimeRegistrationTimeCorrectionPartialUpdateBody},
+  reads: [],
+})
+
+export declare namespace WorkforceTimeRegistrationTimeCorrection {
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vWorkforceTimeRegistrationTimeCorrectionPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vWorkforceTimeRegistrationTimeCorrectionPartialUpdateBody>
+}
+
+/** `api/workforce/user-leave-hours` */
+export const WorkforceUserLeaveHours = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-leave-hours',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceUserLeaveHoursListOptions, queryKey: workforceUserLeaveHoursListQueryKey},
+  filters: [],
+  retrieve: {options: workforceUserLeaveHoursRetrieveOptions, queryKey: workforceUserLeaveHoursRetrieveQueryKey},
+  create: {mutation: workforceUserLeaveHoursCreateMutation, body: vWorkforceUserLeaveHoursCreateBody},
+  update: {mutation: workforceUserLeaveHoursPartialUpdateMutation, body: vWorkforceUserLeaveHoursPartialUpdateBody},
+  destroy: {mutation: workforceUserLeaveHoursDestroyMutation},
+  reads: ['workforceUserLeaveHoursAdminAllNotAcceptedCountRetrieve', 'workforceUserLeaveHoursAdminAllNotAcceptedList', 'workforceUserLeaveHoursAdminList', 'workforceUserLeaveHoursAdminRetrieve', 'workforceUserLeaveHoursAllNotAcceptedCountRetrieve', 'workforceUserLeaveHoursAllNotAcceptedList', 'workforceUserLeaveHoursList', 'workforceUserLeaveHoursRetrieve'],
+})
+
+export declare namespace WorkforceUserLeaveHours {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceUserLeaveHoursListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceUserLeaveHoursListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = WorkforceUserLeaveHoursRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vWorkforceUserLeaveHoursCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vWorkforceUserLeaveHoursCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vWorkforceUserLeaveHoursPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vWorkforceUserLeaveHoursPartialUpdateBody>
+}
+
+/** `api/workforce/user-leave-hours/admin` */
+export const WorkforceUserLeaveHoursAdmin = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-leave-hours/admin',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceUserLeaveHoursAdminListOptions, queryKey: workforceUserLeaveHoursAdminListQueryKey},
+  filters: [],
+  retrieve: {options: workforceUserLeaveHoursAdminRetrieveOptions, queryKey: workforceUserLeaveHoursAdminRetrieveQueryKey},
+  create: {mutation: workforceUserLeaveHoursAdminCreateMutation, body: vWorkforceUserLeaveHoursAdminCreateBody},
+  update: {mutation: workforceUserLeaveHoursAdminPartialUpdateMutation, body: vWorkforceUserLeaveHoursAdminPartialUpdateBody},
+  destroy: {mutation: workforceUserLeaveHoursAdminDestroyMutation},
+  extras: {
+    /** `/api/workforce/user-leave-hours/admin/{id}/set_accepted/` */
+    setAcceptedCreate: {mutation: workforceUserLeaveHoursAdminSetAcceptedCreateMutation},
+    /** `/api/workforce/user-leave-hours/admin/{id}/set_rejected/` */
+    setRejectedCreate: {mutation: workforceUserLeaveHoursAdminSetRejectedCreateMutation},
+  },
+  reads: ['workforceUserLeaveHoursAdminAllNotAcceptedCountRetrieve', 'workforceUserLeaveHoursAdminAllNotAcceptedList', 'workforceUserLeaveHoursAdminList', 'workforceUserLeaveHoursAdminRetrieve'],
+})
+
+export declare namespace WorkforceUserLeaveHoursAdmin {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceUserLeaveHoursAdminListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceUserLeaveHoursAdminListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = WorkforceUserLeaveHoursAdminRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vWorkforceUserLeaveHoursAdminCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vWorkforceUserLeaveHoursAdminCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vWorkforceUserLeaveHoursAdminPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vWorkforceUserLeaveHoursAdminPartialUpdateBody>
+}
+
+/** `api/workforce/user-leave-hours/admin/all_not_accepted` */
+export const WorkforceUserLeaveHoursAdminAllNotAccepted = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-leave-hours/admin/all_not_accepted',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceUserLeaveHoursAdminAllNotAcceptedListOptions, queryKey: workforceUserLeaveHoursAdminAllNotAcceptedListQueryKey},
+  filters: [],
+  reads: ['workforceUserLeaveHoursAdminAllNotAcceptedList'],
+})
+
+export declare namespace WorkforceUserLeaveHoursAdminAllNotAccepted {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceUserLeaveHoursAdminAllNotAcceptedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceUserLeaveHoursAdminAllNotAcceptedListQuery>
+}
+
+/** `api/workforce/user-leave-hours/admin/get_totals` */
+export const WorkforceUserLeaveHoursAdminGetTotals = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-leave-hours/admin/get_totals',
+  kind: 'action',
+  create: {mutation: workforceUserLeaveHoursAdminGetTotalsCreateMutation, body: vWorkforceUserLeaveHoursAdminGetTotalsCreateBody},
+  reads: [],
+})
+
+export declare namespace WorkforceUserLeaveHoursAdminGetTotals {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vWorkforceUserLeaveHoursAdminGetTotalsCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vWorkforceUserLeaveHoursAdminGetTotalsCreateBody>
+}
+
+/** `api/workforce/user-leave-hours/all_not_accepted` */
+export const WorkforceUserLeaveHoursAllNotAccepted = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-leave-hours/all_not_accepted',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceUserLeaveHoursAllNotAcceptedListOptions, queryKey: workforceUserLeaveHoursAllNotAcceptedListQueryKey},
+  filters: [],
+  reads: ['workforceUserLeaveHoursAllNotAcceptedList'],
+})
+
+export declare namespace WorkforceUserLeaveHoursAllNotAccepted {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceUserLeaveHoursAllNotAcceptedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceUserLeaveHoursAllNotAcceptedListQuery>
+}
+
+/** `api/workforce/user-leave-hours/get_totals` */
+export const WorkforceUserLeaveHoursGetTotals = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-leave-hours/get_totals',
+  kind: 'action',
+  create: {mutation: workforceUserLeaveHoursGetTotalsCreateMutation, body: vWorkforceUserLeaveHoursGetTotalsCreateBody},
+  reads: [],
+})
+
+export declare namespace WorkforceUserLeaveHoursGetTotals {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vWorkforceUserLeaveHoursGetTotalsCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vWorkforceUserLeaveHoursGetTotalsCreateBody>
+}
+
+/** `api/workforce/user-sick-leave` */
+export const WorkforceUserSickLeave = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-sick-leave',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceUserSickLeaveListOptions, queryKey: workforceUserSickLeaveListQueryKey},
+  filters: [],
+  retrieve: {options: workforceUserSickLeaveRetrieveOptions, queryKey: workforceUserSickLeaveRetrieveQueryKey},
+  create: {mutation: workforceUserSickLeaveCreateMutation, body: vWorkforceUserSickLeaveCreateBody},
+  update: {mutation: workforceUserSickLeavePartialUpdateMutation, body: vWorkforceUserSickLeavePartialUpdateBody},
+  destroy: {mutation: workforceUserSickLeaveDestroyMutation},
+  reads: ['workforceUserSickLeaveAdminAllSickCountRetrieve', 'workforceUserSickLeaveAdminAllSickList', 'workforceUserSickLeaveAdminAllUnconfirmedCountRetrieve', 'workforceUserSickLeaveAdminAllUnconfirmedList', 'workforceUserSickLeaveAdminList', 'workforceUserSickLeaveAdminRetrieve', 'workforceUserSickLeaveList', 'workforceUserSickLeaveRetrieve'],
+})
+
+export declare namespace WorkforceUserSickLeave {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceUserSickLeaveListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceUserSickLeaveListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = WorkforceUserSickLeaveRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vWorkforceUserSickLeaveCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vWorkforceUserSickLeaveCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vWorkforceUserSickLeavePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vWorkforceUserSickLeavePartialUpdateBody>
+}
+
+/** `api/workforce/user-sick-leave/admin` */
+export const WorkforceUserSickLeaveAdmin = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-sick-leave/admin',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceUserSickLeaveAdminListOptions, queryKey: workforceUserSickLeaveAdminListQueryKey},
+  filters: ['user'] satisfies (keyof WorkforceUserSickLeaveAdmin.ListQuery)[],
+  filterTypes: {user: 'integer'},
+  retrieve: {options: workforceUserSickLeaveAdminRetrieveOptions, queryKey: workforceUserSickLeaveAdminRetrieveQueryKey},
+  create: {mutation: workforceUserSickLeaveAdminCreateMutation, body: vWorkforceUserSickLeaveAdminCreateBody},
+  update: {mutation: workforceUserSickLeaveAdminPartialUpdateMutation, body: vWorkforceUserSickLeaveAdminPartialUpdateBody},
+  destroy: {mutation: workforceUserSickLeaveAdminDestroyMutation},
+  extras: {
+    /** `/api/workforce/user-sick-leave/admin/{id}/end_sick/` */
+    endSickCreate: {mutation: workforceUserSickLeaveAdminEndSickCreateMutation},
+    /** `/api/workforce/user-sick-leave/admin/{id}/set_confirmed/` */
+    setConfirmedCreate: {mutation: workforceUserSickLeaveAdminSetConfirmedCreateMutation},
+  },
+  reads: ['workforceUserSickLeaveAdminAllSickCountRetrieve', 'workforceUserSickLeaveAdminAllSickList', 'workforceUserSickLeaveAdminAllUnconfirmedCountRetrieve', 'workforceUserSickLeaveAdminAllUnconfirmedList', 'workforceUserSickLeaveAdminList', 'workforceUserSickLeaveAdminRetrieve'],
+})
+
+export declare namespace WorkforceUserSickLeaveAdmin {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceUserSickLeaveAdminListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceUserSickLeaveAdminListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = WorkforceUserSickLeaveAdminRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vWorkforceUserSickLeaveAdminCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vWorkforceUserSickLeaveAdminCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vWorkforceUserSickLeaveAdminPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vWorkforceUserSickLeaveAdminPartialUpdateBody>
+}
+
+/** `api/workforce/user-sick-leave/admin/all_sick` */
+export const WorkforceUserSickLeaveAdminAllSick = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-sick-leave/admin/all_sick',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceUserSickLeaveAdminAllSickListOptions, queryKey: workforceUserSickLeaveAdminAllSickListQueryKey},
+  filters: ['user'] satisfies (keyof WorkforceUserSickLeaveAdminAllSick.ListQuery)[],
+  filterTypes: {user: 'integer'},
+  reads: ['workforceUserSickLeaveAdminAllSickList'],
+})
+
+export declare namespace WorkforceUserSickLeaveAdminAllSick {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceUserSickLeaveAdminAllSickListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceUserSickLeaveAdminAllSickListQuery>
+}
+
+/** `api/workforce/user-sick-leave/admin/all_unconfirmed` */
+export const WorkforceUserSickLeaveAdminAllUnconfirmed = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-sick-leave/admin/all_unconfirmed',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceUserSickLeaveAdminAllUnconfirmedListOptions, queryKey: workforceUserSickLeaveAdminAllUnconfirmedListQueryKey},
+  filters: ['user'] satisfies (keyof WorkforceUserSickLeaveAdminAllUnconfirmed.ListQuery)[],
+  filterTypes: {user: 'integer'},
+  reads: ['workforceUserSickLeaveAdminAllUnconfirmedList'],
+})
+
+export declare namespace WorkforceUserSickLeaveAdminAllUnconfirmed {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceUserSickLeaveAdminAllUnconfirmedListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceUserSickLeaveAdminAllUnconfirmedListQuery>
+}
+
+/** `api/workforce/user-sick-leave/end_sick` */
+export const WorkforceUserSickLeaveEndSick = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-sick-leave/end_sick',
+  kind: 'action',
+  create: {mutation: workforceUserSickLeaveEndSickCreateMutation, body: vWorkforceUserSickLeaveEndSickCreateBody},
+  reads: [],
+})
+
+export declare namespace WorkforceUserSickLeaveEndSick {
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vWorkforceUserSickLeaveEndSickCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vWorkforceUserSickLeaveEndSickCreateBody>
+}
+
+/** `api/workforce/user-workhours` */
+export const WorkforceUserWorkhours = /*#__PURE__*/ resource({
+  path: 'api/workforce/user-workhours',
+  kind: 'collection',
+  id: 'number',
+  list: {options: workforceUserWorkhoursListOptions, queryKey: workforceUserWorkhoursListQueryKey},
+  filters: ['start_date', 'user'] satisfies (keyof WorkforceUserWorkhours.ListQuery)[],
+  filterTypes: {user: 'integer'},
+  retrieve: {options: workforceUserWorkhoursRetrieveOptions, queryKey: workforceUserWorkhoursRetrieveQueryKey},
+  create: {mutation: workforceUserWorkhoursCreateMutation, body: vWorkforceUserWorkhoursCreateBody},
+  update: {mutation: workforceUserWorkhoursPartialUpdateMutation, body: vWorkforceUserWorkhoursPartialUpdateBody},
+  destroy: {mutation: workforceUserWorkhoursDestroyMutation},
+  reads: ['workforceUserWorkhoursList', 'workforceUserWorkhoursListTotalsRetrieve', 'workforceUserWorkhoursRetrieve'],
+})
+
+export declare namespace WorkforceUserWorkhours {
+  /** What `list` answers with. */
+  export type ListResponse = WorkforceUserWorkhoursListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vWorkforceUserWorkhoursListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = WorkforceUserWorkhoursRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vWorkforceUserWorkhoursCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vWorkforceUserWorkhoursCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vWorkforceUserWorkhoursPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vWorkforceUserWorkhoursPartialUpdateBody>
+}

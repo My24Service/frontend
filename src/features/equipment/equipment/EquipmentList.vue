@@ -54,8 +54,7 @@
       :delete-modal="{
         modalId: 'delete-equipment-modal',
         confirmText: $trans('Are you sure you want to delete this equipment?'),
-        destroyMutation: equipmentEquipmentDestroyMutation,
-        invalidate: invalidateReads(equipmentEquipment),
+        resource: Api.EquipmentEquipment,
         deletedDetail: $trans('Equipment has been deleted'),
         deleteError: $trans('Error deleting equipment'),
       }"
@@ -82,30 +81,23 @@
 import { RouterLink } from 'vue-router'
 import { equipmentEquipmentExportQrRetrieve } from '@/api/sdk.gen'
 import { useFileDownload, XLSX_MIME } from '@/features/shared'
-import {
-  equipmentEquipmentDestroyMutation,
-  equipmentEquipmentListOptions,
-  equipmentEquipmentStateCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { EquipmentTypeEnum, PaginatedEquipmentList } from '@/api/types.gen'
-import { equipmentEquipment } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+
 import { EQUIPMENT_TYPES } from '@/constants'
-import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, useServerTable, type ListRow } from '@/features/table'
 import { useEquipmentColumns } from './use-equipment-columns'
 const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions and the add link. */
   from_settings?: boolean
   /** The route name stem this mount answers to (`equipment-equipment`, `settings-equipment`, ...). */
-  route_prefix: string
+  route_prefix: 'customers-equipment' | 'equipment-equipment' | 'settings-equipment'
   /** The equipment type the address asked for; the router's path carries it. */
-  type?: EquipmentTypeEnum
+  type?: Api.EquipmentTypeEnum
 }>(), {
   from_settings: false,
   type: EQUIPMENT_TYPES.TECHNICAL,
 })
 
-type EquipmentRow = ListRow<PaginatedEquipmentList>
+type EquipmentRow = ListRow<Api.PaginatedEquipmentList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const addStateModal = useTemplateRef<{show: () => void, hide: () => void}>('addStateModal')
@@ -113,9 +105,8 @@ const addStateModal = useTemplateRef<{show: () => void, hide: () => void}>('addS
 // Read through computeds, not once: the member's branch setting and the
 // user's role must stay live while the list is mounted, and the template's
 // add link reads the branch setting on every render.
-const mainStore = useMainStore()
+const { authStore, mainStore, toast: create } = useCommon()
 const hasBranches = computed(() => mainStore.getMemberHasBranches)
-const authStore = useAuthStore()
 // "Planning" in the legacy screen's sense: neither a branch employee nor a
 // customer. Those two roles are the ones that see neither the owner column nor
 // the brand column.
@@ -135,20 +126,9 @@ const columns = useEquipmentColumns({
 const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetching, refresh} = useServerTable<EquipmentRow>({
   key: 'equipment-table',
   columns,
-  listOptions: (query) => equipmentEquipmentListOptions({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-      ...(query.brand ? {brand: String(query.brand)} : {}),
-      ...(query.customer ? {customer: String(query.customer)} : {}),
-      ...(query.branch ? {branch: String(query.branch)} : {}),
-      ...(query.num_orders ? {num_orders: String(query.num_orders)} : {}),
-      // Always sent: the endpoint scopes the list by type, and the legacy
-      // screen sent its default (`technical`) the same way.
-      type: props.type,
-    },
-  }),
+  // `type` always rides along: the endpoint scopes the list by type, and the
+  // legacy screen sent its default (`technical`) the same way.
+  listOptions: (query) => Api.EquipmentEquipment.listOptions({...query, type: props.type}),
   urlSync: true,
   loadError: $trans('Error loading equipment'),
 })
@@ -157,8 +137,7 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
 // string while it is being typed - it is the wire shape that is a number.
 const state = reactive({equipment: 0, state: '', replace_months: ''})
 
-const {create} = useToast()
-const createState = useMutation(equipmentEquipmentStateCreateMutation())
+const createState = useMutation(Api.EquipmentEquipmentState.create.mutation())
 
 function showAddStateModal(id: number) {
   state.equipment = id
@@ -201,7 +180,7 @@ function downloadList() {
   // type's rows, so a spreadsheet covering both answers a different question
   // than the one on screen. The legacy export forwarded the search term alone.
   const q = globalFilter.value
-  download.fromApi(
+  void download.fromApi(
     () => equipmentEquipmentExportQrRetrieve({query: {...(q ? {q} : {}), type: props.type}, throwOnError: true}),
     'equipment.xlsx', XLSX_MIME)
 }

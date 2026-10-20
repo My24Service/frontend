@@ -1,19 +1,15 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import moment from 'moment'
 import { vTimeRegistrationListResponse } from '@/api/valibot.gen'
 import { TimeRegistration } from '@/features/workforce'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
-import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
+import { mountListView, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({ create: toastCreate }),
-}))
-
 const api = installApiSeam()
-const endpoint = '/api/company/time-registration/'
+const endpoint = '/api/workforce/time-registration/'
 const TENANT = {memberInfo: {companycode: 'acme'}}
 
 // The screen localises moment to the tenant language as it sets up (nl under

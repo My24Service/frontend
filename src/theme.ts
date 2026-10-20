@@ -1,4 +1,4 @@
-// @ts-expect-error - vite-plugin-theme-preprocessor ships no type declarations
+// Contract declared in src/theme-preprocessor.d.ts.
 import { toggleTheme } from "vite-plugin-theme-preprocessor/dist/browser-utils";
 
 export const THEME_DEFAULT = 'theme-default'

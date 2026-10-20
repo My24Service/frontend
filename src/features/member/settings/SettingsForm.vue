@@ -37,8 +37,6 @@
 </template>
 
 <script lang="ts" setup>
-import { memberMemberMySettingsRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
-import { memberMemberMySettings } from '@/api/resources.gen'
 import {
   useResourceForm,
   ValidatedForm,
@@ -49,14 +47,13 @@ import {
   FIELD_LABELS,
   FIELD_MESSAGES,
   isBooleanKey,
-  parseSettings,
   SETTING_GROUPS,
   settingLabel,
   settingsFromRecord,
-  validateSettings,
+  settingsWrite,
 } from './schemas'
 
-const queryClient = useQueryClient()
+const { queryClient } = useCommon()
 
 const {
   values: settings,
@@ -71,14 +68,13 @@ const {
   // the generated client refuses a path on an endpoint that has none, so only
   // the body crosses.
   pk: () => 'my',
-  resource: memberMemberMySettings,
+  resource: Api.MemberMemberMySettings,
   empty: emptySettings,
   fromRecord: settingsFromRecord,
-  validate: validateSettings,
-  parse: parseSettings,
+  contract: settingsWrite,
   // stay on the screen: there is no list to go back to
   afterSave: async () => {
-    await queryClient.invalidateQueries({queryKey: memberMemberMySettingsRetrieveQueryKey()})
+    await queryClient.invalidateQueries({queryKey: Api.MemberMemberMySettings.retrieve.queryKey()})
   },
   copy: {
     fetchError: $trans('Error fetching settings'),

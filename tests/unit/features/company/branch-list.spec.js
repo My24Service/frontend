@@ -1,15 +1,11 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { vBranch } from '@/api/valibot.gen'
 import { BranchList } from '@/features/company'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
-import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
+import { mountListView, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({ create: toastCreate }),
-}))
 
 const api = installApiSeam()
 const endpoint = '/api/company/branch/'
@@ -107,7 +103,6 @@ describe('BranchList', () => {
     await settle()
 
     await wrapper.get('input[aria-label="Search branches"]').setValue('noord')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({ q: 'noord', page: '1' })

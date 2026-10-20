@@ -1,14 +1,10 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { vEquipmentDocument } from '@/api/valibot.gen'
 import { DocumentsComponent } from '@/features/equipment'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
-import { mountForm, toastCreate, toasts } from '../../support/form-harness.js'
+import { mountForm, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
 
 const api = installApiSeam()
 const endpoint = '/api/equipment/equipment-document/'

@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-leave-modal',
         confirmText: $trans('Are you sure you want to delete this leave type?'),
-        destroyMutation: companyLeaveTypeDestroyMutation,
-        invalidate: invalidateReads(companyLeaveType),
+        resource: Api.WorkforceLeaveType,
         deletedDetail: $trans('Leave type has been deleted'),
         deleteError: $trans('Error deleting leave type'),
       }"
@@ -39,10 +38,9 @@
       id="add-edit-leave-type-modal"
       ref="form-modal"
       :title="editingId === null ? $trans('Create leave type') : $trans('Update leave type')"
-      @ok="submit"
-      @hidden="reset"
+      @ok.prevent="submitForm()"
     >
-      <b-overlay :show="submitting" rounded="sm">
+      <b-overlay :show="saving" rounded="sm">
         <div class="flex-columns">
           <BFormGroup
             label-class=""
@@ -78,25 +76,12 @@
 
 <script setup lang="ts">
 import IBiPencil from '~icons/bi/pencil'
-import {
-  companyLeaveTypeCreateMutation,
-  companyLeaveTypeDestroyMutation,
-  companyLeaveTypeListOptions,
-  companyLeaveTypePartialUpdateMutation,
-} from '@/api/@tanstack/vue-query.gen'
-import type { LeaveType, LeaveTypeRequest, PaginatedLeaveTypeList } from '@/api/types.gen'
-import { companyLeaveType } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+
 import RowAction from '@/components/RowAction.vue'
-import { ServerTable, baseListParams, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
-import {
-  emptyLeaveType,
-  leaveTypeFromRecord,
-  parseLeaveType,
-  validateLeaveType,
-  type LeaveTypeFieldErrors,
-} from './schemas'
+import { useResourceForm } from '@/features/forms'
+import { emptyLeaveType, leaveTypeFromRecord, leaveTypeWrite } from './schemas'
 
 /**
  * The tenant's leave types: a list with an add/edit modal and a delete
@@ -111,10 +96,7 @@ import {
  * invalidates the list query, so a save closes the modal and refetches behind
  * it.
  */
-type LeaveTypeRow = ListRow<PaginatedLeaveTypeList>
-
-const queryClient = useQueryClient()
-const {create: toast} = useToast()
+type LeaveTypeRow = ListRow<Api.PaginatedLeaveTypeList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const formModal = useTemplateRef<{show: () => void; hide: () => void}>('form-modal')
@@ -147,76 +129,40 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'leave-type-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => companyLeaveTypeListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.WorkforceLeaveType,
   urlSync: true,
   loadError: $trans('Error loading leave types'),
 })
 
-const values = ref<LeaveTypeRequest>(emptyLeaveType())
-const errors = ref<LeaveTypeFieldErrors>({})
-const submitClicked = ref(false)
-const submitting = ref(false)
 /** null while the modal is creating; the row's id while it is editing. */
 const editingId = ref<number | null>(null)
 
-const createMutation = useMutation(companyLeaveTypeCreateMutation())
-const updateMutation = useMutation(companyLeaveTypePartialUpdateMutation())
+const {values, errors, submitClicked, isLoading: saving, submitForm, reset} = useResourceForm({
+  pk: () => editingId.value,
+  resource: Api.WorkforceLeaveType,
+  empty: emptyLeaveType,
+  fromRecord: leaveTypeFromRecord,
+  contract: leaveTypeWrite,
+  afterSave: () => formModal.value?.hide(),
+  copy: {
+    fetchError: $trans('Error fetching leave type'),
+    created: $trans('Created'),
+    createdDetail: $trans('Leave type has been created'),
+    updated: $trans('Updated'),
+    updatedDetail: $trans('Leave type has been updated'),
+    createError: $trans('Error creating leave types'),
+    updateError: $trans('Error updating leave type'),
+  },
+})
 
-function openCreate() {
-  editingId.value = null
-  values.value = emptyLeaveType()
-  submitClicked.value = false
+function open(id: number | null) {
+  editingId.value = id
+  reset()
   formModal.value?.show()
 }
 
-function openEdit(record: LeaveType) {
-  editingId.value = record.id
-  values.value = leaveTypeFromRecord(record)
-  submitClicked.value = false
-  formModal.value?.show()
-}
-
-/** `@hidden` fires for a cancel as well as a save, so the form is blank either way. */
-function reset() {
-  values.value = emptyLeaveType()
-  errors.value = {}
-  submitClicked.value = false
-  editingId.value = null
-}
-
-async function submit(event: {preventDefault: () => void}) {
-  event.preventDefault()
-  submitClicked.value = true
-  errors.value = validateLeaveType(values.value)
-  if (Object.keys(errors.value).length > 0) return
-
-  const id = editingId.value
-  submitting.value = true
-  try {
-    if (id === null) {
-      await createMutation.mutateAsync({
-        body: parseLeaveType(values.value),
-      })
-      infoToast(toast, $trans('Created'), $trans('Leave type has been created'))
-    } else {
-      await updateMutation.mutateAsync({
-        path: {id},
-        body: parseLeaveType(values.value),
-      })
-      infoToast(toast, $trans('Updated'), $trans('Leave type has been updated'))
-    }
-    await invalidateReads(companyLeaveType)(queryClient)
-    formModal.value?.hide()
-  } catch {
-    errorToast(toast, id === null ? $trans('Error creating leave types') : $trans('Error updating leave type'))
-  } finally {
-    submitting.value = false
-  }
-}
+const openCreate = () => open(null)
+const openEdit = (record: Api.LeaveType) => open(record.id)
 </script>
 
 <style scoped>

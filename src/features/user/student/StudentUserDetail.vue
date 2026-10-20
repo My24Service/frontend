@@ -86,15 +86,14 @@
 </template>
 
 <script lang="ts" setup>
-import { companyStudentuserRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
 const props = defineProps<{
   pk: string | number
 }>()
 
-const router = useRouter()
+const { router } = useCommon()
 
-const detailQuery = useQuery(() => companyStudentuserRetrieveOptions({path: {id: Number(props.pk)}}))
+const detailQuery = useQuery(() => Api.UserStudentuser.retrieve.options({path: {id: Number(props.pk)}}))
 
 useQueryErrorToast(detailQuery.error, $trans('Error loading studentuser'))
 
@@ -113,7 +112,7 @@ const address = computed(() =>
 )
 
 function goBack() {
-  router.push({name: 'users-studentusers'})
+  void router.push({name: 'users-studentusers'})
 }
 </script>
 

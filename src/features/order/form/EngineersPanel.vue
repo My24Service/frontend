@@ -51,7 +51,6 @@
 <script lang="ts" setup>
 import VueMultiselect from 'vue-multiselect'
 
-import type { AssignedUserInfo } from '@/api/types.gen'
 import { useEngineerAssignment } from './use-engineer-assignment'
 
 /**
@@ -61,7 +60,7 @@ import { useEngineerAssignment } from './use-engineer-assignment'
  */
 const props = defineProps<{
   /** The engineers on the record; a change (a load) discards what was staged. */
-  assignees: AssignedUserInfo[]
+  assignees: Api.AssignedUserInfo[]
 }>()
 
 const {engineers, selected, isRemoved, unassign, reset, replay, hasChanges} = useEngineerAssignment()

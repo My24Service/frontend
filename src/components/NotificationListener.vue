@@ -82,11 +82,9 @@ onMounted(async () => {
 
 onUnmounted(async () => {
   // Every handler registered above goes with the component, and each socket is
-  // closed with it. The pairing is not decorative: BaseSocket._onMessageMethod
-  // calls `onmessageHandler` unconditionally, so a handler dropped while its
-  // socket stays open turns the next message into a TypeError rather than
-  // being ignored. Dropping both is what stops the two singletons holding a
-  // dead component's closures - its toasts, its store.
+  // closed with it. Dropping the handler is what stops the two singletons
+  // holding a dead component's closures - its toasts, its store; closing the
+  // socket stops it reconnecting for a listener that is gone.
   userSocket.removeOnmessageHandler()
   userSocket.removeSocket()
 

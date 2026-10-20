@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { NoAccessView } from '@/features/account'
 import {
@@ -7,7 +6,8 @@ import {
   useAuthToken,
 } from '@/features/auth'
 
-import { mountListView, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
+import { installApiSeam } from '../../support/api-seam/index.js'
+import { mountListView, toastCreate } from '../../support/form-harness.js'
 
 /**
  * Return-to-next behaviour for the access gate
@@ -26,26 +26,9 @@ import { mountListView, resetFakeHttp, toastCreate } from '../../support/form-ha
  * tests/unit/features/auth/login-form.spec.js does it.
  */
 
-enableAutoUnmount(afterEach)
-
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
-
-vi.mock('vue-loading-overlay', () => ({
-  useLoading: () => ({ show: () => ({ hide: vi.fn() }) }),
-}))
+// On the seam with nothing stubbed: login is stubbed below, so the gate asks
+// the backend for nothing, and a request would fail the test.
+installApiSeam()
 
 /** Drain macrotasks so the login chain, the watcher, and the router settle. */
 async function flush() {
@@ -65,7 +48,6 @@ const MAIN = {
 }
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp)
   toastCreate.mockClear()
   MAIN.getInitialData.mockClear()
 })

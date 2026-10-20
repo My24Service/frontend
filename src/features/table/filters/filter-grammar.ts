@@ -17,6 +17,19 @@
  * catalogue for its few words.
  */
 import { format } from 'date-fns'
+// ---------------------------------------------------------------- scalars
+
+/**
+ * A filter's wire value as query-string text, or null when it has none to
+ * send: blank, absent, or not a scalar. Every editor writes a string (a
+ * select comma-joins its picks), and the address bar can add a number.
+ */
+export function scalarText(value: unknown): string | null {
+  if (typeof value === 'string') return value === '' ? null : value
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  return null
+}
+
 // ---------------------------------------------------------------- selects
 
 /** The wire value of several picks: comma-joined, a comma inside a pick escaped. */

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { MemberList } from '@/features/member'
 import { vPaginatedMemberList } from '@/api/valibot.gen'
@@ -9,11 +9,6 @@ import { createTestQueryClient, toasts } from '../../support/form-harness.js'
 import { mountList, rowTexts, serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 import { addFilter, offeredFilters } from '../../support/column-filters.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 
@@ -44,7 +39,6 @@ function memberPage(names = ['Acme BV', 'Umbrella NV'], { count = 45 } = {}) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 
@@ -357,7 +351,6 @@ describe('MemberList column filters', () => {
       .find((candidate) => candidate.text() === 'temps')
     if (!option) throw new Error('no temps option in the member type editor')
     await option.trigger('click')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     expect(api.requests().at(-1).query).toMatchObject({member_type: 'temps'})

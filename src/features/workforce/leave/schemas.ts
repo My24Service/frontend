@@ -1,13 +1,6 @@
 import * as v from 'valibot'
 
 import {
-  vLeaveTypeRequest,
-  vPatchedUserLeaveHoursPlanningRequest,
-  vUserLeaveHoursNoPlanningRequest,
-  vUserLeaveHoursPlanningRequest,
-} from '@/api/valibot.gen'
-import type { LeaveType, LeaveTypeRequest, UserLeaveHours } from '@/api/types.gen'
-import {
   fieldErrors,
   requiredOrMaxLength,
   selectMessage,
@@ -15,6 +8,7 @@ import {
   type FieldMessages,
   type FieldLabels,
   type WriteContext,
+  writeContract,
 } from '@/features/forms'
 /**
  * A leave as the form holds it.
@@ -32,7 +26,7 @@ import {
  * added to the serializer is a field this type already has.
  */
 export type LeaveFormValues = Omit<
-  v.InferInput<typeof vUserLeaveHoursPlanningRequest>,
+  v.InferInput<typeof schemas.vUserLeaveHoursPlanningRequest>,
   'user' | 'leave_type' | 'description' | 'start_date' | 'end_date'
   | 'start_date_hours' | 'start_date_minutes' | 'start_date_is_whole_day'
   | 'end_date_hours' | 'end_date_minutes' | 'end_date_is_whole_day'
@@ -51,7 +45,7 @@ export type LeaveFormValues = Omit<
   total_time: string
 }
 
-export type LeaveFieldErrors = FieldErrors<keyof LeaveFormValues & string>
+export type LeaveFieldErrors = FieldErrors<keyof LeaveFormValues>
 
 /** The blank leave the create form starts on, seeded with today's date. */
 export function emptyLeave(today: string, now: string): LeaveFormValues {
@@ -78,7 +72,7 @@ export function emptyLeave(today: string, now: string): LeaveFormValues {
  * "DD/MM/YYYY" - which is only right for the tenants that happen to use that
  * format. The ledger records the change.
  */
-export function leaveFromRecord(record: UserLeaveHours): LeaveFormValues {
+export function leaveFromRecord(record: Api.UserLeaveHours): LeaveFormValues {
   return {
     user: record.user ?? null,
     leave_type: record.leave_type ?? null,
@@ -108,7 +102,7 @@ export const FIELD_LABELS = {
   end_date: () => $trans('End date'),
   start_time: () => $trans('Start time'),
   end_time: () => $trans('End time'),
-} satisfies FieldLabels<keyof LeaveFormValues & string>
+} as const satisfies FieldLabels<keyof LeaveFormValues>
 
 /**
  * The two lines a rule cannot read off the issue: a time that must read HH:mm
@@ -120,7 +114,7 @@ export const FIELD_MESSAGES = {
   leave_type: () => selectMessage(FIELD_LABELS.leave_type()),
   start_time: () => $trans('Please enter a valid start time HH:mm'),
   end_time: () => $trans('Please enter a valid end time HH:mm'),
-} satisfies FieldMessages<keyof LeaveFieldErrors & string>
+} as const satisfies FieldMessages<keyof LeaveFieldErrors>
 
 /**
  * The create body, with the four fields the endpoint cannot do without made
@@ -128,13 +122,13 @@ export const FIELD_MESSAGES = {
  * the generated component; a leave without them is not a leave.
  */
 const vLeaveBody = v.required(
-  vUserLeaveHoursPlanningRequest,
+  schemas.vUserLeaveHoursPlanningRequest,
   ['user', 'leave_type', 'start_date', 'end_date'],
 )
 
 /** The same for the probe, whose endpoint validates with the no-planning body. */
 const vLeaveProbeBody = v.required(
-  vUserLeaveHoursNoPlanningRequest,
+  schemas.vUserLeaveHoursNoPlanningRequest,
   ['start_date', 'end_date'],
 )
 
@@ -188,15 +182,20 @@ function shaped(values: LeaveFormValues): Record<string, unknown> {
 }
 
 /**
- * The schema's verdict, plus the one rule it cannot hold.
+ * The schema's verdict, plus the two rules it cannot hold.
  *
  * A clock is validated by the form, not by the schema: the wire carries
  * `start_date_hours`/`start_date_minutes`, so the shape drops a time text it
  * cannot read and the parse never sees the mistake. A half-typed time on a day
  * that is not whole is refused here instead of silently riding as "no time".
+ *
+ * The backend refuses an end date before the start date with a 400; the form
+ * says so on the field first. Both dates are ISO by then (the schema checked),
+ * so they compare as text. One day is a valid window, whatever its clock says -
+ * the backend compares the dates alone too.
  */
 export function validateLeave(values: LeaveFormValues): LeaveFieldErrors {
-  const errors = fieldErrors<keyof LeaveFormValues & string>(
+  const errors: LeaveFieldErrors = fieldErrors(
     vLeaveBody, shaped(values), FIELD_MESSAGES, FIELD_LABELS,
   )
 
@@ -205,6 +204,9 @@ export function validateLeave(values: LeaveFormValues): LeaveFieldErrors {
   }
   if (!values.end_date_is_whole_day && !isClockTime(values.end_time)) {
     errors.end_time = FIELD_MESSAGES.end_time()
+  }
+  if (!errors.start_date && !errors.end_date && values.end_date < values.start_date) {
+    errors.end_date = $trans('The end date cannot lie before start date')
   }
 
   return errors
@@ -218,18 +220,18 @@ export function validateLeave(values: LeaveFormValues): LeaveFieldErrors {
  */
 export function parseLeave(values: LeaveFormValues, context: WriteContext) {
   const body = shaped(values)
-  if (!context.isCreate) return v.parse(vPatchedUserLeaveHoursPlanningRequest, body)
-  return v.parse(vUserLeaveHoursPlanningRequest, body)
+  if (!context.isCreate) return v.parse(schemas.vPatchedUserLeaveHoursPlanningRequest, body)
+  return v.parse(schemas.vUserLeaveHoursPlanningRequest, body)
 }
 
 /**
  * The body of the totals probe: the window alone.
  *
- * The endpoint validates with the no-planning body and overwrites `user` with
- * the requesting user, so the picker's value has no business on this request -
- * which is also why an unpicked leave type is left out rather than sent as the
- * empty string the legacy screen posted (a body its own schema rejects; the
- * ledger records it).
+ * The endpoint validates with the no-planning body and ignores a `user` in it:
+ * the user the totals are for rides as the `?user=` query param instead, so
+ * the picker's value has no business on this body. An unpicked leave type is
+ * left out rather than sent as the empty string the legacy screen posted (a
+ * body its own schema rejects; the ledger records it).
  */
 export function leaveProbeBody(values: LeaveFormValues) {
   const body = windowBody(values)
@@ -243,20 +245,20 @@ export function leaveProbeBody(values: LeaveFormValues) {
 // ---------------------------------------------------------------------------
 // Leave types
 
-export type LeaveTypeFieldErrors = FieldErrors<keyof LeaveTypeRequest & string>
+export type LeaveTypeFieldErrors = FieldErrors<keyof Api.LeaveTypeRequest>
 
-export function emptyLeaveType(): LeaveTypeRequest {
+export function emptyLeaveType(): Api.LeaveTypeRequest {
   return {name: '', counts_as_leave: true}
 }
 
-export function leaveTypeFromRecord(record: LeaveType): LeaveTypeRequest {
+export function leaveTypeFromRecord(record: Api.LeaveType): Api.LeaveTypeRequest {
   return {name: record.name, counts_as_leave: record.counts_as_leave ?? false}
 }
 
 export const LEAVE_TYPE_LABELS = {
   name: () => $trans('Name'),
   counts_as_leave: () => $trans('Counts as leave'),
-} satisfies FieldLabels<keyof LeaveTypeRequest & string>
+} as const satisfies FieldLabels<keyof Api.LeaveTypeRequest>
 
 /**
  * The modal's `Name` sits beside a "Counts as leave" switch, where the derived
@@ -269,26 +271,21 @@ export const LEAVE_TYPE_MESSAGES = {
     () => $trans('Please enter a leave type name'),
     () => $trans('Please use at most 150 characters'),
   ),
-} satisfies FieldMessages<keyof LeaveTypeFieldErrors & string>
-
-/** `name` already carries `minLength(1)` in the generated component. */
-export function validateLeaveType(values: LeaveTypeRequest): LeaveTypeFieldErrors {
-  return fieldErrors(vLeaveTypeRequest, values, LEAVE_TYPE_MESSAGES, LEAVE_TYPE_LABELS)
-}
+} as const satisfies FieldMessages<keyof LeaveTypeFieldErrors>
 
 /**
- * The body both writes send: the two fields the modal shows and nothing else.
- *
- * Both parse the create component, which is the one that says what a whole
- * leave type needs; the patch body the edit sends is a superset of what PATCH
- * requires, and the two components declare the same keys. The legacy edit
- * handler spread the whole record into the form and PATCHed it back, which
- * carried `id`, `created` and `modified` - the parse drops what the endpoint
- * does not declare.
+ * What the leave-type modal checks and sends: the two fields it shows and
+ * nothing else. Both writes validate against the create body, the one that
+ * says what a whole leave type needs (`name` already carries `minLength(1)`
+ * there). The legacy edit handler spread the whole record into the form and
+ * PATCHed it back, which carried `id`, `created` and `modified` - the parse
+ * drops what the endpoint does not declare.
  */
-export function parseLeaveType(values: LeaveTypeRequest): LeaveTypeRequest {
-  return v.parse(vLeaveTypeRequest, values)
-}
+export const leaveTypeWrite = writeContract(Api.WorkforceLeaveType, {
+  validateWith: Api.WorkforceLeaveType.create.body,
+  labels: LEAVE_TYPE_LABELS,
+  messages: LEAVE_TYPE_MESSAGES,
+})
 
 /** The totals probe's answer, as the screen prints it. */
 export function humanizeDuration(hours: number | null | undefined, minutes: number | null | undefined): string {

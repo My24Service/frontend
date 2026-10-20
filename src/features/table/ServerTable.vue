@@ -4,7 +4,7 @@
     ref="deleteModalRef"
     :modal-id="deleteModal.modalId"
     :confirm-text="deleteModal.confirmText"
-    :destroy-mutation="deleteModal.destroyMutation"
+    :resource="deleteModal.resource"
     :invalidate="deleteModal.invalidate"
     :deleted-detail="deleteModal.deletedDetail"
     :delete-error="deleteModal.deleteError"
@@ -71,10 +71,10 @@
 <script setup lang="ts" generic="TData extends RowData">
 import type { PaginationState, RowData, VueTable } from '@tanstack/vue-table'
 import type { QueryClient } from '@tanstack/vue-query'
-import type { AxiosError } from 'axios'
 import { ColumnFilterChips } from '@/features/table/filters'
 import { useColumnFilters } from '@/features/table/filters/use-column-filters'
 import ListDeleteModal from './ListDeleteModal.vue'
+import type { DeletableResource } from './use-list-delete'
 import ListPageHeader from './ListPageHeader.vue'
 import ServerDataTable from './ServerDataTable.vue'
 import ServerTablePagination from './ServerTablePagination.vue'
@@ -112,13 +112,10 @@ const props = withDefaults(defineProps<{
     modalId: string
     /** e.g. "Are you sure you want to delete this customer?" */
     confirmText: string
-    // `any` for the mutation's data/error/variables — see use-list-delete.ts's
-    // matching note; a generated destroy-mutation factory's shape is
-    // per-resource and restating it here would reject exactly the factories
-    // this exists to accept.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    destroyMutation: () => UseMutationOptions<void, AxiosError<any>, any>
-    invalidate: (queryClient: QueryClient) => Promise<unknown> | void
+    /** The resource whose row is deleted: `Api.CompanyBranch`. */
+    resource: DeletableResource
+    /** Only when a delete stales other reads than the resource's own; see `useListDelete`. */
+    invalidate?: (queryClient: QueryClient) => Promise<unknown> | void
     deletedDetail: string
     deleteError: string
   }

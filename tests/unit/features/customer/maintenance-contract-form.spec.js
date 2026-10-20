@@ -11,6 +11,7 @@ import {
 
 import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
+import { useRealInputDelays } from '../../support/input-delays.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { customerRoutes } from '../../support/customer-routes.js'
 
@@ -34,14 +35,9 @@ import { customerRoutes } from '../../support/customer-routes.js'
 // called: if the loop comes back, the assertions below name the leaked requests
 // instead of failing with "no response registered".
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 const api = installApiSeam()
 
-const MAIN = { getMemberHasBranches: true, getDefaultCurrency: 'EUR', getCountries: [] }
+const MAIN = { getMemberHasBranches: false, getDefaultCurrency: 'EUR', getCountries: [] }
 const AUTH = { isPlanning: true, isAdmin: false }
 
 const CONTRACT_ITEM = itemSchemaOf(vPaginatedMaintenanceContractList)
@@ -229,6 +225,7 @@ describe('MaintenanceContractForm, create', () => {
   })
 
   test('searches customers by query, debounced half a second', async () => {
+    useRealInputDelays()
     const wrapper = await mountContractForm()
 
     await multiselects(wrapper)[0].vm.$emit('search-change', 'acme')
@@ -249,7 +246,6 @@ describe('MaintenanceContractForm, create', () => {
 
     await multiselects(wrapper)[1].vm.$emit('search-change', 'pump')
     await settle()
-    await new Promise((resolve) => setTimeout(resolve, 600))
     await settle()
 
     expect(api.requests()).toEqual([
@@ -400,8 +396,10 @@ describe('MaintenanceContractForm, create', () => {
     ])
   })
 
-  test('refuses to quick-create equipment without a branch-capable tenant', async () => {
-    const wrapper = await mountContractForm({}, { ...MAIN_GETTERS, getMemberHasBranches: false })
+  // Maintenance contracts belong to customers, which only a tenant without
+  // branches has; a branch tenant is the one to refuse.
+  test('refuses to quick-create equipment in a branch tenant', async () => {
+    const wrapper = await mountContractForm({}, { ...MAIN_GETTERS, getMemberHasBranches: true })
     await selectCustomer(wrapper)
     await settle()
 

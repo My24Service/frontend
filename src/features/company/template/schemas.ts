@@ -1,5 +1,3 @@
-import { companyTemplate } from '@/api/resources.gen'
-import type { Template } from '@/api/types.gen'
 import {
   selectMessage,
   type FieldErrors,
@@ -22,7 +20,7 @@ export interface TemplateFormValues {
   is_active: boolean
 }
 
-export type TemplateFormErrors = FieldErrors<keyof TemplateFormValues & string>
+export type TemplateFormErrors = FieldErrors<keyof TemplateFormValues>
 
 /** A template as the form is filled in from scratch. */
 export function emptyTemplate(): TemplateFormValues {
@@ -30,7 +28,7 @@ export function emptyTemplate(): TemplateFormValues {
 }
 
 /** The fetched record as form values: the five fields this form owns. */
-export function templateFromRecord(record: Template): TemplateFormValues {
+export function templateFromRecord(record: Api.Template): TemplateFormValues {
   return {
     name: record.name,
     description: record.description ?? null,
@@ -43,12 +41,12 @@ export function templateFromRecord(record: Template): TemplateFormValues {
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   template_type: () => $trans('Type'),
-} satisfies FieldLabels<keyof TemplateFormValues & string>
+} as const satisfies FieldLabels<keyof TemplateFormValues>
 
 /** The file is chosen, not typed, and the values drop it when none was picked. */
 export const FIELD_MESSAGES = {
   file: () => selectMessage($trans('File')),
-} satisfies FieldMessages<keyof TemplateFormValues & string>
+} as const satisfies FieldMessages<keyof TemplateFormValues>
 
 /**
  * The wire-shaped body: blank text rides as absent keys, not nulls or empty
@@ -76,7 +74,7 @@ function shaped(values: TemplateFormValues) {
  * - an edit reads the patch body, where the name is optional but not blank,
  *   and the shaped body always carries it, so a blank one is refused anyway.
  */
-export const templateWrite = writeContract(companyTemplate, {
+export const templateWrite = writeContract(Api.CompanyTemplate, {
   shape: shaped,
   labels: FIELD_LABELS,
   messages: FIELD_MESSAGES,

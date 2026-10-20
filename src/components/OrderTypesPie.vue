@@ -22,16 +22,43 @@ const orderService = new OrderService()
 const options = percentPieOptions
 const getColor = createLabelColors()
 
+/**
+ * The order-types stats payload, narrowed off the wire. The stats service is
+ * shared with untyped callers, so its answer arrives untyped; tallies that
+ * are missing or misshapen are dropped rather than crashing the pie.
+ */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function toOrderTypeStats(data: unknown): { order_types: Record<string, SliceTally> } {
+  if (!isRecord(data) || !isRecord(data.order_types)) {
+    return { order_types: {} }
+  }
+
+  const tallies: Record<string, SliceTally> = {}
+  for (const [orderType, tally] of Object.entries(data.order_types)) {
+    if (!isRecord(tally) || typeof tally.count !== 'number') {
+      continue
+    }
+    if (typeof tally.perc !== 'number' && typeof tally.perc !== 'string') {
+      continue
+    }
+    tallies[orderType] = { count: tally.count, perc: tally.perc }
+  }
+  return { order_types: tallies }
+}
+
 async function fillPieData() {
   isLoading.value = true
   try {
     let orderTypeStatsData: {order_types: Record<string, SliceTally>}
     if (props.equipmentPk) {
-      orderTypeStatsData = await orderService.getOrderTypesStatsEquipment(props.equipmentPk)
+      orderTypeStatsData = toOrderTypeStats(await orderService.getOrderTypesStatsEquipment(props.equipmentPk))
     } else if (props.locationPk) {
-      orderTypeStatsData = await orderService.getOrderTypesStatsLocation(props.locationPk)
+      orderTypeStatsData = toOrderTypeStats(await orderService.getOrderTypesStatsLocation(props.locationPk))
     } else {
-      orderTypeStatsData = await orderService.getOrderTypesStatsBranch()
+      orderTypeStatsData = toOrderTypeStats(await orderService.getOrderTypesStatsBranch())
     }
     const totals = buildOrderTypeTotals(orderTypeStatsData.order_types, getColor)
 

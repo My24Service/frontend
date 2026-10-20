@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-location-modal',
         confirmText: $trans('Are you sure you want to delete this location?'),
-        destroyMutation: equipmentLocationDestroyMutation,
-        invalidate: invalidateReads(equipmentLocation),
+        resource: Api.EquipmentLocation,
         deletedDetail: $trans('Location has been deleted'),
         deleteError: $trans('Error deleting location'),
       }"
@@ -43,14 +42,8 @@
 import { RouterLink } from 'vue-router'
 import { equipmentLocationExportQrRetrieve } from '@/api/sdk.gen'
 import { useFileDownload, XLSX_MIME } from '@/features/shared'
-import {
-  equipmentLocationDestroyMutation,
-  equipmentLocationListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedLocationList } from '@/api/types.gen'
-import { equipmentLocation } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
-import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
+
+import { ServerTable, useServerTable, type ListRow } from '@/features/table'
 import { useLocationColumns } from './use-location-columns'
 const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions. */
@@ -61,11 +54,11 @@ const props = withDefaults(defineProps<{
   from_settings: false,
 })
 
-type LocationRow = ListRow<PaginatedLocationList>
+type LocationRow = ListRow<Api.PaginatedLocationList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
-const authStore = useAuthStore()
+const { authStore } = useCommon()
 // "Planning" in the legacy screen's sense: neither a branch employee nor a
 // customer. Those two roles see no owner column.
 const planning = !authStore.isEmployee && !authStore.isCustomer
@@ -85,17 +78,7 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
   // The endpoint declares search, paging, `ordering` and the column filters
   // (apps/equipment/views.py), so the kit forwards all three: the sort state
   // and the filters both travel in the query and in the address bar.
-  listOptions: (query) => equipmentLocationListOptions({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-      ...(query.customer ? {customer: String(query.customer)} : {}),
-      ...(query.branch ? {branch: String(query.branch)} : {}),
-      ...(query.created ? {created: String(query.created)} : {}),
-      ...(query.modified ? {modified: String(query.modified)} : {}),
-    },
-  }),
+  resource: Api.EquipmentLocation,
   urlSync: true,
   loadError: $trans('Error loading locations'),
 })
@@ -106,7 +89,7 @@ function downloadList() {
   globalFilter.value = searchDraft.value
 
   const q = globalFilter.value
-  download.fromApi(
+  void download.fromApi(
     () => equipmentLocationExportQrRetrieve({query: q ? {q} : {}, throwOnError: true}),
     'locations.xlsx', XLSX_MIME)
 }

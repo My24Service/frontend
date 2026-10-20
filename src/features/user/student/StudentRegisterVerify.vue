@@ -25,10 +25,6 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  accountsSendResetPasswordLinkCreateMutation,
-  accountsVerifyRegistrationCreateMutation,
-} from '@/api/@tanstack/vue-query.gen'
 import { readLinkParams } from '@/features/account'
 /**
  * The activation link a registrant follows from their email: verify the
@@ -38,8 +34,7 @@ import { readLinkParams } from '@/features/account'
  */
 type Phase = 'verifying' | 'verified' | 'verify-failed' | 'link-sent' | 'link-failed'
 
-const route = useRoute()
-const { create } = useToast()
+const { route, toast: create } = useCommon()
 
 const phase = ref<Phase>('verifying')
 
@@ -47,8 +42,8 @@ const phase = ref<Phase>('verifying')
 // set-password form.
 const link = readLinkParams(route.query)
 
-const verifyMutation = useMutation(accountsVerifyRegistrationCreateMutation())
-const sendLinkMutation = useMutation(accountsSendResetPasswordLinkCreateMutation())
+const verifyMutation = useMutation(Api.AccountsVerifyRegistration.create.mutation())
+const sendLinkMutation = useMutation(Api.AccountsSendResetPasswordLink.create.mutation())
 
 const isSending = computed(() => sendLinkMutation.isPending.value)
 
@@ -84,7 +79,7 @@ async function sendResetPasswordLink() {
   }
 }
 
-verify()
+void verify()
 </script>
 
 <style scoped>

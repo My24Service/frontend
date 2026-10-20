@@ -12,11 +12,6 @@ import { captureDownloads, xlsxResponse } from '../../support/downloads.js'
 import { customerRoutes } from '../../support/customer-routes.js'
 import { addFilter, chip, chipTexts, closeEditor, editorInput, pickMode } from '../../support/column-filters.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 const api = installApiSeam()
 
 const ITEM = itemSchemaOf(vPaginatedCustomerList)
@@ -77,7 +72,6 @@ function customerPage({ count = 45 } = {}) {
 }
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 

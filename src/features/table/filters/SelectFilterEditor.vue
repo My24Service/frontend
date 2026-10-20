@@ -59,6 +59,7 @@
 import type { ColumnFilterSpec, FilterOption } from '../table'
 import { joinArrayItems, splitArrayItems } from './filter-grammar'
 import { focusFirstControl } from './focus-first-control'
+import { optionSearchDelay } from '@/services/input-delays'
 
 /**
  * Any of several picks from a list: the column's own options, or — when
@@ -125,7 +126,7 @@ function move(step: number) {
   const count = visible.value.length
   if (count === 0) return
   highlighted.value = (highlighted.value + step + count) % count
-  nextTick(() => {
+  void nextTick(() => {
     const option = root.value?.querySelector<HTMLElement>(`#${CSS.escape(optionId(highlighted.value))}`)
     if (searchable.value) option?.scrollIntoView?.({block: 'nearest'})
     else option?.focus()
@@ -158,6 +159,11 @@ async function load(search: string) {
       loaded.value = options
       emit('options', options)
     }
+  } catch (error) {
+    // Fired from a debounced watcher, so nothing upstream catches this: a
+    // failed search lists nothing rather than the previous term's matches.
+    console.error('error loading filter options', error)
+    if (id === request) loaded.value = []
   } finally {
     if (id === request) loading.value = false
   }
@@ -165,11 +171,11 @@ async function load(search: string) {
 
 watchDebounced(term, (value) => {
   highlighted.value = -1
-  if (isAsync.value) load(value)
-}, {debounce: 250})
+  if (isAsync.value) void load(value)
+}, {debounce: optionSearchDelay})
 
 onMounted(() => {
-  if (isAsync.value) load('')
+  if (isAsync.value) void load('')
 })
 
 defineExpose({

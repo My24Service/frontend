@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-invoice-modal',
         confirmText: $trans('Are you sure you want to delete this invoice?'),
-        destroyMutation: invoiceInvoiceDestroyMutation,
-        invalidate: invalidateReads(invoiceInvoice),
+        resource: Api.InvoiceInvoice,
         deletedDetail: $trans('Invoice has been deleted'),
         deleteError: $trans('Error deleting invoice'),
       }"
@@ -31,29 +30,21 @@
 import { RouterLink } from 'vue-router'
 import IBiMailbox from '~icons/bi/mailbox'
 import IBiArrowUpRightCircle from '~icons/bi/arrow-up-right-circle'
+
 import {
-  invoiceInvoiceDestroyMutation,
-  invoiceInvoiceListOptions,
-  invoiceInvoicePreliminaryListOptions,
-  invoiceInvoiceSentListOptions,
-  statuscodeStatuscodeListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Invoice } from '@/api/types.gen'
-import { invoiceInvoice } from '@/api/resources.gen'
-import {
-  invalidateReads,
   useQueryErrorToast,
 } from '@/features/forms'
 import RowAction from '@/components/RowAction.vue'
 import {
   ServerTable,
   createAppColumnHelper,
+  useListModeReset,
   useServerTable,
   WHOLE_COLLECTION_PAGE_SIZE,
 } from '@/features/table'
 import InvoiceStatusCell from './InvoiceStatusCell.vue'
 
-const route = useRoute()
+const { route } = useCommon()
 const pageTitle = computed(() => route.name === 'preliminary-invoices'
   ? $trans('Preliminary invoices')
   : route.name === 'invoices-sent' ? $trans('Sent invoices') : $trans('Definitive invoices'))
@@ -61,11 +52,11 @@ const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableR
 
 // A picker needs the collection, not just the table's first page. This is
 // My24Pagination's maximum page size, shared with the other feature pickers.
-const codesQuery = useQuery(statuscodeStatuscodeListOptions({query: {code_type: 'invoice', page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}))
+const codesQuery = useQuery(Api.StatuscodeStatuscode.list.options({query: {code_type: 'invoice', page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}))
 const statuscodes = computed(() => codesQuery.data.value?.results ?? [])
 useQueryErrorToast(codesQuery.error, $trans('Error loading statuscodes'))
 
-const helper = createAppColumnHelper<Invoice>()
+const helper = createAppColumnHelper<Api.Invoice>()
 const columns = helper.columns([
   helper.accessor('invoice_id', {
     header: $trans('ID'),
@@ -103,7 +94,7 @@ const columns = helper.columns([
   }),
 ])
 
-const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetching, refresh} = useServerTable<Invoice>({
+const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetching, refresh} = useServerTable<Api.Invoice>({
   key: 'invoice-table',
   columns,
   // The API offers search and pagination, but no ordering or column filters.
@@ -111,29 +102,15 @@ const {table, searchDraft, globalFilter, pagination, count, isLoading, isFetchin
   enableColumnFilters: false,
   listOptions: ({page, page_size, q}) => {
     const options = {query: {page, page_size, ...(q ? {q} : {})}}
-    if (route.name === 'preliminary-invoices') return invoiceInvoicePreliminaryListOptions(options)
-    if (route.name === 'invoices-sent') return invoiceInvoiceSentListOptions(options)
-    return invoiceInvoiceListOptions(options)
+    if (route.name === 'preliminary-invoices') return Api.InvoiceInvoicePreliminary.list.options(options)
+    if (route.name === 'invoices-sent') return Api.InvoiceInvoiceSent.list.options(options)
+    return Api.InvoiceInvoice.list.options(options)
   },
   urlSync: true,
   loadError: $trans('Error loading invoices'),
 })
 
-// A new list domain must not inherit a page that may not exist there. Run
-// before the query observer so no request escapes with the previous page.
-// Initial URL restoration remains useServerTable's responsibility.
-watch(() => route.name, () => {
-  const page = Number(route.query.page ?? 1)
-  const pageSize = Number(route.query.page_size ?? pagination.value.pageSize)
-  if (typeof route.query.q === 'string') {
-    searchDraft.value = route.query.q
-    globalFilter.value = route.query.q
-  }
-  pagination.value = {
-    pageIndex: Number.isInteger(page) && page > 0 ? page - 1 : 0,
-    pageSize: Number.isInteger(pageSize) && pageSize > 0 ? pageSize : 20,
-  }
-}, {flush: 'sync'})
+useListModeReset(route, {searchDraft, globalFilter, pagination})
 </script>
 
 <style scoped>

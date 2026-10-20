@@ -25,6 +25,46 @@ interface WritePayload {
   [key: string]: unknown
 }
 
+/** Whether a parsed value is a plain field bag (rather than an array or a scalar). */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+/**
+ * Response payloads for the axios calls below.
+ *
+ * `this.axios` is an AxiosInstance, so `get<T>`/`post<T>`/`patch<T>` type
+ * `response.data` as `T` instead of `any`. Each interface mirrors only what
+ * the code reads: `count`/`num_pages` are optional because they are read
+ * behind `'count' in response.data` guards, while `results` is required
+ * because `getSelectOptions`/`loadCollection` call `.map` on it directly.
+ */
+export interface CsrfPayload {
+  token: string
+}
+
+export interface ListPayload<TRecord = Record<string, unknown>> {
+  count?: number
+  num_pages?: number
+  results: TRecord[]
+}
+
+export interface DetailPayload {
+  [key: string]: unknown
+}
+
+export interface StatsPayload {
+  [key: string]: unknown
+}
+
+export interface CountPayload {
+  count: number
+}
+
+export interface AutocompleteRow {
+  [key: string]: unknown
+}
+
 // The default `model`: a placeholder for subclasses that never set one. It
 // ignores whatever it is constructed with, so it takes no parameters - a
 // zero-arg constructor is still assignable to `model`'s type below. The index
@@ -40,7 +80,7 @@ class BaseModel {
   fields: Record<string, unknown> = {}
   url = ''
   listArgs: string[] = []
-  queryArgs: Record<string, unknown> = {}
+  queryArgs: Record<string, string | number> = {}
   searchQuery: string | null = null
   userFilter: string | null = null
   sort: string | null = null
@@ -168,7 +208,10 @@ class BaseModel {
   // end TODO
 
   getFields() {
-    return this.postCopyFields(JSON.parse(JSON.stringify(this.fields)))
+    // A JSON round-trip of the fields bag is always a fresh object; the guard
+    // keeps the parse (typed `any` by the lib) from leaking into the call.
+    const copy: unknown = JSON.parse(JSON.stringify(this.fields))
+    return this.postCopyFields(isRecord(copy) ? copy : {})
   }
 
   postCopyFields(fields: Record<string, unknown>) {
@@ -204,7 +247,7 @@ class BaseModel {
   }
 
   getCsrfToken() {
-    return this.axios.get('/get-csrf-token/').then((response) => response.data.token)
+    return this.axios.get<CsrfPayload>('/get-csrf-token/').then((response) => response.data.token)
   }
 
   getHeaders(token?: string) {
@@ -294,14 +337,12 @@ class BaseModel {
     // After searching, or changing orders the `page=xxx` values starts accumulating to something
     // like `page=1&page=1&page=1`, which is not desired. So an extra pass is done here to ensure
     // that each key is only added once to the listArgs.
-    const sanitizedArgs: Record<string, unknown> = {};
+    const sanitizedArgs: Record<string, string | number> = {};
 
-    for (const argIndex in this.listArgs) {
+    for (const listArg of this.listArgs) {
       // HVG20250319:
       // listArgs can be [ 'param1=value1', 'param2=value2' ], but it can also contain
       // [ 'param1=value1&param2=value2', 'param3=value3' ]
-      const listArg = this.listArgs[ argIndex ];
-
       const assignments = listArg.indexOf('&') > 0
         ? listArg.split('&' )
         : [ listArg ];
@@ -333,17 +374,17 @@ class BaseModel {
     // Start building up the listArgs from the sanitized list of arguments.
     const listArgs: string[] = []
     for (const arg in sanitizedArgs) {
-      listArgs.push( `${arg}=${sanitizedArgs[arg]}` );
+      listArgs.push(`${arg}=${sanitizedArgs[arg]}`);
     }
 
     const url = `${this.getListUrl()}?${listArgs.join('&')}`
-    const response = await this.axios.get(url)
+    const response = await this.axios.get<ListPayload>(url)
 
-    if ('count' in response.data) {
+    if (response.data.count !== undefined) {
       this.count = response.data.count
     }
 
-    if ('num_pages' in response.data) {
+    if (response.data.num_pages !== undefined) {
       this.numPages = response.data.num_pages
     }
 
@@ -382,7 +423,7 @@ class BaseModel {
   }
 
   detail(pk: number | string) {
-    return this.axios.get(this.getDetailUrl(pk)).then((response) => response.data)
+    return this.axios.get<DetailPayload>(this.getDetailUrl(pk)).then((response) => response.data)
   }
 
   preInsert(obj: WritePayload) {
@@ -399,7 +440,7 @@ class BaseModel {
     const token = await this.getCsrfToken()
     const headers = this.getHeaders(token)
 
-    return this.axios.post(this.url, this.preInsert(obj), headers).then((response: AxiosResponse) => response.data)
+    return this.axios.post<DetailPayload>(this.url, this.preInsert(obj), headers).then((response: AxiosResponse<DetailPayload>) => response.data)
   }
 
   preUpdate(obj: WritePayload) {
@@ -409,8 +450,8 @@ class BaseModel {
   }
 
   async update(pk: number | string, obj: WritePayload) {
-    return this.axios.patch(`${this.url}${pk}/`, this.preUpdate(obj))
-      .then((response: AxiosResponse) => response.data)
+    return this.axios.patch<DetailPayload>(`${this.url}${pk}/`, this.preUpdate(obj))
+      .then((response: AxiosResponse<DetailPayload>) => response.data)
   }
 
   async delete(pk: number | string) {

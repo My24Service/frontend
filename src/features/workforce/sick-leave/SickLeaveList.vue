@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-sick-leave-modal',
         confirmText: $trans('Are you sure you want to delete this sick leave?'),
-        destroyMutation: companyUserSickLeaveAdminDestroyMutation,
-        invalidate: invalidateReads(companyUserSickLeaveAdmin),
+        resource: Api.WorkforceUserSickLeaveAdmin,
         deletedDetail: $trans('Sick leave has been deleted'),
         deleteError: $trans('Error deleting sick leave'),
       }"
@@ -35,18 +34,11 @@
 </template>
 
 <script setup lang="ts">
-import {
-  companyUserSickLeaveAdminDestroyMutation,
-  companyUserSickLeaveAdminListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedUserSickLeaveList } from '@/api/types.gen'
-import { companyUserSickLeaveAdmin } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
-import { ServerTable, baseListParams, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import SubNav from '../SubNav.vue'
 
 /**
- * The tenant's sick leave, the admin list `/api/company/user-sick-leave/admin/`.
+ * The tenant's sick leave, the admin list `/api/workforce/user-sick-leave/admin/`.
  *
  * Two defects go with the port. The legacy delete action threw: its
  * `showDeleteModal()` read a bare `id` it was never passed (the template handed
@@ -57,7 +49,7 @@ import SubNav from '../SubNav.vue'
  * name was never the link to `leave-edit` it appeared to be. The row's edit
  * action is the sick-leave editor, which is what the screen means.
  */
-type SickLeaveRow = ListRow<PaginatedUserSickLeaveList>
+type SickLeaveRow = ListRow<Api.PaginatedUserSickLeaveList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 const helper = createAppColumnHelper<SickLeaveRow>()
@@ -97,11 +89,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   key: 'sick-leave-table',
   columns,
   enableSorting: false,
-  listOptions: (query) => companyUserSickLeaveAdminListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.WorkforceUserSickLeaveAdmin,
   urlSync: true,
   loadError: $trans('Error loading sick leave request'),
 })

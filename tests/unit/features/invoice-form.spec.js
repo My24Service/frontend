@@ -6,12 +6,14 @@ import { mountForm, toastCreate, toasts } from '../support/form-harness.js'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { vInvoiceDataResponse, vInvoice, vInvoiceLine, vCustomer, vPaginatedInvoiceLineList, vPaginatedOrderCostList } from '@/api/valibot.gen'
 
-vi.mock('bootstrap-vue-next', async original => ({ ...(await original()), useToast: () => ({ create: toastCreate }) }))
 const api = installApiSeam()
 const BOOT = '/api/invoice/invoice/data/{id}/'
 const INVOICE = '/api/invoice/invoice/'
 const DETAIL = '/api/invoice/invoice/{id}/'
 const LINES = '/api/invoice/invoice-line/'
+// The lines are saved as one replace-set against the invoice they belong to.
+const REPLACE = '/api/invoice/invoice-line/invoice/{invoice_id}/'
+const REPLACED = '/api/invoice/invoice-line/invoice/901/'
 const orderUuid = '00000000-0000-4000-8000-00000000000a'
 const invoice = overrides => fixtureFor(vInvoice, { id: 901, order: 42, order_uuid: orderUuid, invoice_id: 'INV-901', reference: 'Saved reference', description: 'Saved description', term_of_payment_days: 30, preliminary: true, ...overrides })
 const bootstrap = () => fixtureFor(vInvoiceDataResponse, {
@@ -38,10 +40,9 @@ beforeEach(() => {
   api.get(DETAIL, invoice())
   api.post(INVOICE, ({ body }) => invoice(body))
   api.patch(DETAIL, ({ body }) => invoice(body))
-  api.post(LINES, ({ body }) => {
-    const record = fixtureFor(vInvoiceLine, { ...body, id: 800 + savedLines.length, price_currency: 'EUR', total_currency: 'EUR', vat_currency: 'EUR' })
-    savedLines.push(record)
-    return record
+  api.post(REPLACE, ({ body }) => {
+    savedLines = body.map((line, index) => fixtureFor(vInvoiceLine, { ...line, id: line.id ?? 800 + index, invoice: 901, price_currency: 'EUR', total_currency: 'EUR', vat_currency: 'EUR' }))
+    return savedLines
   })
   api.get(LINES, () => fixtureFor(vPaginatedInvoiceLineList, { count: savedLines.length, results: savedLines, next: null, previous: null }))
 })
@@ -74,8 +75,8 @@ test('create flow persists the rendered line after invoice creation and navigate
   await save(wrapper)
   expect(posts(INVOICE)).toHaveLength(1)
   expect(posts(INVOICE)[0].body).toMatchObject({ order: 42, total: '20.00', vat: '4.20' })
-  expect(posts(LINES)).toHaveLength(1)
-  expect(posts(LINES)[0].body).toMatchObject({ invoice: 901, amount: '2', price: '10.00', total: '20.00', vat: '4.20' })
+  expect(posts(REPLACED)).toHaveLength(1)
+  expect(posts(REPLACED)[0].body).toEqual([expect.objectContaining({ amount: '2', price: '10.00', total: '20.00', vat: '4.20' })])
   expect(wrapper.vm.$router.currentRoute.value.name).toBe('invoice-edit')
   expect(toasts().map(toast => toast.body)).toContain('Invoice has been created')
 })
@@ -97,7 +98,7 @@ test('edit uses saved invoice fields rather than bootstrap defaults and patches 
 })
 test('line failure retains the created invoice and retries without duplicate invoice POST', async () => {
   let attempts = 0
-  api.post(LINES, ({ body }) => ++attempts === 1 ? HttpResponse.json({ detail: 'Unavailable' }, { status: 503 }) : fixtureFor(vInvoiceLine, { ...body, id: 88, price_currency: 'EUR', total_currency: 'EUR', vat_currency: 'EUR' }))
+  api.post(REPLACE, ({ body }) => ++attempts === 1 ? HttpResponse.json({ detail: 'Unavailable' }, { status: 503 }) : body.map(line => fixtureFor(vInvoiceLine, { ...line, id: 88, invoice: 901, price_currency: 'EUR', total_currency: 'EUR', vat_currency: 'EUR' })))
   const wrapper = await open()
   await addLine(wrapper)
   await save(wrapper)
@@ -105,7 +106,7 @@ test('line failure retains the created invoice and retries without duplicate inv
   expect(wrapper.findAll('.listing-item')).toHaveLength(1)
   await save(wrapper)
   expect(posts(INVOICE)).toHaveLength(1)
-  expect(posts(LINES)).toHaveLength(2)
+  expect(posts(REPLACED)).toHaveLength(2)
   expect(requests('patch')).toHaveLength(1)
   expect(wrapper.vm.$router.currentRoute.value.name).toBe('invoice-edit')
 })

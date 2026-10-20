@@ -1,7 +1,5 @@
 import * as v from 'valibot'
 
-import type { Action, ActionRequest, ActionTypeEnum } from '@/api/types.gen'
-import { vActionRequest } from '@/api/valibot.gen'
 import {
   fieldsFromRecord,
   type FieldLabels,
@@ -10,7 +8,7 @@ import {
 } from '@/features/forms'
 import type { CodeType } from '../code-types'
 
-type WireValues = v.InferInput<typeof vActionRequest>
+type WireValues = v.InferInput<typeof schemas.vActionRequest>
 
 export type ActionCondition = NonNullable<WireValues['json_conditions']>[number]
 
@@ -20,6 +18,8 @@ export type ActionCondition = NonNullable<WireValues['json_conditions']>[number]
  * when its statuscode is set; the backend's daily task runs it once for every
  * record that has the statuscode anywhere in its history and whose date is in
  * the window ("`start_date` `<=` 14": a reminder two weeks before the job).
+ * The days count from today to the date, so a negative number is a window
+ * after it ("`definitive_date` `<=` -14": 14 or more days ago).
  * The date fields the backend accepts, per code type; other types have none.
  */
 export const DATE_TRIGGER_FIELDS: Partial<Record<CodeType, readonly string[]>> = {
@@ -62,8 +62,8 @@ export function emptyAction(): ActionFormValues {
   }
 }
 
-export function actionFromRecord(record: Action): ActionFormValues {
-  const fields = fieldsFromRecord(vActionRequest, record)
+export function actionFromRecord(record: Api.Action): ActionFormValues {
+  const fields = fieldsFromRecord(schemas.vActionRequest, record)
   return {
     ...emptyAction(),
     ...fields,
@@ -73,14 +73,14 @@ export function actionFromRecord(record: Action): ActionFormValues {
   }
 }
 
-const actionFormSchema = v.omit(vActionRequest, ['statuscode'])
+const actionFormSchema = v.omit(schemas.vActionRequest, ['statuscode'])
 
-export type ActionFieldErrors = FieldErrors<keyof ActionFormValues & string>
+export type ActionFieldErrors = FieldErrors<keyof ActionFormValues>
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   num_days: () => $trans('Number of days'),
-} satisfies FieldLabels<keyof ActionFormValues & string>
+} as const satisfies FieldLabels<keyof ActionFormValues>
 
 function blankToNull(value: string | null | undefined): string | null {
   return value ? value : null
@@ -122,13 +122,13 @@ export interface ActionWrite {
   statuscodePk: string | number | null
 }
 
-export function parseAction(values: ActionFormValues, write: ActionWrite): ActionRequest {
+export function parseAction(values: ActionFormValues, write: ActionWrite): Api.ActionRequest {
   const statuscode = write.isCreate ? Number(write.statuscodePk) : values.statuscode
-  return v.parse(vActionRequest, {...toWire(values), statuscode})
+  return v.parse(schemas.vActionRequest, {...toWire(values), statuscode})
 }
 
 export interface ActionTypeOption {
-  value: ActionTypeEnum
+  value: Api.ActionTypeEnum
   text: string
 }
 

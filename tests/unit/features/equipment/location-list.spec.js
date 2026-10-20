@@ -3,16 +3,12 @@ import { vCustomer, vLocation } from '@/api/valibot.gen'
 import { LocationList } from '@/features/equipment'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
-import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
+import { mountListView, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 import { captureDownloads, xlsxResponse } from '../../support/downloads.js'
 
 import { addFilter, editorInput } from '../../support/column-filters.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
 
 const api = installApiSeam()
 const endpoint = '/api/equipment/location/'
@@ -121,7 +117,6 @@ describe('LocationList', () => {
     await settle()
 
     await wrapper.get('input[aria-label="Search locations"]').setValue('berg')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({q: 'berg', page: '1'})
@@ -212,7 +207,6 @@ describe('LocationList QR export', () => {
     await settle()
 
     await wrapper.get('input[aria-label="Search locations"]').setValue('berg & ruimte')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
     await wrapper.get('button[title="Download QR-codes"]').trigger('click')
     await settle()
@@ -232,8 +226,8 @@ describe('LocationList column filters', () =>
 
     await addFilter(wrapper, 'Name')
     await editorInput(wrapper, 'name').setValue('Bergruimte')
-    // The kit commits the search and the filters on a 300 ms debounce.
-    await new Promise((resolve) => setTimeout(resolve, 350))
+    // The kit commits the search and the filters through its debounce, which
+    // setupTests.js sets to zero.
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({name: 'Bergruimte'})

@@ -1,5 +1,3 @@
-import { companyPicture } from '@/api/resources.gen'
-import type { Picture } from '@/api/types.gen'
 import {
   type FieldErrors,
   type FieldLabels,
@@ -17,7 +15,7 @@ export interface PictureFormValues {
   picture: string | null
 }
 
-export type PictureFieldErrors = FieldErrors<keyof PictureFormValues & string>
+export type PictureFieldErrors = FieldErrors<keyof PictureFormValues>
 
 /** A picture as the form is filled in from scratch. */
 export function emptyPicture(): PictureFormValues {
@@ -30,13 +28,13 @@ export function emptyPicture(): PictureFormValues {
  * so it never enters the values - the screen reads it off the query's record
  * to show the current image.
  */
-export function pictureFromRecord(record: Picture): PictureFormValues {
+export function pictureFromRecord(record: Api.Picture): PictureFormValues {
   return { name: record.name, picture: null }
 }
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof PictureFormValues & string>
+} as const satisfies FieldLabels<keyof PictureFormValues>
 
 /**
  * The wire-shaped body: the staged upload rides only when a file was picked.
@@ -58,8 +56,8 @@ function shaped(values: PictureFormValues) {
  * The patch body it sends is a superset of what PATCH requires, so nothing is
  * added on top of the generated schema.
  */
-export const pictureWrite = writeContract(companyPicture, {
-  validateWith: companyPicture.create.body,
+export const pictureWrite = writeContract(Api.CompanyPicture, {
+  validateWith: Api.CompanyPicture.create.body,
   shape: shaped,
   labels: FIELD_LABELS,
 })

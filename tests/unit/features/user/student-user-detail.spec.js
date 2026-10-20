@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { StudentUserDetail } from '@/features/user'
 import { vStudentUser } from '@/api/valibot.gen'
@@ -27,16 +26,9 @@ import { userRoutes } from '../../support/user-routes.js'
  * fails against the legacy page by design.
  */
 
-enableAutoUnmount(afterEach)
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
-
 const api = installApiSeam()
 
-const DETAIL = '/api/company/studentuser/{id}/'
+const DETAIL = '/api/user/studentuser/{id}/'
 
 const RECORD = fixtureFor(vStudentUser, {
   id: 41,
@@ -90,7 +82,7 @@ describe('StudentUserDetail', () => {
     await mountDetail()
 
     expect(api.requests()).toEqual([
-      { method: 'get', path: '/api/company/studentuser/41/', query: {}, body: undefined },
+      { method: 'get', path: '/api/user/studentuser/41/', query: {}, body: undefined },
     ])
   })
 

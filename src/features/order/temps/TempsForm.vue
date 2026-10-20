@@ -147,8 +147,6 @@
 </template>
 
 <script lang="ts" setup>
-import { orderOrder } from '@/api/resources.gen'
-import type { OrderCreate, OrderUpdate } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms'
 import {
   ContactPanel,
@@ -181,8 +179,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const mainStore = useMainStore()
+const { mainStore, router } = useCommon()
 
 const hasBranches = computed(() => Boolean(mainStore.getMemberHasBranches))
 const orderTypeOptions = useOrderTypeOptions()
@@ -206,20 +203,20 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: orderOrder,
+  resource: Api.OrderOrder,
   empty: emptyTempsOrder,
   fromRecord: tempsFromRecord,
   validate: (values, context) => validateTempsForm(values, variant.value, context),
   parse: (values, context) => parseTempsBody(values, variant.value, context, {orderlines: orderlines.value?.rows}),
   onSaved: async (result, context) => {
-    const saved = result as OrderCreate | OrderUpdate
+    const saved = result as Api.OrderCreate | Api.OrderUpdate
     if (saved.orderlines) orderlines.value?.adopt(saved.orderlines)
 
     if (acceptOnSave.value && !context.isCreate) {
       await accept(context.id)
     }
   },
-  afterSave: async () => {
+  afterSave: () => {
     router.go(-1)
   },
   copy: {

@@ -1,10 +1,10 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { NoAccessView as NoAccess } from '@/features/account'
 import { LoginForm } from '@/features/auth'
 
-import { mountForm, resetFakeHttp, toastCreate } from '../../support/form-harness.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm, toastCreate } from '../../support/form-harness.js'
 
 /**
  * Behaviour characterisation for the access gate (src/features/account/NoAccessView.vue).
@@ -15,36 +15,18 @@ import { mountForm, resetFakeHttp, toastCreate } from '../../support/form-harnes
  * `src/features/account/` unchanged apart from the composition API.
  */
 
-enableAutoUnmount(afterEach)
-
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
-
-async function flush() {
-  for (let i = 0; i < 10; i++) await Promise.resolve()
-}
+// On the seam with nothing stubbed: mounting either branch asks for nothing,
+// and a request would fail the test.
+installApiSeam()
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp)
   toastCreate.mockClear()
 })
 
 describe('NoAccess view', () => {
   test('logged in explains the missing permission', async () => {
     const wrapper = mountForm(NoAccess, { deep: true, auth: { isLoggedIn: true } })
-    await flush()
+    await settle()
 
     expect(wrapper.text()).toContain('No access')
     expect(wrapper.findComponent(LoginForm).exists()).toBe(false)
@@ -52,14 +34,14 @@ describe('NoAccess view', () => {
 
   test('logged out shows the login form', async () => {
     const wrapper = mountForm(NoAccess, { deep: true, auth: { isLoggedIn: false } })
-    await flush()
+    await settle()
 
     expect(wrapper.findComponent(LoginForm).exists()).toBe(true)
   })
 
   test('the login form offers the forgot-password route', async () => {
     const wrapper = mountForm(NoAccess, { deep: true, auth: { isLoggedIn: false } })
-    await flush()
+    await settle()
 
     expect(wrapper.text()).toContain('Forgot password?')
   })

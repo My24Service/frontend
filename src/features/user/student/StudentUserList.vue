@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-student-user-modal',
         confirmText: $trans('Are you sure you want to delete this student user?'),
-        destroyMutation: companyStudentuserDestroyMutation,
-        invalidate: (qc) => qc.invalidateQueries({queryKey: companyStudentuserListQueryKey()}),
+        resource: Api.UserStudentuser,
         deletedDetail: $trans('Student user has been deleted'),
         deleteError: $trans('Error deleting student user'),
       }"
@@ -36,38 +35,23 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  companyStudentuserDestroyMutation,
-  companyStudentuserListOptions,
-  companyStudentuserPartialUpdateMutation,
-  companyStudentuserListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedStudentUserList } from '@/api/types.gen'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 import IBiCheckSquare from '~icons/bi/check-square'
 import IBiCheckSquareFill from '~icons/bi/check-square-fill'
 
-type StudentUserRow = ListRow<PaginatedStudentUserList>
+type StudentUserRow = ListRow<Api.PaginatedStudentUserList>
 
-const queryClient = useQueryClient()
-const {create} = useToast()
+const { toast: create, queryClient } = useCommon()
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated.
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
 const activeMutation = useMutation({
-  ...companyStudentuserPartialUpdateMutation(),
+  ...Api.UserStudentuser.update.mutation(),
   onSuccess: async () => {
-    await queryClient.invalidateQueries({queryKey: companyStudentuserListQueryKey()})
+    await queryClient.invalidateQueries({queryKey: Api.UserStudentuser.list.queryKey()})
   },
   onError: (_error, variables) => {
     errorToast(create, variables.body?.is_active
@@ -137,11 +121,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<StudentUserRow>({
   key: 'student-user-table',
   columns,
-  listOptions: (query) => companyStudentuserListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.UserStudentuser,
   urlSync: true,
   loadError: $trans('Error loading student users'),
 })

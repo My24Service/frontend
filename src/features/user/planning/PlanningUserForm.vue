@@ -1,6 +1,6 @@
 <template>
   <UserFormShell
-    :username="planningUser.username"
+    :edited-username="planningUser.username"
     :is-create="isCreate"
     :is-loading="isLoading"
     :button-disabled="buttonDisabled"
@@ -59,9 +59,6 @@
 import UserFormShell from '../UserFormShell.vue'
 import * as v from 'valibot'
 
-import { companyPlanninguser } from '@/api/resources.gen'
-import type { PlanningUser } from '@/api/types.gen'
-import { vPlanningUserRequestWritable } from '@/api/valibot.gen'
 import UserIdentityPanel from '../UserIdentityPanel.vue'
 import { emptyUserIdentity, filledFrom, USERNAME_TAKEN_MESSAGE } from '../user-form'
 import { useUserForm } from '../use-user-form'
@@ -79,7 +76,7 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-function planningUserFromRecord(record: PlanningUser): PlanningUserFormValues {
+function planningUserFromRecord(record: Api.PlanningUser): PlanningUserFormValues {
   return {
     ...filledFrom(emptyUserIdentity(), record),
     planning_user: filledFrom(emptyPlanningUser().planning_user, record.planning_user),
@@ -98,12 +95,12 @@ const {
   cancelForm,
 } = useUserForm<
   PlanningUserFormValues,
-  PlanningUser,
-  v.InferOutput<typeof vPlanningUserRequestWritable>,
+  Api.PlanningUser,
+  v.InferOutput<typeof schemas.vPlanningUserRequestWritable>,
   PlanningUserFieldErrors
 >({
   pk: () => props.pk,
-  resource: companyPlanninguser,
+  resource: Api.UserPlanninguser,
   empty: () => ({...emptyPlanningUser()}),
   fromRecord: planningUserFromRecord,
   validate: validatePlanningUserForm,

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { StudentUserForm } from '@/features/user'
 import { vStudentUser } from '@/api/valibot.gen'
@@ -24,11 +24,6 @@ import { userRoutes } from '../../support/user-routes.js'
  * `/accounts/register/` flow with its own validations) converts in its own
  * follow-up and is not mounted here.
  */
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 
@@ -59,7 +54,6 @@ const RECORD = fixtureFor(vStudentUser, {
 })
 
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 
@@ -67,10 +61,10 @@ beforeEach(() => {
   // The username probe asks the generated op, so its request lands on the
   // strict seam like every other read: answer it available here.
   api.get('/api/company/username-exists/', { available: true })
-  api.get('/api/company/studentuser/', { count: 0, next: null, previous: null, results: [] })
-  api.get('/api/company/studentuser/{id}/', RECORD)
-  api.post('/api/company/studentuser/', RECORD)
-  api.patch('/api/company/studentuser/{id}/', RECORD)
+  api.get('/api/user/studentuser/', { count: 0, next: null, previous: null, results: [] })
+  api.get('/api/user/studentuser/{id}/', RECORD)
+  api.post('/api/user/studentuser/', RECORD)
+  api.patch('/api/user/studentuser/{id}/', RECORD)
 })
 
 async function mountStudentForm(props = {}) {
@@ -215,7 +209,7 @@ describe('StudentUserForm, creating a student user', () => {
   })
 
   test('tells the user when the create fails, and stays on the form', async () => {
-    api.post('/api/company/studentuser/', serverError)
+    api.post('/api/user/studentuser/', serverError)
     const wrapper = await mountStudentForm()
 
     await fillCreate(wrapper)
@@ -273,7 +267,7 @@ describe('StudentUserForm, editing a student user', () => {
   })
 
   test('tells the user when the record cannot be fetched', async () => {
-    api.get('/api/company/studentuser/{id}/', serverError)
+    api.get('/api/user/studentuser/{id}/', serverError)
 
     await mountStudentForm({ pk: 41 })
 
@@ -281,7 +275,7 @@ describe('StudentUserForm, editing a student user', () => {
   })
 
   test('tells the user when the update fails, and stays on the form', async () => {
-    api.patch('/api/company/studentuser/{id}/', serverError)
+    api.patch('/api/user/studentuser/{id}/', serverError)
     const wrapper = await mountStudentForm({ pk: 41 })
 
     await wrapper.get('#studentuser_first_name').setValue('Jonathan')

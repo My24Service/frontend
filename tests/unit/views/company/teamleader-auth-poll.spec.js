@@ -9,11 +9,6 @@ import { mountForm } from '../../support/form-harness.js'
 // every second until the tokens show up. That watch used to run forever when
 // the grant never came, and kept running after the page was left.
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 let configDetail
 
 beforeEach(() => {

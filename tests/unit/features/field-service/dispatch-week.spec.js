@@ -3,11 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { DispatchWeek } from '@/features/field-service'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
-import { mountForm, toastCreate } from '../../support/form-harness.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
+import { mountForm } from '../../support/form-harness.js'
 
 /**
  * Characterisation of the dispatch week board, written against the LEGACY

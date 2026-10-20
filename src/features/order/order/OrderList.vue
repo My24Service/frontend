@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-order-modal',
         confirmText: $trans('Are you sure you want to delete this order?'),
-        destroyMutation: () => orderOrderDestroyMutation(),
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: orderOrderListQueryKey()}),
+        resource: Api.OrderOrder,
         deletedDetail: $trans('Order has been deleted'),
         deleteError: $trans('Error deleting order'),
       }"
@@ -62,7 +61,6 @@
 </template>
 
 <script lang="ts" setup>
-import { orderOrderDestroyMutation, orderOrderListQueryKey } from '@/api/@tanstack/vue-query.gen'
 import { NEW_DATA_EVENTS, NEW_DATA_EVENTS_TYPES } from '@/constants'
 import { ServerTable, useServerTable } from '@/features/table'
 import { useMemberNewData } from '../use-member-new-data'
@@ -89,8 +87,7 @@ const props = withDefaults(defineProps<{
 
 const mode = computed<ListMode>(() => (isListMode(props.queryMode) ? props.queryMode : 'all'))
 
-const route = useRoute()
-const authStore = useAuthStore()
+const { authStore, route } = useCommon()
 
 const isMobile = computed(() => route.path.startsWith('/mobile'))
 const canDelete = computed(() => !authStore.isCustomer && !authStore.isBranchEmployee)
@@ -121,7 +118,7 @@ const unaccepted = useUnacceptedCount()
 
 function reload() {
   refresh()
-  unaccepted.refetch()
+  void unaccepted.refetch()
 }
 
 const {views, active: activeView, select: selectView} = useOrderViews({mode, mobile: isMobile, columnFilters})

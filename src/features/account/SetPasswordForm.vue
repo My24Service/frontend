@@ -45,7 +45,6 @@
 <script lang="ts" setup>
 import PasswordMeter from 'vue-simple-password-meter'
 
-import { accountsResetPasswordCreateMutation } from '@/api/@tanstack/vue-query.gen'
 import {
   ValidatedForm,
   ValidatedFormField,
@@ -60,16 +59,14 @@ import {
   type SetPasswordValues,
 } from './schemas'
 
-const route = useRoute()
-const router = useRouter()
-const { create } = useToast()
+const { route, router, toast: create } = useCommon()
 
 const values = ref<SetPasswordValues>({ password1: '', password2: '' })
 const errors = ref<SetPasswordErrors>({})
 const submitClicked = ref(false)
 
 const resetMutation = useMutation({
-  ...accountsResetPasswordCreateMutation(),
+  ...Api.AccountsResetPassword.create.mutation(),
 })
 
 const buttonDisabled = computed(() => resetMutation.isPending.value)
@@ -92,7 +89,7 @@ async function submitForm() {
   try {
     await resetMutation.mutateAsync({ body: parseSetPassword(link, values.value.password1) })
     infoToast(create, $trans('Password reset'), $trans('Reset password successful'))
-    router.push({ path: '/' })
+    void router.push({ path: '/' })
   } catch {
     errorToast(create, $trans('Something went wrong, please try again'))
   }

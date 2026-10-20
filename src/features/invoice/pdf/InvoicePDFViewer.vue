@@ -50,33 +50,21 @@
 </template>
 
 <script setup lang="ts">
-import {
-  invoiceInvoiceDetailRetrieveQueryKey,
-  invoiceInvoiceDownloadPdfCreateMutation,
-  invoiceInvoiceGeneratePreviewPdfCreateMutation,
-  invoiceInvoiceMakeDefinitiveCreateMutation,
-  invoiceInvoiceRecreatePdfCreateMutation,
-  invoiceInvoiceRetrieveOptions,
-  invoiceInvoiceRetrieveQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Invoice } from '@/api/types.gen'
-import { invoiceInvoice } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { invoiceInvoiceDetailRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
+
 import { decodePdfError, downloadBlob, type PdfBlobError } from '@/features/shared'
 
 // The editor's and viewer's records come from two retrieve endpoints; the
 // uuid-keyed detail read leaves order_uuid off the record. Only id (all
 // mutations) and uuid (optional, cache invalidation) are load-bearing here.
-type ViewerInvoice = Omit<Invoice, 'order_uuid'> & {order_uuid?: string}
+type ViewerInvoice = Omit<Api.Invoice, 'order_uuid'> & {order_uuid?: string}
 
 const props = withDefaults(defineProps<{
   invoice: ViewerInvoice
   isView?: boolean
 }>(), {isView: false})
 
-const {create} = useToast()
-const router = useRouter()
-const authStore = useAuthStore()
+const { authStore, router, toast: create, queryClient } = useCommon()
 // A customer or branch employee may read the PDF but not regenerate it.
 const canManagePdf = computed(() => !authStore.isCustomer && !authStore.isBranchEmployee)
 
@@ -91,11 +79,10 @@ const isLoading = ref(false)
 const invoiceURL = ref<string | null>(null)
 const pdfBlobError = ref<PdfBlobError | null>(null)
 
-const queryClient = useQueryClient()
-const previewMutation = useMutation(invoiceInvoiceGeneratePreviewPdfCreateMutation())
-const downloadMutation = useMutation(invoiceInvoiceDownloadPdfCreateMutation())
-const recreateMutation = useMutation(invoiceInvoiceRecreatePdfCreateMutation())
-const definitiveMutation = useMutation(invoiceInvoiceMakeDefinitiveCreateMutation())
+const previewMutation = useMutation(Api.InvoiceInvoice.extras.generatePreviewPdfCreate.mutation())
+const downloadMutation = useMutation(Api.InvoiceInvoice.extras.downloadPdfCreate.mutation())
+const recreateMutation = useMutation(Api.InvoiceInvoice.extras.recreatePdfCreate.mutation())
+const definitiveMutation = useMutation(Api.InvoiceInvoice.extras.makeDefinitiveCreate.mutation())
 
 async function loadBlob(): Promise<boolean> {
   isLoading.value = true
@@ -137,7 +124,7 @@ function showMakeDefinitiveModal() {
 function invalidateAfterPdfChange() {
   releaseBlob()
   const keys = [
-    invoiceInvoiceRetrieveQueryKey({path: {id: props.invoice.id}}),
+    Api.InvoiceInvoice.retrieve.queryKey({path: {id: props.invoice.id}}),
     // The uuid-keyed detail read exists only once the record carries a uuid.
     ...(props.invoice.uuid ? [invoiceInvoiceDetailRetrieveQueryKey({path: {id: props.invoice.uuid}})] : []),
   ]
@@ -170,13 +157,13 @@ async function doMakeDefinitive() {
   isLoading.value = true
   try {
     await definitiveMutation.mutateAsync({path: {id: props.invoice.id}})
-    await Promise.all([invalidateAfterPdfChange(), invalidateReads(invoiceInvoice)(queryClient)])
+    await Promise.all([invalidateAfterPdfChange(), Api.InvoiceInvoice.invalidate(queryClient)])
     isLoading.value = false
     infoToast(create, $trans('Success'), $trans('Invoice is now definitive'))
     // make_definitive's response carries no uuid and the prop still holds the
     // record from before it, so read the invoice fresh for where to go next.
     const {uuid} = await queryClient.fetchQuery({
-      ...invoiceInvoiceRetrieveOptions({path: {id: props.invoice.id}}),
+      ...Api.InvoiceInvoice.retrieve.options({path: {id: props.invoice.id}}),
       staleTime: 0,
     })
     if (uuid) {

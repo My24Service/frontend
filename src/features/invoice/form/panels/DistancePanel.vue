@@ -84,19 +84,19 @@
 </template>
 
 <script setup lang="ts">
-import type { ActivityUserTotal } from '@/api/types.gen'
-import HeaderCell from './Header.vue'
-import VAT from './VAT.vue'
-import CostCollectionShell from './CostCollectionShell.vue'
 import {
+  CostCollectionShell,
+  Header as HeaderCell,
+  VAT,
   makeCostRow,
   useCostCollection,
+  useCostPanelContext,
+  COST_TYPE,
   type CostRow,
-} from '../use-cost-collection'
-import { useCostPanelContext } from '../cost-panel-context'
-import { COST_TYPE } from '../calculations'
+} from '@/features/costing'
+import { useOrderCostSource } from '../order-cost-source'
 
-type UserTotal = ActivityUserTotal & { is_partner?: boolean }
+type UserTotal = Api.ActivityUserTotal & { is_partner?: boolean }
 /**
  * The distance driven per engineer as a cost collection, each draft seeded
  * with the tenant's price per km. The order, engineers and the invoice-lines
@@ -109,9 +109,9 @@ const props = withDefaults(defineProps<{
   invoice_default_price_per_km?: string | null
 }>(), { user_totals: null, distance_total: null, invoice_default_price_per_km: null })
 const context = useCostPanelContext()
-const mainStore = useMainStore()
-const default_currency = mainStore.getDefaultCurrency
-const invoice_default_vat = mainStore.getInvoiceDefaultVat
+const { mainStore } = useCommon()
+const default_currency = mainStore.requiredDefaultCurrency
+const invoice_default_vat = mainStore.requiredInvoiceDefaultVat
 const costType = COST_TYPE.DISTANCE
 const distanceTotal = ref<number | null>(null)
 const {
@@ -120,12 +120,13 @@ const {
   createInvoiceLinesClicked, changeVatType, priceChanged, getFullname,
 } = useCostCollection({
   context,
+  source: useOrderCostSource(context.parentPk, () => costType),
   costType: () => costType,
   currency: () => default_currency,
   buildRows: () => (props.user_totals ?? []).map(activity => makeCostRow({
     ...activity,
     cost_type: costType,
-    order: context.orderPk.value ?? undefined,
+    order: context.parentPk.value ?? undefined,
     user_id: Number(activity.user_id),
     user: activity.is_partner ? null : Number(activity.user_id),
     user_full_name: activity.is_partner ? activity.full_name : null,

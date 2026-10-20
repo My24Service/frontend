@@ -1,8 +1,5 @@
 import * as v from 'valibot'
 
-import { companyImport } from '@/api/resources.gen'
-import { vImportedRow } from '@/api/valibot.gen'
-import type { Import } from '@/api/types.gen'
 import {
   selectMessage,
   type FieldErrors,
@@ -23,7 +20,7 @@ export interface ImportFormValues {
   file: string | null
 }
 
-export type ImportFormErrors = FieldErrors<keyof ImportFormValues & string>
+export type ImportFormErrors = FieldErrors<keyof ImportFormValues>
 
 /** An import as the form is filled in from scratch. */
 export function emptyImport(): ImportFormValues {
@@ -31,18 +28,18 @@ export function emptyImport(): ImportFormValues {
 }
 
 /** The fetched record as form values: the name this form owns. */
-export function importFromRecord(record: Import): ImportFormValues {
+export function importFromRecord(record: Api.Import): ImportFormValues {
   return { name: record.name ?? '', file: null }
 }
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof ImportFormValues & string>
+} as const satisfies FieldLabels<keyof ImportFormValues>
 
 /** The file is chosen, not typed, and the values drop it when none was picked. */
 export const FIELD_MESSAGES = {
   file: () => selectMessage($trans('File')),
-} satisfies FieldMessages<keyof ImportFormValues & string>
+} as const satisfies FieldMessages<keyof ImportFormValues>
 
 /**
  * A preview row: the declared core (id, name, whether the run would insert
@@ -51,7 +48,7 @@ export const FIELD_MESSAGES = {
  * open record rather than a redeclared entry.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PreviewRow = v.InferOutput<typeof vImportedRow> & Record<string, any>
+export type PreviewRow = v.InferOutput<typeof schemas.vImportedRow> & Record<string, any>
 
 /**
  * The wire-shaped body: the name trimmed as the API trims it before its
@@ -68,7 +65,7 @@ function shaped(values: ImportFormValues) {
  * the name is optional but not blank, and this form always sends it, so a
  * blank one is refused either way.
  */
-export const importWrite = writeContract(companyImport, {
+export const importWrite = writeContract(Api.ImportingImport, {
   shape: shaped,
   labels: FIELD_LABELS,
   messages: FIELD_MESSAGES,

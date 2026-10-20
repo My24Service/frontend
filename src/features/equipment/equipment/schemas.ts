@@ -5,15 +5,10 @@ import type {
   FieldErrors,
   FieldLabels,
 } from '@/features/forms'
-import {
-  vEquipmentBranchCreateRequest,
-  vEquipmentCustomerCreateRequest,
-  vPatchedEquipmentRequest,
-} from '@/api/valibot.gen'
-import type { Equipment } from '@/api/types.gen'
+
 import { ownedRecordSchemas } from '@/features/equipment/owner'
 
-type EquipmentCreateValues = v.InferInput<typeof vEquipmentBranchCreateRequest>
+type EquipmentCreateValues = v.InferInput<typeof schemas.vEquipmentBranchCreateRequest>
 
 /**
  * What the equipment form binds to.
@@ -34,7 +29,7 @@ export type EquipmentFormValues =
     price_currency: string
   }
 
-export type EquipmentFieldErrors = FieldErrors<keyof EquipmentFormValues & string>
+export type EquipmentFieldErrors = FieldErrors<keyof EquipmentFormValues>
 
 /** An equipment as the form is filled in from scratch. */
 export function emptyEquipment(currency: string): EquipmentFormValues {
@@ -62,7 +57,7 @@ export function emptyEquipment(currency: string): EquipmentFormValues {
  * `default_replace_months` stays absent rather than null when the record has
  * none: the generated entry is `v.optional(v.number())`, which refuses a null.
  */
-export function equipmentFromRecord(record: Equipment): EquipmentFormValues {
+export function equipmentFromRecord(record: Api.Equipment): EquipmentFormValues {
   return {
     name: record.name,
     type: record.type,
@@ -101,7 +96,7 @@ export function wireDate(value: Date | null | undefined): string | null {
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof EquipmentFormValues & string>
+} as const satisfies FieldLabels<keyof EquipmentFormValues>
 
 /**
  * Validation and the wire body, shared with the other owned records: the
@@ -110,8 +105,8 @@ export const FIELD_LABELS = {
  * `ownedRecordSchemas`.
  */
 export const {validate: validateEquipment, parse: parseEquipment} = ownedRecordSchemas<EquipmentFormValues>({
-  branch: vEquipmentBranchCreateRequest,
-  customer: vEquipmentCustomerCreateRequest,
-  patch: vPatchedEquipmentRequest,
+  branch: schemas.vEquipmentBranchCreateRequest,
+  customer: schemas.vEquipmentCustomerCreateRequest,
+  patch: schemas.vPatchedEquipmentRequest,
   labels: FIELD_LABELS,
 })

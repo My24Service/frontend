@@ -1,9 +1,9 @@
-import { companyUserListListOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
+import { typingDelay } from '@/services/input-delays'
 /**
  * The "type to search a user" picker the leave and sick-leave forms both carry.
  *
- * `/api/company/user-list/` is the tenant-wide people search: `q` is a
+ * `/api/user/user-list/` is the tenant-wide people search: `q` is a
  * case-insensitive substring of the username or either name, and the answer is a
  * bare array of `{id, name, email, submodel_id}` rather than a page. It is the
  * one read both forms make of the same endpoint, so it lives at the slice root
@@ -16,10 +16,10 @@ import { useQueryErrorToast } from '@/features/forms'
  */
 export function useUserSearch() {
   const term = ref('')
-  const queryTerm = refDebounced(term, 500)
+  const queryTerm = refDebounced(term, typingDelay)
 
   const search = useQuery(() => ({
-    ...companyUserListListOptions({query: {q: queryTerm.value}}),
+    ...Api.UserUserList.list.options({query: {q: queryTerm.value}}),
     enabled: queryTerm.value.length > 0,
   }))
 

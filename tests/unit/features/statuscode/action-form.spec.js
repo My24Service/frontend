@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { ActionForm } from '@/features/statuscode'
 import { vAction, vPaginatedPartnerDetailList } from '@/api/valibot.gen'
@@ -18,11 +18,6 @@ import { statuscodeRoutes } from '../../support/statuscode-routes.js'
  * update, the per-type action lists, the order type's partner load and Gripp
  * gate, the condition table, the delete, and the failure toasts.
  */
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 
@@ -57,7 +52,7 @@ beforeEach(() => {
   api.post('/api/statuscode/action/', ACTION)
   api.patch('/api/statuscode/action/{id}/', ACTION)
   api.delete('/api/statuscode/action/{id}/', noContent)
-  api.get('/api/company/partner/', partnerPage())
+  api.get('/api/partner/partner/', partnerPage())
 })
 
 async function mountActionForm({ codeType = 'quotation', fromSettings = false, pk = null, statuscodePk = null, auth = {}, main = {} } = {}) {
@@ -175,7 +170,7 @@ describe('ActionForm, the action types per code type', () => {
 
     expect(typeOptions(wrapper)).toEqual(['email', 'email_assigned', 'copy', 'status', 'email_workorders', 'send_sms', 'send_fcm'])
     expect(api.requests()).toEqual([
-      { method: 'get', path: '/api/company/partner/', query: { page_size: '1000' } },
+      { method: 'get', path: '/api/partner/partner/', query: { page_size: '1000' } },
     ])
   })
 

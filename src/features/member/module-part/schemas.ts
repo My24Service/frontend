@@ -1,15 +1,12 @@
-import * as v from 'valibot'
-
-import { vMemberModulePartCreateBody } from '@/api/valibot.gen'
 import {
-  fieldErrors,
+  writeContract,
   requiredMessages,
   type FieldErrors,
   type FieldLabels,
 } from '@/features/forms'
 import { formDefaults } from '@/models/schema'
 export type ModulePartFormValues =
-  Omit<v.InferInput<typeof vMemberModulePartCreateBody>, 'module'> & {module: number | null}
+  Omit<Api.MemberModulePart.CreateInput, 'module'> & {module: number | null}
 
 /**
  * The blank form, derived from the request component. `module` is the one
@@ -17,23 +14,21 @@ export type ModulePartFormValues =
  * its inferred blank is `0`, while an unchosen picker is `null`.
  */
 export function emptyModulePart(): ModulePartFormValues {
-  return formDefaults(vMemberModulePartCreateBody, {module: null})
+  return formDefaults(Api.MemberModulePart.create.body, {module: null})
 }
 
-export type ModulePartFieldErrors = FieldErrors<keyof ModulePartFormValues & string>
+export type ModulePartFieldErrors = FieldErrors<keyof ModulePartFormValues>
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   module: () => $trans('Module'),
-} satisfies FieldLabels<keyof ModulePartFormValues & string>
+} as const satisfies FieldLabels<keyof ModulePartFormValues>
 
 /** The line under an untouched field: the same required line the validation shows. */
 export const PLACEHOLDERS = requiredMessages(FIELD_LABELS)
 
-export function validateModulePart(values: ModulePartFormValues): ModulePartFieldErrors {
-  return fieldErrors(vMemberModulePartCreateBody, values, {}, FIELD_LABELS)
-}
-
-export function parseModulePart(values: ModulePartFormValues): v.InferOutput<typeof vMemberModulePartCreateBody> {
-  return v.parse(vMemberModulePartCreateBody, values)
-}
+/** What the form checks and sends: the whole module part, on a create and an edit alike. */
+export const modulePartWrite = writeContract(Api.MemberModulePart, {
+  validateWith: Api.MemberModulePart.create.body,
+  labels: FIELD_LABELS,
+})

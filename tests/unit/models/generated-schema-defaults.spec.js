@@ -3,13 +3,17 @@ import * as v from 'valibot'
 
 import { formDefaults, lenient, widenNullable } from '@/models/schema'
 import { vStockLocation } from '@/api/valibot.gen'
-import { StockLocationSchema } from '@/models/inventory/StockLocation'
 
 /**
- * `src/models/inventory/StockLocation.ts` is built from the generated schema
- * rather than hand-written. `inventory-schema-fields.spec.js` already proves
- * its form defaults and write shape are unchanged by that migration; this
- * suite covers the seam itself - `formDefaults` and its companions - and pins
+ * The lenient read schema the legacy stock-location model used to export, built
+ * here so the seam keeps a realistic subject now that the inventory models are
+ * gone (the inventory slice reads through the generated client).
+ */
+const StockLocationSchema = lenient(vStockLocation)
+
+/**
+ * The stock-location schema is the sample subject. This suite covers the
+ * `models/schema` seam itself - `formDefaults` and its companions - and pins
  * the two schema facts that only became correct once the backend stopped lying
  * about them.
  *
@@ -38,7 +42,7 @@ describe('formDefaults', () => {
   test('infers null for a nullable scalar', () => {
     // A nullable column's true "no value" is null. The form-text-input
     // exception (nullable but bound to '') is a UI decision and must be stated
-    // explicitly, as StockLocation does for name/identifier.
+    // explicitly, as an override.
     expect(formDefaults(vStockLocation).external_identifier).toBeNull()
   })
 

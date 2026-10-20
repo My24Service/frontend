@@ -2,12 +2,7 @@ import type {
   FieldErrors,
   FieldLabels,
 } from '@/features/forms'
-import {
-  vBuildingBranchCreateRequest,
-  vBuildingCustomerCreateRequest,
-  vPatchedBuildingRequest,
-} from '@/api/valibot.gen'
-import type { Building } from '@/api/types.gen'
+
 import { ownedRecordSchemas } from '@/features/equipment/owner'
 
 /**
@@ -24,7 +19,7 @@ export interface BuildingFormValues {
   branch: number | null
 }
 
-export type BuildingFieldErrors = FieldErrors<keyof BuildingFormValues & string>
+export type BuildingFieldErrors = FieldErrors<keyof BuildingFormValues>
 
 /** A building as the form is filled in from scratch. */
 export function emptyBuilding(): BuildingFormValues {
@@ -32,7 +27,7 @@ export function emptyBuilding(): BuildingFormValues {
 }
 
 /** The fetched record as form values: the three fields this form owns. */
-export function buildingFromRecord(record: Building): BuildingFormValues {
+export function buildingFromRecord(record: Api.Building): BuildingFormValues {
   return {
     name: record.name,
     customer: record.customer ?? null,
@@ -42,7 +37,7 @@ export function buildingFromRecord(record: Building): BuildingFormValues {
 
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
-} satisfies FieldLabels<keyof BuildingFormValues & string>
+} as const satisfies FieldLabels<keyof BuildingFormValues>
 
 /**
  * Validation and the wire body, shared with the other owned records: the
@@ -51,8 +46,8 @@ export const FIELD_LABELS = {
  * `ownedRecordSchemas`.
  */
 export const {validate: validateBuilding, parse: parseBuilding} = ownedRecordSchemas<BuildingFormValues>({
-  branch: vBuildingBranchCreateRequest,
-  customer: vBuildingCustomerCreateRequest,
-  patch: vPatchedBuildingRequest,
+  branch: schemas.vBuildingBranchCreateRequest,
+  customer: schemas.vBuildingCustomerCreateRequest,
+  patch: schemas.vPatchedBuildingRequest,
   labels: FIELD_LABELS,
 })

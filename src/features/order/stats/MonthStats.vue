@@ -38,19 +38,19 @@
 
 <script lang="ts" setup>
 import { orderOrderMonthListRetrieveOptions } from '@/api/@tanstack/vue-query.gen'
-import type { MonthListResponse } from '@/api/types.gen'
+
 import ChartPairRow from './ChartPairRow.vue'
 import StatsPage from './StatsPage.vue'
 import { monthCharts } from './chart-data'
 import { useOrderStatsQuery } from './use-order-stats-query'
 
 /** A month of orders: the weekly totals, the statuses per week, the assignments per week. */
-const mainStore = useMainStore()
+const { mainStore } = useCommon()
 
 const today = new Date()
 const year = ref(today.getFullYear())
 const month = ref(today.getMonth() + 1)
-const {orderType, query, statuscodes} = useOrderStatsQuery<MonthListResponse>(
+const {orderType, query, statuscodes} = useOrderStatsQuery<Api.MonthListResponse>(
   (orderType) => orderOrderMonthListRetrieveOptions({
     query: {order_type: orderType, year: year.value, month: month.value},
   }),

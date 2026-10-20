@@ -13,12 +13,8 @@ import {
 import { captureDownloads } from '../../support/downloads.js'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
-import { mountForm, toastCreate, toasts } from '../../support/form-harness.js'
+import { mountForm, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
 
 const api = installApiSeam()
 

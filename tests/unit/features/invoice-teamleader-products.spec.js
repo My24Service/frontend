@@ -10,9 +10,8 @@ import {
 import { vMaterial, vPaginatedTaxRateList, vProduct, vProductList, vTaxRate } from '@/api/valibot.gen'
 import { fixtureFor } from '../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../support/api-seam/index.js'
-import { mountForm, toastCreate, toasts } from '../support/form-harness.js'
+import { mountForm, toasts } from '../support/form-harness.js'
 
-vi.mock('bootstrap-vue-next', async original => ({ ...(await original()), useToast: () => ({ create: toastCreate }) }))
 const api = installApiSeam()
 const wrappers = []
 afterEach(() => { wrappers.splice(0).forEach(wrapper => wrapper.unmount()); vi.restoreAllMocks() })

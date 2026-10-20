@@ -278,18 +278,13 @@
 
 <script setup lang="ts">
 import moment from 'moment/min/moment-with-locales'
+import { BModal } from 'bootstrap-vue-next'
 import { nl } from 'date-fns/locale'
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import VueMultiselect from 'vue-multiselect'
 
-import {
-  companyDispatchAssignedordersUserListV4RetrieveQueryKey,
-  companyUserListListOptions,
-  mobileAssignedorderDetailChangeDatePartialUpdateMutation,
-  mobileAssignedorderSplitCreateMutation,
-  orderOrderRetrieveOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Order, OrderDetail, UserSelectRow } from '@/api/types.gen'
+import { companyDispatchAssignedordersUserListV4RetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
+
 import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 import { NEW_DATA_EVENTS } from '@/constants'
 import { completeTime } from '@/features/forms'
@@ -302,6 +297,7 @@ import DispatchWeek from './DispatchWeek.vue'
 import SearchAndAssign from './SearchAndAssign.vue'
 import AssignedOrderDatesForm, { type AssignedOrderDates } from './AssignedOrderDatesForm.vue'
 import type { DispatchBoardAssignedOrder } from './dispatch-window'
+import type { AssignOrder } from '@/stores/main'
 
 /**
  * The dispatch week board: the planning screen for the mobile workforce.
@@ -327,10 +323,7 @@ const props = withDefaults(defineProps<{
   assignModeProp: 'false',
 })
 
-const router = useRouter()
-const store = useMainStore()
-const queryClient = useQueryClient()
-const { create: toast } = useToast()
+const { mainStore, router, toast, queryClient } = useCommon()
 const { assignOrders, unassignOrder } = useOrderAssignment()
 
 const socket = new MemberNewDataSocket()
@@ -339,8 +332,22 @@ const socket = new MemberNewDataSocket()
 // `newData` that the planning moved.
 const newData = ref(false)
 
-const mode = ref(localStorage.getItem('displayMode') ? JSON.parse(localStorage.getItem('displayMode') as string) : 'wide')
-const showUsersMode = ref(localStorage.getItem('showUsersMode') ? JSON.parse(localStorage.getItem('showUsersMode') as string) : 'active')
+/**
+ * A display choice the board remembers in localStorage, JSON-encoded. A value
+ * that is missing or unreadable reads as the default rather than throwing
+ * the whole board over in setup.
+ */
+function storedChoice(key: string, fallback: string): string {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? 'null')
+    return typeof parsed === 'string' ? parsed : fallback
+  } catch {
+    return fallback
+  }
+}
+
+const mode = ref(storedChoice('displayMode', 'wide'))
+const showUsersMode = ref(storedChoice('showUsersMode', 'active'))
 
 const modeOptions = [
   {item: 'compact', name: $trans('Compact')},
@@ -351,18 +358,30 @@ const showUsersOptions = [
   {item: 'active', name: $trans('Active')},
 ]
 
+/**
+ * The route's assign-mode flag: a JSON boolean segment. Anything that is not
+ * one reads as off, the way the board's `false` default does.
+ */
+function parseAssignModeFlag(raw: string | undefined): boolean {
+  if (!raw) {
+    return false
+  }
+  const parsed: unknown = JSON.parse(raw)
+  return typeof parsed === 'boolean' ? parsed : false
+}
+
 const startDate = ref<Date>(new Date())
 const loadDone = ref(false)
 const buttonDisabled = ref(false)
 const showOverlay = ref(false)
 
 const assignMode = ref(false)
-const selectedOrders = ref<Order[]>([])
+const selectedOrders = ref<AssignOrder[]>([])
 const selectedOrderIds = ref<string[]>([])
 const selectedUsers = ref<AssignedUser[]>([])
 const alreadyAssignedUsers = ref<AssignedUser[]>([])
 
-const selectedOrder = ref<OrderDetail | null>(null)
+const selectedOrder = ref<Api.OrderDetail | null>(null)
 const selectedAssignedOrder = ref<DispatchBoardAssignedOrder | null>(null)
 const selectedOrderUserId = ref<number | null>(null)
 const selectedOrderIsPartner = ref(false)
@@ -381,19 +400,19 @@ const assignedOrder = ref<AssignedOrderDates>({
 
 const getEngineersDebounced = AwesomeDebouncePromise(getEngineers, 500)
 
-const engineers = ref<UserSelectRow[]>([])
-const selectedEngineers = ref<UserSelectRow[]>([])
+const engineers = ref<Api.UserSelectRow[]>([])
+const selectedEngineers = ref<Api.UserSelectRow[]>([])
 const searchingEngineers = ref(false)
 
 const searchAssignModal = useTemplateRef<InstanceType<typeof SearchAndAssign>>('search-modal-wide')
-const changeDateModal = useTemplateRef<{show: () => void; hide: () => void}>('dispatch-change-date-modal')
-const splitOrderModal = useTemplateRef<{show: () => void; hide: () => void}>('dispatch-split-order-modal')
-const actionsModal = useTemplateRef<{show: () => void; hide: () => Promise<unknown>}>('dispatch-order-actions-modal')
+const changeDateModal = useTemplateRef<InstanceType<typeof BModal>>('dispatch-change-date-modal')
+const splitOrderModal = useTemplateRef<InstanceType<typeof BModal>>('dispatch-split-order-modal')
+const actionsModal = useTemplateRef<InstanceType<typeof BModal>>('dispatch-order-actions-modal')
 
 const startWeek = computed(() => Number(moment(startDate.value).format('w')))
 
-const changeDateMutation = useMutation({...mobileAssignedorderDetailChangeDatePartialUpdateMutation()})
-const splitAssignedOrderMutation = useMutation({...mobileAssignedorderSplitCreateMutation()})
+const changeDateMutation = useMutation({...Api.MobileAssignedorder.extras.detailChangeDatePartialUpdate.mutation()})
+const splitAssignedOrderMutation = useMutation({...Api.MobileAssignedorderSplit.create.mutation()})
 
 watch(mode, (value) => localStorage.setItem('displayMode', JSON.stringify(value)))
 watch(showUsersMode, (value) => localStorage.setItem('showUsersMode', JSON.stringify(value)))
@@ -409,13 +428,13 @@ onMounted(async () => {
   socket.setOnmessageHandler(onNewData)
   socket.getSocket()
 
-  moment.locale(store.getCurrentLanguage || 'nl')
-  const monday = store.getCurrentLanguage === 'en' ? 1 : 0
+  moment.locale(mainStore.getCurrentLanguage || 'nl')
+  const monday = mainStore.getCurrentLanguage === 'en' ? 1 : 0
   startDate.value = moment().weekday(monday).toDate()
 
-  assignMode.value = props.assignModeProp ? JSON.parse(props.assignModeProp) : false
+  assignMode.value = parseAssignModeFlag(props.assignModeProp)
   if (assignMode.value) {
-    selectedOrders.value = [...store.getAssignOrders]
+    selectedOrders.value = [...mainStore.getAssignOrders]
     alreadyAssignedUsers.value = assignedUsersOf(selectedOrders.value)
   } else {
     alreadyAssignedUsers.value = []
@@ -484,7 +503,7 @@ async function openActionsModal(userId: number, order_pk: number, assignedorder:
     // The retrieve path is declared as a string — it accepts an order pk or a
     // uuid — so the number the grid carries is stringified for the request.
     selectedOrder.value = await queryClient.fetchQuery(
-      orderOrderRetrieveOptions({path: {id: String(order_pk)}}))
+      Api.OrderOrder.retrieve.options({path: {id: String(order_pk)}}))
     showOverlay.value = false
     await actionsModal.value?.show()
   } catch (error) {
@@ -497,13 +516,13 @@ async function openActionsModal(userId: number, order_pk: number, assignedorder:
 async function viewOrder() {
   await actionsModal.value?.hide()
   if (!selectedOrder.value?.id) return
-  router.push({name: 'order-view', params: {pk: selectedOrder.value.id}})
+  void router.push({name: 'order-view', params: {pk: selectedOrder.value.id}})
 }
 
 async function editOrder() {
   await actionsModal.value?.hide()
   if (!selectedOrder.value?.id) return
-  router.push({name: 'order-edit', params: {pk: selectedOrder.value.id}})
+  void router.push({name: 'order-edit', params: {pk: selectedOrder.value.id}})
 }
 
 // change date ----------------------------------------------------------------
@@ -535,15 +554,18 @@ function resetAssignedOrderDates() {
   assignedOrder.value = newSplitModel()
 }
 
-function changeDate() {
+// The actions modal is fully hidden before the next one opens, as in
+// viewOrder/editOrder: its focus return would otherwise land after the new
+// modal has taken focus.
+async function changeDate() {
   assignedOrder.value = newDatesModel()
-  actionsModal.value?.hide()
-  changeDateModal.value?.show()
+  await actionsModal.value?.hide()
+  await changeDateModal.value?.show()
 }
 
 function changeDateOk(event: {preventDefault: () => void}) {
   event.preventDefault()
-  changeDateSubmit()
+  void changeDateSubmit()
 }
 
 async function changeDateSubmit() {
@@ -562,7 +584,7 @@ async function changeDateSubmit() {
       },
     })
 
-    changeDateModal.value?.hide()
+    void changeDateModal.value?.hide()
     await invalidateWeek()
     showOverlay.value = false
   } catch (error) {
@@ -582,14 +604,14 @@ function newSplitModel(): AssignedOrderDates {
   }
 }
 
-function splitOrder() {
+async function splitOrder() {
   assignedOrder.value = newSplitModel()
-  actionsModal.value?.hide()
-  splitOrderModal.value?.show()
+  await actionsModal.value?.hide()
+  await splitOrderModal.value?.show()
 }
 
 function cancelSplitOrder() {
-  splitOrderModal.value?.hide()
+  void splitOrderModal.value?.hide()
 }
 
 /**
@@ -616,7 +638,7 @@ async function splitOrderSubmit() {
       },
     })
 
-    splitOrderModal.value?.hide()
+    void splitOrderModal.value?.hide()
     infoToast(toast, $trans('Success'), $trans('Order split'))
     await invalidateWeek()
     showOverlay.value = false
@@ -638,7 +660,7 @@ async function getEngineers(query: string) {
 
   try {
     engineers.value = await queryClient.fetchQuery(
-      companyUserListListOptions({query: {q: query, user_type: 'engineer'}}))
+      Api.UserUserList.list.options({query: {q: query, user_type: 'engineer'}}))
     searchingEngineers.value = false
   } catch (error) {
     console.log('Error fetching engineers', error)
@@ -663,12 +685,12 @@ function showSearchModal() {
  * selection is left alone when the modal closes without one, which is what the
  * legacy board did.
  */
-async function searchAndAssignDone(newAssignMode: boolean) {
+function searchAndAssignDone(newAssignMode: boolean) {
   loadDone.value = false
   assignMode.value = newAssignMode
 
   if (newAssignMode) {
-    selectedOrders.value = [...store.getAssignOrders]
+    selectedOrders.value = [...mainStore.getAssignOrders]
     alreadyAssignedUsers.value = assignedUsersOf(selectedOrders.value)
   } else {
     alreadyAssignedUsers.value = []
@@ -754,7 +776,7 @@ function cancelAssign() {
   selectedOrders.value = []
   alreadyAssignedUsers.value = []
   assignMode.value = false
-  store.setAssignOrders([])
+  mainStore.setAssignOrders([])
 }
 
 function removeSelectedOrder(index: number) {

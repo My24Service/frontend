@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-building-modal',
         confirmText: $trans('Are you sure you want to delete this building?'),
-        destroyMutation: equipmentBuildingDestroyMutation,
-        invalidate: invalidateReads(equipmentBuilding),
+        resource: Api.EquipmentBuilding,
         deletedDetail: $trans('building has been deleted'),
         deleteError: $trans('Error deleting building'),
       }"
@@ -34,20 +33,14 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import {
-  equipmentBuildingDestroyMutation,
-  equipmentBuildingListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedBuildingList } from '@/api/types.gen'
-import { equipmentBuilding } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
-import { ServerTable, baseListParams, useServerTable, type ListRow } from '@/features/table'
+
+import { ServerTable, useServerTable, type ListRow } from '@/features/table'
 import { useBuildingColumns } from './use-building-columns'
-type BuildingRow = ListRow<PaginatedBuildingList>
+type BuildingRow = ListRow<Api.PaginatedBuildingList>
 
 const tableRef = useTemplateRef<{showDeleteModal: (id: number) => void}>('tableRef')
 
-const authStore = useAuthStore()
+const { authStore } = useCommon()
 // "Planning" in the legacy screen's sense: neither a branch employee nor a
 // customer. Those two roles see no owner column.
 const planning = !authStore.isEmployee && !authStore.isCustomer
@@ -70,17 +63,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   columns,
   // The endpoint declares search, paging, `ordering` and the column filters
   // (apps/equipment/views.py), so the kit forwards all three.
-  listOptions: (query) => equipmentBuildingListOptions({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-      ...(query.customer ? {customer: String(query.customer)} : {}),
-      ...(query.branch ? {branch: String(query.branch)} : {}),
-      ...(query.created ? {created: String(query.created)} : {}),
-      ...(query.modified ? {modified: String(query.modified)} : {}),
-    },
-  }),
+  resource: Api.EquipmentBuilding,
   urlSync: true,
   loadError: $trans('Error loading buildings'),
 })

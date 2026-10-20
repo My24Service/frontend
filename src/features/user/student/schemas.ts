@@ -1,4 +1,3 @@
-import { vStudentUserWriteRequestWritable } from '@/api/valibot.gen'
 import {
   normalizePhone,
   type FieldMessages,
@@ -12,7 +11,7 @@ import {
   type UserFieldErrors,
   type UserFormValues,
 } from '../user-form'
-export type StudentUserFormValues = UserFormValues<typeof vStudentUserWriteRequestWritable>
+export type StudentUserFormValues = UserFormValues<typeof schemas.vStudentUserWriteRequestWritable>
 export type StudentUserFieldErrors = UserFieldErrors<'student_user.dob' | 'student_user.mobile' | 'student_user'>
 
 export function emptyStudentUser(): StudentUserFormValues {
@@ -44,12 +43,12 @@ export const FIELD_MESSAGES = {
     // A shape the rule's line would not say.
     dob: () => $trans('Please use yyyy-mm-dd for the date of birth'),
   },
-} satisfies FieldMessages
+} as const satisfies FieldMessages
 
 export const FIELD_LABELS = {
   ...IDENTITY_FIELD_LABELS,
   'student_user.mobile': () => $trans('Mobile'),
-} satisfies FieldLabels
+} as const satisfies FieldLabels
 
 /**
  * Only the inputs the schema cannot take as typed need shaping. `dob` is
@@ -71,9 +70,9 @@ function payloadOf(values: StudentUserFormValues) {
 }
 
 export const { validate: validateStudentUserForm, parse: parseStudentUserForm } = userFormContract<
-  typeof vStudentUserWriteRequestWritable, StudentUserFormValues, 'student_user.dob' | 'student_user.mobile' | 'student_user'
+  typeof schemas.vStudentUserWriteRequestWritable, StudentUserFormValues, 'student_user.dob' | 'student_user.mobile' | 'student_user'
 >({
-  schema: vStudentUserWriteRequestWritable,
+  schema: schemas.vStudentUserWriteRequestWritable,
   messages: FIELD_MESSAGES,
   labels: FIELD_LABELS,
   payloadOf,

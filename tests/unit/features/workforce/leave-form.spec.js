@@ -1,20 +1,17 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import moment from 'moment'
 import { vLeaveHoursTotals, vLeaveType, vUserLeaveHours, vUserSelectRow } from '@/api/valibot.gen'
 import { LeaveForm } from '@/features/workforce'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
-import { mountForm, routerGo, toastCreate, toasts } from '../../support/form-harness.js'
+import { datePickerStub, pick } from '../../support/date-picker-stub.js'
+import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({ create: toastCreate }),
-}))
-
 const api = installApiSeam()
-const resource = '/api/company/user-leave-hours/admin/'
-const leaveTypes = '/api/company/leave-type/'
+const resource = '/api/workforce/user-leave-hours/admin/'
+const leaveTypes = '/api/workforce/leave-type/'
 
 // The form seeds its window from `moment()` at mount, so the expectation is
 // built the same way rather than frozen to the day the spec was written.
@@ -24,12 +21,6 @@ const multiselectStub = {
   props: ['options', 'modelValue'],
   emits: ['select', 'search-change'],
   template: '<div class="multiselect-stub" />',
-}
-
-const datePickerStub = {
-  props: ['modelValue'],
-  emits: ['update:modelValue'],
-  template: '<div class="datepicker-stub" />',
 }
 
 function leaveType(overrides = {}) {
@@ -67,7 +58,7 @@ beforeEach(() => {
   api.post(resource + 'get_totals/', fixtureFor(vLeaveHoursTotals, {
     result: {total_hours: 2, total_minutes: 30},
   }))
-  api.get('/api/company/user-list/', () => [
+  api.get('/api/user/user-list/', () => [
     fixtureFor(vUserSelectRow, {id: 7, name: 'Jan Jansen', email: 'jan@example.com'}),
   ])
   api.get(resource + '{id}/', leaveRecord())
@@ -87,7 +78,6 @@ function mountLeave(pk = null) {
 
 async function pickUser(wrapper) {
   wrapper.findComponent(multiselectStub).vm.$emit('search-change', 'jansen')
-  await new Promise((resolve) => setTimeout(resolve, 600))
   await settle()
   wrapper.findComponent(multiselectStub).vm.$emit('select', {id: 7, name: 'Jan Jansen'})
   await wrapper.vm.$nextTick()
@@ -125,13 +115,26 @@ describe('LeaveForm create', () => {
           end_date_is_whole_day: true,
         },
       },
-      {method: 'get', path: '/api/company/user-list/', query: {q: 'jansen'}},
+      {method: 'get', path: '/api/user/user-list/', query: {q: 'jansen'}},
+      // Picking a user re-probes for that user: the totals come from their
+      // contract hours, not the planner's.
+      {
+        method: 'post',
+        path: resource + 'get_totals/',
+        query: {user: '7'},
+        body: {
+          start_date: TODAY,
+          end_date: TODAY,
+          start_date_is_whole_day: true,
+          end_date_is_whole_day: true,
+        },
+      },
       // Picking a leave type re-probes: the legacy probe never did, so its
       // number stayed stale until a date or a time was touched.
       {
         method: 'post',
         path: resource + 'get_totals/',
-        query: {},
+        query: {user: '7'},
         body: {
           start_date: TODAY,
           end_date: TODAY,
@@ -200,6 +203,38 @@ describe('LeaveForm create', () => {
     expect(wrapper.text()).toContain('Please enter a valid start time HH:mm')
   })
 
+  test('an end date before the start date blocks the submit', async () => {
+    const wrapper = mountLeave()
+    await settle()
+
+    await pickUser(wrapper)
+    await wrapper.get('#leave_type').setValue('3')
+    const [start, end] = wrapper.findAllComponents(datePickerStub)
+    pick(start, new Date(2026, 2, 10, 12))
+    pick(end, new Date(2026, 2, 9, 12))
+    await submit(wrapper)
+    await settle()
+
+    expect(api.requests().filter((request) => request.method === 'post' && request.path === resource)).toHaveLength(0)
+    expect(wrapper.text()).toContain('The end date cannot lie before start date')
+  })
+
+  test('a leave that starts and ends on one day is accepted', async () => {
+    const wrapper = mountLeave()
+    await settle()
+
+    await pickUser(wrapper)
+    await wrapper.get('#leave_type').setValue('3')
+    const [start, end] = wrapper.findAllComponents(datePickerStub)
+    pick(start, new Date(2026, 2, 10, 12))
+    pick(end, new Date(2026, 2, 10, 12))
+    await submit(wrapper)
+    await settle()
+
+    const post = api.requests().find((request) => request.method === 'post' && request.path === resource)
+    expect(post.body).toMatchObject({start_date: '2026-03-10', end_date: '2026-03-10'})
+  })
+
   test('a failed create tells the user', async () => {
     api.post(resource, serverError)
     const wrapper = mountLeave()
@@ -236,11 +271,11 @@ describe('LeaveForm edit', () => {
         },
       },
       {method: 'get', path: resource + '5/', query: {}},
-      // The record's own window, once it lands.
+      // The record's own window, for the record's user, once it lands.
       {
         method: 'post',
         path: resource + 'get_totals/',
-        query: {},
+        query: {user: '7'},
         body: {
           start_date: '2026-02-01',
           end_date: '2026-02-02',

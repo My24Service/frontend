@@ -1,11 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { HttpResponse } from 'msw'
 
-import {
-  OrderForm,
-  nextWorkingDay,
-} from '@/features/order'
-import { toApiDate } from '@/features/forms'
+import { OrderForm } from '@/features/order'
+import { nextWorkingDay, toApiDate } from '@/features/forms'
 import {
   vOrderCreate,
   vOrderDetail,
@@ -17,11 +14,6 @@ import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { orderRoutes } from '../../support/order-routes.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 const api = installApiSeam()
 
@@ -197,7 +189,7 @@ describe('the order form on a temps tenant', () => {
   })
 
   test('a maintenance tenant still gets the full form', async () => {
-    api.get('/api/company/engineer/list-for-select/', [])
+    api.get('/api/user/engineer/list-for-select/', [])
     const wrapper = await mountTempsForm({ main: { getMemberType: 'maintenance', getFlavour: 'maintenance' } })
 
     expect(wrapper.find('#required_users').exists()).toBe(false)

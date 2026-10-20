@@ -15,7 +15,7 @@ interface InterceptorError {
 }
 
 async function errorHandler(error: InterceptorError) {
-  console.error(`got error: ${error}`)
+  console.error('got error:', error)
   const headers = error.config?.headers
   const sentAuth = typeof headers?.get === 'function'
     ? headers.get('Authorization')
@@ -29,6 +29,9 @@ async function errorHandler(error: InterceptorError) {
   } else {
     console.log(error)
   }
+  // An interceptor passes axios's rejection on as it came: callers read
+  // `error.response` off it, which a wrapping Error would hide.
+  // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
   return Promise.reject(error)
 }
 
@@ -46,11 +49,11 @@ export default (client: AxiosInstance) => {
 
       return request
     },
-      error => errorHandler(error)
+      (error: InterceptorError) => errorHandler(error)
   )
 
   client.interceptors.response.use(
     response => response,
-    error => errorHandler(error)
+    (error: InterceptorError) => errorHandler(error)
   )
 }

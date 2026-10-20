@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
 
 import { EngineerMap } from '@/features/field-service'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
@@ -23,11 +22,10 @@ import { mountForm } from '../../support/form-harness.js'
  */
 const api = installApiSeam()
 
-const ENDPOINT = '/api/company/engineer/get_locations/'
+const ENDPOINT = '/api/user/engineer/get_locations/'
 
 // Every mount attaches a window listener; leaving one behind would fire inside
 // the next test and make the counts meaningless.
-enableAutoUnmount(afterEach)
 
 const resizeViewPort = vi.hoisted(() => vi.fn())
 

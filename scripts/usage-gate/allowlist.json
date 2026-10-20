@@ -1,7 +1,7 @@
 {
   "operations": [
     {
-      "op": "GET /api/company/apiuser/dummy_endpoint/",
+      "op": "GET /api/user/apiuser/dummy_endpoint/",
       "reason": "Probe for API-token integrators (IsValidApiUser); no web or Flutter caller by design."
     },
     {

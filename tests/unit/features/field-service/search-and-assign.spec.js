@@ -8,11 +8,7 @@ import { fixtureFor, itemSchemaOf, paginated } from '../../helpers/schema-fixtur
 import { vOrderUpdate, vPaginatedOrderList } from '@/api/valibot.gen'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
-import { mountForm, toastCreate } from '../../support/form-harness.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
+import { mountForm } from '../../support/form-harness.js'
 
 /**
  * Characterisation of the dispatch board's search-and-assign modal, written

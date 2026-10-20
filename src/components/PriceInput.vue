@@ -34,128 +34,97 @@
   </p>
 </template>
 
-<script>
-import Dinero from "dinero.js";
-import {formatMoneyPlain, toDinero} from "@/services/money";
+<script setup lang="ts">
 import { useVuelidate } from '@vuelidate/core'
 import { required, numeric } from '@vuelidate/validators'
-import componentMixin from "@/mixins/common";
 
-export default {
-  name: "PriceInput",
-  props: ['currency', 'modelValue', 'allow-empty' ],
-  emits: ['priceChanged', 'receivedFocus', 'update:modelValue'],
-  mixins: [componentMixin],
-  setup() {
-    return {
-      v$: useVuelidate(),
-    }
-  },
-  validations() {
-    if (this.allowEmpty) {
-      return {
-        number: {
-          numeric
-        },
-        decimal: {
-          numeric
-        }
-      }
-    }
+import { formatMoneyPlain, toDinero, type Money } from '@/services/money'
 
-    return {
-      number: {
-        required,
-        numeric
-      },
-      decimal: {
-        required,
-        numeric
-      },
-      // validationGroup: ['number', 'decimal'],
-    }
-  },
-  data() {
-    return {
-      dinero: null,
-      prevAmount: null,
-      number: null,
-      decimal: null,
-    }
-  },
-  watch: {
-    number(_val) {
-      this.$emit('update:modelValue', this.amount)
-    },
-    decimal(_val) {
-      this.$emit('update:modelValue', this.amount)
-    }
-  },
-  computed: {
-    amount() {
-      return `${this.number}.${this.decimal}`
-    },
-    currencyCode() {
-      if (!this.dinero) {
-        return
-      }
+defineOptions({name: 'PriceInput'})
 
-      if (this.dinero.getCurrency() === 'EUR') {
-        return '€'
-      }
-      if (this.dinero.getCurrency() === 'USD') {
-        return '$'
-      }
-      if (this.dinero.getCurrency() === 'GBP') {
-        return '£'
-      }
-      throw `Unknown currency: ${this.dinero.getCurrency()}`
-    }
-  },
-  methods: {
-    gotFocus() {
-      this.$emit('receivedFocus')
-    },
-    setPrice(priceDecimal) {
-      if (!this.currency) {
-        return
-      }
+const props = defineProps<{
+  currency?: string
+  modelValue?: string | number | null
+  allowEmpty?: boolean
+}>()
 
-      this.dinero = toDinero(priceDecimal, this.currency)
-      const parts = formatMoneyPlain(this.dinero).split('.')
-      this.number = parts[0]
-      this.decimal = parts[1]
-    },
-    update() {
-      this.v$.$touch()
-      if (this.v$.$invalid) {
-        console.log('invalid?', this.v$.$invalid)
-        return
-      }
+const emit = defineEmits<{
+  priceChanged: [price: Money]
+  receivedFocus: []
+  'update:modelValue': [value: string]
+}>()
 
-      const amount = parseInt(`${this.number}${this.decimal}`)
-      if (isNaN(amount)) {
-        throw `invalid input: ${this.number}.${this.decimal}`
-      }
+const dinero = ref<Money | null>(null)
+const prevAmount = ref<number | null>(null)
+const number = ref<string | null>(null)
+const decimal = ref<string | null>(null)
 
-      if (this.prevAmount && this.prevAmount === amount) {
-        return
-      }
+const rules = computed(() => props.allowEmpty
+  ? {number: {numeric}, decimal: {numeric}}
+  : {number: {required, numeric}, decimal: {required, numeric}})
 
-      const dinero = Dinero({
-        amount,
-        currency: this.currency
-      })
+const v$ = useVuelidate(rules, {number, decimal})
 
-      this.$emit('priceChanged', dinero)
-      this.prevAmount = amount
-      this.setPrice(amount/100)
-    }
-  },
-  created() {
-    this.setPrice(this.modelValue)
+const amount = computed(() => `${number.value}.${decimal.value}`)
+
+watch(number, () => emit('update:modelValue', amount.value))
+watch(decimal, () => emit('update:modelValue', amount.value))
+
+const currencyCode = computed(() => {
+  if (!dinero.value) {
+    return
   }
+
+  const currency = dinero.value.getCurrency()
+  if (currency === 'EUR') {
+    return '€'
+  }
+  if (currency === 'USD') {
+    return '$'
+  }
+  if (currency === 'GBP') {
+    return '£'
+  }
+  throw new Error(`Unknown currency: ${currency}`)
+})
+
+function gotFocus() {
+  emit('receivedFocus')
 }
+
+function setPrice(priceDecimal: string | number | null | undefined) {
+  if (!props.currency) {
+    return
+  }
+
+  dinero.value = toDinero(priceDecimal, props.currency)
+  const parts = formatMoneyPlain(dinero.value).split('.')
+  number.value = parts[0]
+  decimal.value = parts[1]
+}
+
+function update() {
+  v$.value.$touch()
+  if (v$.value.$invalid) {
+    console.log('invalid?', v$.value.$invalid)
+    return
+  }
+
+  const cents = parseInt(`${number.value}${decimal.value}`)
+  if (isNaN(cents)) {
+    throw new Error(`invalid input: ${number.value}.${decimal.value}`)
+  }
+
+  if (prevAmount.value && prevAmount.value === cents) {
+    return
+  }
+
+  emit('priceChanged', toDinero(cents / 100, props.currency ?? ''))
+  prevAmount.value = cents
+  setPrice(cents / 100)
+}
+
+setPrice(props.modelValue)
 </script>
 
 <style scoped>

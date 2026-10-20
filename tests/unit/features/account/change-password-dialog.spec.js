@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import TheNavLoggedIn from '@/components/TheNavLoggedIn.vue'
 
@@ -20,13 +19,6 @@ import { serverError } from '../../support/list-harness.js'
  * link flow the account slice owns. The confirm field never rides the wire.
  * Hide runs on success only.
  */
-
-enableAutoUnmount(afterEach)
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
 
 const api = installApiSeam()
 

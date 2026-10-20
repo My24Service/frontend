@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 import { defineComponent, ref } from 'vue'
-import { enableAutoUnmount, flushPromises } from '@vue/test-utils'
+import { flushPromises } from '@vue/test-utils'
 
 import {
   ServerTable,
@@ -20,11 +20,6 @@ import {
 } from '../../support/column-filters.js'
 import { mountListView } from '../../support/form-harness.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
-
 /**
  * The column-filter bar (src/features/table/filters/), driven through the
  * screen that renders it. The engine is real — `useServerTable` over an
@@ -41,8 +36,6 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => {
  * Mounted with the real `<transition>` (see support/column-filters.js) and
  * on the document, so the focus assertions mean something.
  */
-
-enableAutoUnmount(afterEach)
 
 const OWNERS = [
   { value: '1', label: 'Acme' },
@@ -142,9 +135,8 @@ async function mountSeeded(props = {}) {
   return wrapper
 }
 
-/** The last query the engine sent, once the 300 ms filter debounce has run. */
+/** The last query the engine sent, once the filter debounce (zero in specs) has run. */
 async function lastQuery(wrapper) {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
   return wrapper.vm.queries.at(-1)
 }
@@ -377,7 +369,7 @@ describe('the select editor', () => {
     expect(wrapper.findAll('.column-filter-popover [role="option"]').map((option) => option.text())).toEqual(['Acme', 'Beta', 'Gamma'])
 
     await editorInput(wrapper, 'owner').setValue('gam')
-    await new Promise((resolve) => setTimeout(resolve, 300))
+    await settle()
     await flushPromises()
     expect(wrapper.vm.loadOptions).toHaveBeenLastCalledWith('gam')
     expect(wrapper.findAll('.column-filter-popover [role="option"]').map((option) => option.text())).toEqual(['Gamma'])

@@ -1,16 +1,12 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { EngineerEventTypeForm } from '@/features/field-service'
 import { fixtureFor } from '../../helpers/schema-fixture.js'
 import { vEngineerEventType, vStatuscode } from '@/api/valibot.gen'
 
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
-import { mountForm, routerGo, toastCreate, toasts } from '../../support/form-harness.js'
+import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { fieldServiceRoutes } from '../../support/field-service-routes.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
 
 /**
  * Characterisation of the engineer-event-type form, written against the LEGACY
@@ -29,7 +25,7 @@ vi.mock('bootstrap-vue-next', async (importOriginal) => ({
  */
 const api = installApiSeam()
 
-const ENDPOINT = '/api/company/engineer-event-type/'
+const ENDPOINT = '/api/user/engineer-event-type/'
 const STATUSCODE = fixtureFor(vStatuscode, {id: 3, statuscode: 'Done'})
 
 function type(overrides = {}) {

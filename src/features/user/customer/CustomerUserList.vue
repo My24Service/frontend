@@ -16,8 +16,7 @@
       :delete-modal="{
         modalId: 'delete-customer-user-modal',
         confirmText: $trans('Are you sure you want to delete this customer user?'),
-        destroyMutation: companyCustomeruserDestroyMutation,
-        invalidate: (queryClient) => queryClient.invalidateQueries({queryKey: companyCustomeruserListQueryKey()}),
+        resource: Api.UserCustomeruser,
         deletedDetail: $trans('Customer user has been deleted'),
         deleteError: $trans('Error deleting customer user'),
       }"
@@ -37,25 +36,12 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  companyCustomeruserDestroyMutation,
-  companyCustomeruserListOptions,
-  companyCustomeruserListQueryKey,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedCustomerUserList } from '@/api/types.gen'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 
-const authStore = useAuthStore()
+const { authStore } = useCommon()
 
-type CustomerUserRow = ListRow<PaginatedCustomerUserList>
+type CustomerUserRow = ListRow<Api.PaginatedCustomerUserList>
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated.
@@ -98,11 +84,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<CustomerUserRow>({
   key: 'customer-user-table',
   columns,
-  listOptions: (query) => companyCustomeruserListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.UserCustomeruser,
   urlSync: true,
   loadError: $trans('Error loading customer users'),
 })

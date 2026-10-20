@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { TripAvailability } from '@/features/field-service'
 
@@ -8,11 +8,6 @@ import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountListView, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { fieldServiceRoutes } from '../../support/field-service-routes.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create: toastCreate }) }
-})
 
 /**
  * Characterisation of the trip-availability list, written against the LEGACY
@@ -38,9 +33,8 @@ function tripRow(overrides = {}) {
   })
 }
 
-/** The toolbar search commits on a 300 ms debounce. */
+/** The toolbar search commits through the table kit's debounce, zero in specs. */
 async function pastDebounce() {
-  await new Promise((resolve) => setTimeout(resolve, 350))
   await settle()
 }
 

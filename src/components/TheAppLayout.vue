@@ -38,7 +38,7 @@ const showTopBar = computed(() => isShltrFamily.value && (layoutProps.settings |
 // logged-out visitors, fetched from the initial data.
 const memberInfo = computed(() => mainStore.memberInfo)
 if (!store.isLoggedIn) {
-  mainStore.checkInitialData()
+  void mainStore.checkInitialData()
 }
 const route = useRoute()
 

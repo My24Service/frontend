@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 import { StudentRegisterVerify } from '@/features/user'
 import { ResetPasswordConfirmView } from '@/features/account'
@@ -25,13 +24,6 @@ import { serverError } from '../../support/list-harness.js'
  * own screen; the legacy wrapper around it is gone, and the route pin at the
  * bottom is what keeps the mailed URL working.
  */
-
-enableAutoUnmount(afterEach)
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
 
 const api = installApiSeam()
 

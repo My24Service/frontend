@@ -202,7 +202,7 @@ export function formDefaults<S extends AnyObjectSchema>(
       continue
     }
 
-    const inferred = inferDefault(entry as v.GenericSchema)
+    const inferred = inferDefault(entry)
     // A factory keeps each caller's array/object its own, exactly as it does
     // when stored in the schema - so call it rather than handing back the
     // function.
@@ -249,7 +249,7 @@ export function widenNullable<S extends AnyObjectSchema>(schema: S, keys: readon
           'It may have been renamed or removed in the backend serializer.',
       )
     }
-    entries[key] = v.nullable(entry as v.GenericSchema)
+    entries[key] = v.nullable(entry)
   }
 
   return v.object(entries)

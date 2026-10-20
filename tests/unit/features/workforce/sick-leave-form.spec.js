@@ -1,19 +1,16 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import moment from 'moment'
 import { vUserSelectRow, vUserSickLeave } from '@/api/valibot.gen'
 import { SickLeaveForm } from '@/features/workforce'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
-import { mountForm, routerGo, toastCreate, toasts } from '../../support/form-harness.js'
+import { datePickerStub, pick } from '../../support/date-picker-stub.js'
+import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { workforceRoutes } from '../../support/workforce-routes.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({ create: toastCreate }),
-}))
-
 const api = installApiSeam()
-const endpoint = '/api/company/user-sick-leave/admin/'
+const endpoint = '/api/workforce/user-sick-leave/admin/'
 
 // The form seeds the start date from `moment()` at mount.
 const TODAY = moment().format('YYYY-MM-DD')
@@ -22,12 +19,6 @@ const multiselectStub = {
   props: ['options', 'modelValue'],
   emits: ['select', 'search-change'],
   template: '<div class="multiselect-stub" />',
-}
-
-const datePickerStub = {
-  props: ['modelValue'],
-  emits: ['update:modelValue'],
-  template: '<div class="datepicker-stub" />',
 }
 
 function sickLeave(overrides = {}) {
@@ -52,7 +43,7 @@ const bodies = () => toasts().map((toast) => toast.body)
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/')
-  api.get('/api/company/user-list/', () => [
+  api.get('/api/user/user-list/', () => [
     fixtureFor(vUserSelectRow, {id: 7, name: 'Jan Jansen', email: 'jan@example.com'}),
   ])
   api.get(endpoint + '{id}/', sickLeave())
@@ -72,7 +63,6 @@ function mountSick(pk = null) {
 
 async function pickUser(wrapper) {
   wrapper.findComponent(multiselectStub).vm.$emit('search-change', 'jansen')
-  await new Promise((resolve) => setTimeout(resolve, 600))
   await settle()
   wrapper.findComponent(multiselectStub).vm.$emit('select', {id: 7, name: 'Jan Jansen'})
   await wrapper.vm.$nextTick()
@@ -92,7 +82,7 @@ describe('SickLeaveForm create', () => {
     await settle()
 
     expect(api.requests()).toEqual([
-      {method: 'get', path: '/api/company/user-list/', query: {q: 'jansen'}},
+      {method: 'get', path: '/api/user/user-list/', query: {q: 'jansen'}},
       {
         method: 'post',
         path: endpoint,
@@ -102,6 +92,19 @@ describe('SickLeaveForm create', () => {
     ])
     expect(bodies()).toContain('Leave has been created')
     expect(routerGo()).toHaveBeenCalled()
+  })
+
+  test('posts the day that was picked', async () => {
+    const wrapper = mountSick()
+    await settle()
+
+    await pickUser(wrapper)
+    pick(wrapper.findComponent(datePickerStub), new Date(2026, 2, 10, 12))
+    await submit(wrapper)
+    await settle()
+
+    const post = api.requests().find((request) => request.method === 'post')
+    expect(post.body).toEqual({user: 7, start_date: '2026-03-10'})
   })
 
   test('a submit without a user is refused', async () => {

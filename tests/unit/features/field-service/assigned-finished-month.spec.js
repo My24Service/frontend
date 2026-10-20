@@ -6,11 +6,6 @@ import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm } from '../../support/form-harness.js'
 import { paginated } from '../../helpers/schema-fixture.js'
 
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
-
 /**
  * The month window of the assigned-finished list.
  *

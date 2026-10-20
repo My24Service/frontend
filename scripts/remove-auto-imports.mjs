@@ -6,9 +6,9 @@
 // Usage: `npm run cleanup-imports` from the repo root.
 //
 // Contract sources (parsed, not hardcoded):
-// - auto-imports.d.ts: `const X: typeof import('P')` = value X from package P
+// - auto-imports.gen.d.ts: `const X: typeof import('P')` = value X from package P
 //   is auto-imported; `export type {...} from 'P'` = those types are global.
-// - components.d.ts: GlobalComponents / GlobalDirectives = names the
+// - components.gen.d.ts: GlobalComponents / GlobalDirectives = names the
 //   Components plugin resolves in templates.
 //
 // When P is a local module rather than a package - the `dirs` option, which
@@ -49,7 +49,7 @@ const DRY = process.argv.includes('--dry')
 
 // ---- contract ----
 function parseContract() {
-  const auto = fs.readFileSync(path.join(REPO, 'auto-imports.d.ts'), 'utf8')
+  const auto = fs.readFileSync(path.join(REPO, 'auto-imports.gen.d.ts'), 'utf8')
   const values = new Map() // name -> package
   for (const m of auto.matchAll(/const ([\w$]+): typeof import\('([^']+)'\)/g)) {
     values.set(m[1], m[2])
@@ -60,7 +60,7 @@ function parseContract() {
       types.set(n, m[2])
     }
   }
-  const comp = fs.readFileSync(path.join(REPO, 'components.d.ts'), 'utf8')
+  const comp = fs.readFileSync(path.join(REPO, 'components.gen.d.ts'), 'utf8')
   const components = new Set()
   const compBlock = comp.slice(comp.indexOf('GlobalComponents'))
   for (const m of compBlock.matchAll(/(\w+): typeof import/g)) components.add(m[1])

@@ -19,15 +19,8 @@
 <script setup lang="ts">
 import { Fragment } from 'vue'
 import { RouterLink } from 'vue-router'
-import { mobileTripListOptions } from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedTripList } from '@/api/types.gen'
-import {
-  ServerTable,
-  baseListParams,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+
+import { ServerTable, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 /**
  * Who can be put on a trip, read as the trip collection.
  *
@@ -36,7 +29,7 @@ import {
  * `/api/mobile/trip/` and its three counts are the ones the trip serializer
  * derives for them. That read is what this screen keeps.
  */
-type TripRow = ListRow<PaginatedTripList>
+type TripRow = ListRow<Api.PaginatedTripList>
 
 const helper = createAppColumnHelper<TripRow>()
 
@@ -70,11 +63,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   // the rows it held; the endpoint declares no `ordering`, so no sort is
   // forwarded and the headers offer none.
   enableSorting: false,
-  listOptions: (query) => mobileTripListOptions({
-    query: {
-      ...baseListParams(query),
-    },
-  }),
+  resource: Api.MobileTrip,
   urlSync: true,
   loadError: $trans('Error loading trips'),
 })

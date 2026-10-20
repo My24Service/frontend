@@ -2,10 +2,12 @@ import moment from 'moment/min/moment-with-locales'
 
 import {BranchService} from '@/models/company/Branch'
 import componentMixin from "@/mixins/common";
-import {memberMemberMeRetrieve} from "@/api/sdk.gen";
+import {
+  equipmentEquipmentDocumentList,
+  invoicePurchaseYearList,
+  memberMemberMeRetrieve,
+} from "@/api/sdk.gen";
 import {OrderService} from '@/models/orders/Order'
-import {DocumentService} from "@/models/equipment/Document";
-import {PurchaseInvoiceService} from "@/models/invoices/PurchaseInvoice";
 
 let d = new Date()
 
@@ -27,8 +29,6 @@ export default {
       branch: null,
       branchService: new BranchService(),
       orderService: new OrderService(),
-      documentService: new DocumentService(),
-      purchaseInvoiceService: new PurchaseInvoiceService(),
       technicalDocuments: [],
       facilityDocuments: [],
       monthlyCostOverview: [],
@@ -118,25 +118,34 @@ export default {
           this.branch = await this.branchService.first()
         }
 
-        this.documentService.setParentBranchId(this.branch.id)
+        // This branch's documents, split by the type of the equipment they
+        // belong to. Both filters in one query: the legacy service set each
+        // through setListArgs, which replaces, so the type filter dropped the
+        // branch one and every branch's documents came back.
+        const documentsOfType = async (type) => {
+          const {data: page} = await equipmentEquipmentDocumentList({
+            query: {equipment__branch: this.branch.id, type},
+            throwOnError: true,
+          })
+          return page.results
+        }
+        this.technicalDocuments = await documentsOfType('technical')
+        this.facilityDocuments = await documentsOfType('facility')
 
-        this.documentService.setType('technical')
-        await this.documentService.loadCollection()
-        this.technicalDocuments = this.documentService.collection
+        const {data: months} = await invoicePurchaseYearList({
+          query: {year: this.year},
+          throwOnError: true,
+        })
+        this.monthlyCostOverview = months
 
-        this.documentService.setType('facility')
-        await this.documentService.loadCollection()
-        this.facilityDocuments = this.documentService.collection
-
-        this.monthlyCostOverview = await this.purchaseInvoiceService.getMonthlyOverview(this.year)
-
-        // Process monthlyCostOverview for the bar chart
+        // One bar per month. Months without purchases are absent from the
+        // response, and `total` is optional: both chart as zero.
         const labels = this.$moment.monthsShort()
         const monthDataBar = []
 
         for (let i = 1; i <= 12; i++) {
           const monthEntry = this.monthlyCostOverview.find(item => item.month === i)
-          monthDataBar.push(monthEntry ? parseFloat(monthEntry.total) : 0)
+          monthDataBar.push(Number(monthEntry?.total ?? 0))
         }
 
         this.chartdataMonthBar = {

@@ -92,7 +92,7 @@ labels:
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
   module: () => $trans('Module'),
-} satisfies FieldLabels<keyof ModulePartFormValues & string>
+} as const satisfies FieldLabels<keyof ModulePartFormValues>
 
 export function validateModulePart(values: ModulePartFormValues): ModulePartFieldErrors {
   return fieldErrors(vMemberModulePartCreateBody, values, {}, FIELD_LABELS)
@@ -110,7 +110,7 @@ from the same templates where one fits — `selectMessage(FIELD_LABELS.branch())
 export const FIELD_MESSAGES = {
   start_time: () => $trans('Please enter a valid start time HH:mm'),
   branch: () => selectMessage(FIELD_LABELS.branch()),
-} satisfies FieldMessages<keyof OrderFieldErrors & string>
+} as const satisfies FieldMessages<keyof OrderFieldErrors>
 ```
 
 A template that shows a hint under an untouched input reads it from
@@ -129,7 +129,7 @@ A field's label is copy like any other, and it names the field in every rule lin
 export const FIELD_LABELS = {
   address: () => $trans('Address'),
   vat_number: () => $trans('VAT number'),
-} satisfies FieldLabels<keyof MemberRequest & string>
+} as const satisfies FieldLabels<keyof MemberRequest>
 ```
 
 The keys are the form's own field names, so a label for a field that does not
@@ -209,7 +209,7 @@ API must stay lax about it or was simply too loose, and the backend change that
 would retire it. It is not duplicated here — this file is the procedure, that
 one is the record.
 
-Six rules survive, all case 2; nothing is owed by the backend.
+Nine rules survive, all case 2; nothing is owed by the backend.
 
 ### 8. Derive the blank form; don't spell it out
 
@@ -293,17 +293,187 @@ must belong to one resource, and every combination typechecks.
 `openapi/schema.yaml` (`scripts/generate-resources.mjs`): one export per
 resource the API lists, creates or updates, carrying its reads as `{options,
 queryKey}`, its writes as `{mutation, body}`, and in `reads` the query-key id
-of every list and retrieve under its path. The form names the resource:
+of every list and retrieve under its path.
+
+Generated code is reached through one name, `src/services/api-client`:
 
 ```ts
-import { companyBranch } from '@/api/resources.gen'
+import * as Api from '@/services/api-client'
+
+Api.CompanyBranch.list.options()
+Api.CompanyBranch.Record // the record retrieve answers with
+Api.CompanyBranch.CreateInput // the body create takes, as it is sent
+Api.Branch // any type from types.gen
+```
+
+That import is explicit rather than an auto-import, and deliberately so: a
+value auto-import entry emits `const Api: typeof import('...')` and carries
+no types, a `type: true` entry emits `export type * as Api` and makes the
+name unusable as a value. A generated name has to be reachable as both, and a
+namespace import is the one form that is. `auto-imports.config.js` records the
+same reasoning next to the entries it replaces.
+
+Each resource's own types hang off it as a `declare namespace` beside the
+const, so a form reaches the record a read answers with and the body a write
+takes from the same name as the read and the write:
+
+| Alias | What it is |
+| --- | --- |
+| `<resource>.Record` | what `retrieve` answers with |
+| `<resource>.ListResponse` | what `list` answers with |
+| `<resource>.ListQuery` | the `list` query parameters (when it has any) |
+| `<resource>.CreateInput` / `CreateOutput` | the `create` body, as sent / as parsed |
+| `<resource>.UpdateInput` / `UpdateOutput` | the `update` body, as sent / as parsed |
+
+`Record` is bound to the operation's own `*Response` type and the bodies to the
+valibot schema, so none of them can name the wrong resource; the generator
+checks both against what hey-api declared and fails the run if a name moved.
+
+Each resource also carries the conveniences a consumer would otherwise
+re-derive from `kind` and `id`, generated from the same bindings so they cannot
+drift:
+
+| Convenience | What it is |
+| --- | --- |
+| `listOptions(query, filters?)` | the list options plus the four base page parameters, with this resource's column filters |
+| `retrieveOptions(id?)` | the retrieve options, with the path a collection needs and without it for a singleton |
+| `createMutation()` / `updateMutation()` / `destroyMutation()` | that operation's mutation options, for `useMutation` |
+| `updateVars(id, body)` / `updateVars(body)` | what an update sends: `{path, body}` for a collection, `{body}` for a singleton |
+| `invalidate(queryClient?)` | every read under this resource's path, refreshed |
+| `extras.<verb>` | a verb the server serves on *one* of this resource's records, under its path |
+
+`extras` holds what the generator used to drop: the record-level verbs, matched
+by `isAction` - `/branch/{id}/dashboard/`, `/apiuser/{id}/revoke/`,
+`/order/{id}/set_order_accepted/`. A screen that needs one names the resource
+and reaches for `Api.CompanyBranch.extras.dashboardRetrieve`, so a verb on a
+record never becomes a second bare generated import. Ownership is by **path**
+(longest resource path that prefixes it), not by operationId prefix: the name
+would attach `companyPartnerRequestAccept` to `partnerRequest` by luck of
+spelling, and the path is what the server actually answers. Read-only verbs
+carry `{options, queryKey}` like `list`; the rest carry `{mutation, body?}`.
+25 resources have them today.
+
+## The codemod
+
+`npm run use-api-namespace` rewrites the `@/api/**` imports to `Api`. It takes
+a directory (`npm run use-api-namespace -- src/features`) and a `--dry` flag,
+renames through the ts-morph *symbol* so a shadowing local is untouched, and is
+idempotent - a second run rewrites nothing. Anything it cannot place is printed
+by name and left imported, which is how the remaining 34 were found.
+
+Two things it is careful about, both of which were bugs first:
+
+- The **script** pass renames identifiers that resolve to the import, skipping
+  the specifier's own name, and then rebuilds each declaration from the
+  specifiers that still have no other home. Rebuilding rather than deleting is
+  what makes a *partly* placed declaration correct.
+- The **template** pass is not textual. It walks `descriptor.template.ast` and
+  rewrites identifiers inside directive bindings and interpolations, so a
+  string literal is never a candidate - a whole-word substitution turned
+  `$trans('Invoice has been deleted')` into `'Api.Invoice has been deleted'`.
+  The expression offsets are relative to the whole file, not the template
+  block; getting that wrong lands them inside string literals.
+
+`listOptions` is what a server-paged table takes, and a screen names nothing:
+
+```ts
+useServerTable<Row>({
+  listOptions: (query) => Api.CustomerCustomer.listOptions(query),
+})
+```
+
+`filters` defaults to **every query parameter the endpoint declares**, less the
+four the base parameters already send (`page`, `page_size`, `q`, `ordering`)
+and the deprecated `sort_dir`/`sort_field`. So a screen whose columns are the
+endpoint's own filters cannot drift from them: the generator writes the set
+once, annotated `readonly (keyof <Resource>.ListQuery)[]`, which is what fails
+the build if the schema drops a filter. `CustomerCustomer` derives
+`['city', 'contact', 'name', 'num_orders', 'remarks']` - the five its columns
+offer.
+
+Naming `filters` is for the exceptions:
+
+- a screen that wants a **subset** of the endpoint's filters, or
+- a screen filtering on something the endpoint does not declare - which the
+  annotation rejects, since that is a real mismatch and not a naming choice.
+
+A derived name a screen has no column for is simply absent from the table's
+query and never reaches the wire, which is what makes deriving safe even for a
+list with 30-odd parameters.
+
+**Each filter goes on the wire as the type its OpenAPI parameter declares.**
+The generated `*ListOptions` parse the query with the valibot schema and throw
+on `'7'` for an integer, while a filter read back from the URL is always a
+string. So the generator writes `filterTypes` beside `filters` - only the
+non-string ones, e.g. `filterTypes: {supplier_relation: 'integer'}` - and
+`columnFilters` converts by that literal:
+
+- `integer`: an integer, or a digits-only string with an optional `-`
+  (`'7'` -> `7`); `'7.5'`, `' '`, `'1e3'`, `'0x1F'` are not integers.
+- `number`: a finite number, or a plain decimal string.
+- `boolean`: `true`/`false`, or `true`/`false`/`1`/`0` as a string in any
+  case - what django-filter's `BooleanFilter` reads, so a link it accepts
+  still works.
+- anything else (string, enum, `oneOf` union): `String(value)`.
+
+A value its type cannot hold is **dropped**, not thrown on - which *widens*
+the list to the rows that filter would have excluded. That beats a list that
+fails to load over a hand-edited URL, but a screen that must not widen
+validates the value itself. `minimum`/`maximum` are not checked: an
+out-of-range integer still reaches the validator.
+
+drf-spectacular emits no `deprecated: true` for `sort_dir`/`sort_field`, so the
+exclusion cannot be read off the schema; it is `EXCLUDED_PARAMS` in the
+generator, with the reason, like `UNREACHABLE_SHADOWS`. A list whose endpoint
+takes a required query parameter, a required path, or no query at all gets no
+`listOptions` - the generator says so in its run summary, and those keep the
+bare `list.options`.
+
+`limit` and `offset` are the exception that is derived but *not* a filter: they
+page by a different mechanism than `page`/`page_size`, so a screen that set one
+would send `?offset=` beside `?page=`. Only the order lists declare them (14 of
+them, all under `api/order/order/`), no screen has a column for either, and
+neither reaches the wire - so they are derived like any other name and the run
+summary names every resource whose derived set contains one, so that a screen
+adopting one becomes a decision rather than an accident.
+
+`invalidate` replaces the delete modal's two-name spelling:
+
+```vue
+:delete-modal="{
+  destroyMutation: Api.CompanyBranch.destroyMutation,
+  invalidate: Api.CompanyBranch.invalidate,
+  ...
+}"
+```
+
+Its `queryClient` parameter defaults to the application singleton rather than to
+`useQueryClient()`, which throws outside an injection context - and a delete
+modal calls it from a click handler. The singleton is the instance the plugin
+installs, so the default is what the composable would have returned whenever
+the composable would have worked at all. A caller already holding a client (a
+form, inside `setup`) passes it.
+
+Note that a resource's `invalidate` covers *every* read under its path. That is
+the right scope for a write to that resource, and too broad for a write whose
+stale reads are a *subset* of another: renaming a module does not stale the
+member's `me` read, so the module and statuscode `invalidation.ts` modules name
+their query keys rather than composing two `invalidate`s. `invalidateReads(reads)`
+in `src/services/api-client/invalidation.ts` is there for the case that does
+want the whole path, called with a resource's own `reads`.
+
+The form names the resource:
+
+```ts
+import * as Api from '@/services/api-client'
 import { writeContract } from '@/features/forms/write-contract'
 
-export const branchWrite = writeContract(companyBranch, {
-  validateWith: companyBranch.create.body,
+export const branchWrite = writeContract(Api.CompanyBranch, {
+  validateWith: Api.CompanyBranch.create.body,
   shape: shaped,
   labels: FIELD_LABELS,
 })
+export type BranchValues = Api.CompanyBranch.CreateInput
 ```
 
 and the component hands `useResourceForm` the same object, dropping its
@@ -312,7 +482,7 @@ and the component hands `useResourceForm` the same object, dropping its
 ```ts
 const form = useResourceForm<...>({
   pk: () => props.pk,
-  resource: companyBranch,
+  resource: CompanyBranch,
   validate: branchWrite.validate,
   parse: branchWrite.parse,
   ...
@@ -324,7 +494,7 @@ It is one or the other: a form wired by resource may not also name a
 types say so, so a mix does not compile.
 
 - The body schemas are hey-api's own `v<Operation>Body` aliases, reached as
-  `companyBranch.create.body`. Step 2's table still applies to what they
+  `CompanyBranch.create.body`. Step 2's table still applies to what they
   resolve to; you just no longer pick the const by hand. `formDefaults` and
   `v.InferInput` take `resource.create.body` the same way they took the const.
 - `validateWith` is for the form whose validation is not the body it sends.
@@ -343,7 +513,7 @@ types say so, so a mix does not compile.
   resource's path - its list, its detail, the filtered views and counts beside
   them (`user-sick-leave/admin/all_sick/`, `.../all_unconfirmed_count/`) - is a
   read of the same rows, and the generator collected them. A list screen's
-  delete modal takes the same helper: `invalidate: invalidateReads(companyBranch)`.
+  delete modal takes the same helper: `invalidate: invalidateReads(CompanyBranch)`.
   What remains hand-written is the read the schema cannot connect to the write:
   a module write changing what the *member* list returns, the dispatch board
   under another resource's path. Those live in an `invalidation.ts` composed

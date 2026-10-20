@@ -16,7 +16,7 @@
       :delete-modal="{
         modalId: 'delete-module-modal',
         confirmText: $trans('Are you sure you want to delete this module?'),
-        destroyMutation: memberModuleDestroyMutation,
+        resource: Api.MemberModule,
         invalidate: (queryClient) => invalidateModuleListQueries(queryClient),
         deletedDetail: $trans('Module has been deleted'),
         deleteError: $trans('Error deleting module'),
@@ -35,22 +35,10 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  memberModuleDestroyMutation,
-  memberModuleListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedModuleList } from '@/api/types.gen'
 import { invalidateModuleListQueries } from '../invalidation'
-import {
-  ServerTable,
-  baseListParams,
-  createActionColumn,
-  createAppColumnHelper,
-  useServerTable,
-  type ListRow,
-} from '@/features/table'
+import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 
-type ModuleRow = ListRow<PaginatedModuleList>
+type ModuleRow = ListRow<Api.PaginatedModuleList>
 
 // The screen's handle on the table: the icon column calls the delete modal
 // through it, before this ref is populated. Typed structurally because
@@ -76,13 +64,7 @@ const columns = columnHelper.columns([
 const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = useServerTable<ModuleRow>({
   key: 'module-table',
   columns,
-  listOptions: (query) => memberModuleListOptions({
-    query: {
-      ...baseListParams(query),
-
-      ...(query.name ? {name: String(query.name)} : {}),
-    },
-  }),
+  resource: Api.MemberModule,
   urlSync: true,
   loadError: $trans('Error loading modules'),
 })

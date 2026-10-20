@@ -18,8 +18,7 @@
       :delete-modal="{
         modalId: 'delete-event-modal',
         confirmText: $trans('Are you sure you want to delete this event?'),
-        destroyMutation: companyEngineereventDestroyMutation,
-        invalidate: invalidateReads(companyEngineerevent),
+        resource: Api.UserEngineerevent,
         deletedDetail: $trans('Event has been deleted'),
         deleteError: $trans('Error deleting event'),
       }"
@@ -46,13 +45,6 @@
 <script lang="ts" setup>
 import moment from 'moment'
 
-import {
-  companyEngineereventDestroyMutation,
-  companyEngineereventListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { PaginatedEngineerEventList } from '@/api/types.gen'
-import { companyEngineerevent } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
 import { NEW_DATA_EVENTS } from '@/constants'
 import {
   ServerTable,
@@ -61,7 +53,7 @@ import {
   useServerTable,
   type ListRow,
 } from '@/features/table'
-import { companyEventsExportXlsRetrieve } from '@/api/sdk.gen'
+import { userEventsExportXlsRetrieve } from '@/api/sdk.gen'
 import { useFileDownload, XLSX_MIME } from '@/features/shared'
 import MemberNewDataSocket from '@/services/websocket/MemberNewDataSocket'
 
@@ -77,7 +69,7 @@ import EngineerEventOrderForm from './EngineerEventOrderForm.vue'
  * Three things differ from the legacy screen, all of them in the Slice README's
  * ledger:
  *
- *  - the read is `page` and nothing else. `/api/company/engineerevent/` is a
+ *  - the read is `page` and nothing else. `/api/user/engineerevent/` is a
  *    plain `ListCreateAPIView` on DRF's own `PageNumberPagination`
  *    (`DEFAULT_PAGINATION_CLASS`, my24service
  *    `source/settings/default_settings.py:357`), whose `page_size_query_param`
@@ -90,16 +82,16 @@ import EngineerEventOrderForm from './EngineerEventOrderForm.vue'
  *  - the delete is back, and through the kit. The legacy row action reached for
  *    `delete-event-type-modal` while its own modal was `delete-event-modal`, so
  *    it threw before anything opened, and the view had no detail route to call
- *    either; `/api/company/engineerevent/{id}/` (DELETE) exists now, and the
+ *    either; `/api/user/engineerevent/{id}/` (DELETE) exists now, and the
  *    shell's `deleteModal` owns the modal, the confirmation and the refresh.
  */
-type EventRow = ListRow<PaginatedEngineerEventList>
+type EventRow = ListRow<Api.PaginatedEngineerEventList>
 
 /** The page size the endpoint pages by: DRF's `PAGE_SIZE`, and not a parameter. */
 const PAGE_SIZE = 50
 const PAGE_SIZES = [PAGE_SIZE]
 
-const {create: toast} = useToast()
+const { toast } = useCommon()
 
 const columnHelper = createAppColumnHelper<EventRow>()
 const orderModal = useTemplateRef<{show: (eventId: number, engineerUserId: number) => void}>('attach-order-modal')
@@ -165,7 +157,7 @@ const {table, searchDraft, pagination, count, isLoading, isFetching, refresh} = 
   columns,
   enableSorting: false,
   pageSize: PAGE_SIZE,
-  listOptions: (query) => companyEngineereventListOptions({query: {page: query.page}}),
+  listOptions: (query) => Api.UserEngineerevent.list.options({query: {page: query.page}}),
   urlSync: true,
   loadError: $trans('Error loading events'),
 })
@@ -185,7 +177,7 @@ const download = useFileDownload()
 /** The events as a spreadsheet, through the endpoint that renders one. */
 async function downloadList() {
   if (!confirm($trans('Are you sure you want to export all events?'))) return
-  await download.fromApi(() => companyEventsExportXlsRetrieve({throwOnError: true}), 'events.xlsx', XLSX_MIME)
+  await download.fromApi(() => userEventsExportXlsRetrieve({throwOnError: true}), 'events.xlsx', XLSX_MIME)
 }
 
 // the websocket -------------------------------------------------------------

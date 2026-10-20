@@ -1,9 +1,10 @@
-import type { Order } from '@/api/types.gen'
+import type { AssignOrder } from '@/stores/main'
+
 /**
  * What the dispatch screen needs of a picked order: its ids, and who is
  * already on it (listed there as already assigned).
  */
-export type SelectedOrder = Pick<Order, 'id' | 'order_id' | 'assigned_user_info'>
+export type SelectedOrder = AssignOrder
 
 /**
  * The orders picked on the mobile dispatch lists, to hand to the dispatch
@@ -14,10 +15,7 @@ export function useDispatchSelection() {
   const router = useRouter()
   const mainStore = useMainStore()
 
-  const selected = computed<SelectedOrder[]>(() => {
-    const orders = mainStore.getAssignOrders
-    return Array.isArray(orders) ? orders : []
-  })
+  const selected = computed<SelectedOrder[]>(() => mainStore.getAssignOrders)
 
   function select(order: SelectedOrder) {
     if (selected.value.some((entry) => entry.id === order.id)) return
@@ -34,7 +32,7 @@ export function useDispatchSelection() {
 
   function assign() {
     // `/mobile/dispatch/:assignModeProp?` — the dispatch screen JSON.parses the segment.
-    router.push({name: 'mobile-dispatch', params: {assignModeProp: 'true'}})
+    void router.push({name: 'mobile-dispatch', params: {assignModeProp: 'true'}})
   }
 
   return {selected, select, remove, assign}

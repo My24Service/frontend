@@ -48,7 +48,8 @@ describe('clientDriver 401 handling', () => {
     const authStore = useAuthStore()
     authStore.setUserInfo({ user: { username: 'jan' } })
     const href = vi.fn()
-    Object.defineProperty(document, 'location', { value: { set href(v) { href(v) } }, configurable: true })
+    // A spy, not a redefinition: restoreAllMocks puts the real one back.
+    vi.spyOn(document, 'location', 'get').mockReturnValue({ set href(v) { href(v) } })
 
     await expect(handlers.response.fail({
       response: { status: 401 },
@@ -70,7 +71,8 @@ describe('clientDriver 401 handling', () => {
     const authStore = useAuthStore()
     authStore.setUserInfo({ user: { username: 'jan' } })
     const href = vi.fn()
-    Object.defineProperty(document, 'location', { value: { set href(v) { href(v) } }, configurable: true })
+    // A spy, not a redefinition: restoreAllMocks puts the real one back.
+    vi.spyOn(document, 'location', 'get').mockReturnValue({ set href(v) { href(v) } })
 
     await expect(handlers.response.fail({
       response: { status: 401 },

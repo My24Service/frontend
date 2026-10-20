@@ -1,0 +1,179 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renders the legacy view's markup 1`] = `
+"<div class="app-page">
+  <header>
+    <div class="page-title">
+      <h3><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+          <g fill="currentColor">
+            <path d="M7.5 5.5a.5.5 0 0 0-1 0v.634l-.549-.317a.5.5 0 1 0-.5.866L6 7l-.549.317a.5.5 0 1 0 .5.866l.549-.317V8.5a.5.5 0 1 0 1 0v-.634l.549.317a.5.5 0 1 0 .5-.866L8 7l.549-.317a.5.5 0 1 0-.5-.866l-.549.317zm-2 4.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zm0 2a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1z"></path>
+            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"></path>
+          </g>
+        </svg><span class="backlink">Purchase orders</span> / PO-0042 <span class="dimmed">ACME</span></h3>
+      <div class="flex-columns"><button class="btn btn-md btn-secondary btn btn-info" type="button">Back</button><a href="/inventory/purchaseorders/form/42" class="btn"><svg viewBox="0 0 16 16" width="1.2em" height="1.2em">
+            <path fill="currentColor" d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5L13.5 4.793L14.793 3.5L12.5 1.207zm1.586 3L10.5 3.207L4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175l-.106.106l-1.528 3.821l3.821-1.528l.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"></path>
+          </svg> Edit purchase order</a></div>
+    </div>
+  </header>
+  <div class="page-detail flex-columns">
+    <div class="panel">
+      <h3><strong>PO-0042</strong> <br><small>ACME</small></h3>
+      <dl>
+        <dt>Expected entry date</dt>
+        <dd>04/03/2026</dd>
+        <dt>Supplier</dt>
+        <dd>ACME</dd>
+        <dt>Address</dt>
+        <dd>Street 1</dd>
+        <dt>Country/Postal/city</dt>
+        <dd>NL- 1000AA Amsterdam</dd>
+        <dt>Contact</dt>
+        <dd>Jan</dd>
+        <dt>Tel</dt>
+        <dd>020</dd>
+      </dl>
+      <dl>
+        <dt>Mobile</dt>
+        <dd>06</dd>
+        <dt>Email</dt>
+        <dd><a class="px-1" href="mailto:a@b.nl">a@b.nl</a></dd>
+        <dt>Order reference</dt>
+        <dd>REF-1</dd>
+        <dt>Supplier remarks</dt>
+        <dd>Handle with care</dd>
+      </dl>
+      <h6>History</h6>
+      <ul class="listing">
+        <li>
+          <div class="listing-item"><small>01/03/2026</small> <span>Ordered</span></div>
+        </li>
+        <li>
+          <div class="listing-item"><small>02/03/2026</small> <span>Shipped</span></div>
+        </li>
+      </ul>
+    </div>
+    <div class="panel col-2-3">
+      <div class="row">
+        <div class="col-12">
+          <h6>Products</h6>
+          <div class="table-responsive-sm">
+            <table class="table b-table" ariabusy="false">
+              <!---->
+              <thead class="">
+                <tr class="">
+                  <th scope="col" class="">Name</th>
+                  <th scope="col" class="">Amount</th>
+                  <th scope="col" class="">Remarks</th>
+                </tr>
+                <!---->
+              </thead>
+              <tbody class="">
+                <!---->
+                <tr class="">
+                  <td class="">
+                    <!---->Gadget
+                  </td>
+                  <td class="">
+                    <!---->5
+                  </td>
+                  <td class="">
+                    <!---->
+                  </td>
+                </tr>
+                <!---->
+                <tr class="">
+                  <td class="">
+                    <!---->Widget
+                  </td>
+                  <td class="">
+                    <!---->3
+                  </td>
+                  <td class="">
+                    <!---->first
+                  </td>
+                </tr>
+                <!---->
+                <!---->
+              </tbody>
+              <!---->
+              <!---->
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <h6>Reserved products</h6>
+          <div class="table-responsive-sm">
+            <table class="table b-table" ariabusy="false">
+              <!---->
+              <thead class="">
+                <tr class="">
+                  <th scope="col" class="">Name</th>
+                  <th scope="col" class="">Amount</th>
+                  <th scope="col" class="">Remarks</th>
+                </tr>
+                <!---->
+              </thead>
+              <tbody class="">
+                <!---->
+                <tr class="">
+                  <td class="">
+                    <!---->Widget
+                  </td>
+                  <td class="">
+                    <!---->2
+                  </td>
+                  <td class="">
+                    <!---->reserved
+                  </td>
+                </tr>
+                <!---->
+                <!---->
+              </tbody>
+              <!---->
+              <!---->
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <h6>Entries</h6>
+          <div class="table-responsive-sm">
+            <table class="table b-table" ariabusy="false">
+              <!---->
+              <thead class="">
+                <tr class="">
+                  <th scope="col" class="">Product</th>
+                  <th scope="col" class="">Amount</th>
+                  <th scope="col" class="">Date</th>
+                </tr>
+                <!---->
+              </thead>
+              <tbody class="">
+                <!---->
+                <tr class="">
+                  <td class="">
+                    <!---->Widget
+                  </td>
+                  <td class="">
+                    <!---->1
+                  </td>
+                  <td class="">
+                    <!---->03/03/2026
+                  </td>
+                </tr>
+                <!---->
+                <!---->
+              </tbody>
+              <!---->
+              <!---->
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>"
+`;

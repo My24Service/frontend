@@ -115,8 +115,6 @@
 </template>
 
 <script setup lang="ts">
-import { equipmentBuildingListForSelectListOptions } from '@/api/@tanstack/vue-query.gen'
-import { equipmentLocation } from '@/api/resources.gen'
 import {
   useQueryErrorToast,
   useResourceForm,
@@ -160,7 +158,7 @@ const {wireKind, chooses} = useOwnerContext()
 
 const form = useResourceForm({
   pk: () => props.pk,
-  resource: equipmentLocation,
+  resource: Api.EquipmentLocation,
   empty: emptyLocation,
   fromRecord: locationFromRecord,
   validate: (values, context) => validateLocation(values, context, {
@@ -205,7 +203,7 @@ const {ownerId, isResolvingOwner} = formOwner
  * options object.
  */
 const buildingsQuery = useQuery(() => ({
-  ...equipmentBuildingListForSelectListOptions({
+  ...Api.EquipmentBuildingListForSelect.list.options({
     query: wireKind.value === 'branch' ? {branch: ownerId.value ?? 0} : {customer: ownerId.value ?? 0},
   }),
   enabled: ownerId.value != null,

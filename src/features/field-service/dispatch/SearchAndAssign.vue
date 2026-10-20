@@ -108,8 +108,6 @@
 import AwesomeDebouncePromise from 'awesome-debounce-promise'
 import moment from 'moment'
 
-import { orderOrderListOptions, orderOrderPartialUpdateMutation } from '@/api/@tanstack/vue-query.gen'
-import type { Order } from '@/api/types.gen'
 import RowAction from '@/components/RowAction.vue'
 import EditStartDate from './EditStartDate.vue'
 
@@ -128,8 +126,7 @@ const emit = defineEmits<{
   (event: 'search-and-assign-done', hasSelection: boolean): void
 }>()
 
-const store = useMainStore()
-const {create: toast} = useToast()
+const { mainStore, toast } = useCommon()
 
 const modal = useTemplateRef<{show: () => void; hide: () => void}>('search-modal-wide')
 const editStartDateModal = useTemplateRef<InstanceType<typeof EditStartDate>>('edit-start-date')
@@ -138,9 +135,9 @@ const query = ref('')
 /** The term the results on screen answer; `query` is only the draft. */
 const committed = ref('')
 const lastQuery = ref<string | false>(false)
-const selectedOrders = ref<Order[]>([])
+const selectedOrders = ref<Api.Order[]>([])
 
-const mustIncludeReference = computed(() => store.getOrderListMustIncludeReference)
+const mustIncludeReference = computed(() => mainStore.getOrderListMustIncludeReference)
 
 /**
  * The dot beside a row's status. It reads the store's legend, which is what
@@ -148,10 +145,10 @@ const mustIncludeReference = computed(() => store.getOrderListMustIncludeReferen
  * never consulted and the dot is the fallback grey. Preserved as it renders;
  * see the README's preserved defects.
  */
-const orderStatusColorCode = computed(() => my24.status2color(store.getStatuscodes, undefined))
+const orderStatusColorCode = computed(() => my24.status2color(mainStore.getStatuscodes, undefined))
 
 const listQuery = useQuery(() => ({
-  ...orderOrderListOptions({query: {page: 1, q: committed.value}}),
+  ...Api.OrderOrder.list.options({query: {page: 1, q: committed.value}}),
   // Nothing to ask for until the draft is worth a request.
   enabled: committed.value.trim().length > 2,
 }))
@@ -159,28 +156,28 @@ const listQuery = useQuery(() => ({
 const isLoading = computed(() => listQuery.isFetching.value)
 
 /** Results, or none while the box holds a term too short to have searched. */
-const orders = computed<Order[]>(() =>
+const orders = computed<Api.Order[]>(() =>
   committed.value.trim().length > 2 ? (listQuery.data.value?.results ?? []) : [])
 
-const patchOrder = useMutation({...orderOrderPartialUpdateMutation()})
+const patchOrder = useMutation({...Api.OrderOrder.update.mutation()})
 
 const hasSelectedOrders = () => selectedOrders.value.length > 0
 
 const buttonLabel = computed(() => (hasSelectedOrders() ? $trans('Assign these orders') : $trans('Close')))
 
 /** Stage an order; picking the same one twice is a no-op. */
-function selectOrder(order: Order) {
+function selectOrder(order: Api.Order) {
   if (selectedOrders.value.some((selected) => selected.id === order.id)) {
     return
   }
 
   selectedOrders.value.push(order)
-  store.setAssignOrders(selectedOrders.value)
+  mainStore.setAssignOrders(selectedOrders.value)
 }
 
 function removeSelectedOrder(index: number) {
   selectedOrders.value.splice(index, 1)
-  store.setAssignOrders(selectedOrders.value)
+  mainStore.setAssignOrders(selectedOrders.value)
 }
 
 /**
@@ -205,7 +202,7 @@ function search() {
 
 const searchDebounced = AwesomeDebouncePromise(search, 500)
 
-function editStartDate(order: Order) {
+function editStartDate(order: Api.Order) {
   editStartDateModal.value?.setFromOrder(order)
   editStartDateModal.value?.show()
 }
@@ -248,7 +245,7 @@ function hide() {
 
 /** Closing hands the selection to the board, which is the one that assigns it. */
 function searchAndAssignDone() {
-  store.setAssignOrders(selectedOrders.value)
+  mainStore.setAssignOrders(selectedOrders.value)
   emit('search-and-assign-done', hasSelectedOrders())
   hide()
 }

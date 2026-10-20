@@ -5,6 +5,24 @@
 // Shape follows https://unplugin.unjs.io/showcase/unplugin-auto-import.html:
 // preset names, `{package: [...]}` value maps, and
 // `{from, imports, type: true}` for type-only imports.
+//
+// The generated API is reached as one auto-imported name, as a value and as a
+// type at once:
+//
+//     Api.CompanyBranch.list.options()   // a value: the generated query options
+//     Api.CompanyBranch.Record           // a type: the record it answers with
+//     Api.Branch                         // a type from types.gen
+//
+// Two entries make that work, one for each half (see the `*` entries below):
+// the value entry emits `const Api: typeof import('...')` and the `type: true`
+// entry emits `export type * as Api from '...'`. They merge without conflict
+// because a const and a type-only namespace are different declaration spaces,
+// so the one name means both. Neither half works alone - the type entry alone
+// is unusable as a value (TS1362) and the value entry carries no types - which
+// is why both are needed. The explicit
+// `import * as Api from '@/services/api-client'` remains the fallback for
+// files that would rather say where the name comes from. See
+// `src/services/api-client/index.ts`.
 export const autoImportEntries = [
   'vue',
   'vue-router',
@@ -20,15 +38,11 @@ export const autoImportEntries = [
     '@/services/i18n': ['$trans', 'interpolate', 'errorToast', 'infoToast'],
     '@/router/types': ['fromRouteTo', 'toRoute'],
     '@/services/my24': [['default', 'my24']],
+    '@/services/api-client': [['*', 'Api']],
   },
   {
     from: '@/router/types',
     imports: ['RouteName', 'RouteTo'],
-    type: true,
-  },
-  {
-    from: '@/api/types.gen',
-    imports: [['*', 'Api']],
     type: true,
   },
   {
@@ -62,6 +76,11 @@ export const autoImportEntries = [
   {
     from: 'type-fest',
     imports: [['*', 'TF']],
+    type: true,
+  },
+  {
+    from: '@/services/api-client',
+    imports: [['*', 'Api']],
     type: true,
   },
 ]

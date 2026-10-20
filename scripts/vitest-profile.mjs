@@ -118,7 +118,11 @@ try {
     }
     console.log(
       '\n  A file far above the floor is importing far more than it tests.\n' +
-        '  Check its imports for a feature barrel (which re-exports components).',
+        '  Check its imports for a feature barrel (which re-exports components).\n' +
+        '\n  In the `shared` project (see vitest.config.js) a worker loads the app graph\n' +
+        '  once, so the first file each worker runs carries the whole graph and the\n' +
+        '  rest only what is new to that worker. Read a big number there as "ran\n' +
+        '  first"; profile one file on its own to see its real import cost.',
     )
   }
 } finally {

@@ -17,36 +17,32 @@
 
 <script setup lang="ts">
 import { parse } from 'valibot'
-import { invoiceInvoiceDetailRetrieveQueryKey, invoiceInvoiceStatusCreateMutation } from '@/api/@tanstack/vue-query.gen'
-import type { Invoice, Statuscode } from '@/api/types.gen'
-import { vInvoiceStatusRequest } from '@/api/valibot.gen'
-import { invoiceInvoice } from '@/api/resources.gen'
-import { invalidateReads } from '@/features/forms'
+import { invoiceInvoiceDetailRetrieveQueryKey } from '@/api/@tanstack/vue-query.gen'
+
 import {
   StatusCell,
   useStatusCell,
 } from '@/features/shared'
 
 const props = defineProps<{
-  invoice: Invoice
-  statuscodes: Statuscode[]
+  invoice: Api.Invoice
+  statuscodes: Api.Statuscode[]
 }>()
 
-function isAutomatic(code: Statuscode) {
+function isAutomatic(code: Api.Statuscode) {
   return Boolean(code.settings_key || code.roles?.length)
 }
 
-const queryClient = useQueryClient()
-const {create} = useToast()
-const {mutateAsync} = useMutation({...invoiceInvoiceStatusCreateMutation()})
+const { toast: create, queryClient } = useCommon()
+const {mutateAsync} = useMutation({...Api.InvoiceInvoiceStatus.create.mutation()})
 
 const {currentCode, current, selected, color, isPending, change} = useStatusCell({
   row: () => props.invoice,
   statuscodes: () => props.statuscodes,
   isDisabledOption: isAutomatic,
-  write: (status) => mutateAsync({body: parse(vInvoiceStatusRequest, {invoice: props.invoice.id, status})}),
+  write: (status) => mutateAsync({body: parse(schemas.vInvoiceStatusRequest, {invoice: props.invoice.id, status})}),
   onSuccess: () => Promise.all([
-    invalidateReads(invoiceInvoice)(queryClient),
+    Api.InvoiceInvoice.invalidate(queryClient),
     props.invoice.uuid ? queryClient.invalidateQueries({
       queryKey: invoiceInvoiceDetailRetrieveQueryKey({path: {id: props.invoice.uuid}}),
     }) : Promise.resolve(),

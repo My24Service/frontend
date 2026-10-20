@@ -1,9 +1,9 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { enableAutoUnmount } from '@vue/test-utils'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 import TheNavLoggedIn from '@/components/TheNavLoggedIn.vue'
 
-import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
+import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { mountForm } from '../../support/form-harness.js'
 
 /**
  * Behaviour characterisation for the logout sequence
@@ -18,31 +18,16 @@ import { mountForm, resetFakeHttp } from '../../support/form-harness.js'
  * logic. These specs pin the ordering it must keep.
  */
 
-enableAutoUnmount(afterEach)
-
-const fakeHttp = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  patch: vi.fn(),
-  delete: vi.fn(),
-}))
-
-vi.mock('@/services/api', () => ({ default: fakeHttp, normalClient: fakeHttp }))
-
-vi.mock('@/api/client.gen', async () => {
-  const { apiClientMock } = await import('../../support/api-client-mock.js')
-  return apiClientMock(fakeHttp)
-})
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => {
-  const { toastCreate: create } = await import('../../support/form-harness.js')
-  return { ...(await importOriginal()), useToast: () => ({ create }) }
-})
+const api = installApiSeam()
 
 /** Drain macrotasks so the socket promise chain settles. */
 async function flush() {
-  for (let i = 0; i < 10; i++) await new Promise((resolve) => setTimeout(resolve, 0))
+  for (let i = 0; i < 2; i++) await settle()
+}
+
+/** The requests made from here on. */
+function requestsFrom(start) {
+  return api.requests().slice(start)
 }
 
 const MAIN = {
@@ -52,7 +37,8 @@ const MAIN = {
 }
 
 beforeEach(() => {
-  resetFakeHttp(fakeHttp)
+  // Mounting connects the new-data socket, which first asks for its room.
+  api.get('/api/get-member-new-data-room/', { room: 'room-acme' })
   MAIN.checkInitialData.mockClear()
   MAIN.getInitialData.mockClear()
 })
@@ -105,20 +91,21 @@ describe('TheNavLoggedIn logout', () => {
   test('it makes no server call', async () => {
     const wrapper = await mountNav()
     wrapper.vm.$router.currentRoute.path = '/customers/customers'
+    const start = api.requests().length
 
     await wrapper.vm.doLogout()
     await flush()
 
-    expect(fakeHttp.post.mock.calls.length).toBe(0)
+    expect(requestsFrom(start)).toEqual([])
   })
 
   test('it looks up no websocket room to close the sockets', async () => {
     const wrapper = await mountNav()
-    fakeHttp.get.mockClear()
+    const start = api.requests().length
 
     await wrapper.vm.doLogout()
     await flush()
 
-    expect(fakeHttp.get.mock.calls.map(([url]) => url).filter((url) => url.includes('room'))).toEqual([])
+    expect(requestsFrom(start).filter(({ path }) => path.includes('room'))).toEqual([])
   })
 })

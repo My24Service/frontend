@@ -169,12 +169,6 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  customerMaintenanceContractRetrieveOptions,
-  customerMaintenanceEquipmentListOptions,
-  orderOrderMaintenanceOrdersListOptions,
-} from '@/api/@tanstack/vue-query.gen'
-import type { Customer, MaintenanceEquipment } from '@/api/types.gen'
 import CustomerCard from '../CustomerCard.vue'
 import { formatMoney, toDinero } from '@/services/money'
 import { useQueryErrorToast } from '@/features/forms'
@@ -186,17 +180,16 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const router = useRouter()
-const mainStore = useMainStore()
+const { mainStore, router } = useCommon()
 
 const contractId = computed(() => Number(props.pk))
 
 const detailQuery = useQuery(() =>
-  customerMaintenanceContractRetrieveOptions({path: {id: contractId.value}}),
+  Api.CustomerMaintenanceContract.retrieve.options({path: {id: contractId.value}}),
 )
 const maintenanceContract = computed(() => detailQuery.data.value)
 
-const customerRecord = computed<Customer>(() => maintenanceContract.value?.customer_view ?? ({} as Customer))
+const customerRecord = computed<Api.Customer>(() => maintenanceContract.value?.customer_view ?? ({} as Api.Customer))
 
 // The equipment tab lists the contract's whole equipment set — there is no
 // page control on it — so it asks for the whole collection in one read. 1000 is
@@ -205,26 +198,26 @@ const customerRecord = computed<Customer>(() => maintenanceContract.value?.custo
 // rather than rejecting it.
 
 const equipmentQuery = useQuery(() =>
-  customerMaintenanceEquipmentListOptions({
+  Api.CustomerMaintenanceEquipment.list.options({
     query: {contract: contractId.value, page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE},
   }),
 )
 const equipmentRows = computed(() => equipmentQuery.data.value?.results ?? [])
 
-function rowDinero(row: MaintenanceEquipment) {
+function rowDinero(row: Api.MaintenanceEquipment) {
   return toDinero(row.tariff || '0.00', row.tariff_currency)
 }
 
 const sumTariffsDinero = computed(() =>
   // sum_tariffs is required on the contract; only the unloaded record falls
   // back to zero, priced in the tenant default.
-  toDinero(maintenanceContract.value?.sum_tariffs ?? '0.00', mainStore.getDefaultCurrency))
+  toDinero(maintenanceContract.value?.sum_tariffs ?? '0.00', mainStore.requiredDefaultCurrency))
 
 const ordersPerPage = 20
 const ordersPage = ref(1)
 
 const ordersQuery = useQuery(() => ({
-  ...orderOrderMaintenanceOrdersListOptions({
+  ...Api.OrderOrderMaintenanceOrders.list.options({
     query: {contract: contractId.value, page: ordersPage.value, page_size: ordersPerPage},
   }),
 }))
@@ -232,7 +225,7 @@ const maintenanceOrders = computed(() => ordersQuery.data.value?.results ?? [])
 const ordersCount = computed(() => ordersQuery.data.value?.count ?? 0)
 
 function refreshOrders() {
-  ordersQuery.refetch()
+  void ordersQuery.refetch()
 }
 
 // The contract, its equipment and its orders all fail into one message, which
@@ -296,7 +289,7 @@ function createOrder() {
   }
   mainStore.setMaintenanceEquipment(data)
 
-  router.push({name: 'order-add-maintenance'})
+  void router.push({name: 'order-add-maintenance'})
 }
 
 const equipmentFields = [

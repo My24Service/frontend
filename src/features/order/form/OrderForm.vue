@@ -205,8 +205,6 @@
 </template>
 
 <script lang="ts" setup>
-import { orderOrder } from '@/api/resources.gen'
-import type { OrderCreate, OrderUpdate } from '@/api/types.gen'
 import { useResourceForm } from '@/features/forms'
 import ContactPanel from './ContactPanel.vue'
 import DateTimeFields from './DateTimeFields.vue'
@@ -223,6 +221,7 @@ import {
   parseOrderBody,
   validateOrderForm,
   type FormRole,
+  type OrderlineRow,
 } from './schemas'
 import { UnassignRefused } from './use-engineer-assignment'
 import { useOrderSeeds } from './use-order-seeds'
@@ -258,10 +257,7 @@ const props = withDefaults(defineProps<{
   quotationId: null,
 })
 
-const router = useRouter()
-const authStore = useAuthStore()
-const mainStore = useMainStore()
-const {create: toastCreate} = useToast()
+const { authStore, mainStore, router, toast: toastCreate } = useCommon()
 
 const hasBranches = computed(() => Boolean(mainStore.getMemberHasBranches))
 const usesEquipment = computed(() => Boolean(mainStore.getMemberUsesEquipment))
@@ -301,7 +297,7 @@ const {
   cancelForm,
 } = useResourceForm({
   pk: () => props.pk,
-  resource: orderOrder,
+  resource: Api.OrderOrder,
   empty: emptyOrder,
   fromRecord: orderFromRecord,
   validate: (values, context) => validateOrderForm(values, variant.value, context),
@@ -310,7 +306,7 @@ const {
     infolines: infolines.value?.rows,
   }),
   onSaved: async (result, context) => {
-    const saved = result as OrderCreate | OrderUpdate
+    const saved = result as Api.OrderCreate | Api.OrderUpdate
     const orderId = context.isCreate ? saved.id : context.id
     const orderCode = saved.order_id ?? record.value?.order_id ?? ''
 
@@ -413,7 +409,9 @@ const seeds = useOrderSeeds(order, {
   fromQuotation: () => props.fromQuotation,
   quotationId: () => props.quotationId,
   maintenance: () => props.maintenance,
-  stageOrderline: (row) => orderlines.value?.stage(row),
+  stageOrderline: (row: OrderlineRow): void => {
+    orderlines.value?.stage(row)
+  },
 })
 
 const isLoading = computed(() => baseIsLoading.value || seeds.isLoading.value)

@@ -1,17 +1,13 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { vBuilding, vCustomer } from '@/api/valibot.gen'
 import { BuildingList } from '@/features/equipment'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
-import { mountListView, toastCreate, toasts } from '../../support/form-harness.js'
+import { mountListView, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
 import { modal } from '../../support/modal.js'
 
 import { addFilter, editorInput } from '../../support/column-filters.js'
-
-vi.mock('bootstrap-vue-next', async (importOriginal) => ({
-  ...(await importOriginal()), useToast: () => ({create: toastCreate}),
-}))
 
 const api = installApiSeam()
 const endpoint = '/api/equipment/building/'
@@ -92,7 +88,6 @@ describe('BuildingList', () => {
     const wrapper = await mountBuildings()
 
     await wrapper.get('input[aria-label="Search buildings"]').setValue('hoofd')
-    await new Promise((resolve) => setTimeout(resolve, 350))
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({q: 'hoofd', page: '1'})
@@ -181,8 +176,8 @@ describe('BuildingList column filters', () =>
 
     await addFilter(wrapper, 'Name')
     await editorInput(wrapper, 'name').setValue('Hoofdgebouw')
-    // The kit commits the search and the filters on a 300 ms debounce.
-    await new Promise((resolve) => setTimeout(resolve, 350))
+    // The kit commits the search and the filters through its debounce, which
+    // setupTests.js sets to zero.
     await settle()
 
     expect(listRequests().at(-1).query).toMatchObject({name: 'Hoofdgebouw'})

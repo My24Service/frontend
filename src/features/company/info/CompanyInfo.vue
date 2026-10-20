@@ -352,7 +352,6 @@
 </template>
 
 <script setup lang="ts">
-import { memberMemberMe } from '@/api/resources.gen'
 import { NO_IMAGE_URL } from '@/constants'
 import {
   useResourceForm,
@@ -361,8 +360,7 @@ import {
 import {
   emptyInfo,
   infoFromRecord,
-  parseInfo,
-  validateInfo,
+  infoWrite,
 } from './schemas'
 
 /**
@@ -376,7 +374,7 @@ import {
  * the nav reads its name and logo from - the legacy screen did not either, so
  * a rename shows in the nav on the next load. See the module README.
  */
-const mainStore = useMainStore()
+const { mainStore, toast: create } = useCommon()
 
 const isEditing = ref(false)
 const countries = computed(() => mainStore.getCountries)
@@ -385,16 +383,15 @@ const form = useResourceForm({
   // No `:pk` on this route and no create: a truthy pseudo-pk holds the kit's
   // edit path, which the retrieve and update below never read.
   pk: () => 'me',
-  resource: memberMemberMe,
+  resource: Api.MemberMemberMe,
   // The pathless endpoint declares no path, so only the body crosses.
   updateVars: (body) => ({body}),
   empty: emptyInfo,
   fromRecord: infoFromRecord,
-  validate: validateInfo,
-  parse: parseInfo,
+  contract: infoWrite,
   // A save stays on the screen, read-only again, where the invalidation
   // refetches the record behind the values.
-  afterSave: async () => {
+  afterSave: () => {
     isEditing.value = false
   },
   copy: {
@@ -469,6 +466,10 @@ function stageLogo(
   if (!file) return
   return stage(file).then((dataUrl) => {
     values.value[into] = dataUrl
+  }).catch((error: unknown) => {
+    // A file the browser cannot read would otherwise fail without a word.
+    console.error('error reading logo', error)
+    errorToast(create, $trans('Something went wrong, please try again'))
   })
 }
 
