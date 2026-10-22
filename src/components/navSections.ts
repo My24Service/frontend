@@ -14,6 +14,10 @@ import { CODE_TYPES } from '@/features/statuscode'
 // - show: boolean or (ctx) => boolean. Every guard from the old SubNav* files
 //   lives here unchanged.
 // - badge: 'requestedCount' renders the requested-members count.
+// - equipmentType: with it, a route in `active` must also be of this type - its
+//   `type` param, else the `type` its layout props carry, else technical (the
+//   type the equipment screens default to). The Equipment/Facility pair shares
+//   its route names, so the names alone would light both.
 //
 // ctx shape: { hasAccessToModule, isAdmin, isPlanning, isStaff, isSuperuser,
 //   isCustomer, isBranchEmployee, hasBranches, flavour, memberType }.
@@ -37,6 +41,7 @@ export interface SubNavItem {
   active?: string[]
   show?: boolean | ((ctx: NavCtx) => boolean)
   badge?: 'requestedCount'
+  equipmentType?: Api.EquipmentTypeEnum
 }
 
 const COMPANY_USER_ROUTES = [
@@ -95,6 +100,14 @@ function equipmentRoutes(prefix: string): string[] {
     names.push(`${prefix}-view-${type}`, `${prefix}-edit-${type}`)
   }
   return names
+}
+
+/** The names of one equipment type's screens under a prefix with typed routes. */
+function typedEquipmentRoutes(prefix: string, type: Api.EquipmentTypeEnum): string[] {
+  return [
+    ...equipmentRoutes(prefix),
+    `${prefix}-add-${type}`,
+  ]
 }
 
 function locationRoutes(prefix: string): string[] {
@@ -267,8 +280,16 @@ export const SUBNAV_SECTIONS: Record<string, SubNavItem[]> = {
     },
     {
       label: 'Equipment',
-      to: { name: 'customers-equipment-list' },
-      active: equipmentRoutes('customers-equipment'),
+      to: { name: 'customers-equipment-list', params: { type: EQUIPMENT_TYPES.TECHNICAL } },
+      active: typedEquipmentRoutes('customers-equipment', EQUIPMENT_TYPES.TECHNICAL),
+      equipmentType: EQUIPMENT_TYPES.TECHNICAL,
+      show: (ctx) => ctx.hasAccessToModule('customers', 'equipment') && !ctx.isCustomer,
+    },
+    {
+      label: 'Facility',
+      to: { name: 'customers-equipment-list', params: { type: EQUIPMENT_TYPES.FACILITY } },
+      active: typedEquipmentRoutes('customers-equipment', EQUIPMENT_TYPES.FACILITY),
+      equipmentType: EQUIPMENT_TYPES.FACILITY,
       show: (ctx) => ctx.hasAccessToModule('customers', 'equipment') && !ctx.isCustomer,
     },
     {

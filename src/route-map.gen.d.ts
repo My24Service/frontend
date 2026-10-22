@@ -801,13 +801,6 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    'customers-equipment-list': RouteRecordInfo<
-      'customers-equipment-list',
-      '/customers/equipment',
-      Record<never, never>,
-      Record<never, never>,
-      | never
-    >,
     'customers-equipment-view': RouteRecordInfo<
       'customers-equipment-view',
       '/customers/equipment/:pk',
@@ -815,11 +808,25 @@ declare module 'vue-router/auto-routes' {
       { pk: ParamValue<false> },
       | never
     >,
+    'customers-equipment-list': RouteRecordInfo<
+      'customers-equipment-list',
+      '/customers/equipment/:type',
+      { type: ParamValue<true> },
+      { type: ParamValue<false> },
+      | never
+    >,
     'customers-equipment-view-facility': RouteRecordInfo<
       'customers-equipment-view-facility',
       '/customers/equipment/facility/:pk',
       { pk: ParamValue<true> },
       { pk: ParamValue<false> },
+      | never
+    >,
+    'customers-equipment-add-facility': RouteRecordInfo<
+      'customers-equipment-add-facility',
+      '/customers/equipment/facility/form',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
     'customers-equipment-edit-facility': RouteRecordInfo<
@@ -848,6 +855,13 @@ declare module 'vue-router/auto-routes' {
       '/customers/equipment/technical/:pk',
       { pk: ParamValue<true> },
       { pk: ParamValue<false> },
+      | never
+    >,
+    'customers-equipment-add-technical': RouteRecordInfo<
+      'customers-equipment-add-technical',
+      '/customers/equipment/technical/form',
+      Record<never, never>,
+      Record<never, never>,
       | never
     >,
     'customers-equipment-edit-technical': RouteRecordInfo<
@@ -2729,16 +2743,6 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
-    'src/features/equipment/equipment/EquipmentList.vue': {
-      routes:
-        | 'customers-equipment-list'
-        | 'equipment-equipment-list'
-        | 'settings-equipment-list'
-      views:
-        | never
-      pathParamNames:
-        | 'type'
-    }
     'src/features/equipment/equipment/EquipmentDetail.vue': {
       routes:
         | 'customers-equipment-view'
@@ -2755,9 +2759,21 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | 'pk'
     }
+    'src/features/equipment/equipment/EquipmentList.vue': {
+      routes:
+        | 'customers-equipment-list'
+        | 'equipment-equipment-list'
+        | 'settings-equipment-list'
+      views:
+        | never
+      pathParamNames:
+        | 'type'
+    }
     'src/features/equipment/equipment/EquipmentForm.vue': {
       routes:
         | 'customers-equipment-add'
+        | 'customers-equipment-add-facility'
+        | 'customers-equipment-add-technical'
         | 'customers-equipment-edit'
         | 'customers-equipment-edit-facility'
         | 'customers-equipment-edit-technical'

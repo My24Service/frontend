@@ -52,7 +52,7 @@
                 <span class="button-container">
                   <BButton
                     class="btn btn-outline-secondary"
-                    :to="{name: 'customers-equipment-list'}"
+                    :to="{name: 'customers-equipment-list', params: {type: EQUIPMENT_TYPES.TECHNICAL}}"
                     size="sm"
                     type="button"
                     variant="outline-secondary"
@@ -260,6 +260,7 @@
 </template>
 
 <script lang="ts" setup>
+import { EQUIPMENT_TYPES } from '@/constants'
 import { formatMoney, toDinero } from '@/services/money'
 import CustomerCard from '../CustomerCard.vue'
 import { useQueryErrorToast } from '@/features/forms'

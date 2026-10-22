@@ -2249,6 +2249,10 @@ export type ImportRevert = {
  */
 export type ImportSheetResult = {
     errors: Array<ImportError>;
+    /**
+     * Columns the sheet has but the import does not read, such as a misspelt field name; left out when there are none.
+     */
+    unknown_columns?: Array<string>;
     import: Array<ImportedRow>;
 };
 

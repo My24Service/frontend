@@ -184,9 +184,16 @@ export default [
         },
       },
       children: [
+        // One list per equipment type, as under router/equipment.js: the
+        // subnav has an Equipment (technical) and a Facility entry, and the
+        // bare address (old bookmarks) lands on the technical list.
+        {
+          path: '',
+          redirect: { name: 'customers-equipment-list', params: { type: EQUIPMENT_TYPES.TECHNICAL } },
+        },
         {
           name: 'customers-equipment-list',
-          path: '',
+          path: `:type(${Object.values(EQUIPMENT_TYPES).join('|')})`,
           components: {
             'app-content': EquipmentList,
             'app-subnav': SubNav
@@ -228,13 +235,34 @@ export default [
             'app-subnav': { section: 'customers' },
           },
         },
-        // A branch member's equipment list links each row to the `-view-<type>`
-        // name and the detail page edits through `-edit-<type>`, so the untyped
-        // pair above is not enough here. Mirrors router/equipment.js.
+        // The list links each row to the `-view-<type>` name and the detail
+        // page edits through `-edit-<type>`, so the untyped pair above is not
+        // enough here. The type rides along in the layout's props, which is
+        // what keeps the subnav's Equipment/Facility entry lit and lets an
+        // add from the Facility list create a facility.
+        ...Object.values(EQUIPMENT_TYPES).map((item) => {
+          return {
+            name: `customers-equipment-add-${item}`,
+            path: `${item}/form`,
+            meta: {
+              props: { route_prefix: 'customers-equipment', type: item },
+            },
+            components: {
+              'app-content': EquipmentForm,
+              'app-subnav': SubNav
+            },
+            props: {
+              'app-subnav': { section: 'customers' },
+            },
+          }
+        }),
         ...Object.values(EQUIPMENT_TYPES).map((item) => {
           return {
             name: `customers-equipment-view-${item}`,
             path: `${item}/:pk`,
+            meta: {
+              props: { route_prefix: 'customers-equipment', type: item },
+            },
             components: {
               'app-content': EquipmentDetail,
               'app-subnav': SubNav
@@ -248,6 +276,9 @@ export default [
           return {
             name: `customers-equipment-edit-${item}`,
             path: `${item}/form/:pk`,
+            meta: {
+              props: { route_prefix: 'customers-equipment', type: item },
+            },
             components: {
               'app-content': EquipmentForm,
               'app-subnav': SubNav

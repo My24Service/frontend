@@ -26,9 +26,38 @@
               <b-tab
                 v-for="pill in pills"
                 :key="pill.key"
-                :title="pill.title"
               >
+                <template #title>
+                  {{ pill.title }}
+                  <BBadge
+                    v-if="errorRows(pill.key).length > 0"
+                    variant="danger"
+                    :title="$trans('Rows that will not be imported')"
+                  >
+                    {{ errorRows(pill.key).length }}
+                  </BBadge>
+                </template>
                 <b-card-text>
+                  <BAlert
+                    v-if="unknownColumns(pill.key).length > 0"
+                    variant="warning"
+                    :model-value="true"
+                  >
+                    {{ $trans('These columns are not read by the import and will be ignored') }}:
+                    <b>{{ unknownColumns(pill.key).join(', ') }}</b>
+                  </BAlert>
+                  <template v-if="errorRows(pill.key).length > 0">
+                    <h4 class="text-danger">
+                      {{ errorRows(pill.key).length }} {{ $trans('rows will not be imported') }}
+                    </h4>
+                    <b-table
+                      small
+                      :fields="errorFields"
+                      :items="errorRows(pill.key)"
+                      responsive="md"
+                      class="data-table import-errors"
+                    />
+                  </template>
                   <h4>{{ sheet(pill.key).length }} {{ $trans('entries') }}</h4>
                   <p>
                     {{ $trans('Existing records will be checked on') }}:
@@ -148,6 +177,54 @@ const pills = computed(() => (Object.keys(pillTitles) as SheetKey[])
 
 function sheet(key: SheetKey): PreviewRow[] {
   return (importData.value?.[key]?.import ?? []) as PreviewRow[]
+}
+
+/** The sheet's column headers the import does not read, such as `ID` for `identifier`. */
+function unknownColumns(key: SheetKey): string[] {
+  return importData.value?.[key]?.unknown_columns ?? []
+}
+
+const errorMessages: Record<string, string> = {
+  'customer not found': $trans('Customer not found'),
+  'branch not found': $trans('Branch not found'),
+  'location not found': $trans('Location not found'),
+}
+
+const errorFields = [
+  { key: 'name', label: $trans('Row') },
+  { key: 'reason', label: $trans('Reason') },
+  { key: 'details', label: $trans('Details') },
+]
+
+interface ErrorRow {
+  name: string
+  reason: string
+  details: string
+}
+
+/**
+ * The rows the import could not place, each with why. A row missing required
+ * columns names them (`required_not_ok`, the row under `record`); a row whose
+ * owner or location lookup failed carries the `error` and the lookup it tried
+ * (`kwargs`, the row under `row`).
+ */
+function errorRows(key: SheetKey): ErrorRow[] {
+  return (importData.value?.[key]?.errors ?? []).map((error) => {
+    const row = error.record ?? error.row ?? {}
+    const name = typeof row.name === 'string' && row.name !== '' ? row.name : JSON.stringify(row)
+    if (error.required_not_ok) {
+      return {
+        name,
+        reason: $trans('Required fields are missing'),
+        details: error.required_not_ok.join(', '),
+      }
+    }
+    return {
+      name,
+      reason: error.error ? (errorMessages[error.error] ?? error.error) : '',
+      details: error.kwargs ?? '',
+    }
+  })
 }
 
 /** `locations__x` looks its lookup up under `locations`. */

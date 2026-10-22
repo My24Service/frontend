@@ -256,6 +256,18 @@ describe('EquipmentForm create', () => {
     expect(post.body).not.toHaveProperty('price_currency')
   })
 
+  test('a branchless tenant adding from the Facility list creates a facility', async () => {
+    const wrapper = mountEquipment({main: BRANCHLESS_MAIN, props: {pk: null, type: 'facility'}})
+    await settle()
+
+    await picker(wrapper).vm.$emit('select', CUSTOMER_AUTOCOMPLETE[0])
+    await settle()
+    await wrapper.get('#equipment_name').setValue('Bijgebouw')
+    await click(wrapper, 'Submit')
+
+    expect(writeOf('post').body.type).toBe('facility')
+  })
+
   test('the type is a select for a branch tenant and a hidden input otherwise', async () => {
     const branch = mountEquipment()
     await settle()

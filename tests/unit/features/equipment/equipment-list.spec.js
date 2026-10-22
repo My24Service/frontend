@@ -24,6 +24,11 @@ const routes = [
   {name: 'equipment-equipment-view-technical', path: '/equipment/equipment/technical/:pk', component: {template: '<div />'}},
   {name: 'equipment-equipment-view-facility', path: '/equipment/equipment/facility/:pk', component: {template: '<div />'}},
   {name: 'customer-view', path: '/customers/:pk', component: {template: '<div />'}},
+  // The customers mount has an add and a detail route per type.
+  {name: 'customers-equipment-add-technical', path: '/customers/equipment/technical/form', component: {template: '<div />'}},
+  {name: 'customers-equipment-add-facility', path: '/customers/equipment/facility/form', component: {template: '<div />'}},
+  {name: 'customers-equipment-view-technical', path: '/customers/equipment/technical/:pk', component: {template: '<div />'}},
+  {name: 'customers-equipment-view-facility', path: '/customers/equipment/facility/:pk', component: {template: '<div />'}},
   {name: 'company-branch-view', path: '/company/branches/:pk', component: {template: '<div />'}},
   // The settings layout shares this screen, and its row actions link into the
   // settings name family.
@@ -348,6 +353,37 @@ describe('EquipmentList QR export', () => {
     await settle()
 
     expect(exports()).toEqual([{ type: 'facility' }])
+  })
+})
+
+describe('EquipmentList under Customers', () => {
+  // A tenant without branches lists both types from the customers subnav.
+  async function mountCustomers(type) {
+    return mountEquipment({
+      props: {route_prefix: 'customers-equipment', type},
+      main: {getMemberHasBranches: false},
+    })
+  }
+
+  test('a facility list links its rows to the facility detail', async () => {
+    const wrapper = await mountCustomers('facility')
+
+    expect(listRequests()[0].query.type).toBe('facility')
+    expect(wrapper.get('tbody a[href="/customers/equipment/facility/11"]').text()).toBe('Ketel 3000')
+  })
+
+  test('an add from the facility list creates a facility', async () => {
+    const wrapper = await mountCustomers('facility')
+
+    expect(wrapper.get('a.btn-primary').attributes('href')).toBe('/customers/equipment/facility/form')
+  })
+
+  test('the technical list keeps to technical', async () => {
+    const wrapper = await mountCustomers('technical')
+
+    expect(listRequests()[0].query.type).toBe('technical')
+    expect(wrapper.get('a.btn-primary').attributes('href')).toBe('/customers/equipment/technical/form')
+    expect(wrapper.find('tbody a[href="/customers/equipment/technical/11"]').exists()).toBe(true)
   })
 })
 

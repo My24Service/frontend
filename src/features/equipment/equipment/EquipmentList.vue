@@ -112,7 +112,11 @@ const hasBranches = computed(() => mainStore.getMemberHasBranches)
 // the brand column.
 const planning = computed(() => !authStore.isEmployee && !authStore.isCustomer)
 
-const addRoute = computed(() => toRoute(`${props.route_prefix}-add` as RouteName))
+// The customers mount has an add route per type, so an add from its Facility
+// list creates a facility; the others add through the untyped route.
+const addRoute = computed(() => toRoute((props.route_prefix === 'customers-equipment'
+  ? `${props.route_prefix}-add-${props.type}`
+  : `${props.route_prefix}-add`) as RouteName))
 
 const columns = useEquipmentColumns({
   routePrefix: props.route_prefix,

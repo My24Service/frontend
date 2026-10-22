@@ -68,6 +68,8 @@ const emitted = [
       `${prefix}-edit-${type}`,
     ]),
   ]),
+  // The customers mount adds per type, so its Facility list creates a facility.
+  ...TYPES.map((type) => `customers-equipment-add-${type}`),
   ...LOCATION_PREFIXES.flatMap((prefix) => [
     `${prefix}-list`,
     `${prefix}-add`,

@@ -379,8 +379,11 @@ import {
 const props = withDefaults(defineProps<{
   /** The route's `:pk`, passed through by the layout. A create has none. */
   pk?: string | number | null
+  /** The type a create starts as; set by the typed add routes (`customers-equipment-add-<type>`). */
+  type?: Api.EquipmentTypeEnum
 }>(), {
   pk: null,
+  type: EQUIPMENT_TYPES.TECHNICAL,
 })
 
 const {wireKind, chooses} = useOwnerContext()
@@ -399,7 +402,7 @@ const documents = useTemplateRef<{parentCreated: (pk: number) => Promise<unknown
 const form = useResourceForm({
   pk: () => props.pk,
   resource: Api.EquipmentEquipment,
-  empty: () => emptyEquipment(defaultCurrency.value),
+  empty: () => ({...emptyEquipment(defaultCurrency.value), type: props.type}),
   fromRecord: equipmentFromRecord,
   validate: (values, context) => validateEquipment(values, context, {
     kind: wireKind.value,

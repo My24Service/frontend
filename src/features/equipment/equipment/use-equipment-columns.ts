@@ -68,12 +68,16 @@ export function useEquipmentColumns(options: EquipmentColumnOptions) {
     })
   }
 
+  // The customers mount always links to the typed detail: it lists both types
+  // from one subnav, and the typed names are what keep the right entry lit.
+  const typedLinks = computed(() => hasBranches.value || options.routePrefix === 'customers-equipment')
+
   return computed(() => helper.columns([
     helper.accessor('name', {
       header: $trans('Equipment'),
       meta: {filter: {variant: 'text', label: $trans('Equipment')}},
       cell: ({row}) => h(RouterLink, {
-        to: hasBranches.value
+        to: typedLinks.value
           ? toRoute(`${options.routePrefix}-view-${options.type}` as RouteName, {pk: row.original.id})
           : toRoute(`${options.routePrefix}-view` as RouteName, {pk: row.original.id}),
       }, () => row.original.name),
@@ -109,7 +113,7 @@ export function useEquipmentColumns(options: EquipmentColumnOptions) {
           method: () => options.onAddState(row.original.id),
         }),
         h(RowAction, {icon: 'edit',
-          router_name: hasBranches.value
+          router_name: typedLinks.value
             ? `${options.routePrefix}-edit-${options.type}`
             : `${options.routePrefix}-edit`,
           router_params: {pk: row.original.id},

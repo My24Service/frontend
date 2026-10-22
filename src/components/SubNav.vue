@@ -15,6 +15,7 @@
 </template>
 
 <script setup lang="ts">
+import { EQUIPMENT_TYPES } from '@/constants'
 import { hasAccessToModule as checkModuleAccess } from '@/utils'
 import { SUBNAV_SECTIONS, type NavCtx, type SubNavItem } from '@/components/navSections'
 import { useRequestedCount } from '@/components/the_nav/useNav'
@@ -90,7 +91,19 @@ function defaultActiveNames(to: SubNavItem['to']): string[] {
 function isSubActive(item: SubNavItem): boolean {
   const names = item.active ?? defaultActiveNames(item.to)
   const routeName = route.name
-  return typeof routeName === 'string' && names.includes(routeName)
+  if (typeof routeName !== 'string' || !names.includes(routeName)) return false
+  return item.equipmentType == null || routeEquipmentType() === item.equipmentType
+}
+
+/** The equipment type the current screen shows, as the screen itself reads it. */
+function routeEquipmentType(): string {
+  const param = 'type' in route.params ? route.params.type : undefined
+  if (typeof param === 'string' && param !== '') return param
+  const metaProps = route.meta.props
+  if (typeof metaProps === 'object' && metaProps !== null && 'type' in metaProps && typeof metaProps.type === 'string') {
+    return metaProps.type
+  }
+  return EQUIPMENT_TYPES.TECHNICAL
 }
 </script>
 

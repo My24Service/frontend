@@ -69,6 +69,48 @@ describe('ImportPreview', () => {
     expect(body).toContain('name, city')
   })
 
+  test('a sheet shows its unknown columns and the rows it cannot import, even with none imported', async () => {
+    api.get('/api/importing/import/{id}/preview/', fixtureFor(vImportResult, {
+      equipment: {
+        import: [],
+        unknown_columns: ['ID'],
+        errors: [
+          {
+            error: 'location not found',
+            kwargs: "{'name': 'Kelder'}",
+            row: { name: 'Ketel 3000', location__name: 'Kelder' },
+          },
+          {
+            required_not_ok: ['name'],
+            record: { brand: 'Remeha' },
+          },
+        ],
+      },
+    }))
+    const wrapper = mountPreview()
+    await settle()
+
+    const body = wrapper.text()
+    expect(body).toContain('Equipment')
+    expect(body).toContain('These columns are not read by the import and will be ignored: ID')
+    expect(body).toContain('2 rows will not be imported')
+    const errorTable = wrapper.get('.import-errors').text()
+    expect(errorTable).toContain('Ketel 3000')
+    expect(errorTable).toContain('Location not found')
+    expect(errorTable).toContain("{'name': 'Kelder'}")
+    // A row without a name is told apart by its own values.
+    expect(errorTable).toContain('{"brand":"Remeha"}')
+    expect(errorTable).toContain('Required fields are missing')
+  })
+
+  test('a clean sheet shows no warning and no error table', async () => {
+    const wrapper = mountPreview()
+    await settle()
+
+    expect(wrapper.find('.import-errors').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('not read by the import')
+  })
+
   test('importing confirms, posts do and rides to the list', async () => {
     const wrapper = mountPreview()
     await settle()

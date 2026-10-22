@@ -2642,6 +2642,7 @@ export const vImportedRow = v.object({
  */
 export const vImportSheetResult = v.object({
     errors: v.array(vImportError),
+    unknown_columns: v.optional(v.array(v.string())),
     import: v.array(vImportedRow)
 });
 
