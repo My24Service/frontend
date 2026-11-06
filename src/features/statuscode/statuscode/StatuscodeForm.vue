@@ -93,6 +93,42 @@
               :error="errors.num_days"
               :submitted="submitClicked"
             />
+
+            <template v-if="hasWorkflow(codeType)">
+              <h6>{{ $trans('Workflow') }}</h6>
+              <BFormGroup
+                label-cols="3"
+                :label="$trans('Start order')"
+                label-for="statuscode_start_order"
+                :description="$trans('This statuscode marks the start of an order. This is used in the App for the start order button.')"
+              >
+                <BFormCheckbox id="statuscode_start_order" v-model="statuscode.start_order" />
+              </BFormGroup>
+              <BFormGroup
+                label-cols="3"
+                :label="$trans('Completes order')"
+                label-for="statuscode_end_order"
+                :description="$trans('This statuscode marks the end of an order. This is used in the App for the end order button.')"
+              >
+                <BFormCheckbox id="statuscode_end_order" v-model="statuscode.end_order" />
+              </BFormGroup>
+              <BFormGroup
+                label-cols="3"
+                :label="$trans('After end order')"
+                label-for="statuscode_after_end_order"
+                :description="$trans('These statuscodes will show up as buttons in the App after the order is completed.')"
+              >
+                <BFormCheckbox id="statuscode_after_end_order" v-model="statuscode.after_end_order" />
+              </BFormGroup>
+              <BFormGroup
+                label-cols="3"
+                :label="$trans('Re-assignable')"
+                label-for="statuscode_can_be_reassigned_after_end"
+                :description="$trans('When checked, the order can be re-assigned after ending it. For example after no workorder has been reported.')"
+              >
+                <BFormCheckbox id="statuscode_can_be_reassigned_after_end" v-model="statuscode.can_be_reassigned_after_end" />
+              </BFormGroup>
+            </template>
           </div>
         </ValidatedForm>
       </div>
@@ -117,6 +153,7 @@ import {
   FIELD_LABELS,
   FIELD_MESSAGES,
   hasDateTrigger,
+  hasWorkflow,
   parseStatuscode,
   statuscodeFromRecord,
   validateStatuscode,

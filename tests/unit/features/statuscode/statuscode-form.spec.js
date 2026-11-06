@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import {
+  CODE_TYPES,
   StatuscodeForm,
   LABEL_PALETTE,
   labelTextColor,
@@ -134,6 +135,10 @@ describe('StatuscodeForm, creating a statuscode', () => {
           text_color: labelTextColor(LABEL_PALETTE.dark[5]),
           description: null,
           new_status_template: null,
+          start_order: false,
+          end_order: false,
+          after_end_order: false,
+          can_be_reassigned_after_end: false,
           roles: [],
         },
       },
@@ -224,6 +229,103 @@ describe('StatuscodeForm, the expiry condition', () => {
       expect(wrapper.text()).not.toContain('Date trigger')
       expect(wrapper.find('#statuscode_num_days').exists()).toBe(false)
     }
+  })
+})
+
+describe('StatuscodeForm, the workflow flags', () => {
+  const FLAGS = {
+    start_order: '#statuscode_start_order',
+    end_order: '#statuscode_end_order',
+    after_end_order: '#statuscode_after_end_order',
+    can_be_reassigned_after_end: '#statuscode_can_be_reassigned_after_end',
+  }
+
+  const ORDER_STATUSCODE = {
+    ...STATUSCODE,
+    code_type: 'order',
+    start_order: false,
+    end_order: true,
+    after_end_order: false,
+    can_be_reassigned_after_end: true,
+    roles: [],
+  }
+
+  test('are offered for an order, all off on a new statuscode', async () => {
+    const wrapper = await mountStatuscodeForm({ codeType: 'order' })
+
+    expect(wrapper.text()).toContain('Workflow')
+    for (const selector of Object.values(FLAGS)) {
+      expect(wrapper.get(selector).element.checked).toBe(false)
+    }
+  })
+
+  test('a new order statuscode can be made an after-end one — the reported bug', async () => {
+    const wrapper = await mountStatuscodeForm({ codeType: 'order' })
+
+    await type(wrapper, '#statuscode_statuscode', 'Niet afgerond')
+    await pickColor(wrapper, LABEL_PALETTE.light[0])
+    await wrapper.get(FLAGS.after_end_order).setValue(true)
+    await submit(wrapper)
+
+    expect(api.requests().at(-1)).toMatchObject({
+      method: 'post',
+      body: { code_type: 'order', after_end_order: true, start_order: false, end_order: false, can_be_reassigned_after_end: false },
+    })
+  })
+
+  test('are not offered for any other type, and stay off its wire', async () => {
+    for (const codeType of CODE_TYPES.filter((type) => type !== 'order')) {
+      const wrapper = await mountStatuscodeForm({ codeType })
+
+      expect(wrapper.text()).not.toContain('Workflow')
+      expect(wrapper.find(FLAGS.after_end_order).exists()).toBe(false)
+
+      await type(wrapper, '#statuscode_statuscode', 'Iets')
+      await pickColor(wrapper, LABEL_PALETTE.light[0])
+      await submit(wrapper)
+
+      const { body } = api.requests().at(-1)
+      expect(body.code_type).toBe(codeType)
+      for (const field of Object.keys(FLAGS)) expect(field in body).toBe(false)
+    }
+  })
+
+  test('editing an order statuscode shows its flags and saves them unchanged', async () => {
+    api.get('/api/statuscode/statuscode/{id}/', ORDER_STATUSCODE)
+    const wrapper = await mountStatuscodeForm({ codeType: 'order', pk: 3 })
+
+    expect(wrapper.get(FLAGS.start_order).element.checked).toBe(false)
+    expect(wrapper.get(FLAGS.end_order).element.checked).toBe(true)
+    expect(wrapper.get(FLAGS.after_end_order).element.checked).toBe(false)
+    expect(wrapper.get(FLAGS.can_be_reassigned_after_end).element.checked).toBe(true)
+
+    await submit(wrapper)
+
+    expect(api.requests().at(-1)).toMatchObject({
+      method: 'patch',
+      body: { start_order: false, end_order: true, after_end_order: false, can_be_reassigned_after_end: true },
+    })
+  })
+
+  test('a flag can be switched off again on an edit', async () => {
+    api.get('/api/statuscode/statuscode/{id}/', ORDER_STATUSCODE)
+    const wrapper = await mountStatuscodeForm({ codeType: 'order', pk: 3 })
+
+    await wrapper.get(FLAGS.end_order).setValue(false)
+    await submit(wrapper)
+
+    expect(api.requests().at(-1).body.end_order).toBe(false)
+  })
+
+  test('editing another type does not touch flags the record happens to carry', async () => {
+    api.get('/api/statuscode/statuscode/{id}/', { ...STATUSCODE, end_order: true })
+    const wrapper = await mountStatuscodeForm({ codeType: 'quotation', pk: 3 })
+
+    await submit(wrapper)
+
+    const { method, body } = api.requests().at(-1)
+    expect(method).toBe('patch')
+    for (const field of Object.keys(FLAGS)) expect(field in body).toBe(false)
   })
 })
 

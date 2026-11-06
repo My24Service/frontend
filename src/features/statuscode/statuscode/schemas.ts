@@ -29,6 +29,20 @@ export function hasDateTrigger(codeType: CodeType): boolean {
 }
 
 /**
+ * Where an order statuscode sits in the order's life. The mobile API builds the
+ * app's start, end and after-end buttons from these, and the backend decides
+ * from them whether an ended order can be assigned again.
+ */
+const WORKFLOW_FIELDS = ['start_order', 'end_order', 'after_end_order', 'can_be_reassigned_after_end'] as const
+
+/** The code types whose statuscodes carry the workflow flags. */
+export const WORKFLOW_TYPES: readonly CodeType[] = ['order']
+
+export function hasWorkflow(codeType: CodeType): boolean {
+  return WORKFLOW_TYPES.includes(codeType)
+}
+
+/**
  * The form's state. `code_type` is not on it: the screen is mounted per type
  * and stamps it on the body at parse time. `text_color` is not on it either:
  * it is derived from `color` at parse time (see `./palette`), so a label can
@@ -37,8 +51,7 @@ export function hasDateTrigger(codeType: CodeType): boolean {
  */
 export type StatuscodeFormValues = Omit<
   WireValues,
-  'code_type' | 'text_color' | 'num_days' | 'start_order' | 'end_order' | 'after_end_order'
-  | 'color_for_assignedorders' | 'can_be_reassigned_after_end' | 'as_filter' | 'settings_key'
+  'code_type' | 'text_color' | 'num_days' | 'color_for_assignedorders' | 'as_filter' | 'settings_key'
 > & {
   num_days?: number | string | null
   roles: string[]
@@ -53,6 +66,10 @@ export function emptyStatuscode(): StatuscodeFormValues {
     num_days: null,
     num_days_operator: '<',
     num_days_model_field: null,
+    start_order: false,
+    end_order: false,
+    after_end_order: false,
+    can_be_reassigned_after_end: false,
     roles: [],
   }
 }
@@ -68,6 +85,10 @@ export function statuscodeFromRecord(record: Api.Statuscode): StatuscodeFormValu
     num_days: fields.num_days,
     num_days_operator: fields.num_days_operator ?? '<',
     num_days_model_field: fields.num_days_model_field,
+    start_order: fields.start_order ?? false,
+    end_order: fields.end_order ?? false,
+    after_end_order: fields.after_end_order ?? false,
+    can_be_reassigned_after_end: fields.can_be_reassigned_after_end ?? false,
     roles: [...(record.roles ?? [])],
   }
 }
@@ -111,6 +132,10 @@ function toWire(values: StatuscodeFormValues): Record<string, unknown> {
     num_days: daysToNumber(values.num_days),
     num_days_operator: values.num_days_operator,
     num_days_model_field: blankToNull(values.num_days_model_field),
+    start_order: values.start_order,
+    end_order: values.end_order,
+    after_end_order: values.after_end_order,
+    can_be_reassigned_after_end: values.can_be_reassigned_after_end,
     roles: values.roles,
   }
 }
@@ -121,12 +146,16 @@ export function validateStatuscode(values: StatuscodeFormValues): StatuscodeFiel
 
 /**
  * The body for `codeType`. Only the types in `DATE_TRIGGER_TYPES` carry the
- * date trigger; every other type leaves those three fields off the wire.
+ * date trigger, and only those in `WORKFLOW_TYPES` the workflow flags; every
+ * other type leaves those fields off the wire.
  */
 export function parseStatuscode(values: StatuscodeFormValues, codeType: CodeType): Api.StatuscodeRequest {
   const wire: Record<string, unknown> = {...toWire(values), code_type: codeType}
   if (!hasDateTrigger(codeType)) {
     for (const field of DATE_TRIGGER_FIELDS) delete wire[field]
+  }
+  if (!hasWorkflow(codeType)) {
+    for (const field of WORKFLOW_FIELDS) delete wire[field]
   }
   return v.parse(schemas.vStatuscodeRequest, wire)
 }

@@ -104,6 +104,32 @@ describe('parseStatuscode', () => {
   })
 })
 
+describe('the workflow flags', () => {
+  const flags = { start_order: true, end_order: false, after_end_order: true, can_be_reassigned_after_end: true }
+
+  test('ride the wire for an order', () => {
+    expect(parseStatuscode({ ...valid, ...flags }, 'order')).toMatchObject(flags)
+  })
+
+  test('stay off the wire for every other code type', () => {
+    for (const codeType of ['leave_hours', 'sick_leave', 'quotation', 'invoice', 'work_hours']) {
+      const body = parseStatuscode({ ...valid, ...flags }, codeType)
+
+      for (const field of Object.keys(flags)) expect(field in body).toBe(false)
+    }
+  })
+
+  test('come off a record as they are, and default to off', () => {
+    expect(statuscodeFromRecord({ ...valid, ...flags })).toMatchObject(flags)
+    expect(statuscodeFromRecord(valid)).toMatchObject({
+      start_order: false,
+      end_order: false,
+      after_end_order: false,
+      can_be_reassigned_after_end: false,
+    })
+  })
+})
+
 describe('statuscodeFromRecord', () => {
   test('takes the form’s fields off a record and nothing else', () => {
     const values = statuscodeFromRecord({
@@ -118,7 +144,16 @@ describe('statuscodeFromRecord', () => {
       roles: ['quotation_sent_status'],
     })
 
-    expect(values).toEqual({ ...valid, num_days: 7, num_days_model_field: 'created', roles: ['quotation_sent_status'] })
+    expect(values).toEqual({
+      ...valid,
+      num_days: 7,
+      num_days_model_field: 'created',
+      start_order: false,
+      end_order: false,
+      after_end_order: false,
+      can_be_reassigned_after_end: false,
+      roles: ['quotation_sent_status'],
+    })
   })
 
   test('gives a record with no operator the form’s default', () => {
