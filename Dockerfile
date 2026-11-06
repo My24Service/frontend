@@ -1,5 +1,7 @@
 # ---- Base ----
-FROM ghcr.io/pnpm/pnpm:12 AS base
+# Pinned: with the 12.18.0 image, installing fails because pnpm cannot find the
+# Node that "runtime set" installed. Bump this on purpose, not through a floating tag.
+FROM ghcr.io/pnpm/pnpm:12.15.0@sha256:d6148daf3ad2af8fa4ecd1aa06db73da32b2e37f63088987eea2fb375ee7f320 AS base
 RUN pnpm runtime set node 24 -g
 
 RUN apt-get update && apt-get install -y git
