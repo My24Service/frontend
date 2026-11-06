@@ -168,6 +168,16 @@ describe('UnconfirmedSickLeaveList', () => {
     expect(bodies()).toContain('Leave as been marked as confirmed')
   })
 
+  test('the confirm link does not leave the page', async () => {
+    const wrapper = await mountUnconfirmed()
+    await settle()
+
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true })
+    wrapper.get('tbody a[title="Confirm"]').element.dispatchEvent(click)
+
+    expect(click.defaultPrevented).toBe(true)
+  })
+
   test('a failed confirm reports it', async () => {
     api.post(resource + '{id}/set_confirmed/', serverError)
     const wrapper = await mountUnconfirmed()

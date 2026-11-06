@@ -161,6 +161,17 @@ describe('ImportList row actions', () => {
     expect(bodies()).toContain('Import has been reverted')
   })
 
+  test('the revert link opens its modal without leaving the page', async () => {
+    api.get(endpoint, () => paginated([importRow({ result_inserts: { customers: 3 } })]))
+    const wrapper = await mountImports()
+    await settle()
+
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true })
+    wrapper.get('a[title="Revert import"]').element.dispatchEvent(click)
+
+    expect(click.defaultPrevented).toBe(true)
+  })
+
   test('a failed revert keeps the row and reports it', async () => {
     api.get(endpoint, () => paginated([importRow({ result_inserts: { customers: 3 } })]))
     api.post(endpoint + '{id}/revert/', serverError)

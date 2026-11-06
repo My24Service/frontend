@@ -26,8 +26,20 @@ export interface ButtonProps extends ClickProps {
 
 type Slot = () => VNodeChild
 
+/**
+ * A link without an href only runs its handler. BLink still renders it as
+ * `href="#"`, which under hash routing changes the route, so the browser must
+ * not follow it. A real href (`mailto:`) is left alone.
+ */
 export function hLink(props: LinkProps, slot: Slot) {
-  return h(BLink as Component, props, slot)
+  const { href, onClick } = props
+  if (href || !onClick) return h(BLink as Component, props, slot)
+
+  const stayAndRun = (event: MouseEvent) => {
+    event.preventDefault()
+    onClick(event)
+  }
+  return h(BLink as Component, { ...props, onClick: stayAndRun }, slot)
 }
 
 export function hButton(props: ButtonProps, slot: Slot) {

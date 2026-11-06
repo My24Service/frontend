@@ -110,6 +110,17 @@ describe('LeaveRequestsList accepting and rejecting', () => {
     expect(listRequests()).toHaveLength(2)
   })
 
+  test('the accept and reject links do not leave the page', async () => {
+    const wrapper = await mountRequests()
+    await settle()
+
+    for (const action of ['accept', 'reject']) {
+      const click = new MouseEvent('click', { bubbles: true, cancelable: true })
+      rowAction(wrapper, action).element.dispatchEvent(click)
+      expect(click.defaultPrevented).toBe(true)
+    }
+  })
+
   test('a failed accept reports it', async () => {
     api.post(resource + '{id}/set_accepted/', serverError)
     const wrapper = await mountRequests()
