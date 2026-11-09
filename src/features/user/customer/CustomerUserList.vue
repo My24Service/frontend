@@ -22,6 +22,7 @@
       }"
     >
       <template #icon><IBiPeople></IBiPeople></template>
+      <template #subnav><UserPills /></template>
       <template #add>
         <router-link
           v-if="authStore.isStaff || authStore.isSuperuser"
@@ -36,6 +37,7 @@
 </template>
 
 <script lang="ts" setup>
+import UserPills from '../UserPills.vue'
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 

@@ -1,5 +1,5 @@
 <template>
-  <BNav pills>
+  <BNav pills class="pills-nav">
     <BNavItem
       v-for="item in visibleItems"
       :key="item.to.name"
@@ -30,8 +30,8 @@ export interface PillNavItem {
  * The company-users pills (engineers/students/sales/customers/planning/
  * employees/API) as computed items for PillsNav, replacing the bespoke
  * PillsCompanyUsers component. Guard logic is a verbatim port: member-type,
- * flavour and module-contract checks, plus the from_settings planning route
- * (the employees pill always pointed at the settings route; kept as-is).
+ * flavour and module-contract checks. `fromSettings` points the planning and
+ * employees pills at the settings tree's routes.
  */
 export function useCompanyUserPills(fromSettings = false): ComputedRef<PillNavItem[]> {
   const mainStore = useMainStore()
@@ -67,7 +67,7 @@ export function useCompanyUserPills(fromSettings = false): ComputedRef<PillNavIt
       },
       {
         label: $trans('Employees'),
-        to: { name: 'settings-users-employees' },
+        to: { name: fromSettings ? 'settings-users-employees' : 'users-employees' },
       },
       {
         label: $trans('API'),
@@ -88,3 +88,27 @@ const route = useRoute()
 
 const visibleItems = computed(() => props.items.filter((item) => item.guard !== false))
 </script>
+
+<style scoped>
+/* Bootstrap's inactive pill takes the theme link colour, which on the default
+   theme is the same orange as the page band the pills sit on, so it vanished.
+   It takes the surrounding text colour instead (dark on shltr), and on the
+   default theme the white of the page title above it. Same problem as
+   StatuscodePills. */
+.pills-nav :deep(.nav-link:not(.active)) {
+  color: inherit;
+}
+/* The active pill's background is the theme's primary colour, which on the
+   default theme is also the header's; a ring in the pill's own text colour
+   keeps it visible there and disappears into the white shltr header. */
+.pills-nav :deep(.nav-link.active) {
+  box-shadow: 0 0 0 2px currentColor;
+}
+</style>
+
+<style>
+/* Unscoped: the theme class sits on <html>, outside this component. */
+:root.theme-default .pills-nav .nav-link:not(.active) {
+  color: white;
+}
+</style>

@@ -22,6 +22,7 @@
       }"
     >
       <template #icon><IBiPeople></IBiPeople></template>
+      <template #subnav><UserPills :from-settings="fromSettings" /></template>
       <template #add>
         <router-link
           :to="{name: addRoute}"
@@ -35,6 +36,7 @@
 </template>
 
 <script lang="ts" setup>
+import UserPills from '../UserPills.vue'
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 import { createUserColumns } from '../user-list-columns'
 

@@ -129,6 +129,19 @@ describe('PlanningUserList, wire contract', () => {
     expect(settings.find('a[href="/settings/planning-users/form"]').exists()).toBe(true)
   })
 
+  test('the user pills link to the other user lists, following from_settings', async () => {
+    // The sidebar's People entry lands on one user list only; the pills are
+    // how the others are reached. Planning and Employees carry no guard, so
+    // they show for every tenant.
+    const pillHrefs = (wrapper) => wrapper.findAll('.subnav-pills .nav-link').map((link) => link.attributes('href'))
+
+    const company = await mountPlanningList()
+    expect(pillHrefs(company)).toEqual(expect.arrayContaining(['/company/planning-users', '/company/employee-users']))
+
+    const settings = await mountPlanningList({ props: { fromSettings: true } })
+    expect(pillHrefs(settings)).toEqual(expect.arrayContaining(['/settings/planning-users', '/settings/employee-users']))
+  })
+
   test('columns are not sortable — the endpoint declares no ordering parameter', async () => {
     // Same declared-contract finding as the sales list: only page/page_size/q
     // ride the wire, so the columns stay non-sortable.

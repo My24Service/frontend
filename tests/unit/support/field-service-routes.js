@@ -40,6 +40,6 @@ export const fieldServiceRoutes = [
   { path: '/company/sales-users', name: 'users-salesusers', component: blank },
   { path: '/company/customer-users', name: 'users-customerusers', component: blank },
   { path: '/company/planning-users', name: 'users-planningusers', component: blank },
-  { path: '/company/employees', name: 'settings-users-employees', component: blank },
+  { path: '/company/employee-users', name: 'users-employees', component: blank },
   { path: '/company/api-users', name: 'users-apiusers', component: blank },
 ]
