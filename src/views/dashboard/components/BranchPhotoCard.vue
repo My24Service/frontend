@@ -31,17 +31,11 @@
           <!-- Adres tab -->
           <div v-show="activeTab === 'adres'" class="tab-pane fade" :class="{ 'show active': activeTab === 'adres' }">
             <img
-              v-if="imageUrl"
               class="img-fluid"
-              :src="imageUrl"
-              :alt="buildingName"
+              :class="{ 'no-image': !imageUrl }"
+              :src="imageUrl || NO_IMAGE_URL"
+              :alt="imageUrl ? buildingName : $trans('No image')"
             />
-            <img v-else
-                 :src="NO_IMAGE_URL"
-                 :alt="$trans('No image')"
-            />
-
-
             <ul class="list-group list-group-light list-group-small">
               <li class="list-group-item px-1 text-secondary fw-bold">{{ buildingName }}</li>
               <li class="list-group-item px-1 small">{{ street }}</li>
@@ -156,6 +150,11 @@ export default {
   width: 100%;
   height: 120px;
   object-fit: cover;
+}
+
+/* The placeholder is a square with text; cropping it to 120px would cut the text. */
+.gebouwpas-card .tab-content .img-fluid.no-image {
+  object-fit: contain;
 }
 
 .gebouwpas-card .list-group {
