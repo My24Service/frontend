@@ -226,6 +226,14 @@
       </BNavItem>
 
       <BNavItem
+        v-if="!isBranchEmployee && hasChecklists"
+        :to="{name: 'settings-checklists'}"
+        :active="isSubActive(navLists.settingsChecklists)"
+      >
+        {{ $trans('Checklists') }}
+      </BNavItem>
+
+      <BNavItem
         v-if="!isBranchEmployee"
         :to="{name: 'settings-branches'}"
         :active="isSubActive(navLists.settingsBranches)"
@@ -274,6 +282,7 @@ import {
   BRANCH_ORDER_ROUTES,
   BRANCH_PLANNING_ROUTES,
   SETTINGS_BRANCH_ROUTES,
+  SETTINGS_CHECKLIST_ROUTES,
   SETTINGS_FILTER_ROUTES,
   SETTINGS_IMPORT_ROUTES,
   SETTINGS_STATUSCODE_ROUTES,
@@ -324,6 +333,7 @@ const navLists = {
   settingsUsers: SETTINGS_USER_ROUTES,
   settingsStatuses: SETTINGS_STATUSCODE_ROUTES,
   settingsFilters: SETTINGS_FILTER_ROUTES,
+  settingsChecklists: SETTINGS_CHECKLIST_ROUTES,
   settingsBranches: SETTINGS_BRANCH_ROUTES,
   settingsMyBranch: ['settings-my-branch'],
   settingsLocations: locationRoutes('settings-location'),
@@ -346,6 +356,7 @@ const hasInventory = computed<boolean>(() => hasAccessToModule('inventory'))
 const hasMobile = computed<boolean>(() => hasAccessToModule('mobile'))
 const hasQuotations = computed<boolean>(() => hasAccessToModule('quotations'))
 const hasInvoices = computed<boolean>(() => hasAccessToModule('invoices'))
+const hasChecklists = computed<boolean>(() => hasAccessToModule('checklist'))
 const hasMembers = computed<boolean>(() => isAdmin.value)
 
 const unacceptedCount = computed<number | null>(() => mainStore.unacceptedCount)

@@ -47,13 +47,19 @@
         />
         <OrderInvoicesPanel :order="order" />
         <OrderContentsPanel :order="order" />
+        <FilledChecklistsPanel
+          v-if="showChecklists"
+          :order-id="order.id"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { FilledChecklistsPanel } from '@/features/checklist'
 import { useQueryErrorToast } from '@/features/forms'
+import { hasAccessToModule } from '@/utils'
 import OrderContentsPanel from './OrderContentsPanel.vue'
 import OrderInvoicesPanel from './OrderInvoicesPanel.vue'
 import OrderSummaryPanel from './OrderSummaryPanel.vue'
@@ -64,7 +70,8 @@ import { useOrderViewer } from './use-order-viewer'
 /**
  * The order detail, reached by pk (`order-view`) or by uuid (`order-detail`).
  * Three panels: the order and its contact, the invoices and workorder
- * documents, the documents / orderlines / infolines / status timeline.
+ * documents, the documents / orderlines / infolines / status timeline. A
+ * tenant with the checklist module gets a fourth, when a checklist was filled in.
  */
 const props = withDefaults(defineProps<{
   pk?: string | number | null
@@ -77,6 +84,12 @@ const props = withDefaults(defineProps<{
 })
 
 const {isCustomer, isBranchEmployee} = useOrderViewer()
+
+// The answers are served to planning users and engineers only, and only a
+// tenant with the module has any: everyone else is spared the two requests.
+const showChecklists = computed(
+  () => hasAccessToModule('checklist') && !isCustomer.value && !isBranchEmployee.value,
+)
 
 const {order, error, refetch} = useOrderDetail(() => ({pk: props.pk, uuid: props.uuid}))
 useQueryErrorToast(error, $trans('Error fetching order'))

@@ -358,6 +358,67 @@ export const vAssignedOrderActivityRequest = v.object({
 
 /**
  * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-answer/{id}/
+ *   PATCH /api/mobile/checklist-answer/{id}/
+ *   POST /api/mobile/checklist-answer/
+ *
+ * Nested in: PaginatedAssignedOrderChecklistAnswerList
+ */
+export const vAssignedOrderChecklistAnswer = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    assigned_order: v.pipe(v.number(), v.integer()),
+    question: v.pipe(v.number(), v.integer()),
+    question_text: v.pipe(v.string(), v.readonly()),
+    answer: v.string()
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/mobile/checklist-answer/
+ */
+export const vAssignedOrderChecklistAnswerRequest = v.object({
+    assigned_order: v.pipe(v.number(), v.integer()),
+    question: v.pipe(v.number(), v.integer()),
+    answer: v.pipe(v.string(), v.minLength(1))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-signature/{id}/
+ *   PATCH /api/mobile/checklist-signature/{id}/
+ *   POST /api/mobile/checklist-signature/
+ *
+ * Nested in: PaginatedAssignedOrderChecklistSignatureList
+ */
+export const vAssignedOrderChecklistSignature = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    assigned_order: v.pipe(v.number(), v.integer()),
+    checklist: v.pipe(v.number(), v.integer()),
+    signature_user: v.nullish(v.pipe(v.string(), v.url())),
+    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_customer: v.nullish(v.pipe(v.string(), v.url())),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/mobile/checklist-signature/
+ */
+export const vAssignedOrderChecklistSignatureRequest = v.object({
+    assigned_order: v.pipe(v.number(), v.integer()),
+    checklist: v.pipe(v.number(), v.integer()),
+    signature_user: v.nullish(v.string()),
+    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_customer: v.nullish(v.string()),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+});
+
+/**
+ * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: AssignedOrder, AssignedOrderAppView, AssignedOrderView, DetailDeviceResponse
@@ -1051,6 +1112,70 @@ export const vChapterRequest = v.object({
  */
 export const vCheckTokenResponse = v.object({
     result_ok: v.boolean()
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/checklist/checklist/{id}/
+ *   PATCH /api/checklist/checklist/{id}/
+ *   POST /api/checklist/checklist/
+ *
+ * Nested in: PaginatedChecklistList
+ */
+export const vChecklist = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.string()
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/checklist/checklist-question/{id}/
+ *   PATCH /api/checklist/checklist-question/{id}/
+ *   POST /api/checklist/checklist-question/
+ *
+ * Nested in: ChecklistNested, PaginatedChecklistQuestionList
+ */
+export const vChecklistQuestion = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    checklist: v.pipe(v.number(), v.integer()),
+    question: v.string(),
+    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647)))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/checklist/checklist/load/
+ */
+/**
+ * A checklist with its questions in sequence: what `load` answers.
+ */
+export const vChecklistNested = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.string(),
+    questions: v.pipe(v.array(vChecklistQuestion), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/checklist/checklist-question/
+ */
+export const vChecklistQuestionRequest = v.object({
+    checklist: v.pipe(v.number(), v.integer()),
+    question: v.pipe(v.string(), v.minLength(1)),
+    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647)))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/checklist/checklist/
+ */
+export const vChecklistRequest = v.object({
+    name: v.pipe(v.string(), v.minLength(1))
 });
 
 /**
@@ -5846,6 +5971,30 @@ export const vPaginatedAssignedOrderAppViewList = v.object({
 /**
  * @endpoints
  * Response:
+ *   GET /api/mobile/checklist-answer/
+ */
+export const vPaginatedAssignedOrderChecklistAnswerList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vAssignedOrderChecklistAnswer))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-signature/
+ */
+export const vPaginatedAssignedOrderChecklistSignatureList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vAssignedOrderChecklistSignature))
+});
+
+/**
+ * @endpoints
+ * Response:
  *   GET /api/mobile/assignedorderdocument/
  */
 export const vPaginatedAssignedOrderDocumentList = v.object({
@@ -5937,6 +6086,30 @@ export const vPaginatedChapterList = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vChapter))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/checklist/checklist/
+ */
+export const vPaginatedChecklistList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vChecklist))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/checklist/checklist-question/
+ */
+export const vPaginatedChecklistQuestionList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vChecklistQuestion))
 });
 
 /**
@@ -6554,6 +6727,31 @@ export const vPatchedAssignedOrderActivityRequest = v.object({
 /**
  * @endpoints
  * Request body:
+ *   PATCH /api/mobile/checklist-answer/{id}/
+ */
+export const vPatchedAssignedOrderChecklistAnswerRequest = v.object({
+    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
+    question: v.optional(v.pipe(v.number(), v.integer())),
+    answer: v.optional(v.pipe(v.string(), v.minLength(1)))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PATCH /api/mobile/checklist-signature/{id}/
+ */
+export const vPatchedAssignedOrderChecklistSignatureRequest = v.object({
+    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
+    checklist: v.optional(v.pipe(v.number(), v.integer())),
+    signature_user: v.nullish(v.string()),
+    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_customer: v.nullish(v.string()),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+});
+
+/**
+ * @endpoints
+ * Request body:
  *   PATCH /api/mobile/assignedorder/{id}/detail_change_date/
  */
 export const vPatchedAssignedOrderDatesRequest = v.object({
@@ -6673,6 +6871,26 @@ export const vPatchedChapterRequest = v.object({
     quotation: v.optional(v.pipe(v.number(), v.integer())),
     name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
     description: v.nullish(v.string())
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PATCH /api/checklist/checklist-question/{id}/
+ */
+export const vPatchedChecklistQuestionRequest = v.object({
+    checklist: v.optional(v.pipe(v.number(), v.integer())),
+    question: v.optional(v.pipe(v.string(), v.minLength(1))),
+    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647)))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PATCH /api/checklist/checklist/{id}/
+ */
+export const vPatchedChecklistRequest = v.object({
+    name: v.optional(v.pipe(v.string(), v.minLength(1)))
 });
 
 /**
@@ -12335,18 +12553,6 @@ export const vVerifyRegistrationRequest = v.object({
 
 /**
  * @endpoints
- * Request body:
- *   POST /api/user/users/student/register/fetch-user/
- */
-/**
- * The body StudentUserRegisterFetchUserView reads.
- */
-export const vWordPressUserFetchRequestRequest = v.object({
-    email: v.pipe(v.string(), v.email(), v.minLength(1))
-});
-
-/**
- * @endpoints
  * Response:
  *   PATCH /api/teamleader/work-hours-product/
  */
@@ -13207,6 +13413,33 @@ export const vAssignedOrderAppViewWritable = v.object({
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read const is used instead.
+ *
+ * Nested in: PaginatedAssignedOrderChecklistAnswerList
+ */
+export const vAssignedOrderChecklistAnswerWritable = v.object({
+    assigned_order: v.pipe(v.number(), v.integer()),
+    question: v.pipe(v.number(), v.integer()),
+    answer: v.string()
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ *
+ * Nested in: PaginatedAssignedOrderChecklistSignatureList
+ */
+export const vAssignedOrderChecklistSignatureWritable = v.object({
+    assigned_order: v.pipe(v.number(), v.integer()),
+    checklist: v.pipe(v.number(), v.integer()),
+    signature_user: v.nullish(v.pipe(v.string(), v.url())),
+    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_customer: v.nullish(v.pipe(v.string(), v.url())),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
  */
 export const vAssignedOrderCreateWritable = v.object({
     engineer: v.nullish(v.pipe(v.number(), v.integer())),
@@ -13447,6 +13680,39 @@ export const vChapterWritable = v.object({
     quotation: v.pipe(v.number(), v.integer()),
     name: v.pipe(v.string(), v.maxLength(255)),
     description: v.nullish(v.string())
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ *
+ * Nested in: PaginatedChecklistList
+ */
+export const vChecklistWritable = v.object({
+    name: v.string()
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ */
+/**
+ * A checklist with its questions in sequence: what `load` answers.
+ */
+export const vChecklistNestedWritable = v.object({
+    name: v.string()
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ *
+ * Nested in: ChecklistNested, PaginatedChecklistQuestionList
+ */
+export const vChecklistQuestionWritable = v.object({
+    checklist: v.pipe(v.number(), v.integer()),
+    question: v.string(),
+    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647)))
 });
 
 /**
@@ -15466,6 +15732,28 @@ export const vPaginatedAssignedOrderAppViewListWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read const is used instead.
  */
+export const vPaginatedAssignedOrderChecklistAnswerListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vAssignedOrderChecklistAnswerWritable))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ */
+export const vPaginatedAssignedOrderChecklistSignatureListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vAssignedOrderChecklistSignatureWritable))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ */
 export const vPaginatedAssignedOrderDocumentListWritable = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
@@ -15559,6 +15847,28 @@ export const vPaginatedChapterListWritable = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vChapterWritable))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ */
+export const vPaginatedChecklistListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vChecklistWritable))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ */
+export const vPaginatedChecklistQuestionListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vChecklistQuestionWritable))
 });
 
 /**
@@ -17819,6 +18129,79 @@ export const vAccountsVerifyRegistrationCreateBody = vVerifyRegistrationRequest;
 export const vAccountsVerifyRegistrationCreateResponse = vVerifyRegistration;
 
 export const vChangePasswordCreateBody = vChangePasswordRequestRequest;
+
+export const vChecklistChecklistListQuery = v.object({
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
+    q: v.optional(v.string())
+});
+
+export const vChecklistChecklistListResponse = vPaginatedChecklistList;
+
+export const vChecklistChecklistCreateBody = vChecklistRequest;
+
+export const vChecklistChecklistCreateResponse = vChecklist;
+
+export const vChecklistChecklistQuestionListQuery = v.object({
+    checklist: v.optional(v.pipe(v.number(), v.integer())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
+    q: v.optional(v.string())
+});
+
+export const vChecklistChecklistQuestionListResponse = vPaginatedChecklistQuestionList;
+
+export const vChecklistChecklistQuestionCreateBody = vChecklistQuestionRequest;
+
+export const vChecklistChecklistQuestionCreateResponse = vChecklistQuestion;
+
+export const vChecklistChecklistQuestionDestroyPath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * No response body
+ */
+export const vChecklistChecklistQuestionDestroyResponse = v.void();
+
+export const vChecklistChecklistQuestionRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vChecklistChecklistQuestionRetrieveResponse = vChecklistQuestion;
+
+export const vChecklistChecklistQuestionPartialUpdateBody = vPatchedChecklistQuestionRequest;
+
+export const vChecklistChecklistQuestionPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vChecklistChecklistQuestionPartialUpdateResponse = vChecklistQuestion;
+
+export const vChecklistChecklistDestroyPath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * No response body
+ */
+export const vChecklistChecklistDestroyResponse = v.void();
+
+export const vChecklistChecklistRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vChecklistChecklistRetrieveResponse = vChecklist;
+
+export const vChecklistChecklistPartialUpdateBody = vPatchedChecklistRequest;
+
+export const vChecklistChecklistPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vChecklistChecklistPartialUpdateResponse = vChecklist;
+
+export const vChecklistChecklistLoadRetrieveResponse = vChecklistNested;
 
 export const vCompanyActivityListQuery = v.object({
     ordering: v.optional(v.array(v.picklist([
@@ -20214,6 +20597,80 @@ export const vMobileAssignedordermaterialQuotationListQuery = v.object({
 });
 
 export const vMobileAssignedordermaterialQuotationListResponse = v.array(vAssignedOrderMaterialRequested);
+
+export const vMobileChecklistAnswerListQuery = v.object({
+    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
+    order: v.optional(v.pipe(v.number(), v.integer())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
+    q: v.optional(v.string())
+});
+
+export const vMobileChecklistAnswerListResponse = vPaginatedAssignedOrderChecklistAnswerList;
+
+export const vMobileChecklistAnswerCreateBody = vAssignedOrderChecklistAnswerRequest;
+
+export const vMobileChecklistAnswerCreateResponse = vAssignedOrderChecklistAnswer;
+
+export const vMobileChecklistAnswerDestroyPath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * No response body
+ */
+export const vMobileChecklistAnswerDestroyResponse = v.void();
+
+export const vMobileChecklistAnswerRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vMobileChecklistAnswerRetrieveResponse = vAssignedOrderChecklistAnswer;
+
+export const vMobileChecklistAnswerPartialUpdateBody = vPatchedAssignedOrderChecklistAnswerRequest;
+
+export const vMobileChecklistAnswerPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vMobileChecklistAnswerPartialUpdateResponse = vAssignedOrderChecklistAnswer;
+
+export const vMobileChecklistSignatureListQuery = v.object({
+    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
+    order: v.optional(v.pipe(v.number(), v.integer())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
+    q: v.optional(v.string())
+});
+
+export const vMobileChecklistSignatureListResponse = vPaginatedAssignedOrderChecklistSignatureList;
+
+export const vMobileChecklistSignatureCreateBody = vAssignedOrderChecklistSignatureRequest;
+
+export const vMobileChecklistSignatureCreateResponse = vAssignedOrderChecklistSignature;
+
+export const vMobileChecklistSignatureDestroyPath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * No response body
+ */
+export const vMobileChecklistSignatureDestroyResponse = v.void();
+
+export const vMobileChecklistSignatureRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vMobileChecklistSignatureRetrieveResponse = vAssignedOrderChecklistSignature;
+
+export const vMobileChecklistSignaturePartialUpdateBody = vPatchedAssignedOrderChecklistSignatureRequest;
+
+export const vMobileChecklistSignaturePartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vMobileChecklistSignaturePartialUpdateResponse = vAssignedOrderChecklistSignature;
 
 export const vMobileTripListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -23012,13 +23469,6 @@ export const vUserUsersStudentProfileMeRetrieveResponse = vStudentUser;
 export const vUserUsersStudentProfileMePartialUpdateBody = vPatchedStudentUserWriteRequestWritable;
 
 export const vUserUsersStudentProfileMePartialUpdateResponse = vStudentUser;
-
-export const vUserUsersStudentRegisterFetchUserCreateBody = vWordPressUserFetchRequestRequest;
-
-/**
- * Whatever WordPress keeps for this user.
- */
-export const vUserUsersStudentRegisterFetchUserCreateResponse = v.record(v.string(), v.unknown());
 
 export const vWorkforceLeaveTypeListQuery = v.object({
     page: v.optional(v.pipe(v.number(), v.integer())),

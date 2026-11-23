@@ -34,6 +34,20 @@ import {
   accountsVerifyEmailCreateMutation,
   accountsVerifyRegistrationCreateMutation,
   changePasswordCreateMutation,
+  checklistChecklistCreateMutation,
+  checklistChecklistDestroyMutation,
+  checklistChecklistListOptions,
+  checklistChecklistListQueryKey,
+  checklistChecklistPartialUpdateMutation,
+  checklistChecklistQuestionCreateMutation,
+  checklistChecklistQuestionDestroyMutation,
+  checklistChecklistQuestionListOptions,
+  checklistChecklistQuestionListQueryKey,
+  checklistChecklistQuestionPartialUpdateMutation,
+  checklistChecklistQuestionRetrieveOptions,
+  checklistChecklistQuestionRetrieveQueryKey,
+  checklistChecklistRetrieveOptions,
+  checklistChecklistRetrieveQueryKey,
   companyActivityCreateMutation,
   companyActivityDestroyMutation,
   companyActivityListOptions,
@@ -433,6 +447,20 @@ import {
   mobileAssignedordermaterialQuotationListQueryKey,
   mobileAssignedordermaterialRetrieveOptions,
   mobileAssignedordermaterialRetrieveQueryKey,
+  mobileChecklistAnswerCreateMutation,
+  mobileChecklistAnswerDestroyMutation,
+  mobileChecklistAnswerListOptions,
+  mobileChecklistAnswerListQueryKey,
+  mobileChecklistAnswerPartialUpdateMutation,
+  mobileChecklistAnswerRetrieveOptions,
+  mobileChecklistAnswerRetrieveQueryKey,
+  mobileChecklistSignatureCreateMutation,
+  mobileChecklistSignatureDestroyMutation,
+  mobileChecklistSignatureListOptions,
+  mobileChecklistSignatureListQueryKey,
+  mobileChecklistSignaturePartialUpdateMutation,
+  mobileChecklistSignatureRetrieveOptions,
+  mobileChecklistSignatureRetrieveQueryKey,
   mobileTripCreateMutation,
   mobileTripDestroyMutation,
   mobileTripListOptions,
@@ -813,7 +841,6 @@ import {
   userUsersStudentProfileMePartialUpdateMutation,
   userUsersStudentProfileMeRetrieveOptions,
   userUsersStudentProfileMeRetrieveQueryKey,
-  userUsersStudentRegisterFetchUserCreateMutation,
   workforceLeaveTypeCreateMutation,
   workforceLeaveTypeDestroyMutation,
   workforceLeaveTypeListForSelectListOptions,
@@ -895,6 +922,12 @@ import {
   vAccountsVerifyEmailCreateBody,
   vAccountsVerifyRegistrationCreateBody,
   vChangePasswordCreateBody,
+  vChecklistChecklistCreateBody,
+  vChecklistChecklistListQuery,
+  vChecklistChecklistPartialUpdateBody,
+  vChecklistChecklistQuestionCreateBody,
+  vChecklistChecklistQuestionListQuery,
+  vChecklistChecklistQuestionPartialUpdateBody,
   vCompanyActivityCreateBody,
   vCompanyActivityListQuery,
   vCompanyActivityPartialUpdateBody,
@@ -1066,6 +1099,12 @@ import {
   vMobileAssignedordermaterialOrderlinesListQuery,
   vMobileAssignedordermaterialPartialUpdateBody,
   vMobileAssignedordermaterialQuotationListQuery,
+  vMobileChecklistAnswerCreateBody,
+  vMobileChecklistAnswerListQuery,
+  vMobileChecklistAnswerPartialUpdateBody,
+  vMobileChecklistSignatureCreateBody,
+  vMobileChecklistSignatureListQuery,
+  vMobileChecklistSignaturePartialUpdateBody,
   vMobileTripCreateBody,
   vMobileTripListQuery,
   vMobileTripOrderCreateBody,
@@ -1236,7 +1275,6 @@ import {
   vUserUserListListQuery,
   vUserUserSettingsPartialUpdateBody,
   vUserUsersStudentProfileMePartialUpdateBody,
-  vUserUsersStudentRegisterFetchUserCreateBody,
   vWorkforceLeaveTypeCreateBody,
   vWorkforceLeaveTypeListForSelectListQuery,
   vWorkforceLeaveTypeListQuery,
@@ -1271,6 +1309,10 @@ import {
 } from './valibot.gen'
 
 import type {
+  ChecklistChecklistListResponse,
+  ChecklistChecklistQuestionListResponse,
+  ChecklistChecklistQuestionRetrieveResponse,
+  ChecklistChecklistRetrieveResponse,
   CompanyActivityListResponse,
   CompanyActivityRetrieveResponse,
   CompanyBranchAutocompleteListResponse,
@@ -1381,6 +1423,10 @@ import type {
   MobileAssignedordermaterialOrderlinesListResponse,
   MobileAssignedordermaterialQuotationListResponse,
   MobileAssignedordermaterialRetrieveResponse,
+  MobileChecklistAnswerListResponse,
+  MobileChecklistAnswerRetrieveResponse,
+  MobileChecklistSignatureListResponse,
+  MobileChecklistSignatureRetrieveResponse,
   MobileTripListResponse,
   MobileTripOrderListResponse,
   MobileTripOrderRetrieveResponse,
@@ -1691,6 +1737,69 @@ export declare namespace ChangePassword {
   export type CreateInput = InferInput<typeof vChangePasswordCreateBody>
   /** The `create` body, as the schema parses it. */
   export type CreateOutput = InferOutput<typeof vChangePasswordCreateBody>
+}
+
+/** `api/checklist/checklist` */
+export const ChecklistChecklist = /*#__PURE__*/ resource({
+  path: 'api/checklist/checklist',
+  kind: 'collection',
+  id: 'number',
+  list: {options: checklistChecklistListOptions, queryKey: checklistChecklistListQueryKey},
+  filters: [],
+  retrieve: {options: checklistChecklistRetrieveOptions, queryKey: checklistChecklistRetrieveQueryKey},
+  create: {mutation: checklistChecklistCreateMutation, body: vChecklistChecklistCreateBody},
+  update: {mutation: checklistChecklistPartialUpdateMutation, body: vChecklistChecklistPartialUpdateBody},
+  destroy: {mutation: checklistChecklistDestroyMutation},
+  reads: ['checklistChecklistList', 'checklistChecklistLoadRetrieve', 'checklistChecklistRetrieve'],
+})
+
+export declare namespace ChecklistChecklist {
+  /** What `list` answers with. */
+  export type ListResponse = ChecklistChecklistListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vChecklistChecklistListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = ChecklistChecklistRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vChecklistChecklistCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vChecklistChecklistCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vChecklistChecklistPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vChecklistChecklistPartialUpdateBody>
+}
+
+/** `api/checklist/checklist-question` */
+export const ChecklistChecklistQuestion = /*#__PURE__*/ resource({
+  path: 'api/checklist/checklist-question',
+  kind: 'collection',
+  id: 'number',
+  list: {options: checklistChecklistQuestionListOptions, queryKey: checklistChecklistQuestionListQueryKey},
+  filters: ['checklist'] satisfies (keyof ChecklistChecklistQuestion.ListQuery)[],
+  filterTypes: {checklist: 'integer'},
+  retrieve: {options: checklistChecklistQuestionRetrieveOptions, queryKey: checklistChecklistQuestionRetrieveQueryKey},
+  create: {mutation: checklistChecklistQuestionCreateMutation, body: vChecklistChecklistQuestionCreateBody},
+  update: {mutation: checklistChecklistQuestionPartialUpdateMutation, body: vChecklistChecklistQuestionPartialUpdateBody},
+  destroy: {mutation: checklistChecklistQuestionDestroyMutation},
+  reads: ['checklistChecklistQuestionList', 'checklistChecklistQuestionRetrieve'],
+})
+
+export declare namespace ChecklistChecklistQuestion {
+  /** What `list` answers with. */
+  export type ListResponse = ChecklistChecklistQuestionListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vChecklistChecklistQuestionListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = ChecklistChecklistQuestionRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vChecklistChecklistQuestionCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vChecklistChecklistQuestionCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vChecklistChecklistQuestionPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vChecklistChecklistQuestionPartialUpdateBody>
 }
 
 /** `api/company/activity` */
@@ -3851,6 +3960,70 @@ export declare namespace MobileAssignedordermaterialQuotation {
   export type ListResponse = MobileAssignedordermaterialQuotationListResponse
   /** The `list` query parameters. */
   export type ListQuery = InferInput<typeof vMobileAssignedordermaterialQuotationListQuery>
+}
+
+/** `api/mobile/checklist-answer` */
+export const MobileChecklistAnswer = /*#__PURE__*/ resource({
+  path: 'api/mobile/checklist-answer',
+  kind: 'collection',
+  id: 'number',
+  list: {options: mobileChecklistAnswerListOptions, queryKey: mobileChecklistAnswerListQueryKey},
+  filters: ['assigned_order', 'order'] satisfies (keyof MobileChecklistAnswer.ListQuery)[],
+  filterTypes: {assigned_order: 'integer', order: 'integer'},
+  retrieve: {options: mobileChecklistAnswerRetrieveOptions, queryKey: mobileChecklistAnswerRetrieveQueryKey},
+  create: {mutation: mobileChecklistAnswerCreateMutation, body: vMobileChecklistAnswerCreateBody},
+  update: {mutation: mobileChecklistAnswerPartialUpdateMutation, body: vMobileChecklistAnswerPartialUpdateBody},
+  destroy: {mutation: mobileChecklistAnswerDestroyMutation},
+  reads: ['mobileChecklistAnswerList', 'mobileChecklistAnswerRetrieve'],
+})
+
+export declare namespace MobileChecklistAnswer {
+  /** What `list` answers with. */
+  export type ListResponse = MobileChecklistAnswerListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileChecklistAnswerListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileChecklistAnswerRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileChecklistAnswerCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileChecklistAnswerCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileChecklistAnswerPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileChecklistAnswerPartialUpdateBody>
+}
+
+/** `api/mobile/checklist-signature` */
+export const MobileChecklistSignature = /*#__PURE__*/ resource({
+  path: 'api/mobile/checklist-signature',
+  kind: 'collection',
+  id: 'number',
+  list: {options: mobileChecklistSignatureListOptions, queryKey: mobileChecklistSignatureListQueryKey},
+  filters: ['assigned_order', 'order'] satisfies (keyof MobileChecklistSignature.ListQuery)[],
+  filterTypes: {assigned_order: 'integer', order: 'integer'},
+  retrieve: {options: mobileChecklistSignatureRetrieveOptions, queryKey: mobileChecklistSignatureRetrieveQueryKey},
+  create: {mutation: mobileChecklistSignatureCreateMutation, body: vMobileChecklistSignatureCreateBody},
+  update: {mutation: mobileChecklistSignaturePartialUpdateMutation, body: vMobileChecklistSignaturePartialUpdateBody},
+  destroy: {mutation: mobileChecklistSignatureDestroyMutation},
+  reads: ['mobileChecklistSignatureList', 'mobileChecklistSignatureRetrieve'],
+})
+
+export declare namespace MobileChecklistSignature {
+  /** What `list` answers with. */
+  export type ListResponse = MobileChecklistSignatureListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileChecklistSignatureListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileChecklistSignatureRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileChecklistSignatureCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileChecklistSignatureCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileChecklistSignaturePartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileChecklistSignaturePartialUpdateBody>
 }
 
 /** `api/mobile/trip` */
@@ -6022,21 +6195,6 @@ export declare namespace UserUsersStudentProfileMe {
   export type UpdateInput = InferInput<typeof vUserUsersStudentProfileMePartialUpdateBody>
   /** The `update` body, as the schema parses it. */
   export type UpdateOutput = InferOutput<typeof vUserUsersStudentProfileMePartialUpdateBody>
-}
-
-/** `api/user/users/student/register/fetch-user` */
-export const UserUsersStudentRegisterFetchUser = /*#__PURE__*/ resource({
-  path: 'api/user/users/student/register/fetch-user',
-  kind: 'action',
-  create: {mutation: userUsersStudentRegisterFetchUserCreateMutation, body: vUserUsersStudentRegisterFetchUserCreateBody},
-  reads: [],
-})
-
-export declare namespace UserUsersStudentRegisterFetchUser {
-  /** The `create` body, as it is sent. */
-  export type CreateInput = InferInput<typeof vUserUsersStudentRegisterFetchUserCreateBody>
-  /** The `create` body, as the schema parses it. */
-  export type CreateOutput = InferOutput<typeof vUserUsersStudentRegisterFetchUserCreateBody>
 }
 
 /** `api/workforce/leave-type` */

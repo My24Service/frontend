@@ -9,6 +9,8 @@ const ActionForm = () => import('@/features/statuscode/action/ActionForm.vue')
 const BranchForm = () => import('@/features/company/branch/BranchForm.vue')
 const BranchList = () => import('@/features/company/branch/BranchList.vue')
 const BranchView = () => import('@/features/company/branch/BranchView.vue')
+const ChecklistForm = () => import('@/features/checklist/ChecklistForm.vue')
+const ChecklistList = () => import('@/features/checklist/ChecklistList.vue')
 const EmployeeUserForm = () => import('@/features/user/employee/EmployeeUserForm.vue')
 const EmployeeUserList = () => import('@/features/user/employee/EmployeeUserList.vue')
 const EquipmentDetail = () => import('@/features/equipment/equipment/EquipmentDetail.vue')
@@ -257,6 +259,37 @@ export default [
             path: ':pk',
             components: {
               'app-content': BranchView,
+            },
+          },
+        ],
+      },
+      // checklists
+      {
+        path: 'checklists',
+        meta: { authLevelNeeded: [AUTH_LEVELS.PLANNING] },
+        children: [
+          {
+            name: 'settings-checklists',
+            path: '',
+            components: {
+              'app-content': ChecklistList,
+            },
+          },
+          {
+            name: 'settings-checklist-edit',
+            path: 'form/:pk',
+            components: {
+              'app-content': ChecklistForm,
+            },
+            props: {
+              'app-content': route => ({pk: route.params.pk}),
+            },
+          },
+          {
+            name: 'settings-checklist-add',
+            path: 'form',
+            components: {
+              'app-content': ChecklistForm,
             },
           },
         ],

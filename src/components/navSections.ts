@@ -546,6 +546,10 @@ export const SETTINGS_FILTER_ROUTES = [
   'settings-order-filter-list', 'settings-order-filter-add', 'settings-order-filter-edit',
 ]
 
+export const SETTINGS_CHECKLIST_ROUTES = [
+  'settings-checklists', 'settings-checklist-add', 'settings-checklist-edit',
+]
+
 export const SETTINGS_BRANCH_ROUTES = [
   'settings-branches', 'settings-branch-edit', 'settings-branch-add',
   'settings-branch-view', 'settings-my-branch',
