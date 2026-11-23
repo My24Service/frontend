@@ -36,6 +36,7 @@
 </template>
 
 <script lang="ts" setup>
+import { RouterLink } from 'vue-router'
 import { invalidateChecklistQueries } from './invalidation'
 import { ServerTable, createActionColumn, createAppColumnHelper, useServerTable, type ListRow } from '@/features/table'
 
@@ -56,12 +57,16 @@ const columns = columnHelper.columns([
   columnHelper.accessor('name', {
     header: $trans('Name'),
     enableSorting: false,
-    meta: {width: '90%'},
+    meta: {width: '85%'},
+    cell: ({row}) => h(RouterLink, {
+      to: {name: 'settings-checklist-edit', params: {pk: row.original.id}},
+    }, () => row.original.name),
   }),
+  // Wide enough for both icons side by side: at 10% they wrap below ~1600px.
   createActionColumn(columnHelper, {
     editRoute: 'settings-checklist-edit',
     onDelete: (id) => tableRef.value?.showDeleteModal(id),
-    width: '10%',
+    width: '15%',
   }),
 ])
 

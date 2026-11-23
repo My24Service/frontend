@@ -64,6 +64,14 @@ describe('ChecklistList', () => {
     expect(wrapper.get('a.btn').attributes('href')).toBe('/settings/checklists/form')
   })
 
+  test('the name links to that checklist\'s edit form', async () => {
+    const wrapper = await mountChecklists()
+
+    const name = wrapper.findAll('tbody tr')[1].get('td a')
+    expect(name.text()).toBe('Pick-up')
+    expect(name.attributes('href')).toBe('/settings/checklists/form/4')
+  })
+
   test('tells the user when the list cannot be loaded', async () => {
     api.get('/api/checklist/checklist/', serverError)
 
