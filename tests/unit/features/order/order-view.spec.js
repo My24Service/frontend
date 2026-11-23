@@ -101,6 +101,39 @@ async function mountView({ props = { pk: '42' }, auth = {}, main = {} } = {}) {
   return wrapper
 }
 
+describe('OrderView, filled-in checklists', () => {
+  const CHECKLIST_GETS = ['/api/mobile/checklist-answer/', '/api/mobile/checklist-signature/']
+  const checklistRequests = () => api.requests().filter((sent) => CHECKLIST_GETS.includes(sent.path))
+
+  beforeEach(() => {
+    api.get('/api/mobile/checklist-answer/', paginated([
+      { id: 1, assigned_order: 80, question: 11, question_text: 'Is the power connected?', answer: 'Yes' },
+    ]))
+    api.get('/api/mobile/checklist-signature/', paginated([]))
+  })
+
+  test('shows them for this order when the tenant has the checklist module', async () => {
+    const wrapper = await mountView({ main: { getModules: ['checklist'] } })
+
+    expect(checklistRequests().map((sent) => sent.query.order)).toEqual(['42', '42'])
+    expect(wrapper.get('.filled-checklists').text()).toContain('Is the power connected?')
+  })
+
+  test('asks for none without the module', async () => {
+    const wrapper = await mountView({ main: { getModules: ['orders'] } })
+
+    expect(checklistRequests()).toEqual([])
+    expect(wrapper.find('.filled-checklists').exists()).toBe(false)
+  })
+
+  // The endpoints serve planning users and engineers only.
+  test('asks for none as a customer', async () => {
+    await mountView({ main: { getModules: ['checklist'] }, auth: { isCustomer: true } })
+
+    expect(checklistRequests()).toEqual([])
+  })
+})
+
 describe('OrderView by pk', () => {
   test('reads the order once, by its id', async () => {
     await mountView()

@@ -1746,6 +1746,27 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'settings-checklists': RouteRecordInfo<
+      'settings-checklists',
+      '/settings/checklists',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'settings-checklist-add': RouteRecordInfo<
+      'settings-checklist-add',
+      '/settings/checklists/form',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    'settings-checklist-edit': RouteRecordInfo<
+      'settings-checklist-edit',
+      '/settings/checklists/form/:pk',
+      { pk: ParamValue<true> },
+      { pk: ParamValue<false> },
+      | never
+    >,
     'settings-company': RouteRecordInfo<
       'settings-company',
       '/settings/company',
@@ -3409,6 +3430,23 @@ declare module 'vue-router/auto-routes' {
         | never
       pathParamNames:
         | never
+    }
+    'src/features/checklist/ChecklistList.vue': {
+      routes:
+        | 'settings-checklists'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
+    'src/features/checklist/ChecklistForm.vue': {
+      routes:
+        | 'settings-checklist-add'
+        | 'settings-checklist-edit'
+      views:
+        | never
+      pathParamNames:
+        | 'pk'
     }
     'src/views/webshop/WebshopIframe.vue': {
       routes:
