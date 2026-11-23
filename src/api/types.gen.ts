@@ -352,6 +352,39 @@ export type AssignedOrderAppView = {
     readonly start_codes?: Array<AssignedOrderCodesRow>;
 };
 
+export type AssignedOrderChecklistAnswer = {
+    readonly id: number;
+    assigned_order: number;
+    question: number;
+    readonly question_text: string;
+    answer: string;
+};
+
+export type AssignedOrderChecklistAnswerRequest = {
+    assigned_order: number;
+    question: number;
+    answer: string;
+};
+
+export type AssignedOrderChecklistSignature = {
+    readonly id: number;
+    assigned_order: number;
+    checklist: number;
+    signature_user?: string | null;
+    signature_name_user?: string | null;
+    signature_customer?: string | null;
+    signature_name_customer?: string | null;
+};
+
+export type AssignedOrderChecklistSignatureRequest = {
+    assigned_order: number;
+    checklist: number;
+    signature_user?: string | null;
+    signature_name_user?: string | null;
+    signature_customer?: string | null;
+    signature_name_customer?: string | null;
+};
+
 /**
  * {id, statuscode, description} - Statuscode.objects.values() row.
  *
@@ -895,6 +928,37 @@ export type ChapterRequest = {
  */
 export type CheckTokenResponse = {
     result_ok: boolean;
+};
+
+export type Checklist = {
+    readonly id: number;
+    name: string;
+};
+
+/**
+ * A checklist with its questions in sequence: what `load` answers.
+ */
+export type ChecklistNested = {
+    readonly id: number;
+    name: string;
+    readonly questions: Array<ChecklistQuestion>;
+};
+
+export type ChecklistQuestion = {
+    readonly id: number;
+    checklist: number;
+    question: string;
+    sequence?: number;
+};
+
+export type ChecklistQuestionRequest = {
+    checklist: number;
+    question: string;
+    sequence?: number;
+};
+
+export type ChecklistRequest = {
+    name: string;
 };
 
 /**
@@ -4956,6 +5020,20 @@ export type PaginatedAssignedOrderAppViewList = {
     results?: Array<AssignedOrderAppView>;
 };
 
+export type PaginatedAssignedOrderChecklistAnswerList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderChecklistAnswer>;
+};
+
+export type PaginatedAssignedOrderChecklistSignatureList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderChecklistSignature>;
+};
+
 export type PaginatedAssignedOrderDocumentList = {
     count?: number;
     next?: string | null;
@@ -5017,6 +5095,20 @@ export type PaginatedChapterList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<Chapter>;
+};
+
+export type PaginatedChecklistList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<Checklist>;
+};
+
+export type PaginatedChecklistQuestionList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<ChecklistQuestion>;
 };
 
 export type PaginatedContractList = {
@@ -5711,6 +5803,21 @@ export type PatchedAssignedOrderActivityRequest = {
     actual_work?: string | null;
 };
 
+export type PatchedAssignedOrderChecklistAnswerRequest = {
+    assigned_order?: number;
+    question?: number;
+    answer?: string;
+};
+
+export type PatchedAssignedOrderChecklistSignatureRequest = {
+    assigned_order?: number;
+    checklist?: number;
+    signature_user?: string | null;
+    signature_name_user?: string | null;
+    signature_customer?: string | null;
+    signature_name_customer?: string | null;
+};
+
 export type PatchedAssignedOrderDatesRequest = {
     alt_start_date?: string | null;
     alt_start_time?: string | null;
@@ -5795,6 +5902,16 @@ export type PatchedChapterRequest = {
     quotation?: number;
     name?: string;
     description?: string | null;
+};
+
+export type PatchedChecklistQuestionRequest = {
+    checklist?: number;
+    question?: string;
+    sequence?: number;
+};
+
+export type PatchedChecklistRequest = {
+    name?: string;
 };
 
 export type PatchedContractRequest = {
@@ -9397,13 +9514,6 @@ export type VerifyRegistrationRequest = {
     signature: string;
 };
 
-/**
- * The body StudentUserRegisterFetchUserView reads.
- */
-export type WordPressUserFetchRequestRequest = {
-    email: string;
-};
-
 export type WorkHoursProduct = {
     workhours_product_uuid: string;
     workhours_product_name: string;
@@ -9706,6 +9816,21 @@ export type AssignedOrderAppViewWritable = {
     };
 };
 
+export type AssignedOrderChecklistAnswerWritable = {
+    assigned_order: number;
+    question: number;
+    answer: string;
+};
+
+export type AssignedOrderChecklistSignatureWritable = {
+    assigned_order: number;
+    checklist: number;
+    signature_user?: string | null;
+    signature_name_user?: string | null;
+    signature_customer?: string | null;
+    signature_name_customer?: string | null;
+};
+
 export type AssignedOrderCreateWritable = {
     engineer?: number | null;
     student_user?: number | null;
@@ -9866,6 +9991,23 @@ export type ChapterWritable = {
     quotation: number;
     name: string;
     description?: string | null;
+};
+
+export type ChecklistWritable = {
+    name: string;
+};
+
+/**
+ * A checklist with its questions in sequence: what `load` answers.
+ */
+export type ChecklistNestedWritable = {
+    name: string;
+};
+
+export type ChecklistQuestionWritable = {
+    checklist: number;
+    question: string;
+    sequence?: number;
 };
 
 export type ConfigWritable = {
@@ -11475,6 +11617,20 @@ export type PaginatedAssignedOrderAppViewListWritable = {
     results?: Array<AssignedOrderAppViewWritable>;
 };
 
+export type PaginatedAssignedOrderChecklistAnswerListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderChecklistAnswerWritable>;
+};
+
+export type PaginatedAssignedOrderChecklistSignatureListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderChecklistSignatureWritable>;
+};
+
 export type PaginatedAssignedOrderDocumentListWritable = {
     count?: number;
     next?: string | null;
@@ -11536,6 +11692,20 @@ export type PaginatedChapterListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<ChapterWritable>;
+};
+
+export type PaginatedChecklistListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<ChecklistWritable>;
+};
+
+export type PaginatedChecklistQuestionListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<ChecklistQuestionWritable>;
 };
 
 export type PaginatedContractListWritable = {
@@ -13271,6 +13441,212 @@ export type ChangePasswordCreateResponses = {
      */
     200: unknown;
 };
+
+export type ChecklistChecklistListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * Case-insensitive substring match on name.
+         */
+        q?: string;
+    };
+    url: '/api/checklist/checklist/';
+};
+
+export type ChecklistChecklistListResponses = {
+    200: PaginatedChecklistList;
+};
+
+export type ChecklistChecklistListResponse = ChecklistChecklistListResponses[keyof ChecklistChecklistListResponses];
+
+export type ChecklistChecklistCreateData = {
+    body: ChecklistRequest;
+    path?: never;
+    query?: never;
+    url: '/api/checklist/checklist/';
+};
+
+export type ChecklistChecklistCreateResponses = {
+    201: Checklist;
+};
+
+export type ChecklistChecklistCreateResponse = ChecklistChecklistCreateResponses[keyof ChecklistChecklistCreateResponses];
+
+export type ChecklistChecklistQuestionListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        checklist?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/checklist/checklist-question/';
+};
+
+export type ChecklistChecklistQuestionListResponses = {
+    200: PaginatedChecklistQuestionList;
+};
+
+export type ChecklistChecklistQuestionListResponse = ChecklistChecklistQuestionListResponses[keyof ChecklistChecklistQuestionListResponses];
+
+export type ChecklistChecklistQuestionCreateData = {
+    body: ChecklistQuestionRequest;
+    path?: never;
+    query?: never;
+    url: '/api/checklist/checklist-question/';
+};
+
+export type ChecklistChecklistQuestionCreateResponses = {
+    201: ChecklistQuestion;
+};
+
+export type ChecklistChecklistQuestionCreateResponse = ChecklistChecklistQuestionCreateResponses[keyof ChecklistChecklistQuestionCreateResponses];
+
+export type ChecklistChecklistQuestionDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this checklist question.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/checklist/checklist-question/{id}/';
+};
+
+export type ChecklistChecklistQuestionDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type ChecklistChecklistQuestionDestroyResponse = ChecklistChecklistQuestionDestroyResponses[keyof ChecklistChecklistQuestionDestroyResponses];
+
+export type ChecklistChecklistQuestionRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this checklist question.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/checklist/checklist-question/{id}/';
+};
+
+export type ChecklistChecklistQuestionRetrieveResponses = {
+    200: ChecklistQuestion;
+};
+
+export type ChecklistChecklistQuestionRetrieveResponse = ChecklistChecklistQuestionRetrieveResponses[keyof ChecklistChecklistQuestionRetrieveResponses];
+
+export type ChecklistChecklistQuestionPartialUpdateData = {
+    body?: PatchedChecklistQuestionRequest;
+    path: {
+        /**
+         * A unique integer value identifying this checklist question.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/checklist/checklist-question/{id}/';
+};
+
+export type ChecklistChecklistQuestionPartialUpdateResponses = {
+    200: ChecklistQuestion;
+};
+
+export type ChecklistChecklistQuestionPartialUpdateResponse = ChecklistChecklistQuestionPartialUpdateResponses[keyof ChecklistChecklistQuestionPartialUpdateResponses];
+
+export type ChecklistChecklistDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this checklist.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/checklist/checklist/{id}/';
+};
+
+export type ChecklistChecklistDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type ChecklistChecklistDestroyResponse = ChecklistChecklistDestroyResponses[keyof ChecklistChecklistDestroyResponses];
+
+export type ChecklistChecklistRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this checklist.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/checklist/checklist/{id}/';
+};
+
+export type ChecklistChecklistRetrieveResponses = {
+    200: Checklist;
+};
+
+export type ChecklistChecklistRetrieveResponse = ChecklistChecklistRetrieveResponses[keyof ChecklistChecklistRetrieveResponses];
+
+export type ChecklistChecklistPartialUpdateData = {
+    body?: PatchedChecklistRequest;
+    path: {
+        /**
+         * A unique integer value identifying this checklist.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/checklist/checklist/{id}/';
+};
+
+export type ChecklistChecklistPartialUpdateResponses = {
+    200: Checklist;
+};
+
+export type ChecklistChecklistPartialUpdateResponse = ChecklistChecklistPartialUpdateResponses[keyof ChecklistChecklistPartialUpdateResponses];
+
+export type ChecklistChecklistLoadRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/checklist/checklist/load/';
+};
+
+export type ChecklistChecklistLoadRetrieveResponses = {
+    200: ChecklistNested;
+};
+
+export type ChecklistChecklistLoadRetrieveResponse = ChecklistChecklistLoadRetrieveResponses[keyof ChecklistChecklistLoadRetrieveResponses];
 
 export type CompanyActivityListData = {
     body?: never;
@@ -19925,6 +20301,202 @@ export type MobileAssignedordermaterialQuotationListResponses = {
 };
 
 export type MobileAssignedordermaterialQuotationListResponse = MobileAssignedordermaterialQuotationListResponses[keyof MobileAssignedordermaterialQuotationListResponses];
+
+export type MobileChecklistAnswerListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        assigned_order?: number;
+        order?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/mobile/checklist-answer/';
+};
+
+export type MobileChecklistAnswerListResponses = {
+    200: PaginatedAssignedOrderChecklistAnswerList;
+};
+
+export type MobileChecklistAnswerListResponse = MobileChecklistAnswerListResponses[keyof MobileChecklistAnswerListResponses];
+
+export type MobileChecklistAnswerCreateData = {
+    body: AssignedOrderChecklistAnswerRequest;
+    path?: never;
+    query?: never;
+    url: '/api/mobile/checklist-answer/';
+};
+
+export type MobileChecklistAnswerCreateResponses = {
+    201: AssignedOrderChecklistAnswer;
+};
+
+export type MobileChecklistAnswerCreateResponse = MobileChecklistAnswerCreateResponses[keyof MobileChecklistAnswerCreateResponses];
+
+export type MobileChecklistAnswerDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this assigned order checklist answer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/mobile/checklist-answer/{id}/';
+};
+
+export type MobileChecklistAnswerDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type MobileChecklistAnswerDestroyResponse = MobileChecklistAnswerDestroyResponses[keyof MobileChecklistAnswerDestroyResponses];
+
+export type MobileChecklistAnswerRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this assigned order checklist answer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/mobile/checklist-answer/{id}/';
+};
+
+export type MobileChecklistAnswerRetrieveResponses = {
+    200: AssignedOrderChecklistAnswer;
+};
+
+export type MobileChecklistAnswerRetrieveResponse = MobileChecklistAnswerRetrieveResponses[keyof MobileChecklistAnswerRetrieveResponses];
+
+export type MobileChecklistAnswerPartialUpdateData = {
+    body?: PatchedAssignedOrderChecklistAnswerRequest;
+    path: {
+        /**
+         * A unique integer value identifying this assigned order checklist answer.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/mobile/checklist-answer/{id}/';
+};
+
+export type MobileChecklistAnswerPartialUpdateResponses = {
+    200: AssignedOrderChecklistAnswer;
+};
+
+export type MobileChecklistAnswerPartialUpdateResponse = MobileChecklistAnswerPartialUpdateResponses[keyof MobileChecklistAnswerPartialUpdateResponses];
+
+export type MobileChecklistSignatureListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        assigned_order?: number;
+        order?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/mobile/checklist-signature/';
+};
+
+export type MobileChecklistSignatureListResponses = {
+    200: PaginatedAssignedOrderChecklistSignatureList;
+};
+
+export type MobileChecklistSignatureListResponse = MobileChecklistSignatureListResponses[keyof MobileChecklistSignatureListResponses];
+
+export type MobileChecklistSignatureCreateData = {
+    body: AssignedOrderChecklistSignatureRequest;
+    path?: never;
+    query?: never;
+    url: '/api/mobile/checklist-signature/';
+};
+
+export type MobileChecklistSignatureCreateResponses = {
+    201: AssignedOrderChecklistSignature;
+};
+
+export type MobileChecklistSignatureCreateResponse = MobileChecklistSignatureCreateResponses[keyof MobileChecklistSignatureCreateResponses];
+
+export type MobileChecklistSignatureDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this assigned order checklist signature.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/mobile/checklist-signature/{id}/';
+};
+
+export type MobileChecklistSignatureDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type MobileChecklistSignatureDestroyResponse = MobileChecklistSignatureDestroyResponses[keyof MobileChecklistSignatureDestroyResponses];
+
+export type MobileChecklistSignatureRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this assigned order checklist signature.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/mobile/checklist-signature/{id}/';
+};
+
+export type MobileChecklistSignatureRetrieveResponses = {
+    200: AssignedOrderChecklistSignature;
+};
+
+export type MobileChecklistSignatureRetrieveResponse = MobileChecklistSignatureRetrieveResponses[keyof MobileChecklistSignatureRetrieveResponses];
+
+export type MobileChecklistSignaturePartialUpdateData = {
+    body?: PatchedAssignedOrderChecklistSignatureRequest;
+    path: {
+        /**
+         * A unique integer value identifying this assigned order checklist signature.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/mobile/checklist-signature/{id}/';
+};
+
+export type MobileChecklistSignaturePartialUpdateResponses = {
+    200: AssignedOrderChecklistSignature;
+};
+
+export type MobileChecklistSignaturePartialUpdateResponse = MobileChecklistSignaturePartialUpdateResponses[keyof MobileChecklistSignaturePartialUpdateResponses];
 
 export type MobileTripListData = {
     body?: never;
@@ -26829,24 +27401,6 @@ export type UserUsersStudentProfileMePartialUpdateResponses = {
 };
 
 export type UserUsersStudentProfileMePartialUpdateResponse = UserUsersStudentProfileMePartialUpdateResponses[keyof UserUsersStudentProfileMePartialUpdateResponses];
-
-export type UserUsersStudentRegisterFetchUserCreateData = {
-    body: WordPressUserFetchRequestRequest;
-    path?: never;
-    query?: never;
-    url: '/api/user/users/student/register/fetch-user/';
-};
-
-export type UserUsersStudentRegisterFetchUserCreateResponses = {
-    /**
-     * Whatever WordPress keeps for this user.
-     */
-    200: {
-        [key: string]: unknown;
-    };
-};
-
-export type UserUsersStudentRegisterFetchUserCreateResponse = UserUsersStudentRegisterFetchUserCreateResponses[keyof UserUsersStudentRegisterFetchUserCreateResponses];
 
 export type WorkforceLeaveTypeListData = {
     body?: never;

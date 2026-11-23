@@ -261,6 +261,270 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/checklist/checklist/:
+    get:
+      operationId: checklist_checklist_list
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Case-insensitive substring match on name.
+      tags:
+      - checklist
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChecklistList'
+          description: ''
+    post:
+      operationId: checklist_checklist_create
+      description: Viewset that supports all normal viewset functionality.
+      tags:
+      - checklist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChecklistRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChecklistRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChecklistRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checklist'
+          description: ''
+  /api/checklist/checklist-question/:
+    get:
+      operationId: checklist_checklist_question_list
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: checklist
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - checklist
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChecklistQuestionList'
+          description: ''
+    post:
+      operationId: checklist_checklist_question_create
+      description: Viewset that supports all normal viewset functionality.
+      tags:
+      - checklist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChecklistQuestionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChecklistQuestionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChecklistQuestionRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChecklistQuestion'
+          description: ''
+  /api/checklist/checklist-question/{id}/:
+    get:
+      operationId: checklist_checklist_question_retrieve
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this checklist question.
+        required: true
+      tags:
+      - checklist
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChecklistQuestion'
+          description: ''
+    patch:
+      operationId: checklist_checklist_question_partial_update
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this checklist question.
+        required: true
+      tags:
+      - checklist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedChecklistQuestionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedChecklistQuestionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedChecklistQuestionRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChecklistQuestion'
+          description: ''
+    delete:
+      operationId: checklist_checklist_question_destroy
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this checklist question.
+        required: true
+      tags:
+      - checklist
+      responses:
+        '204':
+          description: No response body
+  /api/checklist/checklist/{id}/:
+    get:
+      operationId: checklist_checklist_retrieve
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this checklist.
+        required: true
+      tags:
+      - checklist
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checklist'
+          description: ''
+    patch:
+      operationId: checklist_checklist_partial_update
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this checklist.
+        required: true
+      tags:
+      - checklist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedChecklistRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedChecklistRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedChecklistRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checklist'
+          description: ''
+    delete:
+      operationId: checklist_checklist_destroy
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this checklist.
+        required: true
+      tags:
+      - checklist
+      responses:
+        '204':
+          description: No response body
+  /api/checklist/checklist/load/:
+    get:
+      operationId: checklist_checklist_load_retrieve
+      description: Viewset that supports all normal viewset functionality.
+      tags:
+      - checklist
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChecklistNested'
+          description: ''
   /api/company/activity/:
     get:
       operationId: company_activity_list
@@ -9745,6 +10009,276 @@ paths:
                 items:
                   $ref: '#/components/schemas/AssignedOrderMaterialRequested'
           description: ''
+  /api/mobile/checklist-answer/:
+    get:
+      operationId: mobile_checklist_answer_list
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: assigned_order
+        schema:
+          type: integer
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - mobile
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAssignedOrderChecklistAnswerList'
+          description: ''
+    post:
+      operationId: mobile_checklist_answer_create
+      description: Viewset that supports all normal viewset functionality.
+      tags:
+      - mobile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderChecklistAnswerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderChecklistAnswerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderChecklistAnswerRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistAnswer'
+          description: ''
+  /api/mobile/checklist-answer/{id}/:
+    get:
+      operationId: mobile_checklist_answer_retrieve
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assigned order checklist
+          answer.
+        required: true
+      tags:
+      - mobile
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistAnswer'
+          description: ''
+    patch:
+      operationId: mobile_checklist_answer_partial_update
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assigned order checklist
+          answer.
+        required: true
+      tags:
+      - mobile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignedOrderChecklistAnswerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignedOrderChecklistAnswerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignedOrderChecklistAnswerRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistAnswer'
+          description: ''
+    delete:
+      operationId: mobile_checklist_answer_destroy
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assigned order checklist
+          answer.
+        required: true
+      tags:
+      - mobile
+      responses:
+        '204':
+          description: No response body
+  /api/mobile/checklist-signature/:
+    get:
+      operationId: mobile_checklist_signature_list
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: query
+        name: assigned_order
+        schema:
+          type: integer
+      - in: query
+        name: order
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - mobile
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAssignedOrderChecklistSignatureList'
+          description: ''
+    post:
+      operationId: mobile_checklist_signature_create
+      description: Viewset that supports all normal viewset functionality.
+      tags:
+      - mobile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderChecklistSignatureRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderChecklistSignatureRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderChecklistSignatureRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistSignature'
+          description: ''
+  /api/mobile/checklist-signature/{id}/:
+    get:
+      operationId: mobile_checklist_signature_retrieve
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assigned order checklist
+          signature.
+        required: true
+      tags:
+      - mobile
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistSignature'
+          description: ''
+    patch:
+      operationId: mobile_checklist_signature_partial_update
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assigned order checklist
+          signature.
+        required: true
+      tags:
+      - mobile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignedOrderChecklistSignatureRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignedOrderChecklistSignatureRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignedOrderChecklistSignatureRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistSignature'
+          description: ''
+    delete:
+      operationId: mobile_checklist_signature_destroy
+      description: Viewset that supports all normal viewset functionality.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assigned order checklist
+          signature.
+        required: true
+      tags:
+      - mobile
+      responses:
+        '204':
+          description: No response body
   /api/mobile/trip/:
     get:
       operationId: mobile_trip_list
@@ -20435,34 +20969,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/StudentUser'
           description: ''
-  /api/user/users/student/register/fetch-user/:
-    post:
-      operationId: user_users_student_register_fetch_user_create
-      tags:
-      - user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WordPressUserFetchRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/WordPressUserFetchRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/WordPressUserFetchRequestRequest'
-        required: true
-      security:
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: true
-                description: Whatever WordPress keeps for this user.
-          description: ''
   /api/workforce/leave-type/:
     get:
       operationId: workforce_leave_type_list
@@ -22741,6 +23247,97 @@ components:
       - final_start_time
       - id
       - order
+    AssignedOrderChecklistAnswer:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        assigned_order:
+          type: integer
+        question:
+          type: integer
+        question_text:
+          type: string
+          readOnly: true
+        answer:
+          type: string
+      required:
+      - answer
+      - assigned_order
+      - id
+      - question
+      - question_text
+    AssignedOrderChecklistAnswerRequest:
+      type: object
+      properties:
+        assigned_order:
+          type: integer
+        question:
+          type: integer
+        answer:
+          type: string
+          minLength: 1
+      required:
+      - answer
+      - assigned_order
+      - question
+    AssignedOrderChecklistSignature:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        assigned_order:
+          type: integer
+        checklist:
+          type: integer
+        signature_user:
+          type: string
+          format: uri
+          nullable: true
+        signature_name_user:
+          type: string
+          nullable: true
+          maxLength: 255
+        signature_customer:
+          type: string
+          format: uri
+          nullable: true
+        signature_name_customer:
+          type: string
+          nullable: true
+          maxLength: 255
+      required:
+      - assigned_order
+      - checklist
+      - id
+    AssignedOrderChecklistSignatureRequest:
+      type: object
+      properties:
+        assigned_order:
+          type: integer
+        checklist:
+          type: integer
+        signature_user:
+          type: string
+          format: byte
+          nullable: true
+        signature_name_user:
+          type: string
+          nullable: true
+          maxLength: 255
+        signature_customer:
+          type: string
+          format: byte
+          nullable: true
+        signature_name_customer:
+          type: string
+          nullable: true
+          maxLength: 255
+      required:
+      - assigned_order
+      - checklist
     AssignedOrderCodesRow:
       type: object
       description: |-
@@ -23962,6 +24559,76 @@ components:
           type: boolean
       required:
       - result_ok
+    Checklist:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+      required:
+      - id
+      - name
+    ChecklistNested:
+      type: object
+      description: 'A checklist with its questions in sequence: what `load` answers.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistQuestion'
+          readOnly: true
+      required:
+      - id
+      - name
+      - questions
+    ChecklistQuestion:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        checklist:
+          type: integer
+        question:
+          type: string
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - checklist
+      - id
+      - question
+    ChecklistQuestionRequest:
+      type: object
+      properties:
+        checklist:
+          type: integer
+        question:
+          type: string
+          minLength: 1
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - checklist
+      - question
+    ChecklistRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+      required:
+      - name
     CodeTypeEnum:
       enum:
       - order
@@ -33992,6 +34659,46 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AssignedOrderAppView'
+    PaginatedAssignedOrderChecklistAnswerList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderChecklistAnswer'
+    PaginatedAssignedOrderChecklistSignatureList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderChecklistSignature'
     PaginatedAssignedOrderDocumentList:
       type: object
       properties:
@@ -34172,6 +34879,46 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Chapter'
+    PaginatedChecklistList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Checklist'
+    PaginatedChecklistQuestionList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistQuestion'
     PaginatedContractList:
       type: object
       properties:
@@ -36002,6 +36749,39 @@ components:
           type: string
           format: time
           nullable: true
+    PatchedAssignedOrderChecklistAnswerRequest:
+      type: object
+      properties:
+        assigned_order:
+          type: integer
+        question:
+          type: integer
+        answer:
+          type: string
+          minLength: 1
+    PatchedAssignedOrderChecklistSignatureRequest:
+      type: object
+      properties:
+        assigned_order:
+          type: integer
+        checklist:
+          type: integer
+        signature_user:
+          type: string
+          format: byte
+          nullable: true
+        signature_name_user:
+          type: string
+          nullable: true
+          maxLength: 255
+        signature_customer:
+          type: string
+          format: byte
+          nullable: true
+        signature_name_customer:
+          type: string
+          nullable: true
+          maxLength: 255
     PatchedAssignedOrderDatesRequest:
       type: object
       properties:
@@ -36207,6 +36987,24 @@ components:
         description:
           type: string
           nullable: true
+    PatchedChecklistQuestionRequest:
+      type: object
+      properties:
+        checklist:
+          type: integer
+        question:
+          type: string
+          minLength: 1
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+    PatchedChecklistRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
     PatchedContractRequest:
       type: object
       properties:
@@ -45346,16 +46144,6 @@ components:
       - signature
       - timestamp
       - user_id
-    WordPressUserFetchRequestRequest:
-      type: object
-      description: The body StudentUserRegisterFetchUserView reads.
-      properties:
-        email:
-          type: string
-          format: email
-          minLength: 1
-      required:
-      - email
     WorkHoursProduct:
       type: object
       properties:
