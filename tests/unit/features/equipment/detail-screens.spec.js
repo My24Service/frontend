@@ -4,6 +4,7 @@ import {
   vCustomer,
   vEquipment,
   vEquipmentDashboardResponse,
+  vEquipmentInspection,
   vLocation,
   vLocationDashboardResponse,
   vOrder,
@@ -225,6 +226,49 @@ describe('EquipmentDetail', () => {
     await settle()
 
     expect(bodies()).toContain('Error fetching equipment detail')
+  })
+})
+
+describe('EquipmentDetail inspection', () => {
+  const WITH_MODULE = {
+    getMemberHasBranches: true,
+    getEquipmentQrType: 'my24service',
+    getProductFamily: 'default',
+    getCurrentLanguage: 'nl',
+    getModules: ['equipment', 'checklist'],
+  }
+
+  beforeEach(() => {
+    api.get('/api/equipment/equipment/{id}/', () => fixtureFor(vEquipment, {
+      id: 11,
+      name: 'Ketel 3000',
+      inspection: fixtureFor(vEquipmentInspection, {
+        status: 'rejected', valid_until: '2027-03-01', score: 4, rejected_count: 2, date: '2026-03-01',
+      }),
+      parts: [],
+    }))
+  })
+
+  test('shows the status, the valid-until date, the inspection date, the score and the rejected points', async () => {
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+
+    const rows = Object.fromEntries(wrapper.findAll('dt').map((term) => [term.text(), term.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({
+      'Inspection status': 'Not approved',
+      'Valid until': '01-03-2027',
+      'Last inspection': '01-03-2026',
+      'Condition score': '4',
+      'Rejected points': '2',
+    })
+  })
+
+  test('shows none of them without the checklist module', async () => {
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
+    await settle()
+
+    expect(wrapper.text()).not.toContain('Inspection status')
+    expect(wrapper.text()).not.toContain('Condition score')
   })
 })
 
