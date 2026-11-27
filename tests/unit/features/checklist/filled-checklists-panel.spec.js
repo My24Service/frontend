@@ -193,3 +193,49 @@ describe('FilledChecklistsPanel, groups, results and photos', () => {
     expect(links[0].get('img').attributes('src')).toBe('https://riedel.example/media/p1.jpg')
   })
 })
+
+describe('FilledChecklistsPanel, scores and remarks', () => {
+  test('shows the score, the rejected points and the valid-until date', async () => {
+    api.get(PATH, [finished({score: 3, rejected_count: 2, valid_until: '2027-11-27'})])
+
+    const wrapper = await mountPanel()
+
+    expect(wrapper.get('.checklist-score').text()).toBe('3')
+    expect(wrapper.get('.checklist-rejected').text()).toBe('2')
+    expect(wrapper.get('.checklist-valid-until').text()).toBe('27-11-2027')
+  })
+
+  // A checklist of text questions, and every record finished before results existed.
+  test('shows none of them for a checklist without a score', async () => {
+    const wrapper = await mountPanel()
+
+    expect(wrapper.find('.checklist-result').exists()).toBe(false)
+  })
+
+  test('shows the score of each part', async () => {
+    api.get(PATH, [finished({parts: [
+      {name: 'Door', score: 2, rejected_count: 1},
+      {name: 'Cable', score: 1, rejected_count: 0},
+    ]})])
+
+    const wrapper = await mountPanel()
+
+    const rows = wrapper.findAll('.part-scores tbody tr').map((row) => row.findAll('td').map((cell) => cell.text()))
+    expect(rows).toEqual([['Door', '2', '1'], ['Cable', '1', '0']])
+  })
+
+  test('shows the general remark when there is one', async () => {
+    api.get(PATH, [finished({remarks: 'Lift needs a new door within six months.'})])
+
+    const wrapper = await mountPanel()
+
+    expect(wrapper.get('.checklist-remarks').text()).toContain('Lift needs a new door within six months.')
+  })
+
+  test('shows no remark block without a remark, and no part table without parts', async () => {
+    const wrapper = await mountPanel()
+
+    expect(wrapper.find('.checklist-remarks').exists()).toBe(false)
+    expect(wrapper.find('.part-scores').exists()).toBe(false)
+  })
+})
