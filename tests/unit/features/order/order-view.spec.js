@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { OrderView } from '@/features/order'
-import { vOrderDetail, vPurchase, vResultResponse } from '@/api/valibot.gen'
+import { vAssignedOrderChecklistAnswer, vOrderDetail, vPurchase, vResultResponse } from '@/api/valibot.gen'
 
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
@@ -107,7 +107,7 @@ describe('OrderView, filled-in checklists', () => {
 
   beforeEach(() => {
     api.get('/api/mobile/checklist-answer/', paginated([
-      { id: 1, assigned_order: 80, question: 11, question_text: 'Is the power connected?', answer: 'Yes' },
+      fixtureFor(vAssignedOrderChecklistAnswer, { id: 1, assigned_order: 80, question: 11, question_text: 'Is the power connected?', answer: 'Yes' }),
     ]))
     api.get('/api/mobile/checklist-signature/', paginated([]))
   })

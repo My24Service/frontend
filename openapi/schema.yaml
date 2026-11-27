@@ -512,6 +512,12 @@ paths:
       responses:
         '204':
           description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChecklistDeleteRefused'
+          description: ''
   /api/checklist/checklist/load/:
     get:
       operationId: checklist_checklist_load_retrieve
@@ -3293,6 +3299,220 @@ paths:
                 type: string
                 format: binary
           description: ''
+  /api/equipment/equipment-part/:
+    get:
+      operationId: equipment_equipment_part_list
+      description: |-
+        The parts of an equipment. Checklists and the sync make them; here a
+        planner changes the description and the order, or deletes one.
+
+        Who reads: everyone who reads the equipment, and only the parts of the
+        equipment they see (a customer: its own; a branch employee: its branch's).
+        Who writes (PATCH, DELETE): planning users and staff. There is no create
+        or PUT: a request with such a method gets a 405, whatever the role.
+      parameters:
+      - in: query
+        name: equipment
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - equipment
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEquipmentPartList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
+  /api/equipment/equipment-part/{id}/:
+    get:
+      operationId: equipment_equipment_part_retrieve
+      description: |-
+        The parts of an equipment. Checklists and the sync make them; here a
+        planner changes the description and the order, or deletes one.
+
+        Who reads: everyone who reads the equipment, and only the parts of the
+        equipment they see (a customer: its own; a branch employee: its branch's).
+        Who writes (PATCH, DELETE): planning users and staff. There is no create
+        or PUT: a request with such a method gets a 405, whatever the role.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this equipment part.
+        required: true
+      tags:
+      - equipment
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentPart'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+    patch:
+      operationId: equipment_equipment_part_partial_update
+      description: |-
+        The parts of an equipment. Checklists and the sync make them; here a
+        planner changes the description and the order, or deletes one.
+
+        Who reads: everyone who reads the equipment, and only the parts of the
+        equipment they see (a customer: its own; a branch employee: its branch's).
+        Who writes (PATCH, DELETE): planning users and staff. There is no create
+        or PUT: a request with such a method gets a 405, whatever the role.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this equipment part.
+        required: true
+      tags:
+      - equipment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipmentPartRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipmentPartRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEquipmentPartRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentPart'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+    delete:
+      operationId: equipment_equipment_part_destroy
+      description: |-
+        The parts of an equipment. Checklists and the sync make them; here a
+        planner changes the description and the order, or deletes one.
+
+        Who reads: everyone who reads the equipment, and only the parts of the
+        equipment they see (a customer: its own; a branch employee: its branch's).
+        Who writes (PATCH, DELETE): planning users and staff. There is no create
+        or PUT: a request with such a method gets a 405, whatever the role.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this equipment part.
+        required: true
+      tags:
+      - equipment
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentPartDeleteRefused'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedResponse'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
   /api/equipment/equipment-state/:
     get:
       operationId: equipment_equipment_state_list
@@ -3345,6 +3565,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/EquipmentState'
           description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    type: string
+          description: Validation error.
   /api/equipment/equipment/{id}/:
     get:
       operationId: equipment_equipment_retrieve
@@ -10144,6 +10374,269 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/mobile/checklist-draft/:
+    get:
+      operationId: mobile_checklist_draft_list
+      description: |-
+        Checklists filled in part way, one per assigned order, checklist and
+        equipment (the equipment is optional; none is its own draft).
+
+        POST upserts: saving again for the same key (assigned order, checklist,
+        equipment) updates the draft (200) instead of failing on the unique
+        constraint, so an app that could not load an existing draft still saves.
+        A request without equipment only ever finds the draft without equipment.
+        ``finish`` turns a complete draft into the answer and signature rows a
+        direct submit creates.
+      parameters:
+      - in: query
+        name: assigned_order
+        schema:
+          type: integer
+      - in: query
+        name: equipment
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: 'Number of results to return per page. Capped at 1000: a larger
+          value is clamped, not rejected.'
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+      - name: q
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - mobile
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAssignedOrderChecklistDraftList'
+          description: ''
+    post:
+      operationId: mobile_checklist_draft_create
+      description: |-
+        Checklists filled in part way, one per assigned order, checklist and
+        equipment (the equipment is optional; none is its own draft).
+
+        POST upserts: saving again for the same key (assigned order, checklist,
+        equipment) updates the draft (200) instead of failing on the unique
+        constraint, so an app that could not load an existing draft still saves.
+        A request without equipment only ever finds the draft without equipment.
+        ``finish`` turns a complete draft into the answer and signature rows a
+        direct submit creates.
+      tags:
+      - mobile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderChecklistDraftRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderChecklistDraftRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignedOrderChecklistDraftRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistDraft'
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistDraft'
+          description: ''
+  /api/mobile/checklist-draft/{id}/:
+    get:
+      operationId: mobile_checklist_draft_retrieve
+      description: |-
+        Checklists filled in part way, one per assigned order, checklist and
+        equipment (the equipment is optional; none is its own draft).
+
+        POST upserts: saving again for the same key (assigned order, checklist,
+        equipment) updates the draft (200) instead of failing on the unique
+        constraint, so an app that could not load an existing draft still saves.
+        A request without equipment only ever finds the draft without equipment.
+        ``finish`` turns a complete draft into the answer and signature rows a
+        direct submit creates.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assigned order checklist
+          draft.
+        required: true
+      tags:
+      - mobile
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistDraft'
+          description: ''
+    patch:
+      operationId: mobile_checklist_draft_partial_update
+      description: |-
+        Checklists filled in part way, one per assigned order, checklist and
+        equipment (the equipment is optional; none is its own draft).
+
+        POST upserts: saving again for the same key (assigned order, checklist,
+        equipment) updates the draft (200) instead of failing on the unique
+        constraint, so an app that could not load an existing draft still saves.
+        A request without equipment only ever finds the draft without equipment.
+        ``finish`` turns a complete draft into the answer and signature rows a
+        direct submit creates.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assigned order checklist
+          draft.
+        required: true
+      tags:
+      - mobile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignedOrderChecklistDraftRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignedOrderChecklistDraftRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignedOrderChecklistDraftRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistDraft'
+          description: ''
+    delete:
+      operationId: mobile_checklist_draft_destroy
+      description: |-
+        Checklists filled in part way, one per assigned order, checklist and
+        equipment (the equipment is optional; none is its own draft).
+
+        POST upserts: saving again for the same key (assigned order, checklist,
+        equipment) updates the draft (200) instead of failing on the unique
+        constraint, so an app that could not load an existing draft still saves.
+        A request without equipment only ever finds the draft without equipment.
+        ``finish`` turns a complete draft into the answer and signature rows a
+        direct submit creates.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assigned order checklist
+          draft.
+        required: true
+      tags:
+      - mobile
+      responses:
+        '204':
+          description: No response body
+  /api/mobile/checklist-draft/{id}/finish/:
+    post:
+      operationId: mobile_checklist_draft_finish_create
+      description: |-
+        Checklists filled in part way, one per assigned order, checklist and
+        equipment (the equipment is optional; none is its own draft).
+
+        POST upserts: saving again for the same key (assigned order, checklist,
+        equipment) updates the draft (200) instead of failing on the unique
+        constraint, so an app that could not load an existing draft still saves.
+        A request without equipment only ever finds the draft without equipment.
+        ``finish`` turns a complete draft into the answer and signature rows a
+        direct submit creates.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this assigned order checklist
+          draft.
+        required: true
+      tags:
+      - mobile
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistFinished'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignedOrderChecklistDraftIncomplete'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
+  /api/mobile/checklist-draft/overview/:
+    get:
+      operationId: mobile_checklist_draft_overview_retrieve
+      description: |-
+        The checklists of an assigned order, one entry per equipment. An
+        assigned order the user may not see answers 404, as one that does not
+        exist.
+      parameters:
+      - in: query
+        name: assigned_order
+        schema:
+          type: integer
+        description: The assigned order to list the checklists of.
+        required: true
+      tags:
+      - mobile
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChecklistOverview'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChecklistOverviewBadRequest'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+          description: ''
   /api/mobile/checklist-signature/:
     get:
       operationId: mobile_checklist_signature_list
@@ -12538,6 +13031,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AssignResultResponse'
+          description: ''
+  /api/order/order/{id}/checklists/:
+    get:
+      operationId: order_order_checklists_list
+      description: The filled-in checklists of an order, with photos, including those
+        filled in by a partner tenant for a copy of the order. Planning users only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this order.
+        required: true
+      tags:
+      - order
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChecklistData'
           description: ''
   /api/order/order/{id}/create_pdf_background/:
     post:
@@ -16049,6 +16565,92 @@ paths:
                       required:
                       - user
                       - equipment
+                  checklist_data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user:
+                          type: string
+                        checklist:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                          required:
+                          - id
+                          - name
+                        equipment:
+                          type: object
+                          nullable: true
+                          properties:
+                            id:
+                              type: integer
+                            name:
+                              type: string
+                          required:
+                          - id
+                          - name
+                        signatures:
+                          $ref: '#/components/schemas/AssignedOrderChecklistSignature'
+                        remarks:
+                          type: string
+                        rejected_count:
+                          type: integer
+                          nullable: true
+                        valid_until:
+                          type: string
+                          format: date
+                          nullable: true
+                        score:
+                          type: integer
+                          nullable: true
+                        parts:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              score:
+                                type: integer
+                              rejected_count:
+                                type: integer
+                            required:
+                            - name
+                            - score
+                            - rejected_count
+                        questions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              question:
+                                type: string
+                              answer:
+                                type: string
+                              group_name:
+                                type: string
+                              part_name:
+                                type: string
+                              result:
+                                type: string
+                                enum:
+                                - ok
+                                - nok
+                                - na
+                                - null
+                                nullable: true
+                            required:
+                            - question
+                            - answer
+                      required:
+                      - user
+                      - checklist
+                      - signatures
+                      - questions
                 required:
                 - order
                 - member
@@ -16059,6 +16661,7 @@ paths:
                 - assigned_order_materials
                 - description_work
                 - equipment
+                - checklist_data
           description: ''
   /api/partner/partner/:
     get:
@@ -22768,6 +23371,14 @@ components:
       - postal
       - tel
       - value
+    AnswerTypeEnum:
+      enum:
+      - text
+      - result
+      type: string
+      description: |-
+        * `text` - Text
+        * `result` - Result
     ApiUser:
       type: object
       properties:
@@ -23257,17 +23868,43 @@ components:
           type: integer
         question:
           type: integer
+          nullable: true
         question_text:
           type: string
           readOnly: true
         answer:
           type: string
+        signature:
+          type: integer
+          readOnly: true
+          nullable: true
+        result:
+          allOf:
+          - $ref: '#/components/schemas/ResultEnum'
+          nullable: true
+        grade:
+          nullable: true
+        group_name:
+          type: string
+          readOnly: true
+        part_name:
+          type: string
+          readOnly: true
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistAnswerPhoto'
+          readOnly: true
       required:
       - answer
       - assigned_order
+      - group_name
       - id
+      - part_name
+      - photos
       - question
       - question_text
+      - signature
     AssignedOrderChecklistAnswerRequest:
       type: object
       properties:
@@ -23278,10 +23915,170 @@ components:
         answer:
           type: string
           minLength: 1
+        result:
+          allOf:
+          - $ref: '#/components/schemas/ResultEnum'
+          nullable: true
+        grade:
+          nullable: true
       required:
       - answer
       - assigned_order
       - question
+    AssignedOrderChecklistDraft:
+      type: object
+      description: |-
+        A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+
+        Signatures travel as the base64 PNG text the app's pads produce, both
+        ways, so a resumed draft shows exactly what was drawn.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        assigned_order:
+          type: integer
+        checklist:
+          type: integer
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderChecklistDraftAnswer'
+        signature_user:
+          type: string
+          nullable: true
+        signature_name_user:
+          type: string
+          nullable: true
+          maxLength: 255
+        signature_customer:
+          type: string
+          nullable: true
+        signature_name_customer:
+          type: string
+          nullable: true
+          maxLength: 255
+        remarks:
+          type: string
+        equipment:
+          type: integer
+          nullable: true
+      required:
+      - assigned_order
+      - checklist
+      - id
+    AssignedOrderChecklistDraftAnswer:
+      type: object
+      properties:
+        question:
+          type: integer
+        answer:
+          type: string
+        result:
+          allOf:
+          - $ref: '#/components/schemas/ResultEnum'
+          nullable: true
+        grade:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        photos:
+          type: array
+          items:
+            type: integer
+          maxItems: 50
+      required:
+      - answer
+      - question
+    AssignedOrderChecklistDraftAnswerRequest:
+      type: object
+      properties:
+        question:
+          type: integer
+        answer:
+          type: string
+        result:
+          allOf:
+          - $ref: '#/components/schemas/ResultEnum'
+          nullable: true
+        grade:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        photos:
+          type: array
+          items:
+            type: integer
+          maxItems: 50
+      required:
+      - answer
+      - question
+    AssignedOrderChecklistDraftIncomplete:
+      type: object
+      description: Why a draft can't be finished yet; nothing was created.
+      properties:
+        missing_answers:
+          type: array
+          items:
+            type: integer
+        missing:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistDraftMissingFieldEnum'
+      required:
+      - missing
+      - missing_answers
+    AssignedOrderChecklistDraftRequest:
+      type: object
+      description: |-
+        A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+
+        Signatures travel as the base64 PNG text the app's pads produce, both
+        ways, so a resumed draft shows exactly what was drawn.
+      properties:
+        assigned_order:
+          type: integer
+        checklist:
+          type: integer
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderChecklistDraftAnswerRequest'
+        signature_user:
+          type: string
+          nullable: true
+        signature_name_user:
+          type: string
+          nullable: true
+          maxLength: 255
+        signature_customer:
+          type: string
+          nullable: true
+        signature_name_customer:
+          type: string
+          nullable: true
+          maxLength: 255
+        remarks:
+          type: string
+        equipment:
+          type: integer
+          nullable: true
+      required:
+      - assigned_order
+      - checklist
+    AssignedOrderChecklistFinished:
+      type: object
+      description: 'What finishing a draft created: the rows a direct submit creates.'
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderChecklistAnswer'
+        signature:
+          $ref: '#/components/schemas/AssignedOrderChecklistSignature'
+      required:
+      - answers
+      - signature
     AssignedOrderChecklistSignature:
       type: object
       properties:
@@ -23308,10 +24105,36 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        remarks:
+          type: string
+        rejected_count:
+          type: integer
+          readOnly: true
+          nullable: true
+        valid_until:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        score:
+          type: integer
+          readOnly: true
+          nullable: true
+        equipment:
+          type: integer
+          nullable: true
+        equipment_name:
+          type: string
+          nullable: true
+          readOnly: true
       required:
       - assigned_order
       - checklist
+      - equipment_name
       - id
+      - rejected_count
+      - score
+      - valid_until
     AssignedOrderChecklistSignatureRequest:
       type: object
       properties:
@@ -23335,6 +24158,11 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        remarks:
+          type: string
+        equipment:
+          type: integer
+          nullable: true
       required:
       - assigned_order
       - checklist
@@ -23475,6 +24303,8 @@ components:
         url:
           type: string
           readOnly: true
+        is_checklist_photo:
+          type: boolean
       required:
       - assigned_order
       - created
@@ -23498,6 +24328,8 @@ components:
         document:
           type: string
           format: byte
+        is_checklist_photo:
+          type: boolean
       required:
       - assigned_order
       - name
@@ -24567,9 +25399,165 @@ components:
           readOnly: true
         name:
           type: string
+        norm:
+          type: string
+          maxLength: 80
+        validity_months:
+          type: integer
+          maximum: 120
+          minimum: 1
+          nullable: true
+        archived:
+          type: boolean
       required:
       - id
       - name
+    ChecklistAnswerPhoto:
+      type: object
+      properties:
+        id:
+          type: integer
+        url:
+          type: string
+      required:
+      - id
+      - url
+    ChecklistData:
+      type: object
+      description: |-
+        Documentation only: one signed checklist of an order, with its answers.
+        The view returns the list the service builds, as is.
+      properties:
+        user:
+          type: string
+        checklist:
+          $ref: '#/components/schemas/ChecklistDataChecklist'
+        signatures:
+          $ref: '#/components/schemas/AssignedOrderChecklistSignature'
+        remarks:
+          type: string
+        rejected_count:
+          type: integer
+          nullable: true
+        valid_until:
+          type: string
+          format: date
+          nullable: true
+        score:
+          type: integer
+          nullable: true
+        parts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistDataPart'
+        equipment:
+          allOf:
+          - $ref: '#/components/schemas/ChecklistDataEquipment'
+          nullable: true
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistDataQuestion'
+      required:
+      - checklist
+      - equipment
+      - parts
+      - questions
+      - rejected_count
+      - remarks
+      - score
+      - signatures
+      - user
+      - valid_until
+    ChecklistDataChecklist:
+      type: object
+      description: Documentation only.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+      - id
+      - name
+    ChecklistDataEquipment:
+      type: object
+      description: Documentation only.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+      - id
+      - name
+    ChecklistDataPart:
+      type: object
+      description: Documentation only.
+      properties:
+        name:
+          type: string
+        score:
+          type: integer
+        rejected_count:
+          type: integer
+      required:
+      - name
+      - rejected_count
+      - score
+    ChecklistDataPhoto:
+      type: object
+      description: 'Documentation only: a photo of a checklist answer.'
+      properties:
+        url:
+          type: string
+      required:
+      - url
+    ChecklistDataQuestion:
+      type: object
+      description: |-
+        Documentation only: a question of the checklist data. Rows saved before
+        answers were linked to a signature have only `question` and `answer`.
+      properties:
+        question:
+          type: string
+        answer:
+          type: string
+        group_name:
+          type: string
+        part_name:
+          type: string
+        result:
+          allOf:
+          - $ref: '#/components/schemas/ResultEnum'
+          nullable: true
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistDataPhoto'
+      required:
+      - answer
+      - question
+    ChecklistDeleteRefused:
+      type: object
+      description: The 400 body of a checklist delete that is refused.
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
+    ChecklistDraftMissingFieldEnum:
+      enum:
+      - signature_user
+      - signature_name_user
+      - signature_customer
+      - signature_name_customer
+      type: string
+      description: |-
+        * `signature_user` - signature_user
+        * `signature_name_user` - signature_name_user
+        * `signature_customer` - signature_customer
+        * `signature_name_customer` - signature_name_customer
     ChecklistNested:
       type: object
       description: 'A checklist with its questions in sequence: what `load` answers.'
@@ -24588,6 +25576,74 @@ components:
       - id
       - name
       - questions
+    ChecklistOverview:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistOverviewEntry'
+        checklists:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistNested'
+      required:
+      - checklists
+      - entries
+    ChecklistOverviewBadRequest:
+      type: object
+      description: 'The 400 body of the overview: a message as a string, not a list.'
+      properties:
+        assigned_order:
+          type: string
+      required:
+      - assigned_order
+    ChecklistOverviewEntry:
+      type: object
+      description: |-
+        The checklist of one equipment on an assigned order (or of the work
+        without equipment), with the draft started and the record finished.
+      properties:
+        equipment:
+          allOf:
+          - $ref: '#/components/schemas/ChecklistOverviewEquipment'
+          nullable: true
+        checklist:
+          allOf:
+          - $ref: '#/components/schemas/ChecklistNested'
+          nullable: true
+        draft:
+          allOf:
+          - $ref: '#/components/schemas/AssignedOrderChecklistDraft'
+          nullable: true
+        finished:
+          allOf:
+          - $ref: '#/components/schemas/AssignedOrderChecklistSignature'
+          nullable: true
+        on_order:
+          type: boolean
+      required:
+      - checklist
+      - draft
+      - equipment
+      - finished
+      - on_order
+    ChecklistOverviewEquipment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        identifier:
+          type: string
+          nullable: true
+          maxLength: 100
+      required:
+      - id
+      - name
     ChecklistQuestion:
       type: object
       properties:
@@ -24602,6 +25658,14 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+        group_name:
+          type: string
+          maxLength: 60
+        answer_type:
+          $ref: '#/components/schemas/AnswerTypeEnum'
+        part_name:
+          type: string
+          maxLength: 255
       required:
       - checklist
       - id
@@ -24618,6 +25682,14 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+        group_name:
+          type: string
+          maxLength: 60
+        answer_type:
+          $ref: '#/components/schemas/AnswerTypeEnum'
+        part_name:
+          type: string
+          maxLength: 255
       required:
       - checklist
       - question
@@ -24627,6 +25699,16 @@ components:
         name:
           type: string
           minLength: 1
+        norm:
+          type: string
+          maxLength: 80
+        validity_months:
+          type: integer
+          maximum: 120
+          minimum: 1
+          nullable: true
+        archived:
+          type: boolean
       required:
       - name
     CodeTypeEnum:
@@ -26684,6 +27766,18 @@ components:
           items:
             $ref: '#/components/schemas/EquipmentDocument'
           readOnly: true
+        checklist:
+          type: integer
+          nullable: true
+        inspection:
+          allOf:
+          - $ref: '#/components/schemas/EquipmentInspection'
+          readOnly: true
+        parts:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquipmentPartCondition'
+          readOnly: true
         created:
           type: string
           readOnly: true
@@ -26699,11 +27793,13 @@ components:
       - customer_branch_view
       - documents
       - id
+      - inspection
       - latest_state
       - location_name
       - modified
       - name
       - num_orders
+      - parts
       - price_currency
       - qr_path
       - qr_url
@@ -26791,6 +27887,9 @@ components:
           type: integer
           maximum: 2147483647
           minimum: 0
+        checklist:
+          type: integer
+          nullable: true
       required:
       - branch
       - name
@@ -26846,6 +27945,9 @@ components:
           type: integer
           maximum: 2147483647
           minimum: 0
+        checklist:
+          type: integer
+          nullable: true
         created:
           type: string
           readOnly: true
@@ -26946,6 +28048,9 @@ components:
           type: integer
           maximum: 2147483647
           minimum: 0
+        checklist:
+          type: integer
+          nullable: true
       required:
       - customer
       - name
@@ -27048,6 +28153,46 @@ components:
           format: byte
       required:
       - equipment
+    EquipmentInspection:
+      type: object
+      description: 'Documentation only: the shape of `inspection_of`.'
+      properties:
+        status:
+          $ref: '#/components/schemas/EquipmentInspectionStatusEnum'
+        valid_until:
+          type: string
+          format: date
+          nullable: true
+        score:
+          type: integer
+          nullable: true
+        rejected_count:
+          type: integer
+          nullable: true
+        date:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - date
+      - rejected_count
+      - score
+      - status
+      - valid_until
+    EquipmentInspectionStatusEnum:
+      enum:
+      - none
+      - expired
+      - rejected
+      - expiring
+      - valid
+      type: string
+      description: |-
+        * `none` - none
+        * `expired` - expired
+        * `rejected` - rejected
+        * `expiring` - expiring
+        * `valid` - valid
     EquipmentOrderLine:
       type: object
       properties:
@@ -27105,6 +28250,78 @@ components:
       - id
       - modified
       - name
+    EquipmentPart:
+      type: object
+      description: |-
+        A planner edits the description and the order of a part. The name and
+        the equipment are read-only: a PATCH that sends them (a form may send the
+        whole object back) leaves them as they are.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        equipment:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        created:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+        modified:
+          type: string
+          readOnly: true
+          description: Display string in the tenant's configured date_format, not
+            an ISO-8601 value.
+      required:
+      - created
+      - equipment
+      - id
+      - modified
+      - name
+    EquipmentPartCondition:
+      type: object
+      description: 'Documentation only: the shape of a row of `parts_of`.'
+      properties:
+        id:
+          type: integer
+        sequence:
+          type: integer
+        name:
+          type: string
+        score:
+          type: integer
+          nullable: true
+        rejected_count:
+          type: integer
+          nullable: true
+        date:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - date
+      - id
+      - name
+      - rejected_count
+      - score
+      - sequence
+    EquipmentPartDeleteRefused:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
     EquipmentQrTypeEnum:
       enum:
       - none
@@ -27130,6 +28347,31 @@ components:
           type: integer
           maximum: 2147483647
           minimum: 0
+        part:
+          type: integer
+          readOnly: true
+          nullable: true
+        score:
+          type: integer
+          readOnly: true
+          nullable: true
+        rejected_count:
+          type: integer
+          readOnly: true
+          nullable: true
+        valid_until:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        source:
+          type: string
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
         created:
           type: string
           readOnly: true
@@ -27145,7 +28387,13 @@ components:
       - equipment
       - id
       - modified
+      - part
+      - rejected_count
+      - score
+      - source
       - state
+      - uuid
+      - valid_until
     EquipmentStateRequest:
       type: object
       properties:
@@ -34679,6 +35927,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AssignedOrderChecklistAnswer'
+    PaginatedAssignedOrderChecklistDraftList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderChecklistDraft'
     PaginatedAssignedOrderChecklistSignatureList:
       type: object
       properties:
@@ -35139,6 +36407,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Equipment'
+    PaginatedEquipmentPartList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquipmentPart'
     PaginatedEquipmentStateList:
       type: object
       properties:
@@ -36759,6 +38047,47 @@ components:
         answer:
           type: string
           minLength: 1
+        result:
+          allOf:
+          - $ref: '#/components/schemas/ResultEnum'
+          nullable: true
+        grade:
+          nullable: true
+    PatchedAssignedOrderChecklistDraftRequest:
+      type: object
+      description: |-
+        A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+
+        Signatures travel as the base64 PNG text the app's pads produce, both
+        ways, so a resumed draft shows exactly what was drawn.
+      properties:
+        assigned_order:
+          type: integer
+        checklist:
+          type: integer
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignedOrderChecklistDraftAnswerRequest'
+        signature_user:
+          type: string
+          nullable: true
+        signature_name_user:
+          type: string
+          nullable: true
+          maxLength: 255
+        signature_customer:
+          type: string
+          nullable: true
+        signature_name_customer:
+          type: string
+          nullable: true
+          maxLength: 255
+        remarks:
+          type: string
+        equipment:
+          type: integer
+          nullable: true
     PatchedAssignedOrderChecklistSignatureRequest:
       type: object
       properties:
@@ -36782,6 +38111,11 @@ components:
           type: string
           nullable: true
           maxLength: 255
+        remarks:
+          type: string
+        equipment:
+          type: integer
+          nullable: true
     PatchedAssignedOrderDatesRequest:
       type: object
       properties:
@@ -36816,6 +38150,8 @@ components:
         document:
           type: string
           format: byte
+        is_checklist_photo:
+          type: boolean
     PatchedAssignedOrderMaterialRequest:
       type: object
       properties:
@@ -36999,12 +38335,30 @@ components:
           type: integer
           maximum: 2147483647
           minimum: -2147483648
+        group_name:
+          type: string
+          maxLength: 60
+        answer_type:
+          $ref: '#/components/schemas/AnswerTypeEnum'
+        part_name:
+          type: string
+          maxLength: 255
     PatchedChecklistRequest:
       type: object
       properties:
         name:
           type: string
           minLength: 1
+        norm:
+          type: string
+          maxLength: 80
+        validity_months:
+          type: integer
+          maximum: 120
+          minimum: 1
+          nullable: true
+        archived:
+          type: boolean
     PatchedContractRequest:
       type: object
       properties:
@@ -37426,6 +38780,19 @@ components:
         file:
           type: string
           format: byte
+    PatchedEquipmentPartRequest:
+      type: object
+      description: |-
+        A planner edits the description and the order of a part. The name and
+        the equipment are read-only: a PATCH that sends them (a form may send the
+        whole object back) leaves them as they are.
+      properties:
+        description:
+          type: string
+        sequence:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
     PatchedEquipmentRequest:
       type: object
       properties:
@@ -37482,6 +38849,9 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        checklist:
+          type: integer
+          nullable: true
     PatchedGrippSettingsRequest:
       type: object
       description: The Gripp connector settings; the secrets are write-only.
@@ -42154,6 +43524,16 @@ components:
       - signature
       - timestamp
       - user_id
+    ResultEnum:
+      enum:
+      - ok
+      - nok
+      - na
+      type: string
+      description: |-
+        * `ok` - ok
+        * `nok` - nok
+        * `na` - na
     ResultResponse:
       type: object
       description: '`{''result'': bool}` - whether the action did what was asked.'

@@ -171,6 +171,12 @@ import {
   equipmentEquipmentDocumentRetrieveQueryKey,
   equipmentEquipmentListOptions,
   equipmentEquipmentListQueryKey,
+  equipmentEquipmentPartDestroyMutation,
+  equipmentEquipmentPartListOptions,
+  equipmentEquipmentPartListQueryKey,
+  equipmentEquipmentPartPartialUpdateMutation,
+  equipmentEquipmentPartRetrieveOptions,
+  equipmentEquipmentPartRetrieveQueryKey,
   equipmentEquipmentPartialUpdateMutation,
   equipmentEquipmentRetrieveOptions,
   equipmentEquipmentRetrieveQueryKey,
@@ -454,6 +460,14 @@ import {
   mobileChecklistAnswerPartialUpdateMutation,
   mobileChecklistAnswerRetrieveOptions,
   mobileChecklistAnswerRetrieveQueryKey,
+  mobileChecklistDraftCreateMutation,
+  mobileChecklistDraftDestroyMutation,
+  mobileChecklistDraftFinishCreateMutation,
+  mobileChecklistDraftListOptions,
+  mobileChecklistDraftListQueryKey,
+  mobileChecklistDraftPartialUpdateMutation,
+  mobileChecklistDraftRetrieveOptions,
+  mobileChecklistDraftRetrieveQueryKey,
   mobileChecklistSignatureCreateMutation,
   mobileChecklistSignatureDestroyMutation,
   mobileChecklistSignatureListOptions,
@@ -557,6 +571,8 @@ import {
   orderOrderAssignableListQueryKey,
   orderOrderAutocompleteListOptions,
   orderOrderAutocompleteListQueryKey,
+  orderOrderChecklistsListOptions,
+  orderOrderChecklistsListQueryKey,
   orderOrderCreateMutation,
   orderOrderCreatePdfBackgroundCreateMutation,
   orderOrderDestroyMutation,
@@ -978,6 +994,8 @@ import {
   vEquipmentEquipmentDocumentListQuery,
   vEquipmentEquipmentDocumentPartialUpdateBody,
   vEquipmentEquipmentListQuery,
+  vEquipmentEquipmentPartListQuery,
+  vEquipmentEquipmentPartPartialUpdateBody,
   vEquipmentEquipmentPartialUpdateBody,
   vEquipmentEquipmentStateCreateBody,
   vEquipmentEquipmentStateListQuery,
@@ -1102,6 +1120,9 @@ import {
   vMobileChecklistAnswerCreateBody,
   vMobileChecklistAnswerListQuery,
   vMobileChecklistAnswerPartialUpdateBody,
+  vMobileChecklistDraftCreateBody,
+  vMobileChecklistDraftListQuery,
+  vMobileChecklistDraftPartialUpdateBody,
   vMobileChecklistSignatureCreateBody,
   vMobileChecklistSignatureListQuery,
   vMobileChecklistSignaturePartialUpdateBody,
@@ -1345,6 +1366,8 @@ import type {
   EquipmentEquipmentDocumentListResponse,
   EquipmentEquipmentDocumentRetrieveResponse,
   EquipmentEquipmentListResponse,
+  EquipmentEquipmentPartListResponse,
+  EquipmentEquipmentPartRetrieveResponse,
   EquipmentEquipmentRetrieveResponse,
   EquipmentEquipmentStateListResponse,
   EquipmentLocationAutocompleteListResponse,
@@ -1425,6 +1448,8 @@ import type {
   MobileAssignedordermaterialRetrieveResponse,
   MobileChecklistAnswerListResponse,
   MobileChecklistAnswerRetrieveResponse,
+  MobileChecklistDraftListResponse,
+  MobileChecklistDraftRetrieveResponse,
   MobileChecklistSignatureListResponse,
   MobileChecklistSignatureRetrieveResponse,
   MobileTripListResponse,
@@ -2441,6 +2466,33 @@ export declare namespace EquipmentEquipmentDocument {
   export type UpdateInput = InferInput<typeof vEquipmentEquipmentDocumentPartialUpdateBody>
   /** The `update` body, as the schema parses it. */
   export type UpdateOutput = InferOutput<typeof vEquipmentEquipmentDocumentPartialUpdateBody>
+}
+
+/** `api/equipment/equipment-part` */
+export const EquipmentEquipmentPart = /*#__PURE__*/ resource({
+  path: 'api/equipment/equipment-part',
+  kind: 'collection',
+  id: 'number',
+  list: {options: equipmentEquipmentPartListOptions, queryKey: equipmentEquipmentPartListQueryKey},
+  filters: ['equipment'] satisfies (keyof EquipmentEquipmentPart.ListQuery)[],
+  filterTypes: {equipment: 'integer'},
+  retrieve: {options: equipmentEquipmentPartRetrieveOptions, queryKey: equipmentEquipmentPartRetrieveQueryKey},
+  update: {mutation: equipmentEquipmentPartPartialUpdateMutation, body: vEquipmentEquipmentPartPartialUpdateBody},
+  destroy: {mutation: equipmentEquipmentPartDestroyMutation},
+  reads: ['equipmentEquipmentPartList', 'equipmentEquipmentPartRetrieve'],
+})
+
+export declare namespace EquipmentEquipmentPart {
+  /** What `list` answers with. */
+  export type ListResponse = EquipmentEquipmentPartListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vEquipmentEquipmentPartListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = EquipmentEquipmentPartRetrieveResponse
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vEquipmentEquipmentPartPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vEquipmentEquipmentPartPartialUpdateBody>
 }
 
 /** `api/equipment/equipment-state` */
@@ -3994,6 +4046,42 @@ export declare namespace MobileChecklistAnswer {
   export type UpdateOutput = InferOutput<typeof vMobileChecklistAnswerPartialUpdateBody>
 }
 
+/** `api/mobile/checklist-draft` */
+export const MobileChecklistDraft = /*#__PURE__*/ resource({
+  path: 'api/mobile/checklist-draft',
+  kind: 'collection',
+  id: 'number',
+  list: {options: mobileChecklistDraftListOptions, queryKey: mobileChecklistDraftListQueryKey},
+  filters: ['assigned_order', 'equipment'] satisfies (keyof MobileChecklistDraft.ListQuery)[],
+  filterTypes: {assigned_order: 'integer', equipment: 'integer'},
+  retrieve: {options: mobileChecklistDraftRetrieveOptions, queryKey: mobileChecklistDraftRetrieveQueryKey},
+  create: {mutation: mobileChecklistDraftCreateMutation, body: vMobileChecklistDraftCreateBody},
+  update: {mutation: mobileChecklistDraftPartialUpdateMutation, body: vMobileChecklistDraftPartialUpdateBody},
+  destroy: {mutation: mobileChecklistDraftDestroyMutation},
+  extras: {
+    /** `/api/mobile/checklist-draft/{id}/finish/` */
+    finishCreate: {mutation: mobileChecklistDraftFinishCreateMutation},
+  },
+  reads: ['mobileChecklistDraftList', 'mobileChecklistDraftOverviewRetrieve', 'mobileChecklistDraftRetrieve'],
+})
+
+export declare namespace MobileChecklistDraft {
+  /** What `list` answers with. */
+  export type ListResponse = MobileChecklistDraftListResponse
+  /** The `list` query parameters. */
+  export type ListQuery = InferInput<typeof vMobileChecklistDraftListQuery>
+  /** What `retrieve` answers with. */
+  export type Record = MobileChecklistDraftRetrieveResponse
+  /** The `create` body, as it is sent. */
+  export type CreateInput = InferInput<typeof vMobileChecklistDraftCreateBody>
+  /** The `create` body, as the schema parses it. */
+  export type CreateOutput = InferOutput<typeof vMobileChecklistDraftCreateBody>
+  /** The `update` body, as it is sent. */
+  export type UpdateInput = InferInput<typeof vMobileChecklistDraftPartialUpdateBody>
+  /** The `update` body, as the schema parses it. */
+  export type UpdateOutput = InferOutput<typeof vMobileChecklistDraftPartialUpdateBody>
+}
+
 /** `api/mobile/checklist-signature` */
 export const MobileChecklistSignature = /*#__PURE__*/ resource({
   path: 'api/mobile/checklist-signature',
@@ -4476,6 +4564,8 @@ export const OrderOrder = /*#__PURE__*/ resource({
   extras: {
     /** `/api/order/order/{id}/assign_me/` */
     assignMeCreate: {mutation: orderOrderAssignMeCreateMutation, body: vOrderOrderAssignMeCreateBody},
+    /** `/api/order/order/{id}/checklists/` */
+    checklistsList: {options: orderOrderChecklistsListOptions, queryKey: orderOrderChecklistsListQueryKey},
     /** `/api/order/order/{id}/create_pdf_background/` */
     createPdfBackgroundCreate: {mutation: orderOrderCreatePdfBackgroundCreateMutation, body: vOrderOrderCreatePdfBackgroundCreateBody},
     /** `/api/order/order/{id}/order_availability_detail/` */
@@ -4489,7 +4579,7 @@ export const OrderOrder = /*#__PURE__*/ resource({
     /** `/api/order/order/{id}/set_order_rejected/` */
     setOrderRejectedCreate: {mutation: orderOrderSetOrderRejectedCreateMutation},
   },
-  reads: ['orderOrderAllForCustomerNotAcceptedCountRetrieve', 'orderOrderAllForCustomerNotAcceptedList', 'orderOrderAllForCustomerV2List', 'orderOrderAllForEquipmentLocationList', 'orderOrderAssignableList', 'orderOrderAutocompleteList', 'orderOrderCountsYearOrderTypeStatsRetrieve', 'orderOrderDispatchListAllList', 'orderOrderDispatchListFinishedList', 'orderOrderDispatchListInprogressList', 'orderOrderDispatchListUnassignedList', 'orderOrderGetTopXCustomersRetrieve', 'orderOrderGetWithinRangeList', 'orderOrderList', 'orderOrderMaintenanceOrdersEventsRetrieve', 'orderOrderMaintenanceOrdersList', 'orderOrderMonthEventsList', 'orderOrderMonthListRetrieve', 'orderOrderNewRetrieve', 'orderOrderOrderAvailabilityDetailRetrieve', 'orderOrderOrderAvailabilityList', 'orderOrderOrderCountsStatsRetrieve', 'orderOrderOrderTypesMonthStatsRetrieve', 'orderOrderOrderTypesRetrieve', 'orderOrderOrderTypesStatsRetrieve', 'orderOrderPastList', 'orderOrderRetrieve', 'orderOrderSalesOrdersList', 'orderOrderUserFilterCountRetrieve', 'orderOrderYearListRetrieve'],
+  reads: ['orderOrderAllForCustomerNotAcceptedCountRetrieve', 'orderOrderAllForCustomerNotAcceptedList', 'orderOrderAllForCustomerV2List', 'orderOrderAllForEquipmentLocationList', 'orderOrderAssignableList', 'orderOrderAutocompleteList', 'orderOrderChecklistsList', 'orderOrderCountsYearOrderTypeStatsRetrieve', 'orderOrderDispatchListAllList', 'orderOrderDispatchListFinishedList', 'orderOrderDispatchListInprogressList', 'orderOrderDispatchListUnassignedList', 'orderOrderGetTopXCustomersRetrieve', 'orderOrderGetWithinRangeList', 'orderOrderList', 'orderOrderMaintenanceOrdersEventsRetrieve', 'orderOrderMaintenanceOrdersList', 'orderOrderMonthEventsList', 'orderOrderMonthListRetrieve', 'orderOrderNewRetrieve', 'orderOrderOrderAvailabilityDetailRetrieve', 'orderOrderOrderAvailabilityList', 'orderOrderOrderCountsStatsRetrieve', 'orderOrderOrderTypesMonthStatsRetrieve', 'orderOrderOrderTypesRetrieve', 'orderOrderOrderTypesStatsRetrieve', 'orderOrderPastList', 'orderOrderRetrieve', 'orderOrderSalesOrdersList', 'orderOrderUserFilterCountRetrieve', 'orderOrderYearListRetrieve'],
 })
 
 export declare namespace OrderOrder {

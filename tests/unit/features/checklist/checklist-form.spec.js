@@ -93,7 +93,7 @@ describe('ChecklistForm, creating a checklist', () => {
     await submit(wrapper)
 
     expect(sent('post').map(({ path, body }) => ({path, body}))).toEqual([
-      {path: '/api/checklist/checklist/', body: {name: 'Delivery'}},
+      {path: '/api/checklist/checklist/', body: {name: 'Delivery', norm: '', validity_months: null, archived: false}},
       {path: '/api/checklist/checklist-question/', body: {checklist: 3, question: 'Is the stand level?'}},
       {path: '/api/checklist/checklist-question/', body: {checklist: 3, question: 'Is the power connected?'}},
     ])
@@ -134,7 +134,7 @@ describe('ChecklistForm, creating a checklist', () => {
     await submit(wrapper)
 
     expect(sent('post').map((request) => request.body)).toEqual([
-      {name: 'Delivery'},
+      {name: 'Delivery', norm: '', validity_months: null, archived: false},
       {checklist: 3, question: 'Kept'},
     ])
     expect(sent('delete')).toEqual([])

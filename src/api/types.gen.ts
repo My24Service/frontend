@@ -161,6 +161,12 @@ export type AddressAutocompleteRow = {
     readonly value: string;
 };
 
+/**
+ * * `text` - Text
+ * * `result` - Result
+ */
+export type AnswerTypeEnum = 'text' | 'result';
+
 export type ApiUser = {
     readonly id: number;
     /**
@@ -355,15 +361,96 @@ export type AssignedOrderAppView = {
 export type AssignedOrderChecklistAnswer = {
     readonly id: number;
     assigned_order: number;
-    question: number;
+    question: number | null;
     readonly question_text: string;
     answer: string;
+    readonly signature: number | null;
+    result?: ResultEnum | null;
+    grade?: unknown;
+    readonly group_name: string;
+    readonly part_name: string;
+    readonly photos: Array<ChecklistAnswerPhoto>;
 };
 
 export type AssignedOrderChecklistAnswerRequest = {
     assigned_order: number;
     question: number;
     answer: string;
+    result?: ResultEnum | null;
+    grade?: unknown;
+};
+
+/**
+ * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+ *
+ * Signatures travel as the base64 PNG text the app's pads produce, both
+ * ways, so a resumed draft shows exactly what was drawn.
+ */
+export type AssignedOrderChecklistDraft = {
+    readonly id: number;
+    assigned_order: number;
+    checklist: number;
+    answers?: Array<AssignedOrderChecklistDraftAnswer>;
+    signature_user?: string | null;
+    signature_name_user?: string | null;
+    signature_customer?: string | null;
+    signature_name_customer?: string | null;
+    remarks?: string;
+    equipment?: number | null;
+};
+
+export type AssignedOrderChecklistDraftAnswer = {
+    question: number;
+    answer: string;
+    result?: ResultEnum | null;
+    grade?: {
+        [key: string]: unknown;
+    } | null;
+    photos?: Array<number>;
+};
+
+export type AssignedOrderChecklistDraftAnswerRequest = {
+    question: number;
+    answer: string;
+    result?: ResultEnum | null;
+    grade?: {
+        [key: string]: unknown;
+    } | null;
+    photos?: Array<number>;
+};
+
+/**
+ * Why a draft can't be finished yet; nothing was created.
+ */
+export type AssignedOrderChecklistDraftIncomplete = {
+    missing_answers: Array<number>;
+    missing: Array<ChecklistDraftMissingFieldEnum>;
+};
+
+/**
+ * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+ *
+ * Signatures travel as the base64 PNG text the app's pads produce, both
+ * ways, so a resumed draft shows exactly what was drawn.
+ */
+export type AssignedOrderChecklistDraftRequest = {
+    assigned_order: number;
+    checklist: number;
+    answers?: Array<AssignedOrderChecklistDraftAnswerRequest>;
+    signature_user?: string | null;
+    signature_name_user?: string | null;
+    signature_customer?: string | null;
+    signature_name_customer?: string | null;
+    remarks?: string;
+    equipment?: number | null;
+};
+
+/**
+ * What finishing a draft created: the rows a direct submit creates.
+ */
+export type AssignedOrderChecklistFinished = {
+    answers: Array<AssignedOrderChecklistAnswer>;
+    signature: AssignedOrderChecklistSignature;
 };
 
 export type AssignedOrderChecklistSignature = {
@@ -374,6 +461,12 @@ export type AssignedOrderChecklistSignature = {
     signature_name_user?: string | null;
     signature_customer?: string | null;
     signature_name_customer?: string | null;
+    remarks?: string;
+    readonly rejected_count: number | null;
+    readonly valid_until: string | null;
+    readonly score: number | null;
+    equipment?: number | null;
+    readonly equipment_name: string | null;
 };
 
 export type AssignedOrderChecklistSignatureRequest = {
@@ -383,6 +476,8 @@ export type AssignedOrderChecklistSignatureRequest = {
     signature_name_user?: string | null;
     signature_customer?: string | null;
     signature_name_customer?: string | null;
+    remarks?: string;
+    equipment?: number | null;
 };
 
 /**
@@ -448,6 +543,7 @@ export type AssignedOrderDocument = {
     readonly created: string;
     readonly filename: string;
     readonly url: string;
+    is_checklist_photo?: boolean;
 };
 
 export type AssignedOrderDocumentRequest = {
@@ -455,6 +551,7 @@ export type AssignedOrderDocumentRequest = {
     name: string;
     description?: string | null;
     document?: string;
+    is_checklist_photo?: boolean;
 };
 
 export type AssignedOrderMaterial = {
@@ -933,7 +1030,92 @@ export type CheckTokenResponse = {
 export type Checklist = {
     readonly id: number;
     name: string;
+    norm?: string;
+    validity_months?: number | null;
+    archived?: boolean;
 };
+
+export type ChecklistAnswerPhoto = {
+    id: number;
+    url: string;
+};
+
+/**
+ * Documentation only: one signed checklist of an order, with its answers.
+ * The view returns the list the service builds, as is.
+ */
+export type ChecklistData = {
+    user: string;
+    checklist: ChecklistDataChecklist;
+    signatures: AssignedOrderChecklistSignature;
+    remarks: string;
+    rejected_count: number | null;
+    valid_until: string | null;
+    score: number | null;
+    parts: Array<ChecklistDataPart>;
+    equipment: ChecklistDataEquipment | null;
+    questions: Array<ChecklistDataQuestion>;
+};
+
+/**
+ * Documentation only.
+ */
+export type ChecklistDataChecklist = {
+    id: number;
+    name: string;
+};
+
+/**
+ * Documentation only.
+ */
+export type ChecklistDataEquipment = {
+    id: number;
+    name: string;
+};
+
+/**
+ * Documentation only.
+ */
+export type ChecklistDataPart = {
+    name: string;
+    score: number;
+    rejected_count: number;
+};
+
+/**
+ * Documentation only: a photo of a checklist answer.
+ */
+export type ChecklistDataPhoto = {
+    url: string;
+};
+
+/**
+ * Documentation only: a question of the checklist data. Rows saved before
+ * answers were linked to a signature have only `question` and `answer`.
+ */
+export type ChecklistDataQuestion = {
+    question: string;
+    answer: string;
+    group_name?: string;
+    part_name?: string;
+    result?: ResultEnum | null;
+    photos?: Array<ChecklistDataPhoto>;
+};
+
+/**
+ * The 400 body of a checklist delete that is refused.
+ */
+export type ChecklistDeleteRefused = {
+    detail: string;
+};
+
+/**
+ * * `signature_user` - signature_user
+ * * `signature_name_user` - signature_name_user
+ * * `signature_customer` - signature_customer
+ * * `signature_name_customer` - signature_name_customer
+ */
+export type ChecklistDraftMissingFieldEnum = 'signature_user' | 'signature_name_user' | 'signature_customer' | 'signature_name_customer';
 
 /**
  * A checklist with its questions in sequence: what `load` answers.
@@ -944,21 +1126,60 @@ export type ChecklistNested = {
     readonly questions: Array<ChecklistQuestion>;
 };
 
+export type ChecklistOverview = {
+    entries: Array<ChecklistOverviewEntry>;
+    checklists: Array<ChecklistNested>;
+};
+
+/**
+ * The 400 body of the overview: a message as a string, not a list.
+ */
+export type ChecklistOverviewBadRequest = {
+    assigned_order: string;
+};
+
+/**
+ * The checklist of one equipment on an assigned order (or of the work
+ * without equipment), with the draft started and the record finished.
+ */
+export type ChecklistOverviewEntry = {
+    equipment: ChecklistOverviewEquipment | null;
+    checklist: ChecklistNested | null;
+    draft: AssignedOrderChecklistDraft | null;
+    finished: AssignedOrderChecklistSignature | null;
+    on_order: boolean;
+};
+
+export type ChecklistOverviewEquipment = {
+    readonly id: number;
+    name: string;
+    identifier?: string | null;
+};
+
 export type ChecklistQuestion = {
     readonly id: number;
     checklist: number;
     question: string;
     sequence?: number;
+    group_name?: string;
+    answer_type?: AnswerTypeEnum;
+    part_name?: string;
 };
 
 export type ChecklistQuestionRequest = {
     checklist: number;
     question: string;
     sequence?: number;
+    group_name?: string;
+    answer_type?: AnswerTypeEnum;
+    part_name?: string;
 };
 
 export type ChecklistRequest = {
     name: string;
+    norm?: string;
+    validity_months?: number | null;
+    archived?: boolean;
 };
 
 /**
@@ -1887,6 +2108,9 @@ export type Equipment = {
     readonly qr_url: string | null;
     readonly num_orders: number | null;
     readonly documents: Array<EquipmentDocument>;
+    checklist?: number | null;
+    inspection: EquipmentInspection;
+    readonly parts: Array<EquipmentPartCondition>;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -1927,6 +2151,7 @@ export type EquipmentBranchCreateRequest = {
     location?: number | null;
     price?: string;
     default_replace_months?: number;
+    checklist?: number | null;
 };
 
 export type EquipmentCreate = {
@@ -1944,6 +2169,7 @@ export type EquipmentCreate = {
     price?: string;
     readonly price_currency: string;
     default_replace_months?: number;
+    checklist?: number | null;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -1985,6 +2211,7 @@ export type EquipmentCustomerCreateRequest = {
     location?: number | null;
     price?: string;
     default_replace_months?: number;
+    checklist?: number | null;
 };
 
 export type EquipmentDashboardResponse = {
@@ -2038,6 +2265,26 @@ export type EquipmentDocumentRequest = {
     file?: string;
 };
 
+/**
+ * Documentation only: the shape of `inspection_of`.
+ */
+export type EquipmentInspection = {
+    status: EquipmentInspectionStatusEnum;
+    valid_until: string | null;
+    score: number | null;
+    rejected_count: number | null;
+    date: string | null;
+};
+
+/**
+ * * `none` - none
+ * * `expired` - expired
+ * * `rejected` - rejected
+ * * `expiring` - expiring
+ * * `valid` - valid
+ */
+export type EquipmentInspectionStatusEnum = 'none' | 'expired' | 'rejected' | 'expiring' | 'valid';
+
 export type EquipmentOrderLine = {
     readonly id: number;
     name: string;
@@ -2061,6 +2308,43 @@ export type EquipmentOrderLine = {
 };
 
 /**
+ * A planner edits the description and the order of a part. The name and
+ * the equipment are read-only: a PATCH that sends them (a form may send the
+ * whole object back) leaves them as they are.
+ */
+export type EquipmentPart = {
+    readonly id: number;
+    readonly equipment: number;
+    readonly name: string;
+    description?: string;
+    sequence?: number;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly created: string;
+    /**
+     * Display string in the tenant's configured date_format, not an ISO-8601 value.
+     */
+    readonly modified: string;
+};
+
+/**
+ * Documentation only: the shape of a row of `parts_of`.
+ */
+export type EquipmentPartCondition = {
+    id: number;
+    sequence: number;
+    name: string;
+    score: number | null;
+    rejected_count: number | null;
+    date: string | null;
+};
+
+export type EquipmentPartDeleteRefused = {
+    detail: string;
+};
+
+/**
  * * `none` - none
  * * `my24service` - my24service
  * * `shltr` - shltr
@@ -2072,6 +2356,12 @@ export type EquipmentState = {
     equipment: number;
     state: string;
     replace_months?: number;
+    readonly part: number | null;
+    readonly score: number | null;
+    readonly rejected_count: number | null;
+    readonly valid_until: string | null;
+    readonly source: string;
+    readonly uuid: string | null;
     /**
      * Display string in the tenant's configured date_format, not an ISO-8601 value.
      */
@@ -5027,6 +5317,13 @@ export type PaginatedAssignedOrderChecklistAnswerList = {
     results?: Array<AssignedOrderChecklistAnswer>;
 };
 
+export type PaginatedAssignedOrderChecklistDraftList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderChecklistDraft>;
+};
+
 export type PaginatedAssignedOrderChecklistSignatureList = {
     count?: number;
     next?: string | null;
@@ -5186,6 +5483,13 @@ export type PaginatedEquipmentList = {
     next?: string | null;
     previous?: string | null;
     results?: Array<Equipment>;
+};
+
+export type PaginatedEquipmentPartList = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<EquipmentPart>;
 };
 
 export type PaginatedEquipmentStateList = {
@@ -5807,6 +6111,26 @@ export type PatchedAssignedOrderChecklistAnswerRequest = {
     assigned_order?: number;
     question?: number;
     answer?: string;
+    result?: ResultEnum | null;
+    grade?: unknown;
+};
+
+/**
+ * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+ *
+ * Signatures travel as the base64 PNG text the app's pads produce, both
+ * ways, so a resumed draft shows exactly what was drawn.
+ */
+export type PatchedAssignedOrderChecklistDraftRequest = {
+    assigned_order?: number;
+    checklist?: number;
+    answers?: Array<AssignedOrderChecklistDraftAnswerRequest>;
+    signature_user?: string | null;
+    signature_name_user?: string | null;
+    signature_customer?: string | null;
+    signature_name_customer?: string | null;
+    remarks?: string;
+    equipment?: number | null;
 };
 
 export type PatchedAssignedOrderChecklistSignatureRequest = {
@@ -5816,6 +6140,8 @@ export type PatchedAssignedOrderChecklistSignatureRequest = {
     signature_name_user?: string | null;
     signature_customer?: string | null;
     signature_name_customer?: string | null;
+    remarks?: string;
+    equipment?: number | null;
 };
 
 export type PatchedAssignedOrderDatesRequest = {
@@ -5830,6 +6156,7 @@ export type PatchedAssignedOrderDocumentRequest = {
     name?: string;
     description?: string | null;
     document?: string;
+    is_checklist_photo?: boolean;
 };
 
 export type PatchedAssignedOrderMaterialRequest = {
@@ -5908,10 +6235,16 @@ export type PatchedChecklistQuestionRequest = {
     checklist?: number;
     question?: string;
     sequence?: number;
+    group_name?: string;
+    answer_type?: AnswerTypeEnum;
+    part_name?: string;
 };
 
 export type PatchedChecklistRequest = {
     name?: string;
+    norm?: string;
+    validity_months?: number | null;
+    archived?: boolean;
 };
 
 export type PatchedContractRequest = {
@@ -6100,6 +6433,16 @@ export type PatchedEquipmentDocumentRequest = {
     file?: string;
 };
 
+/**
+ * A planner edits the description and the order of a part. The name and
+ * the equipment are read-only: a PATCH that sends them (a form may send the
+ * whole object back) leaves them as they are.
+ */
+export type PatchedEquipmentPartRequest = {
+    description?: string;
+    sequence?: number;
+};
+
 export type PatchedEquipmentRequest = {
     name?: string;
     type?: EquipmentTypeEnum;
@@ -6116,6 +6459,7 @@ export type PatchedEquipmentRequest = {
     standard_hours?: string | null;
     default_replace_months?: number;
     price?: string;
+    checklist?: number | null;
 };
 
 /**
@@ -7865,6 +8209,13 @@ export type ResetPasswordRequest = {
     signature: string;
     password: string;
 };
+
+/**
+ * * `ok` - ok
+ * * `nok` - nok
+ * * `na` - na
+ */
+export type ResultEnum = 'ok' | 'nok' | 'na';
 
 /**
  * `{'result': bool}` - whether the action did what was asked.
@@ -9818,8 +10169,36 @@ export type AssignedOrderAppViewWritable = {
 
 export type AssignedOrderChecklistAnswerWritable = {
     assigned_order: number;
-    question: number;
+    question: number | null;
     answer: string;
+    result?: ResultEnum | null;
+    grade?: unknown;
+};
+
+/**
+ * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+ *
+ * Signatures travel as the base64 PNG text the app's pads produce, both
+ * ways, so a resumed draft shows exactly what was drawn.
+ */
+export type AssignedOrderChecklistDraftWritable = {
+    assigned_order: number;
+    checklist: number;
+    answers?: Array<AssignedOrderChecklistDraftAnswer>;
+    signature_user?: string | null;
+    signature_name_user?: string | null;
+    signature_customer?: string | null;
+    signature_name_customer?: string | null;
+    remarks?: string;
+    equipment?: number | null;
+};
+
+/**
+ * What finishing a draft created: the rows a direct submit creates.
+ */
+export type AssignedOrderChecklistFinishedWritable = {
+    answers: Array<AssignedOrderChecklistAnswerWritable>;
+    signature: AssignedOrderChecklistSignatureWritable;
 };
 
 export type AssignedOrderChecklistSignatureWritable = {
@@ -9829,6 +10208,8 @@ export type AssignedOrderChecklistSignatureWritable = {
     signature_name_user?: string | null;
     signature_customer?: string | null;
     signature_name_customer?: string | null;
+    remarks?: string;
+    equipment?: number | null;
 };
 
 export type AssignedOrderCreateWritable = {
@@ -9846,6 +10227,7 @@ export type AssignedOrderDocumentWritable = {
     name: string;
     description?: string | null;
     document?: string;
+    is_checklist_photo?: boolean;
 };
 
 export type AssignedOrderMaterialWritable = {
@@ -9995,6 +10377,26 @@ export type ChapterWritable = {
 
 export type ChecklistWritable = {
     name: string;
+    norm?: string;
+    validity_months?: number | null;
+    archived?: boolean;
+};
+
+/**
+ * Documentation only: one signed checklist of an order, with its answers.
+ * The view returns the list the service builds, as is.
+ */
+export type ChecklistDataWritable = {
+    user: string;
+    checklist: ChecklistDataChecklist;
+    signatures: AssignedOrderChecklistSignatureWritable;
+    remarks: string;
+    rejected_count: number | null;
+    valid_until: string | null;
+    score: number | null;
+    parts: Array<ChecklistDataPart>;
+    equipment: ChecklistDataEquipment | null;
+    questions: Array<ChecklistDataQuestion>;
 };
 
 /**
@@ -10004,10 +10406,35 @@ export type ChecklistNestedWritable = {
     name: string;
 };
 
+export type ChecklistOverviewWritable = {
+    entries: Array<ChecklistOverviewEntryWritable>;
+    checklists: Array<ChecklistNestedWritable>;
+};
+
+/**
+ * The checklist of one equipment on an assigned order (or of the work
+ * without equipment), with the draft started and the record finished.
+ */
+export type ChecklistOverviewEntryWritable = {
+    equipment: ChecklistOverviewEquipmentWritable | null;
+    checklist: ChecklistNestedWritable | null;
+    draft: AssignedOrderChecklistDraftWritable | null;
+    finished: AssignedOrderChecklistSignatureWritable | null;
+    on_order: boolean;
+};
+
+export type ChecklistOverviewEquipmentWritable = {
+    name: string;
+    identifier?: string | null;
+};
+
 export type ChecklistQuestionWritable = {
     checklist: number;
     question: string;
     sequence?: number;
+    group_name?: string;
+    answer_type?: AnswerTypeEnum;
+    part_name?: string;
 };
 
 export type ConfigWritable = {
@@ -10405,6 +10832,7 @@ export type EquipmentWritable = {
     standard_hours?: string | null;
     default_replace_months?: number;
     price?: string;
+    checklist?: number | null;
 };
 
 export type EquipmentAutocompleteWritable = AutocompleteRowWritable & {
@@ -10428,6 +10856,7 @@ export type EquipmentCreateWritable = {
     location?: number | null;
     price?: string;
     default_replace_months?: number;
+    checklist?: number | null;
 };
 
 export type EquipmentCreateRequestWritable = EquipmentBranchCreateWritable | EquipmentCustomerCreateWritable;
@@ -10469,6 +10898,16 @@ export type EquipmentOrderLineWritable = {
     serialnumber?: string | null;
     standard_hours?: string | null;
     default_replace_months?: number;
+};
+
+/**
+ * A planner edits the description and the order of a part. The name and
+ * the equipment are read-only: a PATCH that sends them (a form may send the
+ * whole object back) leaves them as they are.
+ */
+export type EquipmentPartWritable = {
+    description?: string;
+    sequence?: number;
 };
 
 export type EquipmentStateWritable = {
@@ -11624,6 +12063,13 @@ export type PaginatedAssignedOrderChecklistAnswerListWritable = {
     results?: Array<AssignedOrderChecklistAnswerWritable>;
 };
 
+export type PaginatedAssignedOrderChecklistDraftListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<AssignedOrderChecklistDraftWritable>;
+};
+
 export type PaginatedAssignedOrderChecklistSignatureListWritable = {
     count?: number;
     next?: string | null;
@@ -11783,6 +12229,13 @@ export type PaginatedEquipmentListWritable = {
     next?: string | null;
     previous?: string | null;
     results?: Array<EquipmentWritable>;
+};
+
+export type PaginatedEquipmentPartListWritable = {
+    count?: number;
+    next?: string | null;
+    previous?: string | null;
+    results?: Array<EquipmentPartWritable>;
 };
 
 export type PaginatedEquipmentStateListWritable = {
@@ -13589,6 +14042,12 @@ export type ChecklistChecklistDestroyData = {
     query?: never;
     url: '/api/checklist/checklist/{id}/';
 };
+
+export type ChecklistChecklistDestroyErrors = {
+    400: ChecklistDeleteRefused;
+};
+
+export type ChecklistChecklistDestroyError = ChecklistChecklistDestroyErrors[keyof ChecklistChecklistDestroyErrors];
 
 export type ChecklistChecklistDestroyResponses = {
     /**
@@ -15528,6 +15987,128 @@ export type EquipmentEquipmentExportQrRetrieveResponses = {
 
 export type EquipmentEquipmentExportQrRetrieveResponse = EquipmentEquipmentExportQrRetrieveResponses[keyof EquipmentEquipmentExportQrRetrieveResponses];
 
+export type EquipmentEquipmentPartListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        equipment?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/equipment/equipment-part/';
+};
+
+export type EquipmentEquipmentPartListErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+};
+
+export type EquipmentEquipmentPartListError = EquipmentEquipmentPartListErrors[keyof EquipmentEquipmentPartListErrors];
+
+export type EquipmentEquipmentPartListResponses = {
+    200: PaginatedEquipmentPartList;
+};
+
+export type EquipmentEquipmentPartListResponse = EquipmentEquipmentPartListResponses[keyof EquipmentEquipmentPartListResponses];
+
+export type EquipmentEquipmentPartDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this equipment part.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/equipment/equipment-part/{id}/';
+};
+
+export type EquipmentEquipmentPartDestroyErrors = {
+    400: EquipmentPartDeleteRefused;
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type EquipmentEquipmentPartDestroyError = EquipmentEquipmentPartDestroyErrors[keyof EquipmentEquipmentPartDestroyErrors];
+
+export type EquipmentEquipmentPartDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EquipmentEquipmentPartDestroyResponse = EquipmentEquipmentPartDestroyResponses[keyof EquipmentEquipmentPartDestroyResponses];
+
+export type EquipmentEquipmentPartRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this equipment part.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/equipment/equipment-part/{id}/';
+};
+
+export type EquipmentEquipmentPartRetrieveErrors = {
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type EquipmentEquipmentPartRetrieveError = EquipmentEquipmentPartRetrieveErrors[keyof EquipmentEquipmentPartRetrieveErrors];
+
+export type EquipmentEquipmentPartRetrieveResponses = {
+    200: EquipmentPart;
+};
+
+export type EquipmentEquipmentPartRetrieveResponse = EquipmentEquipmentPartRetrieveResponses[keyof EquipmentEquipmentPartRetrieveResponses];
+
+export type EquipmentEquipmentPartPartialUpdateData = {
+    body?: PatchedEquipmentPartRequest;
+    path: {
+        /**
+         * A unique integer value identifying this equipment part.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/equipment/equipment-part/{id}/';
+};
+
+export type EquipmentEquipmentPartPartialUpdateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+    401: UnauthorizedResponse;
+    403: ForbiddenResponse;
+    404: NotFoundResponse;
+};
+
+export type EquipmentEquipmentPartPartialUpdateError = EquipmentEquipmentPartPartialUpdateErrors[keyof EquipmentEquipmentPartPartialUpdateErrors];
+
+export type EquipmentEquipmentPartPartialUpdateResponses = {
+    200: EquipmentPart;
+};
+
+export type EquipmentEquipmentPartPartialUpdateResponse = EquipmentEquipmentPartPartialUpdateResponses[keyof EquipmentEquipmentPartPartialUpdateResponses];
+
 export type EquipmentEquipmentStateListData = {
     body?: never;
     path?: never;
@@ -15557,6 +16138,17 @@ export type EquipmentEquipmentStateCreateData = {
     query?: never;
     url: '/api/equipment/equipment-state/';
 };
+
+export type EquipmentEquipmentStateCreateErrors = {
+    /**
+     * Validation error.
+     */
+    400: {
+        [key: string]: Array<string>;
+    };
+};
+
+export type EquipmentEquipmentStateCreateError = EquipmentEquipmentStateCreateErrors[keyof EquipmentEquipmentStateCreateErrors];
 
 export type EquipmentEquipmentStateCreateResponses = {
     201: EquipmentState;
@@ -20400,6 +20992,155 @@ export type MobileChecklistAnswerPartialUpdateResponses = {
 
 export type MobileChecklistAnswerPartialUpdateResponse = MobileChecklistAnswerPartialUpdateResponses[keyof MobileChecklistAnswerPartialUpdateResponses];
 
+export type MobileChecklistDraftListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        assigned_order?: number;
+        equipment?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page. Capped at 1000: a larger value is clamped, not rejected.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        q?: string;
+    };
+    url: '/api/mobile/checklist-draft/';
+};
+
+export type MobileChecklistDraftListResponses = {
+    200: PaginatedAssignedOrderChecklistDraftList;
+};
+
+export type MobileChecklistDraftListResponse = MobileChecklistDraftListResponses[keyof MobileChecklistDraftListResponses];
+
+export type MobileChecklistDraftCreateData = {
+    body: AssignedOrderChecklistDraftRequest;
+    path?: never;
+    query?: never;
+    url: '/api/mobile/checklist-draft/';
+};
+
+export type MobileChecklistDraftCreateResponses = {
+    200: AssignedOrderChecklistDraft;
+    201: AssignedOrderChecklistDraft;
+};
+
+export type MobileChecklistDraftCreateResponse = MobileChecklistDraftCreateResponses[keyof MobileChecklistDraftCreateResponses];
+
+export type MobileChecklistDraftDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this assigned order checklist draft.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/mobile/checklist-draft/{id}/';
+};
+
+export type MobileChecklistDraftDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type MobileChecklistDraftDestroyResponse = MobileChecklistDraftDestroyResponses[keyof MobileChecklistDraftDestroyResponses];
+
+export type MobileChecklistDraftRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this assigned order checklist draft.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/mobile/checklist-draft/{id}/';
+};
+
+export type MobileChecklistDraftRetrieveResponses = {
+    200: AssignedOrderChecklistDraft;
+};
+
+export type MobileChecklistDraftRetrieveResponse = MobileChecklistDraftRetrieveResponses[keyof MobileChecklistDraftRetrieveResponses];
+
+export type MobileChecklistDraftPartialUpdateData = {
+    body?: PatchedAssignedOrderChecklistDraftRequest;
+    path: {
+        /**
+         * A unique integer value identifying this assigned order checklist draft.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/mobile/checklist-draft/{id}/';
+};
+
+export type MobileChecklistDraftPartialUpdateResponses = {
+    200: AssignedOrderChecklistDraft;
+};
+
+export type MobileChecklistDraftPartialUpdateResponse = MobileChecklistDraftPartialUpdateResponses[keyof MobileChecklistDraftPartialUpdateResponses];
+
+export type MobileChecklistDraftFinishCreateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this assigned order checklist draft.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/mobile/checklist-draft/{id}/finish/';
+};
+
+export type MobileChecklistDraftFinishCreateErrors = {
+    400: AssignedOrderChecklistDraftIncomplete;
+    404: NotFoundResponse;
+};
+
+export type MobileChecklistDraftFinishCreateError = MobileChecklistDraftFinishCreateErrors[keyof MobileChecklistDraftFinishCreateErrors];
+
+export type MobileChecklistDraftFinishCreateResponses = {
+    201: AssignedOrderChecklistFinished;
+};
+
+export type MobileChecklistDraftFinishCreateResponse = MobileChecklistDraftFinishCreateResponses[keyof MobileChecklistDraftFinishCreateResponses];
+
+export type MobileChecklistDraftOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * The assigned order to list the checklists of.
+         */
+        assigned_order: number;
+    };
+    url: '/api/mobile/checklist-draft/overview/';
+};
+
+export type MobileChecklistDraftOverviewRetrieveErrors = {
+    400: ChecklistOverviewBadRequest;
+    404: NotFoundResponse;
+};
+
+export type MobileChecklistDraftOverviewRetrieveError = MobileChecklistDraftOverviewRetrieveErrors[keyof MobileChecklistDraftOverviewRetrieveErrors];
+
+export type MobileChecklistDraftOverviewRetrieveResponses = {
+    200: ChecklistOverview;
+};
+
+export type MobileChecklistDraftOverviewRetrieveResponse = MobileChecklistDraftOverviewRetrieveResponses[keyof MobileChecklistDraftOverviewRetrieveResponses];
+
 export type MobileChecklistSignatureListData = {
     body?: never;
     path?: never;
@@ -22028,6 +22769,24 @@ export type OrderOrderAssignMeCreateResponses = {
 };
 
 export type OrderOrderAssignMeCreateResponse = OrderOrderAssignMeCreateResponses[keyof OrderOrderAssignMeCreateResponses];
+
+export type OrderOrderChecklistsListData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this order.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/order/order/{id}/checklists/';
+};
+
+export type OrderOrderChecklistsListResponses = {
+    200: Array<ChecklistData>;
+};
+
+export type OrderOrderChecklistsListResponse = OrderOrderChecklistsListResponses[keyof OrderOrderChecklistsListResponses];
 
 export type OrderOrderCreatePdfBackgroundCreateData = {
     body: CreatePdfBackgroundRequestRequest;
@@ -23817,6 +24576,34 @@ export type OrderWorkorderDataRetrieveResponses = {
         equipment: Array<{
             user: string;
             equipment: string;
+        }>;
+        checklist_data: Array<{
+            user: string;
+            checklist: {
+                id: number;
+                name: string;
+            };
+            equipment?: {
+                id: number;
+                name: string;
+            } | null;
+            signatures: AssignedOrderChecklistSignature;
+            remarks?: string;
+            rejected_count?: number | null;
+            valid_until?: string | null;
+            score?: number | null;
+            parts?: Array<{
+                name: string;
+                score: number;
+                rejected_count: number;
+            }>;
+            questions: Array<{
+                question: string;
+                answer: string;
+                group_name?: string;
+                part_name?: string;
+                result?: 'ok' | 'nok' | 'na' | null;
+            }>;
         }>;
     };
 };
