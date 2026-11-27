@@ -1,12 +1,14 @@
+import { HttpResponse } from 'msw'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { vEquipment, vEquipmentPart, vEquipmentPartCondition } from '@/api/valibot.gen'
 import { EquipmentPartsPanel } from '@/features/equipment/equipment'
 
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
-import { installApiSeam, settle } from '../../support/api-seam/index.js'
+import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
 import { mountForm, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
+import { modal } from '../../support/modal.js'
 
 const api = installApiSeam()
 
@@ -32,6 +34,7 @@ beforeEach(() => {
   api.get('/api/equipment/equipment-part/', PARTS)
   api.patch('/api/equipment/equipment-part/{id}/', ({ params, body }) =>
     part(Number(params.id), 'Door', body.description, body.sequence))
+  api.delete('/api/equipment/equipment-part/{id}/', noContent)
 })
 
 async function mountPanel({ auth = PLANNER, equipment = EQUIPMENT } = {}) {
@@ -138,5 +141,39 @@ describe('EquipmentPartsPanel, editing', () => {
 
     expect(toasts().map((toast) => toast.body)).toContain('Error updating part')
     expect(wrapper.find('#part_description-5').exists()).toBe(true)
+  })
+})
+
+describe('EquipmentPartsPanel, deleting', () => {
+  test('a planner deletes a part through the confirmation modal', async () => {
+    const wrapper = await mountPanel()
+
+    await wrapper.findAll('.delete-part')[1].trigger('click')
+    await settle()
+    expect(api.requests().filter((sent) => sent.method === 'delete')).toEqual([])
+
+    modal('delete-equipment-part-modal').ok()
+    await settle()
+
+    expect(api.requests().find((sent) => sent.method === 'delete')).toMatchObject({
+      path: '/api/equipment/equipment-part/6/',
+    })
+    expect(toasts().map((toast) => toast.body)).toContain('Part has been deleted')
+  })
+
+  // A part with condition records keeps its history: the API answers 400.
+  test('tells the user a part with condition records cannot be deleted', async () => {
+    api.delete('/api/equipment/equipment-part/{id}/', () => HttpResponse.json(
+      {detail: 'This part has condition records and cannot be deleted.'}, {status: 400}))
+    const wrapper = await mountPanel()
+
+    await wrapper.findAll('.delete-part')[0].trigger('click')
+    await settle()
+    modal('delete-equipment-part-modal').ok()
+    await settle()
+
+    expect(toasts().map((toast) => toast.body)).toEqual([
+      'This part has condition records and cannot be deleted.',
+    ])
   })
 })

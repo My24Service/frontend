@@ -1,5 +1,17 @@
 <template>
   <div class="equipment-parts">
+    <ListDeleteModal
+      v-if="canEdit"
+      ref="deleteModal"
+      modal-id="delete-equipment-part-modal"
+      :confirm-text="$trans('Are you sure you want to delete this part?')"
+      :resource="Api.EquipmentEquipmentPart"
+      :invalidate="invalidateEquipmentPartQueries"
+      :deleted-detail="$trans('Part has been deleted')"
+      :delete-error="$trans('Error deleting part')"
+      :refused-detail="$trans('This part has condition records and cannot be deleted.')"
+    />
+
     <p
       v-if="rows.length === 0"
       class="dimmed"
@@ -84,6 +96,13 @@
                 :title="$trans('Edit')"
                 @click="editPart(row)"
               ><IBiPencil /></BButton>
+              <BButton
+                class="delete-part"
+                size="sm"
+                variant="light"
+                :title="$trans('Delete')"
+                @click="deleteModal?.showDeleteModal(row.id)"
+              ><IBiTrash /></BButton>
             </template>
           </td>
         </tr>
@@ -95,7 +114,7 @@
 <script lang="ts" setup>
 import { displayIsoDate } from '@/features/checklist'
 import { fieldErrors, useQueryErrorToast, type FieldLabels } from '@/features/forms'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
+import { ListDeleteModal, WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import { invalidateEquipmentPartQueries } from './invalidation'
 
 /**
@@ -105,7 +124,9 @@ import { invalidateEquipmentPartQueries } from './invalidation'
  * Checklists make the parts: a question that names a part creates it at the
  * first finish. So there is no add here, and the name is the key between the
  * questions, the parts and the two tenants, so it cannot change either. A
- * planner changes the description and the position of a part.
+ * planner changes the description and the position of a part, and deletes a
+ * part that has no condition records; the API refuses the delete of one that
+ * has them.
  *
  * The part list gives the description and the position; the equipment's own
  * `parts` give the scores. The two are joined on the part id.
@@ -189,6 +210,8 @@ async function savePart() {
   editing.value = null
   await invalidateEquipmentPartQueries(queryClient)
 }
+
+const deleteModal = useTemplateRef<{showDeleteModal: (id: number) => void}>('deleteModal')
 </script>
 
 <style scoped>
