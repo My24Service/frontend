@@ -30,6 +30,8 @@ const PARTS = paginated([part(5, 'Door', 'Sliding door', 0), part(6, 'Cable', ''
 
 beforeEach(() => {
   api.get('/api/equipment/equipment-part/', PARTS)
+  api.patch('/api/equipment/equipment-part/{id}/', ({ params, body }) =>
+    part(Number(params.id), 'Door', body.description, body.sequence))
 })
 
 async function mountPanel({ auth = PLANNER, equipment = EQUIPMENT } = {}) {
@@ -75,5 +77,66 @@ describe('EquipmentPartsPanel, reading', () => {
     await mountPanel()
 
     expect(toasts().map((toast) => toast.body)).toContain('Error loading parts')
+  })
+
+  // The API refuses a part write to every role but planning users and staff.
+  test('offers no edit and no delete to a user who is not a planner', async () => {
+    const wrapper = await mountPanel({auth: {isPlanning: false, isCustomer: true}})
+
+    expect(wrapper.find('.edit-part').exists()).toBe(false)
+    expect(wrapper.find('.delete-part').exists()).toBe(false)
+  })
+})
+
+describe('EquipmentPartsPanel, editing', () => {
+  test('a planner changes the description and the position of a part', async () => {
+    const wrapper = await mountPanel()
+
+    await wrapper.findAll('.edit-part')[0].trigger('click')
+    await wrapper.get('#part_description-5').setValue('Sliding door, left')
+    await wrapper.get('#part_sequence-5').setValue('2')
+    await wrapper.get('.save-part').trigger('click')
+    await settle()
+
+    expect(api.requests().filter((sent) => sent.method === 'patch')).toEqual([
+      expect.objectContaining({path: '/api/equipment/equipment-part/5/', body: {description: 'Sliding door, left', sequence: 2}}),
+    ])
+    expect(toasts().map((toast) => toast.body)).toContain('Part has been updated')
+    expect(wrapper.find('#part_description-5').exists()).toBe(false)
+  })
+
+  test('refuses a position that is not a whole number, and sends nothing', async () => {
+    const wrapper = await mountPanel()
+
+    await wrapper.findAll('.edit-part')[0].trigger('click')
+    await wrapper.get('#part_sequence-5').setValue('1.5')
+    await wrapper.get('.save-part').trigger('click')
+    await settle()
+
+    expect(wrapper.text()).toContain('Please enter a whole number')
+    expect(api.requests().filter((sent) => sent.method === 'patch')).toEqual([])
+  })
+
+  test('cancelling sends nothing and shows the stored values again', async () => {
+    const wrapper = await mountPanel()
+
+    await wrapper.findAll('.edit-part')[0].trigger('click')
+    await wrapper.get('#part_description-5').setValue('Changed')
+    await wrapper.get('.cancel-part').trigger('click')
+
+    expect(api.requests().filter((sent) => sent.method === 'patch')).toEqual([])
+    expect(rowsOf(wrapper)[0][1]).toBe('Sliding door')
+  })
+
+  test('tells the user when the part cannot be saved, and stays in the edit', async () => {
+    api.patch('/api/equipment/equipment-part/{id}/', serverError)
+    const wrapper = await mountPanel()
+
+    await wrapper.findAll('.edit-part')[0].trigger('click')
+    await wrapper.get('.save-part').trigger('click')
+    await settle()
+
+    expect(toasts().map((toast) => toast.body)).toContain('Error updating part')
+    expect(wrapper.find('#part_description-5').exists()).toBe(true)
   })
 })
