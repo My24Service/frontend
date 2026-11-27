@@ -133,3 +133,63 @@ describe('FilledChecklistsPanel', () => {
     expect(toasts().map((toast) => toast.body)).toContain('Error loading checklists')
   })
 })
+
+describe('FilledChecklistsPanel, groups, results and photos', () => {
+  test('shows each group heading above its questions', async () => {
+    api.get(PATH, [finished({questions: [
+      question('Does it close?', '', {group_name: 'Door', part_name: '', result: 'ok'}),
+      question('Does it lock?', '', {group_name: 'Door', part_name: '', result: 'ok'}),
+      question('Is the cable whole?', '', {group_name: 'Cable', part_name: '', result: 'ok'}),
+    ]})])
+
+    const wrapper = await mountPanel()
+
+    expect(wrapper.findAll('.checklist-group').map((heading) => heading.text())).toEqual(['Door', 'Cable'])
+  })
+
+  test('shows a result badge per question, and none for a text question', async () => {
+    api.get(PATH, [finished({questions: [
+      question('Does it close?', '', {group_name: '', part_name: '', result: 'ok'}),
+      question('Does it lock?', 'Lock is stiff', {group_name: '', part_name: '', result: 'nok'}),
+      question('Is there a light?', '', {group_name: '', part_name: '', result: 'na'}),
+      question('Remarks for the office', 'None', {group_name: '', part_name: '', result: null}),
+    ]})])
+
+    const wrapper = await mountPanel()
+
+    const badges = wrapper.findAll('tr.checklist-answer').map((row) => row.find('.result .badge'))
+    expect(badges.slice(0, 3).map((badge) => badge.text())).toEqual(['Good', 'Not approved', 'Not applicable'])
+    expect(badges[1].classes()).toContain('text-bg-danger')
+    expect(badges[3].exists()).toBe(false)
+    expect(answerRows(wrapper)[1]).toEqual(['Does it lock?', 'Lock is stiff'])
+  })
+
+  test('names the part a question checks', async () => {
+    api.get(PATH, [finished({questions: [
+      question('Does it close?', '', {group_name: '', part_name: 'Door', result: 'ok'}),
+    ]})])
+
+    const wrapper = await mountPanel()
+
+    expect(wrapper.get('.part-name').text()).toBe('(Door)')
+  })
+
+  test('shows the photos of a question as thumbnails that open the photo', async () => {
+    api.get(PATH, [finished({questions: [
+      question('Does it lock?', 'Lock is stiff', {
+        group_name: '', part_name: '', result: 'nok',
+        photos: [{url: 'https://riedel.example/media/p1.jpg'}, {url: 'https://riedel.example/media/p2.jpg'}],
+      }),
+    ]})])
+
+    const wrapper = await mountPanel()
+
+    const links = wrapper.findAll('.photos a')
+    expect(links.map((link) => link.attributes('href'))).toEqual([
+      'https://riedel.example/media/p1.jpg',
+      'https://riedel.example/media/p2.jpg',
+    ])
+    expect(links[0].attributes('target')).toBe('_blank')
+    expect(links[0].get('img').attributes('src')).toBe('https://riedel.example/media/p1.jpg')
+  })
+})

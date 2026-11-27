@@ -13,29 +13,60 @@
       </h6>
       <p class="checklist-user dimmed">{{ item.user }}</p>
 
-      <table
-        v-if="item.questions.length"
-        class="table table-sm data-table"
+      <template
+        v-for="(group, groupIndex) in groupQuestions(item.questions)"
+        :key="groupIndex"
       >
-        <thead>
-          <tr>
-            <th>{{ $trans('Question') }}</th>
-            <th>{{ $trans('Answer') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(question, questionIndex) in item.questions"
-            :key="questionIndex"
-            class="checklist-answer"
-          >
-            <td class="question">{{ question.question }}</td>
-            <td class="answer">{{ question.answer }}</td>
-          </tr>
-        </tbody>
-      </table>
+        <h6
+          v-if="group.name"
+          class="checklist-group"
+        >{{ group.name }}</h6>
+        <table class="table table-sm data-table">
+          <tbody>
+            <tr
+              v-for="(question, questionIndex) in group.questions"
+              :key="questionIndex"
+              class="checklist-answer"
+            >
+              <td class="question">
+                {{ question.question }}
+                <small
+                  v-if="question.part_name"
+                  class="dimmed part-name"
+                >({{ question.part_name }})</small>
+              </td>
+              <td class="result">
+                <span
+                  v-if="question.result"
+                  :class="resultClass(question.result)"
+                >{{ resultLabel(question.result) }}</span>
+              </td>
+              <td class="answer">
+                {{ question.answer }}
+                <div
+                  v-if="question.photos?.length"
+                  class="photos"
+                >
+                  <!-- No lightbox: a click opens the photo itself, in a new tab. -->
+                  <a
+                    v-for="photo in question.photos"
+                    :key="photo.url"
+                    :href="photo.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="photo"
+                  ><img
+                    :src="photo.url"
+                    :alt="$trans('Photo')"
+                  ></a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </template>
       <small
-        v-else
+        v-if="item.questions.length === 0"
         class="dimmed"
       >{{ $trans('No answers') }}</small>
 
@@ -64,6 +95,7 @@
 <script lang="ts" setup>
 import { orderOrderChecklistsListOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
+import { groupQuestions, resultClass, resultLabel } from './inspection'
 
 /**
  * The checklists engineers finished for an order, read-only: one block per
@@ -92,6 +124,20 @@ const checklists = computed(() => checklistsQuery.data.value ?? [])
 <style scoped>
 .answer {
   white-space: pre-line;
+}
+.checklist-group {
+  margin-top: 1rem;
+}
+.photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+.photo img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
 }
 .signatures {
   gap: 1rem;
