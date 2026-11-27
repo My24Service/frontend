@@ -1,16 +1,20 @@
 <template>
   <div
-    v-if="visits.length"
+    v-if="checklists.length"
     class="panel col-1-3 filled-checklists"
   >
     <div
-      v-for="visit in visits"
-      :key="visit.assignedOrder"
+      v-for="(item, index) in checklists"
+      :key="index"
       class="section filled-checklist"
     >
-      <h6>{{ $trans('Checklist') }}</h6>
+      <h6 class="checklist-title">
+        {{ item.checklist.name }}<template v-if="item.equipment"> - {{ item.equipment.name }}</template>
+      </h6>
+      <p class="checklist-user dimmed">{{ item.user }}</p>
+
       <table
-        v-if="visit.answers.length"
+        v-if="item.questions.length"
         class="table table-sm data-table"
       >
         <thead>
@@ -21,11 +25,12 @@
         </thead>
         <tbody>
           <tr
-            v-for="answer in visit.answers"
-            :key="answer.id"
+            v-for="(question, questionIndex) in item.questions"
+            :key="questionIndex"
+            class="checklist-answer"
           >
-            <td>{{ answer.question_text }}</td>
-            <td class="answer">{{ answer.answer }}</td>
+            <td class="question">{{ question.question }}</td>
+            <td class="answer">{{ question.answer }}</td>
           </tr>
         </tbody>
       </table>
@@ -34,24 +39,20 @@
         class="dimmed"
       >{{ $trans('No answers') }}</small>
 
-      <div
-        v-for="signature in visit.signatures"
-        :key="signature.id"
-        class="flex-columns signatures"
-      >
+      <div class="flex-columns signatures">
         <div class="signature">
-          <p>{{ $trans('Name employee') }}: {{ signature.signature_name_user }}</p>
+          <p>{{ $trans('Name employee') }}: {{ item.signatures.signature_name_user }}</p>
           <img
-            v-if="signature.signature_user"
-            :src="signature.signature_user"
+            v-if="item.signatures.signature_user"
+            :src="item.signatures.signature_user"
             :alt="$trans('Signature employee')"
           >
         </div>
         <div class="signature">
-          <p>{{ $trans('Name customer') }}: {{ signature.signature_name_customer }}</p>
+          <p>{{ $trans('Name customer') }}: {{ item.signatures.signature_name_customer }}</p>
           <img
-            v-if="signature.signature_customer"
-            :src="signature.signature_customer"
+            v-if="item.signatures.signature_customer"
+            :src="item.signatures.signature_customer"
             :alt="$trans('Signature customer')"
           >
         </div>
@@ -61,52 +62,31 @@
 </template>
 
 <script lang="ts" setup>
+import { orderOrderChecklistsListOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 
 /**
- * The checklists engineers filled in for an order, read-only: per assigned
- * order its answers and the signatures given under them. Filling one in is the
- * engineer's job in the app, so there is nothing to edit here.
+ * The checklists engineers finished for an order, read-only: one block per
+ * finished checklist. Filling one in is the engineer's job in the app, so
+ * there is nothing to edit here.
  *
- * An order nobody filled a checklist in for renders nothing at all, which is
+ * It reads the order's `checklists` action, not the answer and signature
+ * lists: the action also returns the checklists a partner tenant filled in for
+ * a copy of this order, so a planner of the tenant that made the order sees
+ * them. Planning users only.
+ *
+ * An order nobody finished a checklist for renders nothing at all, which is
  * most orders.
  */
 const props = defineProps<{
   orderId: number
 }>()
 
-const whole = {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}
+const checklistsQuery = useQuery(() => orderOrderChecklistsListOptions({path: {id: props.orderId}}))
 
-const answersQuery = useQuery(() =>
-  Api.MobileChecklistAnswer.list.options({query: {order: props.orderId, ...whole}}))
-const signaturesQuery = useQuery(() =>
-  Api.MobileChecklistSignature.list.options({query: {order: props.orderId, ...whole}}))
+useQueryErrorToast(checklistsQuery.error, $trans('Error loading checklists'))
 
-useQueryErrorToast(answersQuery.error, $trans('Error loading checklist answers'))
-useQueryErrorToast(signaturesQuery.error, $trans('Error loading checklist signatures'))
-
-interface Visit {
-  assignedOrder: number
-  answers: Api.AssignedOrderChecklistAnswer[]
-  signatures: Api.AssignedOrderChecklistSignature[]
-}
-
-/** One entry per assigned order, in the order the API first names each. */
-const visits = computed<Visit[]>(() => {
-  const byAssignedOrder = new Map<number, Visit>()
-  const visitOf = (assignedOrder: number) => {
-    let visit = byAssignedOrder.get(assignedOrder)
-    if (!visit) {
-      visit = {assignedOrder, answers: [], signatures: []}
-      byAssignedOrder.set(assignedOrder, visit)
-    }
-    return visit
-  }
-  for (const answer of answersQuery.data.value?.results ?? []) visitOf(answer.assigned_order).answers.push(answer)
-  for (const signature of signaturesQuery.data.value?.results ?? []) visitOf(signature.assigned_order).signatures.push(signature)
-  return [...byAssignedOrder.values()]
-})
+const checklists = computed(() => checklistsQuery.data.value ?? [])
 </script>
 
 <style scoped>

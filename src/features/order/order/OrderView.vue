@@ -83,12 +83,13 @@ const props = withDefaults(defineProps<{
   past: false,
 })
 
-const {isCustomer, isBranchEmployee} = useOrderViewer()
+const {isCustomer, isBranchEmployee, isPlanning} = useOrderViewer()
+const authStore = useAuthStore()
 
-// The answers are served to planning users and engineers only, and only a
-// tenant with the module has any: everyone else is spared the two requests.
+// The order's checklists are served to planning users and staff only, and
+// only a tenant with the module has any: everyone else is spared the request.
 const showChecklists = computed(
-  () => hasAccessToModule('checklist') && !isCustomer.value && !isBranchEmployee.value,
+  () => hasAccessToModule('checklist') && Boolean(isPlanning.value || authStore.isAdmin),
 )
 
 const {order, error, refetch} = useOrderDetail(() => ({pk: props.pk, uuid: props.uuid}))

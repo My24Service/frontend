@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { OrderView } from '@/features/order'
-import { vAssignedOrderChecklistAnswer, vOrderDetail, vPurchase, vResultResponse } from '@/api/valibot.gen'
+import { vChecklistData, vChecklistDataQuestion, vOrderDetail, vPurchase, vResultResponse } from '@/api/valibot.gen'
 
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
@@ -102,33 +102,42 @@ async function mountView({ props = { pk: '42' }, auth = {}, main = {} } = {}) {
 }
 
 describe('OrderView, filled-in checklists', () => {
-  const CHECKLIST_GETS = ['/api/mobile/checklist-answer/', '/api/mobile/checklist-signature/']
-  const checklistRequests = () => api.requests().filter((sent) => CHECKLIST_GETS.includes(sent.path))
+  const checklistRequests = () => api.requests().filter((sent) => sent.path === '/api/order/order/42/checklists/')
 
   beforeEach(() => {
-    api.get('/api/mobile/checklist-answer/', paginated([
-      fixtureFor(vAssignedOrderChecklistAnswer, { id: 1, assigned_order: 80, question: 11, question_text: 'Is the power connected?', answer: 'Yes' }),
-    ]))
-    api.get('/api/mobile/checklist-signature/', paginated([]))
+    api.get('/api/order/order/{id}/checklists/', [
+      fixtureFor(vChecklistData, {
+        checklist: { id: 3, name: 'Lift inspection' },
+        equipment: null,
+        parts: [],
+        questions: [fixtureFor(vChecklistDataQuestion, { question: 'Is the power connected?', answer: 'Yes' })],
+      }),
+    ])
   })
 
-  test('shows them for this order when the tenant has the checklist module', async () => {
-    const wrapper = await mountView({ main: { getModules: ['checklist'] } })
+  test('a planner sees them for this order when the tenant has the checklist module', async () => {
+    const wrapper = await mountView({ main: { getModules: ['checklist'] }, auth: { isPlanning: true } })
 
-    expect(checklistRequests().map((sent) => sent.query.order)).toEqual(['42', '42'])
+    expect(checklistRequests()).toHaveLength(1)
     expect(wrapper.get('.filled-checklists').text()).toContain('Is the power connected?')
   })
 
   test('asks for none without the module', async () => {
-    const wrapper = await mountView({ main: { getModules: ['orders'] } })
+    const wrapper = await mountView({ main: { getModules: ['orders'] }, auth: { isPlanning: true } })
 
     expect(checklistRequests()).toEqual([])
     expect(wrapper.find('.filled-checklists').exists()).toBe(false)
   })
 
-  // The endpoints serve planning users and engineers only.
+  // The action serves planning users and staff only.
   test('asks for none as a customer', async () => {
     await mountView({ main: { getModules: ['checklist'] }, auth: { isCustomer: true } })
+
+    expect(checklistRequests()).toEqual([])
+  })
+
+  test('asks for none as an engineer', async () => {
+    await mountView({ main: { getModules: ['checklist'] }, auth: { isEngineer: true } })
 
     expect(checklistRequests()).toEqual([])
   })
