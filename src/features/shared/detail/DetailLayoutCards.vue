@@ -89,6 +89,18 @@
         </div>
       </div>
 
+      <!-- parts -->
+      <div v-if="$slots.parts" class="col-12 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-header py-3 bg-transparent border-bottom">
+            <h5 class="mb-0 text-center text-primary">{{ $trans('Parts') }}</h5>
+          </div>
+          <div class="card-body">
+            <slot name="parts" />
+          </div>
+        </div>
+      </div>
+
       <!-- equipment -->
       <div v-if="$slots.equipment" class="col-12 mb-4">
         <div class="card border-0 shadow-sm h-100">
@@ -111,7 +123,7 @@ import type { DetailField } from './detail-fields'
 // The card-grid frame of a detail page (equipment, location): cards on a
 // grid. The view owns the data and fills the slots; a card only renders when
 // its slot is given. See DetailLayoutSidebar for the other frame.
-// Slots: qr, orders-actions, orders, workorders, documents, order-types, equipment.
+// Slots: qr, orders-actions, orders, workorders, documents, order-types, parts, equipment.
 defineProps<{
   detailsTitle: string
   ordersTitle: string
