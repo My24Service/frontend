@@ -21,6 +21,7 @@
         invalidate: (queryClient) => invalidateChecklistQueries(queryClient),
         deletedDetail: $trans('Checklist has been deleted'),
         deleteError: $trans('Error deleting checklist'),
+        refusedDetail: $trans('This checklist is in use and cannot be deleted. Archive it instead.'),
       }"
     >
       <template #add>
@@ -58,9 +59,16 @@ const columns = columnHelper.columns([
     header: $trans('Name'),
     enableSorting: false,
     meta: {width: '85%'},
-    cell: ({row}) => h(RouterLink, {
-      to: {name: 'settings-checklist-edit', params: {pk: row.original.id}},
-    }, () => row.original.name),
+    // An archived checklist is not offered for new work, but stays in the list:
+    // its finished records still point at it.
+    cell: ({row}) => h('span', [
+      h(RouterLink, {
+        to: {name: 'settings-checklist-edit', params: {pk: row.original.id}},
+      }, () => row.original.name),
+      row.original.archived
+        ? h('span', {class: 'badge text-bg-secondary ms-2 archived'}, $trans('Archived'))
+        : null,
+    ]),
   }),
   // Wide enough for both icons side by side: at 10% they wrap below ~1600px.
   createActionColumn(columnHelper, {
