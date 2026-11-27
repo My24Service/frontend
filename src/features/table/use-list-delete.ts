@@ -26,6 +26,11 @@ export function useListDelete({
   copy: {
     deletedDetail: string
     deleteError: string
+    /**
+     * Shown instead of `deleteError` when the API refuses the delete with a
+     * 400: a record still in use, which the user can act on.
+     */
+    refusedDetail?: string
   }
 }) {
   const queryClient = useQueryClient()
@@ -43,8 +48,9 @@ export function useListDelete({
         infoToast(create, $trans('Deleted'), copy.deletedDetail)
         await (invalidate ? invalidate(queryClient) : resource.invalidate(queryClient))
       },
-      onError: () => {
-        errorToast(create, copy.deleteError)
+      onError: (error) => {
+        const refused = error.response?.status === 400 ? copy.refusedDetail : undefined
+        errorToast(create, refused ?? copy.deleteError)
       },
     }),
   })
