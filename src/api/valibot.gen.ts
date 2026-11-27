@@ -3089,6 +3089,23 @@ export const vInitialDataSettings = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistGrade, ChecklistGradeRequest, PatchedChecklistGradeRequest
+ */
+/**
+ * * `initial` - initial
+ * * `advanced` - advanced
+ * * `final` - final
+ */
+export const vIntensityEnum = v.picklist([
+    'initial',
+    'advanced',
+    'final'
+]);
+
+/**
+ * @endpoints
  * Response:
  *   GET /api/inventory/inventory-locations-for-material/
  *   GET /api/inventory/inventory-locations/
@@ -9972,134 +9989,6 @@ export const vResultEnum = v.picklist([
 
 /**
  * @endpoints
- * Response:
- *   GET /api/mobile/checklist-answer/{id}/
- *   PATCH /api/mobile/checklist-answer/{id}/
- *   POST /api/mobile/checklist-answer/
- *
- * Nested in: AssignedOrderChecklistFinished, PaginatedAssignedOrderChecklistAnswerList
- */
-export const vAssignedOrderChecklistAnswer = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    assigned_order: v.pipe(v.number(), v.integer()),
-    question: v.nullable(v.pipe(v.number(), v.integer())),
-    question_text: v.pipe(v.string(), v.readonly()),
-    answer: v.string(),
-    signature: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
-    result: v.nullish(vResultEnum),
-    grade: v.optional(v.unknown()),
-    group_name: v.pipe(v.string(), v.readonly()),
-    part_name: v.pipe(v.string(), v.readonly()),
-    photos: v.pipe(v.array(vChecklistAnswerPhoto), v.readonly())
-});
-
-/**
- * @endpoints
- * Request body:
- *   POST /api/mobile/checklist-answer/
- */
-export const vAssignedOrderChecklistAnswerRequest = v.object({
-    assigned_order: v.pipe(v.number(), v.integer()),
-    question: v.pipe(v.number(), v.integer()),
-    answer: v.pipe(v.string(), v.minLength(1)),
-    result: v.nullish(vResultEnum),
-    grade: v.optional(v.unknown())
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: AssignedOrderChecklistDraft
- */
-export const vAssignedOrderChecklistDraftAnswer = v.object({
-    question: v.pipe(v.number(), v.integer()),
-    answer: v.string(),
-    result: v.nullish(vResultEnum),
-    grade: v.nullish(v.record(v.string(), v.unknown())),
-    photos: v.optional(v.pipe(v.array(v.pipe(v.number(), v.integer())), v.maxLength(50)))
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/mobile/checklist-draft/{id}/
- *   PATCH /api/mobile/checklist-draft/{id}/
- *   POST /api/mobile/checklist-draft/
- *
- * Nested in: ChecklistOverviewEntry, PaginatedAssignedOrderChecklistDraftList
- */
-/**
- * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
- *
- * Signatures travel as the base64 PNG text the app's pads produce, both
- * ways, so a resumed draft shows exactly what was drawn.
- */
-export const vAssignedOrderChecklistDraft = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    assigned_order: v.pipe(v.number(), v.integer()),
-    checklist: v.pipe(v.number(), v.integer()),
-    answers: v.optional(v.array(vAssignedOrderChecklistDraftAnswer)),
-    signature_user: v.nullish(v.string()),
-    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    signature_customer: v.nullish(v.string()),
-    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    remarks: v.optional(v.string()),
-    equipment: v.nullish(v.pipe(v.number(), v.integer()))
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: AssignedOrderChecklistDraftRequest, PatchedAssignedOrderChecklistDraftRequest
- */
-export const vAssignedOrderChecklistDraftAnswerRequest = v.object({
-    question: v.pipe(v.number(), v.integer()),
-    answer: v.string(),
-    result: v.nullish(vResultEnum),
-    grade: v.nullish(v.record(v.string(), v.unknown())),
-    photos: v.optional(v.pipe(v.array(v.pipe(v.number(), v.integer())), v.maxLength(50)))
-});
-
-/**
- * @endpoints
- * Request body:
- *   POST /api/mobile/checklist-draft/
- */
-/**
- * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
- *
- * Signatures travel as the base64 PNG text the app's pads produce, both
- * ways, so a resumed draft shows exactly what was drawn.
- */
-export const vAssignedOrderChecklistDraftRequest = v.object({
-    assigned_order: v.pipe(v.number(), v.integer()),
-    checklist: v.pipe(v.number(), v.integer()),
-    answers: v.optional(v.array(vAssignedOrderChecklistDraftAnswerRequest)),
-    signature_user: v.nullish(v.string()),
-    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    signature_customer: v.nullish(v.string()),
-    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    remarks: v.optional(v.string()),
-    equipment: v.nullish(v.pipe(v.number(), v.integer()))
-});
-
-/**
- * @endpoints
- * Response:
- *   POST /api/mobile/checklist-draft/{id}/finish/
- */
-/**
- * What finishing a draft created: the rows a direct submit creates.
- */
-export const vAssignedOrderChecklistFinished = v.object({
-    answers: v.array(vAssignedOrderChecklistAnswer),
-    signature: vAssignedOrderChecklistSignature
-});
-
-/**
- * @endpoints
  * Not used directly by an endpoint.
  *
  * Nested in: ChecklistData
@@ -10137,94 +10026,6 @@ export const vChecklistData = v.object({
     parts: v.array(vChecklistDataPart),
     equipment: v.nullable(vChecklistDataEquipment),
     questions: v.array(vChecklistDataQuestion)
-});
-
-/**
- * @endpoints
- * Not used directly by an endpoint.
- *
- * Nested in: ChecklistOverview
- */
-/**
- * The checklist of one equipment on an assigned order (or of the work
- * without equipment), with the draft started and the record finished.
- */
-export const vChecklistOverviewEntry = v.object({
-    equipment: v.nullable(vChecklistOverviewEquipment),
-    checklist: v.nullable(vChecklistNested),
-    draft: v.nullable(vAssignedOrderChecklistDraft),
-    finished: v.nullable(vAssignedOrderChecklistSignature),
-    on_order: v.boolean()
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/mobile/checklist-draft/overview/
- */
-export const vChecklistOverview = v.object({
-    entries: v.array(vChecklistOverviewEntry),
-    checklists: v.array(vChecklistNested)
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/mobile/checklist-answer/
- */
-export const vPaginatedAssignedOrderChecklistAnswerList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vAssignedOrderChecklistAnswer))
-});
-
-/**
- * @endpoints
- * Response:
- *   GET /api/mobile/checklist-draft/
- */
-export const vPaginatedAssignedOrderChecklistDraftList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vAssignedOrderChecklistDraft))
-});
-
-/**
- * @endpoints
- * Request body:
- *   PATCH /api/mobile/checklist-answer/{id}/
- */
-export const vPatchedAssignedOrderChecklistAnswerRequest = v.object({
-    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
-    question: v.optional(v.pipe(v.number(), v.integer())),
-    answer: v.optional(v.pipe(v.string(), v.minLength(1))),
-    result: v.nullish(vResultEnum),
-    grade: v.optional(v.unknown())
-});
-
-/**
- * @endpoints
- * Request body:
- *   PATCH /api/mobile/checklist-draft/{id}/
- */
-/**
- * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
- *
- * Signatures travel as the base64 PNG text the app's pads produce, both
- * ways, so a resumed draft shows exactly what was drawn.
- */
-export const vPatchedAssignedOrderChecklistDraftRequest = v.object({
-    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
-    checklist: v.optional(v.pipe(v.number(), v.integer())),
-    answers: v.optional(v.array(vAssignedOrderChecklistDraftAnswerRequest)),
-    signature_user: v.nullish(v.string()),
-    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    signature_customer: v.nullish(v.string()),
-    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
-    remarks: v.optional(v.string()),
-    equipment: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -10434,6 +10235,296 @@ export const vSetLanguageRequestRequest = v.object({
 export const vSetOrderAcceptedResponse = v.object({
     result: v.boolean(),
     accepted: v.boolean()
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistGrade, ChecklistGradeRequest, PatchedChecklistGradeRequest
+ */
+/**
+ * * `slight` - slight
+ * * `serious` - serious
+ * * `severe` - severe
+ */
+export const vSeverityEnum = v.picklist([
+    'slight',
+    'serious',
+    'severe'
+]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderChecklistAnswer, AssignedOrderChecklistDraftAnswer
+ */
+/**
+ * The NEN 2767 grade of a rejected point, as the schema describes it.
+ *
+ * Only the schema uses this. The answer stores the grade in a JSON column,
+ * and `validate_result_and_grade` checks it, with the messages that installed
+ * apps already get.
+ */
+export const vChecklistGrade = v.object({
+    severity: vSeverityEnum,
+    extent: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(100)),
+    intensity: vIntensityEnum
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-answer/{id}/
+ *   PATCH /api/mobile/checklist-answer/{id}/
+ *   POST /api/mobile/checklist-answer/
+ *
+ * Nested in: AssignedOrderChecklistFinished, PaginatedAssignedOrderChecklistAnswerList
+ */
+export const vAssignedOrderChecklistAnswer = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    assigned_order: v.pipe(v.number(), v.integer()),
+    question: v.nullable(v.pipe(v.number(), v.integer())),
+    question_text: v.pipe(v.string(), v.readonly()),
+    answer: v.string(),
+    signature: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    result: v.nullish(vResultEnum),
+    grade: v.nullish(vChecklistGrade),
+    group_name: v.pipe(v.string(), v.readonly()),
+    part_name: v.pipe(v.string(), v.readonly()),
+    photos: v.pipe(v.array(vChecklistAnswerPhoto), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderChecklistDraft
+ */
+export const vAssignedOrderChecklistDraftAnswer = v.object({
+    question: v.pipe(v.number(), v.integer()),
+    answer: v.string(),
+    result: v.nullish(vResultEnum),
+    grade: v.nullish(vChecklistGrade),
+    photos: v.optional(v.pipe(v.array(v.pipe(v.number(), v.integer())), v.maxLength(50)))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-draft/{id}/
+ *   PATCH /api/mobile/checklist-draft/{id}/
+ *   POST /api/mobile/checklist-draft/
+ *
+ * Nested in: ChecklistOverviewEntry, PaginatedAssignedOrderChecklistDraftList
+ */
+/**
+ * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+ *
+ * Signatures travel as the base64 PNG text the app's pads produce, both
+ * ways, so a resumed draft shows exactly what was drawn.
+ */
+export const vAssignedOrderChecklistDraft = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    assigned_order: v.pipe(v.number(), v.integer()),
+    checklist: v.pipe(v.number(), v.integer()),
+    answers: v.optional(v.array(vAssignedOrderChecklistDraftAnswer)),
+    signature_user: v.nullish(v.string()),
+    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_customer: v.nullish(v.string()),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.optional(v.string()),
+    equipment: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/mobile/checklist-draft/{id}/finish/
+ */
+/**
+ * What finishing a draft created: the rows a direct submit creates.
+ */
+export const vAssignedOrderChecklistFinished = v.object({
+    answers: v.array(vAssignedOrderChecklistAnswer),
+    signature: vAssignedOrderChecklistSignature
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderChecklistAnswerRequest, AssignedOrderChecklistDraftAnswerRequest
+ */
+/**
+ * The NEN 2767 grade of a rejected point, as the schema describes it.
+ *
+ * Only the schema uses this. The answer stores the grade in a JSON column,
+ * and `validate_result_and_grade` checks it, with the messages that installed
+ * apps already get.
+ */
+export const vChecklistGradeRequest = v.object({
+    severity: vSeverityEnum,
+    extent: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(100)),
+    intensity: vIntensityEnum
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/mobile/checklist-answer/
+ */
+export const vAssignedOrderChecklistAnswerRequest = v.object({
+    assigned_order: v.pipe(v.number(), v.integer()),
+    question: v.pipe(v.number(), v.integer()),
+    answer: v.pipe(v.string(), v.minLength(1)),
+    result: v.nullish(vResultEnum),
+    grade: v.nullish(vChecklistGradeRequest)
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderChecklistDraftRequest, PatchedAssignedOrderChecklistDraftRequest
+ */
+export const vAssignedOrderChecklistDraftAnswerRequest = v.object({
+    question: v.pipe(v.number(), v.integer()),
+    answer: v.string(),
+    result: v.nullish(vResultEnum),
+    grade: v.nullish(vChecklistGradeRequest),
+    photos: v.optional(v.pipe(v.array(v.pipe(v.number(), v.integer())), v.maxLength(50)))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/mobile/checklist-draft/
+ */
+/**
+ * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+ *
+ * Signatures travel as the base64 PNG text the app's pads produce, both
+ * ways, so a resumed draft shows exactly what was drawn.
+ */
+export const vAssignedOrderChecklistDraftRequest = v.object({
+    assigned_order: v.pipe(v.number(), v.integer()),
+    checklist: v.pipe(v.number(), v.integer()),
+    answers: v.optional(v.array(vAssignedOrderChecklistDraftAnswerRequest)),
+    signature_user: v.nullish(v.string()),
+    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_customer: v.nullish(v.string()),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.optional(v.string()),
+    equipment: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistOverview
+ */
+/**
+ * The checklist of one equipment on an assigned order (or of the work
+ * without equipment), with the draft started and the record finished.
+ */
+export const vChecklistOverviewEntry = v.object({
+    equipment: v.nullable(vChecklistOverviewEquipment),
+    checklist: v.nullable(vChecklistNested),
+    draft: v.nullable(vAssignedOrderChecklistDraft),
+    finished: v.nullable(vAssignedOrderChecklistSignature),
+    on_order: v.boolean()
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-draft/overview/
+ */
+export const vChecklistOverview = v.object({
+    entries: v.array(vChecklistOverviewEntry),
+    checklists: v.array(vChecklistNested)
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-answer/
+ */
+export const vPaginatedAssignedOrderChecklistAnswerList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vAssignedOrderChecklistAnswer))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-draft/
+ */
+export const vPaginatedAssignedOrderChecklistDraftList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vAssignedOrderChecklistDraft))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PATCH /api/mobile/checklist-draft/{id}/
+ */
+/**
+ * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+ *
+ * Signatures travel as the base64 PNG text the app's pads produce, both
+ * ways, so a resumed draft shows exactly what was drawn.
+ */
+export const vPatchedAssignedOrderChecklistDraftRequest = v.object({
+    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
+    checklist: v.optional(v.pipe(v.number(), v.integer())),
+    answers: v.optional(v.array(vAssignedOrderChecklistDraftAnswerRequest)),
+    signature_user: v.nullish(v.string()),
+    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_customer: v.nullish(v.string()),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.optional(v.string()),
+    equipment: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: PatchedAssignedOrderChecklistAnswerRequest
+ */
+/**
+ * The NEN 2767 grade of a rejected point, as the schema describes it.
+ *
+ * Only the schema uses this. The answer stores the grade in a JSON column,
+ * and `validate_result_and_grade` checks it, with the messages that installed
+ * apps already get.
+ */
+export const vPatchedChecklistGradeRequest = v.object({
+    severity: v.optional(vSeverityEnum),
+    extent: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(100))),
+    intensity: v.optional(vIntensityEnum)
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PATCH /api/mobile/checklist-answer/{id}/
+ */
+export const vPatchedAssignedOrderChecklistAnswerRequest = v.object({
+    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
+    question: v.optional(v.pipe(v.number(), v.integer())),
+    answer: v.optional(v.pipe(v.string(), v.minLength(1))),
+    result: v.nullish(vResultEnum),
+    grade: v.nullish(vPatchedChecklistGradeRequest)
 });
 
 /**
@@ -13966,7 +14057,7 @@ export const vAssignedOrderChecklistAnswerWritable = v.object({
     question: v.nullable(v.pipe(v.number(), v.integer())),
     answer: v.string(),
     result: v.nullish(vResultEnum),
-    grade: v.optional(v.unknown())
+    grade: v.nullish(vChecklistGrade)
 });
 
 /**

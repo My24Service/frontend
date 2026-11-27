@@ -23883,6 +23883,8 @@ components:
           - $ref: '#/components/schemas/ResultEnum'
           nullable: true
         grade:
+          allOf:
+          - $ref: '#/components/schemas/ChecklistGrade'
           nullable: true
         group_name:
           type: string
@@ -23920,6 +23922,8 @@ components:
           - $ref: '#/components/schemas/ResultEnum'
           nullable: true
         grade:
+          allOf:
+          - $ref: '#/components/schemas/ChecklistGradeRequest'
           nullable: true
       required:
       - answer
@@ -23979,8 +23983,8 @@ components:
           - $ref: '#/components/schemas/ResultEnum'
           nullable: true
         grade:
-          type: object
-          additionalProperties: {}
+          allOf:
+          - $ref: '#/components/schemas/ChecklistGrade'
           nullable: true
         photos:
           type: array
@@ -24002,8 +24006,8 @@ components:
           - $ref: '#/components/schemas/ResultEnum'
           nullable: true
         grade:
-          type: object
-          additionalProperties: {}
+          allOf:
+          - $ref: '#/components/schemas/ChecklistGradeRequest'
           nullable: true
         photos:
           type: array
@@ -25558,6 +25562,48 @@ components:
         * `signature_name_user` - signature_name_user
         * `signature_customer` - signature_customer
         * `signature_name_customer` - signature_name_customer
+    ChecklistGrade:
+      type: object
+      description: |-
+        The NEN 2767 grade of a rejected point, as the schema describes it.
+
+        Only the schema uses this. The answer stores the grade in a JSON column,
+        and `validate_result_and_grade` checks it, with the messages that installed
+        apps already get.
+      properties:
+        severity:
+          $ref: '#/components/schemas/SeverityEnum'
+        extent:
+          type: integer
+          maximum: 100
+          minimum: 1
+        intensity:
+          $ref: '#/components/schemas/IntensityEnum'
+      required:
+      - extent
+      - intensity
+      - severity
+    ChecklistGradeRequest:
+      type: object
+      description: |-
+        The NEN 2767 grade of a rejected point, as the schema describes it.
+
+        Only the schema uses this. The answer stores the grade in a JSON column,
+        and `validate_result_and_grade` checks it, with the messages that installed
+        apps already get.
+      properties:
+        severity:
+          $ref: '#/components/schemas/SeverityEnum'
+        extent:
+          type: integer
+          maximum: 100
+          minimum: 1
+        intensity:
+          $ref: '#/components/schemas/IntensityEnum'
+      required:
+      - extent
+      - intensity
+      - severity
     ChecklistNested:
       type: object
       description: 'A checklist with its questions in sequence: what `load` answers.'
@@ -29070,6 +29116,16 @@ components:
           type: integer
         mobile_hours_select_user:
           type: boolean
+    IntensityEnum:
+      enum:
+      - initial
+      - advanced
+      - final
+      type: string
+      description: |-
+        * `initial` - initial
+        * `advanced` - advanced
+        * `final` - final
     InventoryLocations:
       type: object
       properties:
@@ -38052,6 +38108,8 @@ components:
           - $ref: '#/components/schemas/ResultEnum'
           nullable: true
         grade:
+          allOf:
+          - $ref: '#/components/schemas/PatchedChecklistGradeRequest'
           nullable: true
     PatchedAssignedOrderChecklistDraftRequest:
       type: object
@@ -38323,6 +38381,23 @@ components:
         description:
           type: string
           nullable: true
+    PatchedChecklistGradeRequest:
+      type: object
+      description: |-
+        The NEN 2767 grade of a rejected point, as the schema describes it.
+
+        Only the schema uses this. The answer stores the grade in a JSON column,
+        and `validate_result_and_grade` checks it, with the messages that installed
+        apps already get.
+      properties:
+        severity:
+          $ref: '#/components/schemas/SeverityEnum'
+        extent:
+          type: integer
+          maximum: 100
+          minimum: 1
+        intensity:
+          $ref: '#/components/schemas/IntensityEnum'
     PatchedChecklistQuestionRequest:
       type: object
       properties:
@@ -43816,6 +43891,16 @@ components:
       required:
       - accepted
       - result
+    SeverityEnum:
+      enum:
+      - slight
+      - serious
+      - severe
+      type: string
+      description: |-
+        * `slight` - slight
+        * `serious` - serious
+        * `severe` - severe
     SourceEnum:
       enum:
       - mobile

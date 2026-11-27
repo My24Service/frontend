@@ -366,7 +366,7 @@ export type AssignedOrderChecklistAnswer = {
     answer: string;
     readonly signature: number | null;
     result?: ResultEnum | null;
-    grade?: unknown;
+    grade?: ChecklistGrade | null;
     readonly group_name: string;
     readonly part_name: string;
     readonly photos: Array<ChecklistAnswerPhoto>;
@@ -377,7 +377,7 @@ export type AssignedOrderChecklistAnswerRequest = {
     question: number;
     answer: string;
     result?: ResultEnum | null;
-    grade?: unknown;
+    grade?: ChecklistGradeRequest | null;
 };
 
 /**
@@ -403,9 +403,7 @@ export type AssignedOrderChecklistDraftAnswer = {
     question: number;
     answer: string;
     result?: ResultEnum | null;
-    grade?: {
-        [key: string]: unknown;
-    } | null;
+    grade?: ChecklistGrade | null;
     photos?: Array<number>;
 };
 
@@ -413,9 +411,7 @@ export type AssignedOrderChecklistDraftAnswerRequest = {
     question: number;
     answer: string;
     result?: ResultEnum | null;
-    grade?: {
-        [key: string]: unknown;
-    } | null;
+    grade?: ChecklistGradeRequest | null;
     photos?: Array<number>;
 };
 
@@ -1116,6 +1112,32 @@ export type ChecklistDeleteRefused = {
  * * `signature_name_customer` - signature_name_customer
  */
 export type ChecklistDraftMissingFieldEnum = 'signature_user' | 'signature_name_user' | 'signature_customer' | 'signature_name_customer';
+
+/**
+ * The NEN 2767 grade of a rejected point, as the schema describes it.
+ *
+ * Only the schema uses this. The answer stores the grade in a JSON column,
+ * and `validate_result_and_grade` checks it, with the messages that installed
+ * apps already get.
+ */
+export type ChecklistGrade = {
+    severity: SeverityEnum;
+    extent: number;
+    intensity: IntensityEnum;
+};
+
+/**
+ * The NEN 2767 grade of a rejected point, as the schema describes it.
+ *
+ * Only the schema uses this. The answer stores the grade in a JSON column,
+ * and `validate_result_and_grade` checks it, with the messages that installed
+ * apps already get.
+ */
+export type ChecklistGradeRequest = {
+    severity: SeverityEnum;
+    extent: number;
+    intensity: IntensityEnum;
+};
 
 /**
  * A checklist with its questions in sequence: what `load` answers.
@@ -2705,6 +2727,13 @@ export type InitialDataSettings = {
     app_session_token_expiry_days?: number;
     mobile_hours_select_user?: boolean;
 };
+
+/**
+ * * `initial` - initial
+ * * `advanced` - advanced
+ * * `final` - final
+ */
+export type IntensityEnum = 'initial' | 'advanced' | 'final';
 
 export type InventoryLocations = {
     location_id: number;
@@ -6112,7 +6141,7 @@ export type PatchedAssignedOrderChecklistAnswerRequest = {
     question?: number;
     answer?: string;
     result?: ResultEnum | null;
-    grade?: unknown;
+    grade?: PatchedChecklistGradeRequest | null;
 };
 
 /**
@@ -6229,6 +6258,19 @@ export type PatchedChapterRequest = {
     quotation?: number;
     name?: string;
     description?: string | null;
+};
+
+/**
+ * The NEN 2767 grade of a rejected point, as the schema describes it.
+ *
+ * Only the schema uses this. The answer stores the grade in a JSON column,
+ * and `validate_result_and_grade` checks it, with the messages that installed
+ * apps already get.
+ */
+export type PatchedChecklistGradeRequest = {
+    severity?: SeverityEnum;
+    extent?: number;
+    intensity?: IntensityEnum;
 };
 
 export type PatchedChecklistQuestionRequest = {
@@ -8371,6 +8413,13 @@ export type SetOrderAcceptedResponse = {
 };
 
 /**
+ * * `slight` - slight
+ * * `serious` - serious
+ * * `severe` - severe
+ */
+export type SeverityEnum = 'slight' | 'serious' | 'severe';
+
+/**
  * * `mobile` - mobile
  * * `company` - company
  */
@@ -10172,7 +10221,7 @@ export type AssignedOrderChecklistAnswerWritable = {
     question: number | null;
     answer: string;
     result?: ResultEnum | null;
-    grade?: unknown;
+    grade?: ChecklistGrade | null;
 };
 
 /**
