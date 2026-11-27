@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import {
   vBranch,
   vBranchAutocomplete,
+  vChecklist,
   vCustomer,
   vCustomerAutocomplete,
   vEquipment,
@@ -12,7 +13,7 @@ import BranchCard from '@/components/BranchCard.vue'
 import { EquipmentForm } from '@/features/equipment'
 import { toDinero } from '@/services/money'
 
-import { fixtureFor } from '../../helpers/schema-fixture.js'
+import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, settle } from '../../support/api-seam/index.js'
 import { mountForm, routerGo, toasts } from '../../support/form-harness.js'
 import { serverError } from '../../support/list-harness.js'
@@ -482,5 +483,122 @@ describe('EquipmentForm cancel', () => {
 
     expect(routerGo()).toHaveBeenCalledWith(-1)
     expect(writes()).toHaveLength(0)
+  })
+})
+
+describe('EquipmentForm checklist', () => {
+  const CHECKLISTS = paginated([
+    fixtureFor(vChecklist, {id: 3, name: 'Lift inspection', archived: false}),
+    fixtureFor(vChecklist, {id: 4, name: 'Old lift inspection', archived: true}),
+  ])
+  const WITH_MODULE = {
+    getMemberHasBranches: true, getCurrentLanguage: 'nl', getDefaultCurrency: 'EUR', getModules: ['equipment', 'checklist'],
+  }
+  const PLANNER = {isEmployee: false, isCustomer: false, isPlanning: true}
+
+  const optionTexts = (wrapper) => wrapper.findAll('#equipment_checklist option').map((option) => option.text())
+
+  beforeEach(() => {
+    api.get('/api/checklist/checklist/', CHECKLISTS)
+  })
+
+  test('a planner picks the checklist of a new equipment from the checklists that are not archived', async () => {
+    const wrapper = mountEquipment({main: WITH_MODULE, auth: PLANNER})
+    await settle()
+
+    expect(requestsTo('/api/checklist/checklist/').at(-1).query).toEqual({page: '1', page_size: '1000'})
+    expect(optionTexts(wrapper)).toEqual(['No checklist', 'Lift inspection'])
+
+    await fillMinimum(wrapper)
+    await wrapper.get('#equipment_checklist').setValue('3')
+    await click(wrapper, 'Submit')
+
+    expect(writeOf('post').body).toMatchObject({name: 'CV-ketel', checklist: 3})
+  })
+
+  test('the archived checklist an equipment has stays selected, and is marked', async () => {
+    api.get('/api/equipment/equipment/{id}/', equipmentRecord({checklist: 4}))
+    const wrapper = mountEquipment({props: {pk: '31'}, main: WITH_MODULE, auth: PLANNER})
+    await settle()
+
+    expect(optionTexts(wrapper)).toEqual(['No checklist', 'Lift inspection', 'Old lift inspection (Archived)'])
+    expect(wrapper.get('#equipment_checklist').element.value).toBe('4')
+  })
+
+  test('a new equipment shows the "No checklist" option as selected, and sends no checklist key', async () => {
+    const wrapper = mountEquipment({main: WITH_MODULE, auth: PLANNER})
+    await settle()
+
+    const select = wrapper.get('#equipment_checklist').element
+    expect(select.selectedOptions[0]?.text).toBe('No checklist')
+
+    await fillMinimum(wrapper)
+    await click(wrapper, 'Submit')
+
+    expect(writeOf('post').body).not.toHaveProperty('checklist')
+  })
+
+  test('the archived checklist of the stored record stays in the list after another one is chosen', async () => {
+    api.get('/api/equipment/equipment/{id}/', equipmentRecord({checklist: 4}))
+    const wrapper = mountEquipment({props: {pk: '31'}, main: WITH_MODULE, auth: PLANNER})
+    await settle()
+
+    await wrapper.get('#equipment_checklist').setValue('3')
+
+    expect(optionTexts(wrapper)).toEqual(['No checklist', 'Lift inspection', 'Old lift inspection (Archived)'])
+  })
+
+  test('a planner can take the checklist off an equipment', async () => {
+    api.get('/api/equipment/equipment/{id}/', equipmentRecord({checklist: 3}))
+    const wrapper = mountEquipment({props: {pk: '31'}, main: WITH_MODULE, auth: PLANNER})
+    await settle()
+
+    await wrapper.findAll('#equipment_checklist option')[0].setSelected()
+    await click(wrapper, 'Submit')
+
+    expect(writeOf('patch').body).toMatchObject({checklist: null})
+  })
+
+  test('without the checklist module there is no select and no checklist read', async () => {
+    const wrapper = mountEquipment({auth: PLANNER})
+    await settle()
+
+    expect(wrapper.find('#equipment_checklist').exists()).toBe(false)
+    expect(requestsTo('/api/checklist/checklist/')).toEqual([])
+  })
+
+  test('a customer who edits a record that has a checklist gets no select and no checklist read', async () => {
+    api.get('/api/equipment/equipment/{id}/', equipmentRecord({checklist: 3}))
+    const wrapper = mountEquipment({
+      props: {pk: '31'}, main: WITH_MODULE, auth: {isEmployee: false, isCustomer: true, isPlanning: false},
+    })
+    await settle()
+
+    expect(wrapper.find('#equipment_checklist').exists()).toBe(false)
+    expect(requestsTo('/api/checklist/checklist/')).toEqual([])
+  })
+
+  // The select is hidden from a customer, but the form still carries the stored
+  // value, so the PATCH does not take the checklist off the equipment.
+  test('a customer who saves a record that has a checklist still sends that checklist', async () => {
+    api.get('/api/equipment/equipment/{id}/', equipmentRecord({checklist: 3}))
+    const wrapper = mountEquipment({
+      props: {pk: '31'}, main: WITH_MODULE, auth: {isEmployee: false, isCustomer: true, isPlanning: false},
+    })
+    await settle()
+
+    await click(wrapper, 'Submit')
+    await settle()
+
+    expect(writeOf('patch').body).toMatchObject({checklist: 3})
+  })
+
+  // The API drops `checklist` for every role but planning users and staff.
+  test('a user who is not a planner gets no select and no checklist read', async () => {
+    const wrapper = mountEquipment({main: WITH_MODULE, auth: {isEmployee: true, isCustomer: false, isPlanning: false}})
+    await settle()
+
+    expect(wrapper.find('#equipment_checklist').exists()).toBe(false)
+    expect(requestsTo('/api/checklist/checklist/')).toEqual([])
   })
 })

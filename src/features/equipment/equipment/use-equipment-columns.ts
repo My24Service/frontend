@@ -1,6 +1,7 @@
 import { RouterLink } from 'vue-router'
 
 import RowAction from '@/components/RowAction.vue'
+import { inspectionStatusClass, inspectionStatusLabel } from '@/features/checklist'
 import { createAppColumnHelper, type ListRow } from '@/features/table'
 import { useOwnerFilter } from '../use-owner-filter'
 
@@ -15,6 +16,8 @@ export interface EquipmentColumnOptions {
   fromSettings: boolean
   /** Neither a branch employee nor a customer: those two roles see neither the owner nor the brand column. */
   planning: boolean
+  /** The tenant has the checklist module: the inspection status and the score get a column each. */
+  showInspection: boolean
   /** Open the kit's delete confirmation for a row. */
   onDelete: (id: number) => void
   /** Open the add-state modal for a row. */
@@ -100,6 +103,22 @@ export function useEquipmentColumns(options: EquipmentColumnOptions) {
         return `${latest.state} (${$trans('replace in ')} ${latest.replace_months} ${$trans('months')})`
       },
     }),
+    // Derived by the API from the finished checklists: nothing to sort or filter on.
+    ...(options.showInspection ? [
+      helper.display({
+        id: 'inspection',
+        header: $trans('Inspection'),
+        cell: ({row}) => {
+          const inspection = row.original.inspection
+          return h('span', {class: inspectionStatusClass(inspection.status)}, inspectionStatusLabel(inspection))
+        },
+      }),
+      helper.display({
+        id: 'inspection_score',
+        header: $trans('Condition score'),
+        cell: ({row}) => row.original.inspection.score ?? '',
+      }),
+    ] : []),
     helper.accessor('num_orders', {
       header: $trans('Orders'),
       meta: {filter: {variant: 'number', label: $trans('Orders')}},

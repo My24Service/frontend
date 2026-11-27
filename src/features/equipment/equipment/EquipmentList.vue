@@ -84,6 +84,7 @@ import { useFileDownload, XLSX_MIME } from '@/features/shared'
 
 import { EQUIPMENT_TYPES } from '@/constants'
 import { ServerTable, useServerTable, type ListRow } from '@/features/table'
+import { hasAccessToModule } from '@/utils'
 import { useEquipmentColumns } from './use-equipment-columns'
 const props = withDefaults(defineProps<{
   /** Mounted by the settings layout, which adds the row actions and the add link. */
@@ -123,6 +124,7 @@ const columns = useEquipmentColumns({
   type: props.type,
   fromSettings: props.from_settings,
   planning: planning.value,
+  showInspection: hasAccessToModule('checklist'),
   onDelete: (id) => tableRef.value?.showDeleteModal(id),
   onAddState: (id) => showAddStateModal(id),
 })

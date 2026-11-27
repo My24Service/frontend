@@ -34,6 +34,9 @@
         <b-tab key="docs" :title="$trans('Documents')">
           <slot name="documents" />
         </b-tab>
+        <b-tab v-if="$slots.parts" key="parts" :title="$trans('Parts')">
+          <slot name="parts" />
+        </b-tab>
         <b-tab v-if="$slots.equipment" key="equipment" :title="$trans('Equipment')">
           <slot name="equipment" />
         </b-tab>
@@ -48,7 +51,7 @@ import type { DetailField } from './detail-fields'
 // The sidebar-and-tabs frame of a detail page (equipment, location): a
 // sidebar with the details list and the QR code, and a tabbed panel. The view
 // owns the data and fills the slots; see DetailLayoutCards for the card frame.
-// Slots: qr, orders-actions, orders, stats, documents, equipment.
+// Slots: qr, orders-actions, orders, stats, documents, parts, equipment.
 defineProps<{
   detailsTitle: string
   ordersTitle: string

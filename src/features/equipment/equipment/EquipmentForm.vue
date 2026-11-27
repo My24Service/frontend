@@ -323,6 +323,21 @@
               text-field="name"
             />
           </BFormGroup>
+
+          <BFormGroup
+            v-if="showChecklist"
+            label-size="sm"
+            label-cols="4"
+            :label="$trans('Checklist')"
+            label-for="equipment_checklist"
+          >
+            <BFormSelect
+              id="equipment_checklist"
+              v-model="checklistChoice"
+              :options="checklistOptions"
+              size="sm"
+            />
+          </BFormGroup>
         </div>
 
         <!-- 4. Documents -------------------------------------------------- -->
@@ -351,6 +366,8 @@ import {
   useResourceForm,
 } from '@/features/forms'
 import { formatMoneyPlain, toDinero } from '@/services/money'
+import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
+import { hasAccessToModule } from '@/utils'
 import { DocumentsComponent } from '@/features/equipment/documents'
 import {
   OwnerDetails,
@@ -391,7 +408,7 @@ const {wireKind, chooses} = useOwnerContext()
 // exactly the one whose type select has two values to choose between.
 const hasBranches = computed(() => wireKind.value === 'branch')
 
-const { mainStore } = useCommon()
+const { mainStore, authStore } = useCommon()
 /** What a new equipment's price is quoted in, as the legacy model took it. */
 const defaultCurrency = computed(() => mainStore.requiredDefaultCurrency)
 
@@ -473,6 +490,52 @@ const locationsQuery = useQuery(() => {
 useQueryErrorToast(locationsQuery.error, $trans('Error loading equipment'))
 
 const locations = computed(() => locationsQuery.data.value ?? [])
+
+/**
+ * The checklist an engineer fills in for this equipment. Only a planner sets
+ * it (the API drops the key for every other role), and only a tenant with the
+ * checklist module has checklists to choose from.
+ */
+const showChecklist = computed(
+  () => hasAccessToModule('checklist') && Boolean(authStore.isPlanning || authStore.isAdmin),
+)
+
+// Every checklist, not the first page: 1000 is the API's ceiling for one response.
+const checklistsQuery = useQuery(() => ({
+  ...Api.ChecklistChecklist.list.options({query: {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}}),
+  enabled: showChecklist.value,
+}))
+
+useQueryErrorToast(checklistsQuery.error, $trans('Error loading checklists'))
+
+/**
+ * The checklists that are not archived, plus the one this equipment has when
+ * that one is archived: the select must still show what is stored.
+ */
+const checklistOptions = computed(() => {
+  // The stored checklist, not the chosen one: a planner who picks another
+  // checklist can still pick the archived one again.
+  const stored = record.value?.checklist
+  const offered = (checklistsQuery.data.value?.results ?? [])
+    .filter((checklist) => !checklist.archived || checklist.id === stored)
+    .map((checklist) => ({
+      value: checklist.id,
+      text: checklist.archived ? `${checklist.name} (${$trans('Archived')})` : checklist.name,
+    }))
+  return [{value: null, text: $trans('No checklist')}, ...offered]
+})
+
+/**
+ * The select's value. `values.checklist` is absent until the planner chooses
+ * (the request body must not carry the key before then), and an absent value
+ * would leave the select blank instead of on "No checklist".
+ */
+const checklistChoice = computed({
+  get: () => values.value.checklist ?? null,
+  set: (choice: number | null) => {
+    values.value.checklist = choice
+  },
+})
 
 /**
  * Lifespan as the API declares it: a whole number, absent when the field is

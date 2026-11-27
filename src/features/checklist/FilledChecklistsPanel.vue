@@ -1,57 +1,143 @@
 <template>
   <div
-    v-if="visits.length"
+    v-if="checklists.length"
     class="panel col-1-3 filled-checklists"
   >
     <div
-      v-for="visit in visits"
-      :key="visit.assignedOrder"
+      v-for="(item, index) in checklists"
+      :key="index"
       class="section filled-checklist"
     >
-      <h6>{{ $trans('Checklist') }}</h6>
+      <h6 class="checklist-title">
+        {{ item.checklist.name }}<template v-if="item.equipment"> - {{ item.equipment.name }}</template>
+      </h6>
+      <p class="checklist-user dimmed">{{ item.user }}</p>
+
+      <dl
+        v-if="item.score !== null || item.rejected_count !== null || item.valid_until"
+        class="checklist-result"
+      >
+        <template v-if="item.score !== null">
+          <dt>{{ $trans('Condition score') }}</dt>
+          <dd class="checklist-score">{{ item.score }}</dd>
+        </template>
+        <template v-if="item.rejected_count !== null">
+          <dt>{{ $trans('Rejected points') }}</dt>
+          <dd class="checklist-rejected">{{ item.rejected_count }}</dd>
+        </template>
+        <template v-if="item.valid_until">
+          <dt>{{ $trans('Valid until') }}</dt>
+          <dd class="checklist-valid-until">{{ displayIsoDate(item.valid_until) }}</dd>
+        </template>
+      </dl>
+
+      <template
+        v-for="(group, groupIndex) in groupQuestions(item.questions)"
+        :key="groupIndex"
+      >
+        <h6
+          v-if="group.name"
+          class="checklist-group"
+        >{{ group.name }}</h6>
+        <table class="table table-sm data-table">
+          <tbody>
+            <tr
+              v-for="(question, questionIndex) in group.questions"
+              :key="questionIndex"
+              class="checklist-answer"
+            >
+              <td class="question">
+                {{ question.question }}
+                <small
+                  v-if="question.part_name"
+                  class="dimmed part-name"
+                >({{ question.part_name }})</small>
+              </td>
+              <!-- A checklist without results keeps its two columns. -->
+              <td
+                v-if="group.questions.some((entry) => entry.result)"
+                class="result"
+              >
+                <span
+                  v-if="question.result"
+                  :class="resultClass(question.result)"
+                >{{ resultLabel(question.result) }}</span>
+              </td>
+              <td class="answer">
+                {{ question.answer }}
+                <div
+                  v-if="question.photos?.length"
+                  class="photos"
+                >
+                  <!-- No lightbox: a click opens the photo itself, in a new tab. -->
+                  <a
+                    v-for="photo in question.photos"
+                    :key="photo.url"
+                    :href="photo.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="photo"
+                  ><img
+                    :src="photo.url"
+                    :alt="$trans('Photo')"
+                    loading="lazy"
+                  ></a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </template>
+      <small
+        v-if="item.questions.length === 0"
+        class="dimmed"
+      >{{ $trans('No answers') }}</small>
+
       <table
-        v-if="visit.answers.length"
-        class="table table-sm data-table"
+        v-if="item.parts.length"
+        class="table table-sm data-table part-scores"
       >
         <thead>
           <tr>
-            <th>{{ $trans('Question') }}</th>
-            <th>{{ $trans('Answer') }}</th>
+            <th>{{ $trans('Part') }}</th>
+            <th>{{ $trans('Condition score') }}</th>
+            <th>{{ $trans('Rejected points') }}</th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="answer in visit.answers"
-            :key="answer.id"
+            v-for="part in item.parts"
+            :key="part.name"
           >
-            <td>{{ answer.question_text }}</td>
-            <td class="answer">{{ answer.answer }}</td>
+            <td>{{ part.name }}</td>
+            <td>{{ part.score }}</td>
+            <td>{{ part.rejected_count }}</td>
           </tr>
         </tbody>
       </table>
-      <small
-        v-else
-        class="dimmed"
-      >{{ $trans('No answers') }}</small>
 
       <div
-        v-for="signature in visit.signatures"
-        :key="signature.id"
-        class="flex-columns signatures"
+        v-if="item.remarks"
+        class="checklist-remarks"
       >
+        <h6>{{ $trans('General remark') }}</h6>
+        <p class="remarks-text">{{ item.remarks }}</p>
+      </div>
+
+      <div class="flex-columns signatures">
         <div class="signature">
-          <p>{{ $trans('Name employee') }}: {{ signature.signature_name_user }}</p>
+          <p>{{ $trans('Name employee') }}: {{ item.signatures.signature_name_user }}</p>
           <img
-            v-if="signature.signature_user"
-            :src="signature.signature_user"
+            v-if="item.signatures.signature_user"
+            :src="item.signatures.signature_user"
             :alt="$trans('Signature employee')"
           >
         </div>
         <div class="signature">
-          <p>{{ $trans('Name customer') }}: {{ signature.signature_name_customer }}</p>
+          <p>{{ $trans('Name customer') }}: {{ item.signatures.signature_name_customer }}</p>
           <img
-            v-if="signature.signature_customer"
-            :src="signature.signature_customer"
+            v-if="item.signatures.signature_customer"
+            :src="item.signatures.signature_customer"
             :alt="$trans('Signature customer')"
           >
         </div>
@@ -61,57 +147,57 @@
 </template>
 
 <script lang="ts" setup>
+import { orderOrderChecklistsListOptions } from '@/api/@tanstack/vue-query.gen'
 import { useQueryErrorToast } from '@/features/forms'
-import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
+import { displayIsoDate, groupQuestions, resultClass, resultLabel } from './inspection'
 
 /**
- * The checklists engineers filled in for an order, read-only: per assigned
- * order its answers and the signatures given under them. Filling one in is the
- * engineer's job in the app, so there is nothing to edit here.
+ * The checklists engineers finished for an order, read-only: one block per
+ * finished checklist. Filling one in is the engineer's job in the app, so
+ * there is nothing to edit here.
  *
- * An order nobody filled a checklist in for renders nothing at all, which is
+ * It reads the order's `checklists` action, not the answer and signature
+ * lists: the action also returns the checklists a partner tenant filled in for
+ * a copy of this order, so a planner of the tenant that made the order sees
+ * them. Planning users only.
+ *
+ * An order nobody finished a checklist for renders nothing at all, which is
  * most orders.
  */
 const props = defineProps<{
   orderId: number
 }>()
 
-const whole = {page: 1, page_size: WHOLE_COLLECTION_PAGE_SIZE}
+const checklistsQuery = useQuery(() => orderOrderChecklistsListOptions({path: {id: props.orderId}}))
 
-const answersQuery = useQuery(() =>
-  Api.MobileChecklistAnswer.list.options({query: {order: props.orderId, ...whole}}))
-const signaturesQuery = useQuery(() =>
-  Api.MobileChecklistSignature.list.options({query: {order: props.orderId, ...whole}}))
+useQueryErrorToast(checklistsQuery.error, $trans('Error loading checklists'))
 
-useQueryErrorToast(answersQuery.error, $trans('Error loading checklist answers'))
-useQueryErrorToast(signaturesQuery.error, $trans('Error loading checklist signatures'))
-
-interface Visit {
-  assignedOrder: number
-  answers: Api.AssignedOrderChecklistAnswer[]
-  signatures: Api.AssignedOrderChecklistSignature[]
-}
-
-/** One entry per assigned order, in the order the API first names each. */
-const visits = computed<Visit[]>(() => {
-  const byAssignedOrder = new Map<number, Visit>()
-  const visitOf = (assignedOrder: number) => {
-    let visit = byAssignedOrder.get(assignedOrder)
-    if (!visit) {
-      visit = {assignedOrder, answers: [], signatures: []}
-      byAssignedOrder.set(assignedOrder, visit)
-    }
-    return visit
-  }
-  for (const answer of answersQuery.data.value?.results ?? []) visitOf(answer.assigned_order).answers.push(answer)
-  for (const signature of signaturesQuery.data.value?.results ?? []) visitOf(signature.assigned_order).signatures.push(signature)
-  return [...byAssignedOrder.values()]
-})
+const checklists = computed(() => checklistsQuery.data.value ?? [])
 </script>
 
 <style scoped>
-.answer {
+.answer,
+.remarks-text {
   white-space: pre-line;
+}
+.checklist-group {
+  margin-top: 1rem;
+}
+.checklist-result {
+  display: grid;
+  grid-template-columns: max-content auto;
+  column-gap: 1rem;
+}
+.photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+.photo img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
 }
 .signatures {
   gap: 1rem;

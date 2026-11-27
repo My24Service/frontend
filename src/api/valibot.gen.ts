@@ -185,6 +185,18 @@ export const vAddressAutocompleteRow = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
+ * Nested in: ChecklistQuestion, ChecklistQuestionRequest, PatchedChecklistQuestionRequest
+ */
+/**
+ * * `text` - Text
+ * * `result` - Result
+ */
+export const vAnswerTypeEnum = v.picklist(['text', 'result']);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
  * Nested in: ApiUser
  */
 export const vApiUserSub = v.object({
@@ -359,39 +371,12 @@ export const vAssignedOrderActivityRequest = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/mobile/checklist-answer/{id}/
- *   PATCH /api/mobile/checklist-answer/{id}/
- *   POST /api/mobile/checklist-answer/
- *
- * Nested in: PaginatedAssignedOrderChecklistAnswerList
- */
-export const vAssignedOrderChecklistAnswer = v.object({
-    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
-    assigned_order: v.pipe(v.number(), v.integer()),
-    question: v.pipe(v.number(), v.integer()),
-    question_text: v.pipe(v.string(), v.readonly()),
-    answer: v.string()
-});
-
-/**
- * @endpoints
- * Request body:
- *   POST /api/mobile/checklist-answer/
- */
-export const vAssignedOrderChecklistAnswerRequest = v.object({
-    assigned_order: v.pipe(v.number(), v.integer()),
-    question: v.pipe(v.number(), v.integer()),
-    answer: v.pipe(v.string(), v.minLength(1))
-});
-
-/**
- * @endpoints
- * Response:
  *   GET /api/mobile/checklist-signature/{id}/
+ *   GET /api/order/workorder-data/{id}/
  *   PATCH /api/mobile/checklist-signature/{id}/
  *   POST /api/mobile/checklist-signature/
  *
- * Nested in: PaginatedAssignedOrderChecklistSignatureList
+ * Nested in: AssignedOrderChecklistFinished, ChecklistData, ChecklistOverviewEntry, PaginatedAssignedOrderChecklistSignatureList
  */
 export const vAssignedOrderChecklistSignature = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
@@ -400,7 +385,13 @@ export const vAssignedOrderChecklistSignature = v.object({
     signature_user: v.nullish(v.pipe(v.string(), v.url())),
     signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     signature_customer: v.nullish(v.pipe(v.string(), v.url())),
-    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.optional(v.string()),
+    rejected_count: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    valid_until: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    score: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    equipment: v.nullish(v.pipe(v.number(), v.integer())),
+    equipment_name: v.nullable(v.pipe(v.string(), v.readonly()))
 });
 
 /**
@@ -414,7 +405,9 @@ export const vAssignedOrderChecklistSignatureRequest = v.object({
     signature_user: v.nullish(v.string()),
     signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     signature_customer: v.nullish(v.string()),
-    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.optional(v.string()),
+    equipment: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -498,7 +491,8 @@ export const vAssignedOrderDocument = v.object({
     modified: v.pipe(v.string(), v.readonly()),
     created: v.pipe(v.string(), v.readonly()),
     filename: v.pipe(v.string(), v.readonly()),
-    url: v.pipe(v.string(), v.readonly())
+    url: v.pipe(v.string(), v.readonly()),
+    is_checklist_photo: v.optional(v.boolean())
 });
 
 /**
@@ -510,7 +504,8 @@ export const vAssignedOrderDocumentRequest = v.object({
     assigned_order: v.pipe(v.number(), v.integer()),
     name: v.pipe(v.string(), v.minLength(1), v.maxLength(255)),
     description: v.nullish(v.string()),
-    document: v.optional(v.string())
+    document: v.optional(v.string()),
+    is_checklist_photo: v.optional(v.boolean())
 });
 
 /**
@@ -1125,7 +1120,145 @@ export const vCheckTokenResponse = v.object({
  */
 export const vChecklist = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.string(),
+    norm: v.optional(v.pipe(v.string(), v.maxLength(80))),
+    validity_months: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(120))),
+    archived: v.optional(v.boolean())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderChecklistAnswer
+ */
+export const vChecklistAnswerPhoto = v.object({
+    id: v.pipe(v.number(), v.integer()),
+    url: v.string()
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistData
+ */
+/**
+ * Documentation only.
+ */
+export const vChecklistDataChecklist = v.object({
+    id: v.pipe(v.number(), v.integer()),
     name: v.string()
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistData
+ */
+/**
+ * Documentation only.
+ */
+export const vChecklistDataEquipment = v.object({
+    id: v.pipe(v.number(), v.integer()),
+    name: v.string()
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistData
+ */
+/**
+ * Documentation only.
+ */
+export const vChecklistDataPart = v.object({
+    name: v.string(),
+    score: v.pipe(v.number(), v.integer()),
+    rejected_count: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistDataQuestion
+ */
+/**
+ * Documentation only: a photo of a checklist answer.
+ */
+export const vChecklistDataPhoto = v.object({
+    url: v.string()
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   DELETE /api/checklist/checklist/{id}/
+ */
+/**
+ * The 400 body of a checklist delete that is refused.
+ */
+export const vChecklistDeleteRefused = v.object({
+    detail: v.string()
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderChecklistDraftIncomplete
+ */
+/**
+ * * `signature_user` - signature_user
+ * * `signature_name_user` - signature_name_user
+ * * `signature_customer` - signature_customer
+ * * `signature_name_customer` - signature_name_customer
+ */
+export const vChecklistDraftMissingFieldEnum = v.picklist([
+    'signature_user',
+    'signature_name_user',
+    'signature_customer',
+    'signature_name_customer'
+]);
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/mobile/checklist-draft/{id}/finish/
+ */
+/**
+ * Why a draft can't be finished yet; nothing was created.
+ */
+export const vAssignedOrderChecklistDraftIncomplete = v.object({
+    missing_answers: v.array(v.pipe(v.number(), v.integer())),
+    missing: v.array(vChecklistDraftMissingFieldEnum)
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-draft/overview/
+ */
+/**
+ * The 400 body of the overview: a message as a string, not a list.
+ */
+export const vChecklistOverviewBadRequest = v.object({
+    assigned_order: v.string()
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistOverviewEntry
+ */
+export const vChecklistOverviewEquipment = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.pipe(v.string(), v.maxLength(255)),
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
 });
 
 /**
@@ -1141,13 +1274,18 @@ export const vChecklistQuestion = v.object({
     id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
     checklist: v.pipe(v.number(), v.integer()),
     question: v.string(),
-    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647)))
+    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    group_name: v.optional(v.pipe(v.string(), v.maxLength(60))),
+    answer_type: v.optional(vAnswerTypeEnum),
+    part_name: v.optional(v.pipe(v.string(), v.maxLength(255)))
 });
 
 /**
  * @endpoints
  * Response:
  *   GET /api/checklist/checklist/load/
+ *
+ * Nested in: ChecklistOverview, ChecklistOverviewEntry
  */
 /**
  * A checklist with its questions in sequence: what `load` answers.
@@ -1166,7 +1304,10 @@ export const vChecklistNested = v.object({
 export const vChecklistQuestionRequest = v.object({
     checklist: v.pipe(v.number(), v.integer()),
     question: v.pipe(v.string(), v.minLength(1)),
-    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647)))
+    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    group_name: v.optional(v.pipe(v.string(), v.maxLength(60))),
+    answer_type: v.optional(vAnswerTypeEnum),
+    part_name: v.optional(v.pipe(v.string(), v.maxLength(255)))
 });
 
 /**
@@ -1175,7 +1316,10 @@ export const vChecklistQuestionRequest = v.object({
  *   POST /api/checklist/checklist/
  */
 export const vChecklistRequest = v.object({
-    name: v.pipe(v.string(), v.minLength(1))
+    name: v.pipe(v.string(), v.minLength(1)),
+    norm: v.optional(v.pipe(v.string(), v.maxLength(80))),
+    validity_months: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(120))),
+    archived: v.optional(v.boolean())
 });
 
 /**
@@ -2220,6 +2364,94 @@ export const vEquipmentDocumentRequest = v.object({
  * @endpoints
  * Not used directly by an endpoint.
  *
+ * Nested in: EquipmentInspection
+ */
+/**
+ * * `none` - none
+ * * `expired` - expired
+ * * `rejected` - rejected
+ * * `expiring` - expiring
+ * * `valid` - valid
+ */
+export const vEquipmentInspectionStatusEnum = v.picklist([
+    'none',
+    'expired',
+    'rejected',
+    'expiring',
+    'valid'
+]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: Equipment
+ */
+/**
+ * Documentation only: the shape of `inspection_of`.
+ */
+export const vEquipmentInspection = v.object({
+    status: vEquipmentInspectionStatusEnum,
+    valid_until: v.nullable(v.pipe(v.string(), v.isoDate())),
+    score: v.nullable(v.pipe(v.number(), v.integer())),
+    rejected_count: v.nullable(v.pipe(v.number(), v.integer())),
+    date: v.nullable(v.pipe(v.string(), v.isoDate()))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/equipment/equipment-part/{id}/
+ *   PATCH /api/equipment/equipment-part/{id}/
+ *
+ * Nested in: PaginatedEquipmentPartList
+ */
+/**
+ * A planner edits the description and the order of a part. The name and
+ * the equipment are read-only: a PATCH that sends them (a form may send the
+ * whole object back) leaves them as they are.
+ */
+export const vEquipmentPart = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    equipment: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    name: v.pipe(v.string(), v.readonly()),
+    description: v.optional(v.string()),
+    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    created: v.pipe(v.string(), v.readonly()),
+    modified: v.pipe(v.string(), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: Equipment
+ */
+/**
+ * Documentation only: the shape of a row of `parts_of`.
+ */
+export const vEquipmentPartCondition = v.object({
+    id: v.pipe(v.number(), v.integer()),
+    sequence: v.pipe(v.number(), v.integer()),
+    name: v.string(),
+    score: v.nullable(v.pipe(v.number(), v.integer())),
+    rejected_count: v.nullable(v.pipe(v.number(), v.integer())),
+    date: v.nullable(v.pipe(v.string(), v.isoDate()))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   DELETE /api/equipment/equipment-part/{id}/
+ */
+export const vEquipmentPartDeleteRefused = v.object({
+    detail: v.string()
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
  * Nested in: Member, MemberRequest, PatchedMemberRequest
  */
 /**
@@ -2245,6 +2477,12 @@ export const vEquipmentState = v.object({
     equipment: v.pipe(v.number(), v.integer()),
     state: v.pipe(v.string(), v.maxLength(255)),
     replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    part: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    score: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    rejected_count: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    valid_until: v.nullable(v.pipe(v.pipe(v.string(), v.isoDate()), v.readonly())),
+    source: v.pipe(v.string(), v.readonly()),
+    uuid: v.nullable(v.pipe(v.pipe(v.string(), v.uuid()), v.readonly())),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly())
 });
@@ -2291,7 +2529,8 @@ export const vEquipmentBranchCreateRequest = v.object({
     standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     location: v.nullish(v.pipe(v.number(), v.integer())),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
+    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    checklist: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -2315,6 +2554,7 @@ export const vEquipmentCreate = v.object({
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
     price_currency: v.pipe(v.string(), v.readonly()),
     default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    checklist: v.nullish(v.pipe(v.number(), v.integer())),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly())
 });
@@ -2395,7 +2635,8 @@ export const vEquipmentCustomerCreateRequest = v.object({
     standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     location: v.nullish(v.pipe(v.number(), v.integer())),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
+    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    checklist: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -2491,6 +2732,9 @@ export const vEquipment = v.object({
     qr_url: v.nullable(v.pipe(v.string(), v.readonly())),
     num_orders: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
     documents: v.pipe(v.array(vEquipmentDocument), v.readonly()),
+    checklist: v.nullish(v.pipe(v.number(), v.integer())),
+    inspection: vEquipmentInspection,
+    parts: v.pipe(v.array(vEquipmentPartCondition), v.readonly()),
     created: v.pipe(v.string(), v.readonly()),
     modified: v.pipe(v.string(), v.readonly())
 });
@@ -2550,6 +2794,7 @@ export const vFilterConditionRequest = v.object({
 /**
  * @endpoints
  * Response:
+ *   DELETE /api/equipment/equipment-part/{id}/
  *   DELETE /api/inventory/material/{id}/
  *   DELETE /api/inventory/stock-location/{id}/
  *   DELETE /api/inventory/supplier/{id}/
@@ -2559,6 +2804,8 @@ export const vFilterConditionRequest = v.object({
  *   GET /api/company/branch/{id}/dashboard/
  *   GET /api/customer/customer/{id}/dashboard/
  *   GET /api/equipment/building/{id}/dashboard/
+ *   GET /api/equipment/equipment-part/
+ *   GET /api/equipment/equipment-part/{id}/
  *   GET /api/equipment/equipment/{id}/dashboard/
  *   GET /api/equipment/location/{id}/dashboard/
  *   GET /api/inventory/material/{id}/
@@ -2575,6 +2822,7 @@ export const vFilterConditionRequest = v.object({
  *   GET /api/order/orderline/order/{order_id}/
  *   GET /api/order/orderline/{id}/
  *   PATCH /api/customer/customer/{id}/
+ *   PATCH /api/equipment/equipment-part/{id}/
  *   PATCH /api/order/order/{id}/
  *   POST /api/customer/customer/
  *   POST /api/customer/maintenance-contract/with-equipment/
@@ -2838,6 +3086,23 @@ export const vInitialDataSettings = v.object({
     app_session_token_expiry_days: v.optional(v.pipe(v.number(), v.integer())),
     mobile_hours_select_user: v.optional(v.boolean())
 });
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistGrade, ChecklistGradeRequest, PatchedChecklistGradeRequest
+ */
+/**
+ * * `initial` - initial
+ * * `advanced` - advanced
+ * * `final` - final
+ */
+export const vIntensityEnum = v.picklist([
+    'initial',
+    'advanced',
+    'final'
+]);
 
 /**
  * @endpoints
@@ -4400,6 +4665,7 @@ export const vNewCustomerId = v.object({
  * @endpoints
  * Response:
  *   DELETE /api/customer/customer/{id}/
+ *   DELETE /api/equipment/equipment-part/{id}/
  *   DELETE /api/inventory/material/{id}/
  *   DELETE /api/inventory/stock-location/{id}/
  *   DELETE /api/inventory/supplier/{id}/
@@ -4409,18 +4675,22 @@ export const vNewCustomerId = v.object({
  *   GET /api/customer/customer/{id}/
  *   GET /api/customer/customer/{id}/dashboard/
  *   GET /api/equipment/building/{id}/dashboard/
+ *   GET /api/equipment/equipment-part/{id}/
  *   GET /api/equipment/equipment/{id}/dashboard/
  *   GET /api/equipment/location/{id}/dashboard/
  *   GET /api/inventory/material/{id}/
  *   GET /api/inventory/stock-location/{id}/
  *   GET /api/inventory/supplier/{id}/
+ *   GET /api/mobile/checklist-draft/overview/
  *   GET /api/order/order/new/
  *   GET /api/order/order/{id}/
  *   GET /api/order/orderline/{id}/
  *   PATCH /api/customer/customer/{id}/
+ *   PATCH /api/equipment/equipment-part/{id}/
  *   PATCH /api/order/order/{id}/
  *   POST /api/customer/maintenance-contract/{id}/with-equipment/
  *   POST /api/invoice/invoice-line/invoice/{invoice_id}/
+ *   POST /api/mobile/checklist-draft/{id}/finish/
  *   POST /api/order/cost/order/{order_id}/{cost_type}/
  *   POST /api/quotation/cost/quotation/{quotation_id}/{cost_type}/
  *   POST /api/quotation/quotation-line/chapter/{chapter_id}/
@@ -5971,18 +6241,6 @@ export const vPaginatedAssignedOrderAppViewList = v.object({
 /**
  * @endpoints
  * Response:
- *   GET /api/mobile/checklist-answer/
- */
-export const vPaginatedAssignedOrderChecklistAnswerList = v.object({
-    count: v.optional(v.pipe(v.number(), v.integer())),
-    next: v.nullish(v.pipe(v.string(), v.url())),
-    previous: v.nullish(v.pipe(v.string(), v.url())),
-    results: v.optional(v.array(vAssignedOrderChecklistAnswer))
-});
-
-/**
- * @endpoints
- * Response:
  *   GET /api/mobile/checklist-signature/
  */
 export const vPaginatedAssignedOrderChecklistSignatureList = v.object({
@@ -6206,6 +6464,18 @@ export const vPaginatedEquipmentList = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vEquipment))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/equipment/equipment-part/
+ */
+export const vPaginatedEquipmentPartList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vEquipmentPart))
 });
 
 /**
@@ -6727,17 +6997,6 @@ export const vPatchedAssignedOrderActivityRequest = v.object({
 /**
  * @endpoints
  * Request body:
- *   PATCH /api/mobile/checklist-answer/{id}/
- */
-export const vPatchedAssignedOrderChecklistAnswerRequest = v.object({
-    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
-    question: v.optional(v.pipe(v.number(), v.integer())),
-    answer: v.optional(v.pipe(v.string(), v.minLength(1)))
-});
-
-/**
- * @endpoints
- * Request body:
  *   PATCH /api/mobile/checklist-signature/{id}/
  */
 export const vPatchedAssignedOrderChecklistSignatureRequest = v.object({
@@ -6746,7 +7005,9 @@ export const vPatchedAssignedOrderChecklistSignatureRequest = v.object({
     signature_user: v.nullish(v.string()),
     signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     signature_customer: v.nullish(v.string()),
-    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.optional(v.string()),
+    equipment: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -6770,7 +7031,8 @@ export const vPatchedAssignedOrderDocumentRequest = v.object({
     assigned_order: v.optional(v.pipe(v.number(), v.integer())),
     name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(255))),
     description: v.nullish(v.string()),
-    document: v.optional(v.string())
+    document: v.optional(v.string()),
+    is_checklist_photo: v.optional(v.boolean())
 });
 
 /**
@@ -6881,7 +7143,10 @@ export const vPatchedChapterRequest = v.object({
 export const vPatchedChecklistQuestionRequest = v.object({
     checklist: v.optional(v.pipe(v.number(), v.integer())),
     question: v.optional(v.pipe(v.string(), v.minLength(1))),
-    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647)))
+    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    group_name: v.optional(v.pipe(v.string(), v.maxLength(60))),
+    answer_type: v.optional(vAnswerTypeEnum),
+    part_name: v.optional(v.pipe(v.string(), v.maxLength(255)))
 });
 
 /**
@@ -6890,7 +7155,10 @@ export const vPatchedChecklistQuestionRequest = v.object({
  *   PATCH /api/checklist/checklist/{id}/
  */
 export const vPatchedChecklistRequest = v.object({
-    name: v.optional(v.pipe(v.string(), v.minLength(1)))
+    name: v.optional(v.pipe(v.string(), v.minLength(1))),
+    norm: v.optional(v.pipe(v.string(), v.maxLength(80))),
+    validity_months: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(120))),
+    archived: v.optional(v.boolean())
 });
 
 /**
@@ -7131,6 +7399,21 @@ export const vPatchedEquipmentDocumentRequest = v.object({
 /**
  * @endpoints
  * Request body:
+ *   PATCH /api/equipment/equipment-part/{id}/
+ */
+/**
+ * A planner edits the description and the order of a part. The name and
+ * the equipment are read-only: a PATCH that sends them (a form may send the
+ * whole object back) leaves them as they are.
+ */
+export const vPatchedEquipmentPartRequest = v.object({
+    description: v.optional(v.string()),
+    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647)))
+});
+
+/**
+ * @endpoints
+ * Request body:
  *   PATCH /api/equipment/equipment/{id}/
  */
 export const vPatchedEquipmentRequest = v.object({
@@ -7148,7 +7431,8 @@ export const vPatchedEquipmentRequest = v.object({
     serialnumber: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    checklist: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -9688,6 +9972,64 @@ export const vResetPasswordRequest = v.object({
 
 /**
  * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderChecklistAnswer, AssignedOrderChecklistAnswerRequest, AssignedOrderChecklistDraftAnswer, AssignedOrderChecklistDraftAnswerRequest, ChecklistDataQuestion, PatchedAssignedOrderChecklistAnswerRequest
+ */
+/**
+ * * `ok` - ok
+ * * `nok` - nok
+ * * `na` - na
+ */
+export const vResultEnum = v.picklist([
+    'ok',
+    'nok',
+    'na'
+]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistData
+ */
+/**
+ * Documentation only: a question of the checklist data. Rows saved before
+ * answers were linked to a signature have only `question` and `answer`.
+ */
+export const vChecklistDataQuestion = v.object({
+    question: v.string(),
+    answer: v.string(),
+    group_name: v.optional(v.string()),
+    part_name: v.optional(v.string()),
+    result: v.nullish(vResultEnum),
+    photos: v.optional(v.array(vChecklistDataPhoto))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/order/order/{id}/checklists/
+ */
+/**
+ * Documentation only: one signed checklist of an order, with its answers.
+ * The view returns the list the service builds, as is.
+ */
+export const vChecklistData = v.object({
+    user: v.string(),
+    checklist: vChecklistDataChecklist,
+    signatures: vAssignedOrderChecklistSignature,
+    remarks: v.string(),
+    rejected_count: v.nullable(v.pipe(v.number(), v.integer())),
+    valid_until: v.nullable(v.pipe(v.string(), v.isoDate())),
+    score: v.nullable(v.pipe(v.number(), v.integer())),
+    parts: v.array(vChecklistDataPart),
+    equipment: v.nullable(vChecklistDataEquipment),
+    questions: v.array(vChecklistDataQuestion)
+});
+
+/**
+ * @endpoints
  * Response:
  *   PATCH /api/mobile/assignedorder/{id}/detail_change_date/
  *   PATCH /api/user/engineerevent-update/{id}/
@@ -9893,6 +10235,296 @@ export const vSetLanguageRequestRequest = v.object({
 export const vSetOrderAcceptedResponse = v.object({
     result: v.boolean(),
     accepted: v.boolean()
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistGrade, ChecklistGradeRequest, PatchedChecklistGradeRequest
+ */
+/**
+ * * `slight` - slight
+ * * `serious` - serious
+ * * `severe` - severe
+ */
+export const vSeverityEnum = v.picklist([
+    'slight',
+    'serious',
+    'severe'
+]);
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderChecklistAnswer, AssignedOrderChecklistDraftAnswer
+ */
+/**
+ * The NEN 2767 grade of a rejected point, as the schema describes it.
+ *
+ * Only the schema uses this. The answer stores the grade in a JSON column,
+ * and `validate_result_and_grade` checks it, with the messages that installed
+ * apps already get.
+ */
+export const vChecklistGrade = v.object({
+    severity: vSeverityEnum,
+    extent: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(100)),
+    intensity: vIntensityEnum
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-answer/{id}/
+ *   PATCH /api/mobile/checklist-answer/{id}/
+ *   POST /api/mobile/checklist-answer/
+ *
+ * Nested in: AssignedOrderChecklistFinished, PaginatedAssignedOrderChecklistAnswerList
+ */
+export const vAssignedOrderChecklistAnswer = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    assigned_order: v.pipe(v.number(), v.integer()),
+    question: v.nullable(v.pipe(v.number(), v.integer())),
+    question_text: v.pipe(v.string(), v.readonly()),
+    answer: v.string(),
+    signature: v.nullable(v.pipe(v.pipe(v.number(), v.integer()), v.readonly())),
+    result: v.nullish(vResultEnum),
+    grade: v.nullish(vChecklistGrade),
+    group_name: v.pipe(v.string(), v.readonly()),
+    part_name: v.pipe(v.string(), v.readonly()),
+    photos: v.pipe(v.array(vChecklistAnswerPhoto), v.readonly())
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderChecklistDraft
+ */
+export const vAssignedOrderChecklistDraftAnswer = v.object({
+    question: v.pipe(v.number(), v.integer()),
+    answer: v.string(),
+    result: v.nullish(vResultEnum),
+    grade: v.nullish(vChecklistGrade),
+    photos: v.optional(v.pipe(v.array(v.pipe(v.number(), v.integer())), v.maxLength(50)))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-draft/{id}/
+ *   PATCH /api/mobile/checklist-draft/{id}/
+ *   POST /api/mobile/checklist-draft/
+ *
+ * Nested in: ChecklistOverviewEntry, PaginatedAssignedOrderChecklistDraftList
+ */
+/**
+ * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+ *
+ * Signatures travel as the base64 PNG text the app's pads produce, both
+ * ways, so a resumed draft shows exactly what was drawn.
+ */
+export const vAssignedOrderChecklistDraft = v.object({
+    id: v.pipe(v.pipe(v.number(), v.integer()), v.readonly()),
+    assigned_order: v.pipe(v.number(), v.integer()),
+    checklist: v.pipe(v.number(), v.integer()),
+    answers: v.optional(v.array(vAssignedOrderChecklistDraftAnswer)),
+    signature_user: v.nullish(v.string()),
+    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_customer: v.nullish(v.string()),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.optional(v.string()),
+    equipment: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   POST /api/mobile/checklist-draft/{id}/finish/
+ */
+/**
+ * What finishing a draft created: the rows a direct submit creates.
+ */
+export const vAssignedOrderChecklistFinished = v.object({
+    answers: v.array(vAssignedOrderChecklistAnswer),
+    signature: vAssignedOrderChecklistSignature
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderChecklistAnswerRequest, AssignedOrderChecklistDraftAnswerRequest
+ */
+/**
+ * The NEN 2767 grade of a rejected point, as the schema describes it.
+ *
+ * Only the schema uses this. The answer stores the grade in a JSON column,
+ * and `validate_result_and_grade` checks it, with the messages that installed
+ * apps already get.
+ */
+export const vChecklistGradeRequest = v.object({
+    severity: vSeverityEnum,
+    extent: v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(100)),
+    intensity: vIntensityEnum
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/mobile/checklist-answer/
+ */
+export const vAssignedOrderChecklistAnswerRequest = v.object({
+    assigned_order: v.pipe(v.number(), v.integer()),
+    question: v.pipe(v.number(), v.integer()),
+    answer: v.pipe(v.string(), v.minLength(1)),
+    result: v.nullish(vResultEnum),
+    grade: v.nullish(vChecklistGradeRequest)
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: AssignedOrderChecklistDraftRequest, PatchedAssignedOrderChecklistDraftRequest
+ */
+export const vAssignedOrderChecklistDraftAnswerRequest = v.object({
+    question: v.pipe(v.number(), v.integer()),
+    answer: v.string(),
+    result: v.nullish(vResultEnum),
+    grade: v.nullish(vChecklistGradeRequest),
+    photos: v.optional(v.pipe(v.array(v.pipe(v.number(), v.integer())), v.maxLength(50)))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   POST /api/mobile/checklist-draft/
+ */
+/**
+ * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+ *
+ * Signatures travel as the base64 PNG text the app's pads produce, both
+ * ways, so a resumed draft shows exactly what was drawn.
+ */
+export const vAssignedOrderChecklistDraftRequest = v.object({
+    assigned_order: v.pipe(v.number(), v.integer()),
+    checklist: v.pipe(v.number(), v.integer()),
+    answers: v.optional(v.array(vAssignedOrderChecklistDraftAnswerRequest)),
+    signature_user: v.nullish(v.string()),
+    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_customer: v.nullish(v.string()),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.optional(v.string()),
+    equipment: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistOverview
+ */
+/**
+ * The checklist of one equipment on an assigned order (or of the work
+ * without equipment), with the draft started and the record finished.
+ */
+export const vChecklistOverviewEntry = v.object({
+    equipment: v.nullable(vChecklistOverviewEquipment),
+    checklist: v.nullable(vChecklistNested),
+    draft: v.nullable(vAssignedOrderChecklistDraft),
+    finished: v.nullable(vAssignedOrderChecklistSignature),
+    on_order: v.boolean()
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-draft/overview/
+ */
+export const vChecklistOverview = v.object({
+    entries: v.array(vChecklistOverviewEntry),
+    checklists: v.array(vChecklistNested)
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-answer/
+ */
+export const vPaginatedAssignedOrderChecklistAnswerList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vAssignedOrderChecklistAnswer))
+});
+
+/**
+ * @endpoints
+ * Response:
+ *   GET /api/mobile/checklist-draft/
+ */
+export const vPaginatedAssignedOrderChecklistDraftList = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vAssignedOrderChecklistDraft))
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PATCH /api/mobile/checklist-draft/{id}/
+ */
+/**
+ * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+ *
+ * Signatures travel as the base64 PNG text the app's pads produce, both
+ * ways, so a resumed draft shows exactly what was drawn.
+ */
+export const vPatchedAssignedOrderChecklistDraftRequest = v.object({
+    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
+    checklist: v.optional(v.pipe(v.number(), v.integer())),
+    answers: v.optional(v.array(vAssignedOrderChecklistDraftAnswerRequest)),
+    signature_user: v.nullish(v.string()),
+    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_customer: v.nullish(v.string()),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.optional(v.string()),
+    equipment: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: PatchedAssignedOrderChecklistAnswerRequest
+ */
+/**
+ * The NEN 2767 grade of a rejected point, as the schema describes it.
+ *
+ * Only the schema uses this. The answer stores the grade in a JSON column,
+ * and `validate_result_and_grade` checks it, with the messages that installed
+ * apps already get.
+ */
+export const vPatchedChecklistGradeRequest = v.object({
+    severity: v.optional(vSeverityEnum),
+    extent: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(100))),
+    intensity: v.optional(vIntensityEnum)
+});
+
+/**
+ * @endpoints
+ * Request body:
+ *   PATCH /api/mobile/checklist-answer/{id}/
+ */
+export const vPatchedAssignedOrderChecklistAnswerRequest = v.object({
+    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
+    question: v.optional(v.pipe(v.number(), v.integer())),
+    answer: v.optional(v.pipe(v.string(), v.minLength(1))),
+    result: v.nullish(vResultEnum),
+    grade: v.nullish(vPatchedChecklistGradeRequest)
 });
 
 /**
@@ -11743,6 +12375,7 @@ export const vUnassignTripRequestRequest = v.object({
  * @endpoints
  * Response:
  *   DELETE /api/customer/customer/{id}/
+ *   DELETE /api/equipment/equipment-part/{id}/
  *   DELETE /api/inventory/material/{id}/
  *   DELETE /api/inventory/stock-location/{id}/
  *   DELETE /api/inventory/supplier/{id}/
@@ -11752,6 +12385,8 @@ export const vUnassignTripRequestRequest = v.object({
  *   GET /api/customer/customer/{id}/
  *   GET /api/customer/customer/{id}/dashboard/
  *   GET /api/equipment/building/{id}/dashboard/
+ *   GET /api/equipment/equipment-part/
+ *   GET /api/equipment/equipment-part/{id}/
  *   GET /api/equipment/equipment/{id}/dashboard/
  *   GET /api/equipment/location/{id}/dashboard/
  *   GET /api/inventory/material/{id}/
@@ -11767,6 +12402,7 @@ export const vUnassignTripRequestRequest = v.object({
  *   GET /api/order/orderline/order/{order_id}/
  *   GET /api/order/orderline/{id}/
  *   PATCH /api/customer/customer/{id}/
+ *   PATCH /api/equipment/equipment-part/{id}/
  *   PATCH /api/order/order/{id}/
  *   POST /api/customer/customer/
  *   POST /api/customer/maintenance-contract/with-equipment/
@@ -13414,19 +14050,45 @@ export const vAssignedOrderAppViewWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read const is used instead.
  *
- * Nested in: PaginatedAssignedOrderChecklistAnswerList
+ * Nested in: AssignedOrderChecklistFinished, PaginatedAssignedOrderChecklistAnswerList
  */
 export const vAssignedOrderChecklistAnswerWritable = v.object({
     assigned_order: v.pipe(v.number(), v.integer()),
-    question: v.pipe(v.number(), v.integer()),
-    answer: v.string()
+    question: v.nullable(v.pipe(v.number(), v.integer())),
+    answer: v.string(),
+    result: v.nullish(vResultEnum),
+    grade: v.nullish(vChecklistGrade)
 });
 
 /**
  * @endpoints
  * No endpoint takes this as a request body; the read const is used instead.
  *
- * Nested in: PaginatedAssignedOrderChecklistSignatureList
+ * Nested in: ChecklistOverviewEntry, PaginatedAssignedOrderChecklistDraftList
+ */
+/**
+ * A checklist filled in part way; see ``AssignedOrderChecklistDraft``.
+ *
+ * Signatures travel as the base64 PNG text the app's pads produce, both
+ * ways, so a resumed draft shows exactly what was drawn.
+ */
+export const vAssignedOrderChecklistDraftWritable = v.object({
+    assigned_order: v.pipe(v.number(), v.integer()),
+    checklist: v.pipe(v.number(), v.integer()),
+    answers: v.optional(v.array(vAssignedOrderChecklistDraftAnswer)),
+    signature_user: v.nullish(v.string()),
+    signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    signature_customer: v.nullish(v.string()),
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.optional(v.string()),
+    equipment: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ *
+ * Nested in: AssignedOrderChecklistFinished, ChecklistData, ChecklistOverviewEntry, PaginatedAssignedOrderChecklistSignatureList
  */
 export const vAssignedOrderChecklistSignatureWritable = v.object({
     assigned_order: v.pipe(v.number(), v.integer()),
@@ -13434,7 +14096,21 @@ export const vAssignedOrderChecklistSignatureWritable = v.object({
     signature_user: v.nullish(v.pipe(v.string(), v.url())),
     signature_name_user: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     signature_customer: v.nullish(v.pipe(v.string(), v.url())),
-    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255)))
+    signature_name_customer: v.nullish(v.pipe(v.string(), v.maxLength(255))),
+    remarks: v.optional(v.string()),
+    equipment: v.nullish(v.pipe(v.number(), v.integer()))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ */
+/**
+ * What finishing a draft created: the rows a direct submit creates.
+ */
+export const vAssignedOrderChecklistFinishedWritable = v.object({
+    answers: v.array(vAssignedOrderChecklistAnswerWritable),
+    signature: vAssignedOrderChecklistSignatureWritable
 });
 
 /**
@@ -13461,7 +14137,8 @@ export const vAssignedOrderDocumentWritable = v.object({
     assigned_order: v.pipe(v.number(), v.integer()),
     name: v.pipe(v.string(), v.maxLength(255)),
     description: v.nullish(v.string()),
-    document: v.optional(v.pipe(v.string(), v.url()))
+    document: v.optional(v.pipe(v.string(), v.url())),
+    is_checklist_photo: v.optional(v.boolean())
 });
 
 /**
@@ -13689,7 +14366,10 @@ export const vChapterWritable = v.object({
  * Nested in: PaginatedChecklistList
  */
 export const vChecklistWritable = v.object({
-    name: v.string()
+    name: v.string(),
+    norm: v.optional(v.pipe(v.string(), v.maxLength(80))),
+    validity_months: v.nullish(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(120))),
+    archived: v.optional(v.boolean())
 });
 
 /**
@@ -13697,10 +14377,71 @@ export const vChecklistWritable = v.object({
  * No endpoint takes this as a request body; the read const is used instead.
  */
 /**
+ * Documentation only: one signed checklist of an order, with its answers.
+ * The view returns the list the service builds, as is.
+ */
+export const vChecklistDataWritable = v.object({
+    user: v.string(),
+    checklist: vChecklistDataChecklist,
+    signatures: vAssignedOrderChecklistSignatureWritable,
+    remarks: v.string(),
+    rejected_count: v.nullable(v.pipe(v.number(), v.integer())),
+    valid_until: v.nullable(v.pipe(v.string(), v.isoDate())),
+    score: v.nullable(v.pipe(v.number(), v.integer())),
+    parts: v.array(vChecklistDataPart),
+    equipment: v.nullable(vChecklistDataEquipment),
+    questions: v.array(vChecklistDataQuestion)
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ *
+ * Nested in: ChecklistOverview, ChecklistOverviewEntry
+ */
+/**
  * A checklist with its questions in sequence: what `load` answers.
  */
 export const vChecklistNestedWritable = v.object({
     name: v.string()
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistOverviewEntry
+ */
+export const vChecklistOverviewEquipmentWritable = v.object({
+    name: v.pipe(v.string(), v.maxLength(255)),
+    identifier: v.nullish(v.pipe(v.string(), v.maxLength(100)))
+});
+
+/**
+ * @endpoints
+ * Not used directly by an endpoint.
+ *
+ * Nested in: ChecklistOverview
+ */
+/**
+ * The checklist of one equipment on an assigned order (or of the work
+ * without equipment), with the draft started and the record finished.
+ */
+export const vChecklistOverviewEntryWritable = v.object({
+    equipment: v.nullable(vChecklistOverviewEquipmentWritable),
+    checklist: v.nullable(vChecklistNestedWritable),
+    draft: v.nullable(vAssignedOrderChecklistDraftWritable),
+    finished: v.nullable(vAssignedOrderChecklistSignatureWritable),
+    on_order: v.boolean()
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ */
+export const vChecklistOverviewWritable = v.object({
+    entries: v.array(vChecklistOverviewEntryWritable),
+    checklists: v.array(vChecklistNestedWritable)
 });
 
 /**
@@ -13712,7 +14453,10 @@ export const vChecklistNestedWritable = v.object({
 export const vChecklistQuestionWritable = v.object({
     checklist: v.pipe(v.number(), v.integer()),
     question: v.string(),
-    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647)))
+    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647))),
+    group_name: v.optional(v.pipe(v.string(), v.maxLength(60))),
+    answer_type: v.optional(vAnswerTypeEnum),
+    part_name: v.optional(v.pipe(v.string(), v.maxLength(255)))
 });
 
 /**
@@ -14065,7 +14809,8 @@ export const vEquipmentWritable = v.object({
     serialnumber: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
-    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/)))
+    price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
+    checklist: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -14096,7 +14841,8 @@ export const vEquipmentCreateWritable = v.object({
     standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     location: v.nullish(v.pipe(v.number(), v.integer())),
     price: v.optional(v.pipe(v.string(), v.regex(/^-?\d{0,8}(?:\.\d{0,2})?$/))),
-    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
+    default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647))),
+    checklist: v.nullish(v.pipe(v.number(), v.integer()))
 });
 
 /**
@@ -14159,6 +14905,22 @@ export const vEquipmentOrderLineWritable = v.object({
     serialnumber: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     standard_hours: v.nullish(v.pipe(v.string(), v.maxLength(255))),
     default_replace_months: v.optional(v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(2147483647)))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ *
+ * Nested in: PaginatedEquipmentPartList
+ */
+/**
+ * A planner edits the description and the order of a part. The name and
+ * the equipment are read-only: a PATCH that sends them (a form may send the
+ * whole object back) leaves them as they are.
+ */
+export const vEquipmentPartWritable = v.object({
+    description: v.optional(v.string()),
+    sequence: v.optional(v.pipe(v.number(), v.integer(), v.minValue(-2147483648), v.maxValue(2147483647)))
 });
 
 /**
@@ -15743,6 +16505,17 @@ export const vPaginatedAssignedOrderChecklistAnswerListWritable = v.object({
  * @endpoints
  * No endpoint takes this as a request body; the read const is used instead.
  */
+export const vPaginatedAssignedOrderChecklistDraftListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vAssignedOrderChecklistDraftWritable))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ */
 export const vPaginatedAssignedOrderChecklistSignatureListWritable = v.object({
     count: v.optional(v.pipe(v.number(), v.integer())),
     next: v.nullish(v.pipe(v.string(), v.url())),
@@ -15990,6 +16763,17 @@ export const vPaginatedEquipmentListWritable = v.object({
     next: v.nullish(v.pipe(v.string(), v.url())),
     previous: v.nullish(v.pipe(v.string(), v.url())),
     results: v.optional(v.array(vEquipmentWritable))
+});
+
+/**
+ * @endpoints
+ * No endpoint takes this as a request body; the read const is used instead.
+ */
+export const vPaginatedEquipmentPartListWritable = v.object({
+    count: v.optional(v.pipe(v.number(), v.integer())),
+    next: v.nullish(v.pipe(v.string(), v.url())),
+    previous: v.nullish(v.pipe(v.string(), v.url())),
+    results: v.optional(v.array(vEquipmentPartWritable))
 });
 
 /**
@@ -18926,6 +19710,38 @@ export const vEquipmentEquipmentExportQrRetrieveQuery = v.object({
 
 export const vEquipmentEquipmentExportQrRetrieveResponse = v.string();
 
+export const vEquipmentEquipmentPartListQuery = v.object({
+    equipment: v.optional(v.pipe(v.number(), v.integer())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
+    q: v.optional(v.string())
+});
+
+export const vEquipmentEquipmentPartListResponse = vPaginatedEquipmentPartList;
+
+export const vEquipmentEquipmentPartDestroyPath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * No response body
+ */
+export const vEquipmentEquipmentPartDestroyResponse = v.void();
+
+export const vEquipmentEquipmentPartRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vEquipmentEquipmentPartRetrieveResponse = vEquipmentPart;
+
+export const vEquipmentEquipmentPartPartialUpdateBody = vPatchedEquipmentPartRequest;
+
+export const vEquipmentEquipmentPartPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vEquipmentEquipmentPartPartialUpdateResponse = vEquipmentPart;
+
 export const vEquipmentEquipmentStateListQuery = v.object({
     equipment: v.optional(v.pipe(v.number(), v.integer())),
     page: v.optional(v.pipe(v.number(), v.integer())),
@@ -20635,6 +21451,55 @@ export const vMobileChecklistAnswerPartialUpdatePath = v.object({
 
 export const vMobileChecklistAnswerPartialUpdateResponse = vAssignedOrderChecklistAnswer;
 
+export const vMobileChecklistDraftListQuery = v.object({
+    assigned_order: v.optional(v.pipe(v.number(), v.integer())),
+    equipment: v.optional(v.pipe(v.number(), v.integer())),
+    page: v.optional(v.pipe(v.number(), v.integer())),
+    page_size: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(1000))),
+    q: v.optional(v.string())
+});
+
+export const vMobileChecklistDraftListResponse = vPaginatedAssignedOrderChecklistDraftList;
+
+export const vMobileChecklistDraftCreateBody = vAssignedOrderChecklistDraftRequest;
+
+export const vMobileChecklistDraftCreateResponse = vAssignedOrderChecklistDraft;
+
+export const vMobileChecklistDraftDestroyPath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+/**
+ * No response body
+ */
+export const vMobileChecklistDraftDestroyResponse = v.void();
+
+export const vMobileChecklistDraftRetrievePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vMobileChecklistDraftRetrieveResponse = vAssignedOrderChecklistDraft;
+
+export const vMobileChecklistDraftPartialUpdateBody = vPatchedAssignedOrderChecklistDraftRequest;
+
+export const vMobileChecklistDraftPartialUpdatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vMobileChecklistDraftPartialUpdateResponse = vAssignedOrderChecklistDraft;
+
+export const vMobileChecklistDraftFinishCreatePath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vMobileChecklistDraftFinishCreateResponse = vAssignedOrderChecklistFinished;
+
+export const vMobileChecklistDraftOverviewRetrieveQuery = v.object({
+    assigned_order: v.pipe(v.number(), v.integer())
+});
+
+export const vMobileChecklistDraftOverviewRetrieveResponse = vChecklistOverview;
+
 export const vMobileChecklistSignatureListQuery = v.object({
     assigned_order: v.optional(v.pipe(v.number(), v.integer())),
     order: v.optional(v.pipe(v.number(), v.integer())),
@@ -21265,6 +22130,12 @@ export const vOrderOrderAssignMeCreatePath = v.object({
 });
 
 export const vOrderOrderAssignMeCreateResponse = vAssignResultResponse;
+
+export const vOrderOrderChecklistsListPath = v.object({
+    id: v.pipe(v.number(), v.integer())
+});
+
+export const vOrderOrderChecklistsListResponse = v.array(vChecklistData);
 
 export const vOrderOrderCreatePdfBackgroundCreateBody = vCreatePdfBackgroundRequestRequest;
 
@@ -22145,6 +23016,38 @@ export const vOrderWorkorderDataRetrieveResponse = v.object({
     equipment: v.array(v.object({
         user: v.string(),
         equipment: v.string()
+    })),
+    checklist_data: v.array(v.object({
+        user: v.string(),
+        checklist: v.object({
+            id: v.pipe(v.number(), v.integer()),
+            name: v.string()
+        }),
+        equipment: v.nullish(v.object({
+            id: v.pipe(v.number(), v.integer()),
+            name: v.string()
+        })),
+        signatures: vAssignedOrderChecklistSignature,
+        remarks: v.optional(v.string()),
+        rejected_count: v.nullish(v.pipe(v.number(), v.integer())),
+        valid_until: v.nullish(v.pipe(v.string(), v.isoDate())),
+        score: v.nullish(v.pipe(v.number(), v.integer())),
+        parts: v.optional(v.array(v.object({
+            name: v.string(),
+            score: v.pipe(v.number(), v.integer()),
+            rejected_count: v.pipe(v.number(), v.integer())
+        }))),
+        questions: v.array(v.object({
+            question: v.string(),
+            answer: v.string(),
+            group_name: v.optional(v.string()),
+            part_name: v.optional(v.string()),
+            result: v.nullish(v.picklist([
+                'ok',
+                'nok',
+                'na'
+            ]))
+        }))
     }))
 });
 

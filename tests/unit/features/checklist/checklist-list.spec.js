@@ -1,3 +1,4 @@
+import { HttpResponse } from 'msw'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { ChecklistList } from '@/features/checklist'
@@ -95,5 +96,34 @@ describe('ChecklistList', () => {
     })
     expect(toasts().map((toast) => toast.body)).toContain('Checklist has been deleted')
     expect(api.requests().filter((sent) => sent.method === 'get').length).toBeGreaterThan(1)
+  })
+
+  test('marks an archived checklist, and only that one', async () => {
+    api.get('/api/checklist/checklist/', paginated([
+      fixtureFor(ITEM, {id: 3, name: 'Delivery', archived: false}),
+      fixtureFor(ITEM, {id: 4, name: 'Old delivery', archived: true}),
+    ]))
+
+    const wrapper = await mountChecklists()
+
+    const rows = wrapper.findAll('tbody tr')
+    expect(rows[0].find('.archived').exists()).toBe(false)
+    expect(rows[1].get('.archived').text()).toBe('Archived')
+  })
+
+  // The API refuses to delete a checklist with finished records.
+  test('tells the user to archive a checklist that is in use', async () => {
+    api.delete('/api/checklist/checklist/{id}/', () => HttpResponse.json(
+      {detail: 'This checklist has finished records. Archive it instead.'}, {status: 400}))
+    const wrapper = await mountChecklists()
+
+    await wrapper.get('button[title="Delete"]').trigger('click')
+    await settle()
+    modal('delete-checklist-modal').ok()
+    await settle()
+
+    expect(toasts().map((toast) => toast.body)).toEqual([
+      'This checklist is in use and cannot be deleted. Archive it instead.',
+    ])
   })
 })

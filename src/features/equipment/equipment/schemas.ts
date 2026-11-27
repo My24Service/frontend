@@ -56,6 +56,7 @@ export function emptyEquipment(currency: string): EquipmentFormValues {
  *
  * `default_replace_months` stays absent rather than null when the record has
  * none: the generated entry is `v.optional(v.number())`, which refuses a null.
+ * `checklist` stays absent too when the record has none.
  */
 export function equipmentFromRecord(record: Api.Equipment): EquipmentFormValues {
   return {
@@ -72,6 +73,9 @@ export function equipmentFromRecord(record: Api.Equipment): EquipmentFormValues 
     installation_date: record.installation_date ?? null,
     production_date: record.production_date ?? null,
     default_replace_months: record.default_replace_months,
+    // Only a set checklist goes back: the select is a planner's, and a record
+    // without one round-trips without the key, as it did before checklists.
+    ...(record.checklist != null ? {checklist: record.checklist} : {}),
     price: record.price ?? '0.00',
     price_currency: record.price_currency,
   }

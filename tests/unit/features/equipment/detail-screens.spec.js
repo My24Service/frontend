@@ -4,6 +4,9 @@ import {
   vCustomer,
   vEquipment,
   vEquipmentDashboardResponse,
+  vEquipmentInspection,
+  vEquipmentPart,
+  vEquipmentPartCondition,
   vLocation,
   vLocationDashboardResponse,
   vOrder,
@@ -225,6 +228,156 @@ describe('EquipmentDetail', () => {
     await settle()
 
     expect(bodies()).toContain('Error fetching equipment detail')
+  })
+})
+
+describe('EquipmentDetail inspection', () => {
+  const WITH_MODULE = {
+    getMemberHasBranches: true,
+    getEquipmentQrType: 'my24service',
+    getProductFamily: 'default',
+    getCurrentLanguage: 'nl',
+    getModules: ['equipment', 'checklist'],
+  }
+
+  beforeEach(() => {
+    api.get('/api/equipment/equipment/{id}/', () => fixtureFor(vEquipment, {
+      id: 11,
+      name: 'Ketel 3000',
+      inspection: fixtureFor(vEquipmentInspection, {
+        status: 'rejected', valid_until: '2027-03-01', score: 4, rejected_count: 2, date: '2026-03-01',
+      }),
+      parts: [fixtureFor(vEquipmentPartCondition, {id: 5, name: 'Door', sequence: 0, score: 4, rejected_count: 2, date: '2026-03-01'})],
+    }))
+    api.get('/api/equipment/equipment-part/', () => paginated([
+      fixtureFor(vEquipmentPart, {id: 5, equipment: 11, name: 'Door', description: 'Sliding door', sequence: 0}),
+    ]))
+  })
+
+  test('shows the status, the valid-until date, the inspection date, the score and the rejected points', async () => {
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+
+    const rows = Object.fromEntries(wrapper.findAll('dt').map((term) => [term.text(), term.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({
+      'Inspection status': 'Not approved',
+      'Valid until': '01-03-2027',
+      'Last inspection': '01-03-2026',
+      'Condition score': '4',
+      'Rejected points': '2',
+    })
+  })
+
+  test('lists the parts of the equipment with their condition', async () => {
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+
+    expect(requestsTo('/api/equipment/equipment-part/')[0].query).toEqual({equipment: '11', page: '1', page_size: '1000'})
+    expect(wrapper.get('.equipment-part').text()).toContain('Sliding door')
+  })
+
+  test('the refresh button reads the part list again', async () => {
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+    expect(requestsTo('/api/equipment/equipment-part/')).toHaveLength(1)
+
+    await wrapper.get('[title="Refresh"]').trigger('click')
+    await settle()
+
+    expect(requestsTo('/api/equipment/equipment-part/')).toHaveLength(2)
+  })
+
+  test('the shltr family layout shows the inspection rows too', async () => {
+    const wrapper = mountView(EquipmentDetail, {
+      props: {pk: '11', route_prefix: 'equipment-equipment'},
+      main: {...WITH_MODULE, getProductFamily: 'shltr'},
+    })
+    await settle()
+
+    // The cards layout lists each field as a label item followed by a value item.
+    const items = wrapper.findAll('li.list-group-item')
+    const rows = Object.fromEntries(items.filter((_, index) => index % 2 === 0)
+      .map((label) => [label.text(), label.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({
+      'Inspection status': 'Not approved',
+      'Valid until': '01-03-2027',
+      'Condition score': '4',
+    })
+  })
+
+  test('a rejected inspection without a valid-until date shows an empty "Valid until"', async () => {
+    api.get('/api/equipment/equipment/{id}/', () => fixtureFor(vEquipment, {
+      id: 11,
+      name: 'Ketel 3000',
+      inspection: fixtureFor(vEquipmentInspection, {
+        status: 'rejected', valid_until: null, score: 4, rejected_count: 2, date: '2026-03-01',
+      }),
+      parts: [],
+    }))
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+
+    const rows = Object.fromEntries(wrapper.findAll('dt').map((term) => [term.text(), term.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({'Inspection status': 'Not approved', 'Valid until': ''})
+  })
+
+  // The API answers the inspection and the part list to these roles too, but
+  // refuses them a part write.
+  test.each([
+    ['a customer user', {isEmployee: false, isCustomer: true, isPlanning: false}],
+    ['a branch employee', {isEmployee: true, isCustomer: false, isPlanning: false}],
+  ])('%s with the module sees the inspection rows and the parts, and no edit or delete button', async (_, auth) => {
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE, auth})
+    await settle()
+
+    const rows = Object.fromEntries(wrapper.findAll('dt').map((term) => [term.text(), term.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({'Inspection status': 'Not approved', 'Condition score': '4'})
+    expect(wrapper.get('.equipment-part').text()).toContain('Sliding door')
+    expect(wrapper.find('.edit-part').exists()).toBe(false)
+    expect(wrapper.find('.delete-part').exists()).toBe(false)
+    expect(wrapper.find('.save-part').exists()).toBe(false)
+  })
+
+  test('reads "Not inspected" for equipment that never had an inspection', async () => {
+    api.get('/api/equipment/equipment/{id}/', () => fixtureFor(vEquipment, {
+      id: 11,
+      name: 'Ketel 3000',
+      inspection: fixtureFor(vEquipmentInspection, {
+        status: 'none', valid_until: null, score: null, rejected_count: null, date: null,
+      }),
+      parts: [],
+    }))
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+
+    const rows = Object.fromEntries(wrapper.findAll('dt').map((term) => [term.text(), term.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({'Inspection status': 'Not inspected'})
+  })
+
+  test('reads "No validity date" for an inspection with a score and a date but no validity date', async () => {
+    api.get('/api/equipment/equipment/{id}/', () => fixtureFor(vEquipment, {
+      id: 11,
+      name: 'Ketel 3000',
+      inspection: fixtureFor(vEquipmentInspection, {
+        status: 'none', valid_until: null, score: 3, rejected_count: 0, date: '2026-03-01',
+      }),
+      parts: [],
+    }))
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+
+    const rows = Object.fromEntries(wrapper.findAll('dt').map((term) => [term.text(), term.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({'Inspection status': 'No validity date'})
+  })
+
+  test('shows none of them without the checklist module, and reads no parts', async () => {
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
+    await settle()
+
+    expect(wrapper.text()).not.toContain('Inspection status')
+    expect(wrapper.text()).not.toContain('Condition score')
+    expect(wrapper.find('.equipment-parts').exists()).toBe(false)
+    expect(requestsTo('/api/equipment/equipment-part/')).toEqual([])
   })
 })
 

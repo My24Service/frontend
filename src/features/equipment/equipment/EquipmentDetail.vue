@@ -103,6 +103,14 @@
       >
         <OrderTypesPie :equipment-pk="id" />
       </template>
+
+      <!-- checklist module only: the parts and their condition -->
+      <template
+        v-if="showInspection"
+        #parts
+      >
+        <EquipmentPartsPanel :equipment="equipment" />
+      </template>
     </component>
   </div>
 </template>
@@ -111,6 +119,7 @@
 import moment from 'moment/min/moment-with-locales'
 
 import { EQUIPMENT_TYPES } from '@/constants'
+import { displayIsoDate, inspectionStatusLabel } from '@/features/checklist'
 import { useQueryErrorToast } from '@/features/forms'
 import { formatMoney, toDinero } from '@/services/money'
 import { DocumentsComponent } from '@/features/equipment/documents'
@@ -123,6 +132,8 @@ import {
   useDetailChrome,
   useDetailOrders,
 } from '@/features/shared'
+import { hasAccessToModule } from '@/utils'
+import EquipmentPartsPanel from './EquipmentPartsPanel.vue'
 /**
  * The equipment detail page for both product families.
  *
@@ -162,6 +173,9 @@ const {orders, count, perPage, page, isLoading, statsData, renderStats, setSearc
 
 const {hasQr, qrUrl, download, recreateQr} = useQrCode({kind: 'equipment', id, record: equipment})
 
+/** Inspections come from finished checklists: only a tenant with the module has them. */
+const showInspection = computed(() => hasAccessToModule('checklist'))
+
 const layout = computed(() => (mainStore.getProductFamily === 'default' ? DetailLayoutSidebar : DetailLayoutCards))
 const isDefaultFamily = computed(() => mainStore.getProductFamily === 'default')
 
@@ -182,6 +196,15 @@ const detailFields = computed<DetailField[]>(() => {
   const record = equipment.value
   if (!record) return []
   const price = record.price ? formatMoney(toDinero(record.price, record.price_currency)) : ''
+  // `valid_until` and the inspection date can come from two different
+  // inspections, so each gets a label of its own.
+  const inspection: DetailField[] = showInspection.value ? [
+    {label: $trans('Inspection status'), value: inspectionStatusLabel(record.inspection), col: 1},
+    {label: $trans('Valid until'), value: displayIsoDate(record.inspection.valid_until), col: 1},
+    {label: $trans('Last inspection'), value: displayIsoDate(record.inspection.date), col: 2},
+    {label: $trans('Condition score'), value: record.inspection.score ?? '', col: 2},
+    {label: $trans('Rejected points'), value: record.inspection.rejected_count ?? '', col: 2},
+  ] : []
   return [
     {label: $trans('Name'), value: record.name, col: 1},
     {label: $trans('Brand'), value: record.brand, col: 1},
@@ -193,11 +216,21 @@ const detailFields = computed<DetailField[]>(() => {
     {label: $trans('Standard hours'), value: record.standard_hours, col: 1},
     {label: $trans('Lifespan (months)'), value: record.default_replace_months, col: 2},
     {label: $trans('Price'), value: price, col: 2},
+    ...inspection,
   ]
 })
 
+// The refresh also re-reads the part list, which the parts panel keeps in a
+// query of its own. The location detail has no parts and keeps its refresh.
+const queryClient = useQueryClient()
+
 const {handleSearchOk, showSearchModal, refreshAll, goBack} = useDetailChrome({
   orders: {setSearch, refresh},
-  detail: detailQuery,
+  detail: {
+    refetch: () => Promise.all([
+      detailQuery.refetch(),
+      Api.EquipmentEquipmentPart.invalidate(queryClient),
+    ]),
+  },
 })
 </script>

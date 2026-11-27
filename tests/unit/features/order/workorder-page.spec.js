@@ -36,6 +36,7 @@ const DATA = () => ({
   signatures: { signature_user: 'data:image/png;base64,AA==', signature_name_user: 'Piet', signature_customer: 'data:image/png;base64,BB==', signature_name_customer: 'Jan' },
   description_work: [{ user: 'Piet', description_work: 'Replaced the valve' }],
   equipment: [{ user: 'Piet', equipment: 'Ladder' }],
+  checklist_data: [],
 })
 
 beforeEach(() => {

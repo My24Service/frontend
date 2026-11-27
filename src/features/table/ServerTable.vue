@@ -8,6 +8,7 @@
     :invalidate="deleteModal.invalidate"
     :deleted-detail="deleteModal.deletedDetail"
     :delete-error="deleteModal.deleteError"
+    :refused-detail="deleteModal.refusedDetail"
   />
 
   <ListPageHeader
@@ -118,6 +119,8 @@ const props = withDefaults(defineProps<{
     invalidate?: (queryClient: QueryClient) => Promise<unknown> | void
     deletedDetail: string
     deleteError: string
+    /** Shown instead of `deleteError` when the API refuses the delete (400). */
+    refusedDetail?: string
   }
 }>(), {
   count: 0,

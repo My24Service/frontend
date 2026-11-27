@@ -125,4 +125,48 @@ describe('ListDeleteModal', () => {
     expect(mutationFn).toHaveBeenCalledTimes(1)
     expect(toasts().map((toast) => toast.body)).toContain('Thing has been deleted')
   })
+
+  // A 400 is the API refusing a record still in use: the screen says why.
+  test('a refused delete shows the refusal copy and keeps the modal open', async () => {
+    mutationFn.mockRejectedValue({ response: { status: 400, data: { detail: 'in use' } } })
+    const wrapper = await mountDeleteModal({ refusedDetail: 'Thing is in use. Archive it instead.' })
+
+    wrapper.vm.showDeleteModal(7)
+    await settle()
+    modal(MODAL_ID).ok()
+    await settle()
+    await settle()
+
+    expect(toasts().map((toast) => toast.body)).toEqual(['Thing is in use. Archive it instead.'])
+    expect(invalidate).not.toHaveBeenCalled()
+    expect(modal(MODAL_ID).isOpen()).toBe(true)
+  })
+
+  test('any other failure shows the error copy, also when a refusal copy is given', async () => {
+    mutationFn.mockRejectedValue({ response: { status: 500 } })
+    const wrapper = await mountDeleteModal({ refusedDetail: 'Thing is in use. Archive it instead.' })
+
+    wrapper.vm.showDeleteModal(7)
+    await settle()
+    modal(MODAL_ID).ok()
+    await settle()
+    await settle()
+
+    expect(toasts().map((toast) => toast.body)).toEqual(['Error deleting thing'])
+    expect(modal(MODAL_ID).isOpen()).toBe(true)
+  })
+
+  test('a refused delete without a refusal copy shows the error copy', async () => {
+    mutationFn.mockRejectedValue({ response: { status: 400 } })
+    const wrapper = await mountDeleteModal()
+
+    wrapper.vm.showDeleteModal(7)
+    await settle()
+    modal(MODAL_ID).ok()
+    await settle()
+    await settle()
+
+    expect(toasts().map((toast) => toast.body)).toEqual(['Error deleting thing'])
+    expect(modal(MODAL_ID).isOpen()).toBe(true)
+  })
 })

@@ -1,3 +1,4 @@
+import { HttpResponse } from 'msw'
 import { beforeEach, describe, expect, test } from 'vitest'
 
 import { ChecklistForm } from '@/features/checklist'
@@ -11,7 +12,8 @@ import { serverError } from '../../support/list-harness.js'
 
 const api = installApiSeam()
 
-const CHECKLIST = fixtureFor(vChecklist, {id: 3, name: 'Delivery'})
+// As the API sends every checklist: all four fields present.
+const CHECKLIST = fixtureFor(vChecklist, {id: 3, name: 'Delivery', norm: '', validity_months: null, archived: false})
 
 function question(id, checklist, text) {
   return fixtureFor(vChecklistQuestion, {id, checklist, question: text})
@@ -93,7 +95,7 @@ describe('ChecklistForm, creating a checklist', () => {
     await submit(wrapper)
 
     expect(sent('post').map(({ path, body }) => ({path, body}))).toEqual([
-      {path: '/api/checklist/checklist/', body: {name: 'Delivery'}},
+      {path: '/api/checklist/checklist/', body: {name: 'Delivery', norm: '', validity_months: null, archived: false}},
       {path: '/api/checklist/checklist-question/', body: {checklist: 3, question: 'Is the stand level?'}},
       {path: '/api/checklist/checklist-question/', body: {checklist: 3, question: 'Is the power connected?'}},
     ])
@@ -134,7 +136,7 @@ describe('ChecklistForm, creating a checklist', () => {
     await submit(wrapper)
 
     expect(sent('post').map((request) => request.body)).toEqual([
-      {name: 'Delivery'},
+      {name: 'Delivery', norm: '', validity_months: null, archived: false},
       {checklist: 3, question: 'Kept'},
     ])
     expect(sent('delete')).toEqual([])
@@ -157,6 +159,88 @@ describe('ChecklistForm, creating a checklist', () => {
     expect(sent('post').filter((request) => request.path === '/api/checklist/checklist/')).toHaveLength(1)
     expect(sent('patch').map((request) => request.path)).toEqual(['/api/checklist/checklist/3/'])
     expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+
+  test('sends the norm, the validity in months and the archived flag', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Lift inspection')
+    await type(wrapper, '#checklist_norm', 'NEN-EN 81-20')
+    await type(wrapper, '#checklist_validity_months', '12')
+    await wrapper.get('#checklist_archived').setValue(true)
+    await submit(wrapper)
+
+    expect(sent('post')[0]).toMatchObject({
+      path: '/api/checklist/checklist/',
+      body: {name: 'Lift inspection', norm: 'NEN-EN 81-20', validity_months: 12, archived: true},
+    })
+  })
+
+  test('refuses a validity above 120 months, and sends nothing', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Lift inspection')
+    await type(wrapper, '#checklist_validity_months', '121')
+    await submit(wrapper)
+
+    expect(shownErrors(wrapper)).toContain('Please enter a value of at most 120')
+    expect(sent('post')).toEqual([])
+  })
+
+  test('refuses a validity that is not a whole number, and sends nothing', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Lift inspection')
+    await type(wrapper, '#checklist_validity_months', '1.5')
+    await submit(wrapper)
+
+    expect(shownErrors(wrapper)).toContain('Please enter a whole number')
+    expect(sent('post')).toEqual([])
+  })
+
+  test('a retry after a failed second question posts only that question again', async () => {
+    let posted = 0
+    api.post('/api/checklist/checklist-question/', ({ body }) => {
+      posted += 1
+      return posted === 2 ? serverError() : question(100 + posted, body.checklist, body.question)
+    })
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Delivery')
+    await addQuestion(wrapper, 'First')
+    await addQuestion(wrapper, 'Second')
+    await submit(wrapper)
+
+    expect(routerGo()).not.toHaveBeenCalled()
+
+    await submit(wrapper)
+
+    expect(sent('post').filter((request) => request.path === '/api/checklist/checklist-question/')
+      .map((request) => request.body.question)).toEqual(['First', 'Second', 'Second'])
+    expect(sent('patch').filter((request) => request.path.startsWith('/api/checklist/checklist-question/'))).toEqual([])
+    expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+
+  test('refuses a validity of 0 months, and sends nothing', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Lift inspection')
+    await type(wrapper, '#checklist_validity_months', '0')
+    await submit(wrapper)
+
+    expect(wrapper.get('#checklist_validity_months-feedback').text()).toBe('Please enter a value of at least 1')
+    expect(sent('post')).toEqual([])
+  })
+
+  test('refuses a norm longer than 80 characters, and sends nothing', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Lift inspection')
+    await type(wrapper, '#checklist_norm', 'N'.repeat(81))
+    await submit(wrapper)
+
+    expect(shownErrors(wrapper)).toContain('Please use at most 80 characters')
+    expect(sent('post')).toEqual([])
   })
 })
 
@@ -187,7 +271,7 @@ describe('ChecklistForm, editing a checklist', () => {
     await submit(wrapper)
 
     expect(sent('patch').map(({ path, body }) => ({path, body}))).toEqual([
-      {path: '/api/checklist/checklist/3/', body: {name: 'Delivery'}},
+      {path: '/api/checklist/checklist/3/', body: {name: 'Delivery', norm: '', validity_months: null, archived: false}},
       {path: '/api/checklist/checklist-question/12/', body: {question: 'Is the stand level and secured?'}},
     ])
     expect(sent('post').map(({ path, body }) => ({path, body}))).toEqual([
@@ -195,6 +279,40 @@ describe('ChecklistForm, editing a checklist', () => {
     ])
     expect(sent('delete').map((request) => request.path)).toEqual(['/api/checklist/checklist-question/11/'])
     expect(toasts().map((toast) => toast.body)).toContain('Checklist has been updated')
+    expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+
+  test('a retry after a failed delete sends only the delete that failed', async () => {
+    api.delete('/api/checklist/checklist-question/{id}/', ({ params }) =>
+      params.id === '12' ? serverError() : noContent())
+    const wrapper = await mountChecklistForm({pk: 3})
+
+    await wrapper.findAll('.remove-question')[0].trigger('click')
+    await wrapper.findAll('.remove-question')[0].trigger('click')
+    await submit(wrapper)
+
+    expect(sent('delete').map((request) => request.path)).toEqual([
+      '/api/checklist/checklist-question/11/',
+      '/api/checklist/checklist-question/12/',
+    ])
+    expect(toasts().map((toast) => toast.body)).toContain('Error updating checklist')
+    expect(routerGo()).not.toHaveBeenCalled()
+
+    api.delete('/api/checklist/checklist-question/{id}/', noContent)
+    await submit(wrapper)
+
+    expect(sent('delete').map((request) => request.path).slice(2)).toEqual(['/api/checklist/checklist-question/12/'])
+    expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+
+  test('a delete the API answers with 404 counts as done', async () => {
+    api.delete('/api/checklist/checklist-question/{id}/', () =>
+      new HttpResponse(JSON.stringify({detail: 'Not found.'}), {status: 404, headers: {'Content-Type': 'application/json'}}))
+    const wrapper = await mountChecklistForm({pk: 3})
+
+    await wrapper.findAll('.remove-question')[0].trigger('click')
+    await submit(wrapper)
+
     expect(routerGo()).toHaveBeenCalledWith(-1)
   })
 
@@ -239,12 +357,174 @@ describe('ChecklistForm, editing a checklist', () => {
     expect(questionTexts(wrapper)).toEqual(['Typed, not saved', 'Is the stand level?'])
   })
 
+  test('opens on the stored norm, validity and archived flag, and sends an emptied validity as null', async () => {
+    api.get('/api/checklist/checklist/{id}/', fixtureFor(vChecklist, {
+      id: 3, name: 'Delivery', norm: 'NEN 2767', validity_months: 12, archived: false,
+    }))
+    const wrapper = await mountChecklistForm({pk: 3})
+
+    expect(wrapper.get('#checklist_norm').element.value).toBe('NEN 2767')
+    expect(wrapper.get('#checklist_validity_months').element.value).toBe('12')
+    expect(wrapper.get('#checklist_archived').element.checked).toBe(false)
+
+    await type(wrapper, '#checklist_validity_months', '')
+    await wrapper.get('#checklist_archived').setValue(true)
+    await submit(wrapper)
+
+    expect(sent('patch')[0]).toMatchObject({
+      path: '/api/checklist/checklist/3/',
+      body: {name: 'Delivery', norm: 'NEN 2767', validity_months: null, archived: true},
+    })
+  })
+
+  test('a retry after a failed second question update sends only the failed update again', async () => {
+    let attempts = 0
+    api.patch('/api/checklist/checklist-question/{id}/', ({ params, body }) => {
+      if (params.id === '12') {
+        attempts += 1
+        if (attempts === 1) return serverError()
+      }
+      return question(Number(params.id), 3, body.question)
+    })
+    const wrapper = await mountChecklistForm({pk: 3})
+
+    await type(wrapper, '#checklist_question-0', 'First, changed')
+    await type(wrapper, '#checklist_question-1', 'Second, changed')
+    await submit(wrapper)
+
+    expect(routerGo()).not.toHaveBeenCalled()
+
+    await submit(wrapper)
+
+    expect(sent('patch').filter((request) => request.path.startsWith('/api/checklist/checklist-question/'))
+      .map(({ path, body }) => ({path, body}))).toEqual([
+      {path: '/api/checklist/checklist-question/11/', body: {question: 'First, changed'}},
+      {path: '/api/checklist/checklist-question/12/', body: {question: 'Second, changed'}},
+      {path: '/api/checklist/checklist-question/12/', body: {question: 'Second, changed'}},
+    ])
+    expect(routerGo()).toHaveBeenCalledWith(-1)
+  })
+
   test('tells the user when the questions cannot be fetched', async () => {
     api.get('/api/checklist/checklist-question/', serverError)
 
     await mountChecklistForm({pk: 3})
 
     expect(toasts().map((toast) => toast.body)).toContain('Error loading questions')
+  })
+})
+
+describe('ChecklistForm, the group, answer type and part of a question', () => {
+  test('a new question has no group, asks for text and checks no part', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await addQuestion(wrapper, 'Is the stand level?')
+
+    expect(wrapper.get('#checklist_question_group-0').element.value).toBe('')
+    expect(wrapper.get('#checklist_question_type-0').element.value).toBe('text')
+    expect(wrapper.get('#checklist_question_part-0').element.value).toBe('')
+  })
+
+  test('sends them with a new question, without outer spaces', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Door inspection')
+    await addQuestion(wrapper, 'Does the door close?')
+    await type(wrapper, '#checklist_question_group-0', '  Door ')
+    await wrapper.get('#checklist_question_type-0').setValue('result')
+    await type(wrapper, '#checklist_question_part-0', ' Hinge')
+    await submit(wrapper)
+
+    expect(sent('post').map(({ path, body }) => ({path, body}))[1]).toEqual({
+      path: '/api/checklist/checklist-question/',
+      body: {checklist: 3, question: 'Does the door close?', group_name: 'Door', answer_type: 'result', part_name: 'Hinge'},
+    })
+  })
+
+  test('opens on the stored values, and sends only the field that changed', async () => {
+    api.get('/api/checklist/checklist-question/', paginated([
+      fixtureFor(vChecklistQuestion, {
+        id: 11, checklist: 3, question: 'Does the door close?', group_name: 'Door', answer_type: 'result', part_name: 'Hinge',
+      }),
+    ]))
+    // The beforeEach responder echoes `question`, which this patch leaves out.
+    api.patch('/api/checklist/checklist-question/{id}/', ({ params, body }) =>
+      fixtureFor(vChecklistQuestion, {id: Number(params.id), checklist: 3, question: 'Does the door close?', ...body}))
+    const wrapper = await mountChecklistForm({pk: 3})
+
+    expect(wrapper.get('#checklist_question_group-0').element.value).toBe('Door')
+    expect(wrapper.get('#checklist_question_type-0').element.value).toBe('result')
+    expect(wrapper.get('#checklist_question_part-0').element.value).toBe('Hinge')
+
+    await type(wrapper, '#checklist_question_part-0', 'Lock')
+    await submit(wrapper)
+
+    expect(sent('patch').map(({ path, body }) => ({path, body}))[1]).toEqual({
+      path: '/api/checklist/checklist-question/11/',
+      body: {part_name: 'Lock'},
+    })
+  })
+
+  describe('a stored question with a group and an answer type', () => {
+    beforeEach(() => {
+      api.get('/api/checklist/checklist-question/', paginated([
+        fixtureFor(vChecklistQuestion, {
+          id: 11, checklist: 3, question: 'Does the door close?', group_name: 'Door', answer_type: 'result', part_name: '',
+        }),
+      ]))
+      api.patch('/api/checklist/checklist-question/{id}/', ({ params, body }) =>
+        fixtureFor(vChecklistQuestion, {id: Number(params.id), checklist: 3, question: 'Does the door close?', ...body}))
+    })
+
+    const questionPatches = () => sent('patch')
+      .filter((request) => request.path === '/api/checklist/checklist-question/11/')
+      .map((request) => request.body)
+
+    test('a cleared group is sent as an empty group name', async () => {
+      const wrapper = await mountChecklistForm({pk: 3})
+
+      await type(wrapper, '#checklist_question_group-0', '')
+      await submit(wrapper)
+
+      expect(questionPatches()).toEqual([{group_name: ''}])
+    })
+
+    test('an answer type changed from result to text is sent', async () => {
+      const wrapper = await mountChecklistForm({pk: 3})
+
+      await wrapper.get('#checklist_question_type-0').setValue('text')
+      await submit(wrapper)
+
+      expect(questionPatches()).toEqual([{answer_type: 'text'}])
+    })
+  })
+
+  test('refuses a group name longer than 60 characters, and sends nothing', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Door inspection')
+    await addQuestion(wrapper, 'Does the door close?')
+    await type(wrapper, '#checklist_question_group-0', 'G'.repeat(61))
+    await submit(wrapper)
+
+    expect(wrapper.get('#checklist_question_group-feedback-0').text()).toBe('Please use at most 60 characters')
+    expect(wrapper.get('#checklist_question_group-0').classes()).toContain('is-invalid')
+    expect(wrapper.get('#checklist_question-0').classes()).not.toContain('is-invalid')
+    expect(sent('post')).toEqual([])
+  })
+
+  test('shows a too long part name under the part input, not under the question', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Door inspection')
+    await addQuestion(wrapper, 'Does the door close?')
+    await type(wrapper, '#checklist_question_part-0', 'P'.repeat(256))
+    await submit(wrapper)
+
+    expect(wrapper.get('#checklist_question_part-feedback-0').text()).toContain('Please use at most')
+    expect(wrapper.get('#checklist_question_part-0').classes()).toContain('is-invalid')
+    expect(wrapper.get('#checklist_question-0').classes()).not.toContain('is-invalid')
+    expect(sent('post')).toEqual([])
   })
 })
 
