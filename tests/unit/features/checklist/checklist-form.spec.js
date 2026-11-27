@@ -306,6 +306,70 @@ describe('ChecklistForm, editing a checklist', () => {
   })
 })
 
+describe('ChecklistForm, the group, answer type and part of a question', () => {
+  test('a new question has no group, asks for text and checks no part', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await addQuestion(wrapper, 'Is the stand level?')
+
+    expect(wrapper.get('#checklist_question_group-0').element.value).toBe('')
+    expect(wrapper.get('#checklist_question_type-0').element.value).toBe('text')
+    expect(wrapper.get('#checklist_question_part-0').element.value).toBe('')
+  })
+
+  test('sends them with a new question, without outer spaces', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Door inspection')
+    await addQuestion(wrapper, 'Does the door close?')
+    await type(wrapper, '#checklist_question_group-0', '  Door ')
+    await wrapper.get('#checklist_question_type-0').setValue('result')
+    await type(wrapper, '#checklist_question_part-0', ' Hinge')
+    await submit(wrapper)
+
+    expect(sent('post').map(({ path, body }) => ({path, body}))[1]).toEqual({
+      path: '/api/checklist/checklist-question/',
+      body: {checklist: 3, question: 'Does the door close?', group_name: 'Door', answer_type: 'result', part_name: 'Hinge'},
+    })
+  })
+
+  test('opens on the stored values, and sends only the field that changed', async () => {
+    api.get('/api/checklist/checklist-question/', paginated([
+      fixtureFor(vChecklistQuestion, {
+        id: 11, checklist: 3, question: 'Does the door close?', group_name: 'Door', answer_type: 'result', part_name: 'Hinge',
+      }),
+    ]))
+    // The beforeEach responder echoes `question`, which this patch leaves out.
+    api.patch('/api/checklist/checklist-question/{id}/', ({ params, body }) =>
+      fixtureFor(vChecklistQuestion, {id: Number(params.id), checklist: 3, question: 'Does the door close?', ...body}))
+    const wrapper = await mountChecklistForm({pk: 3})
+
+    expect(wrapper.get('#checklist_question_group-0').element.value).toBe('Door')
+    expect(wrapper.get('#checklist_question_type-0').element.value).toBe('result')
+    expect(wrapper.get('#checklist_question_part-0').element.value).toBe('Hinge')
+
+    await type(wrapper, '#checklist_question_part-0', 'Lock')
+    await submit(wrapper)
+
+    expect(sent('patch').map(({ path, body }) => ({path, body}))[1]).toEqual({
+      path: '/api/checklist/checklist-question/11/',
+      body: {part_name: 'Lock'},
+    })
+  })
+
+  test('refuses a group name longer than 60 characters, and sends nothing', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Door inspection')
+    await addQuestion(wrapper, 'Does the door close?')
+    await type(wrapper, '#checklist_question_group-0', 'G'.repeat(61))
+    await submit(wrapper)
+
+    expect(shownErrors(wrapper)).toContain('Please use at most 60 characters')
+    expect(sent('post')).toEqual([])
+  })
+})
+
 describe('ChecklistForm, cancelling', () => {
   test('goes back without sending anything', async () => {
     const wrapper = await mountChecklistForm()

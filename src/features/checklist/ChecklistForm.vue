@@ -81,34 +81,69 @@
           <p v-if="questions.rows.value.length === 0" class="text-muted">
             {{ $trans('This checklist has no questions yet') }}
           </p>
-          <b-row
+          <template
             v-for="(row, index) of questions.rows.value"
             :key="row.id ?? `new-${index}`"
-            class="checklist-question"
-            no-gutters
           >
-            <b-col cols="11" role="group" class="pr-2">
-              <BFormInput
-                v-model="row.question"
-                :id="`checklist_question-${index}`"
-                size="sm"
-                :aria-label="$trans('Question')"
-                :state="submitClicked ? !questionError(row) : null"
-              ></BFormInput>
-              <b-form-invalid-feedback :state="submitClicked ? !questionError(row) : null">
-                {{ questionError(row) }}
-              </b-form-invalid-feedback>
-            </b-col>
-            <b-col cols="1">
-              <BButton
-                class="remove-question"
-                variant="light"
-                size="sm"
-                :title="$trans('Delete')"
-                @click="questions.remove(index)"
-              ><IBiTrash /></BButton>
-            </b-col>
-          </b-row>
+            <b-row
+              class="checklist-question"
+              no-gutters
+            >
+              <b-col cols="11" role="group" class="pr-2">
+                <BFormInput
+                  v-model="row.question"
+                  :id="`checklist_question-${index}`"
+                  size="sm"
+                  :aria-label="$trans('Question')"
+                  :state="submitClicked ? !questionError(row) : null"
+                ></BFormInput>
+                <b-form-invalid-feedback :state="submitClicked ? !questionError(row) : null">
+                  {{ questionError(row) }}
+                </b-form-invalid-feedback>
+              </b-col>
+              <b-col cols="1">
+                <BButton
+                  class="remove-question"
+                  variant="light"
+                  size="sm"
+                  :title="$trans('Delete')"
+                  @click="questions.remove(index)"
+                ><IBiTrash /></BButton>
+              </b-col>
+            </b-row>
+            <b-row
+              class="checklist-question-details"
+              no-gutters
+            >
+              <b-col cols="4" class="pr-2">
+                <BFormInput
+                  v-model="row.group_name"
+                  :id="`checklist_question_group-${index}`"
+                  size="sm"
+                  :placeholder="$trans('Group')"
+                  :aria-label="$trans('Group')"
+                ></BFormInput>
+              </b-col>
+              <b-col cols="4" class="pr-2">
+                <BFormSelect
+                  v-model="row.answer_type"
+                  :id="`checklist_question_type-${index}`"
+                  size="sm"
+                  :options="answerTypeOptions"
+                  :aria-label="$trans('Answer type')"
+                ></BFormSelect>
+              </b-col>
+              <b-col cols="3">
+                <BFormInput
+                  v-model="row.part_name"
+                  :id="`checklist_question_part-${index}`"
+                  size="sm"
+                  :placeholder="$trans('Part')"
+                  :aria-label="$trans('Part')"
+                ></BFormInput>
+              </b-col>
+            </b-row>
+          </template>
           <BButton
             class="add-question"
             type="button"
@@ -143,9 +178,12 @@ import {
   checklistFromRecord,
   checklistWrite,
   emptyChecklist,
+  emptyQuestion,
   PLACEHOLDERS,
+  questionCreateBody,
   questionError,
   questionFromRecord,
+  questionUpdateBody,
   type ChecklistFieldErrors,
   type QuestionRow,
 } from './schemas'
@@ -165,10 +203,10 @@ const props = withDefaults(defineProps<{
   pk: null,
 })
 
-const questions = useStagedRows<QuestionRow>(() => ({question: ''}))
+const questions = useStagedRows<QuestionRow>(emptyQuestion)
 
-/** The stored text per question id, so a save only rewrites the ones that changed. */
-const stored = new Map<number, string>()
+/** The stored question per id, so a save only sends the fields that changed. */
+const stored = new Map<number, QuestionRow>()
 
 const createQuestion = useMutation(Api.ChecklistChecklistQuestion.create.mutation())
 const updateQuestion = useMutation(Api.ChecklistChecklistQuestion.update.mutation())
@@ -192,7 +230,12 @@ const {
   fromRecord: checklistFromRecord,
   validate: (values, context) => {
     // The API strips a question before it checks it, so spaces alone are blank.
-    for (const row of questions.rows.value) row.question = row.question.trim()
+    // A group and a part are keys too: "Door " must not start a second one.
+    for (const row of questions.rows.value) {
+      row.question = row.question.trim()
+      row.group_name = row.group_name.trim()
+      row.part_name = row.part_name.trim()
+    }
     const found: ChecklistFieldErrors = checklistWrite.validate(values, context)
     const refused = questions.rows.value.map(questionError).find((error) => error !== undefined)
     if (refused) found.questions = refused
@@ -203,14 +246,15 @@ const {
     const checklistId = context.isCreate ? (result as Api.Checklist).id : context.id
     await questions.replay(checklistId, {
       create: async (row, parent) => {
-        const created = await createQuestion.mutateAsync({body: {checklist: parent, question: row.question}})
-        stored.set(created.id, created.question)
+        const created = await createQuestion.mutateAsync({body: questionCreateBody(row, parent)})
+        stored.set(created.id, {...row, id: created.id})
         return created
       },
       update: async (questionId, row) => {
-        if (stored.get(questionId) === row.question) return
-        await updateQuestion.mutateAsync({path: {id: questionId}, body: {question: row.question}})
-        stored.set(questionId, row.question)
+        const body = questionUpdateBody(row, stored.get(questionId))
+        if (!body) return
+        await updateQuestion.mutateAsync({path: {id: questionId}, body})
+        stored.set(questionId, {...row})
       },
       destroy: (questionId) => destroyQuestion.mutateAsync({path: {id: questionId}}),
     })
@@ -248,7 +292,7 @@ watch(
     seededFor = checklistId
     const own = page.results ?? []
     stored.clear()
-    for (const question of own) stored.set(question.id, question.question)
+    for (const question of own) stored.set(question.id, questionFromRecord(question))
     questions.seed(own.map(questionFromRecord))
   },
   {immediate: true},
@@ -267,8 +311,13 @@ const validityMonths = computed({
 })
 
 function addQuestion() {
-  questions.rows.value.push({question: ''})
+  questions.rows.value.push(emptyQuestion())
 }
+
+const answerTypeOptions = computed(() => [
+  {value: 'text', text: $trans('Text')},
+  {value: 'result', text: $trans('Good / not approved / not applicable')},
+])
 
 const isLoading = computed(() => baseIsLoading.value || questionsQuery.isLoading.value)
 </script>
@@ -281,6 +330,11 @@ const isLoading = computed(() => baseIsLoading.value || questionsQuery.isLoading
   align-items: flex-start;
   gap: 0.5rem;
   flex-wrap: nowrap;
-  padding-bottom: 10px;
+  padding-bottom: 4px;
+}
+.checklist-question-details {
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  padding-bottom: 14px;
 }
 </style>

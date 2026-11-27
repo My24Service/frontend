@@ -46,25 +46,81 @@ export const checklistWrite = writeContract(Api.ChecklistChecklist, {
   labels: FIELD_LABELS,
 })
 
-/** A question as the form stages it: its text, and its id once it is stored. */
+/**
+ * A question as the form stages it: its text, its heading, whether it asks
+ * for a result (good / rejected / not applicable), the part it checks, and its
+ * id once it is stored. A blank group or part means "none".
+ */
 export interface QuestionRow {
   id?: number
   question: string
+  group_name: string
+  answer_type: Api.AnswerTypeEnum
+  part_name: string
+}
+
+/** A new question: the API's own defaults. */
+export function emptyQuestion(): QuestionRow {
+  return {question: '', group_name: '', answer_type: 'text', part_name: ''}
 }
 
 export function questionFromRecord(record: Api.ChecklistQuestion): QuestionRow {
-  return {id: record.id, question: record.question}
+  return {
+    id: record.id,
+    question: record.question,
+    group_name: record.group_name ?? '',
+    answer_type: record.answer_type ?? 'text',
+    part_name: record.part_name ?? '',
+  }
+}
+
+/**
+ * The body of a new question: the checklist and the text, plus each other
+ * field that differs from the API's default. A default is left out, so a
+ * plain text question is sent as it was before groups and parts existed.
+ */
+export function questionCreateBody(row: QuestionRow, checklist: number): Api.ChecklistChecklistQuestion.CreateInput {
+  const body: Api.ChecklistChecklistQuestion.CreateInput = {checklist, question: row.question}
+  if (row.group_name !== '') body.group_name = row.group_name
+  if (row.answer_type !== 'text') body.answer_type = row.answer_type
+  if (row.part_name !== '') body.part_name = row.part_name
+  return body
+}
+
+/**
+ * The fields of a stored question that changed, or null when none did. Without
+ * a stored copy every field is sent.
+ */
+export function questionUpdateBody(
+  row: QuestionRow,
+  stored: QuestionRow | undefined,
+): Api.ChecklistChecklistQuestion.UpdateInput | null {
+  const body: Api.ChecklistChecklistQuestion.UpdateInput = {}
+  if (row.question !== stored?.question) body.question = row.question
+  if (row.group_name !== stored?.group_name) body.group_name = row.group_name
+  if (row.answer_type !== stored?.answer_type) body.answer_type = row.answer_type
+  if (row.part_name !== stored?.part_name) body.part_name = row.part_name
+  return Object.keys(body).length > 0 ? body : null
 }
 
 const QUESTION_LABELS = {
   question: () => $trans('Question'),
-} as const satisfies FieldLabels<'question'>
+  group_name: () => $trans('Group'),
+  part_name: () => $trans('Part'),
+} as const satisfies FieldLabels<'question' | 'group_name' | 'part_name'>
 
-// The question's own entry on the request body. The `checklist` entry is left
-// out: a staged question has no checklist id until the checklist is saved.
-const questionText = v.pick(Api.ChecklistChecklistQuestion.create.body, ['question'])
+// The question's own entries on the request body. The `checklist` entry is
+// left out: a staged question has no checklist id until the checklist is
+// saved. `answer_type` is left out too: the select offers only valid values.
+const questionFields = v.pick(Api.ChecklistChecklistQuestion.create.body, ['question', 'group_name', 'part_name'])
 
 /** Why a staged question cannot be sent, or nothing when it can. */
 export function questionError(row: QuestionRow): string | undefined {
-  return fieldErrors(questionText, {question: row.question}, {}, QUESTION_LABELS).question
+  const errors = fieldErrors(
+    questionFields,
+    {question: row.question, group_name: row.group_name, part_name: row.part_name},
+    {},
+    QUESTION_LABELS,
+  )
+  return errors.question ?? errors.group_name ?? errors.part_name
 }
