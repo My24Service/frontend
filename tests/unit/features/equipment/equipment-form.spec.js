@@ -578,6 +578,21 @@ describe('EquipmentForm checklist', () => {
     expect(requestsTo('/api/checklist/checklist/')).toEqual([])
   })
 
+  // The select is hidden from a customer, but the form still carries the stored
+  // value, so the PATCH does not take the checklist off the equipment.
+  test('a customer who saves a record that has a checklist still sends that checklist', async () => {
+    api.get('/api/equipment/equipment/{id}/', equipmentRecord({checklist: 3}))
+    const wrapper = mountEquipment({
+      props: {pk: '31'}, main: WITH_MODULE, auth: {isEmployee: false, isCustomer: true, isPlanning: false},
+    })
+    await settle()
+
+    await click(wrapper, 'Submit')
+    await settle()
+
+    expect(writeOf('patch').body).toMatchObject({checklist: 3})
+  })
+
   // The API drops `checklist` for every role but planning users and staff.
   test('a user who is not a planner gets no select and no checklist read', async () => {
     const wrapper = mountEquipment({main: WITH_MODULE, auth: {isEmployee: true, isCustomer: false, isPlanning: false}})

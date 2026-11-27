@@ -153,6 +153,7 @@ describe('ListDeleteModal', () => {
     await settle()
 
     expect(toasts().map((toast) => toast.body)).toEqual(['Error deleting thing'])
+    expect(modal(MODAL_ID).isOpen()).toBe(true)
   })
 
   test('a refused delete without a refusal copy shows the error copy', async () => {
@@ -166,5 +167,6 @@ describe('ListDeleteModal', () => {
     await settle()
 
     expect(toasts().map((toast) => toast.body)).toEqual(['Error deleting thing'])
+    expect(modal(MODAL_ID).isOpen()).toBe(true)
   })
 })

@@ -321,6 +321,55 @@ describe('EquipmentDetail inspection', () => {
     expect(rows).toMatchObject({'Inspection status': 'Not approved', 'Valid until': ''})
   })
 
+  // The API answers the inspection and the part list to these roles too, but
+  // refuses them a part write.
+  test.each([
+    ['a customer user', {isEmployee: false, isCustomer: true, isPlanning: false}],
+    ['a branch employee', {isEmployee: true, isCustomer: false, isPlanning: false}],
+  ])('%s with the module sees the inspection rows and the parts, and no edit or delete button', async (_, auth) => {
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE, auth})
+    await settle()
+
+    const rows = Object.fromEntries(wrapper.findAll('dt').map((term) => [term.text(), term.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({'Inspection status': 'Not approved', 'Condition score': '4'})
+    expect(wrapper.get('.equipment-part').text()).toContain('Sliding door')
+    expect(wrapper.find('.edit-part').exists()).toBe(false)
+    expect(wrapper.find('.delete-part').exists()).toBe(false)
+    expect(wrapper.find('.save-part').exists()).toBe(false)
+  })
+
+  test('reads "Not inspected" for equipment that never had an inspection', async () => {
+    api.get('/api/equipment/equipment/{id}/', () => fixtureFor(vEquipment, {
+      id: 11,
+      name: 'Ketel 3000',
+      inspection: fixtureFor(vEquipmentInspection, {
+        status: 'none', valid_until: null, score: null, rejected_count: null, date: null,
+      }),
+      parts: [],
+    }))
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+
+    const rows = Object.fromEntries(wrapper.findAll('dt').map((term) => [term.text(), term.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({'Inspection status': 'Not inspected'})
+  })
+
+  test('reads "No validity date" for an inspection with a score and a date but no validity date', async () => {
+    api.get('/api/equipment/equipment/{id}/', () => fixtureFor(vEquipment, {
+      id: 11,
+      name: 'Ketel 3000',
+      inspection: fixtureFor(vEquipmentInspection, {
+        status: 'none', valid_until: null, score: 3, rejected_count: 0, date: '2026-03-01',
+      }),
+      parts: [],
+    }))
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+
+    const rows = Object.fromEntries(wrapper.findAll('dt').map((term) => [term.text(), term.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({'Inspection status': 'No validity date'})
+  })
+
   test('shows none of them without the checklist module, and reads no parts', async () => {
     const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
     await settle()

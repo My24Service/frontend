@@ -26,10 +26,20 @@ describe('displayIsoDate', () => {
 })
 
 describe('inspection status', () => {
+  test('reads "Not inspected" for status none when there is no inspection date', () => {
+    expect(inspectionStatusLabel({status: 'none', date: null})).toBe('Not inspected')
+    expect(inspectionStatusLabel({status: 'none'})).toBe('Not inspected')
+  })
+
+  test('keeps "No validity date" for status none with an inspection date', () => {
+    expect(inspectionStatusLabel({status: 'none', date: '2026-03-01'})).toBe('No validity date')
+  })
+
   test('has a label and a badge for each of the five statuses', () => {
     const statuses = ['valid', 'expiring', 'expired', 'rejected', 'none']
 
-    expect(statuses.map(inspectionStatusLabel)).toEqual(['Valid', 'Expiring', 'Expired', 'Not approved', 'No validity date'])
+    expect(statuses.map((status) => inspectionStatusLabel({status, date: '2026-03-01'})))
+      .toEqual(['Valid', 'Expiring', 'Expired', 'Not approved', 'No validity date'])
     expect(statuses.map(inspectionStatusClass)).toEqual([
       'badge text-bg-success',
       'badge text-bg-warning',

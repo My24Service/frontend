@@ -273,7 +273,17 @@ const {
         await updateQuestion.mutateAsync({path: {id: questionId}, body})
         stored.set(questionId, {...row})
       },
-      destroy: (questionId) => destroyQuestion.mutateAsync({path: {id: questionId}}),
+      destroy: async (questionId) => {
+        try {
+          await destroyQuestion.mutateAsync({path: {id: questionId}})
+        } catch (error) {
+          // Gone already (an earlier save got that far): the delete is done.
+          if ((error as {response?: {status?: number}}).response?.status !== 404) throw error
+        }
+        // The replay clears the list only when every delete went through, so a
+        // later failure would send this one again on the retry.
+        questions.deletedIds.value = questions.deletedIds.value.filter((deleted) => deleted !== questionId)
+      },
     })
   },
   copy: {

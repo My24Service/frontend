@@ -79,13 +79,14 @@
                 class="save-part"
                 size="sm"
                 variant="primary"
-                :disabled="updatePart.isPending.value"
+                :disabled="saving"
                 @click="savePart"
               >{{ $trans('Save') }}</BButton>
               <BButton
                 class="cancel-part"
                 size="sm"
                 variant="secondary"
+                :disabled="saving"
                 @click="editing = null"
               >{{ $trans('Cancel') }}</BButton>
             </template>
@@ -184,6 +185,7 @@ const PART_LABELS = {
   sequence: () => $trans('Position'),
 } as const satisfies FieldLabels<'description' | 'sequence'>
 
+const saving = ref(false)
 const updatePart = useMutation(Api.EquipmentEquipmentPart.update.mutation())
 const queryClient = useQueryClient()
 
@@ -194,25 +196,32 @@ function editPart(row: PartRow) {
 
 async function savePart() {
   const draft = editing.value
-  if (!draft) return
+  if (!draft || saving.value) return
   // A blank position is the first position, as on a new part.
   const body = {description: draft.description, sequence: draft.sequence === '' ? 0 : Number(draft.sequence)}
   const errors = fieldErrors(Api.EquipmentEquipmentPart.update.body, body, {}, PART_LABELS)
   editError.value = errors.sequence ?? errors.description
   if (editError.value) return
 
+  // Held until the refetch is done too: the edit stays open that long, and
+  // a second click on Save would send a second PATCH.
+  saving.value = true
   try {
-    await updatePart.mutateAsync({path: {id: draft.id}, body})
-  } catch {
-    errorToast(create, $trans('Error updating part'))
-    return
+    try {
+      await updatePart.mutateAsync({path: {id: draft.id}, body})
+    } catch {
+      errorToast(create, $trans('Error updating part'))
+      return
+    }
+    infoToast(create, $trans('Updated'), $trans('Part has been updated'))
+    // Refetch first, so the row does not show the old values for a moment. The
+    // edit closes only when it is still the saved row's: the planner may have
+    // opened another row while the save ran.
+    await invalidateEquipmentPartQueries(queryClient)
+    if (editing.value?.id === draft.id) editing.value = null
+  } finally {
+    saving.value = false
   }
-  infoToast(create, $trans('Updated'), $trans('Part has been updated'))
-  // Refetch first, so the row does not show the old values for a moment. The
-  // edit closes only when it is still the saved row's: the planner may have
-  // opened another row while the save ran.
-  await invalidateEquipmentPartQueries(queryClient)
-  if (editing.value?.id === draft.id) editing.value = null
 }
 
 const deleteModal = useTemplateRef<{showDeleteModal: (id: number) => void}>('deleteModal')

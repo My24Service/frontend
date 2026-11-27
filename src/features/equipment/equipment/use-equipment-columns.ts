@@ -109,8 +109,8 @@ export function useEquipmentColumns(options: EquipmentColumnOptions) {
         id: 'inspection',
         header: $trans('Inspection'),
         cell: ({row}) => {
-          const status = row.original.inspection.status
-          return h('span', {class: inspectionStatusClass(status)}, inspectionStatusLabel(status))
+          const inspection = row.original.inspection
+          return h('span', {class: inspectionStatusClass(inspection.status)}, inspectionStatusLabel(inspection))
         },
       }),
       helper.display({

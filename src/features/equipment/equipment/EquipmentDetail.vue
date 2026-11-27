@@ -199,7 +199,7 @@ const detailFields = computed<DetailField[]>(() => {
   // `valid_until` and the inspection date can come from two different
   // inspections, so each gets a label of its own.
   const inspection: DetailField[] = showInspection.value ? [
-    {label: $trans('Inspection status'), value: inspectionStatusLabel(record.inspection.status), col: 1},
+    {label: $trans('Inspection status'), value: inspectionStatusLabel(record.inspection), col: 1},
     {label: $trans('Valid until'), value: displayIsoDate(record.inspection.valid_until), col: 1},
     {label: $trans('Last inspection'), value: displayIsoDate(record.inspection.date), col: 2},
     {label: $trans('Condition score'), value: record.inspection.score ?? '', col: 2},

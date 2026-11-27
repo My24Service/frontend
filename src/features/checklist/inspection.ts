@@ -16,13 +16,20 @@ export function displayIsoDate(iso: string | null | undefined): string {
   return isValid(date) ? format(date, 'dd-MM-yyyy') : ''
 }
 
-export function inspectionStatusLabel(status: Api.EquipmentInspectionStatusEnum): string {
-  switch (status) {
+/**
+ * The status of an inspection as a label. `none` has two meanings: an
+ * equipment that was never inspected (no date), and an inspection without a
+ * validity date.
+ */
+export function inspectionStatusLabel(
+  inspection: {status: Api.EquipmentInspectionStatusEnum, date?: string | null},
+): string {
+  switch (inspection.status) {
     case 'valid': return $trans('Valid')
     case 'expiring': return $trans('Expiring')
     case 'expired': return $trans('Expired')
     case 'rejected': return $trans('Not approved')
-    case 'none': return $trans('No validity date')
+    case 'none': return inspection.date ? $trans('No validity date') : $trans('Not inspected')
   }
 }
 

@@ -159,6 +159,47 @@ describe('EquipmentPartsPanel, editing', () => {
     expect(api.requests().filter((sent) => sent.method === 'get' && sent.path === '/api/equipment/equipment-part/')).toHaveLength(2)
   })
 
+  test('a second click on Save while the part list is read again sends no second PATCH', async () => {
+    let release
+    const held = new Promise((resolve) => { release = resolve })
+    let reads = 0
+    api.get('/api/equipment/equipment-part/', async () => {
+      reads += 1
+      if (reads > 1) await held
+      return PARTS
+    })
+    const wrapper = await mountPanel()
+
+    await wrapper.findAll('.edit-part')[0].trigger('click')
+    await wrapper.get('.save-part').trigger('click')
+    await settle()
+    // The PATCH is done and the refetch is held: the edit is still open.
+    expect(wrapper.get('.save-part').attributes('disabled')).toBeDefined()
+    expect(wrapper.get('.cancel-part').attributes('disabled')).toBeDefined()
+    await wrapper.get('.save-part').trigger('click')
+    await settle()
+
+    expect(api.requests().filter((sent) => sent.method === 'patch')).toHaveLength(1)
+
+    release()
+    await settle()
+
+    expect(wrapper.find('#part_description-5').exists()).toBe(false)
+  })
+
+  test('sends a blank position as 0', async () => {
+    const wrapper = await mountPanel()
+
+    await wrapper.findAll('.edit-part')[1].trigger('click')
+    await wrapper.get('#part_sequence-6').setValue('')
+    await wrapper.get('.save-part').trigger('click')
+    await settle()
+
+    expect(api.requests().filter((sent) => sent.method === 'patch')).toEqual([
+      expect.objectContaining({path: '/api/equipment/equipment-part/6/', body: {description: '', sequence: 0}}),
+    ])
+  })
+
   test('a save that finishes after another row was opened leaves that edit open', async () => {
     let release
     const held = new Promise((resolve) => { release = resolve })
@@ -171,9 +212,9 @@ describe('EquipmentPartsPanel, editing', () => {
     await wrapper.findAll('.edit-part')[0].trigger('click')
     await wrapper.get('.save-part').trigger('click')
     await settle()
-    // Row A's save is pending; its edit is still open, so only the other row offers an edit.
+    // Row A's save is pending and its Cancel is disabled, so only the other row offers an edit.
     await wrapper.get('.cancel-part').trigger('click')
-    await wrapper.findAll('.edit-part')[1].trigger('click')
+    await wrapper.findAll('.edit-part')[0].trigger('click')
     expect(wrapper.find('#part_description-6').exists()).toBe(true)
 
     release()

@@ -440,6 +440,19 @@ describe('EquipmentList inspection', () => {
     expect(cellUnder(wrapper, 'Condition score').text()).toBe('3')
   })
 
+  test('shows "Not inspected" for equipment that never had an inspection', async () => {
+    api.get(endpoint, () => paginated([equipment({
+      inspection: fixtureFor(vEquipmentInspection, {
+        status: 'none', valid_until: null, score: null, rejected_count: null, date: null,
+      }),
+    })], {count: 1}))
+
+    const wrapper = await mountEquipment({main: WITH_MODULE})
+
+    expect(cellUnder(wrapper, 'Inspection').text()).toBe('Not inspected')
+    expect(cellUnder(wrapper, 'Inspection').get('.badge').classes()).toContain('text-bg-secondary')
+  })
+
   test('shows an empty score for equipment that has none', async () => {
     api.get(endpoint, () => paginated([equipment({
       inspection: fixtureFor(vEquipmentInspection, {
@@ -449,7 +462,7 @@ describe('EquipmentList inspection', () => {
 
     const wrapper = await mountEquipment({main: WITH_MODULE})
 
-    expect(cellUnder(wrapper, 'Inspection').text()).toBe('No validity date')
+    expect(cellUnder(wrapper, 'Inspection').text()).toBe('Not inspected')
     expect(cellUnder(wrapper, 'Condition score').text()).toBe('')
   })
 
