@@ -26,6 +26,55 @@
             </BFormGroup>
           </b-col>
         </b-row>
+        <b-row>
+          <b-col cols="6" role="group">
+            <BFormGroup
+              label-size="sm"
+              :label="$trans('Norm')"
+              label-for="checklist_norm"
+            >
+              <BFormInput
+                v-model="checklist.norm"
+                id="checklist_norm"
+                size="sm"
+                :state="submitClicked ? !errors.norm : null"
+              ></BFormInput>
+              <b-form-invalid-feedback :state="submitClicked ? !errors.norm : null">
+                {{ errors.norm }}
+              </b-form-invalid-feedback>
+            </BFormGroup>
+          </b-col>
+          <b-col cols="3" role="group">
+            <BFormGroup
+              label-size="sm"
+              :label="$trans('Validity (months)')"
+              label-for="checklist_validity_months"
+            >
+              <BFormInput
+                v-model="validityMonths"
+                id="checklist_validity_months"
+                size="sm"
+                type="number"
+                :state="submitClicked ? !errors.validity_months : null"
+              ></BFormInput>
+              <b-form-invalid-feedback :state="submitClicked ? !errors.validity_months : null">
+                {{ errors.validity_months }}
+              </b-form-invalid-feedback>
+            </BFormGroup>
+          </b-col>
+          <b-col cols="3" role="group">
+            <BFormGroup
+              label-size="sm"
+              :label="$trans('Archived')"
+              label-for="checklist_archived"
+            >
+              <BFormCheckbox
+                v-model="checklist.archived"
+                id="checklist_archived"
+              ></BFormCheckbox>
+            </BFormGroup>
+          </b-col>
+        </b-row>
 
         <div class="checklist-questions section">
           <h6>{{ $trans('Questions') }}</h6>
@@ -91,6 +140,7 @@ import { useQueryErrorToast, useResourceForm, useStagedRows } from '@/features/f
 import { WHOLE_COLLECTION_PAGE_SIZE } from '@/features/table'
 import { invalidateChecklistQueries } from './invalidation'
 import {
+  checklistFromRecord,
   checklistWrite,
   emptyChecklist,
   PLACEHOLDERS,
@@ -139,7 +189,7 @@ const {
   resource: Api.ChecklistChecklist,
   invalidate: invalidateChecklistQueries,
   empty: emptyChecklist,
-  fromRecord: (record) => ({name: record.name}),
+  fromRecord: checklistFromRecord,
   validate: (values, context) => {
     // The API strips a question before it checks it, so spaces alone are blank.
     for (const row of questions.rows.value) row.question = row.question.trim()
@@ -203,6 +253,18 @@ watch(
   },
   {immediate: true},
 )
+
+/**
+ * The validity as the API declares it: a whole number of months, or null for
+ * no valid-until date. The input hands over a string, and '' means "none".
+ */
+const validityMonths = computed({
+  get: () => checklist.value.validity_months ?? '',
+  set: (value: string | number | null) => {
+    const parsed = Number(value)
+    checklist.value.validity_months = value === '' || value === null || Number.isNaN(parsed) ? null : parsed
+  },
+})
 
 function addQuestion() {
   questions.rows.value.push({question: ''})

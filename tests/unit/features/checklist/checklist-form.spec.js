@@ -11,7 +11,8 @@ import { serverError } from '../../support/list-harness.js'
 
 const api = installApiSeam()
 
-const CHECKLIST = fixtureFor(vChecklist, {id: 3, name: 'Delivery'})
+// As the API sends every checklist: all four fields present.
+const CHECKLIST = fixtureFor(vChecklist, {id: 3, name: 'Delivery', norm: '', validity_months: null, archived: false})
 
 function question(id, checklist, text) {
   return fixtureFor(vChecklistQuestion, {id, checklist, question: text})
@@ -158,6 +159,43 @@ describe('ChecklistForm, creating a checklist', () => {
     expect(sent('patch').map((request) => request.path)).toEqual(['/api/checklist/checklist/3/'])
     expect(routerGo()).toHaveBeenCalledWith(-1)
   })
+
+  test('sends the norm, the validity in months and the archived flag', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Lift inspection')
+    await type(wrapper, '#checklist_norm', 'NEN-EN 81-20')
+    await type(wrapper, '#checklist_validity_months', '12')
+    await wrapper.get('#checklist_archived').setValue(true)
+    await submit(wrapper)
+
+    expect(sent('post')[0]).toMatchObject({
+      path: '/api/checklist/checklist/',
+      body: {name: 'Lift inspection', norm: 'NEN-EN 81-20', validity_months: 12, archived: true},
+    })
+  })
+
+  test('refuses a validity above 120 months, and sends nothing', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Lift inspection')
+    await type(wrapper, '#checklist_validity_months', '121')
+    await submit(wrapper)
+
+    expect(shownErrors(wrapper)).toContain('Please enter a value of at most 120')
+    expect(sent('post')).toEqual([])
+  })
+
+  test('refuses a norm longer than 80 characters, and sends nothing', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Lift inspection')
+    await type(wrapper, '#checklist_norm', 'N'.repeat(81))
+    await submit(wrapper)
+
+    expect(shownErrors(wrapper)).toContain('Please use at most 80 characters')
+    expect(sent('post')).toEqual([])
+  })
 })
 
 describe('ChecklistForm, editing a checklist', () => {
@@ -187,7 +225,7 @@ describe('ChecklistForm, editing a checklist', () => {
     await submit(wrapper)
 
     expect(sent('patch').map(({ path, body }) => ({path, body}))).toEqual([
-      {path: '/api/checklist/checklist/3/', body: {name: 'Delivery'}},
+      {path: '/api/checklist/checklist/3/', body: {name: 'Delivery', norm: '', validity_months: null, archived: false}},
       {path: '/api/checklist/checklist-question/12/', body: {question: 'Is the stand level and secured?'}},
     ])
     expect(sent('post').map(({ path, body }) => ({path, body}))).toEqual([
@@ -237,6 +275,26 @@ describe('ChecklistForm, editing a checklist', () => {
 
     expect(sent('get').filter((request) => request.path === '/api/checklist/checklist-question/')).toHaveLength(2)
     expect(questionTexts(wrapper)).toEqual(['Typed, not saved', 'Is the stand level?'])
+  })
+
+  test('opens on the stored norm, validity and archived flag, and sends an emptied validity as null', async () => {
+    api.get('/api/checklist/checklist/{id}/', fixtureFor(vChecklist, {
+      id: 3, name: 'Delivery', norm: 'NEN 2767', validity_months: 12, archived: false,
+    }))
+    const wrapper = await mountChecklistForm({pk: 3})
+
+    expect(wrapper.get('#checklist_norm').element.value).toBe('NEN 2767')
+    expect(wrapper.get('#checklist_validity_months').element.value).toBe('12')
+    expect(wrapper.get('#checklist_archived').element.checked).toBe(false)
+
+    await type(wrapper, '#checklist_validity_months', '')
+    await wrapper.get('#checklist_archived').setValue(true)
+    await submit(wrapper)
+
+    expect(sent('patch')[0]).toMatchObject({
+      path: '/api/checklist/checklist/3/',
+      body: {name: 'Delivery', norm: 'NEN 2767', validity_months: null, archived: true},
+    })
   })
 
   test('tells the user when the questions cannot be fetched', async () => {

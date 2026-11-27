@@ -20,8 +20,21 @@ export function emptyChecklist(): Api.ChecklistChecklist.CreateInput {
 export type ChecklistFieldErrors =
   FieldErrors<keyof Api.ChecklistChecklist.CreateInput | 'questions'>
 
+/** The stored checklist as form values: every field the form edits. */
+export function checklistFromRecord(record: Api.Checklist): Api.ChecklistChecklist.CreateInput {
+  return {
+    name: record.name,
+    norm: record.norm,
+    validity_months: record.validity_months,
+    archived: record.archived,
+  }
+}
+
 export const FIELD_LABELS = {
   name: () => $trans('Name'),
+  norm: () => $trans('Norm'),
+  validity_months: () => $trans('Validity (months)'),
+  archived: () => $trans('Archived'),
 } as const satisfies FieldLabels<keyof Api.ChecklistChecklist.CreateInput>
 
 /** The line under an untouched field: the same required line the validation shows. */
