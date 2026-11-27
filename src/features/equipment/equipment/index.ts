@@ -1,6 +1,7 @@
 export { default as EquipmentDetail } from './EquipmentDetail.vue'
 export { default as EquipmentForm } from './EquipmentForm.vue'
 export { default as EquipmentList } from './EquipmentList.vue'
+export { default as EquipmentPartsPanel } from './EquipmentPartsPanel.vue'
 export {
   emptyEquipment,
   equipmentFromRecord,

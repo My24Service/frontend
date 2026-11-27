@@ -103,6 +103,14 @@
       >
         <OrderTypesPie :equipment-pk="id" />
       </template>
+
+      <!-- checklist module only: the parts and their condition -->
+      <template
+        v-if="showInspection"
+        #parts
+      >
+        <EquipmentPartsPanel :equipment="equipment" />
+      </template>
     </component>
   </div>
 </template>
@@ -125,6 +133,7 @@ import {
   useDetailOrders,
 } from '@/features/shared'
 import { hasAccessToModule } from '@/utils'
+import EquipmentPartsPanel from './EquipmentPartsPanel.vue'
 /**
  * The equipment detail page for both product families.
  *

@@ -5,6 +5,8 @@ import {
   vEquipment,
   vEquipmentDashboardResponse,
   vEquipmentInspection,
+  vEquipmentPart,
+  vEquipmentPartCondition,
   vLocation,
   vLocationDashboardResponse,
   vOrder,
@@ -245,8 +247,11 @@ describe('EquipmentDetail inspection', () => {
       inspection: fixtureFor(vEquipmentInspection, {
         status: 'rejected', valid_until: '2027-03-01', score: 4, rejected_count: 2, date: '2026-03-01',
       }),
-      parts: [],
+      parts: [fixtureFor(vEquipmentPartCondition, {id: 5, name: 'Door', sequence: 0, score: 4, rejected_count: 2, date: '2026-03-01'})],
     }))
+    api.get('/api/equipment/equipment-part/', () => paginated([
+      fixtureFor(vEquipmentPart, {id: 5, equipment: 11, name: 'Door', description: 'Sliding door', sequence: 0}),
+    ]))
   })
 
   test('shows the status, the valid-until date, the inspection date, the score and the rejected points', async () => {
@@ -263,12 +268,22 @@ describe('EquipmentDetail inspection', () => {
     })
   })
 
-  test('shows none of them without the checklist module', async () => {
+  test('lists the parts of the equipment with their condition', async () => {
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+
+    expect(requestsTo('/api/equipment/equipment-part/')[0].query).toEqual({equipment: '11', page: '1', page_size: '1000'})
+    expect(wrapper.get('.equipment-part').text()).toContain('Sliding door')
+  })
+
+  test('shows none of them without the checklist module, and reads no parts', async () => {
     const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
     await settle()
 
     expect(wrapper.text()).not.toContain('Inspection status')
     expect(wrapper.text()).not.toContain('Condition score')
+    expect(wrapper.find('.equipment-parts').exists()).toBe(false)
+    expect(requestsTo('/api/equipment/equipment-part/')).toEqual([])
   })
 })
 
