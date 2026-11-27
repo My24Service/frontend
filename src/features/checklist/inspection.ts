@@ -1,4 +1,4 @@
-import { format, parseISO } from 'date-fns'
+import { format, isValid, parseISO } from 'date-fns'
 
 /**
  * How a finished checklist and an equipment's inspection read on screen: the
@@ -9,9 +9,11 @@ import { format, parseISO } from 'date-fns'
  * two never name the same state differently.
  */
 
-/** An ISO date (`2026-11-27`) as the app shows dates (`27-11-2026`), or nothing. */
+/** An ISO date (`2026-11-27`) as the app shows dates (`27-11-2026`), or nothing for a missing or invalid one. */
 export function displayIsoDate(iso: string | null | undefined): string {
-  return iso ? format(parseISO(iso), 'dd-MM-yyyy') : ''
+  if (!iso) return ''
+  const date = parseISO(iso)
+  return isValid(date) ? format(date, 'dd-MM-yyyy') : ''
 }
 
 export function inspectionStatusLabel(status: Api.EquipmentInspectionStatusEnum): string {
@@ -20,7 +22,7 @@ export function inspectionStatusLabel(status: Api.EquipmentInspectionStatusEnum)
     case 'expiring': return $trans('Expiring')
     case 'expired': return $trans('Expired')
     case 'rejected': return $trans('Not approved')
-    case 'none': return $trans('Not inspected')
+    case 'none': return $trans('No validity date')
   }
 }
 

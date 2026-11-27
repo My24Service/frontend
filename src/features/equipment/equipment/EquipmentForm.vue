@@ -333,7 +333,7 @@
           >
             <BFormSelect
               id="equipment_checklist"
-              v-model="values.checklist"
+              v-model="checklistChoice"
               :options="checklistOptions"
               size="sm"
             />
@@ -513,14 +513,28 @@ useQueryErrorToast(checklistsQuery.error, $trans('Error loading checklists'))
  * that one is archived: the select must still show what is stored.
  */
 const checklistOptions = computed(() => {
-  const current = values.value.checklist
+  // The stored checklist, not the chosen one: a planner who picks another
+  // checklist can still pick the archived one again.
+  const stored = record.value?.checklist
   const offered = (checklistsQuery.data.value?.results ?? [])
-    .filter((checklist) => !checklist.archived || checklist.id === current)
+    .filter((checklist) => !checklist.archived || checklist.id === stored)
     .map((checklist) => ({
       value: checklist.id,
       text: checklist.archived ? `${checklist.name} (${$trans('Archived')})` : checklist.name,
     }))
   return [{value: null, text: $trans('No checklist')}, ...offered]
+})
+
+/**
+ * The select's value. `values.checklist` is absent until the planner chooses
+ * (the request body must not carry the key before then), and an absent value
+ * would leave the select blank instead of on "No checklist".
+ */
+const checklistChoice = computed({
+  get: () => values.value.checklist ?? null,
+  set: (choice: number | null) => {
+    values.value.checklist = choice
+  },
 })
 
 /**

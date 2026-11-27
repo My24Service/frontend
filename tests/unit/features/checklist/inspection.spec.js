@@ -18,13 +18,18 @@ describe('displayIsoDate', () => {
     expect(displayIsoDate(null)).toBe('')
     expect(displayIsoDate(undefined)).toBe('')
   })
+
+  test('shows nothing for a string that is not a date', () => {
+    expect(displayIsoDate('not a date')).toBe('')
+    expect(displayIsoDate('2026-13-45')).toBe('')
+  })
 })
 
 describe('inspection status', () => {
   test('has a label and a badge for each of the five statuses', () => {
     const statuses = ['valid', 'expiring', 'expired', 'rejected', 'none']
 
-    expect(statuses.map(inspectionStatusLabel)).toEqual(['Valid', 'Expiring', 'Expired', 'Not approved', 'Not inspected'])
+    expect(statuses.map(inspectionStatusLabel)).toEqual(['Valid', 'Expiring', 'Expired', 'Not approved', 'No validity date'])
     expect(statuses.map(inspectionStatusClass)).toEqual([
       'badge text-bg-success',
       'badge text-bg-warning',

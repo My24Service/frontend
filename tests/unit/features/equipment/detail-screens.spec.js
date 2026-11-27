@@ -276,6 +276,51 @@ describe('EquipmentDetail inspection', () => {
     expect(wrapper.get('.equipment-part').text()).toContain('Sliding door')
   })
 
+  test('the refresh button reads the part list again', async () => {
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+    expect(requestsTo('/api/equipment/equipment-part/')).toHaveLength(1)
+
+    await wrapper.get('[title="Refresh"]').trigger('click')
+    await settle()
+
+    expect(requestsTo('/api/equipment/equipment-part/')).toHaveLength(2)
+  })
+
+  test('the shltr family layout shows the inspection rows too', async () => {
+    const wrapper = mountView(EquipmentDetail, {
+      props: {pk: '11', route_prefix: 'equipment-equipment'},
+      main: {...WITH_MODULE, getProductFamily: 'shltr'},
+    })
+    await settle()
+
+    // The cards layout lists each field as a label item followed by a value item.
+    const items = wrapper.findAll('li.list-group-item')
+    const rows = Object.fromEntries(items.filter((_, index) => index % 2 === 0)
+      .map((label) => [label.text(), label.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({
+      'Inspection status': 'Not approved',
+      'Valid until': '01-03-2027',
+      'Condition score': '4',
+    })
+  })
+
+  test('a rejected inspection without a valid-until date shows an empty "Valid until"', async () => {
+    api.get('/api/equipment/equipment/{id}/', () => fixtureFor(vEquipment, {
+      id: 11,
+      name: 'Ketel 3000',
+      inspection: fixtureFor(vEquipmentInspection, {
+        status: 'rejected', valid_until: null, score: 4, rejected_count: 2, date: '2026-03-01',
+      }),
+      parts: [],
+    }))
+    const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}, main: WITH_MODULE})
+    await settle()
+
+    const rows = Object.fromEntries(wrapper.findAll('dt').map((term) => [term.text(), term.element.nextElementSibling.textContent.trim()]))
+    expect(rows).toMatchObject({'Inspection status': 'Not approved', 'Valid until': ''})
+  })
+
   test('shows none of them without the checklist module, and reads no parts', async () => {
     const wrapper = mountView(EquipmentDetail, {props: {pk: '11', route_prefix: 'equipment-equipment'}})
     await settle()

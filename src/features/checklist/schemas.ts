@@ -114,13 +114,18 @@ const QUESTION_LABELS = {
 // saved. `answer_type` is left out too: the select offers only valid values.
 const questionFields = v.pick(Api.ChecklistChecklistQuestion.create.body, ['question', 'group_name', 'part_name'])
 
-/** Why a staged question cannot be sent, or nothing when it can. */
-export function questionError(row: QuestionRow): string | undefined {
-  const errors = fieldErrors(
+/** Why each field of a staged question cannot be sent. A field that is fine has no entry. */
+export function questionFieldErrors(row: QuestionRow) {
+  return fieldErrors(
     questionFields,
     {question: row.question, group_name: row.group_name, part_name: row.part_name},
     {},
     QUESTION_LABELS,
   )
+}
+
+/** Why a staged question cannot be sent, or nothing when it can. */
+export function questionError(row: QuestionRow): string | undefined {
+  const errors = questionFieldErrors(row)
   return errors.question ?? errors.group_name ?? errors.part_name
 }

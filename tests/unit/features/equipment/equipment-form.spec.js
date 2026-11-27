@@ -525,6 +525,29 @@ describe('EquipmentForm checklist', () => {
     expect(wrapper.get('#equipment_checklist').element.value).toBe('4')
   })
 
+  test('a new equipment shows the "No checklist" option as selected, and sends no checklist key', async () => {
+    const wrapper = mountEquipment({main: WITH_MODULE, auth: PLANNER})
+    await settle()
+
+    const select = wrapper.get('#equipment_checklist').element
+    expect(select.selectedOptions[0]?.text).toBe('No checklist')
+
+    await fillMinimum(wrapper)
+    await click(wrapper, 'Submit')
+
+    expect(writeOf('post').body).not.toHaveProperty('checklist')
+  })
+
+  test('the archived checklist of the stored record stays in the list after another one is chosen', async () => {
+    api.get('/api/equipment/equipment/{id}/', equipmentRecord({checklist: 4}))
+    const wrapper = mountEquipment({props: {pk: '31'}, main: WITH_MODULE, auth: PLANNER})
+    await settle()
+
+    await wrapper.get('#equipment_checklist').setValue('3')
+
+    expect(optionTexts(wrapper)).toEqual(['No checklist', 'Lift inspection', 'Old lift inspection (Archived)'])
+  })
+
   test('a planner can take the checklist off an equipment', async () => {
     api.get('/api/equipment/equipment/{id}/', equipmentRecord({checklist: 3}))
     const wrapper = mountEquipment({props: {pk: '31'}, main: WITH_MODULE, auth: PLANNER})
@@ -538,6 +561,17 @@ describe('EquipmentForm checklist', () => {
 
   test('without the checklist module there is no select and no checklist read', async () => {
     const wrapper = mountEquipment({auth: PLANNER})
+    await settle()
+
+    expect(wrapper.find('#equipment_checklist').exists()).toBe(false)
+    expect(requestsTo('/api/checklist/checklist/')).toEqual([])
+  })
+
+  test('a customer who edits a record that has a checklist gets no select and no checklist read', async () => {
+    api.get('/api/equipment/equipment/{id}/', equipmentRecord({checklist: 3}))
+    const wrapper = mountEquipment({
+      props: {pk: '31'}, main: WITH_MODULE, auth: {isEmployee: false, isCustomer: true, isPlanning: false},
+    })
     await settle()
 
     expect(wrapper.find('#equipment_checklist').exists()).toBe(false)

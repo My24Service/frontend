@@ -220,8 +220,17 @@ const detailFields = computed<DetailField[]>(() => {
   ]
 })
 
+// The refresh also re-reads the part list, which the parts panel keeps in a
+// query of its own. The location detail has no parts and keeps its refresh.
+const queryClient = useQueryClient()
+
 const {handleSearchOk, showSearchModal, refreshAll, goBack} = useDetailChrome({
   orders: {setSearch, refresh},
-  detail: detailQuery,
+  detail: {
+    refetch: () => Promise.all([
+      detailQuery.refetch(),
+      Api.EquipmentEquipmentPart.invalidate(queryClient),
+    ]),
+  },
 })
 </script>

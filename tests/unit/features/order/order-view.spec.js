@@ -141,6 +141,26 @@ describe('OrderView, filled-in checklists', () => {
 
     expect(checklistRequests()).toEqual([])
   })
+
+  // Staff and superusers pass the API's planner check without a planning profile.
+  test('a staff user without a planning profile asks once', async () => {
+    const wrapper = await mountView({ main: { getModules: ['checklist'] }, auth: { isAdmin: true } })
+
+    expect(checklistRequests()).toHaveLength(1)
+    expect(wrapper.get('.filled-checklists').text()).toContain('Is the power connected?')
+  })
+
+  test('asks for none as a branch employee', async () => {
+    await mountView({ main: { getModules: ['checklist'] }, auth: { isEmployee: true, isBranchEmployee: true } })
+
+    expect(checklistRequests()).toEqual([])
+  })
+
+  test('asks for none as a sales user', async () => {
+    await mountView({ main: { getModules: ['checklist'] }, auth: { isSales: true } })
+
+    expect(checklistRequests()).toEqual([])
+  })
 })
 
 describe('OrderView by pk', () => {

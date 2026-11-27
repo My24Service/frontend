@@ -53,7 +53,11 @@
                   class="dimmed part-name"
                 >({{ question.part_name }})</small>
               </td>
-              <td class="result">
+              <!-- A checklist without results keeps its two columns. -->
+              <td
+                v-if="group.questions.some((entry) => entry.result)"
+                class="result"
+              >
                 <span
                   v-if="question.result"
                   :class="resultClass(question.result)"
@@ -76,6 +80,7 @@
                   ><img
                     :src="photo.url"
                     :alt="$trans('Photo')"
+                    loading="lazy"
                   ></a>
                 </div>
               </td>
@@ -116,7 +121,7 @@
         class="checklist-remarks"
       >
         <h6>{{ $trans('General remark') }}</h6>
-        <p>{{ item.remarks }}</p>
+        <p class="remarks-text">{{ item.remarks }}</p>
       </div>
 
       <div class="flex-columns signatures">
@@ -171,7 +176,8 @@ const checklists = computed(() => checklistsQuery.data.value ?? [])
 </script>
 
 <style scoped>
-.answer {
+.answer,
+.remarks-text {
   white-space: pre-line;
 }
 .checklist-group {

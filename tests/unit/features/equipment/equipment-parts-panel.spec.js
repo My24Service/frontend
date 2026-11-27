@@ -82,6 +82,24 @@ describe('EquipmentPartsPanel, reading', () => {
     expect(toasts().map((toast) => toast.body)).toContain('Error loading parts')
   })
 
+  test('does not say "no parts" after a failed load', async () => {
+    api.get('/api/equipment/equipment-part/', serverError)
+
+    const wrapper = await mountPanel()
+
+    expect(toasts().map((toast) => toast.body)).toContain('Error loading parts')
+    expect(wrapper.text()).not.toContain('This equipment has no parts yet')
+  })
+
+  test('does not say "no parts" while the parts are loading', async () => {
+    api.get('/api/equipment/equipment-part/', () => new Promise(() => {}))
+
+    const wrapper = mountForm(EquipmentPartsPanel, {deep: true, props: {equipment: EQUIPMENT}, auth: PLANNER})
+    await settle()
+
+    expect(wrapper.text()).not.toContain('This equipment has no parts yet')
+  })
+
   // The API refuses a part write to every role but planning users and staff.
   test('offers no edit and no delete to a user who is not a planner', async () => {
     const wrapper = await mountPanel({auth: {isPlanning: false, isCustomer: true}})
@@ -131,6 +149,39 @@ describe('EquipmentPartsPanel, editing', () => {
     expect(rowsOf(wrapper)[0][1]).toBe('Sliding door')
   })
 
+  test('reads the part list again after a save', async () => {
+    const wrapper = await mountPanel()
+
+    await wrapper.findAll('.edit-part')[0].trigger('click')
+    await wrapper.get('.save-part').trigger('click')
+    await settle()
+
+    expect(api.requests().filter((sent) => sent.method === 'get' && sent.path === '/api/equipment/equipment-part/')).toHaveLength(2)
+  })
+
+  test('a save that finishes after another row was opened leaves that edit open', async () => {
+    let release
+    const held = new Promise((resolve) => { release = resolve })
+    api.patch('/api/equipment/equipment-part/{id}/', async ({ params, body }) => {
+      await held
+      return part(Number(params.id), 'Door', body.description, body.sequence)
+    })
+    const wrapper = await mountPanel()
+
+    await wrapper.findAll('.edit-part')[0].trigger('click')
+    await wrapper.get('.save-part').trigger('click')
+    await settle()
+    // Row A's save is pending; its edit is still open, so only the other row offers an edit.
+    await wrapper.get('.cancel-part').trigger('click')
+    await wrapper.findAll('.edit-part')[1].trigger('click')
+    expect(wrapper.find('#part_description-6').exists()).toBe(true)
+
+    release()
+    await settle()
+
+    expect(wrapper.find('#part_description-6').exists()).toBe(true)
+  })
+
   test('tells the user when the part cannot be saved, and stays in the edit', async () => {
     api.patch('/api/equipment/equipment-part/{id}/', serverError)
     const wrapper = await mountPanel()
@@ -159,6 +210,7 @@ describe('EquipmentPartsPanel, deleting', () => {
       path: '/api/equipment/equipment-part/6/',
     })
     expect(toasts().map((toast) => toast.body)).toContain('Part has been deleted')
+    expect(api.requests().filter((sent) => sent.method === 'get' && sent.path === '/api/equipment/equipment-part/')).toHaveLength(2)
   })
 
   // A part with condition records keeps its history: the API answers 400.

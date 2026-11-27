@@ -186,6 +186,17 @@ describe('ChecklistForm, creating a checklist', () => {
     expect(sent('post')).toEqual([])
   })
 
+  test('refuses a validity of 0 months, and sends nothing', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Lift inspection')
+    await type(wrapper, '#checklist_validity_months', '0')
+    await submit(wrapper)
+
+    expect(wrapper.get('#checklist_validity_months-feedback').text()).toBe('Please enter a value of at least 1')
+    expect(sent('post')).toEqual([])
+  })
+
   test('refuses a norm longer than 80 characters, and sends nothing', async () => {
     const wrapper = await mountChecklistForm()
 
@@ -365,7 +376,23 @@ describe('ChecklistForm, the group, answer type and part of a question', () => {
     await type(wrapper, '#checklist_question_group-0', 'G'.repeat(61))
     await submit(wrapper)
 
-    expect(shownErrors(wrapper)).toContain('Please use at most 60 characters')
+    expect(wrapper.get('#checklist_question_group-feedback-0').text()).toBe('Please use at most 60 characters')
+    expect(wrapper.get('#checklist_question_group-0').classes()).toContain('is-invalid')
+    expect(wrapper.get('#checklist_question-0').classes()).not.toContain('is-invalid')
+    expect(sent('post')).toEqual([])
+  })
+
+  test('shows a too long part name under the part input, not under the question', async () => {
+    const wrapper = await mountChecklistForm()
+
+    await type(wrapper, '#checklist_name', 'Door inspection')
+    await addQuestion(wrapper, 'Does the door close?')
+    await type(wrapper, '#checklist_question_part-0', 'P'.repeat(256))
+    await submit(wrapper)
+
+    expect(wrapper.get('#checklist_question_part-feedback-0').text()).toContain('Please use at most')
+    expect(wrapper.get('#checklist_question_part-0').classes()).toContain('is-invalid')
+    expect(wrapper.get('#checklist_question-0').classes()).not.toContain('is-invalid')
     expect(sent('post')).toEqual([])
   })
 })

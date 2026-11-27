@@ -39,7 +39,9 @@
                 size="sm"
                 :state="submitClicked ? !errors.norm : null"
               ></BFormInput>
-              <b-form-invalid-feedback :state="submitClicked ? !errors.norm : null">
+              <b-form-invalid-feedback
+                id="checklist_norm-feedback"
+                :state="submitClicked ? !errors.norm : null">
                 {{ errors.norm }}
               </b-form-invalid-feedback>
             </BFormGroup>
@@ -57,7 +59,9 @@
                 type="number"
                 :state="submitClicked ? !errors.validity_months : null"
               ></BFormInput>
-              <b-form-invalid-feedback :state="submitClicked ? !errors.validity_months : null">
+              <b-form-invalid-feedback
+                id="checklist_validity_months-feedback"
+                :state="submitClicked ? !errors.validity_months : null">
                 {{ errors.validity_months }}
               </b-form-invalid-feedback>
             </BFormGroup>
@@ -95,10 +99,10 @@
                   :id="`checklist_question-${index}`"
                   size="sm"
                   :aria-label="$trans('Question')"
-                  :state="submitClicked ? !questionError(row) : null"
+                  :state="submitClicked ? !questionFieldErrors(row).question : null"
                 ></BFormInput>
-                <b-form-invalid-feedback :state="submitClicked ? !questionError(row) : null">
-                  {{ questionError(row) }}
+                <b-form-invalid-feedback :state="submitClicked ? !questionFieldErrors(row).question : null">
+                  {{ questionFieldErrors(row).question }}
                 </b-form-invalid-feedback>
               </b-col>
               <b-col cols="1">
@@ -122,7 +126,13 @@
                   size="sm"
                   :placeholder="$trans('Group')"
                   :aria-label="$trans('Group')"
+                  :state="submitClicked ? !questionFieldErrors(row).group_name : null"
                 ></BFormInput>
+                <b-form-invalid-feedback
+                  :id="`checklist_question_group-feedback-${index}`"
+                  :state="submitClicked ? !questionFieldErrors(row).group_name : null">
+                  {{ questionFieldErrors(row).group_name }}
+                </b-form-invalid-feedback>
               </b-col>
               <b-col cols="4" class="pr-2">
                 <BFormSelect
@@ -140,7 +150,13 @@
                   size="sm"
                   :placeholder="$trans('Part')"
                   :aria-label="$trans('Part')"
+                  :state="submitClicked ? !questionFieldErrors(row).part_name : null"
                 ></BFormInput>
+                <b-form-invalid-feedback
+                  :id="`checklist_question_part-feedback-${index}`"
+                  :state="submitClicked ? !questionFieldErrors(row).part_name : null">
+                  {{ questionFieldErrors(row).part_name }}
+                </b-form-invalid-feedback>
               </b-col>
             </b-row>
           </template>
@@ -182,6 +198,7 @@ import {
   PLACEHOLDERS,
   questionCreateBody,
   questionError,
+  questionFieldErrors,
   questionFromRecord,
   questionUpdateBody,
   type ChecklistFieldErrors,

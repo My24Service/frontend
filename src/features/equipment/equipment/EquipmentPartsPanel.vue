@@ -12,12 +12,13 @@
       :refused-detail="$trans('This part has condition records and cannot be deleted.')"
     />
 
+    <!-- Only a load that succeeded with no rows is "no parts": not while it loads, not after an error. -->
     <p
-      v-if="rows.length === 0"
+      v-if="partsQuery.isSuccess.value && rows.length === 0"
       class="dimmed"
     >{{ $trans('This equipment has no parts yet') }}</p>
     <table
-      v-else
+      v-else-if="rows.length > 0"
       class="table table-sm data-table"
     >
       <thead>
@@ -207,8 +208,11 @@ async function savePart() {
     return
   }
   infoToast(create, $trans('Updated'), $trans('Part has been updated'))
-  editing.value = null
+  // Refetch first, so the row does not show the old values for a moment. The
+  // edit closes only when it is still the saved row's: the planner may have
+  // opened another row while the save ran.
   await invalidateEquipmentPartQueries(queryClient)
+  if (editing.value?.id === draft.id) editing.value = null
 }
 
 const deleteModal = useTemplateRef<{showDeleteModal: (id: number) => void}>('deleteModal')

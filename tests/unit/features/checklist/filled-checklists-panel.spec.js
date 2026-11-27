@@ -192,6 +192,51 @@ describe('FilledChecklistsPanel, groups, results and photos', () => {
     expect(links[0].attributes('target')).toBe('_blank')
     expect(links[0].get('img').attributes('src')).toBe('https://riedel.example/media/p1.jpg')
   })
+
+  test('opens a photo safely, with an alt text, and loads thumbnails lazily', async () => {
+    api.get(PATH, [finished({questions: [
+      question('Does it lock?', '', {
+        group_name: '', part_name: '', result: 'nok', photos: [{url: 'https://riedel.example/media/p1.jpg'}],
+      }),
+    ]})])
+
+    const wrapper = await mountPanel()
+
+    const link = wrapper.get('.photos a')
+    expect(link.attributes('target')).toBe('_blank')
+    expect(link.attributes('rel')).toContain('noopener')
+    expect(link.get('img').attributes('alt')).toBeTruthy()
+    expect(link.get('img').attributes('loading')).toBe('lazy')
+  })
+
+  test('has no result column for a group without results', async () => {
+    const wrapper = await mountPanel()
+
+    expect(wrapper.findAll('tr.checklist-answer')).toHaveLength(2)
+    expect(wrapper.find('td.result').exists()).toBe(false)
+  })
+
+  test('has the result column on every row of a group where one question has a result', async () => {
+    api.get(PATH, [finished({questions: [
+      question('Does it close?', '', {group_name: 'Door', part_name: '', result: 'ok'}),
+      question('Remarks about the door', 'None', {group_name: 'Door', part_name: '', result: null}),
+      question('Is the cable whole?', 'Yes', {group_name: 'Cable', part_name: '', result: null}),
+    ]})])
+
+    const wrapper = await mountPanel()
+
+    const rows = wrapper.findAll('tr.checklist-answer')
+    expect(rows.map((row) => row.find('td.result').exists())).toEqual([true, true, false])
+  })
+
+  test('says "No answers" for a signed checklist without questions', async () => {
+    api.get(PATH, [finished({questions: []})])
+
+    const wrapper = await mountPanel()
+
+    expect(wrapper.get('.filled-checklist').text()).toContain('No answers')
+    expect(wrapper.find('tr.checklist-answer').exists()).toBe(false)
+  })
 })
 
 describe('FilledChecklistsPanel, scores and remarks', () => {
@@ -203,6 +248,16 @@ describe('FilledChecklistsPanel, scores and remarks', () => {
     expect(wrapper.get('.checklist-score').text()).toBe('3')
     expect(wrapper.get('.checklist-rejected').text()).toBe('2')
     expect(wrapper.get('.checklist-valid-until').text()).toBe('27-11-2027')
+  })
+
+  test('shows zero rejected points without a score row when there is no score', async () => {
+    api.get(PATH, [finished({score: null, rejected_count: 0})])
+
+    const wrapper = await mountPanel()
+
+    expect(wrapper.get('.checklist-result').text()).toContain('Rejected points')
+    expect(wrapper.get('.checklist-rejected').text()).toBe('0')
+    expect(wrapper.find('.checklist-score').exists()).toBe(false)
   })
 
   // A checklist of text questions, and every record finished before results existed.
