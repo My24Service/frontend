@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { vCustomer, vEquipment, vEquipmentState } from '@/api/valibot.gen'
+import { vCustomer, vEquipment, vEquipmentInspection, vEquipmentState } from '@/api/valibot.gen'
 import { EquipmentList } from '@/features/equipment'
 import { fixtureFor, paginated } from '../../helpers/schema-fixture.js'
 import { installApiSeam, noContent, settle } from '../../support/api-seam/index.js'
@@ -402,5 +402,48 @@ describe('EquipmentList column filters', () => {
 
     // The kit mirrors the filters into the address, so a shared link restores them.
     expect(window.location.hash).toContain('name=Ketel')
+  })
+})
+
+describe('EquipmentList inspection', () => {
+  const WITH_MODULE = {getMemberHasBranches: true, getModules: ['equipment', 'checklist']}
+
+  const headers = (wrapper) => wrapper.findAll('thead th').map((th) => th.text())
+  const cellUnder = (wrapper, header) =>
+    wrapper.findAll('tbody tr')[0].findAll('td')[headers(wrapper).indexOf(header)]
+
+  test('shows the inspection status and the condition score when the tenant has the checklist module', async () => {
+    api.get(endpoint, () => paginated([equipment({
+      inspection: fixtureFor(vEquipmentInspection, {
+        status: 'expiring', valid_until: '2026-12-15', score: 3, rejected_count: 0, date: '2025-12-15',
+      }),
+    })], {count: 1}))
+
+    const wrapper = await mountEquipment({main: WITH_MODULE})
+
+    const status = cellUnder(wrapper, 'Inspection').get('.badge')
+    expect(status.text()).toBe('Expiring')
+    expect(status.classes()).toContain('text-bg-warning')
+    expect(cellUnder(wrapper, 'Condition score').text()).toBe('3')
+  })
+
+  test('shows an empty score for equipment that has none', async () => {
+    api.get(endpoint, () => paginated([equipment({
+      inspection: fixtureFor(vEquipmentInspection, {
+        status: 'none', valid_until: null, score: null, rejected_count: null, date: null,
+      }),
+    })], {count: 1}))
+
+    const wrapper = await mountEquipment({main: WITH_MODULE})
+
+    expect(cellUnder(wrapper, 'Inspection').text()).toBe('Not inspected')
+    expect(cellUnder(wrapper, 'Condition score').text()).toBe('')
+  })
+
+  test('shows neither column without the checklist module', async () => {
+    const wrapper = await mountEquipment()
+
+    expect(headers(wrapper)).not.toContain('Inspection')
+    expect(headers(wrapper)).not.toContain('Condition score')
   })
 })
